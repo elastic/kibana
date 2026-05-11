@@ -8,10 +8,8 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  EBT_SCROLL_TO_ORIGIN_ACTION,
-  EBT_FLYOUT_WATERFALL_SCROLL_TO_ORIGIN_BUTTON,
-} from './ebt_constants';
+import { getEbtProps } from '@kbn/ebt-click';
+import { TRACE_WATERFALL_EBT_CLICK_ACTIONS, TRACE_WATERFALL_EBT_ELEMENTS } from './ebt_constants';
 
 const label = i18n.translate('xpack.apm.traceWaterfall.scrollToOrigin.label', {
   defaultMessage: 'Scroll to origin',
@@ -43,8 +41,10 @@ export function ScrollToOriginButton({
             onClick();
             e.currentTarget.blur();
           }}
-          data-ebt-action={EBT_SCROLL_TO_ORIGIN_ACTION}
-          data-ebt-element={EBT_FLYOUT_WATERFALL_SCROLL_TO_ORIGIN_BUTTON}
+          {...getEbtProps({
+            action: TRACE_WATERFALL_EBT_CLICK_ACTIONS.SCROLL_TO_ORIGIN,
+            element: TRACE_WATERFALL_EBT_ELEMENTS.FLYOUT_SCROLL_TO_ORIGIN,
+          })}
           data-test-subj="waterfallScrollToOriginButton"
         >
           {label}

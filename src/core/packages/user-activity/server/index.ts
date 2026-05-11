@@ -10,6 +10,8 @@
 export type {
   UserActivityObject,
   UserActivityEventType,
+  UserActivityEventOutcome,
+  UserActivityError,
   UserActivityEvent,
   TrackUserActionParams,
   UserActivityServiceSetup,
