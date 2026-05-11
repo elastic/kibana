@@ -361,12 +361,6 @@ export const useCommentToEsql = ({
       const currentCommentLine = anchorRanges[0]?.startLineNumber;
       if (!currentCommentLine || !isModelStillValid(liveModel, currentCommentLine)) return;
 
-      if (!isSurgical) {
-        const fullRange = liveModel.getFullModelRange();
-        editor.executeEdits('nl-to-esql', [{ range: fullRange, text: result.content }]);
-        return;
-      }
-
       const { generatedLineStart, generatedLineEnd } = insertGeneratedCode(
         editor,
         liveModel,
