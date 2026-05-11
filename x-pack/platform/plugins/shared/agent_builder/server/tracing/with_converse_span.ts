@@ -16,14 +16,19 @@ import {
 } from '@kbn/inference-tracing';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import {
+  attachOpikDistributedTrace,
+  type OpikDistributedTraceHeaders,
+} from './opik_distributed_tracing';
 
 interface WithConverseSpanOptions {
   agentId: string;
   conversationId: string | undefined;
+  opikHeaders?: OpikDistributedTraceHeaders;
 }
 
 export function withConverseSpan(
-  { agentId, conversationId }: WithConverseSpanOptions,
+  { agentId, conversationId, opikHeaders }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
   return withActiveInferenceSpan(
@@ -39,6 +44,10 @@ export function withConverseSpan(
     (span) => {
       if (!span) {
         return cb();
+      }
+
+      if (opikHeaders) {
+        attachOpikDistributedTrace(span, opikHeaders);
       }
 
       return cb(span).pipe(
