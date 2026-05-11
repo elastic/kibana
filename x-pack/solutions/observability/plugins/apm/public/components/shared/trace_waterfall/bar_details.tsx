@@ -86,6 +86,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           }
         `}
       >
+        {item.missingDestination ? (
+          <EuiFlexItem grow={false}>
+            <SpanMissingDestinationTooltip />
+          </EuiFlexItem>
+        ) : null}
         {item.icon && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
@@ -214,11 +219,6 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               title={ORPHAN_TITLE}
               content={ORPHAN_CONTENT}
             />
-          </EuiFlexItem>
-        ) : null}
-        {item.missingDestination ? (
-          <EuiFlexItem grow={false}>
-            <SpanMissingDestinationTooltip />
           </EuiFlexItem>
         ) : null}
         <SyncBadge sync={item.sync} agentName={item.agentName} />
