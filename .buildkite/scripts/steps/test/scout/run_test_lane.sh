@@ -140,6 +140,7 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
   )
 
   local start_time

@@ -74,6 +74,7 @@ export interface ScoutWorkerFixtures extends ApiServicesFixture {
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
   apiServices: ApiServicesFixture;
+  isSnapshotBuild: boolean;
 }
 
 export const lighthouseFixtures = mergeTests(scoutFixtures, persistentContext, lighthouseFixture);
