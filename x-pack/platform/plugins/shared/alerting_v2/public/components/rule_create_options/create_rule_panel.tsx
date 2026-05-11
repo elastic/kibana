@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
