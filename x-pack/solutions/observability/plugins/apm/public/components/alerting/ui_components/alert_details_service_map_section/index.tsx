@@ -30,12 +30,13 @@ import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/t
 import { getServiceMapTimeRange } from './get_service_map_time_range';
 
 const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.alertDetails.serviceMapPanel.title', {
-  defaultMessage: 'Service map',
+  defaultMessage: 'Service map preview',
 });
 
-const VIEW_IN_APM_LABEL = i18n.translate('xpack.apm.alertDetails.serviceMapPanel.viewInApm', {
-  defaultMessage: 'View in APM',
-});
+const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
+  'xpack.apm.alertDetails.serviceMapPanel.exploreInServiceMap',
+  { defaultMessage: 'Explore in Service map' }
+);
 
 const EMBEDDABLE_HEIGHT = 400;
 
@@ -150,13 +151,11 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="sortRight"
-                iconSide="right"
-                color="text"
+                color="primary"
                 href={fullMapUrl}
-                data-test-subj="apmAlertDetailsServiceMapViewInApm"
+                data-test-subj="apmAlertDetailsExploreInServiceMap"
               >
-                {VIEW_IN_APM_LABEL}
+                {EXPLORE_IN_SERVICE_MAP_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -199,8 +198,8 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 badgesRangeTo={badgesRangeTo}
                 environment={environment}
                 kuery={kuery}
-                // Keep `kuery` scoping the graph, but let badges aggregate across all
-                // visible services so neighbors with their own active alerts also light up.
+                // Keep `kuery` scoping the graph data, but let badges aggregate across
+                // all visible services so neighbors with active alerts also light up.
                 badgesKuery=""
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
