@@ -24,9 +24,6 @@ import {
  * Narrow input describing only the metric fields that `useChartLayers` actually reads.
  * Decouples the hook from the wider `ParsedMetricItem` domain type so non-metrics-explorer
  * call sites (e.g. trace charts) do not need to fabricate unrelated fields.
- *
- * `ParsedMetricItem` remains structurally assignable to this type, so existing call sites
- * passing a full `ParsedMetricItem` continue to type-check unchanged.
  */
 interface ChartLayerMetricInput {
   metricName: string;
