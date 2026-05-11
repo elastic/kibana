@@ -29,7 +29,7 @@ const hasFilterCellAction = (actions: CellValueAction[]) => {
 export const getLegendActions = (
   canFilter: ((data: IInterpreterRenderEvent<unknown>) => Promise<boolean>) | undefined,
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
-  onFilter: (data: FilterEvent, negate?: any) => void,
+  onFilter: (data: FilterEvent, negate?: boolean) => void,
   columnCellValueActions: ColumnCellValueActions,
   visParams: PartitionVisParams,
   visData: Datatable,

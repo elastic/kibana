@@ -180,6 +180,7 @@ export const getDatatableRenderer = (dependencies: {
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
           columnCellValueActions={columnCellValueActions}
           columnFilterable={columnsFilterable}
+          panelHasConfiguredDrilldowns={handlers.panelHasConfiguredDrilldowns ?? false}
           interactive={isInteractive()}
           theme={dependencies.core.theme}
           renderComplete={renderComplete}

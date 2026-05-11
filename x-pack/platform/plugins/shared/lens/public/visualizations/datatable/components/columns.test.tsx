@@ -16,6 +16,7 @@ import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import type { FormatFactory } from '../../../../common/types';
 import { LENS_ROW_HEIGHT_MODE, type LensCellValueAction } from '@kbn/lens-common';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { createGridColumns } from './columns';
 
 const table: Datatable = {
@@ -63,6 +64,7 @@ const callCreateGridColumns = (
     columnCellValueActions: CreateGridColumnsParams[12];
     closeCellPopover: CreateGridColumnsParams[13];
     columnFilterable: CreateGridColumnsParams[14];
+    panelHasConfiguredDrilldowns: CreateGridColumnsParams[15];
   }> = {}
 ) =>
   createGridColumns(
@@ -80,7 +82,8 @@ const callCreateGridColumns = (
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),
-    params.columnFilterable ?? []
+    params.columnFilterable ?? [],
+    params.panelHasConfiguredDrilldowns
   );
 
 const renderCellAction = (
@@ -110,6 +113,30 @@ describe('getContentData', () => {
         columnFilterable: [true],
       });
       expect(cellActions).toHaveLength(2);
+    });
+
+    it('should include disabled filter actions for ES|QL computed columns when column is not filterable', () => {
+      const esqlTable: Datatable = {
+        type: 'datatable',
+        meta: { type: ESQL_TABLE_TYPE, query: 'FROM foo' },
+        columns: [
+          {
+            id: 'a',
+            name: 'a',
+            isComputedColumn: true,
+            meta: {
+              type: 'string',
+            },
+          },
+        ],
+        rows: [{ a: 'v' }],
+      };
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [false],
+        table: esqlTable,
+      });
+      expect(cellActions?.length).toBe(2);
     });
 
     it('should not include filter actions if column not filterable', () => {

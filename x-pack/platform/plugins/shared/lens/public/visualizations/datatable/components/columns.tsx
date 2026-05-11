@@ -13,9 +13,11 @@ import type {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { LENS_ROW_HEIGHT_MODE, DEFAULT_HEADER_ROW_HEIGHT } from '@kbn/lens-common';
 import type { LensCellValueAction, RowHeightMode } from '@kbn/lens-common';
 import type { FormatFactory } from '../../../../common/types';
@@ -55,7 +57,8 @@ export const createGridColumns = (
   headerRowLines: number,
   columnCellValueActions: LensCellValueAction[][] | undefined,
   closeCellPopover?: Function,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  panelHasConfiguredDrilldowns = false
 ) => {
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
@@ -88,12 +91,21 @@ export const createGridColumns = (
       // compatible cell actions from actions registry
       const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
-      if (
-        !hasFilterCellAction(compatibleCellActions) &&
-        filterable &&
+      const queryTimeInteractionReason =
+        table.meta?.type === ESQL_TABLE_TYPE &&
+        columnsReverseLookup[field]?.isComputedColumn === true
+          ? getEsqlQueryTimeFieldUnavailableShortMessage(panelHasConfiguredDrilldowns)
+          : undefined;
+
+      const shouldIncludeBuiltInFilters =
+        (!hasFilterCellAction(compatibleCellActions) || Boolean(queryTimeInteractionReason)) &&
         handleFilterClick &&
-        !columnArgs?.oneClickFilter
-      ) {
+        !columnArgs?.oneClickFilter;
+
+      const showBuiltInFilterActions =
+        shouldIncludeBuiltInFilters && (filterable || Boolean(queryTimeInteractionReason));
+
+      if (showBuiltInFilterActions) {
         cellActions.push(
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -121,11 +133,15 @@ export const createGridColumns = (
               return null;
             }
 
-            return (
+            const filterForButton = (
               <Component
                 aria-label={filterForAriaLabel}
                 data-test-subj="lensDatatableFilterFor"
+                disabled={Boolean(queryTimeInteractionReason)}
                 onClick={() => {
+                  if (queryTimeInteractionReason) {
+                    return;
+                  }
                   handleFilterClick(field, rowValue, colIndex, rowIndex);
                   closeCellPopover?.();
                 }}
@@ -133,6 +149,14 @@ export const createGridColumns = (
               >
                 {filterForText}
               </Component>
+            );
+
+            return queryTimeInteractionReason ? (
+              <EuiToolTip content={queryTimeInteractionReason} anchorClassName="eui-displayBlock">
+                <span css={{ display: 'inline-block', width: '100%' }}>{filterForButton}</span>
+              </EuiToolTip>
+            ) : (
+              filterForButton
             );
           },
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
@@ -161,11 +185,15 @@ export const createGridColumns = (
               return null;
             }
 
-            return (
+            const filterOutButton = (
               <Component
                 data-test-subj="lensDatatableFilterOut"
                 aria-label={filterOutAriaLabel}
+                disabled={Boolean(queryTimeInteractionReason)}
                 onClick={() => {
+                  if (queryTimeInteractionReason) {
+                    return;
+                  }
                   handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                   closeCellPopover?.();
                 }}
@@ -173,6 +201,14 @@ export const createGridColumns = (
               >
                 {filterOutText}
               </Component>
+            );
+
+            return queryTimeInteractionReason ? (
+              <EuiToolTip content={queryTimeInteractionReason} anchorClassName="eui-displayBlock">
+                <span css={{ display: 'inline-block', width: '100%' }}>{filterOutButton}</span>
+              </EuiToolTip>
+            ) : (
+              filterOutButton
             );
           }
         );
@@ -191,11 +227,15 @@ export const createGridColumns = (
             return null;
           }
 
-          return (
+          const drilldownButton = (
             <Component
               aria-label={action.displayName}
               data-test-subj={`lensDatatableCellAction-${action.id}`}
+              disabled={Boolean(queryTimeInteractionReason)}
               onClick={() => {
+                if (queryTimeInteractionReason) {
+                  return;
+                }
                 action.execute([data]);
                 closeCellPopover?.();
               }}
@@ -203,6 +243,14 @@ export const createGridColumns = (
             >
               {action.displayName}
             </Component>
+          );
+
+          return queryTimeInteractionReason ? (
+            <EuiToolTip content={queryTimeInteractionReason} anchorClassName="eui-displayBlock">
+              <span css={{ display: 'inline-block', width: '100%' }}>{drilldownButton}</span>
+            </EuiToolTip>
+          ) : (
+            drilldownButton
           );
         });
       });
@@ -316,3 +364,15 @@ export const createGridColumns = (
     })
     .filter(nonNullable);
 };
+
+function getEsqlQueryTimeFieldUnavailableShortMessage(panelHasConfiguredDrilldowns: boolean) {
+  return panelHasConfiguredDrilldowns
+    ? i18n.translate('xpack.lens.datatable.esqlQueryTimeInteraction.shortWithDrilldown', {
+        defaultMessage:
+          "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
+      })
+    : i18n.translate('xpack.lens.datatable.esqlQueryTimeInteraction.shortFiltersOnly', {
+        defaultMessage:
+          "You can't apply a filter from this value because it relies on a field created at query time.",
+      });
+}

@@ -10,9 +10,12 @@ import memoizeOne from 'memoize-one';
 
 function buildColumnsMetaLookupInner(table: Datatable) {
   return table.columns.reduce<
-    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-  >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
+    Record<
+      string,
+      { name: string; index: number; isComputedColumn?: Boolean; meta?: DatatableColumnMeta }
+    >
+  >((memo, { id, name, meta, isComputedColumn }, i) => {
+    memo[id] = { name, index: i, meta, isComputedColumn };
     return memo;
   }, {});
 }

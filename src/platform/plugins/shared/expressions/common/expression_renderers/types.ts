@@ -86,6 +86,10 @@ export interface IInterpreterRenderHandlers {
   event(event: IInterpreterRenderEvent): void;
   hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
   getCompatibleCellValueActions?(data: object[]): Promise<unknown[]>;
+  /**
+   * Lens / dashboard: whether the panel has at least one saved drilldown (for ES|QL query-time field copy).
+   */
+  panelHasConfiguredDrilldowns?: boolean;
   getRenderMode(): RenderMode;
 
   /**
