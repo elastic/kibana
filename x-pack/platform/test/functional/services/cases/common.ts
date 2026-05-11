@@ -94,8 +94,11 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async expectToasterToContain(content: string) {
-      const toast = await toasts.getElementByIndex(1);
-      expect(await toast.getVisibleText()).to.contain(content);
+      await retry.try(async () => {
+        const toast = await toasts.getElementByIndex(1);
+        const text = await toast.getVisibleText();
+        expect(text).to.contain(content);
+      });
     },
 
     async assertCaseModalVisible(expectVisible = true) {

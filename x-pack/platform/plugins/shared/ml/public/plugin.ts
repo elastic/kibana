@@ -243,6 +243,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
+    if (this.enabledFeatures.ad) {
+      registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
+    }
+    registerMlUiActions(pluginsSetup.uiActions, core);
+
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing
       .pipe(
@@ -274,14 +279,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 this.experimentalFeatures,
                 mlCapabilities
               );
-            }
-
-            if (fullLicense && mlCapabilities.canGetMlInfo && this.enabledFeatures.ad) {
-              registerEmbeddables(pluginsSetup.embeddable, core, pluginsSetup.usageCollection);
-            }
-
-            if (fullLicense && mlCapabilities.canGetMlInfo) {
-              registerMlUiActions(pluginsSetup.uiActions, core);
             }
 
             const { registerSearchLinks, registerCasesAttachments } = await import(

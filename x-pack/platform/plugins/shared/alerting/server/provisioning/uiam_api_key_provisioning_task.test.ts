@@ -257,6 +257,27 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(removeIfExists).not.toHaveBeenCalled();
     });
 
+    it('does not call removeIfExists or log on the initial false emission', async () => {
+      const core = coreMock.createStart();
+      core.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
+      const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+      const removeIfExists = jest.fn().mockResolvedValue(undefined);
+      const taskManager = { ensureScheduled, removeIfExists } as never;
+
+      logger.info.mockClear();
+      logger.error.mockClear();
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      await task.start({ core, taskManager });
+
+      await new Promise<void>((resolve) => setImmediate(resolve));
+
+      expect(ensureScheduled).not.toHaveBeenCalled();
+      expect(removeIfExists).not.toHaveBeenCalled();
+      expect(logger.info).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
     it('calls removeIfExists and logs info when flag emits false after true', async () => {
       const flag$ = new Subject<boolean>();
       const core = coreMock.createStart();
@@ -1267,11 +1288,12 @@ describe('UiamApiKeyProvisioningTask', () => {
       );
       const bulkCreateCalls = savedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
         id: string;
-        attributes: { status: string };
+        attributes: { status: string; errorCode?: string };
       }>;
       const statuses = bulkCreateCalls.map((c) => ({ id: c.id, status: c.attributes.status }));
       expect(statuses).toContainEqual({ id: 'r1', status: UiamApiKeyProvisioningStatus.COMPLETED });
       expect(statuses).toContainEqual({ id: 'r2', status: UiamApiKeyProvisioningStatus.FAILED });
+      expect(bulkCreateCalls.find((c) => c.id === 'r2')?.attributes.errorCode).toBe('400');
       expect(logger.info).toHaveBeenCalledWith(
         'Wrote provisioning status: 2 total (0 skipped, 1 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
