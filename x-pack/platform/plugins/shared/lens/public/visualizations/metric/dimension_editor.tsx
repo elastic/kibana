@@ -889,8 +889,6 @@ export function DimensionEditorAdditionalSection({
   const euiThemeContext = useEuiTheme();
 
   const selectedSupportingVisualization = supportingVisualization(state);
-  const colorControlsSectionVisible =
-    selectedSupportingVisualization !== 'panel' || Boolean(state.applyColorTo);
   const { anchorRef: colorControlsAnchorRef, scrollIntoView: scrollToColorControls } =
     useScrollIntoView();
 
@@ -1008,6 +1006,12 @@ export function DimensionEditorAdditionalSection({
     supportingVisualization(state) === 'panel' && state.applyColorTo === 'value';
 
   const colorMode = state.palette ? 'dynamic' : 'static';
+  const applyColorTo =
+    state.applyColorTo === undefined && state.color
+      ? LENS_METRIC_STATE_DEFAULTS.applyColorTo
+      : state.applyColorTo;
+  const colorControlsSectionVisible =
+    selectedSupportingVisualization !== 'panel' || Boolean(applyColorTo);
 
   return (
     <div
@@ -1182,16 +1186,14 @@ export function DimensionEditorAdditionalSection({
                 value: 'value',
               },
             ]}
-            idSelected={
-              state.applyColorTo
-                ? `${buttonIdPrefix}${state.applyColorTo}`
-                : `${buttonIdPrefix}none`
-            }
+            idSelected={`${buttonIdPrefix}${applyColorTo ?? 'none'}`}
             onChange={(_id, newApplyColorTo) => {
               setState({
                 ...state,
                 applyColorTo: newApplyColorTo === 'none' ? undefined : newApplyColorTo,
+                color: newApplyColorTo === 'none' ? undefined : state.color,
               });
+
               scrollToColorControls();
             }}
           />

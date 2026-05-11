@@ -112,7 +112,7 @@ const getMetricLayerConfiguration = (
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
-    if (props.state.applyColorTo === undefined) {
+    if (props.state.applyColorTo === undefined && props.state.color === undefined) {
       return {
         triggerIconType: 'none',
       };
