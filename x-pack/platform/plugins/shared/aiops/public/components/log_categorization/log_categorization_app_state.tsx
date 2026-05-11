@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
@@ -31,13 +31,21 @@ const localStorage = new Storage(window.localStorage);
  */
 export interface LogCategorizationAppStateProps {
   /** The data view to analyze. */
-  dataView: DataView;
+  dataView: DataView | undefined;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
   /** App context value */
   appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
+  /** Optional page title for screen readers */
+  pageTitle?: ReactNode;
+  /**
+   * Optional data source picker rendered in the page header. When provided it
+   * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
+   * style component supplied by the host application.
+   */
+  headerContent?: ReactNode;
 }
 
 export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
@@ -45,8 +53,19 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
   savedSearch,
   appContextValue,
   showFrozenDataTierChoice = true,
+  pageTitle,
+  headerContent,
 }) => {
-  if (!dataView) return null;
+  if (!dataView) {
+    if (headerContent !== undefined) {
+      return (
+        <AiopsAppContext.Provider value={appContextValue}>
+          <UrlStateProvider>{headerContent}</UrlStateProvider>
+        </AiopsAppContext.Provider>
+      );
+    }
+    return null;
+  }
 
   const warning = timeSeriesDataViewWarning(dataView, 'log_categorization');
 
@@ -76,10 +95,10 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
     <AiopsAppContext.Provider value={appContextValue}>
       <CasesContext owner={[]} permissions={casesPermissions!}>
         <UrlStateProvider>
-          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <LogCategorizationPage />
+                <LogCategorizationPage pageTitle={pageTitle} headerContent={headerContent} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </DataSourceContext.Provider>

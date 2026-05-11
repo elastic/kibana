@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -60,7 +60,10 @@ import { AttachmentsMenu } from './attachments_menu';
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-export const LogCategorizationPage: FC = () => {
+export const LogCategorizationPage: FC<{ pageTitle?: ReactNode; headerContent?: ReactNode }> = ({
+  pageTitle,
+  headerContent,
+}) => {
   const {
     notifications: { toasts },
     embeddingOrigin,
@@ -349,7 +352,7 @@ export const LogCategorizationPage: FC = () => {
 
   return (
     <EuiPageBody data-test-subj="aiopsLogPatternAnalysisPage" paddingSize="none" panelled={false}>
-      <PageHeader />
+      <PageHeader pageTitle={pageTitle} headerContent={headerContent} />
       <EuiSpacer />
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>

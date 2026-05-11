@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { EMPTY, map, merge } from 'rxjs';
@@ -48,13 +48,23 @@ const localStorage = new Storage(window.localStorage);
  */
 export interface ChangePointDetectionAppStateProps {
   /** The data view to analyze. */
-  dataView: DataView;
+  dataView: DataView | undefined;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
   /** App context value */
   appContextValue: AiopsAppContextValue;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
+  /** Optional page title for screen readers */
+  pageTitle?: ReactNode;
+  /**
+   * Optional data source picker rendered in the page header. When provided it
+   * replaces the static data view title. Typically a `DataDriftDataSourcePicker`-
+   * style component supplied by the host application.
+   */
+  headerContent?: ReactNode;
+  /** Optional content rendered to the right of the header content */
+  rightSideItems?: ReactNode;
 }
 
 export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps> = ({
@@ -62,6 +72,9 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   savedSearch,
   appContextValue,
   showFrozenDataTierChoice = true,
+  pageTitle,
+  headerContent,
+  rightSideItems,
 }) => {
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, [
@@ -77,8 +90,6 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     showFrozenDataTierChoice,
   };
 
-  const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
-
   const reload$ = useMemo<Observable<number>>(
     () =>
       merge(
@@ -87,6 +98,19 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
       ),
     [appContextValue.cps?.cpsManager]
   );
+
+  if (!dataView) {
+    if (headerContent !== undefined) {
+      return (
+        <AiopsAppContext.Provider value={appContextValue}>
+          <UrlStateProvider>{headerContent}</UrlStateProvider>
+        </AiopsAppContext.Provider>
+      );
+    }
+    return null;
+  }
+
+  const warning = timeSeriesDataViewWarning(dataView, 'change_point_detection');
 
   if (warning !== null) {
     return <>{warning}</>;
@@ -101,10 +125,14 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     <CasesContext owner={[]} permissions={casesPermissions!}>
       <AiopsAppContext.Provider value={appContextValue}>
         <UrlStateProvider>
-          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <DataSourceContext.Provider key={dataView.id} value={{ dataView, savedSearch }}>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <PageHeader />
+                <PageHeader
+                  pageTitle={pageTitle}
+                  headerContent={headerContent}
+                  rightSideItems={rightSideItems}
+                />
                 <EuiSpacer />
                 <ReloadContextProvider reload$={reload$}>
                   <FilterQueryContextProvider>

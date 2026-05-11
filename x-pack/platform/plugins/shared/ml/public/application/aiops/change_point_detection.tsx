@@ -9,21 +9,21 @@ import type { FC } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
-
 import { MlPageHeader } from '../components/page_header';
-import { useEnabledFeatures } from '../contexts/ml/serverless_context';
 import { PageTitle } from '../components/page_title';
+import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
+import { useEnabledFeatures } from '../contexts/ml/serverless_context';
+import { DataSourcePicker } from '../components/data_source_picker/data_source_picker';
 
 export const ChangePointDetectionPage: FC = () => {
   const { services } = useMlKibana();
@@ -31,59 +31,62 @@ export const ChangePointDetectionPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
+  const pageTitle = (
+    <FormattedMessage
+      id="xpack.ml.changePointDetection.pageHeader"
+      defaultMessage="Change point detection"
+    />
+  );
+
+  const headerContent = (
+    <DataSourcePicker currentDataView={dataView ?? null} currentSavedSearch={savedSearch ?? null} />
+  );
+
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
-            <PageTitle
-              title={
-                <FormattedMessage
-                  id="xpack.ml.changePointDetection.pageHeader"
-                  defaultMessage="Change point detection"
-                />
-              }
-            />
+            <PageTitle title={pageTitle} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TechnicalPreviewBadge />
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView ? (
-        <ChangePointDetection
-          dataView={dataView}
-          savedSearch={savedSearch}
-          showFrozenDataTierChoice={showNodeInfo}
-          appContextValue={{
-            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
-            ...pick(services, [
-              'analytics',
-              'application',
-              'cases',
-              'charts',
-              'data',
-              'embeddable',
-              'executionContext',
-              'fieldFormats',
-              'http',
-              'i18n',
-              'lens',
-              'notifications',
-              'share',
-              'storage',
-              'theme',
-              'uiActions',
-              'uiSettings',
-              'unifiedSearch',
-              'usageCollection',
-              'userProfile',
-              'cps',
-            ]),
-            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
-          }}
-        />
-      ) : null}
+      <ChangePointDetection
+        dataView={dataView}
+        savedSearch={savedSearch}
+        showFrozenDataTierChoice={showNodeInfo}
+        headerContent={headerContent}
+        appContextValue={{
+          embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+          ...pick(services, [
+            'analytics',
+            'application',
+            'cases',
+            'charts',
+            'data',
+            'embeddable',
+            'executionContext',
+            'fieldFormats',
+            'http',
+            'i18n',
+            'lens',
+            'notifications',
+            'share',
+            'storage',
+            'theme',
+            'uiActions',
+            'uiSettings',
+            'unifiedSearch',
+            'usageCollection',
+            'userProfile',
+            'cps',
+          ]),
+          fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+        }}
+      />
       <HelpMenu
         docLink={services.docLinks.links.aggs.change_point}
         appName={i18n.translate('xpack.ml.changePointDetection.pageHeader', {

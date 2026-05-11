@@ -6,10 +6,10 @@
  */
 
 import { css } from '@emotion/react';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, EuiTitle } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -34,7 +34,19 @@ const maxInlineSizeStyles = css`
   min-inline-size: 0;
 `;
 
-export const PageHeader: FC = () => {
+export interface PageHeaderProps {
+  /** Screen-reader page title rendered as an h1 when `headerContent` is provided. */
+  pageTitle?: ReactNode;
+  /** Optional content rendered to the right of the header content */
+  rightSideItems?: ReactNode;
+  /**
+   * When provided, rendered on the left side of the header in place of the
+   * static data view title. Typically the data source picker component.
+   */
+  headerContent?: ReactNode;
+}
+
+export const PageHeader: FC<PageHeaderProps> = ({ pageTitle, rightSideItems, headerContent }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -72,9 +84,23 @@ export const PageHeader: FC = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="l">
-          <h2>{dataView.getName()}</h2>
-        </EuiTitle>
+        {headerContent !== undefined ? (
+          <>
+            {pageTitle ? (
+              <EuiScreenReaderOnly>
+                <h1>{pageTitle}</h1>
+              </EuiScreenReaderOnly>
+            ) : null}
+            <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={false}>{headerContent}</EuiFlexItem>
+              {rightSideItems ? <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem> : null}
+            </EuiFlexGroup>
+          </>
+        ) : (
+          <EuiTitle size="l">
+            <h2>{dataView.getName()}</h2>
+          </EuiTitle>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
         <EuiFlexGroup

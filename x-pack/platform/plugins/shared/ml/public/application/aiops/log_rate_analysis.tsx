@@ -16,9 +16,10 @@ import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
-import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';
+import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
+import { DataSourcePicker } from '../components/data_source_picker/data_source_picker';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
@@ -26,52 +27,52 @@ export const LogRateAnalysisPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
+  const pageTitle = (
+    <FormattedMessage id="xpack.ml.logRateAnalysis.pageHeader" defaultMessage="Log rate analysis" />
+  );
+
+  const headerContent = (
+    <DataSourcePicker currentDataView={dataView ?? null} currentSavedSearch={savedSearch ?? null} />
+  );
+
   return (
     <>
       <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.logRateAnalysis.pageHeader"
-              defaultMessage="Log rate analysis"
-            />
-          }
-        />
+        <PageTitle title={pageTitle} />
       </MlPageHeader>
-      {dataView && (
-        <LogRateAnalysis
-          dataView={dataView}
-          savedSearch={savedSearch}
-          showContextualInsights={showContextualInsights}
-          showFrozenDataTierChoice={showNodeInfo}
-          appContextValue={{
-            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
-            ...pick(services, [
-              'analytics',
-              'application',
-              'charts',
-              'data',
-              'executionContext',
-              'fieldFormats',
-              'http',
-              'i18n',
-              'lens',
-              'notifications',
-              'share',
-              'storage',
-              'theme',
-              'uiActions',
-              'uiSettings',
-              'userProfile',
-              'unifiedSearch',
-              'observabilityAIAssistant',
-              'embeddable',
-              'cases',
-              'cps',
-            ]),
-          }}
-        />
-      )}
+      <LogRateAnalysis
+        dataView={dataView}
+        savedSearch={savedSearch}
+        showContextualInsights={showContextualInsights}
+        showFrozenDataTierChoice={showNodeInfo}
+        headerContent={headerContent}
+        appContextValue={{
+          embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+          ...pick(services, [
+            'analytics',
+            'application',
+            'charts',
+            'data',
+            'executionContext',
+            'fieldFormats',
+            'http',
+            'i18n',
+            'lens',
+            'notifications',
+            'share',
+            'storage',
+            'theme',
+            'uiActions',
+            'uiSettings',
+            'userProfile',
+            'unifiedSearch',
+            'observabilityAIAssistant',
+            'embeddable',
+            'cases',
+            'cps',
+          ]),
+        }}
+      />
       <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );

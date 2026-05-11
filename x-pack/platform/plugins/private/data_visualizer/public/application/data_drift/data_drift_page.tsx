@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
 import type { estypes } from '@elastic/elasticsearch';
@@ -16,7 +16,6 @@ import {
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
-  EuiPageHeader,
   EuiHorizontalRule,
   EuiBadge,
 } from '@elastic/eui';
@@ -35,7 +34,6 @@ import {
   useTimefilter,
 } from '@kbn/ml-date-picker';
 import moment from 'moment';
-import { css } from '@emotion/react';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
@@ -57,15 +55,12 @@ import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
 import { useDataDriftColors } from './use_data_drift_colors';
 
-const dataViewTitleHeader = css({
-  minWidth: '300px',
-});
-
 interface PageHeaderProps {
   onRefresh: () => void;
   needsUpdate: boolean;
+  headerContent?: ReactNode;
 }
-export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
+export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate, headerContent }) => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -101,37 +96,41 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
   );
 
   return (
-    <EuiPageHeader
-      pageTitle={
-        <div data-test-subj={'mlDataDriftPageDataViewTitle'} css={dataViewTitleHeader}>
-          {dataView.getName()}
-        </div>
-      }
-      rightSideGroupProps={{
-        gutterSize: 's',
-        'data-test-subj': 'dataComparisonTimeRangeSelectorSection',
-      }}
-      rightSideItems={[
-        <DatePickerWrapper
-          isAutoRefreshOnly={!hasValidTimeField}
-          showRefresh={!hasValidTimeField}
-          width="full"
-          onRefresh={onRefresh}
-          needsUpdate={needsUpdate}
-        />,
-        hasValidTimeField && (
-          <FullTimeRangeSelector
-            frozenDataPreference={frozenDataPreference}
-            setFrozenDataPreference={setFrozenDataPreference}
-            dataView={dataView}
-            query={undefined}
-            disabled={false}
-            timefilter={timefilter}
-            callback={updateTimeState}
-          />
-        ),
-      ].filter(Boolean)}
-    />
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      justifyContent="spaceBetween"
+      responsive={false}
+      data-test-subj="dataComparisonTimeRangeSelectorSection"
+    >
+      <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {hasValidTimeField && (
+            <EuiFlexItem grow={false}>
+              <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={dataView}
+                query={undefined}
+                disabled={false}
+                timefilter={timefilter}
+                callback={updateTimeState}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <DatePickerWrapper
+              isAutoRefreshOnly={!hasValidTimeField}
+              showRefresh={!hasValidTimeField}
+              width="full"
+              onRefresh={onRefresh}
+              needsUpdate={needsUpdate}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -147,12 +146,13 @@ const getDataDriftDataLabel = (label: string, indexPattern?: string) => (
 );
 interface Props {
   initialSettings: InitialSettings;
+  headerContent?: ReactNode;
 }
 
 const isBarBetween = (start: number, end: number, min: number, max: number) => {
   return start >= min && end <= max;
 };
-export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
+export const DataDriftPage: FC<Props> = ({ initialSettings, headerContent }) => {
   const {
     services: { data: dataService, uiSettings, cps },
   } = useDataVisualizerKibana();
@@ -404,7 +404,11 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
 
   return (
     <EuiPageBody data-test-subj="dataComparisonDataDriftPage" paddingSize="none" panelled={false}>
-      <PageHeader onRefresh={handleRefresh} needsUpdate={queryNeedsUpdate} />
+      <PageHeader
+        onRefresh={handleRefresh}
+        needsUpdate={queryNeedsUpdate}
+        headerContent={headerContent}
+      />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
         <EuiFlexGroup gutterSize="m" direction="column">

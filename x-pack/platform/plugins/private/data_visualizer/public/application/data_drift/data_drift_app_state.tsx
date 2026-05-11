@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React from 'react';
 import { pick } from 'lodash';
 
@@ -40,6 +40,8 @@ export interface DataDriftDetectionAppStateProps {
   dataView: DataView;
   /** The saved search to analyze. */
   savedSearch: SavedSearch | null;
+  /** Optional content rendered in the page header in place of the data view name */
+  headerContent?: ReactNode;
 }
 
 export type DataDriftSpec = typeof DataDriftDetectionAppState;
@@ -57,6 +59,7 @@ const getStr = (arg: string | string[] | null, fallbackStr?: string): string => 
 export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
   dataView,
   savedSearch,
+  headerContent,
 }) => {
   if (!(dataView || savedSearch)) {
     throw Error('No data view or saved search available.');
@@ -147,7 +150,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
                     comparison: comparisonStateManager,
                   }}
                 >
-                  <DataDriftPage initialSettings={initialSettings} />
+                  <DataDriftPage initialSettings={initialSettings} headerContent={headerContent} />
                 </DataDriftStateManagerContext.Provider>
               </DatePickerContextProvider>
             </StorageContextProvider>

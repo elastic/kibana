@@ -19,6 +19,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
+import { DataSourcePicker } from '../components/data_source_picker/data_source_picker';
 
 export const LogCategorizationPage: FC = () => {
   const { services } = useMlKibana();
@@ -26,50 +27,53 @@ export const LogCategorizationPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
+  const pageTitle = (
+    <FormattedMessage
+      id="xpack.ml.logCategorization.pageHeader"
+      defaultMessage="Log pattern analysis"
+    />
+  );
+
+  const headerContent = (
+    <DataSourcePicker currentDataView={dataView ?? null} currentSavedSearch={savedSearch ?? null} />
+  );
+
   return (
     <>
       <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.logCategorization.pageHeader"
-              defaultMessage="Log pattern analysis"
-            />
-          }
-        />
+        <PageTitle title={pageTitle} />
       </MlPageHeader>
-      {dataView && (
-        <LogCategorization
-          dataView={dataView}
-          savedSearch={savedSearch}
-          showFrozenDataTierChoice={showNodeInfo}
-          appContextValue={{
-            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
-            ...pick(services, [
-              'analytics',
-              'application',
-              'charts',
-              'data',
-              'executionContext',
-              'fieldFormats',
-              'http',
-              'i18n',
-              'lens',
-              'notifications',
-              'share',
-              'storage',
-              'theme',
-              'uiActions',
-              'uiSettings',
-              'unifiedSearch',
-              'userProfile',
-              'embeddable',
-              'cases',
-              'cps',
-            ]),
-          }}
-        />
-      )}
+      <LogCategorization
+        dataView={dataView}
+        savedSearch={savedSearch}
+        showFrozenDataTierChoice={showNodeInfo}
+        headerContent={headerContent}
+        appContextValue={{
+          embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+          ...pick(services, [
+            'analytics',
+            'application',
+            'charts',
+            'data',
+            'executionContext',
+            'fieldFormats',
+            'http',
+            'i18n',
+            'lens',
+            'notifications',
+            'share',
+            'storage',
+            'theme',
+            'uiActions',
+            'uiSettings',
+            'unifiedSearch',
+            'userProfile',
+            'embeddable',
+            'cases',
+            'cps',
+          ]),
+        }}
+      />
       <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );

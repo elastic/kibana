@@ -126,28 +126,28 @@ export const AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freez
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
     defaultMessage: 'AIOps Labs',
   }),
-  href: '/aiops/log_rate_analysis_index_select',
+  href: '/aiops/log_rate_analysis',
 });
 
 export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
     defaultMessage: 'AIOps Labs',
   }),
-  href: '/aiops/log_categorization_index_select',
+  href: '/aiops/log_categorization',
 });
 
 export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
     defaultMessage: 'AIOps Labs',
   }),
-  href: '/aiops/change_point_detection_index_select',
+  href: '/aiops/change_point_detection',
 });
 
 export const LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logRateAnalysisBreadcrumbLabel', {
     defaultMessage: 'Log rate analysis',
   }),
-  href: '/aiops/log_rate_analysis_index_select',
+  href: '/aiops/log_rate_analysis',
   deepLinkId: 'ml:logRateAnalysis',
 });
 
@@ -162,7 +162,7 @@ export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
     defaultMessage: 'Log pattern analysis',
   }),
-  href: '/aiops/log_categorization_index_select',
+  href: '/aiops/log_categorization',
   deepLinkId: 'ml:logPatternAnalysis',
 });
 
@@ -177,7 +177,7 @@ export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
     defaultMessage: 'Change point detection',
   }),
-  href: '/aiops/change_point_detection_index_select',
+  href: '/aiops/change_point_detection',
   deepLinkId: 'ml:changePointDetections',
 });
 
@@ -193,7 +193,7 @@ export const DATA_DRIFT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
     defaultMessage: 'Data drift',
   }),
-  href: '/data_drift_index_select',
+  href: '/data_drift',
   deepLinkId: 'ml:dataDrift',
 });
 

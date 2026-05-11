@@ -131,15 +131,14 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.aiOps', {
           defaultMessage: 'AIOps',
         }),
-        // Default to the index select page for log rate analysis since we don't have an AIops overview page
-        path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
+        path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
         deepLinks: [
           {
             id: 'logRateAnalysis',
             title: i18n.translate('xpack.ml.deepLink.logRateAnalysis', {
               defaultMessage: 'Log rate analysis',
             }),
-            path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT}`,
+            path: `/${ML_PAGES.AIOPS_LOG_RATE_ANALYSIS}`,
           },
           {
             id: 'logRateAnalysisPage',
@@ -154,7 +153,7 @@ function createDeepLinks(
             title: i18n.translate('xpack.ml.deepLink.logPatternAnalysis', {
               defaultMessage: 'Log pattern analysis',
             }),
-            path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
+            path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION}`,
           },
           {
             id: 'logPatternAnalysisPage',
@@ -169,7 +168,7 @@ function createDeepLinks(
             title: i18n.translate('xpack.ml.deepLink.changePointDetection', {
               defaultMessage: 'Change point detection',
             }),
-            path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
+            path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION}`,
           },
           {
             id: 'changePointDetectionsPage',
@@ -254,7 +253,7 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.dataDrift', {
           defaultMessage: 'Data drift',
         }),
-        path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
+        path: `/${ML_PAGES.DATA_DRIFT}`,
       };
     },
     getDataDriftPageDeepLink: (): AppDeepLink<LinkId> => {
