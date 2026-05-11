@@ -168,7 +168,11 @@ export class Http1BasePathProxyServer implements BasePathProxyServer {
               pathname: `${this.httpConfig.basePath}/${request.params.kbnPath}`,
               query: request.query,
             }),
-            headers: request.headers,
+            headers: Object.fromEntries(
+              Object.entries(request.headers).flatMap(([k, v]) =>
+                v === undefined ? [] : [[k, Array.isArray(v) ? v.join(', ') : v]]
+              )
+            ),
           }),
         },
       },

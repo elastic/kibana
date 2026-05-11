@@ -8,7 +8,7 @@
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
-import { BIGGER_TIMEOUT } from '../constants';
+import { EXTENDED_TIMEOUT } from '../constants';
 
 export class TransactionDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -82,7 +82,7 @@ export class TransactionDetailsPage {
   async expectTransactionListPageLoaded(serviceName: string) {
     await this.page
       .getByRole('heading', { name: 'Transactions', exact: true })
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await expect(this.page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(serviceName);
     await expect(this.page.getByTestId('appNotFoundPageContent')).toBeHidden();
   }
@@ -110,7 +110,7 @@ export class TransactionDetailsPage {
     );
     await this.page
       .getByTestId('apmSettingsHeaderLink')
-      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   async reload() {

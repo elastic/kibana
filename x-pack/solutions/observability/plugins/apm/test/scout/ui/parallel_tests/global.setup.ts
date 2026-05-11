@@ -14,6 +14,7 @@ import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
 import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_links_data';
 import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
+import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { testData } from '../fixtures';
 
 globalSetupHook(
@@ -47,6 +48,14 @@ globalSetupHook(
     // Generate span stacktrace data for stacktrace tests
     const spanStacktraceData = generateSpanStacktraceData();
     await apmSynthtraceEsClient.index(spanStacktraceData);
+
+    // Generate AWS Lambda service data for cold start chart tests
+    const awsLambdaData = awsLambda({
+      from: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(awsLambdaData);
+    log.info('AWS Lambda service data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

@@ -128,7 +128,7 @@ jest.mock('./actions_menu_button', () => ({
 jest.mock('./decorations', () => ({
   useAlertTriggerDecorations: jest.fn(),
   useConnectorTypeDecorations: jest.fn(),
-  useFocusedStepOutline: jest.fn(() => ({ styles: {} })),
+  useFocusedStepDecoration: jest.fn(),
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
@@ -414,6 +414,57 @@ steps:
 
       // Verify that dispose was called on the completion provider
       expect(mockDispose).toHaveBeenCalled();
+    });
+  });
+
+  describe('monaco markers monkey patching', () => {
+    it('should call original setModelMarkers for models that do not match the current editor', async () => {
+      const store = createMockStore();
+      store.dispatch(setYamlString('version: "1"\nname: "test"'));
+      store.dispatch(setActiveTab('workflow'));
+
+      const originalSetModelMarkers = monaco.editor.setModelMarkers;
+      const setModelMarkersSpy = jest.fn();
+      monaco.editor.setModelMarkers = setModelMarkersSpy;
+
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+      // Wait for the component to mount and monkey patching to be applied
+      await waitFor(() => {
+        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+      });
+
+      // Create a mock model with a different URI than the editor's model
+      const mockModel = {
+        uri: {
+          path: '/different/model/path',
+          toString: () => 'inmemory://different/model',
+        },
+      } as any;
+
+      const mockOwner = 'test-owner';
+      const mockMarkers = [
+        {
+          severity: 8,
+          message: 'Test error',
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 10,
+        },
+      ];
+
+      // Get the monkey-patched function
+      const monkeyPatchedSetModelMarkers = monaco.editor.setModelMarkers;
+
+      // Call the monkey-patched function with a different model
+      monkeyPatchedSetModelMarkers(mockModel, mockOwner, mockMarkers);
+
+      // Verify that the original setModelMarkers was called (not skipped)
+      expect(setModelMarkersSpy).toHaveBeenCalledWith(mockModel, mockOwner, mockMarkers);
+
+      // Restore original function
+      monaco.editor.setModelMarkers = originalSetModelMarkers;
     });
   });
 

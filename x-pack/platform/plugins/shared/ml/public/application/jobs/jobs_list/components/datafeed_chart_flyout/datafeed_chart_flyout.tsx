@@ -496,7 +496,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             key="annotation-results-line"
                             domainType={AnnotationDomainType.XDomain}
                             dataValues={annotationData.line}
-                            marker={<EuiIcon type="annotation" />}
+                            marker={<EuiIcon type="annotation" aria-hidden={true} />}
                             markerPosition={Position.Top}
                             style={{
                               line: {
@@ -531,7 +531,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key="model-snapshots-results-line"
                           domainType={AnnotationDomainType.XDomain}
                           dataValues={modelSnapshotDataForTimeRange}
-                          marker={<EuiIcon type="asterisk" />}
+                          marker={<EuiIcon type="asterisk" aria-hidden={true} />}
                           markerPosition={Position.Top}
                           style={{
                             line: {
@@ -554,7 +554,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             key="messages-results-line"
                             domainType={AnnotationDomainType.XDomain}
                             dataValues={messageData}
-                            marker={<EuiIcon type="tableDensityNormal" />}
+                            marker={<EuiIcon type="tableDensityNormal" aria-hidden={true} />}
                             markerPosition={Position.Top}
                             style={{
                               line: {

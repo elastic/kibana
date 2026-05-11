@@ -77,6 +77,12 @@ export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequ
 
 export type InitEntityStoreResponse = z.infer<typeof InitEntityStoreResponse>;
 export const InitEntityStoreResponse = z.object({
+  /**
+   * Whether the Entity Store was initialized successfully.
+   */
   succeeded: z.boolean().optional(),
+  /**
+   * The engine descriptors created during initialization.
+   */
   engines: z.array(EngineDescriptor).optional(),
 });

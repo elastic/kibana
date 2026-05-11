@@ -9,12 +9,17 @@
 
 import type { UrlParts } from './url_parts';
 
+type ServerUrlParts = UrlParts & {
+  certificateAuthorities?: Array<string | Buffer>;
+};
+
 export interface ScoutServerConfig {
   serverless?: boolean;
+  http2?: boolean;
   servers: {
-    kibana: UrlParts;
-    elasticsearch: UrlParts;
-    fleet?: UrlParts;
+    kibana: ServerUrlParts;
+    elasticsearch: ServerUrlParts;
+    fleet?: ServerUrlParts;
   };
   dockerServers: any;
   esTestCluster: {

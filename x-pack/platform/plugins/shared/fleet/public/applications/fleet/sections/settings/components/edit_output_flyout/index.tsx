@@ -502,6 +502,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                     defaultMessage="Allow agents to write to Streams"
                   />
                 }
+                disabled={inputs.writeToStreams.props.disabled}
                 checked={inputs.writeToStreams.value}
                 onChange={(e) => inputs.writeToStreams.setValue(e.target.checked)}
               />

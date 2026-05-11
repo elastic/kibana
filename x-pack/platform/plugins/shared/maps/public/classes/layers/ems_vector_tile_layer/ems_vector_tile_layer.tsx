@@ -401,7 +401,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const { operation, percentage } = colorOperation;
 
     const properties = TMSService.transformColorProperties(
-      // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
       mbLayer,
       color,
       operation as unknown as blendMode,
@@ -438,10 +437,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
     const textProperty =
       locale === AUTOSELECT_EMS_LOCALE
-        ? // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
-          TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
-        : // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
-          TMSService.transformLanguageProperty(mbLayer, locale);
+        ? TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
+        : TMSService.transformLanguageProperty(mbLayer, locale);
     if (textProperty !== undefined) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
     }

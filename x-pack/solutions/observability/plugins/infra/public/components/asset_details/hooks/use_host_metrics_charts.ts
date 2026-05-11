@@ -125,12 +125,14 @@ export const useHostKpiCharts = ({
       schema: schema ?? 'ecs',
     });
 
-    return [
+    const hostKpiCharts = [
       cpu.metric.cpuUsage,
       cpu.metric.normalizedLoad1m,
       memory.metric.memoryUsage,
       disk.metric.diskUsage,
-    ].map((chart) => ({
+    ];
+
+    return hostKpiCharts.map((chart) => ({
       ...chart,
       seriesColor,
       decimals: 1,

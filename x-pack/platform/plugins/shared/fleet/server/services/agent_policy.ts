@@ -2150,7 +2150,7 @@ class AgentPolicyService {
       findRequest: {
         type: savedObjectType,
         perPage,
-        sortField: 'created_at',
+        sortField: 'updated_at',
         sortOrder: 'asc',
         fields: ['id', 'name'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
@@ -2176,7 +2176,7 @@ class AgentPolicyService {
       perPage = 1000,
       kuery,
       sortOrder = 'asc',
-      sortField = 'created_at',
+      sortField = 'updated_at',
       fields = [],
       spaceId = undefined,
     }: FetchAllAgentPoliciesOptions = {}

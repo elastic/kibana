@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
-import { BIGGER_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 
 test.describe(
   'Custom links',
@@ -52,7 +52,7 @@ test.describe(
       await expect(page).toHaveURL(/.*custom-links$/);
       // Wait for the custom link row to be visible in the table (with extended timeout for slow loading)
       await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
-        timeout: BIGGER_TIMEOUT,
+        timeout: EXTENDED_TIMEOUT,
       });
 
       await test.step('shows create button', async () => {
@@ -74,7 +74,7 @@ test.describe(
         // Verify we're back on the main page and our link row appears in the table (with extended timeout for slow loading)
         await expect(page).toHaveURL(/.*custom-links$/);
         await expect(customLinksPage.getCustomLinkRow(uniqueDeleteLabel)).toBeVisible({
-          timeout: BIGGER_TIMEOUT,
+          timeout: EXTENDED_TIMEOUT,
         });
 
         // Then delete the specific link we created
@@ -84,12 +84,12 @@ test.describe(
         // Verify deletion - the specific link row should no longer be present
         await expect(page).toHaveURL(/.*custom-links$/);
         await expect(customLinksPage.getCustomLinkRow(uniqueDeleteLabel)).toBeHidden({
-          timeout: BIGGER_TIMEOUT,
+          timeout: EXTENDED_TIMEOUT,
         });
 
         // Verify the previously created link row is still present
         await expect(customLinksPage.getCustomLinkRow(uniqueLabel)).toBeVisible({
-          timeout: BIGGER_TIMEOUT,
+          timeout: EXTENDED_TIMEOUT,
         });
       });
     });

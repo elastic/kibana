@@ -80,6 +80,7 @@ export function AlertAiInsight({ alertId, alertTitle }: AlertAiInsightProps) {
 
   return (
     <AiInsight
+      insightType="alert"
       title={i18n.translate('xpack.observabilityAgentBuilder.alertAiInsight.titleLabel', {
         defaultMessage: 'Help me understand this alert',
       })}
