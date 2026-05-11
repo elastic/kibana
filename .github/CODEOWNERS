@@ -2876,7 +2876,9 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/timeline.tsx @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/timeline.ts @elastic/security-threat-hunting
 
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-threat-hunting
 
