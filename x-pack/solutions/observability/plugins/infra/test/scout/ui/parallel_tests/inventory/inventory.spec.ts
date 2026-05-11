@@ -220,6 +220,7 @@ test.describe(
       await expect(inventoryPage.datePickerInput).toHaveValue(DATE_WITH_SEMCONV_DATA);
 
       await test.step('schema selector reflects OTel / semconv', async () => {
+        await inventoryPage.selectSchema('OpenTelemetry');
         await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
           timeout: EXTENDED_TIMEOUT,
         });
@@ -244,9 +245,11 @@ test.describe(
     }) => {
       await inventoryPage.showHosts();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await inventoryPage.selectSchema('OpenTelemetry');
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
       });
+
       await inventoryPage.waitForNodesToLoad();
       await inventoryPage.switchToTableView();
       await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
@@ -266,6 +269,8 @@ test.describe(
     }) => {
       await inventoryPage.showHosts();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+
+      await inventoryPage.selectSchema('OpenTelemetry');
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
       });

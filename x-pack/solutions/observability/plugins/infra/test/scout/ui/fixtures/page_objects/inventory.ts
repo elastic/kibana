@@ -6,6 +6,7 @@
  */
 
 import { type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import {
   EXTENDED_TIMEOUT,
   KUBERNETES_TOUR_STORAGE_KEY,
@@ -277,8 +278,11 @@ export class InventoryPage {
 
   public async filterByQueryBar(query: string) {
     const queryBar = this.page.getByTestId('queryInput');
+    await queryBar.waitFor();
     await queryBar.clear();
+    await expect(queryBar).toHaveValue('');
     await queryBar.fill(query);
+    await expect(queryBar).toHaveValue(query);
     await queryBar.press('Enter');
     await this.waitForNodesToLoad();
   }
@@ -298,6 +302,13 @@ export class InventoryPage {
   public async selectMetric(metricName: string) {
     await this.metricSwitcherButton.click();
     await this.metricsContextMenu.getByRole('button', { name: metricName }).click();
+    await this.waitForNodesToLoad();
+  }
+
+  public async selectSchema(schema: 'OpenTelemetry' | string) {
+    await this.schemaSelect.click();
+    await this.page.getByRole('option', { name: schema }).waitFor();
+    await this.page.getByRole('option', { name: schema }).click();
     await this.waitForNodesToLoad();
   }
 }
