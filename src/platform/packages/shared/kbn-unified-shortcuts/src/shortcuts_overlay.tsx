@@ -133,13 +133,13 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
         if (isVisible) {
           if (!hasModifierKey(event)) {
             consumeKeyboardEvent(event);
+
+            if (event.key !== 'Escape') {
+              runAction(event);
+            }
           }
 
           close();
-
-          if (event.key !== 'Escape') {
-            runAction(event);
-          }
         } else if (!hasOtherActiveLeaderKeyInstance(instanceId) && shouldOpen(event) && open()) {
           consumeKeyboardEvent(event);
         }
