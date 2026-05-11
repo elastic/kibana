@@ -41,4 +41,4 @@ export {
   CONNECTORS_LIST_SELECTORS,
   MAINTENANCE_WINDOWS_APP_PATH,
 } from './constants';
-export { makeEsQueryRule } from './helpers';
+export { makeEsQueryRule, defineIndexThresholdRule } from './helpers';

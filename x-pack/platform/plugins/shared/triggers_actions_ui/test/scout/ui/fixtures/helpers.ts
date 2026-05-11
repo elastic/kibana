@@ -5,6 +5,40 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
+
+// Fills the index-threshold rule form to a state where save is enabled:
+// name + index (first available .k* index) + time field (first non-placeholder option).
+// Used in both rules_create_flow.spec.ts and connector_slack.spec.ts.
+export const defineIndexThresholdRule = async (page: ScoutPage, name: string) => {
+  await page.testSubj.click('createRuleButton');
+  await page.testSubj.locator('ruleTypeModal').waitFor({ state: 'visible' });
+  await page.testSubj.click('.index-threshold-SelectOption');
+  await page.testSubj.locator('ruleForm').waitFor({ state: 'visible' });
+
+  await page.testSubj.locator('ruleDetailsNameInput').fill(name);
+
+  await page.testSubj.click('selectIndexExpression');
+  const indexCombo = page.testSubj.locator('thresholdIndexesComboBox');
+  await indexCombo.click();
+  await page.keyboard.type('.k');
+  const firstIndexOption = page.locator('[role="listbox"] [role="option"]:nth-of-type(1)');
+  await firstIndexOption.waitFor({ state: 'visible' });
+  await firstIndexOption.click();
+
+  const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
+  await timeFieldSelect.waitFor({ state: 'visible' });
+  const firstOptionValue = await timeFieldSelect
+    .locator('option:nth-child(2)')
+    .getAttribute('value');
+  if (!firstOptionValue) {
+    throw new Error('No time-field options available on thresholdAlertTimeFieldSelect');
+  }
+  await timeFieldSelect.selectOption(firstOptionValue);
+
+  await page.testSubj.click('closePopover');
+};
+
 export const makeEsQueryRule = (namePrefix: string) => ({
   name: `${namePrefix}-rule-${Date.now()}`,
   ruleTypeId: '.es-query',
