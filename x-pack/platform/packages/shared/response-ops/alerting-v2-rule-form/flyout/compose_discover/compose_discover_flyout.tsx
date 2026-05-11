@@ -112,7 +112,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const stepTitles = getStepTitles({ tracking: uiState.tracking });
+  const stepTitles = getStepTitles();
   const isLastStep = uiState.step === stepTitles.length - 1;
   const tabConfig = getSandboxTabConfig(uiState);
 

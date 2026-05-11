@@ -7,36 +7,20 @@
 
 export type ComposeDiscoverMode = 'create' | 'edit';
 
-/** 'no-recovery' disables recovery alerts. Not yet wired to the API — shown as disabled in the UI. */
-export type RecoveryType = 'default' | 'no-recovery' | 'custom';
-
 export type QueryTab = 'base' | 'alert' | 'recovery';
 export type DelayMode = 'immediate' | 'breaches' | 'duration';
 
 /**
- * Describes which tabs the Discover Sandbox should show for the current step and context.
- * Computed from state by getSandboxTabConfig().
- *
- * - single:        No tracking enabled — one query editor, no tabs
- * - base-alert:    Tracking on, Alert Condition step — Base query + Alert query tabs
- * - base-recovery: Recovery Condition step with custom recovery — Recovery query tab only
- * - all-three:     YAML mode — all three tabs always visible
+ * Describes which tabs the Discover Sandbox should show.
+ * Always `{ type: 'single' }` for now — tabs (Base/Alert/Recovery) are added in the
+ * custom recovery follow-up PR.
  */
-export type SandboxTabConfig =
-  | { type: 'single' }
-  | { type: 'base-alert' }
-  | { type: 'base-recovery' }
-  | { type: 'all-three' };
+export type SandboxTabConfig = { type: 'single' };
 
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
-  tracking: boolean;
   fullQuery: string;
-  baseQuery: string;
-  alertBlock: string;
-  recoveryBlock: string;
-  recoveryType: RecoveryType;
   notificationsEnabled: boolean;
   // Form value fields — migrated to RHF useForm<FormValues> in this PR
   name: string;
@@ -59,12 +43,6 @@ export type ComposeDiscoverAction =
   | { type: 'SET_NAME'; name: string }
   | { type: 'SET_TAGS'; tags: string[] }
   | { type: 'SET_FULL_QUERY'; query: string }
-  | { type: 'SET_BASE_QUERY'; query: string }
-  | { type: 'SET_ALERT_BLOCK'; block: string }
-  | { type: 'SET_RECOVERY_BLOCK'; block: string }
-  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
-  | { type: 'ENABLE_TRACKING'; base: string; alertBlock: string }
-  | { type: 'DISABLE_TRACKING' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_SCHEDULE'; schedule: string }
   | { type: 'SET_LOOKBACK'; lookback: string }
@@ -82,10 +60,4 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD' }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string }
-  | {
-      type: 'COMMIT_CHILD_SPLIT';
-      baseQuery: string;
-      alertBlock: string;
-      recoveryBlock: string;
-    };
+  | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string };
