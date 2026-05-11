@@ -10,9 +10,6 @@ import { PREFIX } from '../test_ids';
 export const FLYOUT_PREVIEW_LINK_TEST_ID = `${PREFIX}PreviewLink` as const;
 export const FLYOUT_LINK_TEST_ID = `${PREFIX}Link` as const;
 
-export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
-export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
-
 export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
 export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
 export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as const;
