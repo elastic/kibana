@@ -194,8 +194,7 @@ export class Gauge extends Component {
             ref="label"
             data-test-subj="gaugeValue"
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <span dangerouslySetInnerHTML={{ __html: formatter(value) }} />
+            <span>{formatter(value)}</span>
           </div>
           {additionalLabel}
         </div>
@@ -213,8 +212,7 @@ export class Gauge extends Component {
             ref="label"
             data-test-subj="gaugeValue"
           >
-            {/* eslint-disable-next-line react/no-danger */}
-            <span dangerouslySetInnerHTML={{ __html: formatter(value) }} />
+            <span>{formatter(value)}</span>
           </div>
           <div
             className="tvbVisGauge__label"

@@ -12,8 +12,8 @@ set -euo pipefail
 #   PERF_INTERVAL - interval in seconds
 #   PERF_COUNT - number of uploads
 #   CLOUD_DEPLOYMENT_ID - deployment ID
-#   CLOUD_DEPLOYMENT_KIBANA_URL - Kibana URL
-#   CLOUD_DEPLOYMENT_ELASTICSEARCH_URL - Elasticsearch URL
+#   CLOUD_DEPLOYMENT_KIBANA_URL - Kibana base URL
+#   CLOUD_DEPLOYMENT_ELASTICSEARCH_URL - Elasticsearch base URL
 
 # Function to format large numbers (e.g., 1000000 -> "1m", 7500000 -> "7.5m")
 format_log_count() {
@@ -44,6 +44,28 @@ format_log_count() {
   else
     echo "$count"
   fi
+}
+
+rewrite_markdown_for_pr_comment() {
+  local source_file=$1
+  local dest_file=$2
+
+  awk '
+    /^## Deployment Information$/ {
+      print "> See Buildkite artifacts and annotations for this job."
+      print ""
+      skip = 1
+      next
+    }
+    skip {
+      if (/^### / || /^## /) {
+        skip = 0
+        print
+      }
+      next
+    }
+    { print }
+  ' "$source_file" >"$dest_file"
 }
 
 generate_performance_report() {
@@ -230,15 +252,16 @@ EOF
           echo "**Number of Nodes**: $NODE_COUNT" >> "$REPORT_FILE"
           echo "" >> "$REPORT_FILE"
           
-          # Extract metrics for each node
-          echo "$JSON_PART" | jq -r '.nodes[] | 
-            "#### \(.node_name) (\(.node_id))",
-            "- **CPU Usage**: \(.os.cpu.percent // .cpu.percent // "unknown")%",
-            "- **JVM Heap Used**: \(.jvm.mem.heap_used_percent)% (\(.jvm.mem.heap_used_in_bytes // 0 / 1024 / 1024 | floor)MB / \(.jvm.mem.heap_max_in_bytes // 0 / 1024 / 1024 | floor)MB)",
-            "- **OS Memory Used**: \(.os.mem.used_percent)% (\(.os.mem.used_in_bytes // 0 / 1024 / 1024 | floor)MB / \(.os.mem.total_in_bytes // 0 / 1024 / 1024 | floor)MB)",
-            "- **Load Average (1m/5m/15m)**: \(.os.cpu.load_average."1m" | tostring) / \(.os.cpu.load_average."5m" | tostring) / \(.os.cpu.load_average."15m" | tostring)",
-            "- **GC Young Collections**: \(.jvm.gc.collectors.young.collection_count) (total time: \(.jvm.gc.collectors.young.collection_time_in_millis)ms)",
-            "- **GC Old Collections**: \(.jvm.gc.collectors.old.collection_count) (total time: \(.jvm.gc.collectors.old.collection_time_in_millis)ms)",
+          # Extract metrics for each node (anonymized as "Node 1", "Node 2", ...)
+          # First to_entries yields {key: es_node_id, value: stats}; second gives numeric index + inner pair
+          echo "$JSON_PART" | jq -r '.nodes | to_entries | to_entries[] |
+            "#### Node \(.key + 1)",
+            "- **CPU Usage**: \(.value.value.os.cpu.percent // .value.value.cpu.percent // "unknown")%",
+            "- **JVM Heap Used**: \(.value.value.jvm.mem.heap_used_percent)% (\((.value.value.jvm.mem.heap_used_in_bytes // 0) / 1024 / 1024 | floor)MB / \((.value.value.jvm.mem.heap_max_in_bytes // 0) / 1024 / 1024 | floor)MB)",
+            "- **OS Memory Used**: \(.value.value.os.mem.used_percent)% (\(((.value.value.os.mem.total_in_bytes // 0) - (.value.value.os.mem.free_in_bytes // 0)) / 1024 / 1024 | floor)MB / \((.value.value.os.mem.total_in_bytes // 0) / 1024 / 1024 | floor)MB)",
+            "- **Load Average (1m/5m/15m)**: \(.value.value.os.cpu.load_average."1m" | tostring) / \(.value.value.os.cpu.load_average."5m" | tostring) / \(.value.value.os.cpu.load_average."15m" | tostring)",
+            "- **GC Young Collections**: \(.value.value.jvm.gc.collectors.young.collection_count) (total time: \(.value.value.jvm.gc.collectors.young.collection_time_in_millis)ms)",
+            "- **GC Old Collections**: \(.value.value.jvm.gc.collectors.old.collection_count) (total time: \(.value.value.jvm.gc.collectors.old.collection_time_in_millis)ms)",
             ""' >> "$REPORT_FILE"
         fi
       fi
@@ -261,13 +284,16 @@ EOF
   # Annotate Buildkite with report
   buildkite-agent annotate --style "info" --context "entity-store-performance" < "$REPORT_FILE"
 
-  # Upload report as artifact
+  # Upload report as artifact (full content)
   buildkite-agent artifact upload "$REPORT_FILE"
+
+  REPORT_FILE_FOR_PR=$(mktemp)
+  rewrite_markdown_for_pr_comment "$REPORT_FILE" "$REPORT_FILE_FOR_PR"
 
   # Create formatted PR comment with collapsible section
   echo "--- Create PR Comment"
   PR_COMMENT_FILE=$(mktemp)
-  
+
   {
     echo "## Entity Store Performance Tests"
     echo ""
@@ -278,10 +304,11 @@ EOF
     echo "<details>"
     echo "<summary>Click to expand full performance report</summary>"
     echo ""
-    cat "$REPORT_FILE"
+    cat "$REPORT_FILE_FOR_PR"
     echo ""
     echo "</details>"
   } > "$PR_COMMENT_FILE"
+  rm -f "$REPORT_FILE_FOR_PR"
   
   # Post comment directly to PR
   echo "Posting performance report to PR"

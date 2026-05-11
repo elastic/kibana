@@ -18,7 +18,7 @@ import { AnomalyHeatmap } from './anomaly_heatmap';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { RecentAnomaliesHeatmapNoResults } from './recent_anomalies_heatmap_no_results';
 
-const RECENT_ANOMALIES_QUERY_ID = 'recent-anomalies-query';
+export const RECENT_ANOMALIES_QUERY_ID = 'recent-anomalies-query';
 const RECENT_ANOMALIES_CONTEXT_ID = 'RecentAnomalies-table';
 
 /**

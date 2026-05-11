@@ -25,3 +25,6 @@ export const INITIAL_TOUR_CONFIG = {
 };
 
 export const EXPORT_FILE_NAME = 'console_export';
+
+export const IMPORT_REQUESTS_METRIC_ID = 'import_requests';
+export const EXPORT_REQUESTS_METRIC_ID = 'export_requests';
