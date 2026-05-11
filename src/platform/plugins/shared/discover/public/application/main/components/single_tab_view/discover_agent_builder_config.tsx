@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { ActiveConversation } from '@kbn/agent-builder-browser';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { AttachmentType, type AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -31,6 +32,10 @@ const SESSION_TAG = 'discover';
 const MAX_SAMPLE_ROWS = 10;
 const MAX_COLUMNS = 100;
 const MAX_VALUE_LENGTH = 100;
+
+const ESQL_INITIAL_MESSAGE = i18n.translate('discover.agentBuilder.esqlInitialMessage', {
+  defaultMessage: 'Analyze my data',
+});
 
 const updateQuerySchema = z.object({
   query: z.string().min(1).describe('The query string to apply to the current Discover tab.'),
@@ -173,6 +178,24 @@ export const DiscoverAgentBuilderConfig = () => {
   const queryRef = useRef(query);
   queryRef.current = query;
 
+  // Tracks the agent-builder sidebar state. `undefined` means we haven't received
+  // the BehaviorSubject's first emission yet — we must not seed in that gap because
+  // we don't know whether the sidebar is already open.
+  const [activeConversation, setActiveConversation] = useState<
+    ActiveConversation | null | undefined
+  >(undefined);
+
+  // Once we've seeded the initial message for the current ES|QL session, never
+  // seed again — re-seeding would re-trigger autoSendInitialMessage and replay
+  // "Analyze my data" against a conversation the user has moved on from.
+  const hasSeededEsqlPromptRef = useRef(false);
+
+  useEffect(() => {
+    if (!agentBuilder) return;
+    const sub = agentBuilder.events.ui.activeConversation$.subscribe(setActiveConversation);
+    return () => sub.unsubscribe();
+  }, [agentBuilder]);
+
   const runQueryTool: BrowserApiToolDefinition<z.infer<typeof updateQuerySchema>> = useMemo(
     () => ({
       id: 'discover_run_query',
@@ -193,9 +216,25 @@ export const DiscoverAgentBuilderConfig = () => {
     [isEsqlMode, runQueryTool]
   );
 
+  // Keep the seed in config while sidebar is closed (null) or open without a
+  // conversation id yet ({ id: undefined }). Dropping the seed during that window
+  // would wipe `initialMessage` from the freshly-opened sidebar before
+  // `use_initial_message` auto-sends it. `undefined` is the pre-first-emission gap —
+  // can't safely seed there because the sidebar might already be open with an
+  // existing conversation we shouldn't disrupt.
+  const shouldSeedEsqlPrompt =
+    isEsqlMode &&
+    !hasSeededEsqlPromptRef.current &&
+    activeConversation !== undefined &&
+    !activeConversation?.id;
+
   useEffect(() => {
     if (!agentBuilder) {
       return;
+    }
+
+    if (!isEsqlMode) {
+      hasSeededEsqlPromptRef.current = false;
     }
 
     const normalizedTimeRange = timeRange ? { from: timeRange.from, to: timeRange.to } : undefined;
@@ -227,6 +266,13 @@ export const DiscoverAgentBuilderConfig = () => {
       sessionTag: SESSION_TAG,
       attachments,
       browserApiTools,
+      ...(shouldSeedEsqlPrompt
+        ? {
+            newConversation: true,
+            initialMessage: ESQL_INITIAL_MESSAGE,
+            autoSendInitialMessage: true,
+          }
+        : {}),
     });
 
     return () => {
@@ -241,10 +287,21 @@ export const DiscoverAgentBuilderConfig = () => {
     documentState.esqlQueryColumns,
     documentState.result,
     hasEsqlResults,
+    isEsqlMode,
     query,
+    shouldSeedEsqlPrompt,
     timeRange,
     totalHits,
   ]);
+
+  // Mark the prompt as seeded once a real conversation id exists. From that point,
+  // dropping the seed from subsequent setChatConfig calls is safe — the auto-send
+  // has already fired and submitMessage has assigned the id synchronously.
+  useEffect(() => {
+    if (isEsqlMode && activeConversation?.id) {
+      hasSeededEsqlPromptRef.current = true;
+    }
+  }, [isEsqlMode, activeConversation]);
 
   return null;
 };
