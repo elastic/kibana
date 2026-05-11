@@ -30,6 +30,7 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -40,6 +41,7 @@ export interface TaskSchedulingOpts {
   middleware: Middleware;
   taskManagerId: string;
   taskPollingLifecycle?: TaskPollingLifecycle; // subscribe to task lifecycle events
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 /**
@@ -71,6 +73,7 @@ export class TaskScheduling {
   private logger: Logger;
   private middleware: Middleware;
   private readonly taskPolling: TaskPollingLifecycle | undefined;
+  private readonly claimNudgeService: TaskManagerClaimNudgeService | undefined;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -82,6 +85,7 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
     this.taskPolling = opts.taskPollingLifecycle;
+    this.claimNudgeService = opts.claimNudgeService;
   }
 
   /**
@@ -104,18 +108,30 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule(
+    const scheduledTask = await this.store.schedule(
       {
         ...modifiedTask,
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      options?.request
+      options?.request || options?.refresh !== undefined
         ? {
             request: options?.request,
+            refresh: options?.refresh,
           }
         : undefined
     );
+
+    if (options?.refresh === true && this.claimNudgeService) {
+      try {
+        await this.claimNudgeService.notify();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Failed to notify cross-node Task Manager claim nudge: ${message}`);
+      }
+    }
+
+    return scheduledTask;
   }
 
   /**

@@ -141,7 +141,7 @@ describe('AgentExecutionService', () => {
           params: { executionId: result.executionId },
           scope: ['agent-builder'],
         }),
-        { request }
+        { request, refresh: true }
       );
     });
   });

@@ -62,6 +62,7 @@ import {
   ADJUST_THROUGHPUT_INTERVAL,
 } from './lib/create_managed_configuration';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -83,6 +84,7 @@ export interface TaskPollingLifecycleOpts {
   startingCapacity: number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
+  claimNudgeService?: TaskManagerClaimNudgeService;
 }
 
 export type TaskLifecycleEvent =
@@ -148,6 +150,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     startingCapacity,
     apiKeyStrategy,
     eventLogger,
+    claimNudgeService,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -224,6 +227,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
       pollIntervalDelay$,
+      claimNudge$: claimNudgeService?.claimNudge$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {

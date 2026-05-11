@@ -21,6 +21,7 @@ import { omit } from 'lodash';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { TaskAlreadyRunningError } from './lib/errors';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
+import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -63,6 +64,9 @@ describe('TaskScheduling', () => {
   const mockTaskStore = taskStoreMock.create({});
   const definitions = new TaskTypeDictionary(mockLogger());
   const taskPollingLifecycle = taskPollingLifecycleMock.create({});
+  const claimNudgeService = {
+    notify: jest.fn(),
+  } as unknown as jest.Mocked<TaskManagerClaimNudgeService>;
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
     logger: mockLogger(),
@@ -70,6 +74,7 @@ describe('TaskScheduling', () => {
     definitions,
     taskManagerId: '123',
     taskPollingLifecycle,
+    claimNudgeService,
   };
 
   definitions.registerTaskDefinitions({
@@ -128,8 +133,35 @@ describe('TaskScheduling', () => {
       },
       {
         request: mockRequest,
+        refresh: undefined,
       }
     );
+  });
+
+  test('should call task store with refresh when provided', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+
+    await taskScheduling.schedule(task, { refresh: true });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      },
+      {
+        request: undefined,
+        refresh: true,
+      }
+    );
+    expect(claimNudgeService.notify).toHaveBeenCalledTimes(1);
   });
 
   test('allows scheduling tasks that are disabled', async () => {

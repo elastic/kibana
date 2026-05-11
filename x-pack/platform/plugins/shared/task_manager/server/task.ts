@@ -22,6 +22,7 @@ export enum TaskPriority {
   Low = 1,
   NormalLongRunning = 40,
   Normal = 50,
+  High = 75,
 }
 
 export enum TaskCost {
@@ -570,7 +571,14 @@ export interface ApiKeyOptions {
   regenerateApiKey?: boolean;
 }
 
-export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+export type ScheduleOptions = Record<string, unknown> &
+  ApiKeyOptions & {
+    /**
+     * Controls SO refresh behavior after scheduling. Use `true` only for
+     * latency-sensitive scheduling paths.
+     */
+    refresh?: boolean;
+  };
 
 // Local event log interface to avoid a circular dependency with @kbn/event-log-plugin in .tsconfig
 export interface TaskEventLogger {

@@ -55,6 +55,7 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  ScheduleOptions,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
@@ -441,7 +442,7 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._schedule(taskInstance, options), {
       id: 'schedule',
@@ -449,7 +450,7 @@ export class TaskStore {
   }
   private async _schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -478,7 +479,7 @@ export class TaskStore {
           ...apiKeySOFields,
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
-        { id, refresh: false }
+        { id, refresh: options?.refresh ?? false }
       );
       if (
         get(taskInstance, 'schedule.interval', null) == null &&

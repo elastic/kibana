@@ -41,6 +41,7 @@ import {
   BACKGROUND_TASK_NODE_SO_NAME,
   TASK_SO_NAME,
   INVALIDATE_API_KEY_SO_NAME,
+  TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
 } from './saved_objects';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -52,7 +53,7 @@ import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
-import { TASK_MANAGER_INDEX } from './constants';
+import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import type { Metrics } from './metrics';
@@ -76,6 +77,7 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
+import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 
 export interface TaskManagerSetupContract {
   /**
@@ -160,6 +162,7 @@ export class TaskManagerPlugin
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
+  private claimNudgeService?: TaskManagerClaimNudgeService;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -302,7 +305,6 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
-
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
@@ -345,7 +347,15 @@ export class TaskManagerPlugin
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
       INVALIDATE_API_KEY_SO_NAME,
+      TASK_MANAGER_CLAIM_NUDGE_SO_NAME,
     ]);
+
+    this.claimNudgeService = new TaskManagerClaimNudgeService({
+      logger: this.logger,
+      esClient: elasticsearch.client.asInternalUser,
+      savedObjectsRepository,
+      index: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+    });
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
       savedObjectsRepository,
@@ -442,6 +452,7 @@ export class TaskManagerPlugin
         startingCapacity,
         apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
+        claimNudgeService: this.claimNudgeService,
       });
     }
 
@@ -470,7 +481,12 @@ export class TaskManagerPlugin
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      claimNudgeService: this.claimNudgeService,
     });
+
+    if (this.shouldRunBackgroundTasks) {
+      this.claimNudgeService.start();
+    }
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleInvalidateApiKeyTask(
@@ -528,5 +544,7 @@ export class TaskManagerPlugin
         this.logger.error(`Deleting current node has failed. error: ${e.message}`);
       }
     }
+
+    this.claimNudgeService?.stop();
   }
 }

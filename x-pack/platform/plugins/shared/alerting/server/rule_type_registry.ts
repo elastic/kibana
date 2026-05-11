@@ -278,7 +278,11 @@ export class RuleTypeRegistry {
     }
 
     if (ruleType.priority) {
-      if (![TaskPriority.Normal, TaskPriority.NormalLongRunning].includes(ruleType.priority)) {
+      if (
+        ![TaskPriority.Normal, TaskPriority.NormalLongRunning, TaskPriority.High].includes(
+          ruleType.priority
+        )
+      ) {
         throw new Error(
           i18n.translate('xpack.alerting.ruleTypeRegistry.register.invalidPriorityRuleTypeError', {
             defaultMessage: 'Rule type "{id}" has invalid priority: {errorMessage}.',

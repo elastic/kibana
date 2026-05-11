@@ -119,3 +119,15 @@ export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
     },
   },
 };
+
+export const taskManagerClaimNudgeMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    updated_at: {
+      type: 'date',
+    },
+    nonce: {
+      type: 'keyword',
+    },
+  },
+};

@@ -5,6 +5,7 @@
  * 2.0.
  */
 export const TASK_MANAGER_INDEX = '.kibana_task_manager';
+export const TASK_MANAGER_CLAIM_NUDGE_INDEX = '.kibana_task_manager_claim_nudge';
 export const CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: string[] = [
   // for testing
   'sampleTaskWithSingleConcurrency',

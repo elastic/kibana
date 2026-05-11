@@ -1456,6 +1456,10 @@
     "userScope.apiKeyId",
     "userScope.uiamApiKeyId"
   ],
+  "task_manager_wakeup_signal": [
+    "nonce",
+    "updated_at"
+  ],
   "telemetry": [],
   "threshold-explorer-view": [],
   "trial-companion-nba-milestone": [

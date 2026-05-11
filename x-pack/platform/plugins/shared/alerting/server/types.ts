@@ -390,7 +390,7 @@ export interface RuleType<
    * Task priority allowing for tasks to be ran at lower priority (NormalLongRunning vs Normal), defaults to
    * normal priority.
    */
-  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning;
+  priority?: TaskPriority.Normal | TaskPriority.NormalLongRunning | TaskPriority.High;
   /**
    * Indicates that the rule type is managed internally by a Kibana plugin.
    * Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.

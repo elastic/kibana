@@ -175,7 +175,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         enabled: true,
         state: {},
       },
-      { request }
+      { request, refresh: true }
     );
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);

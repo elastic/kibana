@@ -4836,6 +4836,17 @@
       }
     }
   },
+  "task_manager_wakeup_signal": {
+    "dynamic": false,
+    "properties": {
+      "nonce": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  },
   "telemetry": {
     "dynamic": false,
     "properties": {}
