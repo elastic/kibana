@@ -2347,13 +2347,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.3.4":
-  version "9.3.4"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.3.4.tgz#b124f33ba8ddd98267798672dba5ad4aee9d6c89"
-  integrity sha512-Mp14fPEYx+WTfZdcvAaZ9WkLYGHQCbwMx6EP5VCucYdhv4cn/g2sbnMT5HzK+gX3XEpBnnkEK/+WysCKzxuo3A==
+"@elastic/elasticsearch@9.4.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.0.tgz#3ae5e4ef9d4167cc36782c0658a6a0f783e51b4a"
+  integrity sha512-UbvHAtGAqiQdAsAmb3vfCMwOTIf6BoSf6MDpz7mw5UzpU3pRSl4KeFzaXRfrk4+PrgiudYx14socGCI6frgguQ==
   dependencies:
     "@elastic/transport" "^9.3.5"
-    apache-arrow "18.x - 21.x"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.7.0":
@@ -10091,25 +10090,25 @@
   dependencies:
     js-tiktoken "^1.0.12"
 
-"@launchdarkly/js-sdk-common@2.24.1":
-  version "2.24.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.24.1.tgz#7d38c19b7e5e5105174233d5085ae8517514e8bf"
-  integrity sha512-rrqZrUwjPWtSkjDNG1qX+BawlyGTx3RFTX4cdHeIR6MOyJR5i9DTzCit8bNBxjI/kGfxZHBepaPlGxoCfJjGFQ==
+"@launchdarkly/js-sdk-common@2.24.2":
+  version "2.24.2"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.24.2.tgz#449842dd4d9e5725b225a7321ab5e82520855e48"
+  integrity sha512-SuWfR90NZ1ttGxz/2AeavfFXy/sFnFE7PhEBfg4mv0beTF9LeZwVa4XJsVeBe0Zb1PcuUQt7kn4VmFCctQIAzA==
 
-"@launchdarkly/js-server-sdk-common@2.18.4":
-  version "2.18.4"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.18.4.tgz#76719c52b3885da128c2b3f0f76b9621fd905a9f"
-  integrity sha512-N3cYW1MTiXLpUzyIGU2jYo02/ZGeQFxz1diL3utgR+Mkrnb448e34uqt6Mrmv7lHr/IUL5aSgHdiJZc/5+WQAA==
+"@launchdarkly/js-server-sdk-common@2.18.5":
+  version "2.18.5"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.18.5.tgz#efabdb36f9a5f9012febc4039094e1193334c8d1"
+  integrity sha512-P+KvThDSxzBM1jHmCZuHWaz+B0Wu44GRcpDar7RoT5yFW7HN3l2vQEArYrRHGGDvTE3YWqQxOfVUTRK0pktz1g==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.24.1"
+    "@launchdarkly/js-sdk-common" "2.24.2"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@9.10.11":
-  version "9.10.11"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.11.tgz#6626ec0a4f2418cd32f6df1fa4d6df11bb01528a"
-  integrity sha512-2YsWGb7S5lxIg9DJpQDkLem69xzfP9PLXnOqZrfZEae5vh68V9nnKG6VpG3gTaHBJg1gDrqcpdJxCwPodI+MSA==
+"@launchdarkly/node-server-sdk@9.10.12":
+  version "9.10.12"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.12.tgz#752548a324bcb4ffd5c9a697833dca15f8374bd2"
+  integrity sha512-jGScTl6n8lKgnuPvRPMOxf2xdE//+asa5mj97bRPa7AOZYmKtjweJMWNlGEGyaFqeOEqkw+VebqMK+qUJuDOug==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.18.4"
+    "@launchdarkly/js-server-sdk-common" "2.18.5"
     https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
