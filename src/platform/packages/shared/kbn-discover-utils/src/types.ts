@@ -56,17 +56,6 @@ export interface DataTableRecord {
   isAnchor?: boolean;
 }
 
-/**
- * Custom column types per column name
- */
-export type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-  }
->;
-
 import type { ReactNode } from 'react';
 
 type FormattedHitPair = readonly [

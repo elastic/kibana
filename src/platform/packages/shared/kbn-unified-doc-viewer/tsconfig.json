@@ -24,5 +24,6 @@
     "@kbn/restorable-state",
     "@kbn/scout",
     "@kbn/core",
+    "@kbn/data-source",
   ]
 }

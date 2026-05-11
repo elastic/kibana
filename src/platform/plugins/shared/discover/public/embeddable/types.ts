@@ -33,7 +33,7 @@ import type {
   SavedSearch,
   SerializableSavedSearch,
 } from '@kbn/saved-search-plugin/common/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { BehaviorSubject } from 'rxjs';
 import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
@@ -64,7 +64,7 @@ export type SearchEmbeddablePublicState = Pick<
   | 'density'
 > & {
   rows: DataTableRecord[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
 };
@@ -77,7 +77,7 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  'rows' | 'dataSource' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 

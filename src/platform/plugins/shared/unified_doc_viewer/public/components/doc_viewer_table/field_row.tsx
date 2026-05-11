@@ -8,8 +8,8 @@
  */
 
 import type { ReactNode } from 'react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
+import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { IgnoredReason } from '@kbn/discover-utils';
 import {
   convertValueToString,
@@ -19,7 +19,8 @@ import {
 } from '@kbn/discover-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { type DataSource, EsqlSource, IndexPatternSource } from '@kbn/data-source';
 
 export class FieldRow {
   readonly name: string;
@@ -27,7 +28,7 @@ export class FieldRow {
   readonly flattenedValue: unknown;
   readonly dataViewField: DataViewField | undefined;
   readonly isPinned: boolean;
-  readonly columnsMeta: DataTableColumnsMeta | undefined;
+  readonly dataSource: DataSource | undefined;
 
   readonly #hit: DataTableRecord;
   readonly #dataView: DataView;
@@ -49,7 +50,7 @@ export class FieldRow {
     dataView,
     fieldFormats,
     isPinned,
-    columnsMeta,
+    dataSource,
   }: {
     name: string;
     displayNameOverride?: string;
@@ -58,7 +59,7 @@ export class FieldRow {
     dataView: DataView;
     fieldFormats: FieldFormatsStart;
     isPinned: boolean;
-    columnsMeta: DataTableColumnsMeta | undefined;
+    dataSource: DataSource | undefined;
   }) {
     this.#hit = hit;
     this.#dataView = dataView;
@@ -69,13 +70,9 @@ export class FieldRow {
     this.name = name;
     this.displayNameOverride = displayNameOverride;
     this.flattenedValue = flattenedValue;
-    this.dataViewField = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: name,
-      columnMeta: columnsMeta?.[name],
-    });
+    this.dataViewField = resolveFieldFromDataSource(dataSource, name) ?? dataView.fields.getByName(name);
     this.isPinned = isPinned;
-    this.columnsMeta = columnsMeta;
+    this.dataSource = dataSource;
   }
 
   // format as React node in a lazy way
@@ -115,8 +112,11 @@ export class FieldRow {
 
   public get fieldType(): string | undefined {
     if (!this.#fieldType) {
-      const columnMeta = this.columnsMeta?.[this.name];
-      const columnIconType = getTextBasedColumnIconType(columnMeta);
+      const esqlMeta =
+        this.dataSource instanceof EsqlSource
+          ? this.dataSource.resultColumns.find((c) => c.name === this.name)?.meta
+          : undefined;
+      const columnIconType = esqlMeta ? getTextBasedColumnIconType(esqlMeta) : undefined;
       const fieldType = columnIconType
         ? columnIconType // for text-based results types come separately
         : isNestedFieldParent(this.name, this.#dataView)
@@ -136,4 +136,18 @@ export class FieldRow {
       ? getIgnoredReason(this.dataViewField, this.#hit.raw._ignored)
       : undefined;
   }
+}
+
+function resolveFieldFromDataSource(
+  dataSource: DataSource | undefined,
+  name: string
+): DataViewField | undefined {
+  if (dataSource instanceof IndexPatternSource) {
+    return dataSource.getDataView().fields.getByName(name);
+  }
+  if (dataSource instanceof EsqlSource) {
+    const column = dataSource.resultColumns.find((c) => c.name === name);
+    return column ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)) : undefined;
+  }
+  return undefined;
 }

@@ -8,12 +8,11 @@
  */
 
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import type { DataSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
 import { getFieldFromDataSource } from './get_field_from_data_source';
-import { getCompatDataView } from './get_compat_data_view';
 
 interface ConvertedResult {
   formattedString: string;
@@ -48,10 +47,10 @@ export const convertValueToString = ({
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
   const field = getFieldFromDataSource(dataSource, columnId);
-  const dataView = getCompatDataView(dataSource);
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
   return commonConvertValueToString({
-    dataView: dataView!,
+    dataView,
     dataViewField: field,
     flattenedValue: value,
     dataTableRecord: rows[rowIndex],

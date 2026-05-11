@@ -160,7 +160,6 @@ export function fetchEsql({
                   query: query.esql,
                   resultColumns: esqlQueryColumns,
                   timeFieldName: dataView.timeFieldName,
-                  dataView,
                 })
               : undefined;
 

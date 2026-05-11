@@ -672,11 +672,11 @@ const InternalUnifiedDataTable = React.forwardRef<
         canPrependTimeFieldColumn(
           activeColumns,
           timeFieldName,
-          undefined,
+          Boolean(timeFieldName && dataSource?.getColumn(timeFieldName)),
           showTimeCol,
           isPlainRecord
         ),
-      [timeFieldName, isPlainRecord, showTimeCol]
+      [timeFieldName, dataSource, isPlainRecord, showTimeCol]
     );
 
     const visibleColumns = useMemo(() => {
@@ -691,6 +691,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       rows,
       visibleColumns,
       dataSource,
+      fieldFormats,
       sort,
       isPlainRecord,
       isSortEnabled,

@@ -13,15 +13,7 @@ import { type DataSource, EsqlSource, IndexPatternSource } from '@kbn/data-sourc
 
 /**
  * Resolves a `DataViewField` for a given column name from a `DataSource`.
- *
- * - For `IndexPatternSource` (DSL), returns the existing `DataViewField` from
- *   the underlying `DataView`.
- * - For `EsqlSource`, synthesises a `DataViewField` from the raw
- *   `DatatableColumn` so that legacy formatter helpers in `kbn-discover-utils`
- *   (which take `DataViewField`) keep working.
- *
- * Replaces the older `getDataViewFieldOrCreateFromColumnMeta` helper for
- * call sites that have migrated to `DataSource`.
+ * For `EsqlSource`, synthesises one from the raw `DatatableColumn`.
  */
 export function getFieldFromDataSource(
   dataSource: DataSource | undefined,

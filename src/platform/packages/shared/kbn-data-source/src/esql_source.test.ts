@@ -201,28 +201,6 @@ describe('EsqlSource', () => {
     });
   });
 
-  describe('getCompatibilityDataView', () => {
-    it('returns undefined when no DataView is passed', async () => {
-      const source = await EsqlSource.create({
-        query: 'FROM logs-*',
-        resultColumns: [],
-      });
-      expect(source.getCompatibilityDataView()).toBeUndefined();
-    });
-
-    it('returns the DataView passed at construction', async () => {
-      const dv = { id: 'esql-x', title: 'logs-*' } as unknown as Parameters<
-        typeof EsqlSource.create
-      >[0]['dataView'];
-      const source = await EsqlSource.create({
-        query: 'FROM logs-*',
-        resultColumns: [],
-        dataView: dv,
-      });
-      expect(source.getCompatibilityDataView()).toBe(dv);
-    });
-  });
-
   describe('resultColumns', () => {
     it('exposes the raw DatatableColumns it was constructed with', async () => {
       const cols = [

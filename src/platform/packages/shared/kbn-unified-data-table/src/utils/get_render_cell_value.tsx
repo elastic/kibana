@@ -14,7 +14,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
@@ -24,7 +24,6 @@ import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 import { getFieldFromDataSource } from './get_field_from_data_source';
-import { getCompatDataView } from './get_compat_data_view';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -62,7 +61,8 @@ export const getRenderCellValueFn = ({
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = getFieldFromDataSource(dataSource, columnId);
-    const dataView = getCompatDataView(dataSource);
+    const dataView =
+      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
     const ctx = useContext(UnifiedDataTableContext);
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
     const customCellProps = useRef<EuiDataGridSetCellProps>({});
@@ -134,7 +134,7 @@ export const getRenderCellValueFn = ({
             isExpanded={isExpanded}
             colIndex={colIndex}
             row={row}
-            dataView={dataView!}
+            dataView={dataView}
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
@@ -157,7 +157,7 @@ export const getRenderCellValueFn = ({
         row,
         field,
         columnId,
-        dataView: dataView!,
+        dataView,
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
@@ -191,7 +191,7 @@ export const getRenderCellValueFn = ({
           value: row.flattened[columnId],
           hit: row.raw,
           fieldFormats,
-          dataView: dataView!,
+          dataView,
           field,
         })}
       </span>
@@ -223,7 +223,7 @@ function renderPopoverContent({
   row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
-  dataView: DataView;
+  dataView: DataView | undefined;
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;

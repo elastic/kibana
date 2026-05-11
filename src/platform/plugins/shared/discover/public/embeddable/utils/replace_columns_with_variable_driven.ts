@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import { type DataSource, EsqlSource } from '@kbn/data-source';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 
 /**
@@ -16,35 +16,27 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
  */
 export const replaceColumnsWithVariableDriven = (
   savedSearchColumns: string[] | undefined,
-  columnsMeta: Record<string, DatatableColumnMeta> | undefined,
+  dataSource: DataSource | undefined,
   esqlVariables: ESQLControlVariable[] | undefined,
   isEsql: boolean
 ): string[] => {
-  if (!isEsql || !columnsMeta) {
+  if (!isEsql || !(dataSource instanceof EsqlSource)) {
     return savedSearchColumns ?? [];
   }
 
-  const columnsFromRequest = Object.keys(columnsMeta);
-  const columnDrivenByVariable = Object.entries(columnsMeta).find(([id, meta]) => {
-    // check if the id exists in the esqlVariables value property
-    return esqlVariables?.some((esqlVar) => esqlVar.value === id);
-  });
+  const columnsFromRequest = dataSource.getColumns().map((c) => c.name);
+  const variableDrivenColumnName = columnsFromRequest.find((id) =>
+    esqlVariables?.some((esqlVar) => esqlVar.value === id)
+  );
 
-  if (!columnDrivenByVariable) {
+  if (!variableDrivenColumnName) {
     return savedSearchColumns ?? [];
   }
 
-  // find the savedSearch.columns which doesn't exist in columnsFromRequest and replace it with the columnDrivenByVariable
-  const variableDrivenColumnName = columnDrivenByVariable[0];
-  const updatedColumns = (savedSearchColumns ?? []).map((columnName) => {
-    // If this column from savedSearch doesn't exist in the current request columns,
-    // replace it with the variable-driven column
-    if (!columnsFromRequest.includes(columnName)) {
-      return variableDrivenColumnName;
-    }
-    return columnName;
-  });
+  const requestColumnSet = new Set(columnsFromRequest);
+  const updatedColumns = (savedSearchColumns ?? []).map((columnName) =>
+    requestColumnSet.has(columnName) ? columnName : variableDrivenColumnName
+  );
 
-  // Remove duplicates and return
   return Array.from(new Set(updatedColumns));
 };

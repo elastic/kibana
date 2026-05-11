@@ -15,7 +15,7 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
 import {
   EuiDescriptionList,
@@ -28,7 +28,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
-import { getCompatDataView } from '../utils/get_compat_data_view';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 const SKIP_NULLISH_VALUES_FORMAT_OPTIONS = { skipNullishValues: true };
@@ -59,7 +58,8 @@ export function SourceDocument({
   isCompressed?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
-  const dataView = getCompatDataView(dataSource);
+  const dataView =
+    dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
         row,
@@ -71,11 +71,10 @@ export function SourceDocument({
       ).slice(0, maxEntries)
     : formatHitReact(
         row,
-        dataView!,
+        dataView,
         shouldShowFieldHandler,
         maxEntries,
         fieldFormats,
-        undefined,
         isPlainRecord ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
       );
 
@@ -123,7 +122,8 @@ function getTopLevelObjectPairsReact(
   fieldFormats: FieldFormatsStart,
   skipNullishValues: boolean
 ): FormattedHit {
-  const dataView = getCompatDataView(dataSource);
+  const dataView =
+    dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
   const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
@@ -142,7 +142,7 @@ function getTopLevelObjectPairsReact(
     const formatted: ReactNode = values.map((value: unknown, idx) => (
       <Fragment key={`${key}-${idx}`}>
         {idx > 0 ? ', ' : null}
-        {formatFieldValueReact({ value, hit: row.raw, fieldFormats, dataView: dataView!, field: subField })}
+        {formatFieldValueReact({ value, hit: row.raw, fieldFormats, dataView, field: subField })}
       </Fragment>
     ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;

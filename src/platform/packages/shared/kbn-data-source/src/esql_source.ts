@@ -8,7 +8,6 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
@@ -20,13 +19,6 @@ export interface EsqlSourceArgs {
   query: string;
   resultColumns: readonly DatatableColumn[];
   timeFieldName?: string;
-  /**
-   * Optional DataView used only by {@link EsqlSource.getCompatibilityDataView}.
-   * Pass the adhoc DV from upstream (e.g. `getEsqlDataView`) so internal
-   * callers that haven't migrated off `DataView` can keep working during the
-   * transition.
-   */
-  dataView?: DataView;
 }
 
 interface EsqlSourceConstructorArgs {
@@ -34,7 +26,6 @@ interface EsqlSourceConstructorArgs {
   title: string;
   timeFieldName: string | undefined;
   resultColumns: readonly DatatableColumn[];
-  dataView: DataView | undefined;
 }
 
 /**
@@ -65,15 +56,8 @@ export class EsqlSource implements DataSource {
 
   private readonly columns: readonly Column[];
   private readonly columnsByName: ReadonlyMap<string, Column>;
-  private readonly compatibilityDataView: DataView | undefined;
 
-  private constructor({
-    id,
-    title,
-    timeFieldName,
-    resultColumns,
-    dataView,
-  }: EsqlSourceConstructorArgs) {
+  private constructor({ id, title, timeFieldName, resultColumns }: EsqlSourceConstructorArgs) {
     this.id = id;
     this.title = title;
     this.timeFieldName = timeFieldName;
@@ -87,7 +71,6 @@ export class EsqlSource implements DataSource {
       type: c.type,
       esTypes: c.esType ? [c.esType] : undefined,
     }));
-    this.compatibilityDataView = dataView;
   }
 
   /**
@@ -104,7 +87,6 @@ export class EsqlSource implements DataSource {
       title,
       timeFieldName: args.timeFieldName,
       resultColumns: args.resultColumns,
-      dataView: args.dataView,
     });
   }
 
@@ -136,18 +118,5 @@ export class EsqlSource implements DataSource {
       timeFieldName: this.timeFieldName,
       references: this.references,
     };
-  }
-
-  /**
-   * @deprecated Compatibility seam. Returns the DataView passed at construction
-   * (typically the adhoc cache-adapter DV) for use with legacy helpers in
-   * `@kbn/discover-utils` that take a `DataView` for formatter resolution.
-   * Will be removed once those helpers migrate off `DataView`.
-   *
-   * Consumers that just need column metadata should use {@link getColumns} or
-   * {@link getColumn}.
-   */
-  public getCompatibilityDataView(): DataView | undefined {
-    return this.compatibilityDataView;
   }
 }

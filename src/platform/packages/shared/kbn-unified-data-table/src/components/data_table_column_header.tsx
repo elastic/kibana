@@ -15,9 +15,8 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { type DataSource, EsqlSource } from '@kbn/data-source';
+import { type DataSource, EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
-import { getCompatDataView } from '../utils/get_compat_data_view';
 
 interface DataTableColumnHeaderProps {
   dataSource: DataSource | undefined;
@@ -84,8 +83,8 @@ function getRenderedToken({
   }
 
   // DSL: derive icon from the underlying DataView field
-  const dataView = getCompatDataView(dataSource);
-  if (!dataView) return null;
+  if (!(dataSource instanceof IndexPatternSource)) return null;
+  const dataView = dataSource.getDataView();
 
   const dataViewField = dataView.getFieldByName(columnName);
 

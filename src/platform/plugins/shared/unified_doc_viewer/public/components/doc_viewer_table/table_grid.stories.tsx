@@ -65,7 +65,7 @@ const rows: FieldRow[] = fieldNames.map((fieldName) => {
     }),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     isPinned: false,
-    columnsMeta: {},
+    dataSource: undefined,
   });
 });
 
