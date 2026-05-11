@@ -121,7 +121,7 @@ globalTeardownHook(
 
     // Revert feature-flag overrides flipped via apiServices.core.settings(...).
     await apiServices.core.settings({
-      'feature_flags.overrides': { 'discover.isEsqlDefault': 'false' },
+      'feature_flags.overrides': { 'discover.isEsqlDefault': false },
     });
   }
 );
