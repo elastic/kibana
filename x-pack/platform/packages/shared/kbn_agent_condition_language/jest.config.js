@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { validateEqlExpression } from './src/validate';
-export type { EqlSyntaxError } from './src/validate';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn_agent_condition_language'],
+};

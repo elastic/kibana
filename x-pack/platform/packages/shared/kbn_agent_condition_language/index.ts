@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn_elastic_agent_eql'],
-};
+export { validateAgentConditionExpression } from './src/validate';
+export type { AgentConditionSyntaxError } from './src/validate';

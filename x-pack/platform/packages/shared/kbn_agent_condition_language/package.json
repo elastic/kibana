@@ -1,10 +1,10 @@
 {
-  "name": "@kbn/elastic-agent-eql",
+  "name": "@kbn/agent-condition-language",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
-    "build:antlr4": "antlr -Dlanguage=TypeScript -visitor -listener src/antlr/Eql.g4 && node ./scripts/postbuild.js"
+    "build:antlr4": "node ./scripts/build_parser.js"
   },
   "sideEffects": false
 }

@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/elastic-agent-eql",
+  "id": "@kbn/agent-condition-language",
   "owner": [
     "@elastic/fleet"
   ],
