@@ -102,7 +102,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
-  platformCoreTools.generateWorkflow,
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
   platformCoreTools.smlSearch,
