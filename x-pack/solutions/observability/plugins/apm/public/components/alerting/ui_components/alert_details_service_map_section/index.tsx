@@ -16,18 +16,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
-import {
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/es_fields/apm';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { getServiceMapTimeRange } from './get_service_map_time_range';
+import { buildKueryFromAlert, buildFiltersFromAlert } from './build_alert_filters';
 
 const SERVICE_MAP_PANEL_TITLE = i18n.translate('xpack.apm.alertDetails.serviceMapPanel.title', {
   defaultMessage: 'Service map preview',
@@ -39,63 +35,6 @@ const EXPLORE_IN_SERVICE_MAP_LABEL = i18n.translate(
 );
 
 const EMBEDDABLE_HEIGHT = 400;
-
-/**
- * Build a KQL string that scopes the service map to the alerting context.
- * Mirrors the filter badges shown above the map.
- */
-function buildKueryFromAlert(alert: AlertDetailsAppSectionProps['alert']): string {
-  const serviceName = alert.fields[SERVICE_NAME];
-  const transactionType = alert.fields[TRANSACTION_TYPE];
-  const transactionName = alert.fields[TRANSACTION_NAME];
-  const parts: string[] = [];
-  if (serviceName != null && String(serviceName).trim() !== '') {
-    const v = String(serviceName).replace(/"/g, '\\"');
-    parts.push(`service.name: "${v}"`);
-  }
-  if (transactionType != null && String(transactionType).trim() !== '') {
-    const v = String(transactionType).replace(/"/g, '\\"');
-    parts.push(`transaction.type: "${v}"`);
-  }
-  if (transactionName != null && String(transactionName).trim() !== '') {
-    const v = String(transactionName).replace(/"/g, '\\"');
-    parts.push(`transaction.name: "${v}"`);
-  }
-  return parts.join(' and ');
-}
-
-function buildFiltersFromAlert(
-  alert: AlertDetailsAppSectionProps['alert']
-): Array<{ label: string; field: string }> {
-  const filters: Array<{ label: string; field: string }> = [];
-  const serviceName = alert.fields[SERVICE_NAME];
-  const env = alert.fields[SERVICE_ENVIRONMENT];
-  const transactionType = alert.fields[TRANSACTION_TYPE];
-  const transactionName = alert.fields[TRANSACTION_NAME];
-
-  if (serviceName) {
-    filters.push({ label: `service.name: ${String(serviceName)}`, field: 'service.name' });
-  }
-  if (env != null && String(env).trim() !== '') {
-    filters.push({
-      label: `service.environment: ${String(env)}`,
-      field: 'service.environment',
-    });
-  }
-  if (transactionType != null && String(transactionType).trim() !== '') {
-    filters.push({
-      label: `transaction.type: ${String(transactionType)}`,
-      field: 'transaction.type',
-    });
-  }
-  if (transactionName != null && String(transactionName).trim() !== '') {
-    filters.push({
-      label: `transaction.name: ${String(transactionName)}`,
-      field: 'transaction.name',
-    });
-  }
-  return filters;
-}
 
 export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionProps) {
   const embeddableDeps = useApmEmbeddableDeps();
