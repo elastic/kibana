@@ -4998,7 +4998,6 @@ This is the type of text _investigation guides_ will contain.`;
         {
           action: 'rule_create',
           spaceId: 'default',
-          data: { metadata: { bulkCount: 1 } },
         }
       );
     });
