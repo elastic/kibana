@@ -295,9 +295,6 @@ export class WorkflowApi {
     });
   }
 
-  /**
-   * Search `.workflows-events` for the current space (time range, optional trigger ids, KQL).
-   */
   async searchTriggerEvents(
     params: SearchTriggerEventLogParams
   ): Promise<SearchTriggerEventLogResult> {

@@ -38,4 +38,4 @@ export type {
   SearchTriggerEventLogHit,
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
-} from './trigger_events/trigger_event_log_query';
+} from './trigger_events/event_logs/trigger_event_log_query';

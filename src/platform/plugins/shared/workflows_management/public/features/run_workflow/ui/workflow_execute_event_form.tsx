@@ -24,7 +24,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { DataGridDensity } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { DataViewFieldBase, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n-react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -34,14 +34,19 @@ import {
   DataLoadingState,
   type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
-  SELECT_ROW,
+  OPEN_DETAILS,
   type SortOrder,
   UnifiedDataTable,
 } from '@kbn/unified-data-table';
-import type { WorkflowYaml } from '@kbn/workflows';
+import {
+  WORKFLOWS_EVENTS_DATA_STREAM,
+  WORKFLOWS_EVENTS_DATA_VIEW_FIELDS,
+  type WorkflowYaml,
+} from '@kbn/workflows';
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_event_log_grid_cells';
+import { getWorkflowCustomTriggerTypeIds } from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
 
@@ -51,12 +56,22 @@ const EM_DASH = '—';
 
 const DEFAULT_TRIGGER_EVENT_TABLE_COLUMNS: string[] = ['@timestamp', 'summary'];
 
-/**
- * Never persist an empty column list or **only** the data view time field: `getDisplayedColumns`
- * falls back to `_source` for both cases, which enables default-columns mode and hides the Columns
- * toolbar control.
- */
 const VISIBLE_COLUMNS_FALLBACK: readonly string[] = [...DEFAULT_TRIGGER_EVENT_TABLE_COLUMNS];
+
+function workflowsEventsKqlFieldToFieldSpec(field: DataViewFieldBase): FieldSpec {
+  const isObject = field.type === 'object';
+  return {
+    ...field,
+    searchable: true,
+    aggregatable: !isObject,
+    readFromDocValues: !isObject,
+    isMapped: true,
+  };
+}
+
+const WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS: FieldSpec[] = WORKFLOWS_EVENTS_DATA_VIEW_FIELDS.map(
+  workflowsEventsKqlFieldToFieldSpec
+);
 
 function buildSummaryText(row: TriggerEventLogGridRow): string {
   const parts: string[] = [];
@@ -72,72 +87,6 @@ function buildSummaryText(row: TriggerEventLogGridRow): string {
   return parts.join(' ');
 }
 
-/**
- * Field list for KQL when the data views `fields` API returns nothing. That happens for
- * **hidden** dot data streams unless `allowHidden` is set, and can still happen when the
- * backing index does not exist yet. Aligned with `trigger_events_data_stream` mappings.
- */
-const WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS: FieldSpec[] = [
-  {
-    name: '@timestamp',
-    type: 'date',
-    searchable: true,
-    aggregatable: true,
-    esTypes: ['date'],
-    readFromDocValues: true,
-    isMapped: true,
-  },
-  {
-    name: 'eventId',
-    type: 'string',
-    searchable: true,
-    aggregatable: true,
-    esTypes: ['keyword'],
-    readFromDocValues: true,
-    isMapped: true,
-  },
-  {
-    name: 'triggerId',
-    type: 'string',
-    searchable: true,
-    aggregatable: true,
-    esTypes: ['keyword'],
-    readFromDocValues: true,
-    isMapped: true,
-  },
-  {
-    name: 'spaceId',
-    type: 'string',
-    searchable: true,
-    aggregatable: true,
-    esTypes: ['keyword'],
-    readFromDocValues: true,
-    isMapped: true,
-  },
-  {
-    name: 'subscriptions',
-    type: 'string',
-    searchable: true,
-    aggregatable: true,
-    esTypes: ['keyword'],
-    readFromDocValues: true,
-    isMapped: true,
-  },
-  {
-    name: 'payload',
-    type: 'object',
-    searchable: true,
-    aggregatable: false,
-    esTypes: ['object'],
-    readFromDocValues: false,
-    isMapped: true,
-  },
-];
-
-/** Fields listed in the Columns picker (aligned with `.workflows-events` mappings). */
-const WORKFLOWS_EVENTS_PRIMARY_TABLE_FIELDS: readonly string[] =
-  WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS.map((field) => field.name);
-
 function applyWorkflowsEventsKqlFallbackFields(dataView: DataView): void {
   if (dataView.getFieldByName('triggerId')) {
     return;
@@ -150,7 +99,6 @@ export interface WorkflowExecuteEventFormProps {
   value: string;
   setValue: (data: string) => void;
   errors: string | null;
-  setErrors: (errors: string | null) => void;
 }
 
 interface TriggerEventTableRow {
@@ -176,7 +124,6 @@ export const WorkflowExecuteEventForm = ({
   value: _value,
   setValue,
   errors,
-  setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -218,13 +165,10 @@ export const WorkflowExecuteEventForm = ({
     const create = async () => {
       try {
         const created = await dataViews.create({
-          title: '.workflows-events',
+          title: WORKFLOWS_EVENTS_DATA_STREAM,
           timeFieldName: '@timestamp',
-          // Dot data streams are hidden from field_caps unless this flag is set (otherwise `fields` API returns []).
           allowHidden: true,
         });
-        // Load field list from field_caps / mappings so KQL autocomplete includes triggerId, eventId, payload, etc.
-        // Without this, SearchBar only offers meta fields (_id, @timestamp, …).
         try {
           await dataViews.refreshFields(created, false, true);
         } catch {
@@ -246,29 +190,49 @@ export const WorkflowExecuteEventForm = ({
         }
         applyWorkflowsEventsKqlFallbackFields(created);
         setDataView(created);
-        setErrors(null);
-      } catch {
+      } catch (error) {
         setDataView(null);
+        notifications.toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+          title: i18n.translate(
+            'workflows.workflowExecuteEventTriggerForm.dataViewCreateErrorTitle',
+            {
+              defaultMessage: 'Could not prepare trigger event search',
+            }
+          ),
+          toastMessage: i18n.translate(
+            'workflows.workflowExecuteEventTriggerForm.dataViewCreateErrorBody',
+            {
+              defaultMessage:
+                'Creating a data view for .workflows-events failed. Check data view privileges or try again.',
+            }
+          ),
+        });
       } finally {
         dataViewCreatingRef.current = false;
       }
     };
 
     create();
-  }, [services.dataViews, notifications.toasts, setErrors]);
+  }, [services.dataViews, notifications.toasts]);
 
   const queryEnabled =
     eventDrivenExecutionEnabled && !isEventConfigLoading && Boolean(services.http);
 
+  const customTriggerTypeIds = useMemo(
+    () => getWorkflowCustomTriggerTypeIds(definition),
+    [definition]
+  );
+
   const searchParams = useMemo(
     () => ({
+      ...(customTriggerTypeIds.length > 0 ? { triggerIds: customTriggerTypeIds } : {}),
       kql: submittedQuery.query.trim() || undefined,
       from: timeRange.from,
       to: timeRange.to,
       page: pageIndex + 1,
       size: PAGE_SIZE,
     }),
-    [submittedQuery.query, timeRange.from, timeRange.to, pageIndex]
+    [customTriggerTypeIds, submittedQuery.query, timeRange.from, timeRange.to, pageIndex]
   );
 
   const {
@@ -291,33 +255,6 @@ export const WorkflowExecuteEventForm = ({
       };
     });
   }, [searchResult?.hits]);
-
-  const handleSelectedDocIdsChange = useCallback(
-    (docIds: readonly string[]) => {
-      if (docIds.length === 0) {
-        return;
-      }
-      const id = docIds[docIds.length - 1];
-      const row = rows.find((r) => r.id === id);
-      if (!row) {
-        return;
-      }
-      const payload = row.source.payload;
-      setValue(
-        JSON.stringify(
-          {
-            event:
-              payload !== null && typeof payload === 'object' && !Array.isArray(payload)
-                ? payload
-                : {},
-          },
-          null,
-          2
-        )
-      );
-    },
-    [rows, setValue]
-  );
 
   const handleQueryChange = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
@@ -552,7 +489,7 @@ export const WorkflowExecuteEventForm = ({
         />
       </EuiFlexItem>
 
-      {(errors !== null || isError) && (
+      {isError && (
         <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
@@ -563,7 +500,25 @@ export const WorkflowExecuteEventForm = ({
             iconType="error"
             size="s"
           >
-            <p>{errors ?? (isError ? formatQueryError(searchError) : '')}</p>
+            <p>{formatQueryError(searchError)}</p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+      {errors !== null && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'workflows.workflowExecuteEventTriggerForm.executionPayloadErrorTitle',
+              {
+                defaultMessage: 'Fix the run payload before continuing',
+              }
+            )}
+            color="danger"
+            iconType="error"
+            size="s"
+          >
+            <p>{errors}</p>
           </EuiCallOut>
         </EuiFlexItem>
       )}
@@ -683,22 +638,16 @@ export const WorkflowExecuteEventForm = ({
                 sort={sort}
                 onSort={handleSortChange}
                 isSortEnabled={true}
-                showToolbarSortSelector={false}
-                columnSelectorAllowHide={true}
-                includeAllDataViewFieldsInColumnSelector={true}
-                columnSelectorFieldAllowlist={WORKFLOWS_EVENTS_PRIMARY_TABLE_FIELDS}
                 isPaginationEnabled={false}
                 dataGridDensityState={DataGridDensity.NORMAL}
                 isPlainRecord={true}
                 showFullScreenButton={true}
                 showKeyboardShortcuts={false}
                 enableInTableSearch={true}
-                minSizeForControls={-1}
-                controlColumnIds={[SELECT_ROW]}
+                controlColumnIds={[OPEN_DETAILS]}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 renderCustomToolbar={renderCustomToolbar}
                 externalCustomRenderers={externalCustomRenderers}
-                onSelectedDocIdsChange={handleSelectedDocIdsChange}
               />
             </CellActionsProvider>
           ) : null}

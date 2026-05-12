@@ -8,7 +8,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -75,7 +75,6 @@ const baseDefinition = {
 
 describe('WorkflowExecuteEventForm', () => {
   const mockSetValue = jest.fn();
-  const mockSetErrors = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -134,6 +133,7 @@ describe('WorkflowExecuteEventForm', () => {
         notifications: {
           toasts: {
             addWarning: jest.fn(),
+            addError: jest.fn(),
           },
         },
         http: {},
@@ -154,37 +154,19 @@ describe('WorkflowExecuteEventForm', () => {
           value=""
           setValue={mockSetValue}
           errors={null}
-          setErrors={mockSetErrors}
         />
       </TestWrapper>
     );
 
     await findByTestId('workflowTriggerEventsTable');
     expect(getByTestId('workflowTriggerEventsTable')).toBeInTheDocument();
-  });
-
-  it('updates selection JSON when a row is selected', async () => {
-    const { findByTestId } = render(
-      <TestWrapper>
-        <WorkflowExecuteEventForm
-          definition={baseDefinition as any}
-          value=""
-          setValue={mockSetValue}
-          errors={null}
-          setErrors={mockSetErrors}
-        />
-      </TestWrapper>
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerIds: ['custom.trigger'],
+        page: 1,
+        size: 50,
+      }),
+      expect.objectContaining({ enabled: true })
     );
-
-    await findByTestId('workflowTriggerEventsTable');
-    const rowCheckbox = await findByTestId('dscGridSelectDoc-doc-1');
-    fireEvent.click(rowCheckbox);
-
-    await waitFor(() => {
-      expect(mockSetValue).toHaveBeenCalled();
-    });
-
-    const payload = JSON.parse(mockSetValue.mock.calls[0][0] as string);
-    expect(payload.event).toEqual({ foo: 'bar' });
   });
 });

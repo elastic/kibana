@@ -218,7 +218,6 @@ describe('WorkflowExecuteAlertForm', () => {
       </TestWrapper>
     );
 
-    // Wait for initial data view creation and fetch
     await waitFor(() => {
       expect(mockData.dataViews.create).toHaveBeenCalled();
     });
@@ -227,7 +226,6 @@ describe('WorkflowExecuteAlertForm', () => {
       expect(getByTestId('search-bar')).toBeInTheDocument();
     });
 
-    // Wait for initial fetch to complete
     await waitFor(() => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
@@ -235,13 +233,10 @@ describe('WorkflowExecuteAlertForm', () => {
     const initialFetchCount = mockSearchSource.fetch$.mock.calls.length;
     const queryInput = getByTestId('query-input') as HTMLInputElement;
 
-    // Simulate typing (onQueryChange) - this should NOT trigger a fetch
     fireEvent.change(queryInput, { target: { value: 'test query' } });
 
-    // Wait a bit to ensure no additional fetch was triggered
     await new Promise((resolve) => setTimeout(resolve, 50));
 
-    // Should not trigger additional fetch calls (only submitting should)
     expect(mockSearchSource.fetch$.mock.calls.length).toBe(initialFetchCount);
   });
 
@@ -257,21 +252,17 @@ describe('WorkflowExecuteAlertForm', () => {
       </TestWrapper>
     );
 
-    // Wait for alerts to load
     await waitFor(() => {
       expect(mockSearchSource.fetch$).toHaveBeenCalled();
     });
 
-    // Wait for table to render with data
     await waitFor(() => {
       expect(getByRole('table')).toBeInTheDocument();
     });
 
-    // Find and click the checkbox for the first row
     const checkbox = getByTestId('checkboxSelectRow-1');
     fireEvent.click(checkbox);
 
-    // Verify setValue was called with the selected alert data
     await waitFor(() => {
       expect(mockSetValue).toHaveBeenCalled();
     });

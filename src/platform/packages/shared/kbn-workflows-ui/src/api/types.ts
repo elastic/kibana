@@ -125,7 +125,6 @@ export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
 }
 
-/** Body for `POST /internal/workflows/trigger_events/_search` (space comes from the request). */
 export interface SearchTriggerEventLogParams {
   triggerIds?: string[];
   kql?: string;

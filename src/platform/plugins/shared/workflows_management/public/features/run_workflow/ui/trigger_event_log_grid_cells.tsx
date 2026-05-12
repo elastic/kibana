@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-/** Max stored characters for payload JSON string (cell also clips via maxHeight). */
 const PAYLOAD_SUMMARY_MAX_CHARS = 4000;
 
 export interface TriggerEventLogGridRow {
@@ -20,11 +19,8 @@ export interface TriggerEventLogGridRow {
   timestampDisplay: string;
   triggerId: string;
   eventId: string;
-  /** Payload-only preview for the payload column (not full document JSON). */
   payloadSummaryText: string;
-  /** True when the document has no payload keys to show. */
   payloadSummaryEmpty: boolean;
-  /** Subscription workflow IDs (one badge per id in the Summary column). */
   subscriptionIds: string[];
 }
 
@@ -85,7 +81,6 @@ function truncateForBadge(value: string, max: number): string {
   return `${value.slice(0, half)}…${value.slice(value.length - half)}`;
 }
 
-/** Trigger + subscription badges and compact event payload JSON (Summary column). */
 export const TriggerEventLogSummaryCell = ({
   row,
 }: {
@@ -124,7 +119,6 @@ export const TriggerEventLogSummaryCell = ({
   );
 };
 
-/** Payload JSON text only (metadata lives in grid columns). */
 export const TriggerEventLogPayloadCell = ({
   row,
 }: {

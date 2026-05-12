@@ -8,25 +8,13 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataViewBase } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { WORKFLOWS_EVENTS_DATA_VIEW } from '@kbn/workflows';
+import { MAX_PAGE_SIZE, TRACK_TOTAL_HITS_CAP } from './constants';
 import type {
   TriggerEventDocument,
   TriggerEventsDataStreamClient,
-} from './event_logs/trigger_events_data_stream';
-
-/** Minimal field list so KQL can resolve fields on `.workflows-events`. */
-const WORKFLOWS_EVENTS_DATA_VIEW: DataViewBase = {
-  title: '.workflows-events',
-  fields: [
-    { name: '@timestamp', type: 'date', esTypes: ['date'] },
-    { name: 'eventId', type: 'string', esTypes: ['keyword'] },
-    { name: 'triggerId', type: 'string', esTypes: ['keyword'] },
-    { name: 'spaceId', type: 'string', esTypes: ['keyword'] },
-    { name: 'sourceExecutionId', type: 'string', esTypes: ['keyword'] },
-    { name: 'subscriptions', type: 'string', esTypes: ['keyword'] },
-  ],
-};
+} from './trigger_events_data_stream';
 
 export interface SearchTriggerEventLogParams {
   spaceId: string;
@@ -50,7 +38,45 @@ export interface SearchTriggerEventLogResult {
   size: number;
 }
 
-const MAX_PAGE_SIZE = 100;
+function parseTriggerEventHitSource(raw: unknown): TriggerEventDocument {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      '@timestamp': '',
+      eventId: '',
+      triggerId: '',
+      spaceId: '',
+      subscriptions: [],
+      payload: {},
+    };
+  }
+
+  const o = raw as Record<string, unknown>;
+  const payloadValue = o.payload;
+  const payload =
+    payloadValue !== null && typeof payloadValue === 'object' && !Array.isArray(payloadValue)
+      ? (payloadValue as Record<string, unknown>)
+      : {};
+
+  const subscriptionsRaw = o.subscriptions;
+  const subscriptions = Array.isArray(subscriptionsRaw)
+    ? subscriptionsRaw.filter((s): s is string => typeof s === 'string')
+    : [];
+
+  const doc: TriggerEventDocument = {
+    '@timestamp': typeof o['@timestamp'] === 'string' ? o['@timestamp'] : '',
+    eventId: typeof o.eventId === 'string' ? o.eventId : '',
+    triggerId: typeof o.triggerId === 'string' ? o.triggerId : '',
+    spaceId: typeof o.spaceId === 'string' ? o.spaceId : '',
+    subscriptions,
+    payload,
+  };
+
+  if (typeof o.sourceExecutionId === 'string' && o.sourceExecutionId !== '') {
+    return { ...doc, sourceExecutionId: o.sourceExecutionId };
+  }
+
+  return doc;
+}
 
 const buildTriggerEventLogQueryClauses = (
   params: SearchTriggerEventLogParams
@@ -107,13 +133,12 @@ export async function searchTriggerEventLog(
   const sort = [{ '@timestamp': { order: 'desc' as const } }];
   const from = (page - 1) * size;
 
-  // No `space`: space-agnostic client mode; isolate by top-level `spaceId` in `query` above.
   const response = await triggerEventsClient.search({
     query,
     sort,
     from,
     size,
-    track_total_hits: true,
+    track_total_hits: TRACK_TOTAL_HITS_CAP,
   });
 
   const total =
@@ -123,7 +148,7 @@ export async function searchTriggerEventLog(
 
   const hits: SearchTriggerEventLogHit[] = rawHits.map((hit) => ({
     id: hit._id ?? '',
-    source: (hit._source ?? {}) as TriggerEventDocument,
+    source: parseTriggerEventHitSource(hit._source),
   }));
 
   return { hits, total, page, size };

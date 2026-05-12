@@ -84,6 +84,5 @@ export async function writeTriggerEvent(
       ? { sourceExecutionId: params.sourceExecutionId }
       : {}),
   };
-  // Omit `space` so documents are space-agnostic (no `kibana.space_ids`). Scope reads with `spaceId` in the query.
   await client.create({ documents: [doc] });
 }

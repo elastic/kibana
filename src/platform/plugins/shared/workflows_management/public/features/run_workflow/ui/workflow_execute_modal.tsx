@@ -564,7 +564,6 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     value={executionInput}
                     setValue={handleInputChange}
                     errors={executionInputErrors}
-                    setErrors={setExecutionInputErrors}
                   />
                 )}
                 {selectedTrigger === 'historical' && (

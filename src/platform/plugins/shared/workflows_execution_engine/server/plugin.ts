@@ -52,7 +52,7 @@ import { StepExecutionRepository } from './repositories/step_execution_repositor
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
-import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/trigger_event_log_query';
+import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,

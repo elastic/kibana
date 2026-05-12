@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WORKFLOWS_EVENTS_DATA_STREAM = '.workflows-events';
+export { WORKFLOWS_EVENTS_DATA_STREAM } from '@kbn/workflows';
+
+export const MAX_PAGE_SIZE = 100;
+export const TRACK_TOTAL_HITS_CAP = 10_000;

@@ -9,6 +9,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { KQLSyntaxError } from '@kbn/es-query';
 import { registerInternalRoutes } from '.';
 
 describe('Internal Routes', () => {
@@ -125,6 +126,58 @@ describe('Internal Routes', () => {
 
   it('should register trigger event log search routes', () => {
     expect(routeHandlers[`POST:/internal/workflows/trigger_events/_search`]).toBeDefined();
+  });
+
+  it('forwards trigger event log search params to the execution engine', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      body: { triggerIds: ['t1'], kql: 'triggerId : x', page: 2, size: 25 },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
+      spaceId: 'default',
+      triggerIds: ['t1'],
+      kql: 'triggerId : x',
+      from: undefined,
+      to: undefined,
+      page: 2,
+      size: 25,
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { hits: [], total: 0, page: 1, size: 10 },
+    });
+  });
+
+  it('returns 400 when trigger event log search throws KQLSyntaxError', async () => {
+    const kqlError = new KQLSyntaxError(
+      {
+        message: 'Expected',
+        expected: null,
+        found: '',
+        location: { start: { offset: 0 } },
+      } as ConstructorParameters<typeof KQLSyntaxError>[0],
+      'bad:'
+    );
+    mockSearchTriggerEventLog.mockRejectedValueOnce(kqlError);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: {} });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: kqlError.shortMessage },
+    });
   });
 
   it('should call api.disableAllWorkflows scoped to the request space', async () => {

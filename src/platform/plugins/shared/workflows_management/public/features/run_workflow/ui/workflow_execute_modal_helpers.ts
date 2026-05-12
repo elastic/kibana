@@ -71,10 +71,6 @@ export function normalizeInputsFromDefinitionOrYaml(
   return undefined;
 }
 
-/**
- * True when the workflow declares at least one event-driven (registered) trigger whose `type`
- * is not a built-in trigger (`alert`, `scheduled`, `manual`).
- */
 export function hasCustomEventTrigger(definition: WorkflowYaml | null): boolean {
   if (!definition?.triggers?.length) {
     return false;
