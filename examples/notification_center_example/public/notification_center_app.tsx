@@ -9,7 +9,6 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -201,6 +200,9 @@ export function NotificationCenterApp({
                 />
               </>
             )}
+            {/* Absorb the remaining vertical space so the filter controls stay
+                at their natural heights. */}
+            <div aria-hidden="true" style={{ flexGrow: 1 }} />
           </div>
         ) : items.length === 0 ? (
           <EuiEmptyPrompt
@@ -225,7 +227,7 @@ export function NotificationCenterApp({
               iconAriaLabel={event.eventName}
               time={formatTime(event.timestamp)}
               title={event.title}
-              messages={[event.message]}
+              messages={Array.isArray(event.message) ? event.message : [event.message]}
               isRead={event.isRead}
               isPinned={event.isPinned ?? false}
               onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
