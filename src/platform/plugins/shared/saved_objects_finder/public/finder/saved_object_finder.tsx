@@ -120,6 +120,7 @@ class SavedObjectFinderUiClass extends React.Component<
   private metaDataMap = this.getSavedObjectMetaDataMap();
 
   private debouncedFetch = debounce(async (query: Query) => {
+    this.metaDataMap = this.getSavedObjectMetaDataMap();
     const { contentClient, uiSettings } = this.props.services;
 
     const { queryText, visibleTypes, selectedTags } = parseQuery(
@@ -155,11 +156,11 @@ class SavedObjectFinderUiClass extends React.Component<
               limit: fetchLimit,
             },
           })
-        : new Promise<{ hits: never[] }>((resolve) => resolve({ hits: [] })),
+        : Promise.resolve<{ hits: never[] }>({ hits: [] }),
       this.props.extraItems?.get({
         query: queryText,
         perPage: fetchLimit,
-      }) ?? new Promise<never[]>((resolve) => resolve([])),
+      }) ?? Promise.resolve<never[]>([]),
     ]);
 
     const savedObjects = [
@@ -248,6 +249,7 @@ class SavedObjectFinderUiClass extends React.Component<
       savedObjectMetaData,
       euiTablePersist: { pageSize, sorting, onTableChange },
     } = this.props;
+
     const taggingApi = this.props.services.savedObjectsTagging;
     const originalTagColumn = taggingApi?.ui.getTableColumnDefinition();
     const tagColumn: EuiTableFieldDataColumnType<SavedObjectCommon> | undefined = originalTagColumn
