@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useMonitorDetail } from './use_monitor_detail';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
