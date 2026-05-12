@@ -114,6 +114,37 @@ describe('When the add exception modal is opened', () => {
     });
   });
 
+  describe('when the flyout shell is not rendered', () => {
+    let wrapper: ShallowWrapper;
+    beforeEach(() => {
+      mockFetchIndexPatterns.mockImplementation(() => ({
+        isLoading: true,
+        indexPatterns: { fields: [], title: 'foo' },
+        getExtendedFields: () => Promise.resolve([]),
+      }));
+
+      wrapper = shallow(
+        <AddExceptionFlyout
+          rules={[{ ...getRulesSchemaMock() } as Rule]}
+          isBulkAction={false}
+          alertData={undefined}
+          isAlertDataLoading={undefined}
+          alertStatus={undefined}
+          isEndpointItem={false}
+          showAlertCloseOptions
+          renderFlyoutShell={false}
+          onCancel={jest.fn()}
+          onConfirm={jest.fn()}
+        />
+      );
+    });
+
+    it('should render the flyout content without the legacy EuiFlyout wrapper', () => {
+      expect(wrapper.find('EuiFlyout').exists()).toBeFalsy();
+      expect(wrapper.find('EuiSkeletonText').exists()).toBeTruthy();
+    });
+  });
+
   describe('exception list type of "endpoint"', () => {
     describe('common functionality to test regardless of alert input', () => {
       let wrapper: ShallowWrapper;

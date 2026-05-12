@@ -82,6 +82,7 @@ export const useOpenAddRuleException = ({ hit, onConfirm }: UseOpenAddRuleExcept
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          size: 'l',
         }
       );
     },

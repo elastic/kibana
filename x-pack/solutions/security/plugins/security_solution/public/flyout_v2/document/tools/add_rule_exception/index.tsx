@@ -114,6 +114,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
           <AddExceptionFlyout
             rules={rules}
             isEndpointItem={isEndpointItem}
+            renderFlyoutShell={false}
             alertData={alertData}
             isAlertDataLoading={false}
             alertStatus={alertStatus}

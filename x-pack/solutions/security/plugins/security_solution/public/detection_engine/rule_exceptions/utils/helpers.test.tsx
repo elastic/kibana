@@ -242,6 +242,40 @@ describe('Exception helpers', () => {
       expect(result).toEqual(expected);
     });
 
+    test('it should retrieve os type from array values', () => {
+      const alertDataMock = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        host: { os: { family: ['windows'] } },
+      } as unknown as AlertData;
+      const result = retrieveAlertOsTypes(alertDataMock);
+      const expected = ['windows'];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should retrieve endpoint os type from array values', () => {
+      const alertDataMock = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        agent: { type: 'endpoint' },
+        host: { os: { name: ['Windows'] } },
+      } as unknown as AlertData;
+      const result = retrieveAlertOsTypes(alertDataMock);
+      const expected = ['windows'];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should return default os types when os values are not strings', () => {
+      const alertDataMock = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        host: { os: { family: [{ value: 'windows' }] } },
+      } as unknown as AlertData;
+      const result = retrieveAlertOsTypes(alertDataMock);
+      const expected = ['windows', 'macos'];
+      expect(result).toEqual(expected);
+    });
+
     test('it should return default os types if alert data is not provided', () => {
       const result = retrieveAlertOsTypes();
       const expected = ['windows', 'macos'];
