@@ -50,7 +50,7 @@ import { initializeSwimLaneControls, swimLaneComparators } from './initialize_sw
 import { initializeSwimLaneDataFetcher } from './initialize_swim_lane_data_fetcher';
 import type { AnomalySwimLaneEmbeddableApi } from './types';
 import { AnomalySwimlaneUserInput } from './anomaly_swimlane_setup_flyout';
-import { ensureLicense } from '../ensure_license';
+import { checkPermissionAsync } from '../../application/capabilities/check_capabilities';
 
 /**
  * Provides the services required by the Anomaly Swimlane Embeddable.
@@ -91,7 +91,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
   const factory: EmbeddableFactory<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      await ensureLicense(getStartServices);
+      await checkPermissionAsync(getStartServices, 'canGetJobs', true);
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
       }
