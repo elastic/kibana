@@ -6,26 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ChangePointType } from '@kbn/es-types/src';
 import type { GetSLOParams, GetSLOResponse } from '@kbn/slo-schema';
 import type { Transaction } from '@kbn/apm-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
-
-interface TimeseriesChangePoint {
-  change_point?: number | undefined;
-  r_value?: number | undefined;
-  trend?: string | undefined;
-  p_value?: number;
-  date: string | undefined;
-  type: ChangePointType;
-}
-
-interface ChangePointGrouping {
-  title: string;
-  grouping: string;
-  changes: TimeseriesChangePoint[];
-}
 
 interface ServiceSummary {
   'service.name': string;

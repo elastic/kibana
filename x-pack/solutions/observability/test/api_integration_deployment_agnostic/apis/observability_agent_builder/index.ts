@@ -21,6 +21,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./tools/get_log_change_points.spec.ts'));
     loadTestFile(require.resolve('./tools/get_metric_change_points.spec.ts'));
     loadTestFile(require.resolve('./tools/get_trace_change_points.spec.ts'));
+    loadTestFile(require.resolve('./tools/get_exit_span_change_points.spec.ts'));
     loadTestFile(require.resolve('./tools/get_index_info.spec.ts'));
     loadTestFile(require.resolve('./tools/get_service_topology.spec.ts'));
     loadTestFile(require.resolve('./tools/get_traces.spec.ts'));

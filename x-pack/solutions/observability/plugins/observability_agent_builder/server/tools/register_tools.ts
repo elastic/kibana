@@ -48,6 +48,10 @@ import {
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   createGetTraceChangePointsTool,
 } from './get_trace_change_points/tool';
+import {
+  OBSERVABILITY_GET_EXIT_SPAN_CHANGE_POINTS_TOOL_ID,
+  createGetExitSpanChangePointsTool,
+} from './get_exit_span_change_points/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID, createGetIndexInfoTool } from './get_index_info';
 import {
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
@@ -81,6 +85,7 @@ export const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
+  OBSERVABILITY_GET_EXIT_SPAN_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
   OBSERVABILITY_GET_LOGS_TOOL_ID,
@@ -111,6 +116,7 @@ export async function registerTools({
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),
+    createGetExitSpanChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
     createGetLogsTool({ core, logger }),

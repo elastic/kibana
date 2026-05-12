@@ -8,7 +8,6 @@
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { compact, isEmpty } from 'lodash';
 import moment from 'moment';
-import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../../data_registry/data_registry';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -19,6 +18,7 @@ import { getToolHandler as getRuntimeMetrics } from '../../../tools/get_runtime_
 import { getToolHandler as getHosts } from '../../../tools/get_hosts/handler';
 import { getToolHandler as getServices } from '../../../tools/get_services/handler';
 import { getTraceChangePoints } from '../../../tools/get_trace_change_points/handler';
+import { getExitSpanChangePoints } from '../../../tools/get_exit_span_change_points/handler';
 import { getServiceTopology } from '../../../tools/get_service_topology/get_service_topology';
 
 export interface SignalFetcherDeps {
@@ -130,7 +130,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
       if (!serviceName || !serviceEnvironment) return null;
 
-      const buckets = await getTraceChangePoints({
+      const buckets = await getExitSpanChangePoints({
         core,
         plugins,
         request,
@@ -138,8 +138,6 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
         start,
         end,
         kqlFilter: `service.name: "${serviceName}" AND service.environment: "${serviceEnvironment}"`,
-        groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
-        latencyType: 'avg',
       });
       const changePoints = buckets.map((bucket) => {
         return {

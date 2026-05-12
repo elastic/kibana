@@ -33,12 +33,13 @@ const getTraceChangePointsSchema = z.object({
     .string()
     .default('service.name')
     .describe(
-      dedent(`Field to group results by. Use low-cardinality fields. 
+      dedent(`Field to group **incoming transaction** metrics by. Use low-cardinality fields.
       Examples:
         - Service level: service.name, service.environment, service.version
         - Transaction level: transaction.name, transaction.type
-        - Infrastructure level: host.name, container.id, kubernetes.pod.name       
-      `)
+        - Infrastructure level: host.name, container.id, kubernetes.pod.name
+
+      For downstream dependency behavior (outbound), use observability.get_exit_span_change_points instead.`)
     ),
   latencyType: z
     .enum(['avg', 'p95', 'p99'])
@@ -61,17 +62,21 @@ export function createGetTraceChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTraceChangePointsSchema> = {
     id: OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Analyzes traces to detect statistically significant change points in latency, throughput, and failure rate across group (e.g., service, transaction, host).
-Trace metrics:
-- Latency: avg/p95/p99 response time.
-- Throughput: requests per minute.
-- Failure rate: percentage of failed transactions.
+    description:
+      dedent(`Analyzes **ingress** APM transaction metrics (requests to your services) to detect statistically significant change points in latency, throughput, and failure rate for each group (e.g. service, transaction name, host).
 
-Supports optional KQL filtering
+      Trace metrics:
+      - Latency: avg / p95 / p99 response time.
+      - Throughput: requests per minute.
+      - Failure rate: fraction of failed transactions.
 
-When to use:
-- Detecting significant changes in trace behavior (spike, dip, step change, trend change, distribution change, stationary/non‑stationary, indeterminable) and identifying when they occur.
-`,
+      When to use:
+      - Detecting when incoming traffic to a service or endpoint started behaving differently (spikes, dips, step changes, trends).
+
+      When NOT to use:
+      - Outbound calls from a service to its dependencies — use observability.get_exit_span_change_points instead (egress / service destination metrics).
+
+      You may call both tools in one investigation to compare ingress vs egress.`),
     schema: getTraceChangePointsSchema,
     tags: ['observability', 'traces'],
     handler: async ({ start, end, kqlFilter, groupBy, latencyType }, { request }) => {
