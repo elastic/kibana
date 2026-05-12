@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
+import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
@@ -763,9 +763,13 @@ describe('Trusted apps form', () => {
     });
   });
 
+  describe('warnings and confirmation modals', () => {
+    describe('Basic mode', () => {
   describe('and a wildcard value is used with the IS operator', () => {
-    beforeEach(() => render());
-    it('shows warning callout and help text warning if the field is PATH', async () => {
+        describe('when the field is PATH', () => {
+          beforeEach(() => {
+            render();
+
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
         entries: [createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*')],
       };
@@ -773,20 +777,84 @@ describe('Trusted apps form', () => {
       rerenderWithLatestProps();
       act(() => {
         fireEvent.blur(getConditionValue(getCondition()));
+            });
       });
 
+          it('shows warning callout and help text warning if the field is PATH', async () => {
       expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
-      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))).toBeTruthy();
+            expect(
+              renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))
+            ).toBeTruthy();
+            expect(
+              renderResult.queryByTestId('unnecessaryEscapingCallout')
+            ).not.toBeInTheDocument();
     });
 
-    it('shows a warning if field is HASH or SIGNATURE', () => {
-      setTextFieldValue(getConditionValue(getCondition()), 'somewildcard*');
+          it('should provide confirm modal labels when wildcard warning exists', async () => {
+            await waitFor(() => {
+              expect(formProps.onChange).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  confirmModalLabels: expect.objectContaining({
+                    listOfWarnings: [expect.stringContaining('wildcards')],
+                  }),
+                })
+              );
+            });
+          });
+        });
+
+        describe('when the field is HASH or SIGNATURE', () => {
+          beforeEach(() => {
+            render();
+
       const propsItem: Partial<ArtifactFormComponentProps['item']> = {
         entries: [createEntry(ConditionEntryField.HASH, 'match', 'somewildcard*')],
       };
       latestUpdatedItem = { ...formProps.item, ...propsItem };
       rerenderWithLatestProps();
+            act(() => {
+              fireEvent.blur(getConditionValue(getCondition()));
+            });
+          });
+
+          it('shows a warning if field is HASH or SIGNATURE, but no callout is displayed', () => {
       expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
+
+            expect(
+              renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+            ).not.toBeInTheDocument();
+          });
+
+          it('should NOT provide confirm modal labels', async () => {
+            await waitFor(() => {
+              expect(formProps.onChange).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  confirmModalLabels: undefined,
+                })
+              );
+            });
+          });
+        });
+      });
+    });
+
+    describe('Advanced mode', () => {
+      beforeEach(() => {
+        formProps.item.tags = ['policy:all', 'form_mode:advanced'];
+      });
+
+      describe('and a wildcard value is used with the IS operator', () => {
+        beforeEach(() => {
+          formProps.item.entries = [
+            createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*'),
+          ];
+          render();
+        });
+
+        it('shows warning callout', async () => {
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('unnecessaryEscapingCallout')).not.toBeInTheDocument();
+        });
     });
   });
 
