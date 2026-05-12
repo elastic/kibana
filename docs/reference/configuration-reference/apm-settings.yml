@@ -219,12 +219,12 @@ groups:
       - setting: xpack.apm.searchAggregatedTransactions
         description: |
           Controls the search strategy used for transactions. When set to `auto`, Kibana uses aggregated transactions if available and falls back to individual transactions. Set to `always` to force the use of aggregated transactions, or `never` to always query individual transactions.
-        datatype: string
+        datatype: enum
         default: 'auto'
         options:
-          - auto
-          - always
-          - never
+          - option: auto
+          - option: always
+          - option: never
         applies_to:
           stack: ga 7.10
           ech: ga

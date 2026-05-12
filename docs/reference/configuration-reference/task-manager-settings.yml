@@ -73,11 +73,11 @@ groups:
       - setting: xpack.task_manager.monitored_stats_health_verbose_log.level
         description: |
           The log level used when verbose health logging is enabled. Set to `debug` for detailed output or `info` for higher-level summaries.
-        datatype: string
+        datatype: enum
         default: 'debug'
         options:
-          - debug
-          - info
+          - option: debug
+          - option: info
         applies_to:
           stack: ga 8.6
           ech: ga
