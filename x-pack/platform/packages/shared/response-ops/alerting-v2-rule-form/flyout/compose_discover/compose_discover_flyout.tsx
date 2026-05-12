@@ -16,7 +16,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
@@ -96,7 +95,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           tags: mapped.metadata?.tags ?? [],
         },
         timeField: mapped.timeField ?? '@timestamp',
-        schedule: { every: mapped.schedule?.every ?? '1m', lookback: mapped.schedule?.lookback ?? '5m' },
+        schedule: {
+          every: mapped.schedule?.every ?? '1m',
+          lookback: mapped.schedule?.lookback ?? '5m',
+        },
         evaluation: { query: { base: mapped.evaluation?.query?.base ?? '' } },
         grouping: mapped.grouping,
         recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },

@@ -15,7 +15,9 @@ export type DelayMode = 'immediate' | 'breaches' | 'duration';
  * Always `{ type: 'single' }` for now — tabs (Base/Alert/Recovery) are added in the
  * custom recovery follow-up PR.
  */
-export type SandboxTabConfig = { type: 'single' };
+export interface SandboxTabConfig {
+  type: 'single';
+}
 
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;

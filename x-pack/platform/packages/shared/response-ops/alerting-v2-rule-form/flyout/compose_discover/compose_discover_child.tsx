@@ -17,8 +17,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiCallOut,
   EuiEmptyPrompt,
@@ -52,8 +50,7 @@ const INITIAL_EDITOR_HEIGHT = 200;
 const MIN_EDITOR_HEIGHT = 80;
 const MAX_EDITOR_HEIGHT = 600;
 
-const isMac =
-  typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
 export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
@@ -97,13 +94,22 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
-  const { columns, rows, totalRowCount, isLoading, isError, error, run, hasRun, lastExecutedQuery } =
-    useQueryExecution({
-      query: activeQuery,
-      timeField: state.timeField,
-      timeRange,
-      data: services.data,
-    });
+  const {
+    columns,
+    rows,
+    totalRowCount,
+    isLoading,
+    isError,
+    error,
+    run,
+    hasRun,
+    lastExecutedQuery,
+  } = useQueryExecution({
+    query: activeQuery,
+    timeField: state.timeField,
+    timeRange,
+    data: services.data,
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -173,12 +179,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   );
 
   return (
-    <EuiFlyout
-      type="overlay"
-      size="fill"
-      onClose={onClose}
-      aria-labelledby={CHILD_FLYOUT_TITLE_ID}
-    >
+    <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={CHILD_FLYOUT_TITLE_ID}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={CHILD_FLYOUT_TITLE_ID}>
           <h3>{state.queryCommitted ? 'Edit alert query' : 'Define alert query'}</h3>
@@ -223,9 +224,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               <EuiSelect
                 options={timeFieldOptions}
                 value={state.timeField}
-                onChange={(e) =>
-                  dispatch({ type: 'SET_TIME_FIELD', timeField: e.target.value })
-                }
+                onChange={(e) => dispatch({ type: 'SET_TIME_FIELD', timeField: e.target.value })}
                 compressed
                 prepend="Time field"
                 data-test-subj="composeDiscoverTimeField"
@@ -261,86 +260,86 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
         {/* ── 4. Results ──────────────────────────────────────────────── */}
         <div style={{ padding: '0 16px' }}>
-        <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-        {!hasRun && (
-          <EuiEmptyPrompt
-            iconType="playFilled"
-            title={<h4>Run your query to see results</h4>}
-            body={
-              <p>
-                Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
-                execute the query.
-              </p>
-            }
-          />
-        )}
-
-        {hasRun && isLoading && (
-          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-
-        {hasRun && isError && (
-          <EuiCallOut color="danger" iconType="error" title="Query error">
-            <p>{error}</p>
-          </EuiCallOut>
-        )}
-
-        {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
-          <EuiEmptyPrompt
-            iconType="search"
-            title={<h4>No results</h4>}
-            body={<p>The query returned no results for the current time range.</p>}
-          />
-        )}
-
-        {hasRun && !isLoading && !isError && rows.length > 0 && (
-          <>
-            <ComposeDiscoverChart
-              query={lastExecutedQuery ?? activeQuery}
-              timeField={state.timeField}
-              timeRange={timeRange}
-              columns={columns}
-              lens={services.lens}
-              dataViews={services.dataViews}
+          {!hasRun && (
+            <EuiEmptyPrompt
+              iconType="playFilled"
+              title={<h4>Run your query to see results</h4>}
+              body={
+                <p>
+                  Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
+                  execute the query.
+                </p>
+              }
             />
+          )}
 
-            <EuiSpacer size="m" />
-
-            <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+          {hasRun && isLoading && (
+            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
-                </EuiText>
+                <EuiLoadingSpinner size="l" />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
+          )}
 
-            <EuiDataGrid
-              aria-label="Query results"
-              columns={gridColumns}
-              columnVisibility={{ visibleColumns, setVisibleColumns }}
-              rowCount={rows.length}
-              renderCellValue={renderCellValue}
-              pagination={{
-                ...pagination,
-                pageSizeOptions: [10, 25, 50],
-                onChangePage,
-                onChangeItemsPerPage,
-              }}
-              gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
-              toolbarVisibility={{
-                showColumnSelector: true,
-                showSortSelector: true,
-                showFullScreenSelector: false,
-              }}
+          {hasRun && isError && (
+            <EuiCallOut color="danger" iconType="error" title="Query error">
+              <p>{error}</p>
+            </EuiCallOut>
+          )}
+
+          {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
+            <EuiEmptyPrompt
+              iconType="search"
+              title={<h4>No results</h4>}
+              body={<p>The query returned no results for the current time range.</p>}
             />
-          </>
-        )}
+          )}
+
+          {hasRun && !isLoading && !isError && rows.length > 0 && (
+            <>
+              <ComposeDiscoverChart
+                query={lastExecutedQuery ?? activeQuery}
+                timeField={state.timeField}
+                timeRange={timeRange}
+                columns={columns}
+                lens={services.lens}
+                dataViews={services.dataViews}
+              />
+
+              <EuiSpacer size="m" />
+
+              <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+
+              <EuiDataGrid
+                aria-label="Query results"
+                columns={gridColumns}
+                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                rowCount={rows.length}
+                renderCellValue={renderCellValue}
+                pagination={{
+                  ...pagination,
+                  pageSizeOptions: [10, 25, 50],
+                  onChangePage,
+                  onChangeItemsPerPage,
+                }}
+                gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
+                toolbarVisibility={{
+                  showColumnSelector: true,
+                  showSortSelector: true,
+                  showFullScreenSelector: false,
+                }}
+              />
+            </>
+          )}
         </div>
       </EuiFlyoutBody>
 

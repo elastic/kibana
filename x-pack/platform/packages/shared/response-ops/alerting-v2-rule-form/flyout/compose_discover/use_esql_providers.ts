@@ -51,16 +51,12 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
 
     const suggestion = ESQLLang.getSuggestionProvider?.(stableCallbacks);
     if (suggestion) {
-      disposables.push(
-        monaco.languages.registerCompletionItemProvider(ESQL_LANG_ID, suggestion)
-      );
+      disposables.push(monaco.languages.registerCompletionItemProvider(ESQL_LANG_ID, suggestion));
     }
 
     const signature = ESQLLang.getSignatureProvider?.(stableCallbacks);
     if (signature) {
-      disposables.push(
-        monaco.languages.registerSignatureHelpProvider(ESQL_LANG_ID, signature)
-      );
+      disposables.push(monaco.languages.registerSignatureHelpProvider(ESQL_LANG_ID, signature));
     }
 
     const hover = ESQLLang.getHoverProvider?.(stableCallbacks);
@@ -71,8 +67,7 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
     return () => {
       disposables.forEach((d) => d.dispose());
     };
-  // Empty deps: register once on mount, clean up on unmount.
-  // Callbacks stay current via callbacksRef without triggering re-registration.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Empty deps: register once on mount, clean up on unmount.
+    // Callbacks stay current via callbacksRef without triggering re-registration.
   }, []);
 };

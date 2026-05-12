@@ -110,8 +110,16 @@ export const useQueryExecution = ({
   const paramsRef = useRef({ query, timeField, timeRange });
   paramsRef.current = { query, timeField, timeRange };
 
-  const execRef = useRef({ query: executionQuery, timeRange: executionTimeRange, timeField: executionTimeField });
-  execRef.current = { query: executionQuery, timeRange: executionTimeRange, timeField: executionTimeField };
+  const execRef = useRef({
+    query: executionQuery,
+    timeRange: executionTimeRange,
+    timeField: executionTimeField,
+  });
+  execRef.current = {
+    query: executionQuery,
+    timeRange: executionTimeRange,
+    timeField: executionTimeField,
+  };
 
   const run = useCallback(() => {
     const { query: q, timeField: tf, timeRange: tr } = paramsRef.current;

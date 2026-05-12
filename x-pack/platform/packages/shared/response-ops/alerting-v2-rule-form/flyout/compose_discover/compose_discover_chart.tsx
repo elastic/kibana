@@ -81,12 +81,8 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
           query: { esql: query },
         };
 
-        const allSuggestions = suggestions(
-          context,
-          adHocDataView,
-          ['lnsDatatable'],
-          ChartType.Bar
-        ) ?? [];
+        const allSuggestions =
+          suggestions(context, adHocDataView, ['lnsDatatable'], ChartType.Bar) ?? [];
 
         const chartSuggestions = allSuggestions.filter(
           (s) => s.visualizationId && s.visualizationId !== 'lnsDatatable'

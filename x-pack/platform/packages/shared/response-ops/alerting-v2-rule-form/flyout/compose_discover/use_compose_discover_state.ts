@@ -57,10 +57,7 @@ export function getSandboxTabConfig(_state: ComposeDiscoverState): SandboxTabCon
   return { type: 'single' };
 }
 
-function reducer(
-  state: ComposeDiscoverState,
-  action: ComposeDiscoverAction
-): ComposeDiscoverState {
+function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): ComposeDiscoverState {
   switch (action.type) {
     case 'SET_NAME':
       return { ...state, name: action.name };

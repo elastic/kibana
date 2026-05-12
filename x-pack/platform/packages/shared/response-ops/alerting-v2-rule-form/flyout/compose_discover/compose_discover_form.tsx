@@ -12,8 +12,6 @@ import {
   EuiCallOut,
   EuiComboBox,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
@@ -24,7 +22,6 @@ import {
 } from '@elastic/eui';
 import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
 import { QuerySummary } from './query_summary';
-import { getStepTitles } from './use_compose_discover_state';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { RuleDetailsFieldGroup, RuleExecutionFieldGroup } from '../../form';
@@ -227,7 +224,11 @@ stateTransition:
 `;
 }
 
-export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({ state, dispatch, services }) => {
+export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
+  state,
+  dispatch,
+  services,
+}) => {
   const yamlValue = useMemo(() => buildYaml(state), [state]);
 
   if (state.yamlMode) {

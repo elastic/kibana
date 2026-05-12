@@ -97,7 +97,12 @@ export const RulesListPage = () => {
     setPage(1);
   }, [debouncedSearch, filter]);
 
-  const { data: rulesData, isLoading, isError, error } = useFetchRules({
+  const {
+    data: rulesData,
+    isLoading,
+    isError,
+    error,
+  } = useFetchRules({
     page,
     perPage,
     filter,
@@ -144,11 +149,7 @@ export const RulesListPage = () => {
           <EuiFlexGroup key="create-rule-group" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               {/* Primary create button — navigates to the full-page form (existing flow) */}
-              <EuiButton
-                fill
-                href="#/rules/new"
-                data-test-subj="createRuleButton"
-              >
+              <EuiButton fill href="#/rules/new" data-test-subj="createRuleButton">
                 <FormattedMessage
                   id="xpack.alertingV2.rulesList.createRuleButton"
                   defaultMessage="Create rule"
@@ -242,13 +243,28 @@ export const RulesListPage = () => {
           mode={editRule ? 'edit' : 'create'}
           rule={editRule ?? undefined}
           ruleId={editRule?.id}
-          onClose={() => { setFlyoutOpen(false); setEditRule(null); }}
+          onClose={() => {
+            setFlyoutOpen(false);
+            setEditRule(null);
+          }}
           services={ruleFormServices}
           onCreateRule={(payload) =>
-            createRuleMutation.mutate(payload, { onSuccess: () => { setFlyoutOpen(false); } })
+            createRuleMutation.mutate(payload, {
+              onSuccess: () => {
+                setFlyoutOpen(false);
+              },
+            })
           }
           onUpdateRule={(id, payload) =>
-            updateRuleMutation.mutate({ id, payload }, { onSuccess: () => { setFlyoutOpen(false); setEditRule(null); } })
+            updateRuleMutation.mutate(
+              { id, payload },
+              {
+                onSuccess: () => {
+                  setFlyoutOpen(false);
+                  setEditRule(null);
+                },
+              }
+            )
           }
           isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
         />
