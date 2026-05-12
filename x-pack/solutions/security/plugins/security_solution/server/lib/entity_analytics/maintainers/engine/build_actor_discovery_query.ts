@@ -12,8 +12,8 @@ import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE } from './constants';
 
-// TODO(follow-up): actorEntityType is hardcoded to 'user' — add actorEntityType to
-// RelationshipIntegrationConfig to support host→host and service→* relationships.
+// TODO(#266748): actorEntityType is hardcoded to 'user' — add actorEntityType to
+// RelationshipIntegrationConfig to support host→host, host→service, and service→* relationships.
 const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
 
 /**

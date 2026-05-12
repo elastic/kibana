@@ -40,7 +40,7 @@ function buildRelationshipEsql(
   namespace: string
 ): string {
   const indexPattern = config.indexPattern(namespace);
-  // TODO(follow-up): 'user' hardcoded for actor — thread actorEntityType through config.
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
   const userFieldEvals = !config.customActor?.evalOverride
     ? getFieldEvaluationsEsql('user')
     : undefined;
