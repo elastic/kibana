@@ -81,5 +81,13 @@ describe('CHANGE_POINT Validation', () => {
         );
       });
     });
+
+    describe('... BY <groupings> ...', () => {
+      test('raises error on unknown grouping column', () => {
+        changePointExpectErrors('FROM index | CHANGE_POINT doubleField BY notExistingField', [
+          'Unknown column "notExistingField"',
+        ]);
+      });
+    });
   });
 });

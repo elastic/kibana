@@ -48,7 +48,12 @@ describe('CHANGE_POINT Autocomplete', () => {
   });
 
   it('suggests ON after value column', async () => {
-    await changePointExpectSuggestions(`from a | change_point value /`, ['ON ', 'AS ', '| ']);
+    await changePointExpectSuggestions(`from a | change_point value /`, [
+      'ON ',
+      'AS ',
+      'BY ',
+      '| ',
+    ]);
   });
 
   it('suggests fields after ON', async () => {
@@ -60,7 +65,11 @@ describe('CHANGE_POINT Autocomplete', () => {
 
   describe('AS', () => {
     it('suggests AS after ON <field>', async () => {
-      await changePointExpectSuggestions(`from a | change_point value on field `, ['AS ', '| ']);
+      await changePointExpectSuggestions(`from a | change_point value on field `, [
+        'AS ',
+        'BY ',
+        '| ',
+      ]);
     });
 
     it('suggests default field name for AS clauses with an empty ON', async () => {
@@ -93,7 +102,7 @@ describe('CHANGE_POINT Autocomplete', () => {
     it('suggests pipe after complete command', async () => {
       await changePointExpectSuggestions(
         `from a | change_point value on field as changePointType, pValue `,
-        ['| ']
+        ['BY ', '| ']
       );
     });
   });
@@ -102,8 +111,24 @@ describe('CHANGE_POINT Autocomplete', () => {
     it('suggests the pipe after the AS clause, On clause should not be suggested', async () => {
       await changePointExpectSuggestions(
         `from a | change_point value as changePointType, pValue `,
-        ['| ']
+        ['BY ', '| ']
       );
+    });
+  });
+
+  describe('BY', () => {
+    it('suggests fields after BY', async () => {
+      const expectedFields = getFieldNamesByType('any');
+      await changePointExpectSuggestions(`from a | change_point value by /`, expectedFields);
+    });
+
+    it('suggests fields after BY <field>,', async () => {
+      const expectedFields = getFieldNamesByType('any');
+      await changePointExpectSuggestions(`from a | change_point value by host, /`, expectedFields);
+    });
+
+    it('suggests comma and pipe after a complete grouping field', async () => {
+      await changePointExpectSuggestions(`from a | change_point value by host `, [',', '| ']);
     });
   });
 });
