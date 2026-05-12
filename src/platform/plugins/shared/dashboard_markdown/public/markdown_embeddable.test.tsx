@@ -336,4 +336,40 @@ describe('MarkdownEmbeddable', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: MarkdownEditorApi;
+    beforeEach((done) => {
+      renderEmbeddable(
+        markdownEmbeddableSchema.validate({
+          content: 'hello',
+        })
+      )
+        .then(({ embeddable }) => {
+          embeddableApi = embeddable.api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      let emitCount = 0;
+      embeddableApi.anyStateChange$.subscribe(() => {
+        emitCount++;
+        if (emitCount === 1) {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // start_percentage_of_time_range assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        }
+      });
+      embeddableApi.setTitle('cute puppies');
+    });
+  });
 });
