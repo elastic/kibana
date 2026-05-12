@@ -183,9 +183,9 @@ steps:
   #        - exit_status: '-1'
   #          limit: 3
 
-  - command: .buildkite/scripts/steps/check_package_docs.sh
-    label: Check Package Docs
-    key: check_package_docs
+  - command: .buildkite/scripts/steps/report_package_metrics.sh
+    label: Report Package Metrics
+    key: report_package_metrics
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -214,7 +214,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-      - check_package_docs
+      - report_package_metrics
     retry:
       automatic:
         - exit_status: '*'
