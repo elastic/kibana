@@ -293,6 +293,14 @@ export const stripIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] =>
  * array. Keeps the early-return sites in pipeline-design tools consistent:
  * every result the agent receives carries `existing_steps`, `step_changes`,
  * and any drop warnings — so silent overwrites become impossible.
+ *
+ * **All pipeline-design success paths must produce `existing_steps` /
+ * `step_changes` through this helper.** It is the only place that strips
+ * `ignore_failure` from both sides before computing the diff, so calling
+ * `computePipelineDiff` + `buildDropWarnings` directly produces a result
+ * whose shape drifts from `nl_to_streamlang` / `refine_extracted_field` /
+ * `extract_fields` — and the skill prompt (which branches on a single
+ * agreed shape) has no way to special-case the difference.
  */
 export const annotateWithDiff = (
   result: Omit<NlToStreamlangResult, 'existing_steps' | 'step_changes'>,

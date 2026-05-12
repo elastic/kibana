@@ -101,8 +101,18 @@ export function addDeterministicCustomIdentifiersFromIngestProcessing(
   return addDeterministicCustomIdentifiers(streamlangDSLFromIngestProcessing(processing));
 }
 /**
- * Adds a generated customIdentifier to each step
- * This is a combination of a hash of the step's content and the step's path within the DSL.
+ * Assigns a positional `customIdentifier` (`{path}.steps[{index}]`, e.g.
+ * `root.steps[0]`, `root.steps[1].condition.steps[0]`) to each step in
+ * place. The id encodes ONLY the step's position in the DSL tree — it
+ * does NOT include a content hash.
+ *
+ * Position-only is sufficient because {@link checkAdditiveChanges}
+ * detects content modifications via a separate structural-hash
+ * equality check (`objectHash` over `stripNestedStepsForComparison`);
+ * the identifier only needs to anchor "this is the same slot in the
+ * tree". See {@link addDeterministicCustomIdentifiers} for the
+ * orchestrator and the explicit "not a stable cross-call handle"
+ * caveat.
  */
 export function addStepIdentifiers(steps: StreamlangStep[], path = 'root') {
   if (Array.isArray(steps)) {
@@ -129,8 +139,9 @@ export const addIdentifierToStep = (step: StreamlangStep, path: string, index: n
     delete step.customIdentifier;
   }
 
-  // Use just the step path as the identifier - this is sufficient since we only
-  // diff for additive changes now (new steps at end), not content modifications
+  // Position-only identifier. Sufficient because content modifications are
+  // detected by the separate structural-hash equality check inside
+  // `diffStepsForAdditions`; the identifier only has to anchor the slot.
   const stepPath = `${path}.steps[${index}]`;
   step.customIdentifier = stepPath;
 

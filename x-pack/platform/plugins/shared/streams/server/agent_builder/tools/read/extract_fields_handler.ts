@@ -45,6 +45,7 @@ import {
   type SeedParsingCandidate,
 } from '../../../routes/internal/streams/management/seed_parsing_helpers';
 import {
+  annotateWithDiff,
   buildSummary,
   computeFieldChanges,
   computeSuccessRate,
@@ -56,7 +57,6 @@ import {
   type SamplesConfig,
   type SimulationMode,
 } from './_pipeline_design_utils';
-import { buildDropWarnings, computePipelineDiff } from './pipeline_diff';
 import {
   buildDuplicationWarning,
   buildOverwriteWarning,
@@ -684,40 +684,42 @@ const assembleSuccessOutcome = async ({
 
   const finalSteps = injectIgnoreFailure(merged.steps, existingSteps);
 
-  // Diff against the pre-existing pipeline so the agent can present a clear
-  // before/after view. With the append-existing strategy above the diff is
-  // typically all-additions plus all-unchanged, but we still build it to
-  // surface any structural mismatch (e.g. a sub-agent surprise) loudly.
-  const diff = computePipelineDiff(existingSteps, finalSteps);
-  const dropWarnings = buildDropWarnings(diff);
-
+  // Route through `annotateWithDiff` so the agent-facing shape
+  // (`existing_steps` stripped of `ignore_failure`, structural diff, drop
+  // warnings folded into `warnings`) matches `nl_to_streamlang.ts` and
+  // `refine_extracted_field.ts`. Without this, the heuristic success path
+  // emits `existing_steps` carrying live `ignore_failure` flags while the
+  // other tools strip them — a contract drift the skill prompt would then
+  // need to special-case.
   return {
     kind: 'success',
     streamType,
     pickedSourceField: fieldName,
     sourceFieldConflictDetected,
     stepsUsed: suggestion.metadata.stepsUsed,
-    result: {
-      steps: finalSteps,
-      existing_steps: existingSteps,
-      step_changes: diff.changes,
-      summary: buildSummary(finalSteps),
-      field_changes: fieldChanges,
-      simulation: {
-        success_rate: successRate,
-        ...(simErrors.length > 0 && { errors: simErrors }),
-        sample_count: flattenedDocs.length,
-        mode: simulationMode,
+    result: annotateWithDiff(
+      {
+        steps: finalSteps,
+        summary: buildSummary(finalSteps),
+        field_changes: fieldChanges,
+        simulation: {
+          success_rate: successRate,
+          ...(simErrors.length > 0 && { errors: simErrors }),
+          sample_count: flattenedDocs.length,
+          mode: simulationMode,
+        },
+        ...(warnings.length > 0 && { warnings }),
+        hints: [
+          `Seed parsing was discovered automatically using ${winning.type} heuristics on field "${fieldName}".`,
+          ...buildKeyValueHints(
+            parsedDocuments,
+            new Set(fieldChanges.map((change) => change.field))
+          ),
+        ],
+        samples_info: samplesInfo,
       },
-      ...(warnings.length + dropWarnings.length > 0 && {
-        warnings: [...warnings, ...dropWarnings],
-      }),
-      hints: [
-        `Seed parsing was discovered automatically using ${winning.type} heuristics on field "${fieldName}".`,
-        ...buildKeyValueHints(parsedDocuments, new Set(fieldChanges.map((change) => change.field))),
-      ],
-      samples_info: samplesInfo,
-    },
+      existingSteps
+    ),
   };
 };
 
