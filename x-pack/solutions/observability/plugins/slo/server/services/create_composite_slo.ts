@@ -13,31 +13,35 @@ import { persistCompositeSummaryDoc } from './composite_summary_writer';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { SummaryClient } from './summary_client';
 
+export interface CreateCompositeSloParams extends CreateCompositeSLOInput {
+  spaceId: string;
+  userId: string;
+}
+
 export interface CreateCompositeSloDeps {
   esClient: ElasticsearchClient;
   compositeSloRepository: CompositeSLORepository;
   sloDefinitionRepository: SLODefinitionRepository;
   summaryClient: SummaryClient;
   logger: Logger;
-  spaceId: string;
-  userId: string;
 }
 
 export const createCompositeSlo = async (
-  params: CreateCompositeSLOInput,
+  params: CreateCompositeSloParams,
   deps: CreateCompositeSloDeps
 ): Promise<CreateCompositeSLOResponse> => {
+  const { spaceId, userId, ...body } = params;
   const now = new Date().toISOString();
   const compositeSlo = {
-    ...params,
-    id: params.id ?? uuidv4(),
-    tags: params.tags ?? [],
-    enabled: params.enabled ?? true,
+    ...body,
+    id: body.id ?? uuidv4(),
+    tags: body.tags ?? [],
+    enabled: body.enabled ?? true,
     version: 1,
     createdAt: now,
     updatedAt: now,
-    createdBy: deps.userId,
-    updatedBy: deps.userId,
+    createdBy: userId,
+    updatedBy: userId,
   };
 
   const created = await deps.compositeSloRepository.create(compositeSlo);
@@ -47,7 +51,7 @@ export const createCompositeSlo = async (
     summaryClient: deps.summaryClient,
     sloDefinitionRepository: deps.sloDefinitionRepository,
     logger: deps.logger,
-    spaceId: deps.spaceId,
+    spaceId,
     compositeSlo: created,
   });
 

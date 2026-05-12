@@ -39,14 +39,15 @@ export const createCompositeSLORoute = createSloServerRoute({
       burnRatesClient
     );
 
-    return await createCompositeSlo(params.body, {
-      esClient: scopedClusterClient.asCurrentUser,
-      compositeSloRepository,
-      sloDefinitionRepository: repository,
-      summaryClient,
-      logger,
-      spaceId,
-      userId,
-    });
+    return await createCompositeSlo(
+      { ...params.body, spaceId, userId },
+      {
+        esClient: scopedClusterClient.asCurrentUser,
+        compositeSloRepository,
+        sloDefinitionRepository: repository,
+        summaryClient,
+        logger,
+      }
+    );
   },
 });
