@@ -14,18 +14,17 @@ import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drill
 import { BehaviorSubject } from 'rxjs';
 
 describe('image embeddable', () => {
-  const parent = {};
-  const uuid = '1';
-  const finalizeApi = (api: any) => ({
-    ...api,
-    uuid,
-    parent,
-    type: IMAGE_EMBEDDABLE_TYPE,
-    phase$: new BehaviorSubject(undefined),
-  });
-
   let embeddableApi: ImageEmbeddableApi;
   beforeEach((done) => {
+    const parent = {};
+    const uuid = '1';
+    const finalizeApi = (api: any) => ({
+      ...api,
+      uuid,
+      parent,
+      type: IMAGE_EMBEDDABLE_TYPE,
+      phase$: new BehaviorSubject(undefined),
+    });
     const { buildEmbeddable } = getImageEmbeddableFactory();
     buildEmbeddable({
       initializeDrilldownsManager,
