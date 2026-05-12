@@ -1,5 +1,5 @@
 {
-  "sha1": "5b62889419950add2740848b3c222567be213509",
+  "sha1": "c81a2e4638730004aa9843f805fe9449c227ef7c",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 34,
+        "line": 53,
         "column": 12
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 49,
+        "line": 68,
         "column": 12
       }
     },
