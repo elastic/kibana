@@ -19,16 +19,19 @@ import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getSLOWorkflowId,
   getWildcardPipelineId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import type { SLODefinition } from '../domain/models';
+import { isEsqlIndicatorType } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
+import type { WorkflowManager } from './workflow_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class ResetSLO {
@@ -39,7 +42,8 @@ export class ResetSLO {
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private workflowManager?: WorkflowManager
   ) {}
 
   public async execute(sloId: string): Promise<ResetSLOResponse> {
@@ -66,14 +70,22 @@ export class ResetSLO {
   }
 
   private async deleteOriginalSLO(slo: SLODefinition) {
+    const isEsql = isEsqlIndicatorType(slo.indicator.type);
     try {
-      await Promise.all([
-        this.transformManager.uninstall(getSLOTransformId(slo.id, slo.revision)),
+      const deleteOps: Array<Promise<unknown>> = [
         this.summaryTransformManager.uninstall(getSLOSummaryTransformId(slo.id, slo.revision)),
         this.deletePipeline(getWildcardPipelineId(slo.id, slo.revision)),
-      ]);
+      ];
 
-      // Delete after we uninstalled the transforms
+      if (isEsql && this.workflowManager) {
+        deleteOps.push(this.workflowManager.delete(getSLOWorkflowId(slo.id, slo.revision)));
+      } else {
+        deleteOps.push(this.transformManager.uninstall(getSLOTransformId(slo.id, slo.revision)));
+      }
+
+      await Promise.all(deleteOps);
+
+      // Delete after we uninstalled the transforms/workflows
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
       // Any errors here should not prevent moving forward.
@@ -125,17 +137,24 @@ export class ResetSLO {
   }
 
   private async installResetedSLO(slo: SLODefinition) {
-    const rollbackOperations = [];
+    const rollbackOperations: Array<() => Promise<unknown>> = [];
+    const isEsql = isEsqlIndicatorType(slo.indicator.type);
 
     const { id, revision } = slo;
-    const rollupTransformId = getSLOTransformId(id, revision);
     const summaryTransformId = getSLOSummaryTransformId(id, revision);
     try {
       const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo, this.spaceId));
       rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(id, revision)));
 
-      const rollupTransformPromise = this.transformManager.install(slo);
-      rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
+      let rollupPromise: Promise<unknown>;
+      if (isEsql && this.workflowManager) {
+        rollupPromise = this.workflowManager.create(slo);
+        rollbackOperations.push(() => this.workflowManager!.delete(getSLOWorkflowId(id, revision)));
+      } else {
+        const rollupTransformId = getSLOTransformId(id, revision);
+        rollupPromise = this.transformManager.install(slo);
+        rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
+      }
 
       const summaryPipelinePromise = this.createPipeline(
         getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
@@ -150,17 +169,22 @@ export class ResetSLO {
 
       await Promise.all([
         sloPipelinePromise,
-        rollupTransformPromise,
+        rollupPromise,
         summaryPipelinePromise,
         summaryTransformPromise,
         tempDocPromise,
       ]);
 
-      // transforms can only be started after the pipelines are created
-      await Promise.all([
-        this.transformManager.start(rollupTransformId),
-        this.summaryTransformManager.start(summaryTransformId),
-      ]);
+      // Start summary transform; for non-ESQL (or ESQL without workflowManager) also start rollup transform
+      if (isEsql && this.workflowManager) {
+        await this.summaryTransformManager.start(summaryTransformId);
+      } else {
+        const rollupTransformId = getSLOTransformId(id, revision);
+        await Promise.all([
+          this.transformManager.start(rollupTransformId),
+          this.summaryTransformManager.start(summaryTransformId),
+        ]);
+      }
     } catch (err) {
       this.logger.debug(
         `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`

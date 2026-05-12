@@ -83,6 +83,9 @@ export const HEALTH_INDEX_TEMPLATE_NAME = `.slo-observability.health-v${SLO_RESO
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;
 
+export const getSLOWorkflowId = (sloId: string, sloRevision: number) =>
+  `slo-esql-${sloId}-${sloRevision}`;
+
 export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
   `slo-summary-${sloId}-${sloRevision}`;
 

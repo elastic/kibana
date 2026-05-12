@@ -10,6 +10,7 @@ import type { TransformGenerator } from '.';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
+  EsqlCustomTransformGenerator,
   HistogramTransformGenerator,
   KQLCustomTransformGenerator,
   MetricCustomTransformGenerator,
@@ -55,5 +56,6 @@ export function createTransformGenerators(
       dataViewsService,
       isServerless
     ),
+    'sli.esql.custom': new EsqlCustomTransformGenerator(spaceId, dataViewsService, isServerless),
   };
 }

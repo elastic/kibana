@@ -12,12 +12,15 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getSLOWorkflowId,
   getCustomSLOWildcardPipelineId,
   getWildcardPipelineId,
 } from '../../common/constants';
+import { isEsqlIndicatorType } from '../domain/models';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
+import type { WorkflowManager } from './workflow_manager';
 
 interface Options {
   skipDataDeletion: boolean;
@@ -31,7 +34,8 @@ export class DeleteSLO {
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi,
-    private abortController: AbortController = new AbortController()
+    private abortController: AbortController = new AbortController(),
+    private workflowManager?: WorkflowManager
   ) {}
 
   public async execute(
@@ -44,13 +48,12 @@ export class DeleteSLO {
     const slo = await this.repository.findById(sloId);
 
     // First delete the linked resources before deleting the data
-    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    const isEsql = isEsqlIndicatorType(slo.indicator.type);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     const wildcardPipelineId = getWildcardPipelineId(slo.id, slo.revision);
     const customWildcardPipelineId = getCustomSLOWildcardPipelineId(slo.id);
 
-    await Promise.all([
-      this.transformManager.uninstall(rollupTransformId),
+    const deleteOps: Array<Promise<unknown>> = [
       this.summaryTransformManager.uninstall(summaryTransformId),
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
@@ -65,7 +68,20 @@ export class DeleteSLO {
         )
       ),
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
-    ]);
+    ];
+
+    if (isEsql && this.workflowManager) {
+      // Delete the workflow instead of rollup transform for ESQL SLOs
+      deleteOps.push(this.workflowManager.delete(getSLOWorkflowId(slo.id, slo.revision)));
+    } else {
+      // For non-ESQL SLOs or when workflowManager is unavailable (e.g., during migration),
+      // attempt to delete rollup transform. For ESQL SLOs without a transform, this is a safe
+      // no-op because TransformManager.uninstall ignores 404.
+      const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+      deleteOps.push(this.transformManager.uninstall(rollupTransformId));
+    }
+
+    await Promise.all(deleteOps);
 
     await Promise.all([
       this.deleteRollupData(slo.id, options.skipDataDeletion),

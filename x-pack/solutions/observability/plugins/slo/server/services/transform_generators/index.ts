@@ -13,5 +13,6 @@ export * from './kql_custom';
 export * from './metric_custom';
 export * from './histogram';
 export * from './timeslice_metric';
+export * from './esql_custom';
 export * from './common';
 export * from './transform_generators_factory';

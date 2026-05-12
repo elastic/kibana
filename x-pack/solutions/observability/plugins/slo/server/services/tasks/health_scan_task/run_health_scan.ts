@@ -42,7 +42,7 @@ export async function runHealthScan(
     type: SO_SLO_TYPE,
     perPage: PER_PAGE,
     namespaces: ['*'],
-    fields: ['id', 'revision', 'name', 'enabled'],
+    fields: ['id', 'revision', 'name', 'enabled', 'indicator'],
   });
 
   try {
@@ -57,6 +57,7 @@ export async function runHealthScan(
         revision: so.attributes.revision,
         name: so.attributes.name,
         enabled: so.attributes.enabled,
+        indicatorType: so.attributes.indicator?.type,
         spaceId: so.namespaces?.[0] ?? 'default',
       }));
       const sloById = new Map(sloList.map((slo) => [slo.id, slo]));

@@ -20,17 +20,20 @@ import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getSLOWorkflowId,
   getWildcardPipelineId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import type { SLODefinition } from '../domain/models';
+import { isEsqlIndicatorType } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
+import type { WorkflowManager } from './workflow_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
@@ -42,7 +45,8 @@ export class UpdateSLO {
     private logger: Logger,
     private spaceId: string,
     private basePath: IBasePath,
-    private userId: string
+    private userId: string,
+    private workflowManager?: WorkflowManager
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -111,7 +115,7 @@ export class UpdateSLO {
       return this.toResponse(updatedSlo);
     }
 
-    const updatedRollupTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
+    const isEsql = isEsqlIndicatorType(updatedSlo.indicator.type);
     const updatedSummaryTransformId = getSLOSummaryTransformId(updatedSlo.id, updatedSlo.revision);
 
     try {
@@ -122,8 +126,18 @@ export class UpdateSLO {
         this.deletePipeline(getSLOPipelineId(updatedSlo.id, updatedSlo.revision))
       );
 
-      const rollupTransformPromise = this.transformManager.install(updatedSlo);
-      rollbackOperations.push(() => this.transformManager.uninstall(updatedRollupTransformId));
+      // ESQL SLOs use workflows; transform-based SLOs use rollup transforms
+      let rollupPromise: Promise<unknown>;
+      if (isEsql && this.workflowManager) {
+        rollupPromise = this.workflowManager.create(updatedSlo);
+        rollbackOperations.push(() =>
+          this.workflowManager!.delete(getSLOWorkflowId(updatedSlo.id, updatedSlo.revision))
+        );
+      } else {
+        const updatedRollupTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
+        rollupPromise = this.transformManager.install(updatedSlo);
+        rollbackOperations.push(() => this.transformManager.uninstall(updatedRollupTransformId));
+      }
 
       const summaryPipelinePromise = this.createPipeline(
         getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
@@ -142,17 +156,22 @@ export class UpdateSLO {
 
       await Promise.all([
         sloPipelinePromise,
-        rollupTransformPromise,
+        rollupPromise,
         summaryPipelinePromise,
         summaryTransformPromise,
         tempDocPromise,
       ]);
 
-      // transforms can only be started after the pipelines are created
-      await Promise.all([
-        this.transformManager.start(updatedRollupTransformId),
-        this.summaryTransformManager.start(updatedSummaryTransformId),
-      ]);
+      // Start summary transform (and rollup transform only for non-ESQL or when workflowManager unavailable)
+      if (isEsql && this.workflowManager) {
+        await this.summaryTransformManager.start(updatedSummaryTransformId);
+      } else {
+        const updatedRollupTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
+        await Promise.all([
+          this.transformManager.start(updatedRollupTransformId),
+          this.summaryTransformManager.start(updatedSummaryTransformId),
+        ]);
+      }
     } catch (err) {
       this.logger.debug(
         `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back. ${err}`
@@ -199,12 +218,20 @@ export class UpdateSLO {
   }
 
   private async deleteOriginalSLO(slo: SLODefinition) {
+    const isEsql = isEsqlIndicatorType(slo.indicator.type);
     try {
-      await Promise.all([
-        this.transformManager.uninstall(getSLOTransformId(slo.id, slo.revision)),
+      const deleteOps: Array<Promise<unknown>> = [
         this.summaryTransformManager.uninstall(getSLOSummaryTransformId(slo.id, slo.revision)),
         this.deletePipeline(getWildcardPipelineId(slo.id, slo.revision)),
-      ]);
+      ];
+
+      if (isEsql && this.workflowManager) {
+        deleteOps.push(this.workflowManager.delete(getSLOWorkflowId(slo.id, slo.revision)));
+      } else {
+        deleteOps.push(this.transformManager.uninstall(getSLOTransformId(slo.id, slo.revision)));
+      }
+
+      await Promise.all(deleteOps);
 
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
