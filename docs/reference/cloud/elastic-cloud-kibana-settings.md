@@ -98,6 +98,9 @@ stack: ga 9.4
 `xpack.securitySolution.maxEndpointScriptFileSize`
 :    The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
 
+`xpack.fleet.versionSpecificPolicyAssignment.taskInterval`
+:   Configure the interval at which Fleet reassigns agents to the matching version-specific agent policy. The value must be specified in a duration format (for example, `30s`, `1m`, `5m`). Defaults to `1m`.
+
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}
 stack: ga 9.3
@@ -105,6 +108,9 @@ stack: ga 9.3
 
 `xpack.reporting.csv.maxRows`
 :    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
+
+`xpack.fleet.integrationRollbackTTL`
+:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, `1w`). Defaults to `7d`.
 
 `xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
 : The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
