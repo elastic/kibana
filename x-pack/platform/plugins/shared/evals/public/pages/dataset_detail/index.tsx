@@ -61,6 +61,7 @@ import {
   useUpdateExample,
 } from '../../hooks/use_evals_api';
 import { TraceWaterfall } from '../../components/trace_waterfall';
+import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -102,6 +103,7 @@ export const DatasetDetailPage: React.FC = () => {
   const { datasetId } = useParams<{ datasetId: string }>();
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
+  const { canManage } = useEvalsPermissions();
 
   const { data: dataset, isLoading: isDatasetLoading, error: datasetError } = useDataset(datasetId);
   const {
@@ -591,7 +593,7 @@ export const DatasetDetailPage: React.FC = () => {
               <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          {dataset ? (
+          {dataset && canManage ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -714,27 +716,29 @@ export const DatasetDetailPage: React.FC = () => {
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  {!isEditingExample ? (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
-                          {i18n.EDIT_EXAMPLE_BUTTON}
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={i18n.DELETE_EXAMPLE_BUTTON}
-                          iconType="trash"
-                          color="danger"
-                          onClick={() => setDeletingExample(selectedExample)}
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              {canManage ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    {!isEditingExample ? (
+                      <>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
+                            {i18n.EDIT_EXAMPLE_BUTTON}
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                            iconType="trash"
+                            color="danger"
+                            onClick={() => setDeletingExample(selectedExample)}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
