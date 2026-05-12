@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
-import type { RightPanelPaths } from '../tabs';
+import type { TabId as RightPanelPaths } from '../tabs';
 
 const validTabIds: RightPanelPaths[] = ['overview', 'table', 'json'];
 

@@ -12,17 +12,7 @@ export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPr
 /* Tabs */
 
 export const OVERVIEW_TAB_TEST_ID = `${PREFIX}OverviewTab` as const;
-export const TABLE_TAB_TEST_ID = `${PREFIX}TableTab` as const;
 export const JSON_TAB_TEST_ID = `${PREFIX}JsonTab` as const;
-
-const TABLE_TAB_SETTING_TEST_ID = `${PREFIX}TableTabSetting` as const;
-export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${TABLE_TAB_SETTING_TEST_ID}Button` as const;
-export const TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID =
-  `${TABLE_TAB_SETTING_TEST_ID}HighlightedFieldsOnly` as const;
-export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
-  `${TABLE_TAB_SETTING_TEST_ID}HideEmptyFields` as const;
-export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
-  `${TABLE_TAB_SETTING_TEST_ID}HideAlertFields` as const;
 
 /* Header */
 

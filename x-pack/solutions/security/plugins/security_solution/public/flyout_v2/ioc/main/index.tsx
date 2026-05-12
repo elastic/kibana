@@ -16,7 +16,7 @@ import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
-import { useTabs } from '../shared/hooks/use_tabs';
+import { useTabs } from '../../shared/hooks/use_tabs';
 import { getTabsDisplayed, validTabIds, type TabId } from './tabs';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 

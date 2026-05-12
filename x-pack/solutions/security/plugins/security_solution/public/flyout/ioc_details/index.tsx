@@ -13,7 +13,11 @@ import { useIOCDetailsContext } from './context';
 import { Header } from '../../flyout_v2/ioc/main/header';
 import { Content } from '../../flyout_v2/ioc/main/content';
 import { Footer } from '../../flyout_v2/ioc/main/footer';
-import { getTabsDisplayed, validTabIds, type RightPanelPaths } from '../../flyout_v2/ioc/tabs';
+import {
+  getTabsDisplayed,
+  validTabIds,
+  type TabId as RightPanelPaths,
+} from '../../flyout_v2/ioc/main/tabs';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../shared/components/flyout_header';
 import type { IOCDetailsProps } from './types';

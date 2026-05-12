@@ -10,7 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
-import { JsonTab } from '../shared/tabs/json_tab';
+import { JsonTab } from '../../shared/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import {

@@ -5,224 +5,167 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { memo, useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiInMemoryTable,
-  EuiToolTip,
-  useEuiFontSize,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FlyoutError } from '../components/flyout_error';
+import { ALERT_NAMESPACE, EVENT_KIND } from '@kbn/rule-data-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import { TableTab as SharedTableTab, type TableTabItem } from './base_table_tab';
+import { TABLE_TAB_TEST_ID } from '../components/test_ids';
+import { TableFieldNameCell } from '../components/table_field_name_cell';
+import { EventKind } from '../../document/main/constants/event_kinds';
+import { TableTabSettingButton } from '../components/table_tab_setting_button';
+import { FLYOUT_STORAGE_KEYS } from '../../document/main/constants/local_storage';
+import { useKibana } from '../../../common/lib/kibana';
+import { useHighlightedFields } from '../../document/main/hooks/use_highlighted_fields';
 import type { CellActionRenderer } from '../components/cell_actions';
 
-export interface TableTabItem {
-  field: string;
-  value: string | string[] | null;
-  /** Original un-stringified value from the document, used for cell actions. */
-  rawValue?: unknown;
+export interface TableTabState {
+  pinnedFields: string[];
+  showHighlightedFields: boolean;
+  hideEmptyFields: boolean;
+  hideAlertFields: boolean;
 }
 
+const DEFAULT_STATE: TableTabState = {
+  pinnedFields: [],
+  showHighlightedFields: false,
+  hideEmptyFields: false,
+  hideAlertFields: false,
+};
+
 export interface TableTabProps {
-  items: TableTabItem[];
-  tableCaption: string;
-  isEmpty?: boolean;
-  renderValue?: (field: string, value: string | string[] | null) => ReactNode;
-  'data-test-subj'?: string;
-  paginated?: boolean;
-  searchPlaceholder?: string;
-  fieldColumnWidth?: string;
-  toolsRight?: ReactNode[];
-  /** Fields that are currently pinned — shown in a filled pin icon and sorted first by the caller. */
-  pinnedFields?: readonly string[];
-  /** Called when the user clicks the pin/unpin icon. Providing this prop shows the pin column. */
-  onPinField?: (field: string, action: 'pin' | 'unpin') => void;
-  /** Custom renderer for the field name cell (e.g. to add a type icon). */
-  renderFieldName?: (field: string) => ReactNode;
-  /** Fields whose rows should receive a highlighted background color. */
-  highlightedFields?: readonly string[];
-  /** When 'xs', rows render with the EUI xs font size. */
-  rowFontSize?: 'xs';
-  /** Wraps each value cell with cell actions (filter, copy, etc.) */
-  renderCellActions?: CellActionRenderer;
+  hit: DataTableRecord;
+  renderCellActions: CellActionRenderer;
   scopeId?: string;
 }
 
-const PAGINATION = { pageSizeOptions: [25, 50, 100] };
-
-const stringifyValue = (value: string | string[] | null): string =>
-  Array.isArray(value) ? value.join(', ') : String(value ?? '');
-
-const PIN_ROW_CSS = css`
-  .flyout_table__unPinAction {
-    opacity: 1;
-  }
-  .flyout_table__pinAction {
-    opacity: 0;
-  }
-  &:hover {
-    .flyout_table__pinAction {
-      opacity: 1;
-    }
-  }
-`;
-
-const PIN_LABEL = i18n.translate('xpack.securitySolution.flyout.shared.table.pinField', {
-  defaultMessage: 'Pin field',
-});
-
-const UNPIN_LABEL = i18n.translate('xpack.securitySolution.flyout.shared.table.unpinField', {
-  defaultMessage: 'Unpin field',
-});
-
-export const TableTab = memo(
-  ({
-    items,
-    tableCaption,
-    isEmpty = false,
-    renderValue,
-    'data-test-subj': dataTestSubj,
-    paginated = false,
-    searchPlaceholder,
-    fieldColumnWidth = '30%',
-    toolsRight,
-    pinnedFields,
-    onPinField,
-    renderFieldName,
-    highlightedFields,
-    rowFontSize,
-    renderCellActions,
-    scopeId = '',
-  }: TableTabProps) => {
-    const { euiTheme } = useEuiTheme();
-    const { fontSize: xsFontSize } = useEuiFontSize('xs');
-
-    const columns = useMemo<Array<EuiBasicTableColumn<TableTabItem>>>(() => {
-      const cols: Array<EuiBasicTableColumn<TableTabItem>> = [];
-
-      if (onPinField) {
-        cols.push({
-          width: '32px',
-          name: '',
-          sortable: false,
-          render: (item: TableTabItem) => {
-            const isPinned = pinnedFields?.includes(item.field) ?? false;
-            return (
-              <EuiToolTip content={isPinned ? UNPIN_LABEL : PIN_LABEL} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType={isPinned ? 'pinFilled' : 'pin'}
-                  aria-label={isPinned ? UNPIN_LABEL : PIN_LABEL}
-                  className={isPinned ? 'flyout_table__unPinAction' : 'flyout_table__pinAction'}
-                  onClick={() => onPinField(item.field, isPinned ? 'unpin' : 'pin')}
-                  size="xs"
-                  color="text"
-                />
-              </EuiToolTip>
-            );
-          },
-        } as EuiBasicTableColumn<TableTabItem>);
-      }
-
-      cols.push({
-        field: 'field' as const,
-        name: i18n.translate('xpack.securitySolution.flyout.shared.table.fieldColumnLabel', {
-          defaultMessage: 'Field',
-        }),
-        sortable: true,
-        width: fieldColumnWidth,
-        render: (fieldName: string) => (renderFieldName ? renderFieldName(fieldName) : fieldName),
-      });
-
-      cols.push({
-        name: i18n.translate('xpack.securitySolution.flyout.shared.table.valueColumnLabel', {
-          defaultMessage: 'Value',
-        }),
-        render: (item: TableTabItem) => {
-          const content = renderValue
-            ? renderValue(item.field, item.value)
-            : stringifyValue(item.value);
-          if (renderCellActions) {
-            return renderCellActions({
-              field: item.field,
-              value: (item.rawValue ?? item.value) as Parameters<CellActionRenderer>[0]['value'],
-              scopeId,
-              children: content,
-            });
-          }
-          return content;
-        },
-        sortable: (item: TableTabItem) => stringifyValue(item.value),
-      } as EuiBasicTableColumn<TableTabItem>);
-
-      return cols;
-    }, [
-      fieldColumnWidth,
-      onPinField,
-      pinnedFields,
-      renderCellActions,
-      renderFieldName,
-      renderValue,
-      scopeId,
-    ]);
-
-    const search = useMemo(
-      () => ({
-        box: {
-          incremental: true,
-          schema: true,
-          ...(searchPlaceholder ? { placeholder: searchPlaceholder } : {}),
-        },
-        ...(toolsRight ? { toolsRight } : {}),
-      }),
-      [searchPlaceholder, toolsRight]
-    );
-
-    const rowProps = useMemo(
-      () =>
-        highlightedFields || onPinField
-          ? (item: TableTabItem) => ({
-              style: highlightedFields?.includes(item.field)
-                ? { backgroundColor: euiTheme.colors.backgroundBaseWarning }
-                : undefined,
-              css: onPinField ? PIN_ROW_CSS : undefined,
-            })
-          : undefined,
-      [euiTheme.colors.backgroundBaseWarning, highlightedFields, onPinField]
-    );
-
-    const tableCss = useMemo(
-      () =>
-        rowFontSize
-          ? css`
-              .euiTableRow {
-                font-size: ${xsFontSize};
-              }
-            `
-          : undefined,
-      [rowFontSize, xsFontSize]
-    );
-
-    if (isEmpty) return <FlyoutError />;
-
-    return (
-      <EuiInMemoryTable
-        items={items}
-        itemId="field"
-        columns={columns}
-        search={search}
-        sorting={!onPinField}
-        pagination={paginated ? PAGINATION : false}
-        data-test-subj={dataTestSubj}
-        tableCaption={tableCaption}
-        rowProps={rowProps}
-        css={tableCss}
-      />
-    );
-  }
+const TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.flyout.document.table.documentFieldsCaption',
+  { defaultMessage: 'Document fields' }
 );
+
+const SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.flyout.document.table.filterPlaceholderLabel',
+  { defaultMessage: 'Filter by field or value...' }
+);
+
+export const TableTab = memo(({ hit, renderCellActions, scopeId = '' }: TableTabProps) => {
+  const { storage } = useKibana().services;
+
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
+
+  const investigationFields = useMemo<string[]>(() => {
+    const raw = hit.flattened['kibana.alert.investigation_fields.field_names'];
+    if (Array.isArray(raw)) return raw.map(String);
+    if (raw != null) return [String(raw)];
+    return [];
+  }, [hit]);
+
+  const highlightedFieldsResult = useHighlightedFields({ hit, investigationFields });
+  const highlightedFieldNames = useMemo(
+    () => Object.keys(highlightedFieldsResult),
+    [highlightedFieldsResult]
+  );
+
+  const [tableTabState, setTableTabStateInternal] = useState<TableTabState>(() => {
+    const stored = storage.get(FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE);
+    return stored != null ? { ...DEFAULT_STATE, ...stored } : DEFAULT_STATE;
+  });
+
+  const setTableTabState = useCallback(
+    (state: TableTabState) => {
+      setTableTabStateInternal(state);
+      storage.set(FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE, state);
+    },
+    [storage]
+  );
+
+  const onPinField = useCallback(
+    (field: string, action: 'pin' | 'unpin') => {
+      setTableTabState({
+        ...tableTabState,
+        pinnedFields:
+          action === 'pin'
+            ? [...tableTabState.pinnedFields, field]
+            : tableTabState.pinnedFields.filter((f) => f !== field),
+      });
+    },
+    [tableTabState, setTableTabState]
+  );
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const allItems = useMemo<TableTabItem[]>(
+    () =>
+      Object.entries(hit.flattened)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([field, value]) => ({
+          field,
+          value: Array.isArray(value) ? value.join(', ') : String(value ?? ''),
+          rawValue: value,
+        })),
+    [hit.flattened]
+  );
+
+  const items = useMemo<TableTabItem[]>(() => {
+    const { showHighlightedFields, hideEmptyFields, hideAlertFields, pinnedFields } = tableTabState;
+    const filtered = allItems.filter(({ field, value }) => {
+      if (hideEmptyFields && (value === '' || value === 'null' || value === 'undefined')) {
+        return false;
+      }
+      if (hideAlertFields && (field.startsWith(ALERT_NAMESPACE) || field.startsWith('signal.'))) {
+        return false;
+      }
+      if (showHighlightedFields && !highlightedFieldNames.includes(field)) {
+        return false;
+      }
+      return true;
+    });
+    const pinned = filtered.filter(({ field }) => pinnedFields.includes(field));
+    const rest = filtered.filter(({ field }) => !pinnedFields.includes(field));
+    return [...pinned, ...rest];
+  }, [allItems, tableTabState, highlightedFieldNames]);
+
+  const renderFieldName = useCallback(
+    (field: string) => <TableFieldNameCell field={field} rawValue={hit.flattened[field]} />,
+    [hit.flattened]
+  );
+
+  const toolsRight = useMemo(
+    () => [
+      <TableTabSettingButton
+        tableTabState={tableTabState}
+        setTableTabState={setTableTabState}
+        isPopoverOpen={isPopoverOpen}
+        setIsPopoverOpen={setIsPopoverOpen}
+        isAlert={isAlert}
+      />,
+    ],
+    [tableTabState, setTableTabState, isPopoverOpen, isAlert]
+  );
+
+  return (
+    <SharedTableTab
+      items={items}
+      tableCaption={TABLE_CAPTION}
+      data-test-subj={TABLE_TAB_TEST_ID}
+      paginated
+      searchPlaceholder={SEARCH_PLACEHOLDER}
+      fieldColumnWidth="40%"
+      toolsRight={toolsRight}
+      pinnedFields={tableTabState.pinnedFields}
+      onPinField={onPinField}
+      renderFieldName={renderFieldName}
+      highlightedFields={highlightedFieldNames}
+      renderCellActions={renderCellActions}
+      scopeId={scopeId}
+      rowFontSize="xs"
+    />
+  );
+});
 
 TableTab.displayName = 'TableTab';

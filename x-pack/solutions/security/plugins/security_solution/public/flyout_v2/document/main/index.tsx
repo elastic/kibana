@@ -26,7 +26,7 @@ import { getTabsDisplayed, validTabIds } from './tabs';
 import type { TabId } from './tabs';
 import { OverviewTab } from './tabs/overview_tab';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
-import { useTabs } from '../shared/hooks/use_tabs';
+import { useTabs } from '../../shared/hooks/use_tabs';
 import { NotesDetails } from '../../shared/tools/notes';
 import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
