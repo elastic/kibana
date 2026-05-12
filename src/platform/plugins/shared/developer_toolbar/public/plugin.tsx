@@ -60,7 +60,7 @@ export class DeveloperToolbarPlugin
       ),
     });
 
-    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false)) {
+    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, true)) {
       import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
         this.registerItem({
           id: 'Chrome Next',
