@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiButton,
@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
@@ -139,6 +140,17 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     }
   });
 
+  const handleNext = useCallback(async () => {
+    // Step 0: require a committed query before advancing
+    if (uiState.step === 0 && !uiState.queryCommitted) return;
+    // Step 1: validate that the rule name has been filled in
+    if (uiState.step === 1) {
+      const valid = await methods.trigger(['metadata.name']);
+      if (!valid) return;
+    }
+    dispatch({ type: 'GO_NEXT' });
+  }, [uiState.step, uiState.queryCommitted, methods, dispatch]);
+
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
@@ -191,16 +203,27 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                         {isCreate ? 'Create rule' : 'Save rule'}
                       </EuiButton>
                     ) : (
-                      <EuiButton
-                        fill
-                        iconType="arrowRight"
-                        iconSide="right"
-                        isDisabled={uiState.childOpen}
-                        onClick={() => dispatch({ type: 'GO_NEXT' })}
-                        data-test-subj="composeDiscoverNext"
+                      <EuiToolTip
+                        content={
+                          uiState.step === 0 && !uiState.queryCommitted
+                            ? 'Define a query in the editor before continuing'
+                            : undefined
+                        }
                       >
-                        Next
-                      </EuiButton>
+                        <EuiButton
+                          fill
+                          iconType="arrowRight"
+                          iconSide="right"
+                          isDisabled={
+                            uiState.childOpen ||
+                            (uiState.step === 0 && !uiState.queryCommitted)
+                          }
+                          onClick={handleNext}
+                          data-test-subj="composeDiscoverNext"
+                        >
+                          Next
+                        </EuiButton>
+                      </EuiToolTip>
                     )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
