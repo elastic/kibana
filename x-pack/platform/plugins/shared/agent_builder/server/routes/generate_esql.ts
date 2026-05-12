@@ -12,7 +12,7 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_BUILDER_READ_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
-export function registerGenerateEsqlRoute({
+export function registerNlToESQLRoute({
   router,
   getInternalServices,
   logger,
@@ -21,7 +21,7 @@ export function registerGenerateEsqlRoute({
 
   router.versioned
     .post({
-      path: '/api/genie/generate_esql',
+      path: '/api/agent_builder/nl_to_esql',
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Generate an ES|QL query from natural language',
