@@ -14,7 +14,8 @@ import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_fram
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import {
-  commentAttachmentType, lensAttachmentType,
+  commentAttachmentType,
+  lensAttachmentType,
   stackAlertAttachmentType,
 } from '../attachment_framework/attachments';
 
