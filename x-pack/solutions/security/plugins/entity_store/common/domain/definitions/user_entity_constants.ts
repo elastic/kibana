@@ -38,10 +38,22 @@ export const LOCAL_NAMESPACE_EXCLUDED_USER_NAMES = [
   'service',
 ] as const;
 
-/** Allowed values for `entity.confidence` (user after-stats overrides and extracted metadata). */
+/**
+ * Allowed values for `entity.confidence`. Producers:
+ *  - `high` / `medium`: user-tier disambiguation (see `user.ts` after-stats
+ *    overrides), denoting a directly-observed identity with strong (`high`)
+ *    or partial (`medium`) evidence.
+ *  - `low`: written by the `ki-promotion` maintainer on entities promoted
+ *    from the generic engine into a static (host/service) engine to mark
+ *    them as derived rather than directly observed. The maintainer clears
+ *    the field on demote.
+ *
+ * Kept in sync with the `confidence` enum in `entity.schema.yaml`.
+ */
 export const ENTITY_CONFIDENCE = {
   High: 'high',
   Medium: 'medium',
+  Low: 'low',
 } as const;
 
 export type EntityConfidence = (typeof ENTITY_CONFIDENCE)[keyof typeof ENTITY_CONFIDENCE];

@@ -83,6 +83,25 @@ components:
         sub_type:
           type: string
           description: Optional sub-type classification for the entity.
+        confidence:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+          description: >-
+            Confidence tier for the entity record. `high` and `medium` are written
+            by user-tier disambiguation; `low` is set by the `ki-promotion`
+            maintainer on entities promoted from the generic engine into a
+            static (host/service) engine to mark them as derived rather than
+            directly observed.
+        previous_id:
+          type: string
+          description: >-
+            Prior `entity.id` when this document was previously typed differently.
+            Set by the `ki-promotion` maintainer on promote so the reverse
+            (demote) path can restore the generic-engine identifier deterministically;
+            cleared on demote.
         source:
           type: array
           description: Sources that produced this entity record.

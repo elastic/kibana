@@ -9,30 +9,40 @@ import {
   EntityStoreGlobalState,
   KI_AGGREGATION_GROUP_CAP_DEFAULT,
   KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+  KI_PROMOTED_ENTITY_TYPES_DEFAULT,
+  KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
   KnowledgeIndicatorsConfig,
 } from './constants';
 
+const KI_DEFAULTS = {
+  entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+  aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
+  promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+  promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+};
+
 describe('KnowledgeIndicatorsConfig', () => {
   it('applies platform defaults when both fields are missing', () => {
-    expect(KnowledgeIndicatorsConfig.parse({})).toEqual({
-      entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
-      aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
-    });
+    expect(KnowledgeIndicatorsConfig.parse({})).toEqual(KI_DEFAULTS);
   });
 
   it('preserves explicit overrides for both fields', () => {
     expect(
       KnowledgeIndicatorsConfig.parse({ entityMinConfidence: 70, aggregationGroupCap: 50 })
-    ).toEqual({ entityMinConfidence: 70, aggregationGroupCap: 50 });
+    ).toEqual({
+      ...KI_DEFAULTS,
+      entityMinConfidence: 70,
+      aggregationGroupCap: 50,
+    });
   });
 
   it('keeps default for the missing field when only one is provided', () => {
     expect(KnowledgeIndicatorsConfig.parse({ entityMinConfidence: 80 })).toEqual({
+      ...KI_DEFAULTS,
       entityMinConfidence: 80,
-      aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
     });
     expect(KnowledgeIndicatorsConfig.parse({ aggregationGroupCap: 10 })).toEqual({
-      entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+      ...KI_DEFAULTS,
       aggregationGroupCap: 10,
     });
   });
@@ -64,10 +74,7 @@ describe('EntityStoreGlobalState', () => {
       knowledgeIndicators: {},
     });
 
-    expect(result.knowledgeIndicators).toEqual({
-      entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
-      aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
-    });
+    expect(result.knowledgeIndicators).toEqual(KI_DEFAULTS);
   });
 
   it('rejects state that is missing the knowledgeIndicators block entirely (the block is required, but its inner fields default)', () => {
@@ -78,5 +85,49 @@ describe('EntityStoreGlobalState', () => {
     expect(() =>
       EntityStoreGlobalState.parse({ historySnapshot: {}, logsExtraction: {} })
     ).toThrow();
+  });
+});
+
+describe('KnowledgeIndicatorsConfig promotion knobs', () => {
+  it('preserves an explicit non-null promoteToTypedThreshold', () => {
+    const result = KnowledgeIndicatorsConfig.parse({ promoteToTypedThreshold: 95 });
+    expect(result.promoteToTypedThreshold).toBe(95);
+  });
+
+  it('accepts null as a valid value for promoteToTypedThreshold', () => {
+    expect(
+      KnowledgeIndicatorsConfig.parse({ promoteToTypedThreshold: null }).promoteToTypedThreshold
+    ).toBeNull();
+  });
+
+  it('rejects out-of-range promoteToTypedThreshold values', () => {
+    expect(() => KnowledgeIndicatorsConfig.parse({ promoteToTypedThreshold: -1 })).toThrow();
+    expect(() => KnowledgeIndicatorsConfig.parse({ promoteToTypedThreshold: 101 })).toThrow();
+  });
+
+  it('rejects non-integer promoteToTypedThreshold values', () => {
+    expect(() => KnowledgeIndicatorsConfig.parse({ promoteToTypedThreshold: 90.5 })).toThrow();
+  });
+
+  it('accepts host and service in promotedEntityTypes', () => {
+    expect(
+      KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: ['host', 'service'] })
+        .promotedEntityTypes
+    ).toEqual(['host', 'service']);
+  });
+
+  it('rejects entries outside the host/service enum (the user tier is intentionally deferred)', () => {
+    expect(() =>
+      KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: ['user'] })
+    ).toThrow();
+    expect(() =>
+      KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: ['service', 'something-else'] })
+    ).toThrow();
+  });
+
+  it('accepts an empty promotedEntityTypes array (treated as off)', () => {
+    expect(
+      KnowledgeIndicatorsConfig.parse({ promotedEntityTypes: [] }).promotedEntityTypes
+    ).toEqual([]);
   });
 });

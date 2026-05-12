@@ -91,6 +91,14 @@ export const EntityField = lazySchema(() =>
        */
       sub_type: z.string().optional(),
       /**
+       * Confidence tier for the entity record. `high` and `medium` are written by user-tier disambiguation; `low` is set by the `ki-promotion` maintainer on entities promoted from the generic engine into a static (host/service) engine to mark them as derived rather than directly observed.
+       */
+      confidence: z.enum(['low', 'medium', 'high']).optional(),
+      /**
+       * Prior `entity.id` when this document was previously typed differently. Set by the `ki-promotion` maintainer on promote so the reverse (demote) path can restore the generic-engine identifier deterministically; cleared on demote.
+       */
+      previous_id: z.string().optional(),
+      /**
        * Sources that produced this entity record.
        */
       source: z.array(z.string()).optional(),

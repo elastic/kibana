@@ -31,6 +31,7 @@ import { ResolutionClient } from './domain/resolution';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 import { automatedResolutionMaintainerConfig } from './maintainers/automated_resolution';
 import { createKiRelationshipsMaintainerConfig } from './maintainers/ki_relationships';
+import { createKiPromotionMaintainerConfig } from './maintainers/ki_promotion';
 
 export class EntityStorePlugin
   implements
@@ -96,6 +97,14 @@ export class EntityStorePlugin
       taskManager: plugins.taskManager,
       logger: this.logger,
       config: createKiRelationshipsMaintainerConfig(core),
+      core,
+      analytics: createReportEvent(core.analytics),
+    });
+
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: createKiPromotionMaintainerConfig(core),
       core,
       analytics: createReportEvent(core.analytics),
     });

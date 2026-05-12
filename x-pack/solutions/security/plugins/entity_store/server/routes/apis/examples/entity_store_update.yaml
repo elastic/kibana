@@ -16,15 +16,34 @@ requestBody:
           value:
             knowledgeIndicators:
               entityMinConfidence: 50
+        enablePromotionExample:
+          summary: "Enable KI promotion to host/service engines"
+          description: "Opt the tenant into KI promotion. Both knobs must be set: the threshold (>= entityMinConfidence) and the allow-list of target engines."
+          value:
+            knowledgeIndicators:
+              entityMinConfidence: 80
+              promoteToTypedThreshold: 95
+              promotedEntityTypes:
+                - service
+                - host
+        disablePromotionExample:
+          summary: "Disable KI promotion"
+          description: "Explicitly turn promotion off by setting the threshold to null. The maintainer is still registered but becomes a runtime no-op."
+          value:
+            knowledgeIndicators:
+              promoteToTypedThreshold: null
         updateBothExample:
           summary: "Update log extraction and knowledge indicators"
-          description: "Update both blocks in a single request."
+          description: "Update both blocks in a single request, including KI promotion configuration."
           value:
             logExtraction:
               frequency: "10m"
             knowledgeIndicators:
               entityMinConfidence: 50
               aggregationGroupCap: 100
+              promoteToTypedThreshold: 95
+              promotedEntityTypes:
+                - service
 responses:
   200:
     description: "Indicates a successful response."

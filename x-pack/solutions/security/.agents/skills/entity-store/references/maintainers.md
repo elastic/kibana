@@ -55,3 +55,38 @@ interface EntityMaintainerTaskMethodContext {
 ## Available Context Clients
 
 The `crudClient: EntityUpdateClient` gives maintainers write access to entity documents. The `esClient` provides raw ES access scoped to the installing user's permissions. Use `fakeRequest` when you need to create additional scoped Kibana clients.
+
+## Built-in Maintainers
+
+| `id` | Interval | License | Purpose |
+|---|---|---|---|
+| `automated-resolution` | 5m | Enterprise | Resolves entity aliases to canonical targets (resolution graph). |
+| `ki-relationships` | 5m | Enterprise | Stamps `entity.relationships.*` on KI-extracted entities from cross-stream features. |
+| `ki-promotion` | 15m | Enterprise | Re-types Streams-derived `generic` KI entities into `host` / `service` engines when the underlying KI feature confidence and identifier shape allow. See note below. |
+
+### `ki-promotion` — semantics and safety rails
+
+The maintainer is **opt-in** and a no-op until both of these are set on the global state SO:
+
+- `knowledgeIndicators.promoteToTypedThreshold: number` — minimum KI feature confidence to promote (must be `>= entityMinConfidence`)
+- `knowledgeIndicators.promotedEntityTypes: Array<'host' | 'service'>` — engine allow-list
+
+Promotion gates (all must pass; failures are counted but never throw):
+
+- The entity must be in the `generic` engine and carry an `entity.source` tag of the form `stream:<streamName>:<subtype>`.
+- The matching KI feature for that lineage must have `confidence >= promoteToTypedThreshold`.
+- `entity.type` must map to an enabled target engine (`Service` → `service`, `Host` → `host`). `Identity` and pass-through subtypes like `database` are ignored.
+- The doc must have the engine's ECS identity field populated (`host.id` for host, `service.name` for service).
+- The KI feature's `properties.<grouping_field>` must match one of the ECS identity fields above.
+
+On promotion the maintainer:
+
+- Re-computes the EUID with `getEuidFromObject(targetEngine, flattenedDoc)` and writes a new doc at the new `_id`.
+- Sets `entity.confidence: 'low'` and `entity.previous_id: <oldEntityId>` so the relationship to the original generic doc is traceable.
+- Switches `entity.EngineMetadata.Type` to the target engine.
+
+On demotion (when a previously-promoted entity no longer satisfies the gates):
+
+- Restores `entity.EngineMetadata.Type: 'generic'`, clears `entity.confidence` and `entity.previous_id`, and re-keys the doc back to the original EUID.
+
+Failures from `bulkUpdateEntityDocs` are logged at `warn` level and counted in `bulkUpdateErrors`; the run continues so a partial failure does not stall promotion of unrelated entities.

@@ -234,4 +234,146 @@ apiTest.describe('Entity Store install / update API tests', { tag: ENTITY_STORE_
       });
     }
   );
+
+  apiTest(
+    'Update accepts and persists KI promotion fields',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      // Set both KI extraction and promotion knobs in one body so the
+      // cross-field invariant (`promoteToTypedThreshold >= entityMinConfidence`)
+      // is satisfied. The same body also exercises the new
+      // `promotedEntityTypes` enum validation.
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: {
+            entityMinConfidence: 80,
+            promoteToTypedThreshold: 95,
+            promotedEntityTypes: ['service'],
+          },
+        },
+      });
+      expect(update.statusCode).toBe(200);
+
+      // A second update with only one of the two knobs should preserve
+      // the other from the persisted state.
+      const update2 = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { promotedEntityTypes: ['host', 'service'] },
+        },
+      });
+      expect(update2.statusCode).toBe(200);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'Update rejects promoteToTypedThreshold < entityMinConfidence in the same body',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: {
+            entityMinConfidence: 80,
+            promoteToTypedThreshold: 50,
+          },
+        },
+      });
+      expect(update.statusCode).toBe(400);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'Update accepts an explicit null promoteToTypedThreshold to disable promotion',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { promoteToTypedThreshold: null },
+        },
+      });
+      expect(update.statusCode).toBe(200);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
+
+  apiTest(
+    'Update rejects promotedEntityTypes outside the host/service enum',
+    async ({ apiClient, kbnClient }) => {
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+
+      const update = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          knowledgeIndicators: { promotedEntityTypes: ['user'] },
+        },
+      });
+      expect(update.statusCode).toBe(400);
+
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {},
+      });
+    }
+  );
 });

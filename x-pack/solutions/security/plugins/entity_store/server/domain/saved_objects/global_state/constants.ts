@@ -35,6 +35,19 @@ export const KI_ENTITY_MIN_CONFIDENCE_DEFAULT = 99;
 // LLM-emitted feature counts.
 export const KI_AGGREGATION_GROUP_CAP_DEFAULT = 200;
 
+// Knowledge Indicators promotion — gates the `ki-promotion` maintainer.
+//
+// Both knobs default to a no-op so promotion is OFF on any tenant that has
+// not explicitly opted in. The maintainer is registered unconditionally
+// (so the route surface is consistent), but its run callback returns
+// early when these defaults are in effect, mirroring the extraction
+// loop's high-threshold pattern. Operators opt in by setting BOTH:
+//   - `promoteToTypedThreshold` to a non-null value (>= `entityMinConfidence`)
+//   - `promotedEntityTypes` to a non-empty subset of `['host', 'service']`
+// Either knob being at its default is treated as off.
+export const KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT = null;
+export const KI_PROMOTED_ENTITY_TYPES_DEFAULT: ReadonlyArray<'host' | 'service'> = [];
+
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
@@ -87,6 +100,27 @@ export type KnowledgeIndicatorsConfig = z.infer<typeof KnowledgeIndicatorsConfig
 export const KnowledgeIndicatorsConfig = z.object({
   entityMinConfidence: z.number().int().min(0).max(100).default(KI_ENTITY_MIN_CONFIDENCE_DEFAULT),
   aggregationGroupCap: z.number().int().min(1).default(KI_AGGREGATION_GROUP_CAP_DEFAULT),
+  /**
+   * Promotion confidence threshold. When `null` the `ki-promotion` maintainer
+   * is a runtime no-op. When set, must be `>=` the active `entityMinConfidence`
+   * (enforced at the route layer in `update.ts`) so a candidate is always
+   * extracted before it can be promoted.
+   */
+  promoteToTypedThreshold: z
+    .number()
+    .int()
+    .min(0)
+    .max(100)
+    .nullable()
+    .default(KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT),
+  /**
+   * Allow-list of static engines the maintainer may promote into. Empty list
+   * means promotion is off even if `promoteToTypedThreshold` is set. User
+   * tier is intentionally absent in v1 (see strategy doc, Section 8).
+   */
+  promotedEntityTypes: z
+    .array(z.enum(['host', 'service']))
+    .default([...KI_PROMOTED_ENTITY_TYPES_DEFAULT]),
 });
 
 export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;

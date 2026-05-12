@@ -73,9 +73,17 @@ export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
  * validation (range, integer-ness) is duplicated here intentionally so
  * the route returns a 400 with a friendly path-prefixed error message
  * before reaching the SO write.
+ *
+ * `promoteToTypedThreshold` is `nullable` (explicitly setting `null` is
+ * the documented way to disable promotion); cross-field validation
+ * (`promoteToTypedThreshold >= entityMinConfidence`) lives in the update
+ * route's `superRefine` so we can read the persisted SO state for the
+ * other side of the comparison when only one knob is in the body.
  */
 export type KnowledgeIndicatorsUpdateParams = z.infer<typeof KnowledgeIndicatorsUpdateParams>;
 export const KnowledgeIndicatorsUpdateParams = z.object({
   entityMinConfidence: z.number().int().min(0).max(100).optional(),
   aggregationGroupCap: z.number().int().min(1).optional(),
+  promoteToTypedThreshold: z.number().int().min(0).max(100).nullable().optional(),
+  promotedEntityTypes: z.array(z.enum(['host', 'service'])).optional(),
 });

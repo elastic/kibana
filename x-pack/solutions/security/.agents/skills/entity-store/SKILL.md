@@ -90,6 +90,7 @@ x-pack/solutions/security/plugins/entity_store/
 - **`?force=true` required** for CRUD updates to fields without `allowAPIUpdate: true`. Resolution fields have it set, so no force needed for resolution operations.
 - **`entity.source` is an array**. Previously was a single string. UI must handle arrays.
 - **`entity.source` ≠ `entity.namespace`** — `entity.source` (array) lists the index names the entity data came from. `entity.namespace` is the identity provider namespace (`active_directory`, `okta`, `entra_id`, `local`). For resolution target selection by IDP priority, use `entity.namespace`.
+- **`entity.EngineMetadata.Type` is the engine-routing field; `entity.type` is a label**. `entity.EngineMetadata.Type` (values: `host` / `user` / `service` / `generic`) is the authoritative engine-routing field used by extraction, maintainers, and consumer routing. `entity.type` is a human-readable category label (e.g. `Host`, `Service`, `Identity`, or any pass-through subtype like `database`) that may be set by extraction even when the engine is `generic` — the KI extractor populates it from `feature.subtype` via `entityTypeFallback`. Switch on `EngineMetadata.Type` for routing; treat `entity.type` as informational.
 - **Document `_id` = MD5 hash of EUID** — not the EUID itself.
 - **v1 endpoints being removed** — v1 routes are deprecated and being removed. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
 - **EUID stored scripts must be registered** before entity store init — they're deployed during install.

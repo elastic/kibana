@@ -13,6 +13,7 @@ import {
   deriveGroupingField,
   ECS_IDENTITY_PREFERENCE,
   GROUPING_FIELD_LAST_RESORT,
+  SUBTYPE_TO_ENTITY_TYPE_LABEL,
 } from './ki_definition_builder';
 
 const baseFeature = (overrides: Partial<Feature> = {}): Feature =>
@@ -182,14 +183,14 @@ describe('buildDefinitionFromEntityKIs', () => {
     if ('singleField' in def.identityField) {
       throw new Error('expected calculated identity');
     }
-    expect(def.identityField.fieldEvaluations).toEqual([
-      {
-        destination: 'entity.source',
-        sources: [{ literal: 'stream:logs.k8s.pods:database' }],
-        fallbackValue: null,
-        whenClauses: [],
-      },
-    ]);
+    // The entity.source evaluation must be present and first; other evaluations
+    // (e.g. entity.sub_type when properties.technology is set) may follow.
+    expect(def.identityField.fieldEvaluations?.[0]).toEqual({
+      destination: 'entity.source',
+      sources: [{ literal: 'stream:logs.k8s.pods:database' }],
+      fallbackValue: null,
+      whenClauses: [],
+    });
   });
 
   it('aggregates multiple per-instance KIs of the same subtype into one definition keyed by ECS-preferred grouping field', () => {
@@ -268,5 +269,197 @@ describe('buildDefinitionFromEntityKIs', () => {
     expect(evalFragment).toBeDefined();
     expect(evalFragment).toContain('_src_entity_source = "stream:logs.k8s.pods:database"');
     expect(evalFragment).toContain('entity.source = CASE(');
+  });
+});
+
+describe('buildDefinitionFromEntityKIs entityTypeFallback (Section 1 annotation)', () => {
+  const args = (overrides: Partial<Parameters<typeof buildDefinitionFromEntityKIs>[0]> = {}) => ({
+    streamName: 'logs.k8s.pods',
+    subtype: 'service',
+    features: [baseFeature({ filter: { field: 'service.name', eq: 'order-service' } })],
+    indexPatterns: ['logs.k8s.pods'],
+    namespace: 'default',
+    ...overrides,
+  });
+
+  it("populates entityTypeFallback as 'Service' for subtype 'service'", () => {
+    const def = buildDefinitionFromEntityKIs(args({ subtype: 'service' }));
+    expect(def.entityTypeFallback).toBe('Service');
+  });
+
+  it("populates entityTypeFallback as 'Host' for subtype 'host'", () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({ subtype: 'host', features: [baseFeature({ filter: { field: 'host.name', eq: 'h1' } })] })
+    );
+    expect(def.entityTypeFallback).toBe('Host');
+  });
+
+  it("populates entityTypeFallback as 'Identity' for subtype 'user'", () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({ subtype: 'user', features: [baseFeature({ filter: { field: 'user.name', eq: 'u1' } })] })
+    );
+    expect(def.entityTypeFallback).toBe('Identity');
+  });
+
+  it("passes through unmapped subtypes (e.g. 'database') as entityTypeFallback", () => {
+    const def = buildDefinitionFromEntityKIs(args({ subtype: 'database' }));
+    expect(def.entityTypeFallback).toBe('database');
+  });
+
+  it('omits entityTypeFallback for empty subtype', () => {
+    const def = buildDefinitionFromEntityKIs(args({ subtype: '' }));
+    expect(def.entityTypeFallback).toBeUndefined();
+  });
+
+  it('reserves SUBTYPE_TO_ENTITY_TYPE_LABEL exactly for service/host/user', () => {
+    expect(Object.keys(SUBTYPE_TO_ENTITY_TYPE_LABEL).sort()).toEqual(['host', 'service', 'user']);
+  });
+});
+
+describe('buildDefinitionFromEntityKIs entity.sub_type literal evaluation', () => {
+  const args = (overrides: Partial<Parameters<typeof buildDefinitionFromEntityKIs>[0]> = {}) => ({
+    streamName: 'logs.k8s.pods',
+    subtype: 'service',
+    features: [baseFeature({ filter: { field: 'service.name', eq: 'order-service' } })],
+    indexPatterns: ['logs.k8s.pods'],
+    namespace: 'default',
+    ...overrides,
+  });
+
+  it("emits entity.sub_type literal fieldEvaluation when properties.technology is 'java'", () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            filter: { field: 'service.name', eq: 'order-service' },
+            properties: { name: 'order-service', technology: 'java' },
+          }),
+        ],
+      })
+    );
+    if ('singleField' in def.identityField) {
+      throw new Error('expected calculated identity');
+    }
+    expect(def.identityField.fieldEvaluations).toEqual([
+      {
+        destination: 'entity.source',
+        sources: [{ literal: 'stream:logs.k8s.pods:service' }],
+        fallbackValue: null,
+        whenClauses: [],
+      },
+      {
+        destination: 'entity.sub_type',
+        sources: [{ literal: 'java' }],
+        fallbackValue: null,
+        whenClauses: [],
+      },
+    ]);
+  });
+
+  it('omits the entity.sub_type fieldEvaluation when properties.technology is missing', () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            filter: { field: 'service.name', eq: 'order-service' },
+            properties: { name: 'order-service' },
+          }),
+        ],
+      })
+    );
+    if ('singleField' in def.identityField) {
+      throw new Error('expected calculated identity');
+    }
+    expect(def.identityField.fieldEvaluations).toHaveLength(1);
+    expect(def.identityField.fieldEvaluations?.[0].destination).toBe('entity.source');
+  });
+
+  it('omits the entity.sub_type fieldEvaluation when properties.technology is non-string', () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            filter: { field: 'service.name', eq: 'order-service' },
+            properties: {
+              name: 'order-service',
+              technology: 42 as unknown as string,
+            },
+          }),
+        ],
+      })
+    );
+    if ('singleField' in def.identityField) {
+      throw new Error('expected calculated identity');
+    }
+    expect(def.identityField.fieldEvaluations).toHaveLength(1);
+  });
+
+  it('omits the entity.sub_type fieldEvaluation when properties.technology is empty string', () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            filter: { field: 'service.name', eq: 'order-service' },
+            properties: { name: 'order-service', technology: '' },
+          }),
+        ],
+      })
+    );
+    if ('singleField' in def.identityField) {
+      throw new Error('expected calculated identity');
+    }
+    expect(def.identityField.fieldEvaluations).toHaveLength(1);
+  });
+
+  it("resolves conflicting technology values by highest-confidence feature, deterministic tie-break by order", () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            uuid: 'f1',
+            filter: { field: 'service.name', eq: 'a' },
+            confidence: 80,
+            properties: { name: 'a', technology: 'python' },
+          }),
+          baseFeature({
+            uuid: 'f2',
+            filter: { field: 'service.name', eq: 'b' },
+            confidence: 95,
+            properties: { name: 'b', technology: 'java' },
+          }),
+          baseFeature({
+            uuid: 'f3',
+            filter: { field: 'service.name', eq: 'c' },
+            confidence: 95,
+            properties: { name: 'c', technology: 'go' },
+          }),
+        ],
+      })
+    );
+    if ('singleField' in def.identityField) {
+      throw new Error('expected calculated identity');
+    }
+    const subTypeEval = def.identityField.fieldEvaluations?.find(
+      (evaluation) => evaluation.destination === 'entity.sub_type'
+    );
+    expect(subTypeEval).toBeDefined();
+    expect(subTypeEval?.sources).toEqual([{ literal: 'java' }]);
+  });
+
+  it('renders entity.sub_type literal as a quoted ESQL literal in the EVAL fragment', () => {
+    const def = buildDefinitionFromEntityKIs(
+      args({
+        features: [
+          baseFeature({
+            filter: { field: 'service.name', eq: 'order-service' },
+            properties: { name: 'order-service', technology: 'java' },
+          }),
+        ],
+      })
+    );
+    const evalFragment = getFieldEvaluationsEsqlFromDefinition(def);
+    expect(evalFragment).toBeDefined();
+    expect(evalFragment).toContain('_src_entity_sub_type = "java"');
+    expect(evalFragment).toContain('entity.sub_type = CASE(');
   });
 });

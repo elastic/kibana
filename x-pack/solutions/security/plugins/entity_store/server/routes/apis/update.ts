@@ -40,6 +40,25 @@ const bodySchema = z
         message: 'must supply at least one of `logExtraction` or `knowledgeIndicators`',
       });
     }
+    // Same-body cross-field sanity check: when both knobs are set in this
+    // request, the promotion threshold must be >= the extraction threshold.
+    // The cross-state check (only one knob in this body) is performed in the
+    // handler against the persisted SO; here we just catch the
+    // obviously-incoherent case before reaching the SO layer.
+    const ki = data.knowledgeIndicators;
+    if (
+      ki !== undefined &&
+      typeof ki.entityMinConfidence === 'number' &&
+      typeof ki.promoteToTypedThreshold === 'number' &&
+      ki.promoteToTypedThreshold < ki.entityMinConfidence
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['knowledgeIndicators', 'promoteToTypedThreshold'],
+        message:
+          'promoteToTypedThreshold must be >= entityMinConfidence (an entity must be extracted before it can be promoted)',
+      });
+    }
   });
 
 export function registerUpdate(router: EntityStorePluginRouter) {
@@ -74,6 +93,44 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         logger.debug('Update api called');
 
         try {
+          // Cross-state validation for the KI threshold relationship: when
+          // only one of the two thresholds is supplied in this request,
+          // compare it against the persisted state for the other side. We
+          // do this BEFORE either write so a bad request fails as a 400
+          // rather than half-applying a config change. The simpler
+          // same-body check lives in the schema's `superRefine`.
+          const kiBody = req.body.knowledgeIndicators;
+          if (kiBody !== undefined) {
+            const onlyExtractInBody =
+              typeof kiBody.entityMinConfidence === 'number' &&
+              kiBody.promoteToTypedThreshold === undefined;
+            const onlyPromoteInBody =
+              typeof kiBody.promoteToTypedThreshold === 'number' &&
+              kiBody.entityMinConfidence === undefined;
+            if (onlyExtractInBody || onlyPromoteInBody) {
+              const current = await globalStateClient.findOrThrow();
+              const effectiveExtract =
+                typeof kiBody.entityMinConfidence === 'number'
+                  ? kiBody.entityMinConfidence
+                  : current.knowledgeIndicators.entityMinConfidence;
+              const effectivePromote =
+                kiBody.promoteToTypedThreshold !== undefined
+                  ? kiBody.promoteToTypedThreshold
+                  : current.knowledgeIndicators.promoteToTypedThreshold;
+              if (
+                typeof effectivePromote === 'number' &&
+                effectivePromote < effectiveExtract
+              ) {
+                return res.badRequest({
+                  body: {
+                    message:
+                      'knowledgeIndicators.promoteToTypedThreshold must be >= entityMinConfidence (an entity must be extracted before it can be promoted)',
+                  },
+                });
+              }
+            }
+          }
+
           // Each block is independent of the other and is only written when
           // the caller actually supplies it. Keeping the writes separate
           // means a callsite that only wants to retune one of the two pays

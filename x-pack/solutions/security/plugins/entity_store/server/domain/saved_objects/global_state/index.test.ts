@@ -8,7 +8,12 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
 import type { EntityStoreGlobalState } from './constants';
-import { KI_AGGREGATION_GROUP_CAP_DEFAULT, KI_ENTITY_MIN_CONFIDENCE_DEFAULT } from './constants';
+import {
+  KI_AGGREGATION_GROUP_CAP_DEFAULT,
+  KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+  KI_PROMOTED_ENTITY_TYPES_DEFAULT,
+  KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+} from './constants';
 import { EntityStoreGlobalStateClient } from '.';
 
 const buildLogger = () =>
@@ -50,6 +55,8 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(parsed.knowledgeIndicators).toEqual({
         entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
         aggregationGroupCap: KI_AGGREGATION_GROUP_CAP_DEFAULT,
+        promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+        promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
       });
     });
 
@@ -70,6 +77,8 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(parsed.knowledgeIndicators).toEqual({
         entityMinConfidence: 70,
         aggregationGroupCap: 50,
+        promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+        promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
       });
     });
 
@@ -101,7 +110,12 @@ describe('EntityStoreGlobalStateClient', () => {
       ({
         historySnapshot: { status: 'started', frequency: '24h' },
         logsExtraction: { lookbackPeriod: '3h', delay: '1m' },
-        knowledgeIndicators: { entityMinConfidence: 99, aggregationGroupCap: 200 },
+        knowledgeIndicators: {
+          entityMinConfidence: 99,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+          promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+        },
         ...overrides,
       } as EntityStoreGlobalState);
 
@@ -118,7 +132,12 @@ describe('EntityStoreGlobalStateClient', () => {
       const merged = await client.updateKnowledgeIndicatorsConfig({ entityMinConfidence: 70 });
 
       // The merged result keeps the previously-stored aggregationGroupCap untouched
-      expect(merged).toEqual({ entityMinConfidence: 70, aggregationGroupCap: 200 });
+      expect(merged).toEqual({
+        entityMinConfidence: 70,
+        aggregationGroupCap: 200,
+        promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+        promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
+      });
 
       // The SO write request also contains the full merged block (not just the partial)
       expect(soClient.update).toHaveBeenCalledTimes(1);
@@ -126,6 +145,8 @@ describe('EntityStoreGlobalStateClient', () => {
       expect((attributes as EntityStoreGlobalState).knowledgeIndicators).toEqual({
         entityMinConfidence: 70,
         aggregationGroupCap: 200,
+        promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+        promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
       });
     });
 
@@ -137,6 +158,9 @@ describe('EntityStoreGlobalStateClient', () => {
       const preMigration = {
         historySnapshot: { status: 'started', frequency: '24h' },
         logsExtraction: { lookbackPeriod: '3h', delay: '1m' },
+        // Synthetic empty KI block so `EntityStoreGlobalState.parse` is happy
+        // before reaching the partial-merge step.
+        knowledgeIndicators: {},
       } as unknown as EntityStoreGlobalState;
       soClient.find.mockResolvedValue({
         total: 1,
@@ -150,7 +174,82 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(merged).toEqual({
         entityMinConfidence: KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
         aggregationGroupCap: 50,
+        promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
+        promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT],
       });
+    });
+
+    it('preserves the existing promoteToTypedThreshold when only promotedEntityTypes is updated', async () => {
+      const soClient = buildSoClient();
+      const existing = buildExisting({
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: 95,
+          promotedEntityTypes: ['service'],
+        },
+      });
+      soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [{ id: 'entity-store-global-state-default', attributes: existing }],
+      } as never);
+      soClient.update.mockResolvedValue({ attributes: existing } as never);
+      const client = new EntityStoreGlobalStateClient(soClient, 'default', buildLogger());
+
+      const merged = await client.updateKnowledgeIndicatorsConfig({ promotedEntityTypes: ['host'] });
+
+      expect(merged).toEqual({
+        entityMinConfidence: 80,
+        aggregationGroupCap: 200,
+        promoteToTypedThreshold: 95,
+        promotedEntityTypes: ['host'],
+      });
+    });
+
+    it('replaces promotedEntityTypes wholesale rather than appending', async () => {
+      const soClient = buildSoClient();
+      const existing = buildExisting({
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: 95,
+          promotedEntityTypes: ['service', 'host'],
+        },
+      });
+      soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [{ id: 'entity-store-global-state-default', attributes: existing }],
+      } as never);
+      soClient.update.mockResolvedValue({ attributes: existing } as never);
+      const client = new EntityStoreGlobalStateClient(soClient, 'default', buildLogger());
+
+      const merged = await client.updateKnowledgeIndicatorsConfig({ promotedEntityTypes: [] });
+
+      expect(merged.promotedEntityTypes).toEqual([]);
+    });
+
+    it('accepts an explicit null promoteToTypedThreshold to turn promotion off', async () => {
+      const soClient = buildSoClient();
+      const existing = buildExisting({
+        knowledgeIndicators: {
+          entityMinConfidence: 80,
+          aggregationGroupCap: 200,
+          promoteToTypedThreshold: 95,
+          promotedEntityTypes: ['service'],
+        },
+      });
+      soClient.find.mockResolvedValue({
+        total: 1,
+        saved_objects: [{ id: 'entity-store-global-state-default', attributes: existing }],
+      } as never);
+      soClient.update.mockResolvedValue({ attributes: existing } as never);
+      const client = new EntityStoreGlobalStateClient(soClient, 'default', buildLogger());
+
+      const merged = await client.updateKnowledgeIndicatorsConfig({
+        promoteToTypedThreshold: null,
+      });
+
+      expect(merged.promoteToTypedThreshold).toBeNull();
     });
 
     it('throws when no SO exists for the namespace', async () => {

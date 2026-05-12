@@ -10,6 +10,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { Feature } from '@kbn/streams-schema';
 import type {
   EntityField,
+  FieldEvaluation,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import {
@@ -43,6 +44,26 @@ export const GROUPING_FIELD_LAST_RESORT = 'entity.id';
 
 /** Separator joining the grouping value and the stream-lineage tag in the EUID. */
 const EUID_SEPARATOR = '@';
+
+/**
+ * Maps the LLM-emitted `feature.subtype` to the canonical, capitalized
+ * category label written to `entity.type` on the extracted document. The
+ * capitalized labels (`Host`, `Service`, `Identity`) double as the eligibility
+ * signal for the `ki-promotion` maintainer; only entries listed here become
+ * promotion candidates. Subtypes not in this map pass through verbatim
+ * (e.g. `database`, `cache`, `message_queue`) and remain analyst-queryable
+ * but ineligible for promotion in v1.
+ *
+ * Order matters only in that adding a new entry here would expose that
+ * subtype as a candidate label — promotion routing (host/service) lives in
+ * the maintainer's own static map, intentionally separated so this file
+ * stays informational-only.
+ */
+export const SUBTYPE_TO_ENTITY_TYPE_LABEL: Record<string, string> = {
+  service: 'Service',
+  host: 'Host',
+  user: 'Identity',
+};
 
 /**
  * Builds a definition-stable identifier for a stream-derived KI definition.
@@ -107,6 +128,18 @@ export const deriveGroupingField = (features: Feature[]): string => {
  *   index, and engine descriptor as static generic entities.
  * - The `entity.source` lineage carries subtype information at the document
  *   level; `entity.gen.ts` is left untouched.
+ * - `entity.type` is populated via the COALESCE in `customFieldEvalLogic`
+ *   (see `logs_extraction_query_builder.ts`) from `entityTypeFallback` —
+ *   for known subtypes we land canonical labels (`Service`/`Host`/`Identity`)
+ *   that the `ki-promotion` maintainer reads as its eligibility signal;
+ *   unknown subtypes pass through verbatim and are informational only.
+ * - `entity.sub_type` is populated, when available, by a second literal-source
+ *   field evaluation seeded from the LLM-emitted
+ *   `feature.properties.technology` value. When multiple features in the
+ *   group disagree on `technology`, the highest-`confidence` feature wins;
+ *   ties are broken by deterministic feature order (first occurrence). This
+ *   field is informational only in v1 — the promotion maintainer does NOT
+ *   consult it.
  */
 export const buildDefinitionFromEntityKIs = ({
   streamName,
@@ -123,8 +156,27 @@ export const buildDefinitionFromEntityKIs = ({
 }): ManagedEntityDefinition => {
   const groupingField = deriveGroupingField(features);
   const lineageValue = `stream:${streamName}:${subtype}`;
+  const entityTypeFallback = deriveEntityTypeFallback(subtype);
+  const subTypeValue = deriveSubTypeValue(features);
 
-  return {
+  const fieldEvaluations: FieldEvaluation[] = [
+    {
+      destination: ENTITY_SOURCE_FIELD,
+      sources: [{ literal: lineageValue }],
+      fallbackValue: null,
+      whenClauses: [],
+    },
+  ];
+  if (subTypeValue !== undefined) {
+    fieldEvaluations.push({
+      destination: 'entity.sub_type',
+      sources: [{ literal: subTypeValue }],
+      fallbackValue: null,
+      whenClauses: [],
+    });
+  }
+
+  const definition: ManagedEntityDefinition = {
     id: buildKiDefinitionId(streamName, subtype, namespace),
     type: 'generic',
     name: `Stream-derived entity '${subtype}' on '${streamName}'`,
@@ -148,17 +200,73 @@ export const buildDefinitionFromEntityKIs = ({
       // Identity-level evaluation so all consumer paths (ESQL, Painless, DSL,
       // and in-memory document-to-filter) see the lineage value via the same
       // computed destination.
-      fieldEvaluations: [
-        {
-          destination: ENTITY_SOURCE_FIELD,
-          sources: [{ literal: lineageValue }],
-          fallbackValue: null,
-          whenClauses: [],
-        },
-      ],
+      fieldEvaluations,
     },
     fields: buildKiDefinitionFields(groupingField),
   };
+
+  if (entityTypeFallback !== undefined) {
+    definition.entityTypeFallback = entityTypeFallback;
+  }
+
+  return definition;
+};
+
+/**
+ * Returns the canonical entity-type label for a given subtype, or the raw
+ * subtype string when no mapping exists (so the value still lands on
+ * `entity.type` for analyst queries). Returns `undefined` when the subtype
+ * itself is empty / non-string, so the ESQL `customFieldEvalLogic` does not
+ * emit a COALESCE branch that would clobber a real source-side value with
+ * an empty string.
+ */
+const deriveEntityTypeFallback = (subtype: string): string | undefined => {
+  if (typeof subtype !== 'string' || subtype.length === 0) {
+    return undefined;
+  }
+  return SUBTYPE_TO_ENTITY_TYPE_LABEL[subtype] ?? subtype;
+};
+
+/**
+ * Picks the `properties.technology` value to land on `entity.sub_type`.
+ *
+ * Selection rule:
+ *  1. Filter the features down to those carrying a non-empty string
+ *     `properties.technology`. If none qualify, return `undefined` so the
+ *     caller omits the second `fieldEvaluation` entirely (we do NOT fall
+ *     back to `subtype` — that would duplicate `entity.type`).
+ *  2. Among the qualifying features, return the `technology` value from the
+ *     feature with the highest `confidence`. Ties are broken by the feature
+ *     order in the input array (first occurrence wins), making the choice
+ *     deterministic across runs even when the LLM emits two equally-
+ *     confident features that disagree on tech.
+ */
+const deriveSubTypeValue = (features: Feature[]): string | undefined => {
+  let chosen: { value: string; confidence: number; index: number } | undefined;
+  for (let index = 0; index < features.length; index += 1) {
+    const feature = features[index];
+    const technology = readPropertiesTechnology(feature);
+    if (technology === undefined) {
+      continue;
+    }
+    const confidence = typeof feature.confidence === 'number' ? feature.confidence : 0;
+    if (chosen === undefined || confidence > chosen.confidence) {
+      chosen = { value: technology, confidence, index };
+    }
+  }
+  return chosen?.value;
+};
+
+const readPropertiesTechnology = (feature: Feature): string | undefined => {
+  const properties = feature.properties;
+  if (!properties || typeof properties !== 'object') {
+    return undefined;
+  }
+  const technology = (properties as Record<string, unknown>).technology;
+  if (typeof technology !== 'string' || technology.length === 0) {
+    return undefined;
+  }
+  return technology;
 };
 
 const readMetaGroupingField = (feature: Feature): unknown => {

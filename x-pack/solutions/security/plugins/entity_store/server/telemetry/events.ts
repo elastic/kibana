@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceSetup, EventTypeOpts } from '@kbn/core/server';
 import type { EntityMaintainerTelemetryEventType } from '../tasks/entity_maintainers/types';
+import type { KiPromotionLastRun } from '../maintainers/ki_promotion/types';
 
 // ------------------------------------
 //  Event types
@@ -67,6 +68,23 @@ interface KnowledgeIndicatorsLoopEventPayload {
   groupsSkippedNoIndexPatterns: number;
   groupsSkippedMissingSubtype: number;
   groupsTruncated: number;
+}
+
+/**
+ * Per-run summary of the `ki-promotion` maintainer. Mirrors
+ * `KiPromotionLastRun` (the type the maintainer's run callback
+ * returns) plus the canonical `namespace` field every entity-store
+ * telemetry event carries.
+ *
+ * Emitted from the maintainer's `index.ts` factory after every
+ * completed `runKiPromotion` invocation. The framework-level
+ * `ENTITY_MAINTAINER_EVENT` covers run / abort / error lifecycle
+ * signals; THIS event surfaces the per-run counters operators need
+ * to gauge promotion health (how many docs are eligible today, how
+ * many were skipped on identity / threshold gates, etc).
+ */
+interface KiPromotionEventPayload extends KiPromotionLastRun {
+  namespace: string;
 }
 
 interface EntityMaintainerEvent {
@@ -308,6 +326,72 @@ export const ENTITY_STORE_KI_LOOP_EVENT = {
   },
 } as const satisfies EventTypeOpts<KnowledgeIndicatorsLoopEventPayload>;
 
+export const ENTITY_STORE_KI_PROMOTION_EVENT = {
+  eventType: 'entity_store_ki_promotion',
+  schema: {
+    namespace: {
+      type: 'keyword',
+      _meta: { description: 'Namespace where the KI promotion maintainer ran (e.g. "default")' },
+    },
+    candidatesEvaluated: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total promotion candidates evaluated across the promote and demote passes this run',
+      },
+    },
+    promoted: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of generic-typed entities promoted to a static (host/service) engine this run',
+      },
+    },
+    demoted: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of previously-promoted entities demoted back to the generic engine this run (feature no longer above threshold or identity gate failed)',
+      },
+    },
+    skippedMissingIdentityField: {
+      type: 'long',
+      _meta: {
+        description:
+          "Promotion candidates skipped because the target engine's identity field (host.id/name/hostname or service.name) was missing on the stored doc",
+      },
+    },
+    skippedNonEcsGroupingField: {
+      type: 'long',
+      _meta: {
+        description:
+          "Promotion candidates skipped because the underlying KI feature's groupingField was not in the ECS-known set for the target engine",
+      },
+    },
+    skippedThresholdMisconfigured: {
+      type: 'long',
+      _meta: {
+        description:
+          'Set to 1 when the maintainer was a no-op for the run (promoteToTypedThreshold null or promotedEntityTypes empty); 0 otherwise',
+      },
+    },
+    skippedLowConfidenceFeature: {
+      type: 'long',
+      _meta: {
+        description:
+          'Promotion candidates skipped because no above-threshold feature backed the doc this run',
+      },
+    },
+    bulkUpdateErrors: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of item-level errors returned by the bulk update API this run (tolerated; retried on next run)',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<KiPromotionEventPayload>;
+
 // ------------------------------------
 // Registration
 // ------------------------------------
@@ -320,6 +404,7 @@ const events = [
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_MAINTAINER_EVENT,
   ENTITY_STORE_KI_LOOP_EVENT,
+  ENTITY_STORE_KI_PROMOTION_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -337,6 +422,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_HEALTH_REPORT_EVENT.eventType]: EntityStoreHealthReportPayload;
   [ENTITY_MAINTAINER_EVENT.eventType]: EntityMaintainerEvent;
   [ENTITY_STORE_KI_LOOP_EVENT.eventType]: KnowledgeIndicatorsLoopEventPayload;
+  [ENTITY_STORE_KI_PROMOTION_EVENT.eventType]: KiPromotionEventPayload;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;

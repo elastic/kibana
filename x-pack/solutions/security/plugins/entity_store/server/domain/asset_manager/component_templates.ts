@@ -22,6 +22,15 @@ const BASE_ENTITY_INDEX_MAPPING = {
   'entity.EngineMetadata.Type': { type: 'keyword' },
   'entity.EngineMetadata.UntypedId': { type: 'keyword' },
   'entity.source': { type: 'keyword' },
+  // `entity.confidence` and `entity.previous_id` are added at the BASE
+  // mapping (not per-definition) so the shared physical latest index
+  // always has them — independent of which engines are installed in the
+  // tenant. The `ki-promotion` maintainer is the first writer of
+  // `entity.confidence` outside the user engine and the only writer of
+  // `entity.previous_id`; mapping them here makes those dependencies
+  // explicit and survives partial-install tenants.
+  'entity.confidence': { type: 'keyword' },
+  'entity.previous_id': { type: 'keyword' },
   'entity.risk.calculated_level': { type: 'keyword' },
   'entity.risk.calculated_score': { type: 'float' },
   'entity.risk.calculated_score_norm': { type: 'float' },

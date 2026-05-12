@@ -11,6 +11,8 @@ import { schema } from '@kbn/config-schema';
 import {
   KI_AGGREGATION_GROUP_CAP_DEFAULT,
   KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+  KI_PROMOTED_ENTITY_TYPES_DEFAULT,
+  KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT,
   LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
 } from './constants';
 
@@ -47,9 +49,14 @@ const logExtractionSchemaV1 = schema.object({
   frequency: schema.maybe(schema.string()),
 });
 
-const knowledgeIndicatorsSchema = schema.object({
+const knowledgeIndicatorsSchemaV3 = schema.object({
   entityMinConfidence: schema.number(),
   aggregationGroupCap: schema.number(),
+});
+
+const knowledgeIndicatorsSchemaV4 = knowledgeIndicatorsSchemaV3.extends({
+  promoteToTypedThreshold: schema.nullable(schema.number()),
+  promotedEntityTypes: schema.arrayOf(schema.string()),
 });
 
 const globalStateSchemaV1 = schema.object({
@@ -95,7 +102,7 @@ const version2: SavedObjectsFullModelVersion = {
 };
 
 const globalStateSchemaV3 = globalStateSchemaV2.extends({
-  knowledgeIndicators: knowledgeIndicatorsSchema,
+  knowledgeIndicators: knowledgeIndicatorsSchemaV3,
 });
 
 /**
@@ -142,11 +149,71 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
+const globalStateSchemaV4 = globalStateSchemaV3.extends({
+  knowledgeIndicators: knowledgeIndicatorsSchemaV4,
+});
+
+/**
+ * Layered backfill that adds the new promotion fields to the
+ * `knowledgeIndicators` block. Runs AFTER `backfillKnowledgeIndicators`
+ * so the migration order on an old (pre-v3) document is:
+ *   v2 → v3: adds the `knowledgeIndicators` block with extraction defaults
+ *   v3 → v4: adds the promotion fields with off-by-default values
+ *
+ * Idempotent: a document that already carries `promoteToTypedThreshold`
+ * or `promotedEntityTypes` is preserved verbatim. The function tolerates
+ * a missing `knowledgeIndicators` block defensively (which should never
+ * happen post-v3) so we never throw mid-migration.
+ *
+ * Exported for direct unit testing.
+ */
+export const backfillKnowledgeIndicatorsPromotion = (document: {
+  attributes: Record<string, unknown>;
+}): { attributes: Record<string, unknown> } => {
+  const existing = document.attributes.knowledgeIndicators;
+  const knowledgeIndicators =
+    existing !== undefined && existing !== null && typeof existing === 'object'
+      ? (existing as Record<string, unknown>)
+      : {};
+  const hasPromote = 'promoteToTypedThreshold' in knowledgeIndicators;
+  const hasTypes = 'promotedEntityTypes' in knowledgeIndicators;
+  if (hasPromote && hasTypes) {
+    return { attributes: document.attributes };
+  }
+  return {
+    attributes: {
+      ...document.attributes,
+      knowledgeIndicators: {
+        ...knowledgeIndicators,
+        ...(hasPromote
+          ? {}
+          : { promoteToTypedThreshold: KI_PROMOTE_TO_TYPED_THRESHOLD_DEFAULT }),
+        ...(hasTypes
+          ? {}
+          : { promotedEntityTypes: [...KI_PROMOTED_ENTITY_TYPES_DEFAULT] }),
+      },
+    },
+  };
+};
+
+const version4: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill' as const,
+      backfillFn: backfillKnowledgeIndicatorsPromotion,
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV4,
+    forwardCompatibility: globalStateSchemaV4.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
   hiddenFromHttpApis: true,
 };
