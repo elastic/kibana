@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { filterByAgent, settingDefinitions } from '.';
-import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import type { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {
@@ -193,6 +193,24 @@ describe('filterByAgent', () => {
 
     it('opentelemetry/java/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/java/elastic')).toEqual(
+        expect.arrayContaining([
+          'deactivate_all_instrumentations',
+          'deactivate_instrumentations',
+          'infer_spans',
+          'logging_level',
+          'opamp_polling_interval',
+          'sampling_rate',
+          'send_logs',
+          'send_metrics',
+          'send_traces',
+        ])
+      );
+    });
+
+    it('opentelemetry/java/opentelemetry-java-instrumentation', () => {
+      expect(
+        getSettingKeysForAgent('opentelemetry/java/opentelemetry-java-instrumentation')
+      ).toEqual(
         expect.arrayContaining([
           'deactivate_all_instrumentations',
           'deactivate_instrumentations',

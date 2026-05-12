@@ -33,6 +33,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     ),
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
       'opentelemetry/python/elastic',
@@ -53,6 +54,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     ),
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -70,7 +72,11 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'Note with Java for this to apply, inferred spans needs to be enabled at JVM startup by setting OTEL_INFERRED_SPANS_ENABLED to true\n' +
         '\n',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/php/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/php/elastic',
+    ],
   },
   {
     key: 'logging_level',
@@ -94,6 +100,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     ],
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/python/elastic',
       'opentelemetry/php/elastic',
@@ -113,7 +120,11 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'The default interval between checking the collector for new changes to config.\n' +
         'Note the interval is automatically exponentially extended on failures then reset to the value specified here, on recovery.',
     }),
-    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/nodejs/elastic'],
+    includeAgents: [
+      'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
+      'opentelemetry/nodejs/elastic',
+    ],
   },
   {
     key: 'sampling_rate',
@@ -130,6 +141,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     }),
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
       'opentelemetry/python/elastic',
@@ -149,6 +161,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     }),
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -167,6 +180,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     }),
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
@@ -185,6 +199,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     }),
     includeAgents: [
       'opentelemetry/java/elastic',
+      'opentelemetry/java/opentelemetry-java-instrumentation',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
     ],
