@@ -298,7 +298,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                 aria-label={i18n.translate(
                   'xpack.ml.timeSeriesExplorer.controls.popoverAriaLabel',
                   {
-                    defaultMessage: 'Time series explorer actions',
+                    defaultMessage: 'Single metric viewer actions',
                   }
                 )}
               >
