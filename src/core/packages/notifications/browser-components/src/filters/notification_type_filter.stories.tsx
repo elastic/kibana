@@ -10,12 +10,9 @@
 import React, { useState } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { EuiPanel } from '@elastic/eui';
-import {
-  NotificationTypeFilter,
-  type NotificationTypeFilterProps,
-} from './notification_type_filter';
+import { NotificationTypeFilter } from './notification_type_filter';
 
-const meta: Meta<NotificationTypeFilterProps> = {
+const meta: Meta = {
   title: 'Notifications/TypeFilter',
   component: NotificationTypeFilter,
 };
