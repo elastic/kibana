@@ -118,10 +118,12 @@ steps:
     run: |
       set -euo pipefail
 
-      source_sha="$(jq -r '.mergeCommit.oid // .mergeCommit // empty' /tmp/gh-aw/agent/pr-metadata.json)"
-      if [ -n "${source_sha}" ]; then
-        git fetch --no-tags --depth=2 origin "${source_sha}"
+      source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --template '{{.merge_commit_sha}}')"
+      if [ -z "${source_sha}" ]; then
+        echo "No merge_commit_sha found for PR ${PR_NUMBER}" >&2
+        exit 1
       fi
+      git fetch --no-tags --depth=2 origin "${source_sha}"
 
       jq -r '.versions[].branch' versions.json | while read -r branch; do
         git fetch --no-tags --depth=1 origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"
