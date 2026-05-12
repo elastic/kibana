@@ -9,7 +9,12 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 const config = createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  timeout: 120_000,
+  // Each test does one agent_builder/converse round-trip (LLM call over the
+  // restored alerts snapshot, ~285 documents) plus N evaluator (LLM-as-judge)
+  // calls. 120s was tight enough that the converse call alone exhausted the
+  // budget for the larger model variants. 10 minutes leaves headroom for
+  // slow models and judge passes without masking real regressions.
+  timeout: 10 * 60_000,
 });
 
 config.retries = 2;
