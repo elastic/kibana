@@ -322,7 +322,7 @@ function ConfigureSDKInstructions({
     },
     {
       setting: 'OTEL_RESOURCE_ATTRIBUTES',
-      value: `service.name=${serviceNameDisplay},service.version=<app-version>,deployment.environment=production`,
+      value: `service.name=${serviceNameDisplay},service.version=<app-version>,deployment.environment.name=production`,
     },
   ];
 
