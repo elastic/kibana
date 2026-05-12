@@ -49,7 +49,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsViewer();
       // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-      await pageObjects.discover.gotoInQueryMode('esql');
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       // Suppress the tour so it does not overlap the waterfall flyout interactions.
       await page.evaluate(() => localStorage.setItem('fullscreenWaterfallTourDismissed', 'true'));
     });

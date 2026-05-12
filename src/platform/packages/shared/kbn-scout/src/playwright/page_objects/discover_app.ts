@@ -17,6 +17,15 @@ const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
 export type DiscoverQueryMode = 'esql' | 'classic';
 
+export interface DiscoverGotoOptions {
+  /**
+   * When provided, sets Discover's query mode in localStorage before the navigation
+   * runs (via `setQueryMode`). Use this to make tests independent of the
+   * `discover.isEsqlDefault` feature flag default.
+   */
+  queryMode?: DiscoverQueryMode;
+}
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -24,7 +33,9 @@ export class DiscoverApp {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
-  async goto() {
+  async goto(options: DiscoverGotoOptions = {}) {
+    if (options.queryMode) await this.setQueryMode(options.queryMode);
+
     await this.page.gotoApp('discover');
     await this.waitForDiscoverPage();
   }
@@ -661,15 +672,5 @@ export class DiscoverApp {
 
     // Return the mode that is currently visible
     return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
-  }
-
-  /**
-   * Quick helper that sets the desired Discover query mode in
-   * localStorage and then navigates to Discover, so that the test does
-   * not depend on the `discover.isEsqlDefault` feature flag default.
-   */
-  async gotoInQueryMode(mode: DiscoverQueryMode) {
-    await this.setQueryMode(mode);
-    await this.goto();
   }
 }

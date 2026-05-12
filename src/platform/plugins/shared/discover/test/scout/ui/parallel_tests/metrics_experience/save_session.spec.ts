@@ -39,7 +39,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-      await pageObjects.discover.gotoInQueryMode('esql');
+      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

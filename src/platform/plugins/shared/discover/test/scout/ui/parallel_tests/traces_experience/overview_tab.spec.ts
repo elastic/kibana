@@ -67,7 +67,7 @@ spaceTest.describe(
         `${mode.name} mode - should render always-visible sections and hide conditional ones for a minimal document`,
         async ({ pageObjects }) => {
           // Enforce the query mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-          await pageObjects.discover.gotoInQueryMode(mode.value);
+          await pageObjects.discover.goto({ queryMode: mode.value });
 
           await spaceTest.step(`${mode.name} mode - filter for minimal trace`, async () => {
             await mode.filterMinimal(pageObjects.discover);
@@ -107,7 +107,7 @@ spaceTest.describe(
         `${mode.name} mode - should render conditional sections for a document with errors and span links`,
         async ({ pageObjects }) => {
           // Enforce the query mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-          await pageObjects.discover.gotoInQueryMode(mode.value);
+          await pageObjects.discover.goto({ queryMode: mode.value });
 
           await spaceTest.step(
             `${mode.name} mode - filter for span with errors and span links`,
@@ -137,7 +137,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-        await pageObjects.discover.gotoInQueryMode('esql');
+        await pageObjects.discover.goto({ queryMode: 'esql' });
 
         await spaceTest.step('filter for minimal trace transaction', async () => {
           await pageObjects.discover.writeAndSubmitEsqlQuery(

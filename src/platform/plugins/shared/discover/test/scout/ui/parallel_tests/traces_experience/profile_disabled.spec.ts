@@ -44,7 +44,7 @@ spaceTest.describe(
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
           // Enforce classic mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-          await pageObjects.discover.gotoInQueryMode('classic');
+          await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('wait for results to load', async () => {
             await pageObjects.discover.waitForDocTableRendered();
@@ -64,7 +64,7 @@ spaceTest.describe(
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
           // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-          await pageObjects.discover.gotoInQueryMode('classic');
+          await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('open first document in flyout', async () => {
             await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
@@ -82,7 +82,7 @@ spaceTest.describe(
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
           // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
-          await pageObjects.discover.gotoInQueryMode('esql');
+          await pageObjects.discover.goto({ queryMode: 'esql' });
 
           await spaceTest.step('run ESQL query for traces', async () => {
             await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
