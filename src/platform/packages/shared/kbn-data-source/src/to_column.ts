@@ -41,6 +41,6 @@ export function columnFromDatatableColumn(column: DatatableColumn): Column {
     name: column.name,
     type: column.meta.type as KBN_FIELD_TYPES,
     esType: column.meta.esType,
-    source: 'esql-result',
+    source: column.isComputedColumn ? 'esql-result' : 'index',
   };
 }
