@@ -38,11 +38,13 @@ interface UseSplitQueryCompletionParams {
  * native "query context" parameter to its autocomplete API.
  */
 export function useSplitQueryCompletion({ baseQuery, search }: UseSplitQueryCompletionParams) {
-  // Refs so the provider closure always reads current values without re-registering.
+  // Assign refs directly during render — no useEffect needed. Refs are mutable
+  // and reading/writing them during render is safe. Using useEffect here would
+  // add two unnecessary effect invocations per render with no benefit.
   const baseQueryRef = useRef(baseQuery);
   const searchRef = useRef(search);
-  useEffect(() => { baseQueryRef.current = baseQuery; });
-  useEffect(() => { searchRef.current = search; });
+  baseQueryRef.current = baseQuery;
+  searchRef.current = search;
 
   // Store the disposable for cleanup on unmount.
   const disposableRef = useRef<monaco.IDisposable | null>(null);
