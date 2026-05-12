@@ -123,12 +123,14 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - .storybook/**/*
     - common/**/*
     - server/**/*
     - server/**/*.json
     - public/**/*
     - test/scout_alerting_v2/**/*
     - '!target/**/*'
+    - '!.storybook/**/*.js'
   jest-config:
     - jest.config.js
 tasks: {}
