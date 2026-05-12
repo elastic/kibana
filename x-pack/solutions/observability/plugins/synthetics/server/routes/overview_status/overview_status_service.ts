@@ -632,7 +632,11 @@ export class OverviewStatusService {
             overallStatus: status,
           };
 
-          const monLocId = `${configId}-${locData.locationId}`;
+          // Include the remote cluster name in the bucket key so that two
+          // remote clusters that host the same monitor configId in the same
+          // locationId (e.g. an imported project monitor synced to both)
+          // don't collide and silently overwrite each other
+          const monLocId = `${remote.remoteName}-${configId}-${locData.locationId}`;
           if (status === MONITOR_STATUS_ENUM.DOWN) {
             down += 1;
             downConfigs[monLocId] = meta;
