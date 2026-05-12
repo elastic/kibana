@@ -122,9 +122,12 @@ export const MultiSelectPicker: FC<{
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        aria-label={i18n.translate('xpack.dataVisualizer.multiSelectPicker.filterOptionsAriaLabel', {
-          defaultMessage: 'Filter options',
-        })}
+        aria-label={i18n.translate(
+          'xpack.dataVisualizer.multiSelectPicker.filterOptionsAriaLabel',
+          {
+            defaultMessage: 'Filter options',
+          }
+        )}
       >
         <EuiPopoverTitle paddingSize="s">
           <EuiFieldSearch

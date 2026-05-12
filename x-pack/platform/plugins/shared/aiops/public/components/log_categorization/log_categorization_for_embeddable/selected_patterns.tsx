@@ -43,12 +43,9 @@ export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openI
 
   return (
     <EuiPopover
-      aria-label={i18n.translate(
-        'xpack.aiops.logCategorization.selectedPatternsPopoverAriaLabel',
-        {
-          defaultMessage: 'Selected patterns',
-        }
-      )}
+      aria-label={i18n.translate('xpack.aiops.logCategorization.selectedPatternsPopoverAriaLabel', {
+        defaultMessage: 'Selected patterns',
+      })}
       closePopover={() => setShowMenu(false)}
       isOpen={showMenu}
       panelPaddingSize="none"

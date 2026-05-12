@@ -34,12 +34,9 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload }) => {
     <EuiPopover
       data-test-subj="aiopsRandomSamplerOptionsPopover"
       id="aiopsSamplingOptions"
-      aria-label={i18n.translate(
-        'xpack.aiops.logCategorization.samplingOptionsPopoverAriaLabel',
-        {
-          defaultMessage: 'Sampling options',
-        }
-      )}
+      aria-label={i18n.translate('xpack.aiops.logCategorization.samplingOptionsPopoverAriaLabel', {
+        defaultMessage: 'Sampling options',
+      })}
       button={
         <EuiButton
           data-test-subj="aiopsLogPatternAnalysisShowSamplingOptionsButton"
