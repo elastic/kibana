@@ -14,7 +14,7 @@ import {
   toDiscoverQuery,
   buildScreenContext,
   buildEsqlResultsAttachment,
-  shouldSeedEsqlPrompt,
+  shouldPrefillEsqlPrompt,
 } from './discover_agent_builder_config';
 
 interface EsqlResultsData {
@@ -88,35 +88,33 @@ describe('buildScreenContext', () => {
   });
 });
 
-describe('shouldSeedEsqlPrompt', () => {
+describe('shouldPrefillEsqlPrompt', () => {
   it('returns false when not in ES|QL mode', () => {
-    expect(shouldSeedEsqlPrompt(false, null, false)).toBe(false);
-    expect(shouldSeedEsqlPrompt(false, { id: undefined }, false)).toBe(false);
-    expect(shouldSeedEsqlPrompt(false, { id: 'abc' }, false)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(false, null, false)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(false, { id: undefined }, false)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(false, { id: 'abc' }, false)).toBe(false);
   });
 
-  it('returns false when already seeded', () => {
-    expect(shouldSeedEsqlPrompt(true, null, true)).toBe(false);
-    expect(shouldSeedEsqlPrompt(true, { id: undefined }, true)).toBe(false);
+  it('returns false when already prefilled', () => {
+    expect(shouldPrefillEsqlPrompt(true, null, true)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(true, { id: undefined }, true)).toBe(false);
   });
 
   it('returns false when activeConversation is undefined (pre-first-emission gap)', () => {
-    // Don't seed before we know whether the sidebar is already open with someone's existing conversation.
-    expect(shouldSeedEsqlPrompt(true, undefined, false)).toBe(false);
+    // Don't prefill before we know whether the sidebar is already open with an existing conversation.
+    expect(shouldPrefillEsqlPrompt(true, undefined, false)).toBe(false);
   });
 
   it('returns true when in ES|QL mode and sidebar is closed', () => {
-    expect(shouldSeedEsqlPrompt(true, null, false)).toBe(true);
+    expect(shouldPrefillEsqlPrompt(true, null, false)).toBe(true);
   });
 
   it('returns true when sidebar is open without a conversation id', () => {
-    // Keep the seed in config until the auto-send has assigned an id, otherwise
-    // a follow-up setChatConfig call wipes `initialMessage` before it's submitted.
-    expect(shouldSeedEsqlPrompt(true, { id: undefined }, false)).toBe(true);
+    expect(shouldPrefillEsqlPrompt(true, { id: undefined }, false)).toBe(true);
   });
 
   it('returns false once the conversation has an id', () => {
-    expect(shouldSeedEsqlPrompt(true, { id: 'abc' }, false)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(true, { id: 'abc' }, false)).toBe(false);
   });
 });
 

@@ -99,16 +99,16 @@ export const buildScreenContext = (
   },
 });
 
-export const shouldSeedEsqlPrompt = (
+export const shouldPrefillEsqlPrompt = (
   isEsqlMode: boolean,
   activeConversation: ActiveConversation | null | undefined,
-  hasSeeded: boolean
+  hasPrefilled: boolean
 ): boolean => {
-  if (!isEsqlMode || hasSeeded) return false;
-  // Pre-first-emission: don't seed — the sidebar might already be open with an
+  if (!isEsqlMode || hasPrefilled) return false;
+  // Pre-first-emission: don't prefill — the sidebar might already be open with an
   // existing conversation we shouldn't disrupt.
   if (activeConversation === undefined) return false;
-  // Keep the seed in config while sidebar is closed (null) or open without a
+  // Keep the prefill in config while sidebar is closed (null) or open without a
   // conversation id yet. Dropping it during that window would wipe `initialMessage`
   // before `use_initial_message` auto-sends.
   return !activeConversation?.id;
@@ -194,16 +194,13 @@ export const DiscoverAgentBuilderConfig = () => {
   queryRef.current = query;
 
   // Tracks the agent-builder sidebar state. `undefined` means we haven't received
-  // the BehaviorSubject's first emission yet — we must not seed in that gap because
+  // the BehaviorSubject's first emission yet — we must not prefill because
   // we don't know whether the sidebar is already open.
   const [activeConversation, setActiveConversation] = useState<
     ActiveConversation | null | undefined
   >(undefined);
 
-  // Once we've seeded the initial message for the current ES|QL session, never
-  // seed again — re-seeding would re-trigger autoSendInitialMessage and replay
-  // "Analyze my data" against a conversation the user has moved on from.
-  const hasSeededEsqlPromptRef = useRef(false);
+  const hasPrefilledEsqlPromptRef = useRef(false);
 
   useEffect(() => {
     if (!agentBuilder) return;
@@ -231,10 +228,10 @@ export const DiscoverAgentBuilderConfig = () => {
     [isEsqlMode, runQueryTool]
   );
 
-  const seedEsqlPrompt = shouldSeedEsqlPrompt(
+  const prefillEsqlPrompt = shouldPrefillEsqlPrompt(
     isEsqlMode,
     activeConversation,
-    hasSeededEsqlPromptRef.current
+    hasPrefilledEsqlPromptRef.current
   );
 
   useEffect(() => {
@@ -271,7 +268,7 @@ export const DiscoverAgentBuilderConfig = () => {
       sessionTag: SESSION_TAG,
       attachments,
       browserApiTools,
-      ...(seedEsqlPrompt
+      ...(prefillEsqlPrompt
         ? {
             newConversation: true,
             initialMessage: ESQL_INITIAL_MESSAGE,
@@ -294,15 +291,15 @@ export const DiscoverAgentBuilderConfig = () => {
     hasEsqlResults,
     isEsqlMode,
     query,
-    seedEsqlPrompt,
+    prefillEsqlPrompt,
     timeRange,
     totalHits,
   ]);
 
-  // Mark the prompt as seeded once a real conversation id exists.
+  // Mark the prompt as prefilled once a real conversation id exists.
   useEffect(() => {
     if (isEsqlMode && activeConversation?.id) {
-      hasSeededEsqlPromptRef.current = true;
+      hasPrefilledEsqlPromptRef.current = true;
     }
   }, [isEsqlMode, activeConversation]);
 
