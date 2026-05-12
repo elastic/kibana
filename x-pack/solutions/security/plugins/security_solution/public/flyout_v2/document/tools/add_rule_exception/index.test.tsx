@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
-import type { EndpointExceptionContentProps } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exception_content';
+import type { EndpointExceptionsFlyoutProps } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { AddRuleException } from '.';
 import { ADD_RULE_EXCEPTION_LOADING_TEST_ID } from './test_ids';
 
@@ -25,14 +25,14 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
     mockUseIsExperimentalFeatureEnabled(...args),
 }));
 
-const mockEndpointExceptionContent = jest.fn<React.ReactElement, [EndpointExceptionContentProps]>(
+const mockEndpointExceptionsFlyout = jest.fn<React.ReactElement, [EndpointExceptionsFlyoutProps]>(
   () => <div data-test-subj="endpointExceptionContent" />
 );
 jest.mock(
-  '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exception_content',
+  '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout',
   () => ({
-    EndpointExceptionContent: (props: EndpointExceptionContentProps) =>
-      mockEndpointExceptionContent(props),
+    EndpointExceptionsFlyout: (props: EndpointExceptionsFlyoutProps) =>
+      mockEndpointExceptionsFlyout(props),
   })
 );
 
@@ -102,12 +102,12 @@ describe('<AddRuleException />', () => {
     expect(screen.getByTestId('endpointExceptionContent')).toBeInTheDocument();
     expect(mockUseRuleWithFallback).toHaveBeenCalledWith('rule-uuid');
 
-    const endpointExceptionContentProps = mockEndpointExceptionContent.mock.calls[0]?.[0];
-    if (!endpointExceptionContentProps) {
-      throw new Error('Expected EndpointExceptionContent to be called');
+    const endpointExceptionsFlyoutProps = mockEndpointExceptionsFlyout.mock.calls[0]?.[0];
+    if (!endpointExceptionsFlyoutProps) {
+      throw new Error('Expected EndpointExceptionsFlyout to be called');
     }
 
-    const { alertData, alertStatus } = endpointExceptionContentProps;
+    const { alertData, alertStatus } = endpointExceptionsFlyoutProps;
     expect(alertStatus).toEqual('open');
     expect(alertData).toEqual(
       expect.objectContaining({
