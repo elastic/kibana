@@ -37,12 +37,6 @@ paths:
           schema:
             type: string
           description: Filter by dataset ID
-        - name: build_id
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by Buildkite build ID to view all runs from the same CI build
         - name: page
           in: query
           required: false

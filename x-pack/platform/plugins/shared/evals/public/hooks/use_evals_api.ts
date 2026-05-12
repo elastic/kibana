@@ -61,12 +61,11 @@ export interface GetEvalsRemotesResponse {
   remotes: EvalsRemoteSummary[];
 }
 
-export interface RunsListFilters {
+interface RunsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
   datasetId?: string;
-  buildId?: string;
   page?: number;
   perPage?: number;
 }
@@ -386,7 +385,6 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
       if (filters.datasetId) query.dataset_id = filters.datasetId;
-      if (filters.buildId) query.build_id = filters.buildId;
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 

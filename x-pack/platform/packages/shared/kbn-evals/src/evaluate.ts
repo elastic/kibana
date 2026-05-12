@@ -274,10 +274,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
-      const currentRunId = process.env.TEST_RUN_ID;
-      if (!currentRunId) {
+      const baseRunId = process.env.TEST_RUN_ID;
+      if (!baseRunId) {
         throw new Error('runId must be provided via TEST_RUN_ID environment variable');
       }
+
+      const currentRunId = `${baseRunId}-${connector.id}`;
 
       const shouldPreflightExport =
         process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
@@ -356,12 +358,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
 
       await use(executorClient);
-
-      if (!currentRunId) {
-        throw new Error(
-          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
-        );
-      }
 
       const experiments = await executorClient.getRanExperiments();
       const documents = await mapToEvaluationScoreDocuments({

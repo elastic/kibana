@@ -406,18 +406,6 @@ export const RunDetailPage: React.FC = () => {
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
-            {runDetail.ci?.build_id && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiLink
-                  onClick={() =>
-                    history.push(`/?build_id=${encodeURIComponent(runDetail.ci!.build_id!)}`)
-                  }
-                >
-                  {i18n.VIEW_ALL_RUNS_IN_BUILD}
-                </EuiLink>
-              </>
-            )}
             <EuiSpacer size="l" />
           </>
         )}

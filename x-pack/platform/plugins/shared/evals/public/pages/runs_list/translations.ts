@@ -102,15 +102,3 @@ export const COMPARE_MAX_SELECTED_HINT = i18n.translate(
   'xpack.evals.runsList.compareMaxSelectedHint',
   { defaultMessage: '2 runs already selected - deselect one to pick a different run' }
 );
-
-export const COLUMN_BUILD = i18n.translate('xpack.evals.runsList.columns.build', {
-  defaultMessage: 'Build',
-});
-
-export const BUILD_FILTER_TOOLTIP = i18n.translate('xpack.evals.runsList.buildFilterTooltip', {
-  defaultMessage: 'Show all runs from this build',
-});
-
-export const CLEAR_BUILD_FILTER = i18n.translate('xpack.evals.runsList.clearBuildFilter', {
-  defaultMessage: 'Clear build filter',
-});
