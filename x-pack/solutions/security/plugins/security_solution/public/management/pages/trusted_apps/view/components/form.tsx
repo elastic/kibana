@@ -426,19 +426,19 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isValid: updatedValidationResult.isValid && conditionsState.areValid && hasFormChanged,
           confirmModalLabels:
             shouldShowWildcardConfirmModal || shouldShowUnnecessaryEscapingConfirmModal
-            ? CONFIRM_WARNING_MODAL_LABELS(
+              ? CONFIRM_WARNING_MODAL_LABELS(
                   i18n.translate(
                     'xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name',
                     {
-                  defaultMessage: 'trusted application',
+                      defaultMessage: 'trusted application',
                     }
                   ),
                   {
                     hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal,
                     hasUnnecessaryEscaping: shouldShowUnnecessaryEscapingConfirmModal,
                   }
-              )
-            : undefined,
+                )
+              : undefined,
         });
       },
       [
@@ -994,7 +994,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                   <WildCardWithWrongOperatorCallout />
                 )}
                 {conditionsState.hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
-              {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+                {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
               </EuiFlexGroup>
 
               {conditionsState.hasDuplicateFields && (
@@ -1024,12 +1024,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 onVisited={handleConditionBuilderOnVisited}
                 data-test-subj={getTestId('conditionsBuilder')}
               />
-              {conditionsState.hasWildcardWithWrongOperator && (
-                <>
-                  <EuiSpacer size="s" />
-                  <WildCardWithWrongOperatorCallout />
-                </>
-              )}
             </>
           )}
         </EuiFormRow>
