@@ -93,3 +93,9 @@ export const LOCK_PADDING = 12;
 
 /** Pixel offset applied to duplicated elements so they don't overlap the source. */
 export const DUPLICATE_OFFSET = 20;
+
+/** Minimum border-radius (px) to consider an element "rounded". */
+export const ROUNDING_THRESHOLD = 4;
+
+/** Width (px) of the edge zone where dead-zone compensation applies. */
+export const EDGE_ZONE = 16;

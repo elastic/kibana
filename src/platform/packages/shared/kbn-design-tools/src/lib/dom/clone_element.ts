@@ -276,9 +276,13 @@ export const cloneClean = (
 ): { clone: HTMLElement; rect: DOMRect } => {
   const saved = {
     transform: target.style.transform,
+    transformPriority: target.style.getPropertyPriority('transform'),
     display: target.style.display,
+    displayPriority: target.style.getPropertyPriority('display'),
     visibility: target.style.visibility,
+    visibilityPriority: target.style.getPropertyPriority('visibility'),
     pointerEvents: target.style.pointerEvents,
+    pointerEventsPriority: target.style.getPropertyPriority('pointer-events'),
   };
 
   target.style.transform = 'none';
@@ -288,10 +292,10 @@ export const cloneClean = (
 
   const result = cloneElement(target, zIndex);
 
-  target.style.transform = saved.transform;
-  target.style.display = saved.display;
-  target.style.visibility = saved.visibility;
-  target.style.pointerEvents = saved.pointerEvents;
+  target.style.setProperty('transform', saved.transform, saved.transformPriority);
+  target.style.setProperty('display', saved.display, saved.displayPriority);
+  target.style.setProperty('visibility', saved.visibility, saved.visibilityPriority);
+  target.style.setProperty('pointer-events', saved.pointerEvents, saved.pointerEventsPriority);
 
   fixCloneVisibility(result.clone);
 

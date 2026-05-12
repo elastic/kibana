@@ -35,6 +35,7 @@ import type { InteractionState } from './interaction_state';
 import { IDLE } from './interaction_state';
 import { EditOutline } from './outline';
 import { EditModal } from './outline/controls/edit_modal';
+import { hasSignificantRounding, isInRoundedDeadZone } from '../../lib/dom/rounded_dead_zone';
 
 /**
  * Derive the CSS cursor from the current interaction state and hover target.
@@ -89,6 +90,7 @@ export const EditOverlay = ({
   const styleEdits = useRef<Array<{ element: HTMLElement; property: string; original: string }>>(
     []
   );
+  const roundedTargets = useRef(new WeakSet<HTMLElement>());
 
   const updateCursor = useCallback(
     (next: string) => setCursor((prev) => (prev === next ? prev : next)),
@@ -192,11 +194,40 @@ export const EditOverlay = ({
 
             // When the cursor leaves a rounded element (e.g. border-radius: 50%)
             // it exits the hit-testable shape before reaching the bounding-rect
-            // corners where resize handles live. Before switching targets, check
-            // if the cursor is still near a handle on the previous hover target.
+            // corners where resize handles live. Keep the current hover target
+            // while the cursor is in the edge zone of its bounding rect, so the
+            // user can reach the resize handles in the dead zone between the
+            // rounded edge and the rect corners.
+            // Skip when the new target is a child — the cursor moved to a
+            // descendant, not a dead zone.
             if (hoverTarget && nextTarget !== hoverTarget) {
+              const isChild = nextTarget && hoverTarget.contains(nextTarget);
+
+              if (
+                !isChild &&
+                roundedTargets.current.has(hoverTarget) &&
+                isInRoundedDeadZone(
+                  event.clientX,
+                  event.clientY,
+                  hoverTarget.getBoundingClientRect()
+                )
+              ) {
+                const foundHandle = detectHandle(event.clientX, event.clientY, hoverTarget);
+                if (!foundHandle) {
+                  interaction.current = IDLE;
+                }
+                updateCursor(deriveCursor(interaction.current, hoverTarget));
+                return;
+              }
+
               if (detectHandle(event.clientX, event.clientY, hoverTarget)) {
                 return;
+              }
+            }
+
+            if (nextTarget) {
+              if (hasSignificantRounding(nextTarget)) {
+                roundedTargets.current.add(nextTarget);
               }
             }
 
