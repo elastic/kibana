@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosError } from 'axios';
-import axios, { isAxiosError } from 'axios';
+import axios from 'axios';
 import { isEmpty } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
@@ -40,10 +39,6 @@ const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
 
 const VIEW_INCIDENT_URL = `browse`;
-
-export function classifyJiraAxiosError(error: unknown): error is AxiosError {
-  return isAxiosError(error) && error.response?.status === 400;
-}
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import axios, { AxiosError } from 'axios';
-import type { InternalAxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
-import { classifyJiraAxiosError, createExternalService } from './service';
+import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ExternalService } from './types';
 import type { Logger } from '@kbn/core/server';
@@ -33,22 +32,6 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
     request: jest.fn(),
   };
 });
-
-const minimalAxiosRequestConfig = { headers: {} } as InternalAxiosRequestConfig;
-
-const jiraAxios400Error = new AxiosError(
-  'Request failed with status code 400',
-  'ERR_BAD_REQUEST',
-  minimalAxiosRequestConfig,
-  undefined,
-  {
-    status: 400,
-    statusText: 'Bad Request',
-    data: {},
-    headers: {},
-    config: minimalAxiosRequestConfig,
-  }
-);
 
 axios.create = jest.fn(() => axios);
 const requestMock = request as jest.Mock;
@@ -76,29 +59,6 @@ const issueResponse = {
 };
 
 const issuesResponse = [issueResponse];
-
-describe('classifyJiraAxiosError', () => {
-  test('returns true for AxiosError with HTTP 400 response', () => {
-    expect(classifyJiraAxiosError(jiraAxios400Error)).toBe(true);
-  });
-
-  test('returns false for AxiosError with non-400 response', () => {
-    const error = new AxiosError(
-      'Request failed with status code 500',
-      'ERR_BAD_RESPONSE',
-      minimalAxiosRequestConfig,
-      undefined,
-      {
-        status: 500,
-        statusText: 'Internal Server Error',
-        data: {},
-        headers: {},
-        config: minimalAxiosRequestConfig,
-      }
-    );
-    expect(classifyJiraAxiosError(error)).toBe(false);
-  });
-});
 
 describe('Jira service', () => {
   let service: ExternalService;

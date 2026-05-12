@@ -39,7 +39,8 @@ import type {
 } from '@kbn/connector-schemas/jira';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { validate } from './validators';
-import { classifyJiraAxiosError, createExternalService } from './service';
+import { createExternalService } from './service';
+import { isUserError } from './utils';
 import { api } from './api';
 
 const supportedSubActions: string[] = [
@@ -195,7 +196,7 @@ async function executor(
 
     return { status: 'ok', data: data ?? {}, actionId };
   } catch (error) {
-    if (classifyJiraAxiosError(error)) {
+    if (isUserError(error)) {
       throw createTaskRunError(error, TaskErrorSource.USER);
     }
     throw error;
