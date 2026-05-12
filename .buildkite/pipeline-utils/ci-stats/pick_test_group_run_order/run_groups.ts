@@ -36,11 +36,19 @@ export function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName:
   if (groups.length !== 1) {
     throw new Error(`expected to find exactly 1 "${typeName}" run group`);
   }
-  const defaultGroup = groups[0];
-  defaultGroup.groups.forEach((g, i, a) => {
-    g.title = `${typeName} tests ${i + 1}/${a.length}`;
+  return groups[0];
+}
+
+/**
+ * Stamp each subgroup with an indexed title (e.g. "Jest Unit Tests 2/3") so
+ * the run-order artifacts can be matched back to the Buildkite parallel jobs.
+ * Mutates `group.groups` in place.
+ */
+export function labelJestSubgroups(group: RunGroup, typeName: string): void {
+  const { length } = group.groups;
+  group.groups.forEach((g, i) => {
+    g.title = `${typeName} ${i + 1}/${length}`;
   });
-  return defaultGroup;
 }
 
 function annotateMissingDurations(bk: BuildkiteClient, types: RunGroup[], typeName: string): void {
