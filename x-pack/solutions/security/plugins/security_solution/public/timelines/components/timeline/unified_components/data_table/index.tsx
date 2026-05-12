@@ -63,8 +63,8 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { AttackDetails } from '../../../../../flyout_v2/attack_details';
-import { NotesDetails } from '../../../../../flyout_v2/notes';
+import { AttackDetails } from '../../../../../flyout_v2/attack_details/main';
+import { NotesDetails } from '../../../../../flyout_v2/shared/tools/notes';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 

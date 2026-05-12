@@ -30,7 +30,7 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
 import { isAttackDiscoveryHit } from './utils/is_attack_discovery_hit';
-import { AttackDetails } from '../attack_details';
+import { AttackDetails } from '../../attack_details/main';
 
 const footerStyles = css`
   @media (max-width: 767px) {

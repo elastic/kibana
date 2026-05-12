@@ -42,7 +42,7 @@ jest.mock('./footer', () => ({ Footer: () => <div data-test-subj="mock-footer" /
 jest.mock('../../shared/tools/notes', () => ({
   NotesDetails: () => <div data-test-subj="mock-notes-details" />,
 }));
-jest.mock('../attack_details', () => ({
+jest.mock('../../attack_details/main', () => ({
   AttackDetails: ({
     onShowNotes,
     renderCellActions,
