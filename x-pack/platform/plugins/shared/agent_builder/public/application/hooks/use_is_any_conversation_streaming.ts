@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSendMessageContext } from '../context/send_message/send_message_context';
+import { useSendMessageContext } from '../context/streaming/streaming_context';
 
 /**
  * Returns true while ANY conversation is streaming. Derived from the lifted

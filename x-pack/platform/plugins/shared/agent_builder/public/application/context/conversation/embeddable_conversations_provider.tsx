@@ -18,7 +18,7 @@ import type {
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
-import { SendMessageProvider } from '../send_message/send_message_context';
+import { SendMessageProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';

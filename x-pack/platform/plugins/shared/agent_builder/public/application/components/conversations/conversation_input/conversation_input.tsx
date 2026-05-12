@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useSendMessage } from '../../../context/streaming/streaming_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';

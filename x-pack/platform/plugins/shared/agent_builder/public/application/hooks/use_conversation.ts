@@ -23,7 +23,7 @@ import { storageKeys } from '../storage_keys';
 import {
   useSendMessageContext,
   useStreamRecord,
-} from '../context/send_message/send_message_context';
+} from '../context/streaming/streaming_context';
 import { useActiveSpaceId } from '../context/active_space_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';

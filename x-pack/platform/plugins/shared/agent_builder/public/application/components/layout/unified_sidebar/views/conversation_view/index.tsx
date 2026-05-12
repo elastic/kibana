@@ -34,7 +34,7 @@ import { useValidateAgentId } from '../../../../../hooks/agents/use_validate_age
 import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
-import { useSendMessageContext } from '../../../../../context/send_message/send_message_context';
+import { useSendMessageContext } from '../../../../../context/streaming/streaming_context';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';

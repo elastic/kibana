@@ -11,7 +11,7 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useToasts } from '../../../../hooks/use_toasts';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { useSendMessage } from '../../../../context/streaming/streaming_context';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {

@@ -11,7 +11,7 @@ import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
-import { useSendMessageContext, useStreamRecord } from './send_message_context';
+import { useSendMessageContext, useStreamRecord } from './streaming_context';
 
 /**
  * Per-conversation scoped hook. Use INSIDE a conversation tree — it reads `conversationId`

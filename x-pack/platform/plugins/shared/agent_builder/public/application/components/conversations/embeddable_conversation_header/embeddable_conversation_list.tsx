@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useSendMessageContext } from '../../../context/send_message/send_message_context';
+import { useSendMessageContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import {
   createConversationListItemStyles,

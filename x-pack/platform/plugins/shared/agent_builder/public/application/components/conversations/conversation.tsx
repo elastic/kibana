@@ -28,7 +28,7 @@ import { useShouldStickToBottom } from '../../context/conversation/use_should_st
 import {
   useSendMessage,
   useSendMessageContext,
-} from '../../context/send_message/send_message_context';
+} from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
