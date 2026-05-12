@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POC: Custom Workflow Suggest Widget (IContentWidget + Context Keys)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1d1e24;
+    color: #dfe5ef;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    padding: 12px 20px;
+    background: #25262e;
+    border-bottom: 1px solid #343741;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #98a2b3;
+  }
+
+  .header .hint {
+    font-size: 12px;
+    color: #69707d;
+  }
+
+  .header .hint kbd {
+    background: #343741;
+    border: 1px solid #4a4f5c;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: inherit;
+    font-size: 11px;
+  }
+
+  .scenario-tabs {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  .scenario-tab {
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid #343741;
+    background: transparent;
+    color: #98a2b3;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .scenario-tab:hover { background: #343741; }
+  .scenario-tab.active { background: #006bb8; color: #fff; border-color: #006bb8; }
+
+  #editor-container {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Debug bar */
+  .debug-bar {
+    padding: 6px 20px;
+    background: #25262e;
+    border-top: 1px solid #343741;
+    font-size: 11px;
+    font-family: 'SF Mono', monospace;
+    color: #69707d;
+    display: flex;
+    gap: 24px;
+    flex-shrink: 0;
+  }
+
+  .debug-bar .ctx-key {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .debug-bar .ctx-key .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #343741;
+  }
+
+  .debug-bar .ctx-key .dot.active { background: #7ee2a8; }
+
+  /* ─── Custom Suggest Widget ─── */
+
+  /* Monaco sets `display: block; position: fixed; visibility: inherit;`
+     as inline styles on IContentWidget DOM nodes. Since inline styles
+     override class selectors, we hide the inner wrapper instead —
+     Monaco doesn't touch that. */
+
+  .suggest-widget-inner {
+    display: flex;
+    background: #1d1e24;
+    border: 1px solid #343741;
+    border-radius: 6px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+    overflow: hidden;
+    max-height: 340px;
+  }
+
+  .suggest-widget-inner.hidden { display: none; }
+
+  /* ── Left panel: Suggestion list ── */
+
+  .suggest-list-panel {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #343741;
+  }
+
+  .suggest-list-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #69707d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #2a2b33;
+    flex-shrink: 0;
+  }
+
+  .suggest-list {
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .suggest-list::-webkit-scrollbar { width: 6px; }
+  .suggest-list::-webkit-scrollbar-track { background: transparent; }
+  .suggest-list::-webkit-scrollbar-thumb { background: #4a4f5c; border-radius: 3px; }
+  .suggest-list::-webkit-scrollbar-thumb:hover { background: #69707d; }
+
+  .suggest-item {
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #dfe5ef;
+    line-height: 1.4;
+  }
+
+  .suggest-item:hover { background: #25262e; }
+  .suggest-item.selected { background: #006bb8; color: #fff; }
+
+  .suggest-item-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #69707d;
+    background: #25262e;
+    border-radius: 3px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .suggest-item.selected .suggest-item-icon {
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .suggest-item-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+  }
+
+  .suggest-item-label .match {
+    font-weight: 700;
+    color: #fec514;
+  }
+
+  .suggest-item.selected .suggest-item-label .match {
+    color: #fff;
+  }
+
+  .suggest-item-kind {
+    font-size: 10px;
+    color: #69707d;
+    flex-shrink: 0;
+  }
+
+  .suggest-item.selected .suggest-item-kind {
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* ── Right panel: Details ── */
+
+  .suggest-details-panel {
+    width: 380px;
+    padding: 14px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .suggest-details-panel::-webkit-scrollbar { width: 6px; }
+  .suggest-details-panel::-webkit-scrollbar-track { background: transparent; }
+  .suggest-details-panel::-webkit-scrollbar-thumb { background: #4a4f5c; border-radius: 3px; }
+
+  .detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .detail-context {
+    font-size: 11px;
+    color: #69707d;
+    margin-bottom: 2px;
+  }
+
+  .detail-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #dfe5ef;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  }
+
+  .detail-code-link {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #69707d;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .detail-code-link:hover {
+    background: #343741;
+    color: #98a2b3;
+  }
+
+  .detail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .detail-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #69707d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .detail-type-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .type-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  }
+
+  .type-badge.string { background: #1b4332; color: #7ee2a8; }
+  .type-badge.number { background: #1a3a5c; color: #6dccf8; }
+  .type-badge.boolean { background: #4a2c1a; color: #f5a623; }
+  .type-badge.array { background: #3b1f5c; color: #c084fc; }
+  .type-badge.object { background: #1a3a3a; color: #5de0d6; }
+  .type-badge.unknown { background: #343741; color: #98a2b3; }
+  .type-badge.integer { background: #1a3a5c; color: #6dccf8; }
+  .type-badge.enum { background: #3b2f1a; color: #fec514; }
+
+  .detail-required {
+    font-size: 13px;
+    color: #dfe5ef;
+  }
+
+  .detail-required.yes {
+    color: #f66;
+    font-weight: 600;
+  }
+
+  .detail-description {
+    font-size: 13px;
+    color: #98a2b3;
+    line-height: 1.5;
+  }
+
+  .detail-default {
+    font-size: 12px;
+    color: #98a2b3;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    background: #25262e;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .detail-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #4a4f5c;
+    font-size: 13px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>POC v2 — IContentWidget + Context Keys + addAction keybindings</h1>
+  <span class="hint">Press <kbd>Cmd</kbd>+<kbd>I</kbd> to trigger, or type after a key</span>
+  <div class="scenario-tabs">
+    <button class="scenario-tab active" data-scenario="connector-types">Connector Types</button>
+    <button class="scenario-tab" data-scenario="connector-params">Connector Params</button>
+    <button class="scenario-tab" data-scenario="template-vars">Template Variables</button>
+  </div>
+</div>
+
+<div id="editor-container"></div>
+
+<div class="debug-bar">
+  <div class="ctx-key">
+    <span class="dot" id="dot-visible"></span>
+    <span>customSuggestWidgetVisible</span>
+  </div>
+  <div class="ctx-key">
+    <span class="dot" id="dot-focus"></span>
+    <span>editorTextFocus</span>
+  </div>
+  <div id="debug-position" style="margin-left: auto;">—</div>
+  <div id="debug-filter">filter: ""</div>
+  <div id="debug-widget-type">widget: IContentWidget</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<script>
+
+// ─────────────────────────────────────────────────────────────
+// Suggestion Data (unchanged from v1)
+// ─────────────────────────────────────────────────────────────
+
+const SUGGESTION_DATA = {
+  'connector-types': {
+    context: 'Step Type',
+    items: [
+      { label: 'elasticsearch.search', kind: 'connector', types: ['action'], description: 'Search for documents in an Elasticsearch index. Supports full Query DSL, aggregations, and runtime fields.', required: false },
+      { label: 'elasticsearch.index', kind: 'connector', types: ['action'], description: 'Index a document into Elasticsearch. Creates or updates a document with the specified ID.', required: false },
+      { label: 'elasticsearch.delete', kind: 'connector', types: ['action'], description: 'Delete a document from an Elasticsearch index by ID.', required: false },
+      { label: 'slack.sendMessage', kind: 'connector', types: ['action'], description: 'Send a message to a Slack channel or user via the Slack Web API.', required: false },
+      { label: 'slack.postBlockKit', kind: 'connector', types: ['action'], description: 'Post a rich Block Kit message to a Slack channel with interactive components.', required: false },
+      { label: 'http', kind: 'step', types: ['action'], description: 'Make an HTTP request to any URL. Supports GET, POST, PUT, PATCH, DELETE methods with headers and body.', required: false },
+      { label: 'data.set', kind: 'step', types: ['transform'], description: 'Set a value in the workflow data context. Use Liquid templates to compute derived values.', required: false },
+      { label: 'data.filter', kind: 'step', types: ['transform'], description: 'Filter an array using a Liquid condition. Returns items matching the predicate.', required: false },
+      { label: 'wait', kind: 'step', types: ['control'], description: 'Pause workflow execution for a specified duration. Accepts seconds, minutes, or hours.', required: false },
+      { label: 'condition', kind: 'step', types: ['control'], description: 'Branch workflow execution based on a Liquid expression. Supports if/else paths.', required: false },
+      { label: 'loop', kind: 'step', types: ['control'], description: 'Iterate over an array and execute sub-steps for each element.', required: false },
+      { label: 'kubernetes_api.invoke', kind: 'connector', types: ['action'], description: 'Make a Kubernetes API call. Supports list, get, create, patch, and delete operations.', required: false },
+      { label: 'kubernetes_api.get_version', kind: 'connector', types: ['action'], description: 'Get the Kubernetes cluster version info.', required: false },
+    ],
+  },
+
+  'connector-params': {
+    context: 'Elasticsearch.search Parameter',
+    items: [
+      { label: 'query', kind: 'param', types: ['object'], required: true, description: 'The search query in Elasticsearch Query DSL format. Supports match, bool, range, term, and all other query types.', defaultValue: '{}' },
+      { label: 'index', kind: 'param', types: ['string', 'array'], required: true, description: 'Target index or indices to search. Accepts a single index name, comma-separated names, or a wildcard pattern.', defaultValue: '"*"' },
+      { label: 'size', kind: 'param', types: ['number'], required: false, description: 'Maximum number of hits to return. Defaults to 10. Set to 0 to only return aggregation results.', defaultValue: '10' },
+      { label: 'from', kind: 'param', types: ['number'], required: false, description: 'Starting offset for returned hits. Used with size for pagination.', defaultValue: '0' },
+      { label: '_source', kind: 'param', types: ['boolean', 'object'], required: false, description: 'Control which fields of _source are returned. Set to false to disable, or specify includes/excludes.', defaultValue: 'true' },
+      { label: '_source_includes', kind: 'param', types: ['string', 'array'], required: false, description: 'Comma-separated list of source fields to include in the response.', defaultValue: undefined },
+      { label: '_source_excludes', kind: 'param', types: ['string', 'array'], required: false, description: 'Comma-separated list of source fields to exclude from the response.', defaultValue: undefined },
+      { label: 'sort', kind: 'param', types: ['string', 'array', 'object'], required: false, description: 'Sort order for results. Accepts field name, array of fields, or full sort objects with order and mode.', defaultValue: undefined },
+      { label: 'aggs', kind: 'param', types: ['object'], required: false, description: 'Aggregation definitions. Supports all Elasticsearch aggregation types: terms, histogram, date_histogram, etc.', defaultValue: '{}' },
+      { label: 'highlight', kind: 'param', types: ['object'], required: false, description: 'Highlighting configuration. Specify fields and highlight options for matched query terms.', defaultValue: undefined },
+      { label: 'timeout', kind: 'param', types: ['string'], required: false, description: 'Search timeout as a time value (e.g., "30s"). Limits the time each shard can process the query.', defaultValue: undefined },
+      { label: 'seq_no_primary_term', kind: 'param', types: ['boolean'], required: false, description: 'If true, returns sequence number and primary term of the last modification of each hit.', defaultValue: 'false' },
+      { label: 'suggest_field', kind: 'param', types: ['string'], required: false, description: 'Field to use for term or phrase suggestions.', defaultValue: undefined },
+      { label: 'suggest_size', kind: 'param', types: ['number'], required: false, description: 'Maximum number of suggestions to return per suggest text term.', defaultValue: '5' },
+      { label: 'batched_reduce_size', kind: 'param', types: ['number'], required: false, description: 'Number of shard results to reduce on each batch. Reduces memory for large number of shards.', defaultValue: '512' },
+      { label: 'pre_filter_shard_size', kind: 'param', types: ['number'], required: false, description: 'Threshold for pre-filtering shards based on query rewriting. Shards below this are skipped.', defaultValue: '128' },
+      { label: 'force_synthetic_source', kind: 'param', types: ['boolean'], required: false, description: 'Force the use of synthetic _source, even if the mapping does not enable it.', defaultValue: 'false' },
+      { label: 'track_total_hits', kind: 'param', types: ['boolean', 'integer'], required: false, description: 'Whether to track the total number of matching documents. Set to true or an integer threshold.', defaultValue: '10000' },
+    ],
+  },
+
+  'template-vars': {
+    context: 'Template Variable',
+    items: [
+      { label: 'steps.search_alerts.result', kind: 'variable', types: ['object'], required: false, description: 'The output of the "search_alerts" step. Contains the full response body from the connector action.' },
+      { label: 'steps.search_alerts.result.hits.hits', kind: 'variable', types: ['array'], required: false, description: 'Array of matching documents from the search step. Each hit contains _source, _id, and _score.' },
+      { label: 'steps.search_alerts.result.hits.total.value', kind: 'variable', types: ['number'], required: false, description: 'Total number of documents matching the search query.' },
+      { label: 'steps.notify_slack.result', kind: 'variable', types: ['object'], required: false, description: 'The response from the Slack notification step. Contains ok, channel, ts, and message fields.' },
+      { label: 'steps.enrich_data.result', kind: 'variable', types: ['object'], required: false, description: 'Output of the data enrichment step.' },
+      { label: 'inputs.threshold', kind: 'variable', types: ['number'], required: false, description: 'User-provided threshold value. Defined in the workflow inputs section.', defaultValue: '100' },
+      { label: 'inputs.channel', kind: 'variable', types: ['string'], required: false, description: 'Target Slack channel for notifications. Defined in the workflow inputs section.', defaultValue: '"#alerts"' },
+      { label: 'inputs.index_pattern', kind: 'variable', types: ['string'], required: false, description: 'Elasticsearch index pattern to query. Defined in the workflow inputs section.', defaultValue: '".alerts-*"' },
+      { label: 'inputs.severity', kind: 'variable', types: ['enum'], required: false, description: 'Alert severity filter. Defined in the workflow inputs section. One of: critical, high, medium, low.', defaultValue: '"critical"' },
+      { label: 'consts.max_retries', kind: 'variable', types: ['number'], required: false, description: 'Maximum retry attempts for failed steps. Defined in the workflow constants section.', defaultValue: '3' },
+      { label: 'consts.api_base_url', kind: 'variable', types: ['string'], required: false, description: 'Base URL for external API calls. Defined in the workflow constants section.' },
+      { label: 'trigger.alert', kind: 'variable', types: ['object'], required: false, description: 'The alert payload that triggered this workflow. Contains alert ID, severity, message, and context.' },
+      { label: 'trigger.alert.severity', kind: 'variable', types: ['string'], required: false, description: 'Severity level of the triggering alert: critical, high, medium, or low.' },
+      { label: 'trigger.timestamp', kind: 'variable', types: ['string'], required: false, description: 'ISO 8601 timestamp of when the workflow was triggered.' },
+    ],
+  },
+};
+
+const SCENARIO_YAML = {
+  'connector-types': `name: Alert Triage Workflow
+enabled: true
+
+triggers:
+  - type: alert
+    rule_ids:
+      - "high-severity-rule"
+
+steps:
+  - name: search_alerts
+    type: \x20
+    connector-id: my-es-connector
+    with:
+      index: ".alerts-security.*"
+      query:
+        bool:
+          filter:
+            - term:
+                kibana.alert.severity: critical
+
+  - name: notify_team
+    type: slack.sendMessage
+    connector-id: my-slack-connector
+    with:
+      channel: "#security-alerts"
+      message: "Found {{ steps.search_alerts.result.hits.total.value }} critical alerts"
+`,
+
+  'connector-params': `name: Alert Triage Workflow
+enabled: true
+
+triggers:
+  - type: alert
+
+steps:
+  - name: search_alerts
+    type: elasticsearch.search
+    connector-id: my-es-connector
+    with:
+      index: ".alerts-security.*"
+      \x20
+      query:
+        bool:
+          filter:
+            - term:
+                kibana.alert.severity: critical
+`,
+
+  'template-vars': `name: Alert Triage Workflow
+enabled: true
+
+inputs:
+  threshold:
+    type: number
+    default: 100
+  channel:
+    type: string
+    default: "#alerts"
+
+consts:
+  max_retries: 3
+  api_base_url: "https://api.example.com"
+
+triggers:
+  - type: alert
+
+steps:
+  - name: search_alerts
+    type: elasticsearch.search
+    connector-id: my-es-connector
+    with:
+      index: ".alerts-security.*"
+      size: "{{ }}"
+
+  - name: notify_team
+    type: slack.sendMessage
+    connector-id: my-slack-connector
+    with:
+      channel: "{{ inputs.channel }}"
+      message: "Found {{ steps.search_alerts.result.hits.total.value }} alerts"
+`,
+};
+
+const SCENARIO_CURSOR = {
+  'connector-types': { lineNumber: 11, column: 11 },
+  'connector-params': { lineNumber: 12, column: 7 },
+  'template-vars': { lineNumber: 22, column: 16 },
+};
+
+// ─────────────────────────────────────────────────────────────
+// Fuzzy Match
+// ─────────────────────────────────────────────────────────────
+
+function fuzzyMatch(pattern, text) {
+  if (!pattern) return { matches: true, indices: [], score: 0 };
+  const pLower = pattern.toLowerCase();
+  const tLower = text.toLowerCase();
+  const indices = [];
+  let pi = 0;
+  for (let ti = 0; ti < tLower.length && pi < pLower.length; ti++) {
+    if (tLower[ti] === pLower[pi]) {
+      indices.push(ti);
+      pi++;
+    }
+  }
+  if (pi < pLower.length) return { matches: false, indices: [], score: -1 };
+  let score = 0;
+  for (let i = 0; i < indices.length; i++) {
+    score -= indices[i];
+    if (i > 0 && indices[i] === indices[i - 1] + 1) score += 10;
+  }
+  return { matches: true, indices, score };
+}
+
+function highlightLabel(label, indices) {
+  if (!indices.length) return escapeHtml(label);
+  const set = new Set(indices);
+  let html = '';
+  for (let i = 0; i < label.length; i++) {
+    const ch = escapeHtml(label[i]);
+    html += set.has(i) ? `<span class="match">${ch}</span>` : ch;
+  }
+  return html;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Monaco Setup
+// ─────────────────────────────────────────────────────────────
+
+require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs' } });
+
+require(['vs/editor/editor.main'], function (monaco) {
+
+  // Enable fixedOverflowWidgets so content widgets can escape the editor bounds
+  // (same option Kibana uses in code_editor.tsx)
+  const editor = monaco.editor.create(document.getElementById('editor-container'), {
+    value: SCENARIO_YAML['connector-types'],
+    language: 'yaml',
+    theme: 'vs-dark',
+    fontSize: 13,
+    fontFamily: "'SF Mono', 'Fira Code', Consolas, monospace",
+    minimap: { enabled: false },
+    lineNumbers: 'on',
+    renderLineHighlight: 'all',
+    scrollBeyondLastLine: false,
+    padding: { top: 12 },
+    tabSize: 2,
+    fixedOverflowWidgets: true,   // KEY: allows content widgets to overflow editor bounds
+    quickSuggestions: false,       // Suppress built-in suggest widget
+    suggestOnTriggerCharacters: false,
+    wordBasedSuggestions: 'off',
+    parameterHints: { enabled: false },
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // Context Keys (public API: editor.createContextKey)
+  //
+  // These gate keybindings so arrow/enter/escape only intercept
+  // when the custom widget is visible. Same mechanism Monaco uses
+  // internally for `suggestWidgetVisible`.
+  // ─────────────────────────────────────────────────────────────
+
+  const ctxWidgetVisible = editor.createContextKey('customSuggestWidgetVisible', false);
+
+  // Debug: update status bar dots
+  function updateDebugBar() {
+    document.getElementById('dot-visible').classList.toggle('active', !!ctxWidgetVisible.get());
+    document.getElementById('debug-filter').textContent = `filter: "${filterText}"`;
+    const pos = editor.getPosition();
+    document.getElementById('debug-position').textContent = pos
+      ? `Ln ${pos.lineNumber}, Col ${pos.column}`
+      : '—';
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Custom Suggest Widget as IContentWidget
+  //
+  // IContentWidget positions relative to text content (line/col),
+  // scrolls with the text, and auto-flips ABOVE/BELOW based on
+  // available space. allowEditorOverflow lets it extend beyond
+  // the editor viewport (same as Monaco's built-in suggest widget).
+  // ─────────────────────────────────────────────────────────────
+
+  let currentScenario = 'connector-types';
+  let selectedIndex = 0;
+  let filterText = '';
+  let filteredItems = [];
+  let anchorPosition = null; // {lineNumber, column} where widget was triggered
+
+  // Create widget DOM
+  const widgetEl = document.createElement('div');
+  widgetEl.className = 'suggest-widget-custom';
+  // Set explicit width so Monaco's max-width doesn't clip the flex children
+  widgetEl.style.width = '702px'; // 320 + 1 (border) + 380 + 1 (border)
+  widgetEl.innerHTML = `
+    <div class="suggest-widget-inner hidden">
+      <div class="suggest-list-panel">
+        <div class="suggest-list-header">Suggested</div>
+        <div class="suggest-list"></div>
+      </div>
+      <div class="suggest-details-panel">
+        <div class="detail-empty">Select a suggestion to see details</div>
+      </div>
+    </div>
+  `;
+  const innerEl = widgetEl.querySelector('.suggest-widget-inner');
+
+  // Prevent clicks on the widget from stealing editor focus
+  widgetEl.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+  });
+
+  const listEl = widgetEl.querySelector('.suggest-list');
+  const detailsEl = widgetEl.querySelector('.suggest-details-panel');
+
+  // ─── IContentWidget implementation ───
+
+  const contentWidget = {
+    getId: () => 'custom.suggest.widget',
+
+    getDomNode: () => widgetEl,
+
+    // allowEditorOverflow: the widget DOM is placed in the overflow container
+    // (outside editor's scrollable area), so it can extend beyond the viewport.
+    // In Kibana this renders into [data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"].
+    allowEditorOverflow: true,
+
+    // suppressMouseDown: prevents the editor from receiving mousedown events
+    // that originate on this widget (keeps editor focus stable when clicking suggestions).
+    suppressMouseDown: true,
+
+    getPosition: () => {
+      if (!anchorPosition) return null;
+      return {
+        position: anchorPosition,
+        preference: [
+          // Try below cursor first, flip above if not enough space
+          monaco.editor.ContentWidgetPositionPreference.BELOW,
+          monaco.editor.ContentWidgetPositionPreference.ABOVE,
+        ],
+      };
+    },
+  };
+
+  // Register the widget once. We show/hide via CSS class and
+  // call layoutContentWidget() to reposition when anchor changes.
+  editor.addContentWidget(contentWidget);
+
+  // ─────────────────────────────────────────────────────────────
+  // Keybindings via editor.addAction (precondition-gated)
+  //
+  // These actions ONLY fire when customSuggestWidgetVisible is true.
+  // When the widget is hidden, arrow keys, Enter, Escape all
+  // behave normally (Monaco's default behavior).
+  //
+  // addAction is the recommended public API for conditional
+  // keybindings — it creates proper keybinding rules internally.
+  // ─────────────────────────────────────────────────────────────
+
+  editor.addAction({
+    id: 'customSuggest.selectPrevious',
+    label: 'Custom Suggest: Select Previous',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.UpArrow],
+    run: () => {
+      selectedIndex = Math.max(0, selectedIndex - 1);
+      renderList();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.selectNext',
+    label: 'Custom Suggest: Select Next',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.DownArrow],
+    run: () => {
+      selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 1);
+      renderList();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.accept',
+    label: 'Custom Suggest: Accept',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.Enter, monaco.KeyCode.Tab],
+    run: () => {
+      acceptSuggestion();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.dismiss',
+    label: 'Custom Suggest: Dismiss',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.Escape],
+    run: () => {
+      hideWidget();
+    },
+  });
+
+  // Page Up / Page Down for fast scrolling
+  editor.addAction({
+    id: 'customSuggest.pageUp',
+    label: 'Custom Suggest: Page Up',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.PageUp],
+    run: () => {
+      selectedIndex = Math.max(0, selectedIndex - 8);
+      renderList();
+    },
+  });
+
+  editor.addAction({
+    id: 'customSuggest.pageDown',
+    label: 'Custom Suggest: Page Down',
+    precondition: 'customSuggestWidgetVisible',
+    keybindings: [monaco.KeyCode.PageDown],
+    run: () => {
+      selectedIndex = Math.min(filteredItems.length - 1, selectedIndex + 8);
+      renderList();
+    },
+  });
+
+  // Trigger widget: Cmd+I on Mac / Ctrl+I on Win/Linux
+  // (Cmd+Space is Spotlight on Mac, Ctrl+Space triggers Monaco's built-in suggest)
+  editor.addAction({
+    id: 'customSuggest.trigger',
+    label: 'Custom Suggest: Trigger',
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
+    run: () => {
+      showWidget();
+    },
+  });
+
+  // Suppress Monaco's built-in suggest widget entirely.
+  // The built-in trigger is Ctrl+Space — unbind it so it doesn't conflict.
+  // Also suppress the built-in accept/navigation keybindings when our widget is open.
+  monaco.editor.addKeybindingRules([
+    // Unbind Ctrl+Space from built-in suggest (we use Cmd+I instead)
+    {
+      keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space,
+      command: null,
+    },
+    {
+      keybinding: monaco.KeyCode.Space | monaco.KeyMod.WinCtrl,
+      command: null,
+    },
+    // When our widget is visible, suppress built-in suggest navigation
+    // so our addAction handlers take priority
+    {
+      keybinding: monaco.KeyCode.Enter,
+      command: null,
+      when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
+    },
+    {
+      keybinding: monaco.KeyCode.Tab,
+      command: null,
+      when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
+    },
+    {
+      keybinding: monaco.KeyCode.Escape,
+      command: null,
+      when: 'customSuggestWidgetVisible && !suggestWidgetVisible',
+    },
+  ]);
+
+  // ─────────────────────────────────────────────────────────────
+  // Filter text tracking via onDidChangeModelContent
+  //
+  // Instead of fragile onKeyDown char-matching, we listen to
+  // actual model content changes to track what the user typed
+  // since the widget opened. This handles all input methods
+  // (keyboard, paste, IME, etc.)
+  // ─────────────────────────────────────────────────────────────
+
+  editor.onDidChangeModelContent((e) => {
+    if (!ctxWidgetVisible.get() || isAccepting) return;
+
+    for (const change of e.changes) {
+      if (change.text.length > 0 && change.rangeLength === 0) {
+        // Insertion — append to filter (handles single chars, paste, IME)
+        filterText += change.text;
+      } else if (change.text.length === 0 && change.rangeLength > 0) {
+        // Deletion — trim filter from the end
+        filterText = filterText.slice(0, Math.max(0, filterText.length - change.rangeLength));
+      } else if (change.text.length > 0 && change.rangeLength > 0) {
+        // Replacement — trim deleted, then append inserted
+        filterText = filterText.slice(0, Math.max(0, filterText.length - change.rangeLength));
+        filterText += change.text;
+      }
+    }
+
+    selectedIndex = 0;
+    renderList();
+    updateDebugBar();
+
+    // If filter becomes empty from backspace, dismiss
+    if (filterText.length === 0 && e.changes.some(c => c.rangeLength > 0)) {
+      hideWidget();
+    }
+  });
+
+  // ─── Dismiss on cursor moving to a different line ───
+
+  editor.onDidChangeCursorPosition((e) => {
+    if (!ctxWidgetVisible.get()) return;
+
+    // If cursor moved to a completely different line, dismiss
+    if (anchorPosition && e.position.lineNumber !== anchorPosition.lineNumber) {
+      hideWidget();
+      return;
+    }
+
+    updateDebugBar();
+  });
+
+  // Dismiss on click outside widget
+  editor.onMouseDown(() => {
+    if (ctxWidgetVisible.get()) {
+      hideWidget();
+    }
+  });
+
+  // Reposition on scroll (IContentWidget auto-handles this, but
+  // we may need to update visibility for edge cases)
+  editor.onDidScrollChange(() => {
+    if (ctxWidgetVisible.get()) {
+      editor.layoutContentWidget(contentWidget);
+    }
+  });
+
+  // Track editor focus for debug bar
+  editor.onDidFocusEditorText(() => {
+    document.getElementById('dot-focus').classList.add('active');
+  });
+  editor.onDidBlurEditorText(() => {
+    document.getElementById('dot-focus').classList.remove('active');
+    // Optionally dismiss on blur (in production, delay to allow widget clicks)
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // Widget show/hide/accept logic
+  // ─────────────────────────────────────────────────────────────
+
+  function getIconForKind(kind) {
+    switch (kind) {
+      case 'connector': return '>_';
+      case 'step': return 'fn';
+      case 'param': return 'P';
+      case 'variable': return '$';
+      default: return '?';
+    }
+  }
+
+  function getFilteredItems() {
+    const data = SUGGESTION_DATA[currentScenario];
+    if (!data) return [];
+    if (!filterText) return data.items.map((item, i) => ({ ...item, matchIndices: [], score: 0, origIndex: i }));
+
+    return data.items
+      .map((item, i) => {
+        const result = fuzzyMatch(filterText, item.label);
+        return { ...item, matchIndices: result.indices, score: result.score, matches: result.matches, origIndex: i };
+      })
+      .filter(item => item.matches)
+      .sort((a, b) => b.score - a.score);
+  }
+
+  function renderList() {
+    filteredItems = getFilteredItems();
+    if (filteredItems.length === 0) {
+      hideWidget();
+      return;
+    }
+
+    selectedIndex = Math.min(selectedIndex, filteredItems.length - 1);
+    selectedIndex = Math.max(selectedIndex, 0);
+
+    listEl.innerHTML = filteredItems.map((item, i) => `
+      <div class="suggest-item ${i === selectedIndex ? 'selected' : ''}" data-index="${i}">
+        <span class="suggest-item-icon">${getIconForKind(item.kind)}</span>
+        <span class="suggest-item-label">${highlightLabel(item.label, item.matchIndices)}</span>
+        <span class="suggest-item-kind">${item.kind}</span>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.suggest-item').forEach(el => {
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selectedIndex = parseInt(el.dataset.index);
+        acceptSuggestion();
+      });
+      el.addEventListener('mouseover', () => {
+        const idx = parseInt(el.dataset.index);
+        if (idx !== selectedIndex) {
+          selectedIndex = idx;
+          renderList();
+        }
+      });
+    });
+
+    const selectedEl = listEl.querySelector('.suggest-item.selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    renderDetails();
+  }
+
+  function renderDetails() {
+    if (filteredItems.length === 0) {
+      detailsEl.innerHTML = '<div class="detail-empty">No matching suggestions</div>';
+      return;
+    }
+
+    const item = filteredItems[selectedIndex];
+    if (!item) return;
+
+    const data = SUGGESTION_DATA[currentScenario];
+    const contextLabel = data.context;
+
+    const typeBadgesHtml = (item.types || []).map(t =>
+      `<span class="type-badge ${t}">${escapeHtml(t)}</span>`
+    ).join('');
+
+    const requiredHtml = item.required !== undefined
+      ? `<div class="detail-section">
+           <div class="detail-label">Required</div>
+           <div class="detail-required ${item.required ? 'yes' : ''}">${item.required ? 'Yes' : 'No'}</div>
+         </div>`
+      : '';
+
+    const defaultHtml = item.defaultValue !== undefined
+      ? `<div class="detail-section">
+           <div class="detail-label">Default</div>
+           <div class="detail-default">${escapeHtml(String(item.defaultValue))}</div>
+         </div>`
+      : '';
+
+    detailsEl.innerHTML = `
+      <div class="detail-header">
+        <div>
+          <div class="detail-context">${escapeHtml(contextLabel)}:</div>
+          <div class="detail-name">${escapeHtml(item.label)}</div>
+        </div>
+        <div class="detail-code-link" title="View schema">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M5.854 4.146a.5.5 0 0 1 0 .708L3.207 7.5H10.5a.5.5 0 0 1 0 1H3.207l2.647 2.646a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zM11 4a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 11 4zm0 4a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2A.5.5 0 0 1 11 8zm0 4a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+          </svg>
+        </div>
+      </div>
+
+      ${typeBadgesHtml ? `
+      <div class="detail-section">
+        <div class="detail-label">Type</div>
+        <div class="detail-type-badges">${typeBadgesHtml}</div>
+      </div>` : ''}
+
+      ${requiredHtml}
+
+      ${item.description ? `
+      <div class="detail-section">
+        <div class="detail-label">Description</div>
+        <div class="detail-description">${escapeHtml(item.description)}</div>
+      </div>` : ''}
+
+      ${defaultHtml}
+    `;
+  }
+
+  // Flag to suppress onDidChangeModelContent during acceptSuggestion
+  let isAccepting = false;
+
+  function showWidget() {
+    const pos = editor.getPosition();
+    if (!pos) return;
+
+    filterText = '';
+    selectedIndex = 0;
+    anchorPosition = { lineNumber: pos.lineNumber, column: pos.column };
+
+    // Set context key BEFORE showing — this enables the keybindings
+    ctxWidgetVisible.set(true);
+
+    innerEl.classList.remove('hidden');
+
+    // Tell Monaco to (re-)position the content widget at the anchor
+    editor.layoutContentWidget(contentWidget);
+
+    renderList();
+    updateDebugBar();
+  }
+
+  function hideWidget() {
+    innerEl.classList.add('hidden');
+
+    // Clear context key — this disables the keybindings
+    ctxWidgetVisible.set(false);
+
+    filterText = '';
+    anchorPosition = null;
+    updateDebugBar();
+  }
+
+  function acceptSuggestion() {
+    if (!filteredItems.length) return;
+    const item = filteredItems[selectedIndex];
+    if (!item) return;
+
+    const pos = editor.getPosition();
+    if (!pos) return;
+
+    let insertText = item.label;
+    if (item.kind === 'param') {
+      insertText = item.label + ': ';
+    }
+
+    // Replace from anchor column (where widget was triggered) to current cursor
+    const startCol = anchorPosition ? anchorPosition.column : pos.column - filterText.length;
+    const range = new monaco.Range(pos.lineNumber, startCol, pos.lineNumber, pos.column);
+
+    // Suppress the onDidChangeModelContent handler during the edit —
+    // otherwise it would re-filter with the inserted text and keep the widget open
+    isAccepting = true;
+    hideWidget();
+
+    editor.executeEdits('custom-suggest', [{
+      range,
+      text: insertText,
+      forceMoveMarkers: true,
+    }]);
+
+    isAccepting = false;
+    editor.focus();
+  }
+
+  // ─── Scenario switching ───
+
+  function switchScenario(scenario) {
+    currentScenario = scenario;
+    hideWidget();
+
+    document.querySelectorAll('.scenario-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.scenario === scenario);
+    });
+
+    const model = editor.getModel();
+    model.setValue(SCENARIO_YAML[scenario]);
+
+    const cursor = SCENARIO_CURSOR[scenario];
+    setTimeout(() => {
+      editor.setPosition(cursor);
+      editor.focus();
+      showWidget();
+    }, 100);
+  }
+
+  document.querySelectorAll('.scenario-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchScenario(tab.dataset.scenario));
+  });
+
+  // ─── Auto-show widget on load ───
+
+  window.addEventListener('resize', () => editor.layout());
+
+  setTimeout(() => {
+    const cursor = SCENARIO_CURSOR['connector-types'];
+    editor.setPosition(cursor);
+    editor.focus();
+    showWidget();
+  }, 300);
+
+});
+</script>
+</body>
+</html>

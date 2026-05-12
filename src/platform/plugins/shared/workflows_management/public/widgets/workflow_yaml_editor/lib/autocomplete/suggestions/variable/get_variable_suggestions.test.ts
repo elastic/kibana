@@ -89,13 +89,15 @@ describe('getVariableSuggestions', () => {
       const context = createMockAutocompleteContext();
       const suggestions = getVariableSuggestions(context);
 
+      // `detail` carries the type signature; the human description lives on
+      // `documentation` so the suggest widget can render them separately.
       const apiUrlSuggestion = suggestions.find((s) => s.label === 'apiUrl');
-      expect(apiUrlSuggestion?.detail).toBe('string // The API URL: The API URL');
+      expect(apiUrlSuggestion?.detail).toBe('string // The API URL');
+      expect(apiUrlSuggestion?.documentation).toBe('The API URL');
 
       const timeoutSuggestion = suggestions.find((s) => s.label === 'timeout');
-      expect(timeoutSuggestion?.detail).toBe(
-        'number // Request timeout in seconds: Request timeout in seconds'
-      );
+      expect(timeoutSuggestion?.detail).toBe('number // Request timeout in seconds');
+      expect(timeoutSuggestion?.documentation).toBe('Request timeout in seconds');
     });
 
     it('should filter suggestions based on lastPathSegment', () => {

@@ -84,6 +84,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
+import { useCustomSuggestWidget } from '../lib/custom_suggest_widget';
 import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
 import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
@@ -147,6 +148,7 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     showSnippets: true,
     filterGraceful: true, // Better filtering
     localityBonus: true, // Prioritize matches near cursor
+    showStatusBar: false, // Suppress "No suggestions" when custom widget handles display
   },
   wordBasedSuggestions: false,
   hover: {
@@ -481,6 +483,9 @@ export const WorkflowYAMLEditor = ({
   }, []);
 
   useFocusedStepDecoration(editorRef.current);
+
+  // Custom suggest widget (replaces Monaco's built-in suggest widget)
+  useCustomSuggestWidget(editorRef.current, isEditorMounted);
 
   // Decorations
   useTriggerTypeDecorations({

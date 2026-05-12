@@ -107,11 +107,11 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       max-height: 120px;
     }
 
-    .monaco-editor .suggest-widget {
-      border-radius: 6px !important;
-      ${euiShadow(euiThemeContext, 'm')}
-      border-width: 0 !important;
-      overflow: hidden !important; // so border-radius is applied correctly
+    /* Hide built-in suggest widget inside the workflow editor's overflow container
+       — our custom IContentWidget handles display for this editor. Scoped so other
+       Monaco editors on the page keep their built-in suggest UI. */
+    .workflow-custom-suggest-host .suggest-widget {
+      display: none !important;
     }
 
     .monaco-editor .suggest-details > .monaco-scrollable-element > .body > .header > .codicon-close,
