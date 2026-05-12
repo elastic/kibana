@@ -112,6 +112,7 @@ const CompareDocuments = ({
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
+    columnsMeta,
     selectedFieldNames,
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),

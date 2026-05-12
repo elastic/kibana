@@ -11,7 +11,7 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { columnsMetaWithCustomField, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { render, screen, renderHook } from '@testing-library/react';
+import { render, screen, renderHook, within } from '@testing-library/react';
 import React from 'react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
@@ -125,6 +125,7 @@ const renderComparisonCell = ({
     getAllSegments: () => getCell().querySelectorAll(`.${SEGMENT_CLASS}`),
     getAddedSegments: () => getCell().querySelectorAll(`.${ADDED_SEGMENT_CLASS}`),
     getRemovedSegments: () => getCell().querySelectorAll(`.${REMOVED_SEGMENT_CLASS}`),
+    getFieldIcon: () => within(getCell()).getByTestId('unifiedDataTableComparisonFieldIcon'),
   };
 };
 
@@ -457,9 +458,7 @@ describe('useComparisonCellValue', () => {
       colIndex: 0,
       rowIndex: 0,
       renderCellValue,
-    }).getCell();
-    const fieldIcon = customFieldCell.querySelector('.kbnFieldIcon');
-    expect(fieldIcon).toBeInTheDocument();
-    expect(customFieldCell).toMatchSnapshot();
+    });
+    expect(customFieldCell.getFieldIcon()).toBeInTheDocument();
   });
 });

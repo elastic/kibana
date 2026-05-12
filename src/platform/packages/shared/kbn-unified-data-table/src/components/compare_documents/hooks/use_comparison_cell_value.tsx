@@ -135,7 +135,10 @@ const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
     <EuiFlexGroup responsive={false} gutterSize="s">
       {field && (
         <EuiFlexItem grow={false}>
-          <FieldIcon {...getFieldIconProps(field)} />
+          <FieldIcon
+            {...getFieldIconProps(field)}
+            data-test-subj="unifiedDataTableComparisonFieldIcon"
+          />
         </EuiFlexItem>
       )}
       <EuiFlexItem>
