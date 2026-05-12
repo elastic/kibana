@@ -5018,7 +5018,7 @@
               "(name: ",
               "ComponentTemplateName",
               ", modify: (template: ",
-              "ClusterComponentTemplateSummary",
+              "ClusterComponentTemplateSummaryRes",
               ") => ",
               "IndicesPutIndexTemplateIndexTemplateMapping",
               ") => Promise<void>"
@@ -5056,7 +5056,7 @@
                 "description": [],
                 "signature": [
                   "(template: ",
-                  "ClusterComponentTemplateSummary",
+                  "ClusterComponentTemplateSummaryRes",
                   ") => ",
                   "IndicesPutIndexTemplateIndexTemplateMapping"
                 ],
@@ -6465,7 +6465,7 @@
             "description": [],
             "signature": [
               "(indexName: string, modify: (template: ",
-              "IndicesIndexTemplate",
+              "IndicesIndexTemplateWithRollover",
               ") => ",
               "IndicesPutIndexTemplateRequest",
               ") => Promise<void>"
@@ -6502,7 +6502,7 @@
                 "description": [],
                 "signature": [
                   "(template: ",
-                  "IndicesIndexTemplate",
+                  "IndicesIndexTemplateWithRollover",
                   ") => ",
                   "IndicesPutIndexTemplateRequest"
                 ],

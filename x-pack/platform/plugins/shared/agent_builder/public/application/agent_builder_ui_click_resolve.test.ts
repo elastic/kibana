@@ -170,5 +170,37 @@ describe('agent_builder_ui_click_resolve', () => {
         location_pathname: '/x',
       });
     });
+
+    it('resolves portaled clicks when path has agentBuilder. data-ebt-element', () => {
+      const portal = document.createElement('div');
+      document.body.appendChild(portal);
+      const btn = document.createElement('button');
+      btn.setAttribute('data-ebt-element', 'agentBuilder.test.portal');
+      portal.appendChild(btn);
+      try {
+        expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/agents')).toEqual({
+          ebt_element: 'agentBuilder.test.portal',
+          element_kind: 'button',
+          location_pathname: '/agents',
+        });
+      } finally {
+        portal.remove();
+      }
+    });
+
+    it('returns null for clicks outside mount when no agentBuilder. data-ebt-element on path', () => {
+      const outside = document.createElement('div');
+      document.body.appendChild(outside);
+      const btn = document.createElement('button');
+      btn.setAttribute('data-ebt-element', 'other.widget');
+      outside.appendChild(btn);
+      try {
+        expect(
+          resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/manage/tools')
+        ).toBeNull();
+      } finally {
+        outside.remove();
+      }
+    });
   });
 });

@@ -10,6 +10,30 @@ import type {
   ReportUiClickParams,
 } from '@kbn/agent-builder-common/telemetry';
 
+/** Portaled UI uses `data-ebt-element` values with this prefix (Agent Builder contract only). */
+const AGENT_BUILDER_EBT_ELEMENT_PREFIX = 'agentBuilder.';
+
+function getEventTargetElement(event: MouseEvent): Element | null {
+  const t = event.target;
+  if (t instanceof Element) {
+    return t;
+  }
+  if (t instanceof Text && t.parentElement) {
+    return t.parentElement;
+  }
+  return null;
+}
+
+function hasAgentBuilderEbtContractOnPath(element: Element): boolean {
+  for (let cur: Element | null = element; cur; cur = cur.parentElement) {
+    const v = cur.getAttribute('data-ebt-element');
+    if (v?.startsWith(AGENT_BUILDER_EBT_ELEMENT_PREFIX)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function classifyInteractiveKind(el: Element): AgentBuilderUiClickElementKind {
   const role = el.getAttribute('role');
   if (role === 'button') {
@@ -64,8 +88,8 @@ export function isInteractiveDisabled(el: Element): boolean {
   return false;
 }
 
-function findInteractiveAncestor(start: Element | null, root: HTMLElement): Element | null {
-  for (let cur: Element | null = start; cur && root.contains(cur); cur = cur.parentElement) {
+function findInteractiveAncestor(start: Element | null, boundary: HTMLElement): Element | null {
+  for (let cur: Element | null = start; cur && boundary.contains(cur); cur = cur.parentElement) {
     if (isClickableTarget(cur)) {
       return cur;
     }
@@ -75,13 +99,17 @@ function findInteractiveAncestor(start: Element | null, root: HTMLElement): Elem
 
 function collectEbtFromAncestors(
   interactive: Element,
-  root: HTMLElement
+  boundary: HTMLElement
 ): { ebt_element?: string; ebt_action?: string; ebt_detail?: string } {
   let ebtElement: string | undefined;
   let ebtAction: string | undefined;
   let ebtDetail: string | undefined;
 
-  for (let cur: Element | null = interactive; cur && root.contains(cur); cur = cur.parentElement) {
+  for (
+    let cur: Element | null = interactive;
+    cur && boundary.contains(cur);
+    cur = cur.parentElement
+  ) {
     if (!ebtElement) {
       const v = cur.getAttribute('data-ebt-element');
       if (v) {
@@ -111,21 +139,28 @@ function collectEbtFromAncestors(
 
 export function resolveAgentBuilderUiClickPayload(
   event: MouseEvent,
-  root: HTMLElement,
+  mountRoot: HTMLElement,
   locationPathname: string
 ): ReportUiClickParams | null {
   if (event.button !== 0) {
     return null;
   }
-  const rawTarget = event.target;
-  if (!(rawTarget instanceof Element)) {
-    return null;
-  }
-  if (!root.contains(rawTarget)) {
+  const startEl = getEventTargetElement(event);
+  if (!startEl) {
     return null;
   }
 
-  const interactive = findInteractiveAncestor(rawTarget, root);
+  const insideMount = mountRoot.contains(startEl);
+  if (!insideMount && !hasAgentBuilderEbtContractOnPath(startEl)) {
+    return null;
+  }
+
+  const boundary: HTMLElement = insideMount ? mountRoot : document.body;
+  if (!boundary.contains(startEl)) {
+    return null;
+  }
+
+  const interactive = findInteractiveAncestor(startEl, boundary);
   if (!interactive) {
     return null;
   }
@@ -133,7 +168,7 @@ export function resolveAgentBuilderUiClickPayload(
     return null;
   }
 
-  const ebt = collectEbtFromAncestors(interactive, root);
+  const ebt = collectEbtFromAncestors(interactive, boundary);
   const ebtElement = ebt.ebt_element;
   if (!ebtElement) {
     return null;
