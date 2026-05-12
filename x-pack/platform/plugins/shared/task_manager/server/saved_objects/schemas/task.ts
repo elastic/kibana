@@ -87,3 +87,15 @@ export const taskSchemaV8 = taskSchemaV7.extends({
     schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
   ),
 });
+
+export const taskSchemaV9 = taskSchemaV8.extends({
+  uiamApiKey: schema.maybe(schema.string()),
+  userScope: schema.maybe(
+    schema.object({
+      apiKeyId: schema.string(),
+      uiamApiKeyId: schema.maybe(schema.string()),
+      spaceId: schema.string(),
+      apiKeyCreatedByUser: schema.boolean(),
+    })
+  ),
+});

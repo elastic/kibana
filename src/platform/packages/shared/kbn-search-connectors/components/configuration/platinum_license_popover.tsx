@@ -66,7 +66,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           {subscriptionLink && (
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="popout" target="_blank" href={subscriptionLink}>
+              <EuiButton iconType="external" target="_blank" href={subscriptionLink}>
                 {i18n.translate('searchConnectors.connectors.subscriptionLabel', {
                   defaultMessage: 'Subscription plans',
                 })}

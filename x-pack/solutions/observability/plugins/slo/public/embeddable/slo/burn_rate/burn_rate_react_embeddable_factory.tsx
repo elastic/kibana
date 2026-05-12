@@ -24,6 +24,7 @@ import { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn
 import type { BurnRateApi, BurnRateCustomState, BurnRateEmbeddableState } from './types';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
+import { ensureLicense } from '../ensure_license';
 
 const getTitle = () =>
   i18n.translate('xpack.slo.burnRateEmbeddable.title', {
@@ -41,7 +42,14 @@ export const getBurnRateEmbeddableFactory = ({
 }) => {
   const factory: EmbeddableFactory<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+    buildEmbeddable: async ({
+      initialState,
+      finalizeApi,
+      uuid,
+      parentApi,
+      initializeDrilldownsManager,
+    }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
@@ -50,22 +58,29 @@ export const getBurnRateEmbeddableFactory = ({
         slo_instance_id: '*',
         duration: '',
       });
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const reload$ = new Subject<boolean>();
 
-      function serializeState() {
+      function serializeState(): BurnRateEmbeddableState {
         return {
           ...titleManager.getLatestState(),
           ...sloBurnRateManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<BurnRateEmbeddableState>({
         uuid,
         parentApi,
-        anyStateChange$: merge(titleManager.anyStateChange$, sloBurnRateManager.anyStateChange$),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          sloBurnRateManager.anyStateChange$,
+          drilldownsManager.anyStateChange$
+        ),
         serializeState,
         getComparators: () => ({
           ...titleComparators,
+          ...drilldownsManager.comparators,
           slo_id: 'referenceEquality',
           slo_instance_id: 'referenceEquality',
           duration: 'referenceEquality',
@@ -73,12 +88,14 @@ export const getBurnRateEmbeddableFactory = ({
         onReset: (lastSaved) => {
           sloBurnRateManager.reinitializeState(lastSaved);
           titleManager.reinitializeState(lastSaved);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...unsavedChangesApi,
+        ...drilldownsManager.api,
         defaultTitle$,
         serializeState,
       });
@@ -101,6 +118,7 @@ export const getBurnRateEmbeddableFactory = ({
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              drilldownsManager.cleanup();
             };
           }, []);
 

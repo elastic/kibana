@@ -29,6 +29,7 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
@@ -319,6 +320,7 @@ export function registerTransactionDurationRuleType({
           [PROCESSOR_EVENT]: ProcessorEvent.transaction,
           [ALERT_EVALUATION_VALUE]: transactionDuration,
           [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
+          [ALERT_GROUPING]: groupingObject,
           [ALERT_REASON]: reason,
           [ALERT_INDEX_PATTERN]: index,
           ...sourceFields,
@@ -369,7 +371,8 @@ export function registerTransactionDurationRuleType({
           alertHits?.[ALERT_EVALUATION_VALUE]
         ).formatted;
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-        const groupingObject = unflattenObject(groupByFields);
+        const groupingObjectFromRecoveredAlert =
+          alertHits?.[ALERT_GROUPING] ?? unflattenObject(groupByFields);
 
         const recoveredContext = {
           alertDetailsUrl,
@@ -383,7 +386,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: groupingObjectFromRecoveredAlert,
           ...groupByActionVariables,
         };
 

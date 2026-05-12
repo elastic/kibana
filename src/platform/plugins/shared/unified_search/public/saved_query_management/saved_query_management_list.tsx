@@ -164,7 +164,16 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.description) {
     label = (
       <>
-        {label} <EuiIcon type="info" color="subdued" size="s" />
+        {label}{' '}
+        <EuiIcon
+          type="info"
+          color="subdued"
+          size="s"
+          aria-label={i18n.translate(
+            'unifiedSearch.search.searchBar.savedQueryHasDescriptionAriaLabel',
+            { defaultMessage: 'Has description' }
+          )}
+        />
       </>
     );
   }
@@ -172,7 +181,16 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.timefilter) {
     label = (
       <>
-        {label} <EuiIcon type="clock" color="subdued" size="s" />
+        {label}{' '}
+        <EuiIcon
+          type="clock"
+          color="subdued"
+          size="s"
+          aria-label={i18n.translate(
+            'unifiedSearch.search.searchBar.savedQueryHasTimeFilterAriaLabel',
+            { defaultMessage: 'Has time filter' }
+          )}
+        />
       </>
     );
   }

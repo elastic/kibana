@@ -35,7 +35,7 @@ export const commonRouteConfig = {
   security: {
     authz: {
       enabled: false,
-      reason: 'Relies on Content Client for authorization',
+      reason: 'Relies on Saved Objects Client for authorization',
     },
   },
 } as const;

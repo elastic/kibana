@@ -1,0 +1,250 @@
+{
+  "id": "@kbn/as-code-shared-schemas",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.getMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getMeta",
+        "description": [],
+        "signature": [
+          "(savedObject: Pick<",
+          "SavedObject",
+          "<unknown>, \"version\" | \"created_at\" | \"updated_at\" | \"managed\" | \"created_by\" | \"updated_by\" | \"accessControl\">) => Readonly<{ version?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; managed?: boolean | undefined; owner?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; } & {}>"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/meta/get_meta.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-shared-schemas",
+            "id": "def-common.getMeta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObject",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "SavedObject",
+              "<unknown>, \"version\" | \"created_at\" | \"updated_at\" | \"managed\" | \"created_by\" | \"updated_by\" | \"accessControl\">"
+            ],
+            "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/meta/get_meta.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Pick",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.AsCodeMeta",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeMeta",
+        "description": [],
+        "signature": [
+          "{ readonly version?: string | undefined; readonly created_at?: string | undefined; readonly updated_at?: string | undefined; readonly managed?: boolean | undefined; readonly owner?: string | undefined; readonly created_by?: string | undefined; readonly updated_by?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/meta/schema.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.AsCodeQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeQuery",
+        "description": [],
+        "signature": [
+          "{ readonly language: \"kql\" | \"lucene\"; readonly expression: string; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/query/schema.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.asCodeIdSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeIdSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/id/id.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.asCodeMetaSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeMetaSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ created_at: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; created_by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; managed: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; owner: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; updated_at: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; updated_by: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; version: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/meta/schema.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.asCodeQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeQuerySchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ expression: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; language: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"kql\" | \"lucene\">; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/query/schema.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -29,6 +29,8 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getInputEffectiveName,
+  buildInputKey,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset } from './is_valid_namespace';
@@ -369,7 +371,11 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+      const varDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
@@ -382,9 +388,11 @@ export const validatePackagePolicy = (
   >((reqVarDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const requiredVarDefKey = hasIntegrations
-        ? `${policyTemplate.name}-${input.type}`
-        : input.type;
+      const requiredVarDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         reqVarDefs[requiredVarDefKey] = input.required_vars;
@@ -430,7 +438,11 @@ export const validatePackagePolicy = (
     if (!input.vars && !input.streams) {
       return;
     }
-    const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
+    const inputKey = buildInputKey(
+      getInputEffectiveName(input),
+      input.policy_template,
+      hasIntegrations
+    );
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       required_vars: undefined,
@@ -469,7 +481,7 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
-        const streamKey = `${stream.data_stream.dataset}-${input.type}`;
+        const streamKey = `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`;
 
         const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
         const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];
@@ -620,7 +632,9 @@ export const validatePackagePolicyConfig = (
 
   if (varDef.type === 'yaml') {
     try {
-      parsedValue = safeLoadYaml(value);
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      parsedValue = safeLoadYaml(String(value));
     } catch (e) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {

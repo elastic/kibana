@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/ai-components/ai_button/src'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/ai-components'],
 };

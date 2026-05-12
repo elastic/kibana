@@ -14,29 +14,53 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { EntityType } from '../common.gen';
 import { Entity } from './common.gen';
 
+/**
+ * A wrapper that pairs an entity type with the entity record to upsert.
+ */
+export const EntityContainer = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the record.
+     */
+    type: EntityType,
+    /**
+     * The entity record to create or update.
+     */
+    record: Entity,
+  })
+);
 export type EntityContainer = z.infer<typeof EntityContainer>;
-export const EntityContainer = z.object({
-  type: EntityType,
-  record: Entity,
-});
 
+/**
+ * A collection of entities to upsert in bulk.
+ */
+export const EntitiesContainer = lazySchema(() =>
+  z.object({
+    /**
+     * The entities to create or update.
+     */
+    entities: z.array(EntityContainer),
+  })
+);
 export type EntitiesContainer = z.infer<typeof EntitiesContainer>;
-export const EntitiesContainer = z.object({
-  entities: z.array(EntityContainer),
-});
 
+export const UpsertEntitiesBulkRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * When true, allows updating protected fields.
+     */
+    force: BooleanFromString.optional().default(false),
+  })
+);
 export type UpsertEntitiesBulkRequestQuery = z.infer<typeof UpsertEntitiesBulkRequestQuery>;
-export const UpsertEntitiesBulkRequestQuery = z.object({
-  force: BooleanFromString.optional().default(false),
-});
 export type UpsertEntitiesBulkRequestQueryInput = z.input<typeof UpsertEntitiesBulkRequestQuery>;
 
+export const UpsertEntitiesBulkRequestBody = lazySchema(() => EntitiesContainer);
 export type UpsertEntitiesBulkRequestBody = z.infer<typeof UpsertEntitiesBulkRequestBody>;
-export const UpsertEntitiesBulkRequestBody = EntitiesContainer;
 export type UpsertEntitiesBulkRequestBodyInput = z.input<typeof UpsertEntitiesBulkRequestBody>;

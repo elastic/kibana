@@ -7,18 +7,16 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import {
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL,
-  ENTITY_ANALYTICS_HOME_PAGE_URL,
-} from '../../../urls/navigation';
+import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
   PAGE_TITLE,
   COMBINED_RISK_DONUT_CHART,
   ANOMALIES_PLACEHOLDER_PANEL,
   ENTITIES_TABLE_GRID,
   TIMELINE_ACTION,
+  ENTITY_STORE_DISABLED_EMPTY_PROMPT,
 } from '../../../screens/entity_analytics/entity_analytics_home';
-import { WATCHLIST_FILTER_COMBO_BOX } from '../../../screens/entity_analytics/watchlist_filter';
+import { interceptEntityStoreStatus } from '../../../tasks/entity_analytics/entity_analytics_home';
 
 describe(
   'Entity Analytics page',
@@ -30,6 +28,7 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
@@ -40,9 +39,19 @@ describe(
     });
 
     beforeEach(() => {
+      interceptEntityStoreStatus('running');
       login();
+      // Set grouping to "none" so the flat EntitiesDataTable renders.
+      // Default "Resolution" grouping renders GroupWrapper, which doesn't
+      // contain the ENTITIES_TABLE_GRID or TIMELINE_ACTION test subjects.
+      cy.window().then((win) =>
+        win.localStorage.setItem(
+          'groups',
+          JSON.stringify({ 'entityAnalytics:grouping': { activeGroups: ['none'] } })
+        )
+      );
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
-      cy.url().should('include', ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
     });
 
     after(() => {
@@ -51,7 +60,7 @@ describe(
 
     it('renders page as expected', () => {
       cy.get(PAGE_TITLE).should('exist');
-      cy.get('h1').contains('Entity Analytics').should('be.visible');
+      cy.get('h1').contains('Entity analytics').should('be.visible');
     });
 
     it('renders KQL search bar', () => {
@@ -75,18 +84,6 @@ describe(
       cy.get(ENTITIES_TABLE_GRID).should('exist');
     });
 
-    it('navigate to privileged user monitoring page on selecting privileged users watchlist', () => {
-      cy.get(PAGE_TITLE).should('exist');
-
-      cy.get(WATCHLIST_FILTER_COMBO_BOX).should('exist');
-      const comboBoxInput = `${WATCHLIST_FILTER_COMBO_BOX} input`;
-      cy.get(comboBoxInput).first().click();
-      cy.get(comboBoxInput).first().type('Privileged users{downArrow}{enter}');
-
-      cy.url().should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
-      cy.url().should('include', '/entity_analytics_privileged_user_monitoring');
-    });
-
     it('displays timeline action icons in the data grid', () => {
       cy.get(PAGE_TITLE).should('exist');
       cy.get(ENTITIES_TABLE_GRID).should('exist');
@@ -100,6 +97,36 @@ describe(
 
       cy.get(TIMELINE_ACTION).first().should('be.visible');
       cy.get(TIMELINE_ACTION).first().click();
+    });
+  }
+);
+
+describe(
+  'Entity Analytics page - Disabled state',
+  {
+    tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'entityAnalyticsNewHomePageEnabled',
+          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
+        ],
+      },
+    },
+  },
+  () => {
+    beforeEach(() => {
+      interceptEntityStoreStatus('not_installed');
+      login();
+      visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
+      cy.wait('@entityStoreStatus', { timeout: 20000 });
+      cy.contains('h1', 'Entity analytics').should('exist');
+    });
+
+    it('displays the entity store disabled prompt', () => {
+      cy.get(ENTITY_STORE_DISABLED_EMPTY_PROMPT).should('exist');
     });
   }
 );

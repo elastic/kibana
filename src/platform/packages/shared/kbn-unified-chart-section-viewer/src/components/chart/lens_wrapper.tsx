@@ -6,12 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
+import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
 import type { UnifiedMetricsGridProps } from '../../types';
 
@@ -82,19 +83,19 @@ export function LensWrapper({
     }
   `;
 
+  const resolvedQuery = useMemo(
+    () => resolveEsqlVariables(lensProps.attributes.state.query, lensProps.esqlVariables),
+    [lensProps.attributes.state.query, lensProps.esqlVariables]
+  );
+
   const handleExploreInDiscoverTab = useCallback(
     () =>
       onExploreInDiscoverTab?.({
-        query: lensProps.attributes.state.query,
+        query: resolvedQuery,
         tabLabel: lensProps.attributes.title,
         timeRange: lensProps.timeRange,
       }),
-    [
-      lensProps.attributes.state.query,
-      lensProps.attributes.title,
-      lensProps.timeRange,
-      onExploreInDiscoverTab,
-    ]
+    [resolvedQuery, lensProps.attributes.title, lensProps.timeRange, onExploreInDiscoverTab]
   );
 
   const extraActions = useLensExtraActions({
@@ -109,8 +110,8 @@ export function LensWrapper({
 
   return (
     <div css={chartCss}>
-      <PresentationPanelQuickActionContext.Provider
-        value={{ view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] }}
+      <EmbeddableRendererContext.Provider
+        value={{ quickActions: { view: [ACTION_EXPLORE_IN_DISCOVER_TAB, 'openInspector'] } }}
       >
         <EmbeddableComponent
           {...lensProps}
@@ -125,7 +126,7 @@ export function LensWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />
-      </PresentationPanelQuickActionContext.Provider>
+      </EmbeddableRendererContext.Provider>
     </div>
   );
 }

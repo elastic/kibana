@@ -200,6 +200,192 @@ test('should work with @kbn/zod v4', () => {
   `);
 });
 
+describe('Zod v4 config and secrets', () => {
+  test('validateConfig uses z.prettifyError for v4 schema failures', () => {
+    const configSchema = z.object({ apiUrl: z.string() }).strict();
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: { schema: z.object({}) },
+        config: { schema: configSchema },
+        secrets: { schema: z.object({}) },
+        connector: () => null,
+      },
+    };
+
+    const result = validateConfig(
+      actionType,
+      { apiUrl: 'https://example.com' },
+      { configurationUtilities }
+    );
+    expect(result).toEqual({ apiUrl: 'https://example.com' });
+
+    expect(() => validateConfig(actionType, { apiUrl: 123 }, { configurationUtilities })).toThrow(
+      /error validating connector type config/
+    );
+    expect(() => validateConfig(actionType, { apiUrl: 123 }, { configurationUtilities })).toThrow(
+      /apiUrl|string|number/
+    );
+  });
+
+  test('validateSecrets uses z.prettifyError for v4 schema failures', () => {
+    const secretsSchema = z.object({ token: z.string() }).strict();
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: { schema: z.object({}) },
+        config: { schema: z.object({}) },
+        secrets: { schema: secretsSchema },
+        connector: () => null,
+      },
+    };
+
+    const result = validateSecrets(
+      actionType,
+      { token: 'secret-token' },
+      { configurationUtilities }
+    );
+    expect(result).toEqual({ token: 'secret-token' });
+
+    expect(() => validateSecrets(actionType, { token: 456 }, { configurationUtilities })).toThrow(
+      /error validating connector type secrets/
+    );
+    expect(() => validateSecrets(actionType, { token: 456 }, { configurationUtilities })).toThrow(
+      /token|string|number/
+    );
+  });
+});
+
+describe('schema transforms and complex schemas', () => {
+  test('returns transformed value when schema has transform', () => {
+    const transformSchema = z.object({ count: z.number() }).transform((v) => ({
+      ...v,
+      doubled: v.count * 2,
+    }));
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: { schema: transformSchema },
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        connector: () => null,
+      },
+    };
+
+    const result = validateParams(actionType, { count: 5 }, { configurationUtilities });
+    expect(result).toEqual({ count: 5, doubled: 10 });
+  });
+
+  test('validates optional and nullable fields', () => {
+    const schema = z.object({
+      required: z.string(),
+      optional: z.string().optional(),
+      nullable: z.string().nullable(),
+    });
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: { schema },
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        connector: () => null,
+      },
+    };
+
+    const result = validateParams(
+      actionType,
+      { required: 'x', nullable: null },
+      { configurationUtilities }
+    );
+    expect(result).toEqual({ required: 'x', nullable: null });
+  });
+
+  test('rejects null, undefined, and missing key for required z.string()', () => {
+    const schema = z.object({
+      required: z.string(),
+    });
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: { schema },
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        connector: () => null,
+      },
+    };
+
+    expect(() =>
+      validateParams(actionType, { required: null }, { configurationUtilities })
+    ).toThrow(/error validating action params/);
+
+    expect(() =>
+      validateParams(actionType, { required: undefined }, { configurationUtilities })
+    ).toThrow(/error validating action params/);
+
+    expect(() => validateParams(actionType, {}, { configurationUtilities })).toThrow(
+      /error validating action params/
+    );
+  });
+
+  test('validates union schema', () => {
+    const unionSchema = z.union([
+      z.object({ type: z.literal('a'), value: z.string() }),
+      z.object({ type: z.literal('b'), value: z.number() }),
+    ]);
+    const actionType: ActionType = {
+      id: 'foo',
+      name: 'bar',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor,
+      validate: {
+        params: { schema: unionSchema },
+        config: { schema: z.object({}) },
+        secrets: { schema: z.object({}) },
+        connector: () => null,
+      },
+    };
+
+    const resultA = validateParams(
+      actionType,
+      { type: 'a', value: 'hello' },
+      { configurationUtilities }
+    );
+    expect(resultA).toEqual({ type: 'a', value: 'hello' });
+
+    const resultB = validateParams(
+      actionType,
+      { type: 'b', value: 42 },
+      { configurationUtilities }
+    );
+    expect(resultB).toEqual({ type: 'b', value: 42 });
+
+    expect(() =>
+      validateParams(actionType, { type: 'c', value: 1 }, { configurationUtilities })
+    ).toThrow();
+  });
+});
+
 test('should validate when custom validator is defined', () => {
   const schemaValidator = {
     parse: (value: ActionTypeParams | ActionTypeConfig | ActionTypeSecrets) => value,
@@ -292,54 +478,140 @@ test('should throw an error when custom validators fail', () => {
 });
 
 describe('validateSecrets', () => {
-  test('should not run validation when secrets are undefined', () => {
-    const schemaValidator = z.object({ foo: z.string() }).strict();
-    const actionType: ActionType = {
-      id: 'foo',
-      name: 'bar',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-      validate: {
-        params: {
-          schema: schemaValidator,
-        },
-        config: {
-          schema: schemaValidator,
-        },
-        secrets: {
-          schema: schemaValidator,
-        },
-      },
-    };
+  const secretsSchema = z.object({ foo: z.string() }).strict();
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor,
+    validate: {
+      params: { schema: secretsSchema },
+      config: { schema: secretsSchema },
+      secrets: { schema: secretsSchema },
+    },
+  };
 
+  test('should not run validation when secrets are undefined', () => {
     expect(() =>
       validateSecrets(actionType, undefined, { configurationUtilities })
     ).not.toThrowError();
   });
 
   test('should not run validation when secrets are null', () => {
-    const schemaValidator = z.object({ foo: z.string() }).strict();
-    const actionType: ActionType = {
-      id: 'foo',
-      name: 'bar',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-      validate: {
-        params: {
-          schema: schemaValidator,
-        },
-        config: {
-          schema: schemaValidator,
-        },
-        secrets: {
-          schema: schemaValidator,
-        },
-      },
-    };
-
     expect(() => validateSecrets(actionType, null, { configurationUtilities })).not.toThrowError();
+  });
+
+  test('should throw when a required field is null', () => {
+    expect(() => validateSecrets(actionType, { foo: null }, { configurationUtilities })).toThrow(
+      /error validating connector type secrets/
+    );
+  });
+
+  test('should throw when a required field is undefined', () => {
+    expect(() =>
+      validateSecrets(actionType, { foo: undefined }, { configurationUtilities })
+    ).toThrow(/error validating connector type secrets/);
+  });
+
+  test('should throw when a required field is missing', () => {
+    expect(() => validateSecrets(actionType, {}, { configurationUtilities })).toThrow(
+      /error validating connector type secrets/
+    );
+  });
+});
+
+describe('validateConfig — null and undefined inputs', () => {
+  const configSchema = z.object({ apiUrl: z.string() }).strict();
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor,
+    validate: {
+      params: { schema: z.object({}) },
+      config: { schema: configSchema },
+      secrets: { schema: z.object({}) },
+      connector: () => null,
+    },
+  };
+
+  test('should throw when config is null', () => {
+    expect(() => validateConfig(actionType, null, { configurationUtilities })).toThrow(
+      /error validating connector type config/
+    );
+  });
+
+  test('should throw when config is undefined', () => {
+    expect(() => validateConfig(actionType, undefined, { configurationUtilities })).toThrow(
+      /error validating connector type config/
+    );
+  });
+
+  test('should throw when a required field is null', () => {
+    expect(() => validateConfig(actionType, { apiUrl: null }, { configurationUtilities })).toThrow(
+      /error validating connector type config/
+    );
+  });
+
+  test('should throw when a required field is undefined', () => {
+    expect(() =>
+      validateConfig(actionType, { apiUrl: undefined }, { configurationUtilities })
+    ).toThrow(/error validating connector type config/);
+  });
+
+  test('should throw when a required field is missing', () => {
+    expect(() => validateConfig(actionType, {}, { configurationUtilities })).toThrow(
+      /error validating connector type config/
+    );
+  });
+});
+
+describe('validateParams — null and undefined inputs', () => {
+  const paramsSchema = z.object({ id: z.string() }).strict();
+  const actionType: ActionType = {
+    id: 'foo',
+    name: 'bar',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor,
+    validate: {
+      params: { schema: paramsSchema },
+      config: { schema: z.object({}) },
+      secrets: { schema: z.object({}) },
+      connector: () => null,
+    },
+  };
+
+  test('should throw when params is null', () => {
+    expect(() => validateParams(actionType, null, { configurationUtilities })).toThrow(
+      /error validating action params/
+    );
+  });
+
+  test('should throw when params is undefined', () => {
+    expect(() => validateParams(actionType, undefined, { configurationUtilities })).toThrow(
+      /error validating action params/
+    );
+  });
+
+  test('should throw when a required field is null', () => {
+    expect(() => validateParams(actionType, { id: null }, { configurationUtilities })).toThrow(
+      /error validating action params/
+    );
+  });
+
+  test('should throw when a required field is undefined', () => {
+    expect(() => validateParams(actionType, { id: undefined }, { configurationUtilities })).toThrow(
+      /error validating action params/
+    );
+  });
+
+  test('should throw when a required field is missing', () => {
+    expect(() => validateParams(actionType, {}, { configurationUtilities })).toThrow(
+      /error validating action params/
+    );
   });
 });
 

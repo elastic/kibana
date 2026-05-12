@@ -9,11 +9,8 @@ import React from 'react';
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
-import type { IHttpFetchError } from '@kbn/core/public';
-
-import { useLoadConnectors } from '../connectorland/use_load_connectors';
-
-import type { UseQueryResult } from '@kbn/react-query';
+import { useLoadConnectors } from '@kbn/inference-connectors';
+import type { UseLoadConnectorsResult } from '@kbn/inference-connectors';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -23,7 +20,6 @@ import type { FetchCurrentUserConversations } from './api';
 import { useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { welcomeConvo } from '../mock/conversation';
@@ -37,7 +33,7 @@ import {
   STREAMING_LOCAL_STORAGE_KEY,
 } from '../assistant_context/constants';
 
-jest.mock('../connectorland/use_load_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('../connectorland/connector_setup');
 jest.mock('react-use/lib/useLocalStorage');
 jest.mock('react-use/lib/useSessionStorage');
@@ -155,7 +151,7 @@ describe('Assistant', () => {
       isFetched: true,
       isFetchedAfterMount: true,
       data: connectors,
-    } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+    } as unknown as UseLoadConnectorsResult);
 
     jest
       .mocked(useFetchCurrentUserConversations)
@@ -326,7 +322,7 @@ describe('Assistant', () => {
         isFetched: true,
         isFetchedAfterMount: true,
         data: [],
-      } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+      } as unknown as UseLoadConnectorsResult);
 
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         ...defaultFetchUserConversations,
@@ -363,7 +359,7 @@ describe('Assistant', () => {
         isFetched: true,
         isFetchedAfterMount: true,
         data: connectors,
-      } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+      } as unknown as UseLoadConnectorsResult);
 
       await renderAssistant();
 

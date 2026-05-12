@@ -347,7 +347,8 @@ describe('WorkflowStepExecutionTree', () => {
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
         expect.objectContaining({}),
-        'completed'
+        'completed',
+        undefined
       );
       expect(
         screen.getByRole('list', { name: 'Workflow step execution tree' })
@@ -540,7 +541,8 @@ describe('WorkflowStepExecutionTree', () => {
       expect(buildStepExecutionsTree).toHaveBeenCalledWith(
         [stepExecution],
         expect.objectContaining({}),
-        'completed'
+        'completed',
+        undefined
       );
       expect(isTerminalStatus).toHaveBeenCalledWith(ExecutionStatus.COMPLETED);
     });
@@ -1031,6 +1033,123 @@ describe('WorkflowStepExecutionTree', () => {
       const label = screen.getByTestId('step-execution-tree-item-label');
       // When execution time is undefined, the attribute should not be set
       expect(label).not.toHaveAttribute('data-execution-time-ms');
+    });
+  });
+
+  describe('failed before steps', () => {
+    it('should render skeleton steps when execution failed before any steps ran', () => {
+      isTerminalStatus.mockReturnValue(true);
+      isInProgressStatus.mockReturnValue(false);
+
+      const execution = createMockExecution({
+        status: ExecutionStatus.FAILED,
+        stepExecutions: [],
+        error: { type: 'InputValidationError', message: 'name: Required' },
+        triggeredBy: 'manual',
+      });
+
+      const definition = createMockDefinition({
+        steps: [
+          { name: 'step-1', type: 'action', with: { message: 'test' } },
+          { name: 'step-2', type: 'http', with: { url: 'http://example.com' } },
+        ],
+      });
+
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: '__overview',
+          stepId: 'Overview',
+          stepType: '__overview',
+          executionIndex: 0,
+          children: [],
+        },
+        {
+          stepExecutionId: 'trigger',
+          stepId: 'Inputs',
+          stepType: '__inputs',
+          executionIndex: 0,
+          isTriggerPseudoStep: true,
+          children: [],
+        },
+        {
+          stepExecutionId: 'skeleton-step-1-action-0',
+          stepId: 'step-1',
+          stepType: 'action',
+          executionIndex: 0,
+          children: [],
+        },
+        {
+          stepExecutionId: 'skeleton-step-2-http-1',
+          stepId: 'step-2',
+          stepType: 'http',
+          executionIndex: 0,
+          children: [],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={execution}
+            definition={definition}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      expect(screen.queryByText('No step executions found')).not.toBeInTheDocument();
+      expect(
+        screen.getByRole('list', { name: 'Workflow step execution tree' })
+      ).toBeInTheDocument();
+
+      const labels = screen.getAllByTestId('step-execution-tree-item-label');
+      expect(labels.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should pass triggeredBy to buildStepExecutionsTree', () => {
+      isTerminalStatus.mockReturnValue(true);
+      isInProgressStatus.mockReturnValue(false);
+
+      const execution = createMockExecution({
+        status: ExecutionStatus.FAILED,
+        stepExecutions: [],
+        triggeredBy: 'manual',
+      });
+
+      const definition = createMockDefinition({
+        steps: [{ name: 'step-1', type: 'action', with: { message: 'test' } }],
+      });
+
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: '__overview',
+          stepId: 'Overview',
+          stepType: '__overview',
+          executionIndex: 0,
+          children: [],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={execution}
+            definition={definition}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      expect(buildStepExecutionsTree).toHaveBeenCalledWith(
+        expect.any(Array),
+        undefined,
+        ExecutionStatus.FAILED,
+        'manual'
+      );
     });
   });
 });

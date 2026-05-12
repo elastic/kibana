@@ -9,13 +9,3 @@
  * Attachment type identifier for dashboard state
  */
 export const DASHBOARD_ATTACHMENT_TYPE = 'platform.dashboard.dashboard_state';
-
-/**
- * UI event type for panel added
- */
-export const DASHBOARD_PANEL_ADDED_EVENT = 'dashboard:panel_added';
-
-/**
- * UI event type for panel removed
- */
-export const DASHBOARD_PANELS_REMOVED_EVENT = 'dashboard:panels_removed';

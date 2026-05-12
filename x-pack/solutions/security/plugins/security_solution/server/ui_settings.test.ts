@@ -14,7 +14,6 @@ describe('initUiSettings', () => {
   let mockUiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   const mockExperimentalFeatures = {
     enableAlertsAndAttacksAlignment: false,
-    siemReadinessDashboard: false,
     extendedRuleExecutionLoggingEnabled: false,
   } as ExperimentalFeatures;
 

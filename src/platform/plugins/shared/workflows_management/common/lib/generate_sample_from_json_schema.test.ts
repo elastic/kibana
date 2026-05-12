@@ -130,12 +130,42 @@ describe('generateSampleFromJsonSchema', () => {
     });
   });
 
+  describe('implicit object (no explicit type, but has properties)', () => {
+    it('generates defaults from properties when type is omitted', () => {
+      const schema: JSONSchema7 = {
+        properties: {
+          approved: { type: 'boolean', default: true },
+          note: { type: 'string' },
+        },
+      };
+      // approved has a default → included; note has no default and is not required → omitted
+      expect(generateSampleFromJsonSchema(schema)).toEqual({ approved: true });
+    });
+
+    it('includes required properties even when no default', () => {
+      const schema: JSONSchema7 = {
+        properties: {
+          severity: { type: 'string' },
+        },
+        required: ['severity'],
+      };
+      expect(generateSampleFromJsonSchema(schema)).toEqual({ severity: INPUT_STRING_PLACEHOLDER });
+    });
+
+    it('returns empty object when properties exist but none are required or defaulted', () => {
+      const schema: JSONSchema7 = {
+        properties: { optional: { type: 'string' } },
+      };
+      expect(generateSampleFromJsonSchema(schema)).toEqual({});
+    });
+  });
+
   describe('unknown / unhandled type', () => {
     it('returns undefined for null type', () => {
       expect(generateSampleFromJsonSchema({ type: 'null' })).toBeUndefined();
     });
 
-    it('returns undefined for no type', () => {
+    it('returns undefined for no type and no properties', () => {
       expect(generateSampleFromJsonSchema({})).toBeUndefined();
     });
   });

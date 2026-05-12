@@ -16,13 +16,16 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type {
   ESQLControlVariable,
   ESQLQueryStats,
   ESQLControlsContext,
   ESQLCallbacks,
   ESQLTelemetryCallbacks,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
+import type { ESQLDependencies } from '@kbn/monaco/src/languages/esql/language';
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -103,6 +106,7 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
 export interface ESQLEditorDeps {
@@ -113,6 +117,7 @@ export interface ESQLEditorDeps {
   kql: KqlPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   esql?: EsqlPluginStartBase;
 }
 
@@ -121,4 +126,8 @@ export enum HistoryTabId {
   standardQueries = 'starred-queries-tab',
 }
 
-export type EsqlLanguageDeps = ESQLCallbacks & Partial<{ telemetry: ESQLTelemetryCallbacks }>;
+export type EsqlLanguageDeps = ESQLCallbacks &
+  Partial<{
+    telemetry: ESQLTelemetryCallbacks;
+    getEditorMessages: ESQLDependencies['getEditorMessages'];
+  }>;

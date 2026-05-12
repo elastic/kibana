@@ -106,6 +106,7 @@ export {
   builtInComparators,
   builtInGroupByTypes,
   builtInAggregationTypes,
+  convertFieldSpecToFieldOption,
   getFields,
   getIndexOptions,
   firstFieldOption,

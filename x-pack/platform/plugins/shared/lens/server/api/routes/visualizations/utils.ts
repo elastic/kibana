@@ -6,15 +6,11 @@
  */
 
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { isLensDSLConfig, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { getMeta, type AsCodeMeta } from '@kbn/as-code-shared-schemas';
 
 import type { LensSavedObject, LensUpdateIn } from '../../../content_management';
-import type {
-  LensCreateRequestBody,
-  LensItemMeta,
-  LensResponseItem,
-  LensUpdateRequestBody,
-} from './types';
+import type { LensCreateRequestBody, LensResponseItem, LensUpdateRequestBody } from './types';
 
 /**
  * Converts Lens request data to Lens Config
@@ -31,55 +27,53 @@ export function getLensRequestConfig(
 }
 
 /**
- * Used to extend the meta of the response item. Needed in Lens GET request.
- */
-export type ExtendedLensResponseItem<M extends Record<string, string | boolean> = {}> = Omit<
-  LensResponseItem,
-  'meta'
-> & {
-  meta: LensResponseItem['meta'] & M;
-};
-
-/**
  * Converts Lens Saved Object to Lens Response Item
  */
-export function getLensResponseItem<M extends Record<string, string | boolean>>(
+export function getLensResponseItem(
   builder: LensConfigBuilder,
-  item: LensSavedObject,
-  extraMeta: M = {} as M
-): ExtendedLensResponseItem<M> {
+  item: LensSavedObject
+): LensResponseItem {
   const { id, references, attributes } = item;
-  const meta = getLensResponseItemMeta<M>(item, extraMeta);
+  const meta = getLensResponseItemMeta(item);
 
   const data = builder.toAPIFormat({
     references,
     ...attributes,
+
     // TODO: fix these type issues
     state: attributes.state!,
     visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
-  return {
-    id,
-    data,
-    meta,
-  } satisfies LensResponseItem;
+
+  if (isLensDSLConfig(data)) {
+    return {
+      id,
+      data,
+      meta,
+    } satisfies LensResponseItem;
+  }
+
+  throw new Error('ES|QL charts are not supported in by-ref Lens');
 }
 
 /**
- * Converts Lens Saved Object to Lens Response Item
+ * Converts Lens Saved Object to Lens Response Item meta
+ *
+ * TODO: remove this and replace with `getMeta` when internal routes are removed
  */
-function getLensResponseItemMeta<M extends Record<string, string | boolean>>(
-  { type, createdAt, updatedAt, createdBy, updatedBy, managed, originId }: LensSavedObject,
-  extraMeta: M = {} as M
-): LensItemMeta & M {
-  return {
-    type,
-    managed,
+function getLensResponseItemMeta({
+  createdAt,
+  updatedAt,
+  createdBy,
+  updatedBy,
+  ...rest
+}: LensSavedObject): AsCodeMeta {
+  return getMeta({
+    ...rest,
+    // align camelCase from CM to snake_case
     created_at: createdAt,
     updated_at: updatedAt,
     created_by: createdBy,
     updated_by: updatedBy,
-    origin_id: originId,
-    ...extraMeta,
-  };
+  });
 }

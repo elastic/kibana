@@ -7,9 +7,10 @@
 
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -28,6 +29,7 @@ import { runDefendInsightsEvaluations } from './run_evaluations';
 
 export const evaluateDefendInsights = async ({
   actionsClient,
+  getInferenceConnectorById,
   defendInsightsGraphs,
   anonymizationFields = DEFAULT_EVAL_ANONYMIZATION_FIELDS, // determines which fields are included in the alerts
   connectors,
@@ -46,9 +48,10 @@ export const evaluateDefendInsights = async ({
   size,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   defendInsightsGraphs: DefendInsightsGraphMetadata[];
   anonymizationFields?: AnonymizationFieldResponse[];
-  connectors: Connector[];
+  connectors: InferenceConnector[];
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
@@ -68,7 +71,7 @@ export const evaluateDefendInsights = async ({
     async ({ getDefaultDefendInsightsGraph, insightType }) => {
       // create a graph for every connector:
       const graphs: Array<{
-        connector: Connector;
+        connector: InferenceConnector;
         graph: DefaultDefendInsightsGraph;
         llmType: string | undefined;
         name: string;
@@ -78,12 +81,11 @@ export const evaluateDefendInsights = async ({
         };
       }> = await Promise.all(
         connectors.map(async (connector) => {
-          const llmType = getLlmType(connector.actionTypeId);
+          const llmType = getLlmType(connector.type);
           const prompts = await getDefendInsightsPrompt({
             type: insightType,
-            actionsClient,
-            connectorId: connector.id,
-            connector,
+            getInferenceConnectorById,
+            connectorId: connector.connectorId,
             savedObjectsClient: soClient,
           });
 
@@ -100,13 +102,13 @@ export const evaluateDefendInsights = async ({
 
           const llm = new ActionsClientLlm({
             actionsClient,
-            connectorId: connector.id,
+            connectorId: connector.connectorId,
             llmType,
             logger,
             temperature: 0, // zero temperature for defend insights, because we want structured JSON output
             timeout: connectorTimeout,
             traceOptions,
-            model: connector.config?.defaultModel,
+            model: getConnectorDefaultModel(connector),
           });
 
           const graph = getDefaultDefendInsightsGraph({

@@ -1,0 +1,45 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getWorkflowExecutionsResponseExample:
+            description: 'Example response returning a paginated list of executions for a workflow'
+            value:
+              results:
+                - id: exec-001
+                  spaceId: default
+                  status: completed
+                  isTestRun: false
+                  startedAt: '2025-11-20T12:00:00.000Z'
+                  finishedAt: '2025-11-20T12:00:03.000Z'
+                  duration: 3000
+                  error: null
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  executedBy: elastic
+                  triggeredBy: manual
+                - id: exec-002
+                  spaceId: default
+                  status: failed
+                  isTestRun: false
+                  startedAt: '2025-11-20T13:00:00.000Z'
+                  finishedAt: '2025-11-20T13:00:02.000Z'
+                  duration: 2000
+                  error:
+                    message: "Step 'hello_world_step' failed"
+                  workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  executedBy: elastic
+                  triggeredBy: manual
+              page: 1
+              size: 20
+              total: 2
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows/workflow/{workflowId}/executions?page=1&size=20" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20

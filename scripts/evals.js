@@ -12,7 +12,7 @@
 var Fs = require('fs');
 var Path = require('path');
 
-var METADATA_RELATIVE_PATH = 'x-pack/platform/packages/shared/kbn-evals/evals.suites.json';
+var METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
 
 function hasFlag(args, flag) {
   if (args.includes(flag)) {
@@ -341,13 +341,17 @@ function runFastHelp() {
   logInfo('For full command help/flags: node scripts/evals --full-help');
   logInfo('');
   logInfo('Commands:');
-  logInfo('  init                          Set up connectors for local evals');
+  logInfo('  init                          Set up config + connectors for local evals');
+  logInfo('  init config                   Only create/update vault config.json');
+  logInfo('    --profile <name>            Write config.<name>.json (e.g. --profile local)');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
   logInfo('  scout                         Start Scout server for evals');
+  logInfo('  clear-index                   Delete kibana-evaluations indices (reset export)');
   logInfo('  run [--suite <id>] [...]      Run an eval suite');
   logInfo('  list [--refresh] [--json]     List eval suites');
+  logInfo('  labels [suite-id ...]         Create/sync GitHub eval suite labels');
   logInfo('  compare <run-a> <run-b>       Compare two eval runs');
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');

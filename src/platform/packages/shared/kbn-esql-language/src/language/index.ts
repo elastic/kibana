@@ -25,3 +25,7 @@ export { getDocumentHighlightItems } from './document_highlight';
 // Validation function
 export { validateQuery } from './validation/validation';
 export type { ValidationOptions } from './validation/types';
+
+// Code actions (quick fixes)
+export { getQuickFixForMessage } from './code_actions';
+export type { EsqlCodeAction } from './code_actions';

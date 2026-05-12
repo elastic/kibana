@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./indicator_match'));
     loadTestFile(require.resolve('./indicator_match_alert_suppression'));
     loadTestFile(require.resolve('./indicator_match_validation'));
+    loadTestFile(require.resolve('./indicator_match_metrics'));
   });
 }

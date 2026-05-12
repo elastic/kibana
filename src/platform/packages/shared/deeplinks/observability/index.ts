@@ -16,6 +16,7 @@ export {
   AI_ASSISTANT_APP_ID,
   OBLT_UX_APP_ID,
   OBLT_PROFILING_APP_ID,
+  INGEST_HUB_APP_ID,
 } from './constants';
 export type { AppId, DeepLinkId } from './deep_links';
 export * from './locators';

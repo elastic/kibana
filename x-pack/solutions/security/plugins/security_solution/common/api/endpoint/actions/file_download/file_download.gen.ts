@@ -14,20 +14,25 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export type EndpointFileDownloadRequestParams = z.infer<typeof EndpointFileDownloadRequestParams>;
-export const EndpointFileDownloadRequestParams = z.object({
-  action_id: z.string(),
-  /**
+export const EndpointFileDownloadRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the response action that generated the file.
+     */
+    action_id: z.string(),
+    /**
       * The file identifier is constructed in one of two ways:
 - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
 `{file_id}` = `{action_id}.{agent_id}`
 - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
 
       */
-  file_id: z.string(),
-});
+    file_id: z.string(),
+  })
+);
+export type EndpointFileDownloadRequestParams = z.infer<typeof EndpointFileDownloadRequestParams>;
 export type EndpointFileDownloadRequestParamsInput = z.input<
   typeof EndpointFileDownloadRequestParams
 >;

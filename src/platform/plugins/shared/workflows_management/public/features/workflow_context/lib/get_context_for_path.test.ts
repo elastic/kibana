@@ -12,7 +12,7 @@ import { DynamicStepContextSchema, ForEachContextSchema, WhileContextSchema } fr
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
-import { getContextSchemaForPath } from './get_context_for_path';
+import { getContextSchemaForPath, getContextSchemaForStep } from './get_context_for_path';
 
 jest.mock('./get_output_schema_for_step_type');
 
@@ -465,5 +465,27 @@ describe('getContextSchemaForPath', () => {
     expect((context.shape as any).consts).toBeDefined();
     expect((context.shape as any).variables).toBeDefined();
     expect(Object.keys((context.shape as any).steps.shape)).toEqual([]);
+  });
+});
+
+describe('getContextSchemaForStep', () => {
+  const definition = {
+    version: '1' as const,
+    name: 'test-workflow',
+    enabled: true,
+    triggers: [{ type: 'manual' as const }],
+    steps: [{ name: 'step-a', type: 'console', with: { message: 'hello' } }],
+  } as WorkflowYaml;
+
+  const workflowGraph = WorkflowGraph.fromWorkflowDefinition(definition);
+
+  it('should return baseSchema unmodified for an unknown step name', () => {
+    const baseSchema = DynamicStepContextSchema.extend({
+      inputs: z.object({}),
+    }) as typeof DynamicStepContextSchema;
+
+    const result = getContextSchemaForStep(baseSchema, workflowGraph, 'nonexistent-step');
+
+    expect(result).toBe(baseSchema);
   });
 });

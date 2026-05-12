@@ -45,9 +45,9 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/server-route-repository-utils'
   - '@kbn/es-query'
-  - '@kbn/traced-es-client'
   - '@kbn/zod-helpers'
   - '@kbn/inference-common'
+  - '@kbn/inference-prompt-utils'
   - '@kbn/std'
   - '@kbn/core-http-server'
   - '@kbn/core-saved-objects-api-server'
@@ -76,13 +76,27 @@ dependsOn:
   - '@kbn/core-http-common'
   - '@kbn/scout'
   - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-logging-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/core-ui-settings-server'
-  - '@kbn/agent-builder-common'
+  - '@kbn/search-inference-endpoints'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
+  - '@kbn/datemath'
+  - '@kbn/setup-node-env'
+  - '@kbn/synthtrace'
+  - '@kbn/synthtrace-client'
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/core-security-server'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/workflows'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/data-streams'
+  - '@kbn/es-mappings'
 tags:
   - plugin
   - prod
@@ -92,32 +106,13 @@ tags:
 fileGroups:
   src:
     - common/**/*
+    - docs/**/*
     - scripts/**/*
     - server/**/*
     - public/**/*
     - types/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

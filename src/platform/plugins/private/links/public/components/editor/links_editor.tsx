@@ -221,7 +221,7 @@ export const LinksEditor = ({
                   <EuiButtonEmpty
                     flush="left"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={() => addOrEditLink()}
                     data-test-subj="links--panelEditor--addLinkBtn"
                   >

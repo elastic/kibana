@@ -49,7 +49,7 @@ export const VisualizationsSection = memo(() => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   // Decide whether to show the graph preview or not
-  const { shouldShowGraph } = useGraphPreview({
+  const { hasGraphData } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -92,7 +92,7 @@ export const VisualizationsSection = memo(() => {
         showIcon={!isPreviewMode}
         disableNavigation={isRulePreview}
       />
-      {shouldShowGraph && (
+      {hasGraphData && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />

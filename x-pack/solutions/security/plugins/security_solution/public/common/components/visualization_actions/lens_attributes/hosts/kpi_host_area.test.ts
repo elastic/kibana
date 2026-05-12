@@ -52,4 +52,37 @@ describe('getKpiHostAreaLensAttributes', () => {
 
     expect(result?.current).toMatchSnapshot();
   });
+
+  it('uses Entity Store v2 latest index as ad-hoc data source when entityStoreV2Enabled', () => {
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          extraOptions: { entityStoreV2Enabled: true, spaceId: 'my_space' },
+          getLensAttributes: getKpiHostAreaLensAttributes,
+          stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    const attrs = result.current;
+    expect(attrs?.references).toEqual([]);
+    expect(attrs?.state.internalReferences).toHaveLength(2);
+    const adHoc = attrs?.state.adHocDataViews;
+    expect(adHoc).toBeDefined();
+    const spec = Object.values(adHoc ?? {})[0];
+    expect(spec?.title).toBe('.entities.v2.latest.security_my_space-00001');
+    const hostTypeFilter = attrs?.state.filters?.find(
+      (f) => f.meta?.key === 'entity.EngineMetadata.Type'
+    );
+    expect(hostTypeFilter).toBeDefined();
+    expect(hostTypeFilter?.meta?.index).toBe('7f2a9c1e-4b8d-4e6f-a3c2-9d1e8f7a6b5c');
+
+    const formBased = attrs?.state.datasourceStates?.formBased;
+    const layer = formBased?.layers && Object.values(formBased.layers)[0];
+    const metricColumn =
+      layer?.columns && Object.values(layer.columns).find((c) => c.isBucketed === false);
+    expect(
+      metricColumn && 'sourceField' in metricColumn ? metricColumn.sourceField : undefined
+    ).toBe('entity.id');
+  });
 });

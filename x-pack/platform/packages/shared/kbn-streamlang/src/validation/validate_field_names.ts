@@ -105,9 +105,17 @@ export function extractAllFieldNames(processor: StreamlangProcessorDefinition): 
         fields.push(processor.internal_networks_field);
       }
       break;
+    case 'json_extract':
+      fields.push(processor.field);
+      processor.extractions.forEach((extraction) => {
+        fields.push(extraction.target_field);
+      });
+      break;
+    case 'enrich':
+      fields.push(processor.to);
+      break;
     case 'drop_document':
     case 'manual_ingest_pipeline':
-      // No field names to validate
       break;
     default: {
       const _exhaustiveCheck: never = processor;

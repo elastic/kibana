@@ -9,29 +9,16 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type {
-  ExecutionStatus,
-  WorkflowExecutionDto,
-  WorkflowStepExecutionDto,
-} from '@kbn/workflows';
+import type { ChildWorkflowExecutionItem, WorkflowExecutionDto } from '@kbn/workflows';
 import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
-export interface ChildWorkflowExecutionInfo {
-  parentStepExecutionId: string;
-  workflowId: string;
-  workflowName: string;
-  executionId: string;
-  status: ExecutionStatus;
-  stepExecutions: WorkflowStepExecutionDto[];
-}
-
-export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionInfo>;
+export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionItem>;
 
 export function useChildWorkflowExecutions(
   parentExecution: WorkflowExecutionDto | undefined | null
 ): { childExecutions: ChildWorkflowExecutionsMap; isLoading: boolean } {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
 
   // Derive a key that changes when workflow.execute steps reach terminal status,
   // so react-query invalidates cached results and fetches newly available children.
@@ -47,9 +34,7 @@ export function useChildWorkflowExecutions(
     queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
       const executionId = parentExecution?.id ?? '';
-      const items = await http.get<ChildWorkflowExecutionInfo[]>(
-        `/api/workflowExecutions/${executionId}/childExecutions`
-      );
+      const items = await api.getChildrenExecutions(executionId);
       const map: ChildWorkflowExecutionsMap = new Map();
       for (const item of items) {
         map.set(item.parentStepExecutionId, item);

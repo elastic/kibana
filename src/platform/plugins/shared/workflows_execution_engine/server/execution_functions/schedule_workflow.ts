@@ -13,6 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
+import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 /**
@@ -29,7 +30,8 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
  *   → Execution was created for THIS scheduled run but is still PENDING/RUNNING
  *   → `attempts > 1` means this is a retry/recovery (not the first attempt)
  *   → The execution is stale from a previous attempt and will never complete
- *   → Mark execution as FAILED and proceed with new execution
+ *   → If `waiting_for_input`, skip this tick only (human resume; do not fail the execution)
+ *   → Else mark execution as FAILED (TaskRecoveryError) and proceed with a new execution for this tick
  *
  * - If execution's `taskRunAt` differs from current task's `runAt`:
  *   → Execution is from a DIFFERENT scheduled run that's still running
@@ -79,19 +81,19 @@ export async function checkAndSkipIfExistingScheduledExecution(
       currentTaskInstance.attempts > 1;
 
     if (isStaleExecution) {
-      // Stale execution from THIS scheduled run (task was interrupted/recovered) - mark it as failed and proceed
+      if (existingExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+        logger.warn(
+          `Stale scheduled retry for execution ${existingExecution.id} (taskRunAt: ${executionTaskRunAt}) is waiting_for_input - skipping duplicate scheduled invocation (human resume only)`
+        );
+        return true;
+      }
+
       logger.warn(
         `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
       );
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: existingExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'TaskRecoveryError',
-          message: `Execution abandoned due to recovery mechanism. Execution was created for this scheduled run but task was interrupted.`,
-        },
+      await markExecutionFailedTaskRecovery(workflowExecutionRepository, existingExecution.id, {
+        message: taskRecoveryMessages.scheduledStale,
       });
-      // Proceed with new execution
       return false;
     }
 

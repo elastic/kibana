@@ -39,8 +39,8 @@ export const SearchApplicationIndices: React.FC = () => {
   const { removeIndexFromSearchApplication } = useActions(SearchApplicationIndicesLogic);
   const { navigateToUrl, share } = useValues(KibanaLogic);
   const [removeIndexConfirm, setConfirmRemoveIndex] = useState<string | null>(null);
-  const searchIndicesLocator = useMemo(
-    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
+  const indexManagementLocator = useMemo(
+    () => share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID'),
     [share]
   );
 
@@ -63,7 +63,7 @@ export const SearchApplicationIndices: React.FC = () => {
           defaultMessage: 'Remove this index from search application',
         }
       ),
-      icon: 'minusInCircle',
+      icon: 'minusCircle',
       isPrimary: false,
       name: (index: EnterpriseSearchApplicationIndex) =>
         i18n.translate(
@@ -116,7 +116,7 @@ export const SearchApplicationIndices: React.FC = () => {
       ),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
-          <EuiIcon type="dot" color={indexHealthToHealthColor(health)} />
+          <EuiIcon type="dot" color={indexHealthToHealthColor(health)} aria-hidden />
           &nbsp;{health ?? '-'}
         </span>
       ),
@@ -146,7 +146,7 @@ export const SearchApplicationIndices: React.FC = () => {
     {
       actions: [
         {
-          enabled: () => searchIndicesLocator !== undefined,
+          enabled: () => indexManagementLocator !== undefined,
           available: (index) => index.health !== 'unknown',
           'data-test-subj': 'search-application-view-index-btn',
           description: i18n.translate(
@@ -169,8 +169,11 @@ export const SearchApplicationIndices: React.FC = () => {
             ),
 
           onClick: async (index) => {
-            if (searchIndicesLocator) {
-              const url = await searchIndicesLocator.getUrl({ indexName: index.name });
+            if (indexManagementLocator) {
+              const url = await indexManagementLocator.getUrl({
+                indexName: index.name,
+                page: 'index_details',
+              });
               navigateToUrl(url, {
                 shouldNotCreateHref: true,
                 shouldNotPrepend: true,

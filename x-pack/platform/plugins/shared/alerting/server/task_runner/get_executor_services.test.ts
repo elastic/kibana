@@ -15,7 +15,7 @@ import { getExecutorServices } from './get_executor_services';
 import type { TaskRunnerContext } from './types';
 import { ruleMonitoringServiceMock } from '../monitoring/rule_monitoring_service.mock';
 import { ruleResultServiceMock } from '../monitoring/rule_result_service.mock';
-import type { SpaceNPRERouting } from '@kbn/core-elasticsearch-server';
+import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
 jest.mock('../lib/wrap_scoped_cluster_client', () => ({
@@ -30,7 +30,7 @@ jest.mock('../lib/wrap_async_search_client', () => ({
   wrapAsyncSearchClient: jest.fn().mockReturnValue({ search: jest.fn(), getMetrics: jest.fn() }),
 }));
 
-const projectRouting: SpaceNPRERouting = { projectRouting: 'space' };
+const projectRouting: AsScopedOptions = { projectRouting: 'space' };
 
 function createMockContext(): jest.Mocked<TaskRunnerContext> {
   const elasticsearch = elasticsearchServiceMock.createInternalStart();
@@ -76,7 +76,7 @@ describe('getExecutorServices', () => {
   };
   const ruleMonitoringService = ruleMonitoringServiceMock.create();
   const ruleResultService = ruleResultServiceMock.create();
-  (ruleMonitoringService.getLastRunMetricsSetters as jest.Mock).mockReturnValue({});
+  (ruleMonitoringService.getSetters as jest.Mock).mockReturnValue({});
   (ruleResultService.getLastRunSetters as jest.Mock).mockReturnValue({});
 
   beforeEach(() => {

@@ -26,7 +26,12 @@ describe('StatusContextMenu', () => {
   it('renders', async () => {
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 
@@ -39,6 +44,8 @@ describe('StatusContextMenu', () => {
         <StatusContextMenu
           disabled={true}
           currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
           onStatusChanged={onStatusChanged}
         />
       </TestProviders>
@@ -51,7 +58,12 @@ describe('StatusContextMenu', () => {
   it('renders the current status correctly', async () => {
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.closed} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.closed}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 
@@ -63,7 +75,12 @@ describe('StatusContextMenu', () => {
   it('changes the status', async () => {
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 
@@ -79,7 +96,12 @@ describe('StatusContextMenu', () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => true);
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 
@@ -97,7 +119,12 @@ describe('StatusContextMenu', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 
@@ -111,7 +138,12 @@ describe('StatusContextMenu', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 
@@ -124,7 +156,12 @@ describe('StatusContextMenu', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+        <StatusContextMenu
+          currentStatus={CaseStatuses.open}
+          totalAlerts={0}
+          syncAlertsEnabled={false}
+          onStatusChanged={onStatusChanged}
+        />
       </TestProviders>
     );
 

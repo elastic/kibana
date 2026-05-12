@@ -26,8 +26,7 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -78,11 +77,8 @@ describe('WHERE Autocomplete', () => {
 
   describe('within the expression', () => {
     const suggest = async (query: string) => {
-      const correctedQuery = correctQuerySyntax(query);
-      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
       const cursorPosition = query.length;
-      const { command } = findAstPosition(root, cursorPosition);
+      const { command } = findAutocompleteAstPosition(query, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }

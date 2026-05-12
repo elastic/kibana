@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { conflict } from '@hapi/boom';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { STREAMS_API_PRIVILEGES, STREAMS_SETTINGS_DOCUMENT_ID } from '../../../../common/constants';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
 import type { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -20,6 +20,7 @@ export const enableStreamsRoute = createServerRoute({
     summary: 'Enable streams',
     description: 'Enables wired streams',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -29,12 +30,14 @@ export const enableStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
-    const { streamsClient } = await getScopedClients({
+    const { streamsClient, streamsSettingsStorageClient } = await getScopedClients({
       request,
     });
 
     try {
-      return await streamsClient.enableStreams();
+      const result = await streamsClient.enableStreams();
+      await streamsSettingsStorageClient.clean();
+      return result;
     } catch (error) {
       if (error instanceof NameTakenError) {
         throw conflict(`Cannot enable Streams, failed to create root stream: ${error.message}`);
@@ -54,6 +57,7 @@ export const disableStreamsRoute = createServerRoute({
     description:
       'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.',
     availability: {
+      since: '9.1.0',
       stability: 'experimental',
     },
   },
@@ -63,9 +67,16 @@ export const disableStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
-    const { streamsClient } = await getScopedClients({ request });
+    const { streamsClient, streamsSettingsStorageClient } = await getScopedClients({ request });
 
-    return await streamsClient.disableStreams();
+    const result = await streamsClient.disableStreams();
+    await streamsSettingsStorageClient.index({
+      id: STREAMS_SETTINGS_DOCUMENT_ID,
+      document: {
+        wired_streams_disabled_by_user: true,
+      },
+    });
+    return result;
   },
 });
 

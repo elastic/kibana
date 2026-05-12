@@ -61,7 +61,6 @@ export const fetchEvents = async ({
       columnar: false,
       filter: buildDslFilter(eventIds, start, end),
       query,
-      // @ts-expect-error - esql helper params types are not up to date
       params: eventIds.map((id, idx) => ({ [`doc_id${idx}`]: id })),
     })
     .toRecords<EventRecord>();
@@ -115,7 +114,7 @@ ${buildTargetEntityIdEvals(GRAPH_TARGET_ENTITY_FIELDS)}
 | MV_EXPAND targetEntityId
 ${buildEntityFieldHints(GRAPH_ACTOR_ENTITY_FIELDS, GRAPH_TARGET_ENTITY_FIELDS)}
 | EVAL timestamp = TO_STRING(\`@timestamp\`)
-${buildEntityEnrichment(isLookupIndexAvailable, false, spaceId)}
+${buildEntityEnrichment(isLookupIndexAvailable, spaceId)}
 | EVAL docId = _id
 | EVAL eventId = event.id
 | EVAL index = _index

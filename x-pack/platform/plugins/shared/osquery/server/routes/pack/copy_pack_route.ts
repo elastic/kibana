@@ -18,6 +18,7 @@ import type { ReadPacksRequestParamsSchema } from '../../../common/api';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
 import type { PackResponseData } from './types';
+import { copyPackResponseSchema } from './response_schemas';
 
 export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -39,6 +40,11 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               typeof readPacksRequestParamsSchema,
               ReadPacksRequestParamsSchema
             >(readPacksRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => copyPackResponseSchema,
+            },
           },
         },
       },

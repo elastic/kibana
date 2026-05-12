@@ -28,6 +28,7 @@ export class AgentBuilderClient implements ChatClient {
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;
+      traceId?: string;
       messages: { message: string }[];
       errors: any[];
       steps?: any[];
@@ -52,12 +53,14 @@ export class AgentBuilderClient implements ChatClient {
       };
       const {
         conversation_id: conversationIdFromResponse,
+        trace_id: traceId,
         response: latestResponse,
         steps,
       } = chatResponse;
 
       return {
         conversationId: conversationIdFromResponse,
+        traceId,
         messages: [{ message: messages }, latestResponse],
         steps,
         errors: [],
@@ -90,6 +93,7 @@ export class AgentBuilderClient implements ChatClient {
 
       return {
         conversationId: result.conversationId,
+        traceId: result.traceId,
         messages: result.messages.map((msg) => ({
           content: msg.message,
         })),

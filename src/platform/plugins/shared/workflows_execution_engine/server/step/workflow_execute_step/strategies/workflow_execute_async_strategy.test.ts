@@ -87,6 +87,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
         spaceId: 'default',
         inputs: { param1: 'value1' },
         triggeredBy: 'workflow-step',
+        parentWorkflowInvocation: 'async',
         parentWorkflowId: 'parent-workflow-id',
         parentWorkflowExecutionId: 'parent-exec-1',
         parentStepId: 'async-step-1',

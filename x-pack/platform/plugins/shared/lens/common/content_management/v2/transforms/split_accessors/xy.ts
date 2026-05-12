@@ -8,7 +8,7 @@
 import type {
   XYDataLayerConfig,
   XYLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../../../../public/visualizations/xy/types';
 
 /** @deprecated */
@@ -21,14 +21,16 @@ export interface DeprecatedSplitAccessorLayer extends Omit<XYDataLayerConfig, 's
  *
  * @deprecated
  */
-export interface DeprecatedSplitAccessorState extends Omit<XYState, 'layers'> {
+export interface DeprecatedSplitAccessorState extends Omit<XYVisualizationState, 'layers'> {
   layers: Array<DeprecatedSplitAccessorLayer | XYLayerConfig>;
 }
 
-export function convertToSplitAccessorsFn(state: DeprecatedSplitAccessorState | XYState): XYState {
+export function convertToSplitAccessorsFn(
+  state: DeprecatedSplitAccessorState | XYVisualizationState
+): XYVisualizationState {
   const hasDeprecatedSplitAccessor = state.layers.some((layer) => 'splitAccessor' in layer);
 
-  if (!hasDeprecatedSplitAccessor) return state satisfies XYState;
+  if (!hasDeprecatedSplitAccessor) return state satisfies XYVisualizationState;
 
   const convertedLayers = state.layers.map<XYLayerConfig>((layer) => {
     if (!('splitAccessor' in layer)) {

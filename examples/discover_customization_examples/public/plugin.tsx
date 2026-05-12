@@ -8,6 +8,7 @@
  */
 
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
@@ -121,6 +122,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           return (
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'discoverCustomizationExamples.logsViewSelectorAriaLabel',
+                  { defaultMessage: 'Logs view selector' }
+                )}
                 button={
                   <EuiButton
                     size="s"

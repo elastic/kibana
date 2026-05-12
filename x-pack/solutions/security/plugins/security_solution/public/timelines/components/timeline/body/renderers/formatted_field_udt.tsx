@@ -36,6 +36,7 @@ export const getFormattedFields = ({
             isExpanded={false}
             isExpandable={true}
             data={dataTableRows[props.rowIndex].data}
+            ecsData={dataTableRows[props.rowIndex].ecs}
             eventId={dataTableRows[props.rowIndex]._id}
             scopeId={scopeId}
             linkValues={undefined}

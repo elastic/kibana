@@ -10,10 +10,10 @@
 import { Subject } from 'rxjs';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common';
+import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';
 import { AttachmentBridge, baseProposalId } from './attachment_bridge';
 import { ProposalTracker } from './proposal_tracker';
 import type { ProposalManager } from './proposed_changes';
-import { WORKFLOW_YAML_CHANGED_EVENT } from '../../../common/agent_builder/constants';
 
 describe('baseProposalId', () => {
   it('strips the hunk suffix from a suffixed ID', () => {
@@ -154,6 +154,76 @@ describe('AttachmentBridge: workflow navigation', () => {
 
     expect(managerB.applyAfterYaml).toHaveBeenCalledTimes(1);
     expect(managerB.applyAfterYaml).toHaveBeenCalledWith(editedWorkflowBYaml);
+
+    bridge.stop();
+  });
+});
+
+describe('AttachmentBridge: onProposalReceived workflowId', () => {
+  it('does not fall back to attachmentId when event workflowId is undefined', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: content');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const onProposalReceived = jest.fn();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      workflowId: 'attachment-uuid-not-a-real-workflow-id',
+      onProposalReceived,
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: 'yaml: content',
+        afterYaml: 'yaml: changed',
+        toolId: 'some.tool',
+      })
+    );
+
+    expect(onProposalReceived).toHaveBeenCalledTimes(1);
+    expect(onProposalReceived).toHaveBeenCalledWith({
+      proposalId: 'p1',
+      toolId: 'some.tool',
+      workflowId: undefined,
+    });
+
+    bridge.stop();
+  });
+
+  it('passes real workflowId from event payload when present', () => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const editor = createMockEditor('yaml: content');
+    const editorRef = { current: editor };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+
+    const onProposalReceived = jest.fn();
+
+    const bridge = new AttachmentBridge();
+    bridge.start(chat$, manager, editorRef, tracker, {
+      workflowId: 'real-workflow-id',
+      onProposalReceived,
+    });
+
+    chat$.next(
+      makeYamlChangedEvent({
+        proposalId: 'p1',
+        beforeYaml: 'yaml: content',
+        afterYaml: 'yaml: changed',
+        workflowId: 'real-workflow-id',
+        toolId: 'some.tool',
+      })
+    );
+
+    expect(onProposalReceived).toHaveBeenCalledWith({
+      proposalId: 'p1',
+      toolId: 'some.tool',
+      workflowId: 'real-workflow-id',
+    });
 
     bridge.stop();
   });

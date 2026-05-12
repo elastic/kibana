@@ -12,9 +12,8 @@ import type { Logger } from '@kbn/logging';
 
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import type { ContentReferencesStore } from '@kbn/elastic-assistant-common';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { AgentState, NodeParamsBase } from './types';
 
@@ -26,7 +25,7 @@ import { AssistantStateAnnotation } from './state';
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
 export interface GetDefaultAssistantGraphParams {
-  actionsClient: PublicMethodsOf<ActionsClient>;
+  getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
   createLlmInstance: () => Promise<BaseChatModel>;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
@@ -39,7 +38,7 @@ export interface GetDefaultAssistantGraphParams {
 export type DefaultAssistantGraph = Awaited<ReturnType<typeof getDefaultAssistantGraph>>;
 
 export const getDefaultAssistantGraph = async ({
-  actionsClient,
+  getInferenceConnectorById,
   checkpointSaver,
   contentReferencesStore,
   createLlmInstance,
@@ -52,7 +51,7 @@ export const getDefaultAssistantGraph = async ({
   try {
     // Default node parameters
     const nodeParams: NodeParamsBase = {
-      actionsClient,
+      getInferenceConnectorById,
       logger,
       savedObjectsClient,
       contentReferencesStore,

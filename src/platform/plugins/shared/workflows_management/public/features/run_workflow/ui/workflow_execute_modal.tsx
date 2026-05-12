@@ -18,16 +18,17 @@ import {
   EuiModalHeaderTitle,
   EuiRadio,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { parseDocument } from 'yaml';
+import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
@@ -35,23 +36,15 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
-
-function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
-  if (!definition) {
-    return 'alert';
-  }
-
-  const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
-  // Check if inputs exist and have properties (handles both new and legacy formats)
-  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
-  const hasInputs =
-    normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
-
-  if (hasManualTrigger && hasInputs) {
-    return 'manual';
-  }
-  return 'alert';
-}
+import {
+  getFallbackTriggerTab,
+  hasWorkflowInputFields,
+  isRacAlertsApiForbiddenError,
+  normalizeInputsFromDefinitionOrYaml,
+  resolveInitialSelectedTrigger,
+} from './workflow_execute_modal_helpers';
+import { useKibana } from '../../../hooks/use_kibana';
+import { sanitizeText } from '../../../shared/lib/sanitize_text';
 
 export interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
@@ -66,15 +59,48 @@ export interface WorkflowExecuteModalProps {
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
   ({ definition, workflowId, onClose, onSubmit, isTestRun, yamlString, initialExecutionId }) => {
     const modalTitleId = useGeneratedHtmlId();
+    const { services } = useKibana();
+    const { http } = services;
+    const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+
+    const [hasAlertRacAccess, setHasAlertRacAccess] = useState(true);
+
+    useFetchAlertsIndexNamesQuery(
+      { http, ruleTypeIds: [] },
+      {
+        enabled: hasAlertRacAccess,
+        retry: false,
+        onError: (err: unknown) => {
+          if (isRacAlertsApiForbiddenError(err)) {
+            setHasAlertRacAccess(false);
+          }
+        },
+      }
+    );
+
+    const normalizedInputs = useMemo(
+      () => normalizeInputsFromDefinitionOrYaml(definition, yamlString),
+      [definition, yamlString]
+    );
 
     const [selectedTrigger, setSelectedTrigger] = useState<WorkflowTriggerTab>(() =>
-      initialExecutionId ? 'historical' : getDefaultTrigger(definition)
+      resolveInitialSelectedTrigger(
+        definition,
+        initialExecutionId,
+        hasAlertRacAccess,
+        canReadWorkflowExecution,
+        normalizedInputs
+      )
     );
 
     const [executionInput, setExecutionInput] = useState<string>('');
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
     const { euiTheme } = useEuiTheme();
+
+    const handleInputChange = useCallback((value: string) => {
+      setExecutionInput(sanitizeText(value));
+    }, []);
 
     const handleSubmit = useCallback(() => {
       onSubmit(JSON.parse(executionInput), selectedTrigger);
@@ -83,6 +109,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
+        if (trigger === 'alert' && !hasAlertRacAccess) {
+          return;
+        }
+        if (trigger === 'historical' && !canReadWorkflowExecution) {
+          return;
+        }
         if (trigger === selectedTrigger) {
           return;
         }
@@ -90,66 +122,55 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setExecutionInputErrors(null);
         setSelectedTrigger(trigger);
       },
-      [setExecutionInput, selectedTrigger]
+      [hasAlertRacAccess, canReadWorkflowExecution, selectedTrigger]
     );
-
-    // Extract inputs from yamlString if definition.inputs is undefined
-    const normalizedInputs = useMemo(() => {
-      if (definition?.inputs) {
-        return normalizeFieldsToJsonSchema(definition.inputs);
-      }
-      if (yamlString) {
-        try {
-          const yamlDoc = parseDocument(yamlString);
-          const yamlJson = yamlDoc.toJSON();
-          if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-            return normalizeFieldsToJsonSchema(yamlJson.inputs);
-          }
-        } catch (e) {
-          // ignore errors when extracting from YAML
-        }
-      }
-      return undefined;
-    }, [definition?.inputs, yamlString]);
 
     const shouldAutoRun = useMemo(() => {
       if (!definition) {
         return false;
       }
       const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
-      const hasInputs =
-        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
-      if (!hasAlertTrigger && !hasInputs) {
-        return true;
-      }
-      return false;
+      return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
     }, [definition, normalizedInputs]);
 
     useEffect(() => {
       if (shouldAutoRun) {
         onSubmit({}, 'manual');
         onClose();
-        return;
       }
-      if (initialExecutionId) {
-        return;
-      }
-      // Default trigger selection when no initialExecutionId
-      if (definition?.triggers?.some((trigger) => trigger.type === 'alert')) {
-        setSelectedTrigger('alert');
-        return;
-      }
-      const hasInputs =
-        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
-      if (hasInputs) {
-        setSelectedTrigger('manual');
-      }
-    }, [shouldAutoRun, onSubmit, onClose, definition, normalizedInputs, initialExecutionId]);
+    }, [shouldAutoRun, onSubmit, onClose]);
+
+    useEffect(() => {
+      setSelectedTrigger((current) => {
+        if (current === 'alert' && !hasAlertRacAccess) {
+          return getFallbackTriggerTab(normalizedInputs);
+        }
+        if (current === 'historical' && !canReadWorkflowExecution) {
+          return getFallbackTriggerTab(normalizedInputs);
+        }
+        return current;
+      });
+    }, [hasAlertRacAccess, canReadWorkflowExecution, normalizedInputs]);
 
     if (shouldAutoRun) {
-      // Not rendered if the workflow should auto run, will close the modal automatically
       return null;
     }
+
+    const alertTabDisabledTooltip = i18n.translate(
+      'workflows.workflowExecuteModal.alertTabRacDisabledTooltip',
+      {
+        defaultMessage:
+          'You need Rule Registry (rac) access—typically via Stack Rules, Security alerts, SLOs, or another alerts-capable feature—to use this option.',
+      }
+    );
+
+    const historicalTabDisabledTooltip = i18n.translate(
+      'workflows.workflowExecuteModal.historicalTabExecutionReadDisabledTooltip',
+      {
+        defaultMessage:
+          'You need the Workflows "Read Workflow Execution" privilege to reuse input from previous runs.',
+      }
+    );
 
     const modalTitle = isTestRun
       ? {
@@ -206,24 +227,44 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               border-top: ${euiTheme.colors.borderBasePlain};
               border-bottom: ${euiTheme.colors.borderBasePlain};
               .euiModalBody__overflow {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
                 padding-inline: 0;
+                overflow: hidden;
               }
             `}
           >
-            <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="m"
+              css={css`
+                min-height: 0;
+              `}
+            >
               <EuiFlexItem
                 grow={false}
                 css={css`
                   padding: 0 ${euiTheme.size.l};
                 `}
               >
-                <EuiFlexGroup direction="row" gutterSize="s">
-                  {ENABLED_TRIGGER_TABS.map((trigger) => (
-                    <EuiFlexItem key={trigger}>
+                <EuiFlexGroup direction="row" gutterSize="s" alignItems="stretch">
+                  {ENABLED_TRIGGER_TABS.map((trigger) => {
+                    let triggerDisabledTooltip: string | undefined;
+                    if (trigger === 'alert' && !hasAlertRacAccess) {
+                      triggerDisabledTooltip = alertTabDisabledTooltip;
+                    } else if (trigger === 'historical' && !canReadWorkflowExecution) {
+                      triggerDisabledTooltip = historicalTabDisabledTooltip;
+                    }
+                    const isTriggerTabDisabled = triggerDisabledTooltip !== undefined;
+                    const triggerButton = (
                       <EuiButton
                         color={selectedTrigger === trigger ? 'primary' : 'text'}
                         onClick={() => handleChangeTrigger(trigger)}
+                        isDisabled={isTriggerTabDisabled}
                         iconSide="right"
+                        data-test-subj={`workflowExecuteModalTrigger-${trigger}`}
                         contentProps={{
                           style: {
                             justifyContent: 'flex-start',
@@ -234,8 +275,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                         }}
                         css={css`
                           width: 100%;
-                          height: fit-content;
-                          min-height: 100%;
+                          flex: 1;
+                          min-height: 0;
+                          align-self: stretch;
                           padding: ${euiTheme.size.m};
                         `}
                       >
@@ -244,6 +286,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                           label={TRIGGER_TABS_LABELS[trigger]}
                           id={trigger}
                           checked={selectedTrigger === trigger}
+                          disabled={isTriggerTabDisabled}
                           onChange={() => {}}
                           css={{ fontWeight: euiTheme.font.weight.bold }}
                         />
@@ -257,13 +300,68 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                           {TRIGGER_TABS_DESCRIPTIONS[trigger]}
                         </EuiText>
                       </EuiButton>
-                    </EuiFlexItem>
-                  ))}
+                    );
+
+                    return (
+                      <EuiFlexItem
+                        key={trigger}
+                        grow={true}
+                        css={css`
+                          display: flex;
+                          flex-direction: column;
+                          min-width: 0;
+                        `}
+                      >
+                        {triggerDisabledTooltip ? (
+                          <div
+                            css={css`
+                              flex: 1;
+                              min-height: 0;
+                              width: 100%;
+                              display: flex;
+                              flex-direction: column;
+                            `}
+                          >
+                            <EuiToolTip
+                              content={triggerDisabledTooltip}
+                              position="top"
+                              display="block"
+                              anchorProps={{
+                                style: {
+                                  flex: 1,
+                                  minHeight: 0,
+                                  width: '100%',
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                },
+                              }}
+                            >
+                              <span
+                                tabIndex={0}
+                                css={css`
+                                  display: flex;
+                                  flex-direction: column;
+                                  flex: 1;
+                                  min-height: 0;
+                                  width: 100%;
+                                `}
+                              >
+                                {triggerButton}
+                              </span>
+                            </EuiToolTip>
+                          </div>
+                        ) : (
+                          triggerButton
+                        )}
+                      </EuiFlexItem>
+                    );
+                  })}
                 </EuiFlexGroup>
               </EuiFlexItem>
 
               <EuiFlexItem
                 css={css`
+                  overflow: hidden;
                   background-color: ${euiTheme.colors.backgroundBaseSubdued};
                   padding: ${euiTheme.size.m} ${euiTheme.size.l};
                 `}
@@ -271,9 +369,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 {selectedTrigger === 'alert' && (
                   <WorkflowExecuteEventForm
                     value={executionInput}
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
+                    racQueriesEnabled={hasAlertRacAccess}
                   />
                 )}
                 {selectedTrigger === 'manual' && (
@@ -282,12 +381,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     inputs={normalizedInputs}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                   />
                 )}
                 {selectedTrigger === 'index' && (
                   <WorkflowExecuteIndexForm
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                   />
@@ -298,7 +397,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     inputs={normalizedInputs}
                     initialExecutionId={initialExecutionId}
                     value={executionInput}
-                    setValue={setExecutionInput}
+                    setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}
                   />

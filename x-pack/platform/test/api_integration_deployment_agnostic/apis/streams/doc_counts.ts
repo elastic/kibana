@@ -52,6 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, 'logs.otel', {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             ...(rootStream.body as any).stream.ingest,
@@ -78,6 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, 'logs.otel.test-stream-1', {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -100,6 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await putStream(apiClient, 'logs.otel.test-stream-2', {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -331,6 +334,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const putResponse = await putStream(apiClient, 'logs-failing-stream', {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },

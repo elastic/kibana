@@ -34,7 +34,7 @@ const InstalledVersionStatus: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         <EuiIcon
           size="m"
-          type="checkInCircleFilled"
+          type="checkCircleFill"
           color="success"
           aria-label={item.installationInfo?.version ?? item.version}
         />

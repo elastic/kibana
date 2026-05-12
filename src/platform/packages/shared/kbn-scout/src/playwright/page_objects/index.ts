@@ -24,7 +24,17 @@ import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
 import { LoginPage } from './login_page';
 import { OverlaysPage } from './overlays';
+import { VisualizeApp } from './visualize_app';
+import {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './content_list';
+import type { ContentListUrlState } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
+
+export { ContentListWrapper, buildContentListSearch, buildContentListUrlRegex };
+export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -47,6 +57,7 @@ export interface PageObjects {
   lens: LensApp;
   login: LoginPage;
   overlays: OverlaysPage;
+  visualize: VisualizeApp;
 }
 
 /**
@@ -70,5 +81,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     lens: createLazyPageObject(LensApp, fixtures.page),
     login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     overlays: createLazyPageObject(OverlaysPage, fixtures.page),
+    visualize: createLazyPageObject(VisualizeApp, fixtures.page),
   };
 }

@@ -25,6 +25,7 @@ export interface SolutionSideNavItem<T extends string = string> {
   items?: Array<SolutionSideNavItem<T>>;
   categories?: LinkCategories<T>;
   iconType?: IconType;
+  prependSeparator?: boolean;
   appendSeparator?: boolean;
   position?: SolutionSideNavItemPosition;
   disabled?: boolean;

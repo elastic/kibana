@@ -6,9 +6,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:44:02.109Z",
       "user": {
-        "entity": {
-          "id": "admin@example.com"
-        }
+        "id": "admin@example.com"
       },
       "client": {
         "user": {
@@ -363,9 +361,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:45:02.109Z",
       "user": {
-        "entity": {
-          "id": "admin6@example.com"
-        }
+        "id": "admin6@example.com"
       },
       "client": {
         "user": {
@@ -723,9 +719,7 @@
     "source": {
       "@timestamp": "2024-09-01T12:39:03.646Z",
       "user": {
-        "entity": {
-          "id": "admin@example.com"
-        }
+        "id": "admin@example.com"
       },
       "client": {
         "user": {

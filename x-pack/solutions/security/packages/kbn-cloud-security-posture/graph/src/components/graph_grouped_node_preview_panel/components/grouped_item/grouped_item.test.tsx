@@ -56,11 +56,12 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
-            icon: 'node',
+            icon: 'vectorTriangle',
             timestamp,
             risk: 55,
             ips: ['5.5.5.5'],
             countryCodes: ['US'],
+            entity: {},
           }}
         />
       );
@@ -138,7 +139,10 @@ describe('<GroupedItem />', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
         const { getByTestId } = render(
-          <GroupedItem scopeId={TEST_SCOPE_ID} item={{ itemType: 'entity', id: entityId }} />
+          <GroupedItem
+            scopeId={TEST_SCOPE_ID}
+            item={{ itemType: 'entity', id: entityId, entity: {} }}
+          />
         );
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID_TEXT).textContent).toBe(entityId);
       });
@@ -175,6 +179,7 @@ describe('<GroupedItem />', () => {
               itemType: 'entity',
               id: 'e1',
               label: 'entity-1',
+              entity: {},
               actor: { id: 'a1', label: 'actor' },
               target: { id: 't1', label: 'target' },
             } as any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -413,6 +418,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'entity-1',
             label: 'test_entity',
+            entity: {},
           }}
         />
       );
@@ -432,6 +438,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['il'],
+            entity: {},
           }}
         />
       );
@@ -448,6 +455,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: undefined,
+            entity: {},
           }}
         />
       );
@@ -464,6 +472,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: [''],
+            entity: {},
           }}
         />
       );
@@ -480,6 +489,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['INVALID'],
+            entity: {},
           }}
         />
       );
@@ -493,6 +503,7 @@ describe('<GroupedItem />', () => {
         itemType: 'entity',
         id: 'e1',
         label: 'entity-1',
+        entity: {},
       };
 
       const { getByTestId, rerender } = render(
@@ -531,6 +542,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: undefined,
+            entity: {},
           }}
         />
       );
@@ -547,6 +559,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: [''],
+            entity: {},
           }}
         />
       );
@@ -564,6 +577,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: [ipv4],
+            entity: {},
           }}
         />
       );
@@ -581,6 +595,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: ipArray,
+            entity: {},
           }}
         />
       );
@@ -597,6 +612,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: [],
+            entity: {},
           }}
         />
       );
@@ -613,6 +629,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             ips: ['', ''],
+            entity: {},
           }}
         />
       );
@@ -632,6 +649,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: countryArray,
+            entity: {},
           }}
         />
       );
@@ -650,6 +668,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: [],
+            entity: {},
           }}
         />
       );
@@ -666,6 +685,7 @@ describe('<GroupedItem />', () => {
             id: 'e1',
             label: 'entity-1',
             countryCodes: ['', ''],
+            entity: {},
           }}
         />
       );
@@ -692,6 +712,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
+            entity: {},
           }}
         />
       );
@@ -710,6 +731,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
+            entity: {},
           }}
         />
       );
@@ -727,6 +749,7 @@ describe('<GroupedItem />', () => {
             itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
+            entity: {},
           }}
         />
       );

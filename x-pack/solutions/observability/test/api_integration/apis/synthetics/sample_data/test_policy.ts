@@ -22,19 +22,20 @@ interface PolicyProps {
   proxyUrl?: string;
   params?: Record<string, any>;
   isBrowser?: boolean;
-  spaceId?: string;
+  spaceIds?: string[];
   mws?: MaintenanceWindow[];
   packageVersion?: string;
+  kibanaUrl?: string;
 }
 
 export const getTestSyntheticsPolicy = (props: PolicyProps): PackagePolicy => {
-  const { namespace, packageVersion } = props;
+  const { namespace, packageVersion, spaceIds } = props;
   return {
     id: '2bfd7da0-22ed-11ed-8c6b-09a2d21dfbc3-27337270-22ed-11ed-8c6b-09a2d21dfbc3-default',
     version: 'WzE2MjYsMV0=',
     name: 'test-monitor-name-Test private location 0-default',
     namespace: namespace ?? 'testnamespace',
-    spaceIds: ['default'],
+    spaceIds: spaceIds || ['default'],
     package: {
       name: 'synthetics',
       title: 'Elastic Synthetics',
@@ -139,9 +140,10 @@ export const getHttpInput = ({
   proxyUrl,
   isTLSEnabled,
   isBrowser,
-  spaceId,
+  spaceIds,
   namespace,
   mws,
+  kibanaUrl,
   name = 'check if title is present-Test private location 0',
 }: PolicyProps) => {
   const enabled = !isBrowser;
@@ -212,9 +214,12 @@ export const getHttpInput = ({
             fields: {
               'monitor.fleet_managed': true,
               config_id: id,
-              meta: { space_id: spaceId ?? 'default' },
-              'monitor.project.name': projectId,
-              'monitor.project.id': projectId,
+              ...(projectId
+                ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
+                : {}),
+              'monitor.interval': 300,
+              meta: { space_id: spaceIds ? spaceIds[0] : 'default' },
+              ...(kibanaUrl ? { kibanaUrl } : {}),
             },
             target: '',
           },
@@ -313,14 +318,16 @@ export const getHttpInput = ({
       {
         add_fields: {
           fields: {
-            config_id: id,
-            meta: {
-              space_id: spaceId ?? 'default',
-            },
             'monitor.fleet_managed': true,
+            config_id: id,
             ...(projectId
-              ? { 'monitor.project.id': projectId, 'monitor.project.name': projectId }
+              ? { 'monitor.project.name': projectId, 'monitor.project.id': projectId }
               : {}),
+            'monitor.interval': 300,
+            meta: {
+              space_id: spaceIds ? spaceIds[0] : 'default',
+            },
+            ...(kibanaUrl ? { kibanaUrl } : {}),
           },
           target: '',
         },

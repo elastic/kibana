@@ -33,6 +33,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
   config.vm.provision "shell", inline: "mkdir -p #{agentDestinationFolder}"
-  config.vm.provision "shell", inline: "tar -zxf #{cachedAgentFilename} --directory #{agentDestinationFolder} --strip-components=1 && rm -f #{cachedAgentFilename}"
+  config.vm.provision "shell", inline: "gzip -t /home/vagrant/#{cachedAgentFilename} || (echo 'Agent tarball integrity check failed' && exit 1)"
+  config.vm.provision "shell", inline: "tar -zxf /home/vagrant/#{cachedAgentFilename} --directory #{agentDestinationFolder} --strip-components=1 && rm -f /home/vagrant/#{cachedAgentFilename}"
   config.vm.provision "shell", inline: "sudo apt-get update && sudo apt-get install -y unzip"
 end

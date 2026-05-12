@@ -20,6 +20,13 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
+import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
+
+jest.mock('@kbn/discover-utils', () => ({
+  DiscoverFlyouts: { metricInsights: 'metricInsights' },
+  dismissAllFlyoutsExceptFor: jest.fn(),
+}));
 
 jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="chart" />),
@@ -33,7 +40,7 @@ jest.mock('../../../common/utils', () => ({
       splitAccessors.length > 0
         ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
         : '';
-    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)${splitAccessorsStr}`;
+    return `FROM ${metricItem.dataStream} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
   }),
 }));
 
@@ -88,7 +95,11 @@ describe('MetricsGrid', () => {
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
-    return render(<MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />);
+    return render(
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />
+      </MetricsExperienceStateProvider>
+    );
   };
 
   beforeEach(() => {
@@ -109,23 +120,27 @@ describe('MetricsGrid', () => {
 
   it('passes the correct size prop', () => {
     const { rerender } = render(
-      <MetricsGrid
-        {...defaultProps}
-        columns={3}
-        dimensions={[{ name: 'host.name' }]}
-        discoverFetch$={discoverFetch$}
-      />
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid
+          {...defaultProps}
+          columns={3}
+          dimensions={[{ name: 'host.name' }]}
+          discoverFetch$={discoverFetch$}
+        />
+      </MetricsExperienceStateProvider>
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
 
     rerender(
-      <MetricsGrid
-        {...defaultProps}
-        columns={4}
-        dimensions={[{ name: 'host.name' }]}
-        discoverFetch$={discoverFetch$}
-      />
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid
+          {...defaultProps}
+          columns={4}
+          dimensions={[{ name: 'host.name' }]}
+          discoverFetch$={discoverFetch$}
+        />
+      </MetricsExperienceStateProvider>
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
@@ -165,7 +180,9 @@ describe('MetricsGrid', () => {
     );
   });
 
-  it('handles multiple dimensions correctly in ESQL query and chart layers', () => {
+  it('filters dimensions to only those applicable to each metric', () => {
+    // mockMetricItems only have dimensionFields: [{ name: 'host.name' }]
+    // so service.name and container.id should be filtered out
     const multipleDimensions = [
       { name: 'host.name' },
       { name: 'service.name' },
@@ -177,7 +194,7 @@ describe('MetricsGrid', () => {
     expect(createESQLQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         metricItem: expect.any(Object),
-        splitAccessors: ['host.name', 'service.name', 'container.id'],
+        splitAccessors: ['host.name'],
       })
     );
 
@@ -185,11 +202,54 @@ describe('MetricsGrid', () => {
       expect.objectContaining({
         chartLayers: expect.arrayContaining([
           expect.objectContaining({
-            breakdown: ['host.name', 'service.name', 'container.id'],
+            breakdown: ['host.name'],
           }),
         ]),
       }),
       expect.anything()
+    );
+  });
+
+  it('applies breakdown per-metric when metrics have different dimensionFields', () => {
+    const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
+      {
+        metricName: 'fieldsense.energy.battery.voltage',
+        dataStream: 'fieldsense-station-metrics',
+        units: [null],
+        metricTypes: ['gauge'],
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+        dimensionFields: [{ name: 'station.id' }, { name: 'sensor.type' }],
+      },
+      {
+        metricName: 'system.cpu.utilization',
+        dataStream: 'metrics-hostmetricsreceiver.otel-default',
+        units: [null],
+        metricTypes: ['gauge'],
+        fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+        dimensionFields: [{ name: 'attributes.cpu' }, { name: 'host.name' }],
+      },
+    ];
+
+    // Select station.id, which only exists in the fieldsense metric
+    renderMetricsGrid({
+      metricItems: heterogeneousMetrics,
+      dimensions: [{ name: 'station.id' }],
+    });
+
+    // First chart (fieldsense) should get the breakdown
+    expect(createESQLQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricItem: expect.objectContaining({ metricName: 'fieldsense.energy.battery.voltage' }),
+        splitAccessors: ['station.id'],
+      })
+    );
+
+    // Second chart (hostmetrics) should get no breakdown
+    expect(createESQLQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metricItem: expect.objectContaining({ metricName: 'system.cpu.utilization' }),
+        splitAccessors: [],
+      })
     );
   });
 
@@ -384,6 +444,34 @@ describe('MetricsGrid', () => {
         expect(gridCells[1]).toHaveAttribute('tabindex', '0');
         expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
       });
+    });
+  });
+
+  describe('flyout dismissal on view details', () => {
+    it('should call dismissAllFlyoutsExceptFor with metricInsights when handleViewDetails is triggered', () => {
+      renderMetricsGrid();
+
+      // Get the onViewDetails callback passed to the first Chart
+      const chartCalls = (Chart as jest.Mock).mock.calls;
+      expect(chartCalls.length).toBeGreaterThan(0);
+
+      const firstChartProps = chartCalls[0][0];
+      expect(firstChartProps.onViewDetails).toBeDefined();
+
+      // Clear mock to isolate calls from handleViewDetails vs flyout mount useEffect
+      (dismissAllFlyoutsExceptFor as jest.Mock).mockClear();
+
+      // Trigger the onViewDetails callback
+      act(() => {
+        firstChartProps.onViewDetails();
+      });
+
+      // Verify dismissAllFlyoutsExceptFor was called from handleViewDetails
+      // AND from the flyout's useEffect on mount (2 calls total).
+      // The first call is the early dismissal in handleViewDetails (before flyout mounts),
+      // the second is the safety-net useEffect inside MetricInsightsFlyout.
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledTimes(2);
+      expect(dismissAllFlyoutsExceptFor).toHaveBeenCalledWith('metricInsights');
     });
   });
 });

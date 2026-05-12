@@ -520,5 +520,65 @@ describe('BarDetails', () => {
       const { queryByTestId } = render(<BarDetails item={mockItemWithoutServiceName} left={10} />);
       expect(queryByTestId('apmBarDetailsServiceNameBadge')).not.toBeInTheDocument();
     });
+
+    describe('when getServiceBadgeHref is provided in context', () => {
+      const mockItemWithServiceName = {
+        ...mockItem,
+        serviceName: 'my-service',
+      } as unknown as TraceWaterfallItem;
+
+      beforeEach(() => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          getServiceBadgeHref: (serviceName: string) => `/services/${serviceName}/overview`,
+        });
+      });
+
+      it('renders the badge as a link with the correct href', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        const badge = getByTestId('apmBarDetailsServiceNameBadge');
+        expect(badge).toHaveAttribute('href', '/services/my-service/overview');
+      });
+
+      it('renders the correct aria-label', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        const badge = getByTestId('apmBarDetailsServiceNameBadge');
+        expect(badge).toHaveAttribute('aria-label', 'Go to my-service service overview');
+      });
+
+      it('sets data-prevent-row-click to prevent the row click handler from firing', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).toHaveAttribute(
+          'data-prevent-row-click'
+        );
+      });
+    });
+
+    describe('when getServiceBadgeHref is not provided in context', () => {
+      beforeEach(() => {
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
+          getServiceBadgeHref: undefined,
+        });
+      });
+
+      it('renders the badge without href', () => {
+        const mockItemWithServiceName = {
+          ...mockItem,
+          serviceName: 'my-service',
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).not.toHaveAttribute('href');
+      });
+
+      it('does not render aria-label', () => {
+        const mockItemWithServiceName = {
+          ...mockItem,
+          serviceName: 'my-service',
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).not.toHaveAttribute('aria-label');
+      });
+    });
   });
 });

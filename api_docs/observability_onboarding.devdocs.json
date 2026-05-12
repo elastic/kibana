@@ -267,7 +267,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -275,7 +283,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -285,7 +301,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -496,7 +520,7 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/plugin.ts",
-      "lineNumber": 49,
+      "lineNumber": 50,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

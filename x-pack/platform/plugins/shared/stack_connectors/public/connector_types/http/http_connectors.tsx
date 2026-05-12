@@ -134,6 +134,7 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazyLoadedAuthConfig
           readOnly={readOnly}
+          isEdit={isEdit}
           isPfxEnabled={isPfxEnabled}
           isOAuth2Enabled={true}
         />

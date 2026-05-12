@@ -9,7 +9,7 @@ applies_to:
 
 # GitHub connector [github-action-type]
 
-The GitHub data source connects to GitHub through the GitHub MCP server and the GitHub REST API. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It uses Bearer token (personal access token) authentication.
+The GitHub data source connects to GitHub through the GitHub MCP server. It provides search across code, repositories, issues, pull requests, and users. It also provides access to commits, branches, tags, releases, teams, and file contents. It supports two authentication methods: Bearer token (personal access token) and OAuth Authorization Code.
 
 ## Create connectors in {{kib}} [define-github-ui]
 
@@ -19,77 +19,79 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 GitHub connectors have the following configuration properties:
 
-Bearer Token
-:   A GitHub personal access token for authentication. Refer to [Get API credentials](#github-api-credentials) for instructions.
+MCP Server URL
+:   The URL of the GitHub MCP server. Defaults to `https://api.githubcopilot.com/mcp/`.
+
+Authentication
+:   Choose one of the following authentication methods:
+    - **Bearer Token**: A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials) for instructions.
+    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
 
 ## Test connectors [github-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}.
 
-The GitHub data source exposes the following tools through MCP:
+The GitHub connector exposes the following actions:
 
-`get_me`
+`getMe`
 :   Get the authenticated GitHub user's profile information.
 
-`list_issues`
-:   List issues in a repository.
+`searchCode`
+:   Search for code across GitHub repositories.
 
-`list_pull_requests`
-:   List pull requests in a repository.
+`searchRepositories`
+:   Search for GitHub repositories.
 
-`pull_request_read`
-:   Read the details of a specific pull request.
+`searchIssues`
+:   Search for issues across GitHub repositories.
 
-`list_commits`
-:   List commits in a repository.
+`searchPullRequests`
+:   Search for pull requests across GitHub repositories.
 
-`get_commit`
+`searchUsers`
+:   Search for GitHub users.
+
+`listIssues`
+:   List issues in a repository. Uses cursor-based pagination.
+
+`listPullRequests`
+:   List pull requests in a repository. Uses cursor-based pagination.
+
+`listCommits`
+:   List commits in a repository. Uses cursor-based pagination.
+
+`listBranches`
+:   List branches in a repository. Uses cursor-based pagination.
+
+`listTags`
+:   List tags in a repository. Uses cursor-based pagination.
+
+`listReleases`
+:   List releases in a repository. Uses cursor-based pagination.
+
+`getCommit`
 :   Get details of a specific commit.
 
-`list_branches`
-:   List branches in a repository.
-
-`list_tags`
-:   List tags in a repository.
-
-`get_tag`
-:   Get details of a specific tag.
-
-`list_releases`
-:   List releases in a repository.
-
-`get_latest_release`
+`getLatestRelease`
 :   Get the latest release for a repository.
 
-`get_label`
-:   Get details of a specific label.
+`pullRequestRead`
+:   Read the details of a specific pull request.
 
-`list_issue_types`
-:   List available issue types in a repository.
+`getFileContents`
+:   Get the contents of a file or directory from a GitHub repository.
 
-`get_teams`
-:   List teams in an organization.
+`getIssue`
+:   Get details of a specific issue in a repository.
 
-`get_team_members`
-:   List members of a specific team.
+`getIssueComments`
+:   Get comments for a specific issue in a repository.
 
-The following workflow actions are also available:
+`listTools`
+:   List all tools available on the GitHub MCP server. Use this to discover available capabilities.
 
-Search
-:   Search through GitHub code, repositories, issues, pull requests, and users using GitHub query syntax.
-    - `tool_name` (required): The type of search to perform. Valid values: `search_code`, `search_repositories`, `search_issues`, `search_pull_requests`, `search_users`.
-    - `query` (required): The search query string using GitHub query syntax.
-    - `order` (optional): Sort order. Valid values: `asc`, `desc`. Defaults to `desc`.
-    - `page` (optional): Page number for pagination. Defaults to 1.
-    - `per_page` (optional): Number of results per page. Defaults to 10.
-    - `sort` (optional): Sort field. Valid values: `comments`, `reactions`, `reactions-+1`, `reactions--1`, `reactions-smile`, `reactions-thinking_face`, `reactions-heart`, `reactions-tada`, `interactions`, `created`, `updated`. Defaults to `created`.
-
-Get file contents
-:   Get the contents of a file from a GitHub repository.
-    - `owner` (required): The owner of the repository (username or organization).
-    - `repo` (required): The name of the repository.
-    - `path` (required): The path to the file in the repository.
-    - `ref` (optional): The branch, tag, or commit SHA. Defaults to the repository's default branch.
+`callTool`
+:   Call any tool on the GitHub MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.
 
 ## Connector networking configuration [github-connector-networking-configuration]
 
@@ -97,7 +99,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [github-api-credentials]
 
-To use the GitHub connector, you need a GitHub personal access token:
+To use the GitHub connector with a personal access token:
 
 1. Log in to [GitHub](https://github.com/).
 2. Go to **Settings** > **Developer settings** > **Personal access tokens** > **Fine-grained tokens** (or [create one directly](https://github.com/settings/personal-access-tokens/new)).
@@ -113,3 +115,15 @@ To use the GitHub connector, you need a GitHub personal access token:
 ::::{note}
 Classic personal access tokens also work. When using a classic token, select the `repo` scope for full repository access, or `public_repo` for public repositories only.
 ::::
+
+## Get OAuth credentials [github-oauth-credentials]
+
+To use the GitHub connector with OAuth:
+
+1. Log in to [GitHub](https://github.com/).
+2. Go to **Settings** > **Developer settings** > **OAuth Apps** > **New OAuth App** (or [create one directly](https://github.com/settings/applications/new)).
+3. Configure the application:
+   - Set a descriptive name (for example, "Kibana GitHub Connector").
+   - Set the **Authorization callback URL** to your Kibana OAuth redirect URI.
+4. After creating the app, copy the **Client ID** and generate a **Client Secret**.
+5. In {{kib}}, select **OAuth Authorization Code** as the authentication method and enter the Client ID and Client Secret.

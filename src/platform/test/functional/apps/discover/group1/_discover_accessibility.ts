@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton', true));
 
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed(
@@ -102,27 +102,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('discoverCreateAlertButton');
         await testSubjects.click('discoverCreateAlertButton');
         await testSubjects.existOrFail('addRuleFlyoutTitle');
+        await testSubjects.existOrFail('euiFlyoutCloseButton');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
+        await testSubjects.existOrFail('app-menu-overflow-button');
+
         await retry.try(async () => {
-          await browser.pressKeys(browser.keys.ESCAPE);
-          // A bug exists with the create rule flyout where sometimes the confirm modal
-          // shows even though the form hasn't been touched, so this works around it
-          if (await testSubjects.exists('confirmRuleCloseModal', { timeout: 0 })) {
-            await focusAndPressButton(
-              await testSubjects.findDescendant(
-                'confirmModalConfirmButton',
-                await testSubjects.find('confirmRuleCloseModal')
-              )
-            );
-          }
           expect(await hasFocus('app-menu-overflow-button')).to.be(true);
         });
       });
 
       it('should return focus to the share button when dismissing the share popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
-
-      it('should return focus to the inspect button when dismissing the inspector flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton', true));
 
       it('should return focus to the save button when dismissing the save modal', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));

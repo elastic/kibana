@@ -53,7 +53,7 @@ export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps
         <>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            iconType="plusInCircle"
+            iconType="plusCircle"
             href={getHref('settings_create_download_sources')}
             data-test-subj="addDownloadSourcesBtn"
           >

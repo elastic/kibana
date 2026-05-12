@@ -30,6 +30,14 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  sideNav: ChromeStart['sideNav'] & {
+    /**
+     * Set the width of the side nav.
+     * @param width The width of the side nav in pixels.
+     */
+    setWidth(width: number): void;
+  };
+
   /**
    * Get an observable of the current badge.
    * Only consumed by chrome components; plugins use `setBadge()`.

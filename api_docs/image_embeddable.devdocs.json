@@ -25,7 +25,7 @@
           "{ readonly alt_text?: string | undefined; readonly background_color?: string | undefined; readonly src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
-        "lineNumber": 66,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -42,7 +42,7 @@
           "{ readonly alt_text?: string | undefined; readonly background_color?: string | undefined; readonly src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
-        "lineNumber": 67,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -67,7 +67,7 @@
           "[] | undefined; readonly image_config: Readonly<{ alt_text?: string | undefined; background_color?: string | undefined; } & { src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
-        "lineNumber": 68,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

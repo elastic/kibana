@@ -39,7 +39,7 @@ test.describe(
       // Navigate directly to the create dashboard page to bypass the
       // listing page (which may redirect to the no-data prompt).
       await page.gotoApp('dashboards', { hash: '/create' });
-      await page.waitForLoadingIndicatorHidden();
+      await page.testSubj.waitForSelector('emptyDashboardWidget', { timeout: 20000 });
     });
 
     test.afterAll(async ({ kbnClient }) => {

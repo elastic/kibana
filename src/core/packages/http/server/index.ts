@@ -129,6 +129,10 @@ export type {
   RouteDeprecationInfo,
   PostValidationMetadata,
   AnyKibanaRequest,
+  RequestTiming,
+  Timer,
+  TimingEvent,
+  RequestTimingState,
 } from './src/router';
 export {
   validBodyOutput,

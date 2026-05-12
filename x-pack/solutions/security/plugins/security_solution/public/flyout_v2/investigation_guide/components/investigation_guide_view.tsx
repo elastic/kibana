@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody } from '@elastic/eui';
 import React, { createContext, memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { MarkdownRenderer } from '../../../common/components/markdown_editor';
@@ -34,11 +33,11 @@ interface InvestigationGuideViewProps {
  */
 export const InvestigationGuideView = memo(
   ({ hit, investigationGuide }: InvestigationGuideViewProps) => (
-    <EuiFlyoutBody data-test-subj="investigation-guide-full-view">
+    <div data-test-subj="investigation-guide-full-view">
       <AlertDataContext.Provider value={hit}>
         <MarkdownRenderer textSize="s">{investigationGuide}</MarkdownRenderer>
       </AlertDataContext.Provider>
-    </EuiFlyoutBody>
+    </div>
   )
 );
 

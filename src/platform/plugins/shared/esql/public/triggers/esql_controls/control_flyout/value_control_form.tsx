@@ -23,6 +23,8 @@ import {
   ESQLVariableType,
   EsqlControlType,
   TIMEFIELD_ROUTE,
+  isQueryESQLControl,
+  isStaticESQLControl,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -51,6 +53,7 @@ interface ValueControlFormProps {
   controlFlyoutType: EsqlControlType;
   queryString: string;
   setControlState: (state: OptionsListESQLControlState) => void;
+  setIsValid: (isValid: boolean) => void;
   initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
@@ -59,8 +62,8 @@ interface ValueControlFormProps {
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
-To get the agent field values use: 
-FROM logs-* 
+To get the agent field values use:
+FROM logs-*
 |  WHERE @timestamp <=?_tend and @timestamp >?_tstart
 | STATS BY agent
 */`;
@@ -73,6 +76,7 @@ export function ValueControlForm({
   controlFlyoutType,
   search,
   setControlState,
+  setIsValid,
   valuesRetrieval,
   timeRange,
   esqlVariables,
@@ -102,7 +106,7 @@ export function ValueControlForm({
   );
 
   const [selectedValues, setSelectedValues] = useState<EuiComboBoxOptionOption[]>(
-    initialState?.available_options
+    isStaticESQLControl(initialState)
       ? initialState.available_options.map((option) => {
           return {
             label: option,
@@ -115,7 +119,9 @@ export function ValueControlForm({
 
   const [valuesQuery, setValuesQuery] = useState<string>(
     variableType === ESQLVariableType.VALUES
-      ? initialState?.esql_query ?? INITIAL_EMPTY_STATE_QUERY
+      ? isQueryESQLControl(initialState)
+        ? initialState.esql_query
+        : INITIAL_EMPTY_STATE_QUERY
       : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
@@ -177,7 +183,7 @@ export function ValueControlForm({
 
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-        getESQLResults({
+        const results = await getESQLResults({
           esqlQuery: query,
           search,
           signal: controller.signal,
@@ -186,49 +192,54 @@ export function ValueControlForm({
           timeRange,
           timezone,
           variables: esqlVariables,
-        }).then((results) => {
-          if (!isMounted() || controller.signal.aborted) {
-            return;
-          }
-          const columns = results.response.columns.map((col) => col.name);
-          setQueryColumns(columns);
-          setShowValuesPreview(true);
-
-          if (columns.length === 1) {
-            const valuesArray = results.response.values.map((value) => value[0]);
-            const options = valuesArray
-              .filter((v) => v)
-              .map((option) => {
-                return {
-                  label: String(option),
-                  key: String(option),
-                  'data-test-subj': String(option),
-                };
-              });
-            setSelectedValues(options);
-            setAvailableValuesOptions(options);
-            setEsqlQueryErrors([]);
-          }
         });
+        if (!isMounted() || controller.signal.aborted) {
+          return;
+        }
+        const columns = results.response.columns.map((col) => col.name);
+        setQueryColumns(columns);
+        setShowValuesPreview(true);
+
+        if (columns.length === 1) {
+          const valuesArray = results.response.values.map((value) => value[0]);
+          const options = valuesArray
+            .filter((v) => v)
+            .map((option) => {
+              return {
+                label: String(option),
+                key: String(option),
+                'data-test-subj': String(option),
+              };
+            });
+          setSelectedValues(options);
+          setAvailableValuesOptions(options);
+          setEsqlQueryErrors([]);
+          setIsValid(true);
+        } else {
+          setIsValid(false);
+        }
+
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
           return;
         }
+        setIsValid(false);
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings, setIsValid]
   );
 
   const setSuggestedQuery = useCallback(async () => {
     const indexPattern = getIndexPatternFromESQLQuery(queryString);
-    const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
-    const response = (await core.http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch the timefield', error);
-      return undefined;
-    })) as { timeField?: string } | undefined;
+    const response = (await core.http
+      ?.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: `FROM ${indexPattern}` }) })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch the timefield', error);
+        return undefined;
+      })) as { timeField?: string } | undefined;
 
     const timeField = response?.timeField;
     const timeFilter = Boolean(timeField)
@@ -240,7 +251,7 @@ export function ValueControlForm({
 
   useEffect(() => {
     if (!selectedValues?.length && controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY) {
-      if (initialState?.esql_query) {
+      if (isQueryESQLControl(initialState)) {
         onValuesQuerySubmit(initialState.esql_query);
       } else if (valuesRetrieval) {
         setSuggestedQuery();
@@ -249,7 +260,7 @@ export function ValueControlForm({
   }, [
     selectedValues?.length,
     controlFlyoutType,
-    initialState?.esql_query,
+    initialState,
     variableName,
     valuesRetrieval,
     onValuesQuerySubmit,
@@ -316,6 +327,7 @@ export function ValueControlForm({
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
+              setIsValid(false);
               setValuesQuery(q.esql);
             }}
             disableAutoFocus={true}

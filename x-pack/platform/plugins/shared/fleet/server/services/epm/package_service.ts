@@ -65,7 +65,8 @@ import {
   getInstalledPackages,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
-import { getEsPackage } from './archive/storage';
+import { getAsset, getEsPackage } from './archive/storage';
+import type { PackageAsset } from './archive/storage';
 import { createArchiveIteratorFromMap } from './archive/archive_iterator';
 import { rollbackInstallation } from './packages/rollback';
 
@@ -157,6 +158,11 @@ export interface PackageClient {
   ): Promise<GetInstalledPackagesResponse>;
 
   rollbackPackage(options: { pkgName: string }): Promise<RollbackPackageResponse>;
+
+  getPackageAsset(
+    assetPath: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ): Promise<PackageAsset | undefined>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -483,6 +489,15 @@ class PackageClientImpl implements PackageClient {
       request: this.request,
     });
     return installedTransforms;
+  }
+
+  public async getPackageAsset(
+    assetPath: string,
+    savedObjectsClient: SavedObjectsClientContract = this.internalSoClient
+  ): Promise<PackageAsset | undefined> {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    return getAsset({ savedObjectsClient, path: assetPath });
   }
 
   async #runPreflight(requiredAuthz?: FleetAuthzRouteConfig['fleetAuthz']) {

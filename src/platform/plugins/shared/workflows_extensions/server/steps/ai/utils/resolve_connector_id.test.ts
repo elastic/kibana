@@ -26,6 +26,7 @@ describe('resolveConnectorId', () => {
     config: {},
     capabilities: {},
     isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...partial,
   });
 

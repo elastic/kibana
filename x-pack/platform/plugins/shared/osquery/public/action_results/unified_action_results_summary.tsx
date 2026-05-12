@@ -80,7 +80,9 @@ const statusTableContainerCss = {
 
 const unifiedTableWrapperCss = {
   flex: '1 1 auto',
-  minHeight: 200,
+  '.euiDataGrid__controls': {
+    paddingLeft: '8px',
+  },
 };
 
 const gridStyleOverride = {
@@ -227,6 +229,14 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
     currentAgentCountRef.current = agentIds?.length;
   }, [agentIds?.length, data.aggregations.totalResponded, error, expired]);
 
+  // Remount the grid on fullscreen exit to reset internal EuiDataGrid column widths that persist from the wider viewport.
+  const [gridKey, setGridKey] = useState(0);
+  const handleFullScreenChange = useCallback((isFullScreen: boolean) => {
+    if (!isFullScreen) {
+      setGridKey((k) => k + 1);
+    }
+  }, []);
+
   if (!dataView) {
     return null;
   }
@@ -239,6 +249,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
         <div css={tableWrapperCss} data-test-subj="osqueryStatusTable">
           <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
             <UnifiedDataTable
+              key={gridKey}
               ariaLabelledBy="osquery-status-results"
               dataView={dataView}
               columns={DEFAULT_COLUMNS}
@@ -248,6 +259,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               sort={EMPTY_SORT}
               showTimeCol={false}
               showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+              onFullScreenChange={handleFullScreenChange}
               canDragAndDropColumns={false}
               isSortEnabled={false}
               isPaginationEnabled={false}
@@ -261,6 +273,7 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               onSetColumns={noop}
               controlColumnIds={EMPTY_CONTROL_COLUMN_IDS}
               gridStyleOverride={gridStyleOverride}
+              rowHeightState={0}
               dataGridDensityState={DataGridDensity.EXPANDED}
             />
           </CellActionsProvider>

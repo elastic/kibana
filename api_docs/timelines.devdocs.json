@@ -319,7 +319,7 @@
                     "id": "def-public.getTableSkipFocus.$1.getFocusedCell.$1",
                     "type": "Object",
                     "tags": [],
-                    "label": "__0",
+                    "label": "{\n  containerElement,\n  tableClassName,\n}",
                     "description": [],
                     "signature": [
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
@@ -968,7 +968,7 @@
             "id": "def-public.OnColumnFocused.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  newFocusedColumn,\n  newFocusedColumnAriaColindex,\n}",
             "description": [],
             "signature": [
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
@@ -1103,6 +1103,7 @@
               "lineNumber": 26,
               "columnNumber": 20,
               "deprecated": false,
+              "docsReferencedTypeName": "LastUpdatedAtProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1187,6 +1188,7 @@
               "lineNumber": 29,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "Store",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1282,6 +1284,7 @@
             "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Fields",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1370,6 +1373,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchHit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1725,11 +1729,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/cases/components/case_events/table.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/cases/attachments/event/components/table.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/cases/components/case_events/table.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/cases/attachments/event/components/table.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -1801,6 +1805,7 @@
                 "lineNumber": 18,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Ecs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4154,6 +4159,10 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/app/home/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
           },
           {
@@ -4194,14 +4203,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/hooks/use_attack_details.ts"
           },
           {
@@ -4223,6 +4224,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details/utils/table_tab_columns.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
           },
           {
             "plugin": "securitySolution",
@@ -4584,27 +4593,7 @@
         "label": "TimelineEqlRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ sort: { field: string; direction: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.Direction",
-            "text": "Direction"
-          },
-          "; type?: string | undefined; esTypes?: string[] | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; size?: number | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; format?: string | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; timestampField?: string | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
-          "objectInputType",
-          "<{ activePage: ",
-          "ZodNumber",
-          "; cursorStart: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; querySize: ",
-          "ZodNumber",
-          "; }, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; format?: string | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          "{ entityType: any; filterStatus: any; sort: { direction: any; field: string; esTypes?: string[] | undefined; type?: string | undefined; }[]; filterQuery: any; fieldRequested: string[]; language: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; params?: any; pagination?: { [x: string]: unknown; activePage: number; querySize: number; cursorStart?: number | undefined; } | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; timestampField?: string | undefined; size?: number | undefined; runTimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
         "lineNumber": 26,
@@ -4621,35 +4610,7 @@
         "label": "TimelineEventsAllOptionsInput",
         "description": [],
         "signature": [
-          "{ sort: { field: string; direction: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.Direction",
-            "text": "Direction"
-          },
-          "; esTypes: string[]; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsQueries",
-            "text": "TimelineEventsQueries"
-          },
-          ".all; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; format?: string | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
-          "objectInputType",
-          "<{ activePage: ",
-          "ZodNumber",
-          "; cursorStart: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; querySize: ",
-          "ZodNumber",
-          "; }, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; dateRangeField?: string | undefined; excludeEcsData?: boolean | undefined; }"
+          "{ entityType: any; filterStatus: any; fieldRequested: string[]; sort: { direction: any; field: string; esTypes: string[]; type?: string | undefined; }[]; filterQuery: any; fields: any[]; language: any; factoryQueryType: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; params?: any; pagination?: { [x: string]: unknown; activePage: number; querySize: number; cursorStart?: number | undefined; } | undefined; authFilter?: Record<string, never> | undefined; dateRangeField?: string | undefined; excludeEcsData?: boolean | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
         "lineNumber": 42,
@@ -4666,27 +4627,7 @@
         "label": "TimelineEventsDetailsRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ eventId: string; indexName: string; factoryQueryType: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsQueries",
-            "text": "TimelineEventsQueries"
-          },
-          ".details; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; format?: string | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
-          "objectInputType",
-          "<{ activePage: ",
-          "ZodNumber",
-          "; cursorStart: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; querySize: ",
-          "ZodNumber",
-          "; }, ",
-          "ZodTypeAny",
-          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; }"
+          "{ indexName: string; eventId: string; factoryQueryType: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; filterQuery?: any; defaultIndex?: string[] | undefined; entityType?: any; params?: any; filterStatus?: any; pagination?: { [x: string]: unknown; activePage: number; querySize: number; cursorStart?: number | undefined; } | undefined; authFilter?: Record<string, never> | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
         "lineNumber": 21,
@@ -4703,23 +4644,7 @@
         "label": "TimelineEventsLastEventTimeRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ details: { ip?: string | null | undefined; hostName?: string | null | undefined; userName?: string | null | undefined; }; factoryQueryType: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsQueries",
-            "text": "TimelineEventsQueries"
-          },
-          ".lastEventTime; indexKey: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.LastEventIndexKey",
-            "text": "LastEventIndexKey"
-          },
-          "; params?: any; id?: string | undefined; indexType?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          "{ indexKey: any; details: { hostName?: string | null | undefined; userName?: string | null | undefined; ip?: string | null | undefined; }; factoryQueryType: any; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "lineNumber": 44,
@@ -4736,15 +4661,7 @@
         "label": "TimelineKpiRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ factoryQueryType: ",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.TimelineEventsQueries",
-            "text": "TimelineEventsQueries"
-          },
-          ".kpi; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; format?: string | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          "{ filterQuery: any; entityType: any; filterStatus: any; factoryQueryType: any; indexType?: string | undefined; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: any; script: any; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; params?: any; }"
         ],
         "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "lineNumber": 16,

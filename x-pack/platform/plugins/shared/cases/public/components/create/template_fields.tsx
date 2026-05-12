@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { FC } from 'react';
-import { controlRegistry } from '../templates_v2/field_types/field_types_registry';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useTemplateFormSync } from './use_template_form_sync';
 import * as i18n from './translations';
+import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 
 export const CreateCaseTemplateFields: React.FC = () => {
+  const form = useFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { template, isLoading } = useTemplateFormSync();
 
@@ -22,16 +22,8 @@ export const CreateCaseTemplateFields: React.FC = () => {
       return null;
     }
 
-    return template.definition.fields.map((field) => {
-      const Control = controlRegistry[field.control] as FC<Record<string, unknown>>;
-
-      if (!Control) {
-        return null;
-      }
-
-      return <Control key={field.name} {...field} />;
-    });
-  }, [template]);
+    return <FieldsRenderer form={form} parsedTemplate={template.definition} />;
+  }, [template, form]);
 
   if (isLoading) {
     return null;

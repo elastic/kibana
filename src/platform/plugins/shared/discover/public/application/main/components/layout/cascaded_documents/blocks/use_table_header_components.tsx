@@ -93,16 +93,19 @@ function CascadeGroupingSelectionPopover({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('discover.dataCascade.header.groupBySelectorAriaLabel', {
+        defaultMessage: 'Select groups to group by',
+      })}
       isOpen={cascadeSelectOpen}
       closePopover={closeSelectionPopover}
       panelPaddingSize="none"
       button={
         <EuiToolTip
           title={i18n.translate('discover.dataCascade.header.techPreviewLabel', {
-            defaultMessage: 'Cascade experience (Technical preview)',
+            defaultMessage: 'Grouped results (technical preview)',
           })}
           content={i18n.translate('discover.dataCascade.header.techPreviewTooltip', {
-            defaultMessage: 'This functionality is in technical preview and is subject to change.',
+            defaultMessage: 'Results are grouped when running a Stats BY',
           })}
         >
           <EuiFilterGroup css={toolbarStyles.controlButton}>
@@ -113,7 +116,7 @@ function CascadeGroupingSelectionPopover({
               badgeContent={currentSelectedColumns.length}
               data-test-subj="discoverEnableCascadeLayoutSwitch"
             >
-              <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <FormattedMessage
                     id="discover.dataCascade.header.layoutSwitchLabel"

@@ -11,10 +11,18 @@
         "tags": [],
         "label": "GetSearchBarFilterOptions",
         "description": [
-          "\nOptions for the {@link SavedObjectsTaggingApiUi.getSearchBarFilter | getSearchBarFilter api}\n"
+          "\nOptions for the ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter",
+            "text": "getSearchBarFilter api"
+          },
+          "\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 296,
+        "lineNumber": 302,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +40,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 302,
+            "lineNumber": 308,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -50,7 +58,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 319,
+            "lineNumber": 325,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -65,10 +73,18 @@
         "tags": [],
         "label": "GetTableColumnDefinitionOptions",
         "description": [
-          "\nOptions for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}\n"
+          "\nOptions for the ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApiUi.getTableColumnDefinition",
+            "text": "getTableColumnDefinition api"
+          },
+          "\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 274,
+        "lineNumber": 280,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -86,7 +102,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 280,
+            "lineNumber": 286,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -196,6 +212,26 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-public.ITagsCache.isInitialized",
+            "type": "Function",
+            "tags": [],
+            "label": "isInitialized",
+            "description": [
+              "\nTrue after the cache has completed its initial load (`initialize`), including\nwhen that load produced an empty tag list."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -208,7 +244,7 @@
         "label": "ParsedSearchQuery",
         "description": [],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 327,
+        "lineNumber": 333,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -221,7 +257,7 @@
             "label": "searchTerm",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 331,
+            "lineNumber": 337,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -238,7 +274,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 332,
+            "lineNumber": 338,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -255,7 +291,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 333,
+            "lineNumber": 339,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -268,7 +304,7 @@
             "label": "valid",
             "description": [],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 334,
+            "lineNumber": 340,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -283,10 +319,18 @@
         "tags": [],
         "label": "ParseSearchQueryOptions",
         "description": [
-          "\nOptions for the {@link SavedObjectsTaggingApiUi.parseSearchQuery | parseSearchQuery api}\n"
+          "\nOptions for the ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery",
+            "text": "parseSearchQuery api"
+          },
+          "\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 337,
+        "lineNumber": 343,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -304,7 +348,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 343,
+            "lineNumber": 349,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -322,7 +366,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 353,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -428,7 +472,7 @@
           "\nReact components and utility methods to use the SO tagging feature\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 55,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -454,7 +498,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 61,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -470,7 +514,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 66,
+                "lineNumber": 72,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -500,7 +544,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 67,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -529,7 +573,7 @@
               "SearchFilterConfig"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 72,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -552,9 +596,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 84,
+                "lineNumber": 90,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetSearchBarFilterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -586,7 +631,7 @@
               "<unknown>>"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 86,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -609,9 +654,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 101,
+                "lineNumber": 107,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetTableColumnDefinitionOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -625,7 +671,15 @@
             "tags": [],
             "label": "convertNameToReference",
             "description": [
-              "\nConvert given tag name to a {@link SavedObjectsFindOptionsReference | reference }\nto be used to search using the savedObjects `_find` API. Will return `undefined`\nif the given name does not match any existing tag."
+              "\nConvert given tag name to a ",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.SavedObjectsFindOptionsReference",
+                "text": "reference"
+              },
+              "\nto be used to search using the savedObjects `_find` API. Will return `undefined`\nif the given name does not match any existing tag."
             ],
             "signature": [
               "(tagName: string) => ",
@@ -633,7 +687,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 104,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -649,7 +703,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 109,
+                "lineNumber": 115,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -687,7 +741,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 111,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -705,7 +759,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 154,
+                "lineNumber": 160,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -731,9 +785,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 154,
+                "lineNumber": 160,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "ParseSearchQueryOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -757,7 +812,7 @@
               ")[]) => string[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 156,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -777,9 +832,10 @@
                   ")[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 160,
+                "lineNumber": 166,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -800,7 +856,7 @@
               "SavedObjectReference"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 163,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -816,7 +872,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 166,
+                "lineNumber": 172,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -838,7 +894,7 @@
               "(tagName: string) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 168,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -854,7 +910,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 172,
+                "lineNumber": 178,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -880,7 +936,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 174,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -897,7 +953,7 @@
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 179,
+                "lineNumber": 185,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -914,7 +970,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 180,
+                "lineNumber": 186,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -930,7 +986,15 @@
             "tags": [],
             "label": "components",
             "description": [
-              "\n{@link SavedObjectsTaggingApiUiComponent | React components} to support the tagging feature."
+              "\n",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "public",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-public.SavedObjectsTaggingApiUiComponent",
+                "text": "React components"
+              },
+              " to support the tagging feature."
             ],
             "signature": [
               {
@@ -942,7 +1006,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 183,
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -960,7 +1024,7 @@
           "\nReact UI components to be used to display the tagging feature in any application.\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 189,
+        "lineNumber": 195,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -986,7 +1050,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 195,
+            "lineNumber": 201,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1006,6 +1070,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -1047,7 +1112,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 199,
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1067,6 +1132,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -1108,7 +1174,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 203,
+            "lineNumber": 209,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1128,6 +1194,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -1158,10 +1225,18 @@
         "tags": [],
         "label": "TagListComponentProps",
         "description": [
-          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}\n"
+          "\nProps type for the ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApiUiComponent.TagList",
+            "text": "TagList component"
+          },
+          "\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 211,
+        "lineNumber": 217,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1181,7 +1256,7 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 217,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1207,7 +1282,7 @@
               ") => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 221,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1229,9 +1304,10 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 224,
+                "lineNumber": 230,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "TagWithOptionalId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1259,7 +1335,7 @@
               ") => JSX.Element) | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 225,
+            "lineNumber": 231,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1281,9 +1357,10 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 228,
+                "lineNumber": 234,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "TagWithOptionalId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1300,10 +1377,18 @@
         "tags": [],
         "label": "TagSelectorComponentProps",
         "description": [
-          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagSelector | TagSelector component}\n"
+          "\nProps type for the ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApiUiComponent.TagSelector",
+            "text": "TagSelector component"
+          },
+          "\n"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 231,
+        "lineNumber": 237,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1321,7 +1406,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 237,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1339,7 +1424,7 @@
               "(ids: string[]) => void"
             ],
             "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-            "lineNumber": 241,
+            "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1355,7 +1440,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-                "lineNumber": 244,
+                "lineNumber": 250,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1377,7 +1462,15 @@
         "tags": [],
         "label": "SavedObjectSaveModalTagSelectorComponentProps",
         "description": [
-          "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector | SavedObjectSaveModalTagSelector component}\n"
+          "\nProps type for the ",
+          {
+            "pluginId": "savedObjectsTaggingOss",
+            "scope": "public",
+            "docId": "kibSavedObjectsTaggingOssPluginApi",
+            "section": "def-public.SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector",
+            "text": "SavedObjectSaveModalTagSelector component"
+          },
+          "\n"
         ],
         "signature": [
           "Omit<",
@@ -1390,7 +1483,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>, \"options\" | \"prepend\" | \"append\" | \"async\" | \"fullWidth\" | \"compressed\" | \"isClearable\" | \"selectedOptions\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          " | { type: \"__create_option__\"; }>, \"options\" | \"prepend\" | \"append\" | \"fullWidth\" | \"compressed\" | \"isClearable\" | \"async\" | \"selectedOptions\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "common",
@@ -1401,7 +1494,7 @@
           " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; markOptional?: boolean | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
-        "lineNumber": 247,
+        "lineNumber": 253,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1470,6 +1563,7 @@
               "lineNumber": 22,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "Promise",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1743,6 +1837,7 @@
                 "lineNumber": 38,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "TagAttributes",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1767,6 +1862,7 @@
                 "lineNumber": 38,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateTagOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1870,6 +1966,7 @@
                 "lineNumber": 40,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetAllTagsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2056,6 +2153,7 @@
                 "lineNumber": 43,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "TagAttributes",
                 "trackAdoption": false,
                 "isRequired": true
               }

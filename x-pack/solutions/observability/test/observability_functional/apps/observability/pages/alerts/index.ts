@@ -226,9 +226,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await actionsButton.click();
           await observability.alerts.common.viewRuleDetailsButtonClick();
 
-          expect(
-            await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
-          ).to.eql('Observability');
+          await retry.try(async () => {
+            expect(
+              await (
+                await find.byCssSelector('[data-test-subj*="breadcrumb first"]')
+              ).getVisibleText()
+            ).to.eql('Rules');
+          });
         });
       });
 

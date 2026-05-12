@@ -13,8 +13,8 @@ import type { SidebarProps } from './sidebar';
 
 const SidebarLazy = lazy(() => import('./sidebar'));
 
-export const Sidebar: ComponentType<SidebarProps> = (props) => (
+export const Sidebar: ComponentType<SidebarProps> = React.memo((props) => (
   <Suspense fallback={null}>
     <SidebarLazy {...props} />
   </Suspense>
-);
+));

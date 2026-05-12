@@ -43,6 +43,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, restoreStreamName, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               settings: {},
@@ -79,6 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, deleteStreamName, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               settings: {},

@@ -15,7 +15,7 @@ import type {
   MultiContextEvaluationContext,
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
-import apm from 'elastic-apm-node';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { getFlattenedObject } from '@kbn/std';
 import {
   type Client,
@@ -215,7 +215,7 @@ export class FeatureFlagsService {
         ? (override as T)
         : // We have to bind the evaluation or the client will lose its internal context
           await evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
-    apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
+    addSpanLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
     // TODO: increment usage counter
     return value;
   }

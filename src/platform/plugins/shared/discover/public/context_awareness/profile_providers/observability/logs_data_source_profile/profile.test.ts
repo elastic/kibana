@@ -165,7 +165,7 @@ describe('logsDataSourceProfileProvider', () => {
       });
 
       expect(getRowIndicator).toBeDefined();
-      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#a8caff', label: 'Info' });
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#adccff', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {

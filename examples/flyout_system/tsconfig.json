@@ -8,6 +8,7 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
+    "test/scout_examples/**/*",
     "../../typings/**/*"
   ],
   "exclude": [
@@ -19,6 +20,7 @@
     "@kbn/core-rendering-browser",
     "@kbn/shared-ux-router",
     "@kbn/core-mount-utils-browser",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/scout"
   ]
 }

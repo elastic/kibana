@@ -9,7 +9,9 @@ import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { useLastAgentId } from '../../../hooks/use_last_agent_id';
 import { appPaths } from '../../../utils/app_paths';
 
 const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
@@ -19,19 +21,20 @@ const NEW_CONVERSATION_BUTTON_LABEL = i18n.translate(
   }
 );
 
-const NEW_CONVERSATION_PATH = appPaths.chat.new;
-
 export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const { removeError } = useSendMessage();
+  const lastAgentId = useLastAgentId();
 
   const handleClick = useCallback(() => {
     if (isEmbeddedContext) {
+      removeError();
       setConversationId?.(undefined);
     } else {
-      navigateToAgentBuilderUrl(NEW_CONVERSATION_PATH);
+      navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: lastAgentId }));
     }
-  }, [isEmbeddedContext, setConversationId, navigateToAgentBuilderUrl]);
+  }, [isEmbeddedContext, removeError, setConversationId, navigateToAgentBuilderUrl, lastAgentId]);
 
   return (
     <EuiButton

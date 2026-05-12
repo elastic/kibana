@@ -31,6 +31,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     actions: {
       validateEmailAddresses: jest.fn(),
       enabledEmailServices: ['*'],
+      isEarsEnabled: false,
     },
     ruleTypeRegistry: {
       has: jest.fn(),

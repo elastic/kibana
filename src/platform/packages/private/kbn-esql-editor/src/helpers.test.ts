@@ -14,6 +14,7 @@ import {
   parseErrors,
   parseWarning,
   filterDuplicatedWarnings,
+  shouldAutoTriggerSuggestions,
 } from './helpers';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 
@@ -381,6 +382,20 @@ describe('helpers', function () {
 
     it('should uncomment the single commented line', function () {
       expect(getToggleCommentLines(['//| LIMIT 10'])).toEqual(['| LIMIT 10']);
+    });
+  });
+
+  describe('shouldAutoTriggerSuggestions', function () {
+    it.each([
+      ['space', 'FROM ', true],
+      ['inline cast ::', 'field::', true],
+      ['dot', 'index.', true],
+      ['word character', 'FRO', true],
+      ['backtick', 'FROM `', true],
+      ['empty string', '', false],
+      ['comma', 'field1,', false],
+    ])('should return %s for %s', (_label, input, expected) => {
+      expect(shouldAutoTriggerSuggestions(input as string)).toBe(expected);
     });
   });
 });

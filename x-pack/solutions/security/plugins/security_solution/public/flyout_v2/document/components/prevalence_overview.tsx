@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_PREVALENCE } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
-import { usePrevalence } from '../hooks/use_prevalence';
+import { usePrevalence } from '../../prevalence/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';

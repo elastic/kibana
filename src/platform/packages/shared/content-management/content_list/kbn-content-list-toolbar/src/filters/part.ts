@@ -19,7 +19,7 @@ import { toolbar } from '../assembly';
  * forwarded to the underlying {@link SortRenderer}. Extend this interface
  * only with props the `resolve` callback can act on directly.
  */
-export type SortFilterProps = Record<string, never>;
+export type SortFilterProps = Record<never, never>;
 
 /**
  * Props for the {@link TagFilter} declarative component.
@@ -30,7 +30,7 @@ export type SortFilterProps = Record<string, never>;
  * forwarded to the underlying {@link TagFilterRenderer}. Extend this interface
  * only with props the `resolve` callback can act on directly.
  */
-export type TagFilterProps = Record<string, never>;
+export type TagFilterProps = Record<never, never>;
 
 /**
  * Props for the {@link StarredFilter} declarative component.
@@ -41,13 +41,19 @@ export type TagFilterProps = Record<string, never>;
  * forwarded to the underlying {@link StarredFilterRenderer}. Extend this interface
  * only with props the `resolve` callback can act on directly.
  */
-export type StarredFilterProps = Record<string, never>;
+export type StarredFilterProps = Record<never, never>;
+
+/**
+ * Props for the {@link CreatedByFilter} declarative component.
+ */
+export type CreatedByFilterProps = Record<never, never>;
 
 /** Preset-to-props mapping for toolbar filters. */
 export interface FilterPresets {
   sort: SortFilterProps;
   tags: TagFilterProps;
   starred: StarredFilterProps;
+  createdBy: CreatedByFilterProps;
 }
 
 /** Context passed to filter `resolve` callbacks. */
@@ -58,6 +64,8 @@ export interface FilterContext {
   hasTags: boolean;
   /** Whether starred filtering is available from the provider. */
   hasStarred: boolean;
+  /** Whether created by filtering is available from the provider. */
+  hasCreatedBy: boolean;
 }
 
 /** Part factory for toolbar filters. */

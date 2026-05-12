@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
+import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
@@ -23,7 +23,7 @@ import { PanelStateManager } from './panel_state_manager';
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
   setWidth: (width: number) => void;
-  onToggleCollapsed: (isCollapsed: boolean) => void;
+  onToggleCollapsed?: (isCollapsed: boolean) => void;
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {

@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { AvailableLanguages } from '@kbn/search-code-examples/src/getting-started-tutorials';
 import type { CodeLanguage } from '@kbn/search-code-examples/src/getting-started-tutorials/types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 export interface LanguageSelectorProps {
   selectedLanguage: AvailableLanguages;
@@ -27,6 +29,7 @@ export const LanguageSelector = ({
   showLabel = false,
 }: LanguageSelectorProps) => {
   const assetBasePath = useAssetBasePath();
+  const usageTracker = useUsageTracker();
   const languageOptions = useMemo(
     () =>
       options.map((lang) => ({
@@ -62,7 +65,13 @@ export const LanguageSelector = ({
       })}
       options={languageOptions}
       valueOfSelected={selectedLanguage}
-      onChange={onSelectLanguage}
+      onChange={(value) => {
+        usageTracker.click([
+          AnalyticsEvents.languageSelected,
+          `${AnalyticsEvents.languageSelected}_${value}`,
+        ]);
+        onSelectLanguage(value);
+      }}
       data-test-subj="codeExampleLanguageSelect"
     />
   );

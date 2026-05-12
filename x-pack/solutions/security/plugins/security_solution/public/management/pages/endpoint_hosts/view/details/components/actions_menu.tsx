@@ -41,7 +41,7 @@ export const ActionsMenu = memo<{ hostInfo: HostInfo }>(({ hostInfo }) => {
       <EuiButton
         iconSide="right"
         fill
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         data-test-subj="endpointDetailsActionsButton"
         onClick={() => {
           setIsPopoverOpen(!isPopoverOpen);

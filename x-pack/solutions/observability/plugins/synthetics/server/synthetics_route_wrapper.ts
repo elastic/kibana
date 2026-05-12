@@ -9,10 +9,14 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
 import { MonitorConfigRepository } from './services/monitor_config_repository';
+import { MonitorIntegrationHealthApi } from './services/monitor_integration_health_api';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
+import { getSyntheticsDynamicSettings } from './saved_objects/synthetics_settings';
+import { getSyntheticsIndices } from './services/get_synthetics_indices';
+import { isCCSEnabled } from './lib/remote_result_utils';
 import type { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
@@ -45,6 +49,21 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       // specifically needed for the synthetics service api key generation
       server.authSavedObjectsClient = savedObjectsClient;
 
+      let heartbeatIndices = SYNTHETICS_INDEX_PATTERN;
+      if (isCCSEnabled(server)) {
+        try {
+          const dynamicSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+          const ccsSettings = {
+            useAllRemoteClusters: dynamicSettings.useAllRemoteClusters ?? false,
+            selectedRemoteClusters: dynamicSettings.selectedRemoteClusters ?? [],
+          };
+          const { indices } = await getSyntheticsIndices(esClient.asCurrentUser, ccsSettings);
+          heartbeatIndices = indices;
+        } catch (e) {
+          server.logger.warn(`Failed to resolve CCS indices, falling back to local: ${e.message}`);
+        }
+      }
+
       const syntheticsEsClient = new SyntheticsEsClient(
         savedObjectsClient,
         esClient.asCurrentUser,
@@ -52,7 +71,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           request,
           uiSettings,
           isDev: Boolean(server.isDev) && !isTestUser(server),
-          heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+          heartbeatIndices,
         }
       );
 
@@ -65,6 +84,13 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
+      const monitorIntegrationHealthApi = new MonitorIntegrationHealthApi(
+        server,
+        savedObjectsClient,
+        monitorConfigRepository,
+        spaceId
+      );
+
       try {
         const data = {
           syntheticsEsClient,
@@ -76,6 +102,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
+          monitorIntegrationHealthApi,
         };
 
         const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));

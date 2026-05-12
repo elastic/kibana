@@ -9,7 +9,7 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with wait step', () => {

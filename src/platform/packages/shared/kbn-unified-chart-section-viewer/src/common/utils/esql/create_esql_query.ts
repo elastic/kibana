@@ -7,11 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stats, timeseries, where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
+
+/**
+ * Formats a single-line ES|QL query into a multi-line format where each
+ * pipe command is on its own line with `  | ` indentation.
+ */
+function formatQuery(basicQuery: string): string {
+  return basicQuery.replace(/ \| /g, '\n  | ');
+}
 
 interface CreateESQLQueryParams {
   metricItem: ParsedMetricItem;
@@ -36,33 +44,40 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
   const index = dataStream;
-  const type = firstNonNullable(fieldTypes);
   const instrument = firstNonNullable(metricTypes);
-  const source = timeseries(index);
 
-  const whereCommands = whereStatements.flatMap((statement) => {
-    const trimmed = statement.trim();
-    return trimmed.length > 0 ? [where(trimmed)] : [];
+  if (fieldTypes.length === 0 || !instrument) {
+    return '';
+  }
+
+  const metricAggregation = createMetricAggregation({
+    types: fieldTypes,
+    instrument,
+    metricName,
+    placeholderName: 'metricName',
   });
 
-  // TODO rename instrument to match metrics_info response
-  const queryPipeline = source.pipe(
-    ...whereCommands,
-    stats(
-      `${createMetricAggregation({
-        type,
-        instrument,
-        placeholderName: 'metricName',
-      })} BY ${createTimeBucketAggregation({})}${
-        splitAccessors.length > 0
-          ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
-          : ''
-      }`,
-      {
-        metricName,
-      }
-    )
-  );
+  if (!metricAggregation) {
+    return '';
+  }
 
-  return queryPipeline.toString();
+  const query = esql.ts(index);
+  const timeBucketAggregation = createTimeBucketAggregation({});
+  const splitAccessorsClause =
+    splitAccessors.length > 0
+      ? `, ${splitAccessors.map((field) => sanitazeESQLInput(field)).join(',')}`
+      : '';
+  const statsClause = `STATS ${metricAggregation} BY ${timeBucketAggregation}${splitAccessorsClause}`;
+
+  for (const statement of whereStatements) {
+    const trimmed = statement.trim();
+    if (trimmed.length > 0) {
+      query.pipe(`WHERE ${trimmed}`);
+    }
+  }
+
+  // TODO rename instrument to match metrics_info response
+  query.pipe(statsClause);
+
+  return formatQuery(query.print('basic'));
 }

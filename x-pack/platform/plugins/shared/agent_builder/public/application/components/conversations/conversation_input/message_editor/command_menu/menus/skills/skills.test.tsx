@@ -16,8 +16,12 @@ const mockSkills = [
   { id: 'skill-3', name: 'Search', description: 'Search documents' },
 ];
 
-jest.mock('../../../../../../../hooks/skills/use_skills', () => ({
-  useSkills: () => ({
+jest.mock('../../../../../../../hooks/use_conversation', () => ({
+  useAgentId: () => 'test-agent-id',
+}));
+
+jest.mock('../../../../../../../hooks/skills/use_agent_skills', () => ({
+  useAgentSkills: () => ({
     skills: mockSkills,
     isLoading: false,
     error: null,
@@ -54,11 +58,13 @@ describe('Skills', () => {
   });
 
   it('shows loading state when skills are loading', () => {
-    const useSkillsMock = jest.requireMock('../../../../../../../hooks/skills/use_skills') as {
-      useSkills: () => unknown;
+    const useAgentSkillsMock = jest.requireMock(
+      '../../../../../../../hooks/skills/use_agent_skills'
+    ) as {
+      useAgentSkills: () => unknown;
     };
-    const originalImpl = useSkillsMock.useSkills;
-    useSkillsMock.useSkills = () => ({
+    const originalImpl = useAgentSkillsMock.useAgentSkills;
+    useAgentSkillsMock.useAgentSkills = () => ({
       skills: [],
       isLoading: true,
       error: null,
@@ -69,6 +75,6 @@ describe('Skills', () => {
 
     expect(screen.getByTestId('skillsMenu-loading')).toBeInTheDocument();
 
-    useSkillsMock.useSkills = originalImpl;
+    useAgentSkillsMock.useAgentSkills = originalImpl;
   });
 });

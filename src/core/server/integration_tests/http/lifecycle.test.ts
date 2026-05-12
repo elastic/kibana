@@ -822,8 +822,18 @@ describe('Auth', () => {
       {
         path: '/',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: false },
+        security: {
+          authc: {
+            enabled: false,
+            reason:
+              'This route is part of an HTTP integration test and does not require authentication.',
+          },
+          authz: {
+            enabled: false,
+            reason:
+              'This route is part of an HTTP integration test and does not require authorization.',
+          },
+        },
       },
       (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );
@@ -846,7 +856,6 @@ describe('Auth', () => {
         path: '/',
         validate: false,
         security: { authz: { enabled: false, reason: '' } },
-        options: { authRequired: true },
       },
       (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
     );

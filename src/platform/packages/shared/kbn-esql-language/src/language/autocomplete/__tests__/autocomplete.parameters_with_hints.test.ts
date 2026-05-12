@@ -26,9 +26,11 @@ const allUniqueParameterHints = uniqBy(
 
 describe('function parameters autocomplete from hints', () => {
   const callbacks: ESQLCallbacks = {
-    getInferenceEndpoints: async () => {
+    getInferenceEndpoints: async (taskType) => {
       return {
-        inferenceEndpoints: [{ inference_id: 'inference_endpoint_1', task_type: 'text_embedding' }],
+        inferenceEndpoints: [
+          { inference_id: 'inference_endpoint_1', task_type: taskType ?? 'text_embedding' },
+        ],
       };
     },
   };

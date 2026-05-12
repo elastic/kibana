@@ -9,6 +9,9 @@
 
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import type { ILicense } from '@kbn/licensing-types';
 import type { KibanaServices } from './types';
 import { MaintenanceWindowStatus } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
@@ -31,13 +34,21 @@ export function MaintenanceWindowCallout({
   const {
     application: { capabilities },
     http,
+    licensing,
   } = kibanaServices;
+  const license = useObservable<ILicense | null>(
+    licensing?.license$ ?? new Observable<ILicense>(),
+    null
+  );
 
   const isMaintenanceWindowDisabled =
     !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.show &&
     !capabilities[MAINTENANCE_WINDOW_FEATURE_ID]?.save;
+  const isMaintenanceWindowLicensed =
+    !licensing ||
+    (!!license && license.isAvailable && license.isActive && license.hasAtLeast('platinum'));
   const { data: activeMaintenanceWindows = [] } = useFetchActiveMaintenanceWindows(kibanaServices, {
-    enabled: !isMaintenanceWindowDisabled,
+    enabled: !isMaintenanceWindowDisabled && isMaintenanceWindowLicensed,
   });
 
   const shouldShowMaintenanceWindowCallout = useMemo(() => {
@@ -64,7 +75,7 @@ export function MaintenanceWindowCallout({
     });
   }, [categories, activeMaintenanceWindows]);
 
-  if (isMaintenanceWindowDisabled) {
+  if (isMaintenanceWindowDisabled || !isMaintenanceWindowLicensed) {
     return null;
   }
 

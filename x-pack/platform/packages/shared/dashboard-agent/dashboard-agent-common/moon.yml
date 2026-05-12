@@ -19,6 +19,9 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/lens-common'
 tags:
   - shared-common
   - package

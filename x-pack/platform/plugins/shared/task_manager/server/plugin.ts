@@ -50,7 +50,7 @@ import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -67,11 +67,15 @@ import {
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
-import type { ApiKeyInvalidationFn } from './invalidate_api_keys/invalidate_api_keys_task';
+import type {
+  ApiKeyInvalidationFn,
+  UiamApiKeyInvalidationFn,
+} from './invalidate_api_keys/invalidate_api_keys_task';
 import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
+import { createApiKeyStrategy } from './api_key_strategy';
 
 export interface TaskManagerSetupContract {
   /**
@@ -85,6 +89,7 @@ export interface TaskManagerSetupContract {
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
+  registerTaskEventLogger: (logger: TaskEventLogger) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -104,6 +109,7 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
     registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
     registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => void;
+    registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => void;
   };
 
 export interface TaskManagerPluginsStart {
@@ -150,6 +156,10 @@ export class TaskManagerPlugin
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  private taskEventLogger?: TaskEventLogger;
+  private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
+  private taskStore?: TaskStore;
+  private startContract?: TaskManagerStartContract;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -172,6 +182,10 @@ export class TaskManagerPlugin
     if (this.invalidateApiKeyFn) {
       return this.invalidateApiKeyFn(params);
     }
+  }
+
+  private get invalidateUiamApiKey(): UiamApiKeyInvalidationFn | undefined {
+    return this.invalidateUiamApiKeyFn;
   }
 
   public setup(
@@ -276,7 +290,9 @@ export class TaskManagerPlugin
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
+      getEncryptedSavedObjectsClient: () => this.taskStore?.getEncryptedSavedObjectsClient(),
       invalidateApiKeyFn: this.invalidateApiKey.bind(this),
+      invalidateUiamApiKeyFn: () => this.invalidateUiamApiKey,
       logger: this.logger,
       removalDelay: this.config.invalidate_api_key_task.removalDelay,
       taskTypeDictionary: this.definitions,
@@ -313,6 +329,9 @@ export class TaskManagerPlugin
       registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
         this.canEncryptSavedObjects = canEncrypt;
       },
+      registerTaskEventLogger: (logger: TaskEventLogger) => {
+        this.taskEventLogger = logger;
+      },
     };
   }
 
@@ -341,6 +360,12 @@ export class TaskManagerPlugin
     }
 
     const serializer = savedObjects.createSerializer();
+    const apiKeyStrategy = createApiKeyStrategy(
+      this.config.api_key_type,
+      this.config.grant_uiam_api_keys,
+      security,
+      this.logger
+    );
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
@@ -358,7 +383,9 @@ export class TaskManagerPlugin
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
       basePath: http.basePath,
       executionContext,
+      apiKeyStrategy,
     });
+    this.taskStore = taskStore;
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
@@ -413,6 +440,8 @@ export class TaskManagerPlugin
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
         taskPartitioner,
         startingCapacity,
+        apiKeyStrategy,
+        eventLogger: this.taskEventLogger!,
       });
     }
 
@@ -451,7 +480,7 @@ export class TaskManagerPlugin
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
-    return {
+    this.startContract = {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
@@ -475,7 +504,12 @@ export class TaskManagerPlugin
       registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => {
         this.invalidateApiKeyFn = fn;
       },
+      registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => {
+        this.invalidateUiamApiKeyFn = fn;
+      },
     };
+
+    return this.startContract;
   }
 
   public async stop() {

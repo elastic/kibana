@@ -16,6 +16,10 @@ post:
         schema:
           type: object
           nullable: true
+        examples:
+          pushCaseRequest:
+            summary: Push a case to an external service. No request body is required.
+            value: null
   responses:
     '200':
       description: Indicates a successful call.
@@ -32,3 +36,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'

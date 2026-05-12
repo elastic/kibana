@@ -62,6 +62,68 @@ export const resolveResource = async ({
     throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
   }
 
+  return resolveSingleResource({ resourceName, resolveRes, esClient });
+};
+
+/**
+ * Retrieve resource metadata for ES|QL generation.
+ * Supports index patterns and comma-separated targets by using field_caps
+ * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
+ */
+export const resolveResourceForEsql = async ({
+  resourceName,
+  esClient,
+}: {
+  resourceName: string;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse> => {
+  let resolveRes: IndicesResolveIndexResponse;
+  try {
+    resolveRes = await esClient.indices.resolveIndex({
+      name: [resourceName],
+      allow_no_indices: false,
+      expand_wildcards: ['all'],
+    });
+  } catch (e) {
+    if (isNotFoundError(e)) {
+      throw new Error(`No resource found for '${resourceName}'`);
+    }
+    throw e;
+  }
+
+  const resourceCount =
+    resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
+
+  if (resourceCount === 0) {
+    throw new Error(`No resource found for pattern ${resourceName}`);
+  }
+
+  if (resourceCount === 1) {
+    return resolveSingleResource({ resourceName, resolveRes, esClient });
+  }
+
+  const fieldCapRes = await esClient.fieldCaps({
+    index: resourceName,
+    fields: ['*'],
+  });
+  const { fields } = processFieldCapsResponse(fieldCapRes);
+
+  return {
+    name: resourceName,
+    type: EsResourceType.indexPattern,
+    fields,
+  };
+};
+
+const resolveSingleResource = async ({
+  resourceName,
+  resolveRes,
+  esClient,
+}: {
+  resourceName: string;
+  resolveRes: IndicesResolveIndexResponse;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse> => {
   // target is an index
   if (resolveRes.indices.length > 0) {
     const indexName = resolveRes.indices[0].name;

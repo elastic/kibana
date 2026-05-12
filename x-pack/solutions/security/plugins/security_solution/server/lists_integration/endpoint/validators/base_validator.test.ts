@@ -654,6 +654,28 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       });
     });
 
+    describe('#validateCanImportGlobalArtifacts()', () => {
+      beforeEach(() => {
+        exceptionLikeItem.tags = [GLOBAL_ARTIFACT_TAG];
+      });
+
+      it('should error is user does not have new global artifact management privilege', async () => {
+        authzMock.canManageGlobalArtifacts = false;
+
+        await expect(
+          validator._validateCanImportGlobalArtifacts(exceptionLikeItem)
+        ).rejects.toThrow(
+          /This artifact can't be imported because you don't have permission to manage global artifacts./
+        );
+      });
+
+      it('should allow import of global artifacts when user has privilege', async () => {
+        await expect(
+          validator._validateCanImportGlobalArtifacts(exceptionLikeItem)
+        ).resolves.toBeUndefined();
+      });
+    });
+
     describe('#validateImportOwnerSpaceIds()', () => {
       it('should do nothing when item has no tags', async () => {
         exceptionLikeItem.tags = [];
@@ -676,7 +698,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           setArtifactOwnerSpaceId(exceptionLikeItem, 'inaccessible-space');
 
           await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
-            /invalid owner space IDs/
+            /This artifact can\'t be imported because it belongs to a space you don\'t have access to/
           );
         });
 
@@ -689,7 +711,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           ]);
 
           await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
-            /Importing artifacts that are not visible in the current space/
+            /This artifact can't be imported because it isn't visible in the current space/
           );
         });
       });
@@ -709,7 +731,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           setArtifactOwnerSpaceId(exceptionLikeItem, 'other-space');
 
           await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
-            /Importing artifacts to a different space requires global artifact management privilege/
+            /This artifact can't be imported because you don't have permission to manage artifacts in other spaces/
           );
         });
 
@@ -719,7 +741,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           setArtifactOwnerSpaceId(exceptionLikeItem, 'other-space');
 
           await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
-            /Importing artifacts to a different space requires global artifact management privilege/
+            /This artifact can't be imported because you don't have permission to manage artifacts in other spaces/
           );
         });
       });

@@ -53,7 +53,7 @@ export function AlertSearchBar({
     >
       <QueryStringInput
         appName="synthetics"
-        iconType="search"
+        iconType="magnify"
         placeholder={PLACEHOLDER}
         indexPatterns={[dataView]}
         onChange={(queryN) => {

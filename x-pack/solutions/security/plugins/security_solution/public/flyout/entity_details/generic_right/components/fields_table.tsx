@@ -167,7 +167,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
                 const isPinned = pinnedFields?.includes(fieldKey);
                 return (
                   <EuiButtonIcon
-                    iconType={isPinned ? 'pinFilled' : 'pin'}
+                    iconType={isPinned ? 'pinFill' : 'pin'}
                     aria-label={isPinned ? 'Unpin field' : 'Pin field'}
                     color={isPinned ? 'primary' : 'text'}
                     onClick={() => togglePin(fieldKey)}

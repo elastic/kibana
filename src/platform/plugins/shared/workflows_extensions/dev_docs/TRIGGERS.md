@@ -116,32 +116,24 @@ Reference: `examples/workflows_extensions_example/public/triggers/custom_trigger
 When you have an HTTP request, use the request-scoped client so space and request are taken from the current context:
 
 1. Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`.
-2. Type your route handler context to include `workflows: WorkflowsRouteHandlerContext` (from `@kbn/workflows-extensions/server`).
+2. Type your route handler context to include `workflows: WorkflowsApiRequestHandlerContext` (from `@kbn/workflows/server`).
 3. In the route handler:
 
 ```typescript
-const client = (await context.workflows).getWorkflowsClient();
-await client.emitEvent(MY_TRIGGER_ID, {
-  message: request.body.message,
-  source: 'my-api',
-  category: 'alerts',
-});
+const workflows = await context.workflows;
+await workflows.emitEvent(MY_TRIGGER_ID, { message: request.body.message, source: 'my-api', category: 'alerts' });
 ```
 
-Reference: `examples/workflows_extensions_example/server/request_context.ts` and `server/routes/emit_event.ts`.
+Reference: `examples/workflows_extensions_example/server/plugin.ts` and `server/routes/emit_event.ts`.
 
 **Option B — Direct (when you have request and space)**
 
-When emitting from background code (e.g. a job) where you have a `KibanaRequest` and `spaceId`, use the start contract:
+1. Add `workflowsExtensions` to your plugin's `requiredPlugins` in `kibana.jsonc`.
+2. When emitting from background code (e.g. a job) where you have a `KibanaRequest`, you can get the workflows client from the start contract of the `workflowsExtension` plugin, to emit an event:
 
 ```typescript
-// In code that has access to workflowsExtensions start (e.g. another plugin):
-await workflowsExtensions.emitEvent({
-  triggerId: MY_TRIGGER_ID,
-  spaceId: targetSpaceId,
-  payload: { message: 'Event from job', source: 'background', category: 'audit' },
-  request: myKibanaRequest, // e.g. system request for background execution
-});
+const workflowsClient = await plugins.workflowsExtensions.getClient(request);
+await workflowsClient.emitEvent(MY_TRIGGER_ID, { message: 'Event from job', source: 'background', category: 'audit' });
 ```
 
 Payload is validated against the trigger's `eventSchema`; if validation fails, `emitEvent` throws. A trigger event handler must be registered (e.g. by `workflows_management`) for workflows to run.
@@ -197,3 +189,49 @@ All event-driven trigger definitions must be approved by the workflows-eng team 
 4. **Get approval** from the workflows-eng team (via PR review).
 
 If you change the trigger's `eventSchema`, the schema hash changes; update the approved list and get re-approval.
+
+## Event-driven guardrails
+
+To prevent infinite loops and unbounded workflow executions:
+
+- **Event-chain depth**: Depth is inferred from the request inside `emitEvent` (and propagated on outbound `kibana.request` steps via headers). Each time a trigger event schedules workflow runs, depth is incremented for those runs. If the new depth would exceed the configured maximum, those workflows are **not** scheduled and a server warning is logged.
+
+- **Configuration**: Set the maximum chain depth in `kibana.yml` with **`workflowsExecutionEngine.eventDriven.maxChainDepth`**. Default is **`10`**; minimum is **`1`**. See the [workflows execution engine README](../../workflows_execution_engine/README.md#configuration) and [config](../../workflows_execution_engine/server/config.ts).
+
+- **Same request is required for depth tracking**: Emitters must pass the **same request** from the current code path when calling `emitEvent`. The platform attaches event-chain context (depth, source execution id, and visited workflow ids when present) to that request when a workflow runs; if you use a different request (e.g. a new or unrelated one), the platform cannot infer chain context and cannot enforce the depth limit. **Always use the request you use for attribution/space** so the guardrail works correctly.
+
+- **Per-trigger `on.workflowEvents` (YAML)**: For registered (custom) triggers, workflows may set `triggers[].on.workflowEvents` to **`ignore`**, **`avoid-loop`**, or **`allow-all`**. Omitted defaults to **`avoid-loop`**: the workflow runs on workflow-attributed emits unless the event-chain **cycle** guard blocks it; **`ignore`** skips scheduling when the emit is workflow-attributed; **`allow-all`** opts out of the cycle guard (depth cap still applies).
+
+#### Event-chain depth (loop) demo
+
+The example plugin registers a second trigger `example.loopTrigger` (payload: `{ iteration: number }`) and a route that emits it. You can demonstrate the event-chain depth guardrail (`workflowsExecutionEngine.eventDriven.maxChainDepth`, default `10`) by running a workflow that re-emits the same trigger until the guardrail stops scheduling. Use a **`kibana.request`** step so the execution engine attaches event-chain headers on the outbound call; a generic HTTP connector step does not add those headers and may not propagate depth correctly.
+
+Example workflow (create this in the UI or import as YAML):
+
+```yaml
+name: Example loop trigger (event-chain depth demo)
+description: >-
+  Triggered by example.loopTrigger; calls emit_loop to re-emit with the next iteration until maxChainDepth is reached.
+enabled: true
+
+triggers:
+  - type: example.loopTrigger
+
+steps:
+  - name: reemit_loop
+    type: kibana.request
+    with:
+      method: POST
+      path: /api/workflows_extensions_example/emit_loop
+      body:
+        iteration: '{{ event.iteration | default: 0 | plus: 1 }}'
+```
+
+1. **Run Kibana with examples:** `yarn start --run-examples`.
+2. **Create the loop workflow** using the YAML above (trigger `example.loopTrigger` and the `kibana.request` step as shown).
+3. **Start the loop:**
+   ```bash
+   curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
+     'http://localhost:5601/api/workflows_extensions_example/emit_loop' -d '{}'
+   ```
+   (or `-d '{"iteration":0}'`). Each run executes the `kibana.request` step, which POSTs to `emit_loop` with the next iteration and re-emits the trigger. After the event chain reaches your configured `maxChainDepth` (default `10`), the guardrail stops scheduling further runs.

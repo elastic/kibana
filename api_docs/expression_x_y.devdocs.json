@@ -150,7 +150,7 @@
         "label": "AnnotationLayerArgs",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 345,
+        "lineNumber": 340,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -163,7 +163,7 @@
             "label": "layerId",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 346,
+            "lineNumber": 341,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -186,7 +186,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 347,
+            "lineNumber": 342,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -202,7 +202,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 348,
+            "lineNumber": 343,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1174,24 +1174,6 @@
           },
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.LegendConfig.listLayoutMaxWidth",
-            "type": "number",
-            "tags": [],
-            "label": "listLayoutMaxWidth",
-            "description": [
-              "\nMaximum label width in pixels for \"list\" layout truncation"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 218,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressionXY",
             "id": "def-common.LegendConfig.shouldTruncate",
             "type": "CompoundType",
             "tags": [],
@@ -1203,7 +1185,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 223,
+            "lineNumber": 218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1228,7 +1210,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 228,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1253,7 +1235,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 233,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1276,7 +1258,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 238,
+            "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1292,7 +1274,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 239,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1308,7 +1290,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 240,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1610,7 +1592,7 @@
         "label": "ReferenceLineLayerArgs",
         "description": [],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 372,
+        "lineNumber": 367,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1626,7 +1608,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 373,
+            "lineNumber": 368,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1642,7 +1624,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 374,
+            "lineNumber": 369,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1658,7 +1640,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 375,
+            "lineNumber": 370,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1681,7 +1663,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 376,
+            "lineNumber": 371,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1704,7 +1686,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 377,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1793,7 +1775,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 244,
+        "lineNumber": 239,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1816,7 +1798,7 @@
               " & { type: \"legendConfig\"; }"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 245,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1839,7 +1821,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 246,
+            "lineNumber": 241,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1855,7 +1837,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 247,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1871,7 +1853,7 @@
               "\"show\" | \"hide\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 248,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1888,7 +1870,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 249,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1911,7 +1893,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 250,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1927,7 +1909,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 251,
+            "lineNumber": 246,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1943,7 +1925,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 252,
+            "lineNumber": 247,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1959,7 +1941,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 253,
+            "lineNumber": 248,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1982,7 +1964,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 254,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2005,7 +1987,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 255,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2021,7 +2003,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 256,
+            "lineNumber": 251,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2037,7 +2019,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 257,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2053,7 +2035,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 258,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2069,7 +2051,7 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 259,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2093,7 +2075,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 260,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2117,7 +2099,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 261,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2133,7 +2115,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 262,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2149,7 +2131,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 263,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2162,7 +2144,7 @@
             "label": "showTooltip",
             "description": [],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-            "lineNumber": 264,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2262,7 +2244,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { title?: string | undefined; style?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -2274,7 +2256,7 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+              ", \"gridLine\">> | undefined>; position?: ",
               "Position",
               " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
               {
@@ -2296,7 +2278,7 @@
               },
               "<Partial<",
               "GridLineStyle",
-              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+              "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; }>> & Partial<Record<\"settings\", { locale?: string | undefined; onResize?: \"ignore\" | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -2324,7 +2306,7 @@
               "PointerUpdateTrigger",
               " | undefined; brushAxis?: ",
               "BrushAxis",
-              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
+              " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; dow?: number | undefined; legendValues?: ",
               "MakeOverridesSerializable",
               "<",
               "LegendValue",
@@ -2523,7 +2505,7 @@
         "label": "AllowedXYOverrides",
         "description": [],
         "signature": [
-          "{ axisX?: { style?: ",
+          "{ axisX?: { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2535,7 +2517,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          ", \"gridLine\">> | undefined>; position?: ",
           "Position",
           " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
@@ -2557,7 +2539,7 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { style?: ",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisLeft?: { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2569,7 +2551,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          ", \"gridLine\">> | undefined>; position?: ",
           "Position",
           " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
@@ -2591,7 +2573,7 @@
           },
           "<Partial<",
           "GridLineStyle",
-          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { style?: ",
+          "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; axisRight?: { title?: string | undefined; style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -2603,7 +2585,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; position?: ",
+          ", \"gridLine\">> | undefined>; position?: ",
           "Position",
           " | undefined; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; domain?: ",
           {
@@ -2628,7 +2610,7 @@
           "> | undefined>; labelFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; showDuplicatedTicks?: boolean | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 537,
+        "lineNumber": 532,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2669,7 +2651,7 @@
           " & { type: \"axisExtentConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 448,
+        "lineNumber": 443,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2722,7 +2704,7 @@
           "ExtendedAnnotationLayerConfig"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 459,
+        "lineNumber": 454,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2747,7 +2729,7 @@
           "ExtendedDataLayerConfig"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 456,
+        "lineNumber": 451,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2778,7 +2760,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 451,
+        "lineNumber": 446,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2817,7 +2799,7 @@
           "ExtendedAnnotationLayerConfig"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 450,
+        "lineNumber": 445,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2842,7 +2824,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 457,
+        "lineNumber": 452,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2867,7 +2849,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 452,
+        "lineNumber": 447,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2923,7 +2905,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 496,
+        "lineNumber": 491,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2947,7 +2929,7 @@
           " & { type: \"dataDecorationConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 437,
+        "lineNumber": 432,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2989,7 +2971,7 @@
           "WithLayerId"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 422,
+        "lineNumber": 417,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3030,7 +3012,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 411,
+        "lineNumber": 406,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3091,7 +3073,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 286,
+        "lineNumber": 281,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3115,7 +3097,7 @@
           " & { layerId: string; } & { type: \"extendedAnnotationLayer\"; layerType: \"annotations\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 360,
+        "lineNumber": 355,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3165,7 +3147,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 530,
+        "lineNumber": 525,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3200,7 +3182,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 430,
+        "lineNumber": 425,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3258,7 +3240,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 476,
+        "lineNumber": 471,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3367,7 +3349,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 468,
+        "lineNumber": 463,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3440,7 +3422,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 509,
+        "lineNumber": 504,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3464,7 +3446,7 @@
           " & { type: \"legendConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 447,
+        "lineNumber": 442,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3588,7 +3570,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 502,
+        "lineNumber": 497,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3612,7 +3594,7 @@
           " & { type: \"referenceLineDecorationConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 440,
+        "lineNumber": 435,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3645,7 +3627,7 @@
           "WithLayerId"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 427,
+        "lineNumber": 422,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3677,7 +3659,7 @@
           "; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 405,
+        "lineNumber": 400,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3741,7 +3723,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 489,
+        "lineNumber": 484,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3831,7 +3813,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 516,
+        "lineNumber": 511,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3855,7 +3837,7 @@
           " & { type: \"xAxisConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 444,
+        "lineNumber": 439,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3922,7 +3904,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 388,
+        "lineNumber": 383,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3955,7 +3937,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 380,
+        "lineNumber": 375,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4011,7 +3993,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 523,
+        "lineNumber": 518,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4035,7 +4017,7 @@
           " & { type: \"yAxisConfig\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
-        "lineNumber": 445,
+        "lineNumber": 440,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

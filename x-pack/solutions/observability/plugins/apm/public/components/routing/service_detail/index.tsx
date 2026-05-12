@@ -22,7 +22,12 @@ import {
 } from '../../../../common/latency_aggregation_types';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { ALERT_STATUS_ALL, AlertsOverview } from '../../app/alerts_overview';
+import {
+  ALERT_STATUS_ALL,
+  AlertsOverview,
+  AlertsSearchBarContextProvider,
+  AlertsHeaderSearchBar,
+} from '../../app/alerts_overview';
 import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
@@ -63,23 +68,38 @@ const TransactionOverview = dynamic(() =>
 const ProfilingOverview = dynamic(() =>
   import('../../app/profiling_overview').then((mod) => ({ default: mod.ProfilingOverview }))
 );
+const ProfilingHeaderSearchBar = dynamic(() =>
+  import('../../app/profiling_overview').then((mod) => ({
+    default: mod.ProfilingHeaderSearchBar,
+  }))
+);
 
 function page({
   title,
   tab,
   element,
   searchBarOptions,
+  bottomHeaderContent,
+  contentWrapper,
 }: {
   title: string;
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  bottomHeaderContent?: React.ComponentType;
+  contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): {
   element: React.ReactElement<any, any>;
 } {
   return {
     element: (
-      <ApmServiceTemplate title={title} selectedTab={tab} searchBarOptions={searchBarOptions}>
+      <ApmServiceTemplate
+        title={title}
+        selectedTab={tab}
+        searchBarOptions={searchBarOptions}
+        bottomHeaderContent={bottomHeaderContent}
+        contentWrapper={contentWrapper}
+      >
         {element}
       </ApmServiceTemplate>
     ),
@@ -155,7 +175,8 @@ export const serviceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            hidden: true,
+            showTimeComparison: true,
+            showTransactionTypeSelector: true,
           },
         }),
         params: t.partial({
@@ -328,7 +349,7 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
-          hidden: true,
+          showTimeComparison: true,
         },
       }),
       '/services/{serviceName}/logs': page({
@@ -351,9 +372,6 @@ export const serviceDetailRoute = {
             defaultMessage: 'Infrastructure',
           }),
           element: <InfraOverview />,
-          searchBarOptions: {
-            showUnifiedSearchBar: false,
-          },
         }),
         params: t.partial({
           query: t.partial({
@@ -373,8 +391,10 @@ export const serviceDetailRoute = {
           }),
           element: <AlertsOverview />,
           searchBarOptions: {
-            hidden: true,
+            showUnifiedSearchBar: false,
           },
+          bottomHeaderContent: AlertsHeaderSearchBar,
+          contentWrapper: AlertsSearchBarContextProvider,
         }),
         params: t.partial({
           query: t.partial({
@@ -396,6 +416,7 @@ export const serviceDetailRoute = {
           searchBarOptions: {
             hidden: true,
           },
+          bottomHeaderContent: ProfilingHeaderSearchBar,
         }),
       },
       '/services/{serviceName}/dashboards': {

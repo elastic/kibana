@@ -7,6 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -42,6 +43,7 @@ interface PackResultsHeadersProps {
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;
   isScheduled?: boolean;
+  onSaveQuery?: () => void;
 }
 
 const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -60,7 +62,7 @@ const actionsGroupCss = {
 };
 
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
-  ({ actionId, agentIds, queryIds, addToTimeline, isScheduled }) => {
+  ({ actionId, agentIds, queryIds, addToTimeline, isScheduled, onSaveQuery }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
     const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
     const permissions = useKibana().services.application.capabilities.osquery;
@@ -97,7 +99,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             </EuiFlexItem>
             {actionId && (
               <EuiFlexItem grow={false} css={actionsGroupCss}>
-                <EuiFlexGroup gutterSize="m" alignItems="center">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <AddToCaseWrapper
                       actionId={actionId}
@@ -116,15 +118,35 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                   </EuiFlexItem>
                   {showAddTags && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="m"
-                        iconType="tag"
-                        color="primary"
-                        onClick={handleOpenFlyout}
-                        data-test-subj="add-tags-button"
+                      <EuiToolTip
+                        content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}
                       >
-                        {ADD_TAGS_LABEL}
-                      </EuiButtonEmpty>
+                        <EuiButtonEmpty
+                          size="m"
+                          iconType="tag"
+                          color="primary"
+                          onClick={handleOpenFlyout}
+                          isDisabled={isScheduled}
+                          data-test-subj="add-tags-button"
+                        >
+                          {ADD_TAGS_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                  {onSaveQuery && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        size="m"
+                        onClick={onSaveQuery}
+                        data-test-subj="save-query-button"
+                      >
+                        <FormattedMessage
+                          id="xpack.osquery.packResultsHeader.saveQueryButtonLabel"
+                          defaultMessage="Save query"
+                        />
+                      </EuiButton>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

@@ -12,7 +12,8 @@ import { TestProviders } from '../../../common/mock';
 import { PanelHeader } from './header';
 import type { LeftPanelTabType } from './tabs';
 import { INSIGHTS_TAB_ID, NOTES_TAB_ID } from '../constants/left_panel_paths';
-import { INSIGHTS_TAB_TEST_ID, NOTES_TAB_TEST_ID } from '../constants/test_ids';
+import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
+import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/notes/test_ids';
 
 jest.mock('../../shared/components/flyout_header', () => ({
   FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
@@ -29,7 +30,7 @@ const mockTabs: LeftPanelTabType[] = [
   },
   {
     id: NOTES_TAB_ID,
-    'data-test-subj': NOTES_TAB_TEST_ID,
+    'data-test-subj': NOTES_DETAILS_TEST_ID,
     name: <span>{'Notes'}</span>,
     content: <div>{'Notes content'}</div>,
   },
@@ -60,7 +61,7 @@ describe('PanelHeader', () => {
     renderPanelHeader(INSIGHTS_TAB_ID);
 
     expect(screen.getByTestId(INSIGHTS_TAB_TEST_ID)).toBeInTheDocument();
-    expect(screen.getByTestId(NOTES_TAB_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(NOTES_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders tab names', () => {
@@ -75,7 +76,7 @@ describe('PanelHeader', () => {
     const setSelectedTabId = jest.fn();
     renderPanelHeader(INSIGHTS_TAB_ID, setSelectedTabId);
 
-    await user.click(screen.getByTestId(NOTES_TAB_TEST_ID));
+    await user.click(screen.getByTestId(NOTES_DETAILS_TEST_ID));
 
     expect(setSelectedTabId).toHaveBeenCalledTimes(1);
     expect(setSelectedTabId).toHaveBeenCalledWith(NOTES_TAB_ID);
@@ -104,6 +105,6 @@ describe('PanelHeader', () => {
     );
 
     expect(screen.getByTestId(INSIGHTS_TAB_TEST_ID)).toBeInTheDocument();
-    expect(screen.queryByTestId(NOTES_TAB_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(NOTES_DETAILS_TEST_ID)).not.toBeInTheDocument();
   });
 });

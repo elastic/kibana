@@ -53,6 +53,9 @@ export function SpatialJoinExpression(props: Props) {
         />
       }
       repositionOnScroll={true}
+      aria-label={i18n.translate('xpack.maps.spatialJoinExpression.popoverAriaLabel', {
+        defaultMessage: 'Configure spatial join',
+      })}
     >
       <SpatialJoinPopoverContent
         sourceDescriptor={props.sourceDescriptor}

@@ -38,12 +38,12 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ebt-tools'
   - '@kbn/core-analytics-server'
-  - '@kbn/storybook'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-common'
   - '@kbn/core-http-browser'
   - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
@@ -57,26 +57,6 @@ fileGroups:
     - server/**/*
     - .storybook/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

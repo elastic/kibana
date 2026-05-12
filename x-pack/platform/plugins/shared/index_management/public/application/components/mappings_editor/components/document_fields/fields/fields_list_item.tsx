@@ -231,6 +231,7 @@ function FieldListItemComponent(
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
+            wrap
             css={[
               styles.content,
               !hasChildFields &&
@@ -265,18 +266,22 @@ function FieldListItemComponent(
               </EuiFlexItem>
             )}
 
-            {isMultiField && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon color="subdued" type="documents" />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
+                {isMultiField && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon color="subdued" type="documents" aria-hidden="true" />
+                  </EuiFlexItem>
+                )}
 
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
-              aria-label={i18nTexts.fieldListNameLabel}
-            >
-              {source.name}
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
+                  aria-label={i18nTexts.fieldListNameLabel}
+                >
+                  {source.name}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexGroup aria-label={i18nTexts.fieldListTypesLabel}>

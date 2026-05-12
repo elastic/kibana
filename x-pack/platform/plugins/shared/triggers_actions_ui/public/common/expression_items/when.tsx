@@ -44,6 +44,10 @@ export const WhenExpression = ({
   const aggregationTypes = customAggTypesOptions ?? builtInAggregationTypes;
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.when.popoverAriaLabel',
+        { defaultMessage: 'When' }
+      )}
       button={
         <EuiExpression
           data-test-subj="whenExpression"

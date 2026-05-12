@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { dashboardManagementSkill } from './dashboard_management_skill';
 import { registerSkills } from './register_skills';
 
@@ -20,5 +20,10 @@ describe('registerSkills', () => {
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(dashboardManagementSkill);
+  });
+
+  it('includes SML discovery instructions in the skill content', () => {
+    expect(dashboardManagementSkill.content).toContain('platform.core.sml_search');
+    expect(dashboardManagementSkill.content).toContain('platform.core.sml_attach');
   });
 });

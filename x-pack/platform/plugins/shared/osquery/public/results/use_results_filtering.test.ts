@@ -153,4 +153,64 @@ describe('useResultsFiltering', () => {
     expect(result.current.filters).toEqual(newFilters);
     expect(resetPagination).toHaveBeenCalled();
   });
+
+  it('sets filter meta.index to data view ID', () => {
+    const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
+
+    act(() => {
+      result.current.handleFilter({ name: 'agent.name' } as DataViewField, 'test-host', '+');
+    });
+
+    expect(result.current.filters[0].meta.index).toBe('test-dv-id');
+  });
+
+  it('handleFilter correctly preserves comma in value', () => {
+    const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
+
+    act(() => {
+      result.current.handleFilter(
+        { name: 'osquery.description' } as DataViewField,
+        'Apple, Inc.',
+        '+'
+      );
+    });
+
+    const filter = result.current.filters[0];
+    expect(filter.meta.value).toBe('Apple, Inc.');
+    expect(filter.meta.params).toEqual({ query: 'Apple, Inc.' });
+    expect(filter.query).toEqual({ match_phrase: { 'osquery.description': 'Apple, Inc.' } });
+  });
+
+  it('handleFilter with negative operation sets meta.negate to true', () => {
+    const { result } = renderHook(() => useResultsFiltering(defaultOptions, resetPagination));
+
+    act(() => {
+      result.current.handleFilter({ name: 'agent.name' } as DataViewField, 'test-host', '-');
+    });
+
+    const filter = result.current.filters[0];
+    expect(filter.meta.negate).toBe(true);
+    expect(filter.meta.key).toBe('agent.name');
+    expect(filter.meta.value).toBe('test-host');
+    expect(filter.query).toEqual({ match_phrase: { 'agent.name': 'test-host' } });
+  });
+
+  it('provides filtersForSuggestions for scheduled queries', () => {
+    const { result } = renderHook(() =>
+      useResultsFiltering(
+        {
+          ...defaultOptions,
+          scheduleId: 'sched-1',
+          executionCount: 5,
+        },
+        resetPagination
+      )
+    );
+
+    expect(result.current.filtersForSuggestions).toHaveLength(2);
+    expect(result.current.filtersForSuggestions[0].meta.key).toBe('schedule_id');
+    expect(result.current.filtersForSuggestions[1].meta.key).toBe(
+      'osquery_meta.schedule_execution_count'
+    );
+  });
 });

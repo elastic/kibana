@@ -9,7 +9,7 @@
 
 import { buildXY } from './xy';
 import { mockDataViewsService } from './mock_utils';
-import type { XYState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import { LegendValue } from '@elastic/charts';
 
 test('generates xy chart config', async () => {
@@ -256,7 +256,7 @@ test('it generates xy chart with multiple reference lines', async () => {
     }
   );
 
-  const xyState = result.state.visualization as XYState;
+  const xyState = result.state.visualization as XYVisualizationState;
 
   expect(xyState.layers).toHaveLength(3);
 
@@ -327,7 +327,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toBeUndefined();
@@ -361,7 +361,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
@@ -395,7 +395,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toEqual(['metric_formula_accessor0_breakdown_0']);
@@ -429,7 +429,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const dataLayer = xyState.layers[0] as any;
 
     expect(dataLayer.splitAccessors).toEqual([
@@ -479,7 +479,7 @@ describe('breakdown handling', () => {
       }
     );
 
-    const xyState = result.state.visualization as XYState;
+    const xyState = result.state.visualization as XYVisualizationState;
     const layer0 = xyState.layers[0] as any;
     const layer1 = xyState.layers[1] as any;
 

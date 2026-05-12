@@ -76,10 +76,10 @@ export function Configuration({ onCreate, onCancel }: Props) {
             <SloSelector
               singleSelection={true}
               hasError={hasError}
-              onSelected={(slo) => {
-                setHasError(slo === undefined);
-                if (slo && 'id' in slo) {
-                  setSelectedSlo({ slo_id: slo.id, slo_instance_id: slo.instanceId });
+              onSelected={(slos) => {
+                setHasError(slos === undefined);
+                if (slos?.[0]) {
+                  setSelectedSlo(slos[0]);
                 }
               }}
             />

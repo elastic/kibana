@@ -17,6 +17,7 @@ export {
   MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
   HasEsDataFailureReason,
 } from './constants';
+export type { PrimitiveRuntimeFieldTypes, RuntimeFieldCompositeType } from './constants';
 
 export { LATEST_VERSION } from './content_management/v1/constants';
 

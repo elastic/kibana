@@ -61,6 +61,8 @@ export interface WorkflowDetailState {
   loading: LoadingStates;
   /** Whether the editor has validation errors (strict schema + custom validations) */
   hasYamlSchemaValidationErrors: boolean;
+  /** Whether the user has accepted at least one AI proposal in the current editing session */
+  aiAssisted: boolean;
   /** Connector flyout state */
   connectorFlyout: {
     isOpen: boolean;

@@ -159,6 +159,17 @@ const bytesColumn: GenericIndexPatternColumn = {
   params: { format: { id: 'bytes' } },
 };
 
+const lastValueColumn = (
+  dataType: GenericIndexPatternColumn['dataType']
+): GenericIndexPatternColumn => ({
+  label: 'Last value of source',
+  dataType,
+  isBucketed: false,
+  operationType: 'last_value',
+  sourceField: 'source',
+  params: {},
+});
+
 /**
  * The datasource exposes four main pieces of code which are tested at
  * an integration test level. The main reason for this fairly high level
@@ -168,8 +179,7 @@ const bytesColumn: GenericIndexPatternColumn = {
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
  */
-// Failing: See https://github.com/elastic/kibana/issues/253327
-describe.skip('FormBasedDimensionEditor', () => {
+describe('FormBasedDimensionEditor', () => {
   let state: FormBasedPrivateState;
   let setState: jest.Mock;
   let defaultProps: FormBasedDimensionEditorProps;
@@ -286,6 +296,7 @@ describe.skip('FormBasedDimensionEditor', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount();
+      wrapper = undefined as unknown as ReactWrapper | ShallowWrapper;
     }
   });
 
@@ -326,7 +337,8 @@ describe.skip('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-  test('should list all field names and document as a whole in prioritized order', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/253327
+  test.skip('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
@@ -2512,5 +2524,53 @@ describe.skip('FormBasedDimensionEditor', () => {
     );
 
     expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
+  });
+
+  describe('FormatSelector numeric column detection', () => {
+    it('should show FormatSelector when activeData reports the column as numeric', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'number' } }],
+            rows: [],
+          },
+        },
+      });
+
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector when activeData reports the column as non-numeric', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'string' } }],
+            rows: [],
+          },
+        },
+      });
+
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
+    });
+
+    it('should show FormatSelector when selectedColumn dataType is numeric and activeData is not available', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+      });
+
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector selectedColumn dataType is non numeric and activeData is not available', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+      });
+
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
+    });
   });
 });

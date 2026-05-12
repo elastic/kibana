@@ -3,7 +3,7 @@ info:
   title: Watchlists Entity Source Common Schema
   description: Common schema for Watchlists Entity Source
   version: "1"
-  
+
 paths: {}
 components:
   schemas:
@@ -12,10 +12,13 @@ components:
       enum:
         - index
         - entity_analytics_integration
+        - store
 
     UpdateableMonitoringEntitySourceProperties:
       type: object
       properties:
+        type:
+          $ref: "#/components/schemas/EntitySourceType"
         name:
           type: string
         indexPattern:
@@ -24,6 +27,12 @@ components:
           type: string
         enabled:
           type: boolean
+        identifierField:
+          type: string
+          description: Field used to query the entity store for index-type sources
+        queryRule:
+          type: string
+          description: KQL query used to filter data from the provided index patterns
         matchers:
           type: array
           items:
@@ -32,6 +41,8 @@ components:
           $ref: "#/components/schemas/Filter"
         integrations:
           $ref: "#/components/schemas/Integrations"
+        range:
+          $ref: "#/components/schemas/DateRange"
 
     UpdateEntitySourceNoadditionalProps:
       allOf:
@@ -44,8 +55,6 @@ components:
         - $ref: "#/components/schemas/UpdateableMonitoringEntitySourceProperties"
         - type: object
           properties:
-            type:
-              $ref: "#/components/schemas/EntitySourceType"
             managed:
               type: boolean
 
@@ -94,6 +103,20 @@ components:
           properties:
             id:
               type: string
+
+    DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+        end:
+          type: string
+          description: End of the lookback period (date math or ISO string, e.g. "now")
 
     Integrations:
       type: object

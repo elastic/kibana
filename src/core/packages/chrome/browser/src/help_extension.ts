@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
-import type { ReactNode } from 'react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
-
-/** @public */
-export interface ChromeHelpMenuActions {
-  hideHelpMenu: () => void;
-}
 
 /** @public */
 export interface ChromeHelpExtension {
@@ -26,18 +19,6 @@ export interface ChromeHelpExtension {
    * Creates unified links for sending users to documentation or a custom link/button
    */
   links?: ChromeHelpExtensionMenuLink[];
-  /**
-   * Custom content to render below the list of links. Receives menu actions and returns a ReactNode.
-   *
-   * @example
-   * ```tsx
-   * core.chrome.setHelpExtension({
-   *   appName: 'My App',
-   *   content: ({ hideHelpMenu }) => <MyHelpComponent onClose={hideHelpMenu} />,
-   * });
-   * ```
-   */
-  content?: (menuActions: ChromeHelpMenuActions) => ReactNode;
 }
 
 /** @public */
@@ -66,21 +47,30 @@ export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLi
    */
   linkType: 'custom';
   /**
-   * URL of the link
+   * URL of the link. Omit when using `onClick` only.
    */
-  href: string;
+  href?: string;
   /**
-   * Content of the button (in lieu of `children`)
+   * Label of the button (in lieu of `children`)
    */
-  content: React.ReactNode;
+  content: string;
   /**
    * Opens link in new tab
    */
   external?: boolean;
+  /**
+   * Click handler. When provided without `href`, the link acts as a button.
+   */
+  onClick?: () => void;
 }
 
 /** @public */
-export interface ChromeGlobalHelpExtensionMenuLink extends ChromeHelpExtensionMenuCustomLink {
+export interface ChromeGlobalHelpExtensionMenuLink
+  extends Omit<ChromeHelpExtensionMenuCustomLink, 'href'> {
+  /**
+   * URL of the link (required for global help links).
+   */
+  href: string;
   /**
    * Highest priority items are listed at the top of the list of links.
    */

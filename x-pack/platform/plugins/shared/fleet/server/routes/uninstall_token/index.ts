@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { UNINSTALL_TOKEN_ROUTES, API_VERSIONS } from '../../../common/constants';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -38,6 +40,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_uninstall_tokens.yaml'),
+        },
         validate: {
           request: GetUninstallTokensMetadataRequestSchema,
           response: {
@@ -72,6 +77,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_uninstall_token.yaml'),
+        },
         validate: {
           request: GetUninstallTokenRequestSchema,
           response: {

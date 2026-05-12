@@ -42,6 +42,9 @@ test.describe('When the user has Editor built-in role', { tag: tags.stateful.cla
     await fleetHome.navigateTo();
     await fleetHome.waitForPageToLoad();
 
+    // When enableOpAMP is on, addAgentButton lives inside a popover — open it first.
+    await fleetHome.openAddAgentMenu();
+
     // Verify Add Agent button exists
     await expect(fleetHome.getAddAgentButton()).toBeVisible();
   });

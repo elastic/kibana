@@ -72,7 +72,7 @@ const ViewToggle = ({
       label: i18n.translate('xpack.spaces.spaceSelector.tableViewLabel', {
         defaultMessage: 'Table view',
       }),
-      iconType: 'list',
+      iconType: 'listBullet',
     },
   ];
 

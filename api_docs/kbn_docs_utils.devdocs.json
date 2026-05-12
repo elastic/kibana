@@ -50,6 +50,7 @@
             "lineNumber": 88,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "FindPluginsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -128,7 +129,7 @@
           "() => void"
         ],
         "path": "packages/kbn-docs-utils/src/check_package_docs_cli.ts",
-        "lineNumber": 181,
+        "lineNumber": 186,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

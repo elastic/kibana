@@ -72,7 +72,6 @@ export const buildFieldsDefinitions = (
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.fieldDefinition', {
         defaultMessage: `Field specified by the input table`,
       }),
-      sortText: 'D',
       category: SuggestionCategory.FIELD,
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -273,11 +272,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
 
-  let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
-  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
-    functionsPriority = '1A';
-  }
-
   // Determine function category explicitly
   let category: SuggestionCategory;
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
@@ -306,8 +300,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
         fn.examples
       ),
     },
-    // time_series_agg functions have priority over everything else
-    sortText: functionsPriority,
     category,
     // Open signature help when function is accepted
     command: {
@@ -316,24 +308,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
   };
 }
-
-/**
- * Generates a sort key for field suggestions based on their categorization.
- * Recommended fields are prioritized, followed by ECS fields.
- *
- * @param isEcs - True if the field is an Elastic Common Schema (ECS) field.
- * @param isRecommended - True if the field is a recommended field from the registry.
- * @returns A string representing the sort key ('1C' for recommended, '1D' for ECS, 'D' for others).
- */
-const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
-  if (isRecommended) {
-    return '1C';
-  }
-  if (isEcs) {
-    return '1D';
-  }
-  return 'D';
-};
 
 const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
@@ -393,10 +367,6 @@ export const buildColumnSuggestions = (
     const fieldIsRecommended = recommendedFieldsFromExtensions.some(
       (recommendedField) => recommendedField.name === column.name
     );
-    const sortText = getFieldsSortText(
-      !column.userDefined && Boolean(column.isEcs),
-      Boolean(fieldIsRecommended)
-    );
 
     const category = getColumnSuggestionCategory(column, fieldIsRecommended);
 
@@ -408,7 +378,6 @@ export const buildColumnSuggestions = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      sortText,
       category,
     };
 

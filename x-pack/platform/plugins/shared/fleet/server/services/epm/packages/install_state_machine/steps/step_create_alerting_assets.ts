@@ -108,8 +108,12 @@ export async function createAlertingRuleFromTemplate(
   }
 }
 
-function getInactivityMonitoringTemplateId(pkgName: string): string {
-  return `fleet-${pkgName}-inactivity-monitoring`;
+function getInactivityMonitoringTemplateId(pkgName: string, spaceId?: string): string {
+  const targetSpace = spaceId ?? DEFAULT_SPACE_ID;
+  if (targetSpace === DEFAULT_SPACE_ID) {
+    return `fleet-${pkgName}-inactivity-monitoring`;
+  }
+  return `fleet-${pkgName}-inactivity-monitoring-${targetSpace}`;
 }
 
 function getDataStreamPatterns(packageInfo: InstallablePackage): string[] {
@@ -124,10 +128,12 @@ export async function createInactivityMonitoringTemplate(
   deps: { logger: Logger; savedObjectsClient: SavedObjectsClientContract },
   params: {
     packageInfo: InstallablePackage;
+    spaceId?: string;
+    installAsAdditionalSpace?: boolean;
   }
 ): Promise<KibanaAssetReference | undefined> {
   const { logger, savedObjectsClient } = deps;
-  const { packageInfo } = params;
+  const { packageInfo, spaceId, installAsAdditionalSpace = false } = params;
   const { name: pkgName, title: pkgTitle } = packageInfo;
 
   if (!appContextService.getExperimentalFeatures().enableIntegrationInactivityAlerting) {
@@ -144,7 +150,7 @@ export async function createInactivityMonitoringTemplate(
     return;
   }
 
-  const templateId = getInactivityMonitoringTemplateId(pkgName);
+  const templateId = getInactivityMonitoringTemplateId(pkgName, spaceId);
   const templateRef: KibanaAssetReference = {
     id: templateId,
     type: KibanaSavedObjectType.alertingRuleTemplate,
@@ -152,7 +158,12 @@ export async function createInactivityMonitoringTemplate(
 
   return withPackageSpan(`Create inactivity monitoring template for ${pkgName}`, async () => {
     try {
-      const internalSoClient = appContextService.getInternalUserSOClient();
+      // Always use explicit namespace scoping via asScopedToNamespace because
+      // alerting_rule_template is a multiple-isolated SO type. Using an implicitly
+      // scoped or unscoped client causes incorrect namespace resolution for get/create.
+      const internalSoClient = appContextService
+        .getInternalUserSOClient()
+        .asScopedToNamespace(spaceId ?? DEFAULT_SPACE_ID);
 
       // Check if the template already exists
       const existing = await internalSoClient
@@ -192,38 +203,60 @@ export async function createInactivityMonitoringTemplate(
         }
 
         // Re-register the asset ref (it may have been overwritten by stepInstallKibanaAssets)
-        await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [templateRef], false, true);
+        await saveKibanaAssetsRefs(
+          savedObjectsClient,
+          pkgName,
+          [templateRef],
+          installAsAdditionalSpace,
+          true
+        );
         return templateRef;
       }
 
       logger.debug(`Creating inactivity monitoring template ${templateId} for package ${pkgName}`);
 
-      await internalSoClient.create(
-        KibanaSavedObjectType.alertingRuleTemplate,
-        {
-          name: `[${pkgTitle}] Idle data streams`,
-          ruleTypeId: '.es-query',
-          tags: [pkgTitle],
-          schedule: { interval: '24h' },
-          params: {
-            searchType: 'esQuery',
-            esQuery: JSON.stringify({ query: { match_all: {} } }),
-            index: dataStreamPatterns,
-            timeField: '@timestamp',
-            timeWindowSize: 24,
-            timeWindowUnit: 'h',
-            threshold: [1],
-            thresholdComparator: '<',
-            size: 0,
-            aggType: 'count',
-            groupBy: 'all',
-            excludeHitsFromPreviousRun: true,
+      try {
+        await internalSoClient.create(
+          KibanaSavedObjectType.alertingRuleTemplate,
+          {
+            name: `[${pkgTitle}] Idle data streams`,
+            ruleTypeId: '.es-query',
+            tags: [pkgTitle],
+            schedule: { interval: '24h' },
+            params: {
+              searchType: 'esQuery',
+              esQuery: JSON.stringify({ query: { match_all: {} } }),
+              index: dataStreamPatterns,
+              timeField: '@timestamp',
+              timeWindowSize: 24,
+              timeWindowUnit: 'h',
+              threshold: [1],
+              thresholdComparator: '<',
+              size: 0,
+              aggType: 'count',
+              groupBy: 'all',
+              excludeHitsFromPreviousRun: true,
+            },
           },
-        },
-        { id: templateId }
-      );
+          { id: templateId }
+        );
+      } catch (createErr) {
+        if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
+          logger.debug(
+            `Inactivity monitoring template ${templateId} already exists for package ${pkgName} (conflict on create)`
+          );
+        } else {
+          throw createErr;
+        }
+      }
 
-      await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [templateRef], false, true);
+      await saveKibanaAssetsRefs(
+        savedObjectsClient,
+        pkgName,
+        [templateRef],
+        installAsAdditionalSpace,
+        true
+      );
 
       return templateRef;
     } catch (e) {
@@ -240,14 +273,18 @@ export async function stepCreateAlertingAssets(
   context: Pick<
     InstallContext,
     'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'
-  >
+  > & { installAsAdditionalSpace?: boolean }
 ) {
-  const { logger, savedObjectsClient, packageInstallContext, spaceId } = context;
+  const { logger, savedObjectsClient, packageInstallContext, spaceId, installAsAdditionalSpace } =
+    context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
   // Create or re-create inactivity monitoring template for integration packages
-  await createInactivityMonitoringTemplate({ logger, savedObjectsClient }, { packageInfo });
+  await createInactivityMonitoringTemplate(
+    { logger, savedObjectsClient },
+    { packageInfo, spaceId, installAsAdditionalSpace }
+  );
 
   // Create alerting rules templates from archive assets
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {

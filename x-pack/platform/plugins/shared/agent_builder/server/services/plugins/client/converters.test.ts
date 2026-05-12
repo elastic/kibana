@@ -32,7 +32,6 @@ const createPluginProperties = (overrides?: Partial<PluginProperties>): PluginPr
   source_url: 'https://github.com/test/plugin/archive/main.zip',
   skill_ids: ['skill-1', 'skill-2'],
   unmanaged_assets: {
-    commands: ['commands/cmd1.md'],
     agents: [],
     hooks: [],
     mcp_servers: ['mcp-config.json'],
@@ -69,7 +68,6 @@ describe('plugin converters', () => {
         source_url: 'https://github.com/test/plugin/archive/main.zip',
         skill_ids: ['skill-1', 'skill-2'],
         unmanaged_assets: {
-          commands: ['commands/cmd1.md'],
           agents: [],
           hooks: [],
           mcp_servers: ['mcp-config.json'],
@@ -117,7 +115,6 @@ describe('plugin converters', () => {
           source_url: 'https://example.com/plugin.zip',
           skill_ids: ['s1'],
           unmanaged_assets: {
-            commands: [],
             agents: [],
             hooks: [],
             mcp_servers: [],
@@ -142,7 +139,6 @@ describe('plugin converters', () => {
         source_url: 'https://example.com/plugin.zip',
         skill_ids: ['s1'],
         unmanaged_assets: {
-          commands: [],
           agents: [],
           hooks: [],
           mcp_servers: [],
@@ -163,7 +159,6 @@ describe('plugin converters', () => {
           description: '',
           manifest: {},
           unmanaged_assets: {
-            commands: [],
             agents: [],
             hooks: [],
             mcp_servers: [],
@@ -187,7 +182,6 @@ describe('plugin converters', () => {
           description: '',
           manifest: {},
           unmanaged_assets: {
-            commands: ['cmd.md'],
             agents: ['agent/'],
             hooks: ['hooks.json'],
             mcp_servers: ['mcp.json'],
@@ -200,7 +194,6 @@ describe('plugin converters', () => {
       });
 
       expect(result.unmanaged_assets).toEqual({
-        commands: ['cmd.md'],
         agents: ['agent/'],
         hooks: ['hooks.json'],
         mcp_servers: ['mcp.json'],
@@ -225,7 +218,6 @@ describe('plugin converters', () => {
       },
       skills: [],
       unmanagedAssets: {
-        commands: ['cmd.md'],
         agents: [],
         hooks: [],
         mcp_servers: ['mcp.json'],
@@ -255,7 +247,6 @@ describe('plugin converters', () => {
         source_url: 'https://github.com/test/plugin/archive/main.zip',
         skill_ids: [],
         unmanaged_assets: {
-          commands: ['cmd.md'],
           agents: [],
           hooks: [],
           mcp_servers: ['mcp.json'],
@@ -391,7 +382,6 @@ describe('plugin converters', () => {
         current,
         update: {
           unmanaged_assets: {
-            commands: [],
             agents: [],
             hooks: [],
             mcp_servers: ['new-mcp.json'],
@@ -403,7 +393,6 @@ describe('plugin converters', () => {
       });
 
       expect(result.unmanaged_assets).toEqual({
-        commands: [],
         agents: [],
         hooks: [],
         mcp_servers: ['new-mcp.json'],
@@ -438,6 +427,7 @@ describe('plugin converters', () => {
         name: 'test-plugin',
         version: '1.0.0',
         description: 'A test plugin',
+        readonly: false,
         manifest: {
           author: { name: 'Test Author', email: 'test@example.com' },
           homepage: 'https://example.com',
@@ -448,7 +438,6 @@ describe('plugin converters', () => {
         source_url: 'https://github.com/test/plugin/archive/main.zip',
         skill_ids: ['skill-1', 'skill-2'],
         unmanaged_assets: {
-          commands: ['commands/cmd1.md'],
           agents: [],
           hooks: [],
           mcp_servers: ['mcp-config.json'],
@@ -465,6 +454,13 @@ describe('plugin converters', () => {
       const result = toPluginDefinition(persisted);
 
       expect(result.source_url).toBeUndefined();
+    });
+
+    it('sets readonly to false for persisted plugins', () => {
+      const persisted = fromEs(createPluginDocument());
+      const result = toPluginDefinition(persisted);
+
+      expect(result.readonly).toBe(false);
     });
   });
 });

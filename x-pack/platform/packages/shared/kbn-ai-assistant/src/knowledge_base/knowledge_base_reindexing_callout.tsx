@@ -25,7 +25,7 @@ export const KnowledgeBaseReindexingCallout = () => {
         defaultMessage: 'Re-indexing in progress.',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="knowledgeBaseReindexingCallOut"
     >
       {i18n.translate('xpack.aiAssistant.knowledgeBase.reindexingCalloutBody', {

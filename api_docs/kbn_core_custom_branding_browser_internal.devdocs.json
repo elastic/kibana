@@ -48,6 +48,7 @@
                 "lineNumber": 26,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomBrandingSetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }

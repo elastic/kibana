@@ -109,7 +109,7 @@ export const getFieldListFactory = (
           })
       );
 
-      function serializeState() {
+      function serializeState(): FieldListSerializedState {
         const { dataViews: selectedDataViews, ...rest } = fieldListStateManager.getLatestState();
         return {
           ...titleManager.getLatestState(),
@@ -117,7 +117,7 @@ export const getFieldListFactory = (
         };
       }
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<FieldListSerializedState>({
         uuid,
         parentApi,
         serializeState,

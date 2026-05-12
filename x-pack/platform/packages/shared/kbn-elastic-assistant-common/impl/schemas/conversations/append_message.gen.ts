@@ -14,31 +14,35 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import { ConversationMessageCreateProps, ConversationResponse } from './common_attributes.gen';
 
+export const AppendConversationMessageRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The unique identifier (`id`) of the conversation to which the message will be appended.
+     */
+    id: NonEmptyString,
+  })
+);
 export type AppendConversationMessageRequestParams = z.infer<
   typeof AppendConversationMessageRequestParams
 >;
-export const AppendConversationMessageRequestParams = z.object({
-  /**
-   * The unique identifier (`id`) of the conversation to which the message will be appended.
-   */
-  id: NonEmptyString,
-});
 export type AppendConversationMessageRequestParamsInput = z.input<
   typeof AppendConversationMessageRequestParams
 >;
 
+export const AppendConversationMessageRequestBody = lazySchema(
+  () => ConversationMessageCreateProps
+);
 export type AppendConversationMessageRequestBody = z.infer<
   typeof AppendConversationMessageRequestBody
 >;
-export const AppendConversationMessageRequestBody = ConversationMessageCreateProps;
 export type AppendConversationMessageRequestBodyInput = z.input<
   typeof AppendConversationMessageRequestBody
 >;
 
+export const AppendConversationMessageResponse = lazySchema(() => ConversationResponse);
 export type AppendConversationMessageResponse = z.infer<typeof AppendConversationMessageResponse>;
-export const AppendConversationMessageResponse = ConversationResponse;

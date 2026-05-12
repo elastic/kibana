@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const CASES_ATTACHMENT_LOG_PATTERN = 'aiopsPatternAnalysisEmbeddable';
-
 //
 // Do not change constant value - part of public REST APIs
 //

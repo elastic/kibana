@@ -450,7 +450,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.max.script]: definition for this key is missing"`
+      `"[someAgg.max.script]: Additional properties are not allowed ('script' was unexpected)"`
     );
   });
 
@@ -474,7 +474,7 @@ describe('validateAndConvertAggregations', () => {
     expect(() => {
       validateAndConvertAggregations(['foo'], aggregations, mockMappings);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"[someAgg.aggs.nested.max.script]: definition for this key is missing"`
+      `"[someAgg.aggs.nested.max.script]: Additional properties are not allowed ('script' was unexpected)"`
     );
   });
 

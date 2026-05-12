@@ -13,7 +13,7 @@ export const lensGetRequestParamsSchema = schema.object(
   {
     id: schema.string({
       meta: {
-        description: 'The saved object id of a visualization.',
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
       },
     }),
   },

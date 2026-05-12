@@ -33,6 +33,7 @@ import {
   missingSortBeforeLimit,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
+  getSparklineColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -987,6 +988,33 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getSparklineColumns', () => {
+    it('should return sparkline alias and not inner column refs (patterns-style query)', () => {
+      const esql =
+        'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline=SPARKLINE(Count(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(message) | SORT Count DESC';
+      expect(getSparklineColumns(esql)).toEqual(['Sparkline']);
+    });
+
+    it('should return bare SPARKLINE expression as column id', () => {
+      const esql =
+        'FROM index | STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*),@timestamp,10,?_tstart,?_tend)',
+      ]);
+    });
+
+    it('should not treat unrelated stats columns as sparklines based on name text', () => {
+      const esql = 'FROM index | STATS my_sparkline_metric = COUNT(*) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([]);
+    });
+
+    it('should apply every RENAME command in pipeline order', () => {
+      const esql =
+        'FROM index | STATS Sparkline=SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) BY Pattern=CATEGORIZE(m) | RENAME Sparkline AS S1 | RENAME S1 AS S2';
+      expect(getSparklineColumns(esql)).toEqual(['S2']);
     });
   });
 

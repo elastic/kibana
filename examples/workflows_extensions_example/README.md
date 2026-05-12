@@ -70,11 +70,15 @@ You can emit events in two ways: **via the request-scoped client** (from a route
 
 ### Emit an event (request context)
 
-From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type the route context with `workflows: WorkflowsRouteHandlerContext`):
+From a route handler, use the request-scoped workflows context (your plugin must depend on `workflows_extensions` and type your HTTP router with `WorkflowsExtensionsRequestHandlerContext` from `@kbn/workflows-extensions/server`, as in `server/plugin.ts`):
 
 ```ts
 const client = context.workflows.getWorkflowsClient();
-await client.emitEvent(CUSTOM_TRIGGER_ID, { message: 'Hello', source: 'example' });
+await client.emitEvent(CUSTOM_TRIGGER_ID, {
+  message: 'Hello',
+  source: 'example',
+  labels: ['demo', 'alerts'],
+});
 ```
 
 To try it via HTTP (example only; authz disabled for demo):
@@ -82,10 +86,12 @@ To try it via HTTP (example only; authz disabled for demo):
 ```bash
 curl -X POST -u elastic:changeme -H 'Content-Type: application/json' \
   'http://localhost:5601/api/workflows_extensions_example/emit' \
-  -d '{"message":"Hello from example","source":"curl"}'
+  -d '{"message":"Hello from example","source":"curl","labels":["demo","curl"]}'
 ```
 
-The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required, `source` optional).
+The trigger id is `example.customTrigger` (kebab-case namespace, camelCase event). The event payload must match the trigger’s `eventSchema` (`message` required; `source`, `category`, and `labels` optional).
+
+For information about some guardrails in event-driven triggers see [Event-driven guardrails](../../src/platform/plugins/shared/workflows_extensions/dev_docs/TRIGGERS.md#event-driven-guardrails).
 
 ## Key Points
 

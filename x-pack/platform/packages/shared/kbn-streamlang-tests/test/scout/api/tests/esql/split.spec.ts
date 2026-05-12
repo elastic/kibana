@@ -11,8 +11,7 @@ import type { SplitProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
 
-// https://github.com/elastic/kibana/issues/258476
-apiTest.describe.skip(
+apiTest.describe(
   'Streamlang to ES|QL - Split Processor',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -31,7 +30,7 @@ apiTest.describe.skip(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: 'foo,bar,baz' }];
         await testBed.ingest(indexName, docs);
@@ -60,7 +59,7 @@ apiTest.describe.skip(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [{ tags: 'foo,bar,baz' }];
         await testBed.ingest(indexName, docs);
@@ -89,7 +88,7 @@ apiTest.describe.skip(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ path: 'home/user/documents' }];
       await testBed.ingest(indexName, docs);
@@ -114,14 +113,15 @@ apiTest.describe.skip(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [{ tags: 'single' }];
       await testBed.ingest(indexName, docs);
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: ['single'] }));
+      // ES|QL returns a scalar (not array) when SPLIT finds no delimiter
+      expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ tags: 'single' }));
     });
 
     apiTest(
@@ -139,7 +139,7 @@ apiTest.describe.skip(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
         const docWithoutField = { status: 'doc2' }; // Should be filtered out
@@ -169,7 +169,7 @@ apiTest.describe.skip(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docWithField = { tags: 'foo,bar,baz', status: 'doc1' };
       const docWithoutField = { status: 'doc2' }; // Should pass through
@@ -202,7 +202,7 @@ apiTest.describe.skip(
         ],
       };
 
-      const { query } = transpile(streamlangDSL);
+      const { query } = await transpile(streamlangDSL);
 
       const docs = [
         { tags: 'foo,bar,baz', event: { kind: 'test' }, status: 'doc1' },
@@ -244,7 +244,7 @@ apiTest.describe.skip(
           ],
         };
 
-        const { query } = transpile(streamlangDSL);
+        const { query } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -297,7 +297,7 @@ apiTest.describe.skip(
           } as SplitProcessor,
         ],
       };
-      expect(() => transpile(streamlangDSL)).toThrow(
+      await expect(transpile(streamlangDSL)).rejects.toThrow(
         'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
       );
     });

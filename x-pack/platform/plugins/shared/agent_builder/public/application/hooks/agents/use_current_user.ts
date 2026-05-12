@@ -12,7 +12,7 @@ import { useKibana } from '../use_kibana';
 /**
  * Fetches the current user from Kibana's User Profile service.
  */
-export const useCurrentUser = ({ enabled }: { enabled: boolean }) => {
+export const useCurrentUser = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { services } = useKibana();
 
   const { data, isLoading } = useQuery({

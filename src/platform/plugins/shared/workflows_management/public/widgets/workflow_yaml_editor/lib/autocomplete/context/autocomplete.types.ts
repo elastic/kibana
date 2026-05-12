@@ -10,6 +10,7 @@
 import type { Document, LineCounter, Scalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
+import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import type { z } from '@kbn/zod/v4';
 import type { LineParseResult } from './parse_line_for_completion';
 import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
@@ -44,6 +45,14 @@ export interface AutocompleteContext {
 
   // kind of ast info
   isInLiquidBlock: boolean;
+  /** True when the cursor is in the scalar value for `triggers[i].on.condition`. */
+  isInTriggerConditionField: boolean;
+  /**
+   * When the cursor is in `on.condition` and `triggers[i].type` matches a trigger registered
+   * in workflows extensions, the public definition. Undefined for built-in types, unregistered
+   * ids, or missing `type` in YAML.
+   */
+  triggerConditionDefinition: PublicTriggerDefinition | undefined;
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;

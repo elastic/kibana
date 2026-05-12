@@ -56,5 +56,11 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
   if (typeof rawDefault === 'number') {
     return String(rawDefault);
   }
+  if (rawDefault instanceof Date) {
+    return rawDefault.toISOString();
+  }
+  if (Array.isArray(rawDefault)) {
+    return JSON.stringify(rawDefault);
+  }
   return '';
 };

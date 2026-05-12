@@ -109,6 +109,7 @@
                     "lineNumber": 124,
                     "columnNumber": 42,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ConfigDeprecationFactory",
                     "trackAdoption": false
                   }
                 ]
@@ -238,6 +239,7 @@
                     "lineNumber": 124,
                     "columnNumber": 42,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ConfigDeprecationFactory",
                     "trackAdoption": false
                   }
                 ]

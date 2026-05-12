@@ -12,11 +12,15 @@ import type {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import type { Subscription } from 'rxjs';
+import { type Subscription } from 'rxjs';
 import type { ChromeBreadcrumb, ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import {
+  INDEX_MANAGEMENT_LOCATOR_ID,
+  type IndexManagementLocatorParams,
+} from '@kbn/index-management-shared-types';
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
@@ -25,6 +29,7 @@ import type {
   AppPluginStartDependencies,
 } from './types';
 import { classicNavigationFactory } from './classic_navigation';
+import { SearchIndexManagementLocatorDefinition } from './locator';
 
 export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
@@ -51,6 +56,22 @@ export class SearchNavigationPlugin
     this.chromeSub = core.chrome.getChromeStyle$().subscribe((value) => {
       this.currentChromeStyle = value;
     });
+
+    const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+      core.application.capabilities.index_management;
+    if (monitor || manageEnrich || monitorEnrich || manageIndexTemplates) {
+      const indexManagementLocator =
+        this.pluginsStart.share.url.locators.get<IndexManagementLocatorParams>(
+          INDEX_MANAGEMENT_LOCATOR_ID
+        );
+      const getChromeStyle = (): 'classic' | 'project' | undefined => this.currentChromeStyle;
+      this.pluginsStart.share.url.locators.create(
+        new SearchIndexManagementLocatorDefinition({
+          getChromeStyle,
+          indexManagementLocator: indexManagementLocator ?? undefined,
+        })
+      );
+    }
 
     // Async loads classic nav items on start
     import('./base_classic_navigation_items').then(({ BaseClassicNavItems }) => {
@@ -95,7 +116,12 @@ export class SearchNavigationPlugin
   private useClassicNavigation(history: ScopedHistory<unknown>) {
     if (this.coreStart === undefined || this.currentChromeStyle !== 'classic') return undefined;
 
-    return classicNavigationFactory(this.baseClassicNavItems, this.coreStart, history);
+    return classicNavigationFactory(
+      this.baseClassicNavItems,
+      this.coreStart,
+      history,
+      this.pluginsStart?.spaces
+    );
   }
 
   private getBaseClassicNavItems(): ClassicNavItem[] {

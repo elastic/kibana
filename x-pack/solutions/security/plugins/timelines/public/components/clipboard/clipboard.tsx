@@ -67,7 +67,7 @@ export const Clipboard = ({
       className={className}
       data-test-subj="clipboard"
       iconSize="s"
-      iconType="copyClipboard"
+      iconType="copy"
       onClick={onClick}
     >
       {children}

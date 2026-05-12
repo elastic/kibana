@@ -10,14 +10,14 @@
         "tags": [],
         "label": "openLazyFlyout",
         "description": [
-          "\nOpens a flyout panel with lazily loaded content.\n\nThis helper handles:\n- Mounting a flyout panel with async content.\n- Automatically focusing the flyout when content is ready.\n- Closing the flyout when the user navigates to a different app.\n- Tracking the flyout if `parentApi` supports overlay tracking.\n- Returning focus to a trigger element when the flyout closes.\n"
+          "\nOpens a flyout panel with lazily loaded content.\n\nThis helper handles:\n- Mounting a flyout panel with async content.\n- Automatically focusing the flyout when content is ready.\n- Tracking the flyout if `parentApi` supports overlay tracking.\n- Returning focus to a trigger element when the flyout closes.\n"
         ],
         "signature": [
           "(params: OpenLazyFlyoutParams) => ",
           "OverlayRef"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_util/src/open_lazy_flyout.tsx",
-        "lineNumber": 54,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -35,9 +35,10 @@
               "OpenLazyFlyoutParams"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_util/src/open_lazy_flyout.tsx",
-            "lineNumber": 54,
+            "lineNumber": 52,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "OpenLazyFlyoutParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -54,7 +55,15 @@
         "tags": [],
         "label": "tracksOverlays",
         "description": [
-          "\nType guard to check if an object implements {@link TracksOverlays}.\n"
+          "\nType guard to check if an object implements ",
+          {
+            "pluginId": "@kbn/presentation-util",
+            "scope": "public",
+            "docId": "kibKbnPresentationUtilPluginApi",
+            "section": "def-public.TracksOverlays",
+            "text": "TracksOverlays"
+          },
+          ".\n"
         ],
         "signature": [
           "(root: unknown) => root is ",
@@ -152,6 +161,7 @@
                 "lineNumber": 39,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayRef",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -172,6 +182,7 @@
                 "lineNumber": 39,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "TracksOverlaysOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }

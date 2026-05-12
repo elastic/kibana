@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
-import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -29,10 +28,6 @@ import type { FocusedTraceItems } from './build_focused_trace_items';
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import type { TraceItems } from './get_trace_items';
-import { getTraceItems } from './get_trace_items';
-import type { TraceSamplesResponse } from './get_trace_samples_by_query';
-import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
@@ -84,54 +79,6 @@ const tracesRoute = createApmServerRoute({
   },
 });
 
-const tracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      t.type({ entryTransactionId: t.string }),
-      t.partial({ maxTraceItems: toNumberRt }),
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceItems: TraceItems;
-    entryTransaction?: Transaction;
-  }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params, config, logger } = resources;
-    const { traceId } = params.path;
-    const { start, end, entryTransactionId } = params.query;
-    const [traceItems, entryTransaction] = await Promise.all([
-      getTraceItems({
-        traceId,
-        config,
-        apmEventClient,
-        start,
-        end,
-        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        logger,
-      }),
-      getTransaction({
-        transactionId: entryTransactionId,
-        traceId,
-        apmEventClient,
-        start,
-        end,
-      }),
-    ]);
-    return {
-      traceItems,
-      entryTransaction,
-    };
-  },
-});
-
 const unifiedTracesByIdRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/unified_traces/{traceId}',
   params: t.type({
@@ -141,9 +88,9 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     query: t.intersection([
       rangeRt,
       t.partial({
-        maxTraceItems: toNumberRt,
         serviceName: t.string,
         entryTransactionId: t.string,
+        ecsOnly: toBooleanRt,
       }),
     ]),
   }),
@@ -155,6 +102,8 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     errors: Error[];
     agentMarks: Record<string, number>;
     entryTransaction?: Transaction;
+    traceDocsTotal: number;
+    maxTraceItems: number;
   }> => {
     const [apmEventClient, logsClient] = await Promise.all([
       getApmEventClient(resources),
@@ -163,29 +112,31 @@ const unifiedTracesByIdRoute = createApmServerRoute({
 
     const { params, config } = resources;
     const { traceId } = params.path;
-    const { start, end, serviceName, entryTransactionId } = params.query;
+    const { start, end, serviceName, entryTransactionId, ecsOnly } = params.query;
+    const maxTraceItems = config.ui.maxTraceItems;
 
-    const [{ traceItems, agentMarks, unifiedTraceErrors }, entryTransaction] = await Promise.all([
-      getUnifiedTraceItems({
-        apmEventClient,
-        logsClient,
-        traceId,
-        start,
-        end,
-        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        config,
-        serviceName,
-      }),
-      entryTransactionId
-        ? getTransaction({
-            transactionId: entryTransactionId,
-            traceId,
-            apmEventClient,
-            start,
-            end,
-          })
-        : Promise.resolve(undefined),
-    ]);
+    const [{ traceItems, agentMarks, unifiedTraceErrors, traceDocsTotal }, entryTransaction] =
+      await Promise.all([
+        getUnifiedTraceItems({
+          apmEventClient,
+          logsClient,
+          traceId,
+          start,
+          end,
+          maxTraceItems,
+          serviceName,
+          ecsOnly: ecsOnly ?? false,
+        }),
+        entryTransactionId
+          ? getTransaction({
+              transactionId: entryTransactionId,
+              traceId,
+              apmEventClient,
+              start,
+              end,
+            })
+          : Promise.resolve(undefined),
+      ]);
 
     return {
       traceItems,
@@ -193,6 +144,8 @@ const unifiedTracesByIdRoute = createApmServerRoute({
       errors: unifiedTraceErrors.apmErrors,
       agentMarks,
       entryTransaction,
+      traceDocsTotal,
+      maxTraceItems,
     };
   },
 });
@@ -221,6 +174,8 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
     const { traceId } = params.path;
     const { start, end, docId } = params.query;
 
+    const maxTraceItems = params.query.maxTraceItems ?? config.ui.maxTraceItems;
+
     const [{ traceItems, unifiedTraceErrors }, traceSummaryCount] = await Promise.all([
       getUnifiedTraceItems({
         apmEventClient,
@@ -228,8 +183,7 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
         traceId,
         start,
         end,
-        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        config,
+        maxTraceItems,
       }),
       getTraceSummaryCount({ apmEventClient, start, end, traceId }),
     ]);
@@ -430,41 +384,6 @@ const transactionByNameRoute = createApmServerRoute({
   },
 });
 
-const findTracesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/find',
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      t.type({
-        query: t.string,
-        type: t.union([t.literal(TraceSearchType.kql), t.literal(TraceSearchType.eql)]),
-      }),
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceSamples: TraceSamplesResponse;
-  }> => {
-    const { start, end, environment, query, type } = resources.params.query;
-
-    const apmEventClient = await getApmEventClient(resources);
-
-    return {
-      traceSamples: await getTraceSamplesByQuery({
-        apmEventClient,
-        start,
-        end,
-        environment,
-        query,
-        type,
-      }),
-    };
-  },
-});
-
 const transactionFromTraceByIdRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
   params: t.type({
@@ -555,13 +474,11 @@ const unifiedTraceSpanRoute = createApmServerRoute({
 });
 
 export const traceRouteRepository = {
-  ...tracesByIdRoute,
   ...unifiedTracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,
   ...rootItemByTraceIdRoute,
   ...transactionByIdRoute,
-  ...findTracesRoute,
   ...transactionFromTraceByIdRoute,
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,

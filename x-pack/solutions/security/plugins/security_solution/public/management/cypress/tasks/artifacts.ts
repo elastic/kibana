@@ -18,12 +18,14 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
+import type { GetEndpointExceptionsPerPolicyOptInResponse } from '../../../../common/api/endpoint/endpoint_exceptions_per_policy_opt_in/endpoint_exceptions_per_policy_opt_in.gen';
 import {
   APP_BLOCKLIST_PATH,
   APP_TRUSTED_APPS_PATH,
   APP_TRUSTED_DEVICES_PATH,
 } from '../../../../common/constants';
 import { loadPage, request } from './common';
+import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../common/endpoint/constants';
 
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -442,4 +444,34 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('blocklistPage-card-cardDeleteAction').click();
     cy.getByTestSubj('blocklistPage-deleteModal-submitButton').click();
   },
+};
+
+export const fetchEndpointExceptionPerPolicyOptInStatus = (): Cypress.Chainable<boolean> =>
+  request<GetEndpointExceptionsPerPolicyOptInResponse>({
+    method: 'GET',
+    url: ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
+    headers: { 'elastic-api-version': '1' },
+  }).then((response) => response.body.status);
+
+export const enableEndpointExceptionPerPolicyOptIn = () =>
+  request<GetEndpointExceptionsPerPolicyOptInResponse>({
+    method: 'POST',
+    url: ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
+    headers: { 'elastic-api-version': '1' },
+    failOnStatusCode: false,
+  });
+
+export const resetEndpointExceptionPerPolicyOptInStatus = () => {
+  const index = '.kibana_security_solution';
+  const id = 'security:reference-data:ENDPOINT-EXCEPTIONS-PER-POLICY-OPT-IN-STATUS';
+
+  return cy.request({
+    method: 'DELETE',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${index}/_doc/${id}`,
+    auth: {
+      user: Cypress.env('ELASTICSEARCH_USERNAME'),
+      pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+    },
+    failOnStatusCode: false,
+  });
 };

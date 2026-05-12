@@ -6,7 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/kbn-client';
 import { withRetry } from './retry_utils';
 
 function toErrorMessage(error: unknown): string {

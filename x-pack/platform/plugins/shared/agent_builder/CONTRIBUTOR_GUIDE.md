@@ -220,6 +220,25 @@ agentBuilderSetup.tools.register({
 });
 ```
 
+### Marking a tool as experimental
+
+Individual built-in tools (and other static tool registrations) can be flagged as experimental by setting `experimental: true` on the registration.
+Experimental tools are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
+
+**Example:**
+
+```ts
+agentBuilder.tools.register({
+  id: 'platform.experimental.my-tool',
+  type: ToolType.builtin,
+  description: 'An experimental tool only visible when experimental features are on',
+  tags: [],
+  schema: z.object({}),
+  experimental: true,
+  handler: async () => ({ results: [] }),
+});
+```
+
 ## Registering built-in agents
 
 ### Registering the agent
@@ -325,24 +344,21 @@ class MyPlugin {
 }
 ```
 
-There are two main categories of attachment types:
+Attachments are created in two ways; both use the same [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts) (there is no separate `inline` / `reference` discriminator on the definition):
 
-- `inline`: attachment is self-contained, with the data attached to it.
-  `reference`: reference a persisted resource (for example, a dashboard, an alert, etc) by its id, and resolve it dynamically when needed.
-  - (Not implemented yet)
+- **By-value:** the client sends `data`. The server runs `validate` and stores that payload. `origin` stays unset unless you later call `updateOrigin` (see below).
+- **By-reference:** the client sends an **`origin` string** (for example a saved object ID). If the type implements the optional **`resolve`** hook, the framework calls it once at add time, persists the returned content as `data`, and records `origin` plus `origin_snapshot_at`. Optional **`isStale`** detects when the live source changed so the UI can offer a resync. See [By-reference attachments with `resolve`](#by-reference-attachments-with-resolve) and [Detecting stale attachments with `isStale`](#detecting-stale-attachments-with-isstale).
 
-**Example of inline attachment type definition:**
+**Example of attachment type definition (by-value only, no `resolve`):**
 
 ```ts
 const textDataSchema = z.object({
   content: z.string(),
 });
 
-const textArrachmentType: InlineAttachmentTypeDefinition = {
+const textAttachmentType: AttachmentTypeDefinition = {
   // unique id of the attachment type
   id: AttachmentType.text,
-  // type: inline or reference
-  type: 'inline',
   // validate and parse the input when received from the client
   validate: (input) => {
     const parseResult = textDataSchema.safeParse(input);
@@ -353,14 +369,36 @@ const textArrachmentType: InlineAttachmentTypeDefinition = {
     }
   },
   // format the data to be exposed to the LLM
-  format: (input) => {
-    return { type: 'text', value: input.content };
+  format: (attachment) => {
+    return { type: 'text', value: attachment.data.content };
   },
 };
 ```
 
 Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts)
 for the full list of available configuration options.
+
+#### `getAgentDescription` — describing inline rendering to the agent
+
+When your attachment type supports inline rendering, `getAgentDescription` should tell
+the agent **what** it looks like when rendered inline. This description is injected into the
+`ATTACHMENT TYPES` prompt block whenever an attachment of your type is present in the
+conversation.
+
+Keep the description focused on the **user-visible outcome** of rendering — not on when or why:
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition = {
+  id: 'image',
+  validate: ...,
+  format: ...,
+  getAgentDescription: () =>
+    'Represents an image attachment. Rendering this attachment inline displays the image inside the conversation UI.',
+};
+```
+
+Do **not** include guidance on *when* to render inline — that is the responsibility of the
+skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
 ### Browser-side registration
 
@@ -402,6 +440,12 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
       <EuiCodeBlock fontSize="s">{attachment.data.content}</EuiCodeBlock>
     );
   },
+
+  // Optional: preferred width of the canvas flyout in full-screen context.
+  // Accepts any valid CSS width value (e.g. '600px', '40vw').
+  // Defaults to '50vw' when not specified. Has no effect in sidebar context
+  // or on narrow viewports (where the canvas always fills available width).
+  canvasWidth: '600px',
 
   // Expanded view rendered in the canvas flyout
   renderCanvasContent: ({ attachment }) => (
@@ -471,6 +515,21 @@ The `getActionButtons` params include flags to customize behavior per viewport:
 - **`isCanvas`** - `true` when rendered in the canvas flyout (expanded view)
 - **`openCanvas`** - Callback to open canvas mode; `undefined` when already in canvas
 - **`openSidebarConversation`** - Callback to open the agent builder sidebar with the current conversation loaded; `undefined` when already in the sidebar
+
+#### Canvas flyout width
+
+By default the canvas flyout opens at `50vw` in full-screen context. You can override this per attachment type using the optional `canvasWidth` property on `AttachmentUIDefinition`:
+
+```ts
+export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  // ...
+  canvasWidth: '600px', // any valid CSS width value
+};
+```
+
+- Accepts any valid CSS width string: `'600px'`, `'40vw'`, `'80%'`, etc.
+- Has no effect in sidebar context — the canvas always fills available width there.
+- Has no effect on narrow viewports (below the `l` EUI breakpoint, ~992px) — the canvas switches to overlay mode and fills available width regardless of this setting.
 
 #### Opening the sidebar from attachments
 
@@ -546,7 +605,7 @@ const MyCanvasContent: React.FC<MyCanvasContentProps> = ({
         handler: async () => {
           const savedObjectId = await api.save();
           // Link the attachment to the saved object
-          await updateOrigin({ saved_object_id: savedObjectId });
+          await updateOrigin(savedObjectId);
         },
       },
     ]);
@@ -589,7 +648,7 @@ The `updateOrigin` callback allows you to link a by-value attachment to its pers
 
 This callback is available in two places:
 - **`getActionButtons` params** - for static action buttons defined at registration time
-- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Registering action buttons dynamically](#registering-action-buttons-dynamically) above)
+- **`renderCanvasContent` callbacks** - for dynamic buttons registered at runtime (see [Dynamic canvas buttons with registerActionButtons](#dynamic-canvas-buttons-with-registeractionbuttons) above)
 
 **When to use `updateOrigin`:**
 
@@ -619,19 +678,19 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
         const savedObjectId = await myApi.saveToLibrary(attachment.data);
 
         // 2. Link the attachment to the saved object
-        await updateOrigin({ saved_object_id: savedObjectId });
+        await updateOrigin(savedObjectId);
       },
     });
   }
 
-  // Show "Open in App" if already linked
-  if (attachment.origin?.saved_object_id) {
+  // Show "Open in App" if already linked (`origin` is a string, e.g. saved object id)
+  if (attachment.origin) {
     buttons.push({
       label: 'Open in App',
       icon: 'popout',
       type: ActionButtonType.SECONDARY,
       handler: () => {
-        window.open(`/app/myApp/${attachment.origin.saved_object_id}`, '_blank');
+        window.open(`/app/myApp/${attachment.origin}`, '_blank');
       },
     });
   }
@@ -640,17 +699,9 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
 },
 ```
 
-**Origin shape:**
+**`origin` is a string:**
 
-The `origin` parameter accepts any shape - it will be validated by the attachment type's `validateOrigin` function on the server. For saved object references, the common pattern is:
-
-```ts
-{
-  saved_object_id: string;
-  title?: string;
-  description?: string;
-}
-```
+On the wire and in `Attachment`, **`origin` is always a string** (for example a saved object ID). The same string is passed to your type’s **`resolve`** hook when the attachment is added or resynced. `updateOrigin` and `updateAttachmentOrigin` also take that string — not an object.
 
 #### Updating origin from outside attachment context
 
@@ -661,73 +712,257 @@ If you need to update an attachment's origin from outside the `getActionButtons`
 class MyPlugin {
   start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
     // Update an attachment's origin directly
-    await agentBuilder.updateAttachmentOrigin(
-      conversationId,
-      attachmentId,
-      { saved_object_id: savedObjectId }
-    );
+    await agentBuilder.updateAttachmentOrigin(conversationId, attachmentId, savedObjectId);
   }
 }
 ```
 
 This is useful when the save operation happens outside the attachment's UI, such as when a separate "Save to library" workflow completes asynchronously. It is your responsibility to pass the `conversationId` and `attachmentId` to your plugin when navigating away from the chat - how you do this is up to you (e.g., URL parameters, local storage, or other mechanisms).
 
-#### Attachment lifecycle hook: onAttachmentMount
+#### By-reference attachments with `resolve`
 
-The `onAttachmentMount` lifecycle hook allows you to run side effects when an attachment is mounted to a conversation, and clean them up when the attachment is removed.
-
-**When to use `onAttachmentMount`:**
-
-- Setting up subscriptions that should live for the duration of the attachment's presence in the conversation
-- Syncing attachment state with external systems
-- Any side effect that needs cleanup when the attachment is removed
-
-**Important:** This hook is called once per attachment (not per version). The framework tracks attachment presence at the conversation level, so you don't need to handle deduplication.
-
-**Parameters:**
+The optional `resolve` hook in `AttachmentTypeDefinition` enables **by-reference attachment creation**: instead of providing inline `data`, the caller provides an `origin` string (e.g. a saved object ID), and the framework calls `resolve` once at add time to fetch and store the content.
 
 ```ts
-interface AttachmentLifecycleParams<TAttachment> {
-  /** The attachment instance */
-  attachment: TAttachment;
-  /** The conversation ID containing this attachment */
-  conversationId: string;
-  /** Whether the attachment is rendered in the sidebar context */
-  isSidebar: boolean;
-}
-```
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
+  id: 'my_type',
+  validate: (input) => { /* ... */ },
+  format: (attachment) => { /* ... */ },
 
-**Example: Syncing attachment origin when a dashboard is saved**
-
-```tsx
-export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
-  getLabel: () => 'My attachment',
-  getIcon: () => 'document',
-
-  onAttachmentMount: ({ attachment, conversationId }) => {
-    // Set up a subscription when the attachment is added
-    const subscription = someObservable$.subscribe((newValue) => {
-      if (newValue !== attachment.origin) {
-        // Update the attachment's origin using the plugin API
-        agentBuilder.updateAttachmentOrigin(conversationId, attachment.id, newValue);
-      }
-    });
-
-    // Return cleanup function - called when the attachment is removed from the conversation
-    return () => {
-      subscription.unsubscribe();
-    };
+  /**
+   * Called once when an attachment is added with an `origin`.
+   * Returns the current content for that origin, or undefined if not found.
+   */
+  resolve: async (origin, context) => {
+    const savedObject = await context.savedObjectsClient?.get('my_type', origin);
+    if (!savedObject) return undefined;
+    return { content: savedObject.attributes.content };
   },
-
-  // ... other definition properties
 };
 ```
 
-**Cleanup behavior:**
+- `origin` — the reference string passed by the caller (typically a saved object ID)
+- `context.savedObjectsClient` — scoped to the current user; use it to fetch saved objects
+- `context.request` / `context.spaceId` — available for other service lookups
+- Return `undefined` if the origin cannot be resolved (the add operation will fail with an error)
+- **Only called once** at add time; the resolved content is stored as `data` in the attachment version, and an `origin_snapshot_at` timestamp is recorded
 
-- The cleanup function is called when the attachment is removed from the conversation
-- It's also called when the conversation component unmounts (e.g., navigating away)
-- If `onAttachmentMount` returns `undefined` or `void`, no cleanup is performed
+Refer to [`AttachmentTypeDefinition`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-server/attachments/type_definition.ts) for the full type signature.
+
+#### Detecting stale attachments with `isStale`
+
+When an attachment is linked to a persistent origin (e.g. a dashboard saved object), the underlying data can change after the attachment was created. The optional `isStale` hook lets your attachment type detect this so the UI can prompt the user to refresh.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyContent> = {
+  id: 'my_type',
+  validate: (input) => { /* ... */ },
+  format: (attachment) => { /* ... */ },
+  resolve: async (origin, context) => { /* ... */ },
+
+  /**
+   * Called to check whether the stored attachment data is behind the current state
+   * of the referenced origin. Return true if the attachment is stale.
+   *
+   * Only invoked for attachments that have a populated `origin`.
+   * No automatic fallback — staleness detection is opt-in per type.
+   */
+  isStale: async (attachment, context) => {
+    const savedObject = await context.savedObjectsClient?.get('my_type', attachment.origin);
+    if (!savedObject) return false;
+    // Compare the saved object's last-modified time against when the attachment was snapshotted
+    return (
+      Boolean(savedObject.updated_at) &&
+      Boolean(attachment.origin_snapshot_at) &&
+      new Date(savedObject.updated_at) > new Date(attachment.origin_snapshot_at)
+    );
+  },
+};
+```
+
+- `attachment.origin_snapshot_at` — ISO timestamp of when `resolve` last ran; use it to compare against the origin's current version
+- `context` — same `AttachmentResolveContext` as `resolve` (includes `savedObjectsClient`, `request`, `spaceId`)
+- Return `true` if the stored data is outdated; the framework will call `resolve` again to fetch fresh content and surface a resync prompt in the UI
+- Staleness checking is **only triggered for attachments with a populated `origin`**; inline-only types that never set `origin` will never have `isStale` called
+
+**How the resync flow works end-to-end:**
+
+1. User focuses the conversation input → the UI calls `GET /{conversationId}/attachments/stale`
+2. The server calls `isStale` for each active attachment that has an `origin`
+3. For stale attachments, `resolve` is called again to fetch fresh content
+4. The UI shows a panel listing stale attachments, letting the user add the refreshed version or dismiss
+
+Refer to [`AttachmentStaleCheckResult`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/attachments/stale_check.ts) for the result types returned by the stale check API.
+
+## Chat integration and pending attachments
+
+Plugins can integrate with the active chat surface (the embeddable sidebar and the full-page routed chat) through the `agentBuilder` start contract.
+
+This is useful when the surrounding application wants to attach page context only under specific conditions, and react when the active chat binds to a new or existing conversation.
+
+A **pending attachment** is a client-only attachment attached to the active conversation that has not yet been persisted to a round; it lives in the chat UI until the user submits the next message, at which point it is sent with that round and persisted.
+
+### `setChatConfig(...)`
+
+> **Scope:** sidebar only.
+
+`setChatConfig(...)` configures the next sidebar open, or updates the active sidebar if it is already open.
+
+It supports the regular embeddable conversation props, including:
+
+- `newConversation` - force the sidebar to start a fresh conversation instead of restoring the persisted one
+- `attachments` - pre-populate the pending attachment list for the active sidebar conversation
+
+Use `clearChatConfig()` to remove that runtime configuration.
+
+#### `newConversation`
+
+Set `newConversation: true` when the sidebar must always bind to a fresh conversation:
+
+```ts
+agentBuilder.setChatConfig({
+  newConversation: true,
+});
+```
+
+#### `attachments`
+
+Set `attachments` when you want the sidebar to open with one or more pending attachments already present:
+
+```ts
+agentBuilder.setChatConfig({
+  attachments: [
+    {
+      id: 'my-context',
+      type: 'my_type',
+      data: { ... },
+    },
+  ],
+});
+```
+
+### `addAttachment(...)`
+
+> **Scope:** sidebar only. If no sidebar is open, the call is silently ignored.
+
+`addAttachment(...)` adds or updates a pending attachment in the active sidebar conversation.
+
+```ts
+agentBuilder.addAttachment({
+  id: 'my-pending-context',
+  type: 'my_type',
+  data: { ... },
+  origin: 'saved-object-id',
+});
+```
+
+Pending attachments added through `agentBuilder.addAttachment(...)` can include an `origin` string, just like other attachment inputs sent to the Agent Builder APIs. Use this when your pending attachment already corresponds to a persistent resource (for example, a saved object-backed dashboard or visualization), and your attachment type expects `origin` to be present.
+
+## Events
+
+The `agentBuilder` start contract exposes observables on the `events.ui` namespace that let plugins react to the chat surface lifecycle (currently the active conversation binding).
+
+### Observing sidebar open state
+
+If you need to know whether the Agent Builder sidebar is currently open, subscribe to the core chrome sidebar primitive and match on the `agentBuilder` app id:
+
+```ts
+useEffect(() => {
+  const sub = chrome.sidebar.getCurrentAppId$().subscribe((appId) => {
+    const isOpen = appId === 'agentBuilder';
+    // react to the {isOpen} value
+  });
+
+  return () => sub.unsubscribe();
+}, [chrome.sidebar]);
+```
+
+### `events.ui.activeConversation$`
+
+Use `events.ui.activeConversation$` when you need to react to the conversation currently bound to the active chat surface.
+
+The non-null payload is:
+
+- `id?: string` - the currently bound conversation id, or `undefined` when the chat is currently bound to a new conversation
+- `conversation?: Conversation` - the fully loaded conversation when it has been successfully fetched (undefined for new conversations, while loading, or on fetch errors)
+
+```ts
+class MyPlugin {
+  private conversationSubscription?: Subscription;
+
+  start(core: CoreStart, { agentBuilder }: { agentBuilder: AgentBuilderPluginStart }) {
+    this.conversationSubscription = agentBuilder.events.ui.activeConversation$.subscribe((change) => {
+      if (!change) {
+        // No chat surface currently bound — tear down local state.
+        return;
+      }
+
+      const { id, conversation } = change;
+
+      if (!id) {
+        agentBuilder.addAttachment({
+          id: 'my-pending-context',
+          type: 'my_type',
+          data: { ... },
+        });
+        return;
+      }
+
+      const hasMyAttachment = conversation?.attachments?.some(
+        (attachment) => attachment.id === 'my-pending-context'
+      );
+
+      if (!hasMyAttachment) {
+        // Handle the switch away from the pending attachment in your plugin state.
+      }
+    });
+  }
+
+  stop() {
+    this.conversationSubscription?.unsubscribe();
+  }
+}
+```
+
+### Chat events: per-conversation streams
+
+`events.chat$` exposes a hot observable of every chat event from every in-flight
+conversation. Concurrent per-conversation streams are now supported, so this stream
+interleaves events across conversations, and most event payloads do not carry a
+`conversation_id` you can filter on directly. **`chat$` is deprecated.**
+
+Use `events.getChatEvents$(conversationId)` instead. It returns a hot observable
+scoped to a single conversation — every event is tagged with the conversation that
+produced it, and the returned stream filters to the matching tag.
+
+```ts
+// Before — works only when a single conversation streams at a time.
+agentBuilder.events.chat$
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to a known conversation id.
+agentBuilder.events
+  .getChatEvents$(conversationId)
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to whichever conversation the chat surface is currently focused on.
+agentBuilder.events.ui.activeConversation$
+  .pipe(
+    filter((c): c is ActiveConversation => c?.id != null),
+    switchMap((c) => agentBuilder.events.getChatEvents$(c.id!))
+  )
+  .subscribe((event) => { ... });
+```
+
+`switchMap` cancels the previous per-conversation subscription whenever the active
+conversation changes — e.g. when a consumer follows the user's focus.
+
+All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddable,
+or full-page chat), and the UI generates a client-side conversation UUID before
+each request. Plugins consuming this contract have access to that id via
+`events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
 
 ## Registering skills
 
@@ -797,9 +1032,31 @@ agentBuilder.skills.register({
 });
 ```
 
+### Inline rendering guidance in skills
+
+Whether and when the agent should render an attachment inline depends on the task it is
+performing. Skills that create or modify attachments should therefore include explicit
+guidance on this in their instructions.
+
+**Rule of thumb:** tell the agent exactly which attachment to render and at what point in
+the task.
+
+**Examples:**
+
+- A skill that creates a single visualization:
+  > "Once you have created the visualization, render it inline so the user can see it."
+
+- A skill that builds a dashboard (composed of multiple visualizations):
+  > "Render the dashboard attachment inline once you have finished building it. Do NOT
+  >  render each individual visualization inline — only the final dashboard."
+
+This per-skill guidance is what controls inline rendering behaviour across different tasks:
+the attachment type definition (via `getAgentDescription`) tells the agent *what* rendering
+does; the skill tells it *when* to do it.
+
 ### Marking a skill as experimental
 
-Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition.
 Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
 
 **Example:**
@@ -864,7 +1121,7 @@ attach them to a conversation.
 | **Crawler** | A Task Manager background task that periodically calls your `list()` and `getSmlData()` hooks, indexing content into system indices. Uses mark-and-sweep with `last_crawled_at` timestamps for efficient change detection. |
 | **SML Document** | A single indexed chunk stored in the `.chat-sml-data` system index, containing title, content, permissions, and space information. |
 | **`sml_search` tool** | A built-in Agent Builder tool the AI uses to keyword-search SML documents. Results are filtered by the requesting user's space and permissions. |
-| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert an SML search result into a conversation attachment (e.g. a rendered Lens visualization). |
+| **`sml_attach` tool** | A built-in Agent Builder tool the AI uses to convert SML search hits into conversation attachments. It accepts `chunk_ids` from `sml_search`;  `chunk_id` format is `attachment_type:origin_id:uuid`. |
 | **Origin ID** | The unique identifier for the source asset (typically a saved object ID). Used to link SML documents back to their source. |
 
 #### Data flow
@@ -878,9 +1135,7 @@ attach them to a conversation.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
    the data index, filtering by the user's current space and checking Kibana
    privileges against each result's `permissions` array.
-4. **Attach**: When the AI agent calls `sml_attach`, the service resolves
-   the saved object via your `toAttachment()` hook and adds the result as a
-   conversation attachment.
+4. **Attach**: When the AI agent calls `sml_attach` with `chunk_ids`, the service loads each chunk, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
@@ -1032,6 +1287,12 @@ Return `undefined` if the item can no longer be resolved. The `sml_attach`
 tool will report a per-item error to the AI agent without failing the entire
 call.
 
+You may include an optional `description` string on the object returned from
+`toAttachment`. It is stored on the conversation
+attachment and shown in the Agent Builder UI (for example, the “Attachment
+added: …” line). If you omit it, a default label is derived from the SML
+document’s type and title.
+
 ##### `fetchFrequency` — Choose an appropriate interval
 
 - High-churn data (alerts, logs): `5m`–`10m`
@@ -1058,4 +1319,125 @@ setupDeps.agentBuilder.sml.registerType(visualizationSmlType);
 ```
 
 The full implementation is ~130 lines and serves as the reference for new types.
+
+## Streams lifecycle (frontend)
+
+The chat streaming layer lives in `public/application/context/send_message/`. This section
+documents how mutations, lifted state, and the React Query cache fit together. Read this
+before touching any of:
+`send_message_context.tsx`, `use_send_message.ts`, `use_send_message_mutation.ts`,
+`use_resume_round_mutation.ts`, `use_subscribe_to_chat_events.ts`,
+`use_is_any_conversation_streaming.ts`.
+
+### The lift
+
+`<SendMessageProvider>` is mounted **once** above the routes/sidebar:
+
+- Routed app: in `mount.tsx`, above `<AgentBuilderRoutes>`. The sidebar is part of the
+  routes, so it can read streaming state directly.
+- Embeddable: in `embeddable_conversations_provider.tsx`, one provider per embeddable
+  instance because each instance has its own `QueryClient`.
+
+The sidebar uses `useSendMessageContext()` directly. `useIsAnyConversationStreaming()`
+is derived from the same context and is used by the page-leave guard and the
+embeddable welcome-message dismiss — both genuinely care about "is anything in
+flight, anywhere?". Anything inside the conversation tree should use the per-conversation
+scoped hook, `useSendMessage()` (in `use_send_message.ts`).
+
+### Lifted state
+
+`SendMessageProvider` owns two slices with split lifecycles:
+
+- `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
+  in-flight stream. Set synchronously when each mutation kicks off; deleted in the
+  mutation's `finally`. Multiple entries can coexist — concurrent streams are
+  supported, one per conversation. Native `Map` rather than `Record` because the
+  same key shape pairs with the `Map<conversationId, AbortController>` ref each
+  mutation hook holds, and `cancelAllStreams` iterates this map's keys.
+- `byConversationId: Record<string, StreamRecord>` — per-conversation
+  `pendingMessage`, `error`, `errorSteps`. Persists across stream end so a user
+  can hit Retry after a failure. Mutated via immer; lifecycle is unrelated to
+  in-flight streams so it stayed a plain record.
+
+### Mutations: single-scope `mutationFn`
+
+`useSendMessageMutation` and `useResumeRoundMutation` use a **single-scope `mutationFn`
+with `try / catch / finally`**, not React Query's lifecycle methods (`onMutate`,
+`onSuccess`, `onError`, `onSettled`). The shape is:
+
+```ts
+mutationFn: async (vars) => {
+  // setup phase (sync, before any await): seed the optimistic round, set pending message.
+  // Note: `activeStream` is set by the provider's `mutateSendMessage` wrapper *before*
+  // `mutate()` returns — not here.
+  const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
+
+  try {
+    await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
+    // success cleanup
+  } catch (err) {
+    // error cleanup
+    throw err;
+  } finally {
+    // cleanup: invalidate cache (skipped if round paused on HITL),
+    // delete this conversation's `activeStreams` entry, delete its abort controller.
+  }
+}
+```
+
+Each mutation hook holds a `Map<conversationId, AbortController>` ref so concurrent
+streams have independent cancel signals. The map is keyed by `vars.conversationId`,
+the cancel helper takes the same key, and the `finally` block deletes only the
+entry it installed (compared by reference so a re-mutate's controller isn't
+clobbered).
+
+**Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
+happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
+the work across lifecycle callbacks forces you to bridge state between scopes via refs
+or React Query's `context` return — neither is clean for streaming. With single-scope,
+`streamActions` and `vars` are visible throughout. No refs to bridge phases. Reads
+top-to-bottom.
+
+### Each conversation owns its streaming lifecycle
+
+Every `mutationFn` invocation builds its **own** `streamActions` instance via
+`createConversationActions({ conversationId: vars.conversationId, ... })`. That instance
+is closure-bound to the mutation's conversation id. **Stream events target the
+conversation the mutation was started for, regardless of where the user has navigated.**
+
+If the user submits on conversation A and immediately switches to B, the stream events
+keep writing to A's cache. B loads cleanly from the server.
+
+### Per-conversation `useConversation` gate
+
+`useConversation` is disabled for a conversation when (a) a stream is currently writing
+to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
+authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
+or with the resume mutation about to fire on Approve (HITL). Other conversations stay
+free to refetch — switch to conversation B while A streams and B loads cleanly. See the
+inline comment on the `enabled` predicate for details.
+
+### Concurrent streams
+
+The app supports concurrent per-conversation streams. Submitting on conversation B
+while A is mid-stream starts a second stream alongside A — A keeps writing to its
+cache, B writes to its own. Cancelling one doesn't affect the other.
+
+What this means in practice:
+
+- **Submit gate** (`conversation_input.tsx`) is per-conversation: `isResponseLoading`
+  from `useSendMessage()`. The new-conversation route (`/conversations/new`) has
+  no `conversationId`, so `isResponseLoading` is `false` and submit is always
+  allowed there even while other conversations stream.
+- **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
+  `isResponseLoading && !isResuming`. Other in-flight conversations cannot
+  corrupt this conversation's cache because `streamActions` are closure-bound
+  to `vars.conversationId`.
+- **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
+  The mutation hooks hold `Map<conversationId, AbortController>` refs so cancels
+  hit only the targeted controller.
+- **Page-leave guard** is the lone remaining global check. If any stream is in
+  flight when the user navigates away, a confirm dialog appears; on confirm,
+  `cancelAllStreams()` aborts every controller in the map before the platform
+  proceeds.
 

@@ -11,7 +11,15 @@
         "tags": [],
         "label": "GlobalSearchBatchedResults",
         "description": [
-          "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
+          "\nResponse returned from the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart",
+            "text": "global search service"
+          },
+          "'s `find` API\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 86,
@@ -48,7 +56,14 @@
         "tags": [],
         "label": "GlobalSearchFindOptions",
         "description": [
-          "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}"
+          "\nOptions for the server-side ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart.find",
+            "text": "find API"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/public/services/types.ts",
         "lineNumber": 11,
@@ -122,7 +137,15 @@
         "tags": [],
         "label": "GlobalSearchFindParams",
         "description": [
-          "\nSearch parameters for the {@link GlobalSearchPluginStart.find | `find` API}\n"
+          "\nSearch parameters for the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart.find",
+            "text": "`find` API"
+          },
+          "\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 98,
@@ -194,7 +217,15 @@
         "tags": [],
         "label": "GlobalSearchProviderFindOptions",
         "description": [
-          "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
+          "\nOptions provided to ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchResultProvider",
+            "text": "a result provider"
+          },
+          "'s `find` method."
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 12,
@@ -280,7 +311,14 @@
         "tags": [],
         "label": "GlobalSearchProviderResult",
         "description": [
-          "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
+          "\nRepresentation of a result returned by a ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchResultProvider",
+            "text": "result provider"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 47,
@@ -420,7 +458,14 @@
         "tags": [],
         "label": "GlobalSearchResultProvider",
         "description": [
-          "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}"
+          "\nGlobalSearch result provider, to be registered using the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginSetup",
+            "text": "global search API"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/public/types.ts",
         "lineNumber": 19,
@@ -483,6 +528,7 @@
                 "lineNumber": 45,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -500,6 +546,7 @@
                 "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -513,7 +560,15 @@
             "tags": [],
             "label": "getSearchableTypes",
             "description": [
-              "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
+              "\nMethod that should return all the possible ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "public",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-public.GlobalSearchProviderResult.type",
+                "text": "type"
+              },
+              " of results that\nthis provider can return."
             ],
             "signature": [
               "() => string[] | Promise<string[]>"
@@ -556,7 +611,14 @@
         "tags": [],
         "label": "GlobalSearchProviderResultUrl",
         "description": [
-          "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
+          "\nStructured type for the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchProviderResult.url",
+            "text": "provider result's url property"
+          }
         ],
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
@@ -575,7 +637,14 @@
         "tags": [],
         "label": "GlobalSearchResult",
         "description": [
-          "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
+          "\nRepresentation of a result returned by the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "public",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-public.GlobalSearchPluginStart.find",
+            "text": "`find` API"
+          }
         ],
         "signature": [
           "Omit<",
@@ -661,7 +730,15 @@
         "tags": [],
         "label": "GlobalSearchBatchedResults",
         "description": [
-          "\nResponse returned from the {@link GlobalSearchPluginStart | global search service}'s `find` API\n"
+          "\nResponse returned from the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginStart",
+            "text": "global search service"
+          },
+          "'s `find` API\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 86,
@@ -698,7 +775,15 @@
         "tags": [],
         "label": "GlobalSearchFindOptions",
         "description": [
-          "\nOptions for the server-side {@link GlobalSearchPluginStart.find | find API}\n"
+          "\nOptions for the server-side ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginStart.find",
+            "text": "find API"
+          },
+          "\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
         "lineNumber": 78,
@@ -816,7 +901,15 @@
         "tags": [],
         "label": "GlobalSearchProviderFindOptions",
         "description": [
-          "\nOptions provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method."
+          "\nOptions provided to ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchResultProvider",
+            "text": "a result provider"
+          },
+          "'s `find` method."
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 12,
@@ -902,7 +995,14 @@
         "tags": [],
         "label": "GlobalSearchProviderResult",
         "description": [
-          "\nRepresentation of a result returned by a {@link GlobalSearchResultProvider | result provider}"
+          "\nRepresentation of a result returned by a ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchResultProvider",
+            "text": "result provider"
+          }
         ],
         "path": "x-pack/platform/plugins/shared/global_search/common/types.ts",
         "lineNumber": 47,
@@ -1042,7 +1142,15 @@
         "tags": [],
         "label": "GlobalSearchResultProvider",
         "description": [
-          "\nGlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}\n"
+          "\nGlobalSearch result provider, to be registered using the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginSetup",
+            "text": "global search API"
+          },
+          "\n"
         ],
         "path": "x-pack/platform/plugins/shared/global_search/server/types.ts",
         "lineNumber": 103,
@@ -1113,6 +1221,7 @@
                 "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1130,6 +1239,7 @@
                 "lineNumber": 132,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1153,6 +1263,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1166,7 +1277,15 @@
             "tags": [],
             "label": "getSearchableTypes",
             "description": [
-              "\nMethod that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that\nthis provider can return."
+              "\nMethod that should return all the possible ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "server",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-server.GlobalSearchProviderResult.type",
+                "text": "type"
+              },
+              " of results that\nthis provider can return."
             ],
             "signature": [
               "(context: ",
@@ -1205,6 +1324,7 @@
                 "lineNumber": 140,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchProviderContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1236,7 +1356,14 @@
             "tags": [],
             "label": "find",
             "description": [
-              "\nSee {@link SearchServiceStart.find | the find API}"
+              "\nSee ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "server",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-server.SearchServiceStart.find",
+                "text": "the find API"
+              }
             ],
             "signature": [
               "(params: ",
@@ -1275,6 +1402,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchFindParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1298,6 +1426,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "GlobalSearchFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1311,7 +1440,14 @@
             "tags": [],
             "label": "getSearchableTypes",
             "description": [
-              "\nSee {@link SearchServiceStart.getSearchableTypes | the getSearchableTypes API}"
+              "\nSee ",
+              {
+                "pluginId": "globalSearch",
+                "scope": "server",
+                "docId": "kibGlobalSearchPluginApi",
+                "section": "def-server.SearchServiceStart.getSearchableTypes",
+                "text": "the getSearchableTypes API"
+              }
             ],
             "signature": [
               "() => Promise<string[]>"
@@ -1337,7 +1473,14 @@
         "tags": [],
         "label": "GlobalSearchProviderResultUrl",
         "description": [
-          "\nStructured type for the {@link GlobalSearchProviderResult.url | provider result's url property}"
+          "\nStructured type for the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchProviderResult.url",
+            "text": "provider result's url property"
+          }
         ],
         "signature": [
           "string | { path: string; prependBasePath: boolean; }"
@@ -1356,7 +1499,14 @@
         "tags": [],
         "label": "GlobalSearchResult",
         "description": [
-          "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
+          "\nRepresentation of a result returned by the ",
+          {
+            "pluginId": "globalSearch",
+            "scope": "server",
+            "docId": "kibGlobalSearchPluginApi",
+            "section": "def-server.GlobalSearchPluginStart.find",
+            "text": "`find` API"
+          }
         ],
         "signature": [
           "Omit<",

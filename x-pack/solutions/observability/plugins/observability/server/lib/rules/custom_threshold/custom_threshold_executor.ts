@@ -276,9 +276,8 @@ export const createCustomThresholdExecutor = ({
             : {}
           : {};
 
-        additionalContext.tags = Array.from(
-          new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
-        );
+        const contextTags = [additionalContext.tags ?? []].flat();
+        additionalContext.tags = Array.from(new Set([...contextTags, ...options.rule.tags]));
 
         const { uuid, start } = alertsClient.report({
           id: `${group}`,

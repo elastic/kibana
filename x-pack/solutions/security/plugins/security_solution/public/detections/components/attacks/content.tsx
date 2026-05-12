@@ -19,7 +19,8 @@ import { noop } from 'lodash/fp';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
@@ -48,6 +49,10 @@ import { KPIsSection } from './kpis/kpis_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
+export const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
+export const ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID = 'attacks-page-assignee-filter';
+export const ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID = 'attacks-page-connector-filter';
+export const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
 const FILTERS_SECTION_WIDTH = 480;
 
 /**
@@ -84,10 +89,10 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   } = useKibana();
   const { euiTheme } = useEuiTheme();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
   const { from } = useGlobalTime();
@@ -158,7 +163,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
               </EuiFlexGroup>
             }
           >
-            <EuiFlexGroup gutterSize="m">
+            <EuiFlexGroup gutterSize="m" data-test-subj={ATTACKS_PAGE_ACTIONS_TEST_ID}>
               <EuiFlexItem>
                 <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
@@ -169,14 +174,14 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiFlexGroup direction="row" responsive={false} wrap={true}>
             <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
               <EuiFlexGroup direction="row" responsive={false}>
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_ASSIGNEE_FILTER_TEST_ID}>
                   <FilterByAssigneesPopover
                     selectedUserIds={assignees}
                     onSelectionChange={onAssigneesSelectionChange}
                     compressed={true}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={1}>
+                <EuiFlexItem grow={1} data-test-subj={ATTACKS_PAGE_CONNECTOR_FILTER_TEST_ID}>
                   <ConnectorFilter
                     aiConnectors={aiConnectors}
                     connectorNames={aiConnectorNames}
@@ -188,7 +193,11 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
               </EuiFlexGroup>
             </EuiFlexItem>
             <VerticalDivider grow={false} aria-hidden={true} />
-            <EuiFlexItem grow={1} style={{ minWidth: FILTERS_SECTION_WIDTH }}>
+            <EuiFlexItem
+              grow={1}
+              style={{ minWidth: FILTERS_SECTION_WIDTH }}
+              data-test-subj={ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID}
+            >
               <FiltersSection
                 dataView={dataView}
                 pageFilters={pageFilters}

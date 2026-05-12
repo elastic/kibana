@@ -26,7 +26,7 @@ const ViewModeOptions: EuiButtonGroupOptionProps[] = [
     label: i18n.translate('workflows.jsonDataTable.viewMode.table', {
       defaultMessage: 'Table',
     }),
-    iconType: 'tableDensityNormal',
+    iconType: 'table',
   },
   {
     id: 'json',

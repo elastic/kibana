@@ -93,6 +93,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
+  getDecimalsFromFormat,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -131,6 +132,7 @@ declare global {
 }
 
 const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+const DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -361,6 +363,8 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
+  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
@@ -453,7 +457,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    darkMode
   );
 
   const visualConfigs = [
@@ -869,7 +874,7 @@ export function XYChart({
                     labelOptions: legend.shouldTruncate
                       ? {
                           maxLines: legend?.maxLines ?? 1,
-                          widthLimit: legend.listLayoutMaxWidth ?? 250,
+                          widthLimit: DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT,
                         }
                       : {
                           maxLines: 0,
@@ -949,6 +954,7 @@ export function XYChart({
                 }
                 return value;
               }}
+              maximumFractionDigits={xTickDecimals}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -962,6 +968,10 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
+              const tickDecimals = axis.formatter
+                ? getDecimalsFromFormat(axis.formatter)
+                : undefined;
+
               return (
                 <Axis
                   key={axis.groupId}
@@ -980,6 +990,7 @@ export function XYChart({
                     }
                     return value;
                   }}
+                  maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}

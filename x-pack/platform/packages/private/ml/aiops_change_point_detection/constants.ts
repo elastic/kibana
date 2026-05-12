@@ -11,8 +11,6 @@
  */
 export const CHANGE_POINT_DETECTION_ENABLED = true;
 
-export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
-
 //
 // Do not change constant value - part of public REST APIs
 //

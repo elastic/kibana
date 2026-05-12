@@ -20,13 +20,31 @@
         ],
         "label": "getSpaceNPRE",
         "description": [
-          "\nGet the NPRE for a given space ID or a request carrying a URL.\n\nWhen a request object is provided, the space is extracted from the URL pathname.\n\n**Assumption**: this function assumes that the server base path is `/` (the\ndefault). If Kibana is configured with a custom `server.basePath`, the base\npath prefix will not be stripped before matching the space segment, causing\nthe function to always fall back to the default space. CPS is a\nServerless-only feature and Serverless deployments always run at the root\npath, so this is not a practical concern today.\n"
+          "\nGet the NPRE for a given space ID or a request carrying a URL.\n\nWhen a request object is provided, the space is taken from a URL pathname via\n",
+          {
+            "pluginId": "@kbn/cps-server-utils",
+            "scope": "server",
+            "docId": "kibKbnCpsServerUtilsPluginApi",
+            "section": "def-server.getSpaceIdFromPath",
+            "text": "getSpaceIdFromPath"
+          },
+          ". If the request has a `rewrittenUrl` (set by core\nwhen the first `onPreRouting` handler returns `rewriteUrl`), that URL is\nused instead of `url`. This matches HTTP requests after the Spaces plugin\nstrips `/s/:spaceId` from `request.url` during pre-routing: the original\nbrowser path (including the space segment) remains on `rewrittenUrl`.\n\n**Server base path**: ",
+          {
+            "pluginId": "@kbn/cps-server-utils",
+            "scope": "server",
+            "docId": "kibKbnCpsServerUtilsPluginApi",
+            "section": "def-server.getSpaceIdFromPath",
+            "text": "getSpaceIdFromPath"
+          },
+          " is called with the pathname\nonly; a non-root `server.basePath` is not stripped here. CPS is only\navailable on Serverless, where custom base paths are not used, so this\nlimitation is not a practical concern for CPS.\n"
         ],
         "signature": [
-          "(spaceIdOrRequest: string | { url: URL; }) => string"
+          "(spaceIdOrRequest: string | ",
+          "ScopeableUrlRequest",
+          ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,13 +56,14 @@
             "tags": [],
             "label": "spaceIdOrRequest",
             "description": [
-              "- The space ID string, or an object with a `url: URL` property"
+              "- Space ID string, or a `ScopeableUrlRequest` (incoming"
             ],
             "signature": [
-              "string | { url: URL; }"
+              "string | ",
+              "ScopeableUrlRequest"
             ],
             "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
-            "lineNumber": 30,
+            "lineNumber": 35,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,

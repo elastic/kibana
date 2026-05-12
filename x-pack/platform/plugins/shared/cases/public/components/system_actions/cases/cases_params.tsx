@@ -29,7 +29,9 @@ import type { CasesActionParams } from './types';
 import {
   CASES_CONNECTOR_SUB_ACTION,
   DEFAULT_MAX_OPEN_CASES,
-  MAX_OPEN_CASES,
+  MAX_OPEN_CASES_ADVANCED_SETTING,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+  getMaximumOpenCases,
 } from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
@@ -50,6 +52,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     cloud,
     data: { dataViews: dataViewsService },
     http,
+    uiSettings,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -85,6 +88,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   );
 
   const isAttackDiscoveryRuleType = ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
+  const configuredMaximumOpenCases = useMemo(() => {
+    try {
+      return getMaximumOpenCases(uiSettings.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING));
+    } catch {
+      return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
+    }
+  }, [uiSettings]);
 
   const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
@@ -297,7 +307,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           data-test-subj="show-time-window-warning"
           title={i18n.TIME_WINDOW_WARNING}
           color="warning"
-          iconType="alert"
+          iconType="warning"
           size="s"
         />
       )}
@@ -331,12 +341,12 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           <EuiFormRow
             fullWidth
             label={i18n.MAX_CASES_TO_OPEN_LABEL}
-            helpText={i18n.MAX_CASES_TO_OPEN_HELP_TEXT(MAX_OPEN_CASES)}
+            helpText={i18n.MAX_CASES_TO_OPEN_HELP_TEXT(configuredMaximumOpenCases)}
           >
             <EuiFieldNumber
               fullWidth
               min={1}
-              max={MAX_OPEN_CASES}
+              max={configuredMaximumOpenCases}
               step={1}
               defaultValue={
                 actionParams.subActionParams?.maximumCasesToOpen ?? DEFAULT_MAX_OPEN_CASES

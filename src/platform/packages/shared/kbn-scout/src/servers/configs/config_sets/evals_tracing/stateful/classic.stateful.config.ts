@@ -122,13 +122,20 @@ export const servers: ScoutServerConfig = {
     ...defaultConfig.kbnTestServer,
     env: {
       ...defaultConfig.kbnTestServer.env,
-      ...(shouldEnableTracing ? { KBN_OTEL_AUTO_INSTRUMENTATIONS: 'true' } : {}),
+      ...(shouldEnableTracing
+        ? {
+            ELASTIC_APM_ACTIVE: 'false',
+            ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
+          }
+        : {}),
     },
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       ...(preconfiguredEisConnectorsArg ? [preconfiguredEisConnectorsArg] : []),
       ...(shouldEnableTracing
         ? [
+            '--elastic.apm.active=false',
+            '--elastic.apm.contextPropagationOnly=false',
             '--telemetry.enabled=true',
             '--telemetry.tracing.enabled=true',
             '--telemetry.tracing.sample_rate=1',

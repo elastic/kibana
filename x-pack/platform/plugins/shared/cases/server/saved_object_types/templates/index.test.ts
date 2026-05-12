@@ -36,9 +36,26 @@ describe('caseTemplateSavedObjectType', () => {
             "type": "integer",
           },
           "fieldNames": Object {
-            "type": "keyword",
+            "properties": Object {
+              "control": Object {
+                "type": "keyword",
+              },
+              "label": Object {
+                "type": "text",
+              },
+              "name": Object {
+                "type": "keyword",
+              },
+              "type": Object {
+                "type": "keyword",
+              },
+            },
+            "type": "nested",
           },
           "isDefault": Object {
+            "type": "boolean",
+          },
+          "isEnabled": Object {
             "type": "boolean",
           },
           "isLatest": Object {

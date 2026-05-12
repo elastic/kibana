@@ -21,7 +21,6 @@ import type { LinksState } from './content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 import { transforms } from '../common/embeddable/transforms/transforms';
-import { linksEmbeddableSchema } from './embeddable_schemas';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -50,9 +49,11 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     core.savedObjects.registerType<LinksState>(linksSavedObjectType);
 
-    plugins.embeddable.registerTransforms(LINKS_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(LINKS_EMBEDDABLE_TYPE, {
+      title: 'Links',
       getTransforms: () => transforms,
-      getSchema: () => linksEmbeddableSchema,
+      // do not publish - not finalized
+      // getSchema: () => linksEmbeddableSchema,
     });
 
     return {};

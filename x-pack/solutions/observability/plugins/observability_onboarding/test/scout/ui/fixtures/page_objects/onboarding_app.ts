@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ScoutPage } from '@kbn/scout-oblt';
 
 export class OnboardingApp {
@@ -138,15 +139,23 @@ export class OnboardingApp {
 
   async clickIntegrationCard(cardSelector: string) {
     const card = this.page.getByTestId(cardSelector);
-    await card.click();
 
     const nonRouting =
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
-      await this.page.waitForURL(
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/,
-        { timeout: 30_000 }
-      );
+      const urlPattern =
+        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/;
+
+      // Retry click + URL check to handle race conditions where the card
+      // is rendered but React click handlers aren't yet attached after a re-render
+      await expect(async () => {
+        if (!urlPattern.test(this.page.url())) {
+          await card.click();
+        }
+        expect(this.page.url()).toMatch(urlPattern);
+      }).toPass({ timeout: 30_000 });
+    } else {
+      await card.click();
     }
 
     // For flows that have the ingestion selector, wait for it to be visible

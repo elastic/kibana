@@ -87,7 +87,7 @@ export function buildRoute({
     method,
     path: getRouteFullPath(router.routerPath, route.path),
     options: validOptions(method, route),
-    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
+    security: validRouteSecurity(route.security as DeepPartial<RouteSecurity>),
     validationSchemas: route.validate,
     isVersioned: false,
   };

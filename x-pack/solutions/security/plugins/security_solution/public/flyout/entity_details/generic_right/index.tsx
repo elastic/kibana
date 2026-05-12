@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -69,13 +69,19 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
   params: GenericEntityPanelProps;
 }
 
-export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
+export const GenericEntityPanel = memo(function GenericEntityPanel(
+  params: GenericEntityPanelProps
+) {
   const { isPreviewMode, scopeId, isEngineMetadataExist } = params;
 
   // When you destructuring params in the function signature TypeScript loses track
   // of the union type constraints and infers them as potentially undefined
   const { getGenericEntity } = useGetGenericEntity(params);
   const genericInsightsValue = getGenericEntity.data?._source?.entity.id;
+  const identityFields = useMemo(
+    () => ({ 'related.entity': genericInsightsValue || '' }),
+    [genericInsightsValue]
+  );
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!genericInsightsValue,
     idField: EntityIdentifierFields.generic,
@@ -84,8 +90,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
   });
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    insightsField: 'related.entity',
-    insightsValue: genericInsightsValue || '',
+    identityFields,
     ...params,
   });
 
@@ -214,8 +219,7 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
       <GenericEntityFlyoutContent
         source={source}
         openGenericEntityDetailsPanelByPath={openGenericEntityDetailsPanelByPath}
-        insightsField={'related.entity'}
-        insightsValue={source.entity.id}
+        identityFields={identityFields}
         onAssetCriticalityChange={calculateEntityRiskScore}
       />
       <GenericEntityFlyoutFooter
@@ -227,6 +231,6 @@ export const GenericEntityPanel = (params: GenericEntityPanelProps) => {
       />
     </>
   );
-};
+});
 
 GenericEntityPanel.displayName = 'GenericEntityPanel';

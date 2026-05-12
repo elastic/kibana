@@ -77,15 +77,22 @@ async function resolveStreamNames(
 async function fetchFeatureIndicators({
   streamNames,
   limit,
+  searchText,
   getFeatures,
   onFeatureFetchError,
 }: {
   streamNames: string[];
   limit: number;
-  getFeatures: (streamName: string, options: { limit?: number }) => Promise<Feature[]>;
+  searchText: string | undefined;
+  getFeatures: (
+    streamName: string,
+    options: { searchText?: string; limit?: number }
+  ) => Promise<Feature[]>;
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
-  const results = await Promise.allSettled(streamNames.map((name) => getFeatures(name, { limit })));
+  const results = await Promise.allSettled(
+    streamNames.map((name) => getFeatures(name, { searchText, limit }))
+  );
 
   const indicators: KnowledgeIndicatorFeature[] = [];
   results.forEach((result, index) => {
@@ -125,7 +132,10 @@ export async function searchKnowledgeIndicators({
   params,
 }: {
   getStreamNames(): Promise<string[]>;
-  getFeatures(streamName: string, options: { limit?: number }): Promise<Feature[]>;
+  getFeatures(
+    streamName: string,
+    options: { searchText?: string; limit?: number }
+  ): Promise<Feature[]>;
   getQueries(streamNames: string[], search_text?: string): Promise<QueryLink[]>;
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
@@ -135,12 +145,18 @@ export async function searchKnowledgeIndicators({
 
   // Step 2: Resolve streams (requested ∩ accessible).
   const streamNames = await resolveStreamNames(params, getStreamNames);
+  const hasRequestedStreams = Array.isArray(params.stream_names) && params.stream_names.length > 0;
+  // Handle the case where no streams are accessible and streams were requested.
+  if (hasRequestedStreams && streamNames.length === 0) {
+    return { knowledge_indicators: [] };
+  }
 
-  // Step 3: Fetch features (best-effort per stream).
+  // Step 3: Fetch features.
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
         streamNames,
         limit: normalized.limit,
+        searchText: normalized.searchText,
         getFeatures,
         onFeatureFetchError,
       })

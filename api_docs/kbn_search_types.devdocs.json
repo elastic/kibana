@@ -512,6 +512,7 @@
                 "lineNumber": 24,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "SearchStrategyRequest",
                 "trackAdoption": false
               },
               {
@@ -535,6 +536,7 @@
                 "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ISearchOptions",
                 "trackAdoption": false
               }
             ]
@@ -600,6 +602,7 @@
                 "lineNumber": 28,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "ISearchOptions",
                 "trackAdoption": false
               }
             ]
@@ -678,6 +681,7 @@
                 "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "ISearchOptions",
                 "trackAdoption": false
               }
             ]
@@ -826,12 +830,12 @@
           },
           {
             "parentPluginId": "@kbn/search-types",
-            "id": "def-common.ISearchOptions.retrieveResults",
+            "id": "def-common.ISearchOptions.returnIntermediateResults",
             "type": "CompoundType",
             "tags": [],
-            "label": "retrieveResults",
+            "label": "returnIntermediateResults",
             "description": [
-              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete). (For async\nsearch, this is the difference between calling _async_search/{id} and _async_search/status/{id}.) setting this to\n`true` will request the search results, regardless of whether or not the search is complete."
+              "\nBy default, when polling, we don't retrieve the results of the search request (until it is complete).\nsetting this to `true` will request the search results, regardless of whether or not the search is complete."
             ],
             "signature": [
               "boolean | undefined"
@@ -856,7 +860,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-            "lineNumber": 103,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -881,7 +885,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-            "lineNumber": 108,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -893,7 +897,14 @@
             "tags": [],
             "label": "transport",
             "description": [
-              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
+              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use ",
+              {
+                "pluginId": "@kbn/search-types",
+                "scope": "common",
+                "docId": "kibKbnSearchTypesPluginApi",
+                "section": "def-common.ISearchOptions.abortSignal",
+                "text": "ISearchOptions.abortSignal"
+              }
             ],
             "signature": [
               "Omit<",
@@ -901,7 +912,7 @@
               ", \"signal\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-            "lineNumber": 113,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -919,7 +930,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-            "lineNumber": 119,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -937,7 +948,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-            "lineNumber": 124,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -955,7 +966,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-            "lineNumber": 129,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1075,6 +1086,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchStrategyRequest",
             "trackAdoption": false
           },
           {
@@ -1098,6 +1110,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ISearchOptions",
             "trackAdoption": false
           }
         ],
@@ -1113,7 +1126,7 @@
           "\nSame as `ISearchOptions`, but contains only serializable fields, which can\nbe sent over the network."
         ],
         "signature": [
-          "{ projectRouting?: ",
+          "{ strategy?: string | symbol | undefined; projectRouting?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1123,10 +1136,10 @@
           },
           "; executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; strategy?: string | symbol | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; retrieveResults?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; stream?: boolean | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; returnIntermediateResults?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
-        "lineNumber": 135,
+        "lineNumber": 134,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1158,7 +1171,7 @@
         "label": "SanitizedConnectionRequestParams",
         "description": [],
         "signature": [
-          "{ querystring?: string | undefined; path: string; method: string; }"
+          "{ path: string; querystring?: string | undefined; method: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-search-types/src/types.ts",
         "lineNumber": 47,

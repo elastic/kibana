@@ -5,28 +5,76 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiIconTip, EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import Boom from '@hapi/boom';
-import { act } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { AliasTable } from './alias_table';
-import { NoSpacesAvailable } from './no_spaces_available';
 import { RelativesFooter } from './relatives_footer';
 import { SelectableSpacesControl } from './selectable_spaces_control';
 import { ShareModeControl } from './share_mode_control';
 import { getShareToSpaceFlyoutComponent } from './share_to_space_flyout';
-import { ShareToSpaceForm } from './share_to_space_form';
 import type { Space } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
-import { CopyToSpaceFlyoutInternal } from '../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiSelectable: jest.fn((props: any) => <actual.EuiSelectable {...props} />),
+  };
+});
+
+jest.mock('./selectable_spaces_control', () => {
+  const actual = jest.requireActual('./selectable_spaces_control');
+  return {
+    SelectableSpacesControl: jest.fn((props: any) => <actual.SelectableSpacesControl {...props} />),
+  };
+});
+
+jest.mock('./share_mode_control', () => {
+  const actual = jest.requireActual('./share_mode_control');
+  return {
+    ShareModeControl: jest.fn((props: any) => <actual.ShareModeControl {...props} />),
+  };
+});
+
+jest.mock('./alias_table', () => {
+  const actual = jest.requireActual('./alias_table');
+  return {
+    AliasTable: jest.fn((props: any) => <actual.AliasTable {...props} />),
+  };
+});
+
+jest.mock('./relatives_footer', () => {
+  const actual = jest.requireActual('./relatives_footer');
+  return {
+    RelativesFooter: jest.fn((props: any) => <actual.RelativesFooter {...props} />),
+  };
+});
+
+jest.mock('../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal', () => ({
+  CopyToSpaceFlyoutInternal: () => <div data-test-subj="copy-to-space-flyout" />,
+}));
+
+const MockedSelectableSpacesControl = SelectableSpacesControl as unknown as jest.MockedFunction<
+  typeof SelectableSpacesControl
+>;
+const MockedShareModeControl = ShareModeControl as unknown as jest.MockedFunction<
+  typeof ShareModeControl
+>;
+const MockedAliasTable = AliasTable as unknown as jest.MockedFunction<typeof AliasTable>;
+const MockedRelativesFooter = RelativesFooter as unknown as jest.MockedFunction<
+  typeof RelativesFooter
+>;
+const MockedEuiSelectable = EuiSelectable as unknown as jest.Mock;
 
 interface SetupOpts {
   mockSpaces?: Space[];
@@ -91,7 +139,7 @@ const setup = async (opts: SetupOpts = {}) => {
     title: 'foo',
   };
 
-  mockSpacesManager.getShareableReferences.mockResolvedValue({
+  const shareableReferencesResult = {
     objects: [
       {
         // this is the result for the saved object target; by default, it has no references
@@ -102,7 +150,18 @@ const setup = async (opts: SetupOpts = {}) => {
       },
       ...(opts.additionalShareableReferences ?? []),
     ],
-  });
+  };
+
+  let resolveSpacesData: (() => void) | undefined;
+  if (opts.returnBeforeSpacesLoad) {
+    mockSpacesManager.getShareableReferences.mockReturnValue(
+      new Promise((resolve) => {
+        resolveSpacesData = () => resolve(shareableReferencesResult);
+      })
+    );
+  } else {
+    mockSpacesManager.getShareableReferences.mockResolvedValue(shareableReferencesResult);
+  }
 
   const { getStartServices } = coreMock.createSetup();
   const startServices = coreMock.createStart();
@@ -118,80 +177,92 @@ const setup = async (opts: SetupOpts = {}) => {
     spacesManager: mockSpacesManager,
   });
   const ShareToSpaceFlyout = await getShareToSpaceFlyoutComponent();
-  // the internal flyout depends upon the Kibana React Context, and it cannot be used without the context wrapper
-  // the context wrapper is only split into a separate component to avoid recreating the context upon every flyout state change
-  // the ShareToSpaceFlyout component renders the internal flyout inside of the context wrapper
-  const wrapper = mountWithIntl(
-    <SpacesContext feature={opts.mockFeatureId}>
-      <ShareToSpaceFlyout
-        savedObjectTarget={savedObjectToShare}
-        onUpdate={onUpdate}
-        onClose={onClose}
-        enableCreateCopyCallout={opts.enableCreateCopyCallout}
-        enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
-        behaviorContext={opts.behaviorContext}
-      />
-    </SpacesContext>
+
+  render(
+    <I18nProvider>
+      <SpacesContext feature={opts.mockFeatureId}>
+        <ShareToSpaceFlyout
+          savedObjectTarget={savedObjectToShare}
+          onUpdate={onUpdate}
+          onClose={onClose}
+          enableCreateCopyCallout={opts.enableCreateCopyCallout}
+          enableCreateNewSpaceLink={opts.enableCreateNewSpaceLink}
+          behaviorContext={opts.behaviorContext}
+        />
+      </SpacesContext>
+    </I18nProvider>
   );
 
-  // wait for context wrapper to rerender
-  await act(async () => {
-    await nextTick();
-    wrapper.update();
-  });
-
   if (!opts.returnBeforeSpacesLoad) {
-    // Wait for spaces manager to complete and flyout to rerender
-    wrapper.update();
+    await waitFor(() => {
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+    });
+  } else {
+    await waitFor(() => {
+      expect(screen.getByTestId('share-to-space-flyout')).toBeInTheDocument();
+    });
   }
 
-  return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare };
+  return {
+    onClose,
+    mockSpacesManager,
+    mockToastNotifications,
+    savedObjectToShare,
+    resolveSpacesData,
+  };
 };
 
-function changeSpaceSelection(wrapper: ReactWrapper, selectedSpaces: string[]) {
-  // Using props callback instead of simulating clicks, because EuiSelectable uses a virtualized list, which isn't easily testable via test
-  // subjects
-  const spaceSelector = wrapper.find(SelectableSpacesControl);
+function changeSpaceSelection(selectedSpaces: string[]) {
+  const lastCall = MockedSelectableSpacesControl.mock.calls.at(-1)!;
   act(() => {
-    spaceSelector.props().onChange(selectedSpaces);
+    lastCall[0].onChange(selectedSpaces);
   });
-  wrapper.update();
 }
 
-async function clickButton(wrapper: ReactWrapper, button: 'continue' | 'save' | 'copy') {
-  wrapper.update();
-  const buttonNode = findTestSubject(wrapper, `sts-${button}-button`);
+async function clickButton(button: 'continue' | 'save' | 'copy') {
+  const buttonNode = screen.getByTestId(`sts-${button}-button`);
   await act(async () => {
-    buttonNode.first().simulate('click');
-    await nextTick();
-    wrapper.update();
+    buttonNode.click();
   });
 }
+
+beforeEach(() => {
+  MockedSelectableSpacesControl.mockClear();
+  MockedShareModeControl.mockClear();
+  MockedAliasTable.mockClear();
+  MockedRelativesFooter.mockClear();
+  MockedEuiSelectable.mockClear();
+});
 
 describe('ShareToSpaceFlyout', () => {
   it('waits for spaces to load', async () => {
-    const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
+    const { resolveSpacesData } = await setup({ returnBeforeSpacesLoad: true });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(screen.queryByTestId('share-mode-control-description')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).toBeInTheDocument();
 
-    wrapper.update();
+    await act(async () => {
+      resolveSpacesData!();
+    });
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+    await waitFor(() => {
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
   });
 
   describe('without enableCreateCopyCallout', () => {
     it('does not show a warning callout when the saved object only has one namespace', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         namespaces: ['my-active-space'],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiCallOut)).toHaveLength(0);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByTestId('sts-copy-button')).not.toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
   });
@@ -200,76 +271,77 @@ describe('ShareToSpaceFlyout', () => {
     const enableCreateCopyCallout = true;
 
     it('does not show a warning callout when the saved object has multiple namespaces', async () => {
-      const { wrapper, onClose } = await setup({ enableCreateCopyCallout });
+      const { onClose } = await setup({ enableCreateCopyCallout });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiCallOut)).toHaveLength(0);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByTestId('sts-copy-button')).not.toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
 
     it('shows a warning callout when the saved object only has one namespace', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         enableCreateCopyCallout,
         namespaces: ['my-active-space'],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiCallOut)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.getByTestId('sts-copy-button')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
 
     it('does not show the Copy flyout by default', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         enableCreateCopyCallout,
         namespaces: ['my-active-space'],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(0);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByTestId('copy-to-space-flyout')).not.toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
 
     it('shows the Copy flyout if the the "Make a copy" button is clicked', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         enableCreateCopyCallout,
         namespaces: ['my-active-space'],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-      await clickButton(wrapper, 'copy'); // this link is only present in the warning callout
-      wrapper.update();
+      await clickButton('copy');
 
-      expect(wrapper.find(CopyToSpaceFlyoutInternal)).toHaveLength(1);
+      await waitFor(() => {
+        expect(screen.getByTestId('copy-to-space-flyout')).toBeInTheDocument();
+      });
       expect(onClose).toHaveBeenCalledTimes(0);
     });
   });
 
   describe('without enableCreateNewSpaceLink', () => {
     it('does not render a NoSpacesAvailable component when no spaces are available', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
 
     it('does not render a NoSpacesAvailable component when only the active space is available', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
   });
@@ -278,58 +350,58 @@ describe('ShareToSpaceFlyout', () => {
     const enableCreateNewSpaceLink = true;
 
     it('renders a NoSpacesAvailable component when no spaces are available', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         enableCreateNewSpaceLink,
         mockSpaces: [{ id: 'my-active-space', name: 'my active space', disabledFeatures: [] }],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sts-new-space-link')).toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
 
     it('renders a NoSpacesAvailable component when only the active space is available', async () => {
-      const { wrapper, onClose } = await setup({
+      const { onClose } = await setup({
         enableCreateNewSpaceLink,
         mockSpaces: [{ id: 'my-active-space', name: '', disabledFeatures: [] }],
       });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(1);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('sts-new-space-link')).toBeInTheDocument();
       expect(onClose).toHaveBeenCalledTimes(0);
     });
   });
 
   it('handles errors thrown from shareSavedObjectsAdd API call', async () => {
-    const { wrapper, mockSpacesManager, mockToastNotifications } = await setup();
+    const { mockSpacesManager, mockToastNotifications } = await setup();
 
     mockSpacesManager.updateSavedObjectsSpaces.mockRejectedValue(
       Boom.serverUnavailable('Something bad happened')
     );
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+    expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-    changeSpaceSelection(wrapper, ['space-2', 'space-3']);
-    await clickButton(wrapper, 'save');
+    changeSpaceSelection(['space-2', 'space-3']);
+    await clickButton('save');
 
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalled();
     expect(mockToastNotifications.addError).toHaveBeenCalled();
   });
 
   it('allows the form to be filled out to add a space', async () => {
-    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+    const { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
       await setup();
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+    expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-    changeSpaceSelection(wrapper, ['space-1', 'space-2', 'space-3']);
-    await clickButton(wrapper, 'save');
+    changeSpaceSelection(['space-1', 'space-2', 'space-3']);
+    await clickButton('save');
 
     const { type, id } = savedObjectToShare;
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -344,15 +416,15 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to remove a space', async () => {
-    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+    const { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
       await setup();
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+    expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-    changeSpaceSelection(wrapper, []);
-    await clickButton(wrapper, 'save');
+    changeSpaceSelection([]);
+    await clickButton('save');
 
     const { type, id } = savedObjectToShare;
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -367,15 +439,15 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out to add and remove a space', async () => {
-    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+    const { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
       await setup();
 
-    expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+    expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-    changeSpaceSelection(wrapper, ['space-2', 'space-3']);
-    await clickButton(wrapper, 'save');
+    changeSpaceSelection(['space-2', 'space-3']);
+    await clickButton('save');
 
     const { type, id } = savedObjectToShare;
     expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -404,17 +476,17 @@ describe('ShareToSpaceFlyout', () => {
     };
 
     it('adds spaces to related objects when only adding spaces', async () => {
-      const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      const { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
         await setup({
           additionalShareableReferences: [relatedObject],
         });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-      changeSpaceSelection(wrapper, ['space-1', 'space-2']);
-      await clickButton(wrapper, 'save');
+      changeSpaceSelection(['space-1', 'space-2']);
+      await clickButton('save');
 
       const expectedObjects: Array<{ type: string; id: string }> = [
         savedObjectToShare,
@@ -436,17 +508,17 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     it('does not remove spaces from related objects when only removing spaces', async () => {
-      const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      const { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
         await setup({
           additionalShareableReferences: [relatedObject],
         });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-      changeSpaceSelection(wrapper, []);
-      await clickButton(wrapper, 'save');
+      changeSpaceSelection([]);
+      await clickButton('save');
 
       expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
@@ -461,17 +533,17 @@ describe('ShareToSpaceFlyout', () => {
     });
 
     it('adds spaces but does not remove spaces from related objects when adding and removing spaces', async () => {
-      const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
+      const { onClose, mockSpacesManager, mockToastNotifications, savedObjectToShare } =
         await setup({
           additionalShareableReferences: [relatedObject],
         });
 
-      expect(wrapper.find(ShareToSpaceForm)).toHaveLength(1);
-      expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-      expect(wrapper.find(NoSpacesAvailable)).toHaveLength(0);
+      expect(screen.getByTestId('share-mode-control-description')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sts-new-space-link')).not.toBeInTheDocument();
 
-      changeSpaceSelection(wrapper, ['space-2', 'space-3']);
-      await clickButton(wrapper, 'save');
+      changeSpaceSelection(['space-2', 'space-3']);
+      await clickButton('save');
 
       expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(2);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
@@ -494,12 +566,12 @@ describe('ShareToSpaceFlyout', () => {
   });
 
   describe('correctly renders share mode control', () => {
-    function getDescriptionAndWarning(wrapper: ReactWrapper) {
-      const descriptionNode = findTestSubject(wrapper, 'share-mode-control-description');
-      const iconTipNode = wrapper.find(ShareModeControl).find(EuiIconTip);
+    function getDescriptionAndWarning() {
+      const descriptionNode = screen.getByTestId('share-mode-control-description');
+      const lastCall = MockedShareModeControl.mock.calls.at(-1)!;
       return {
-        description: descriptionNode.text(),
-        isPrivilegeTooltipDisplayed: iconTipNode.length > 0,
+        description: descriptionNode.textContent,
+        isPrivilegeTooltipDisplayed: !lastCall[0].canShareToAllSpaces,
       };
     }
 
@@ -508,8 +580,8 @@ describe('ShareToSpaceFlyout', () => {
 
       it('and the object is not shared to all spaces', async () => {
         const namespaces = ['my-active-space'];
-        const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
+        await setup({ canShareToAllSpaces, namespaces });
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning();
 
         expect(description).toMatchInlineSnapshot(
           `"Make object available in selected spaces only."`
@@ -519,8 +591,8 @@ describe('ShareToSpaceFlyout', () => {
 
       it('and the object is shared to all spaces', async () => {
         const namespaces = [ALL_SPACES_ID];
-        const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
+        await setup({ canShareToAllSpaces, namespaces });
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning();
 
         expect(description).toMatchInlineSnapshot(
           `"Make object available in all current and future spaces."`
@@ -534,8 +606,8 @@ describe('ShareToSpaceFlyout', () => {
 
       it('and the object is not shared to all spaces', async () => {
         const namespaces = ['my-active-space'];
-        const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
+        await setup({ canShareToAllSpaces, namespaces });
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning();
 
         expect(description).toMatchInlineSnapshot(
           `"Make object available in selected spaces only."`
@@ -545,8 +617,8 @@ describe('ShareToSpaceFlyout', () => {
 
       it('and the object is shared to all spaces', async () => {
         const namespaces = [ALL_SPACES_ID];
-        const { wrapper } = await setup({ canShareToAllSpaces, namespaces });
-        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning(wrapper);
+        await setup({ canShareToAllSpaces, namespaces });
+        const { description, isPrivilegeTooltipDisplayed } = getDescriptionAndWarning();
 
         expect(description).toMatchInlineSnapshot(
           `"Make object available in all current and future spaces."`
@@ -593,6 +665,13 @@ describe('ShareToSpaceFlyout', () => {
         disabledFeatures: [],
       },
     ];
+
+    function getSelectableOptions() {
+      const selectableCalls = MockedEuiSelectable.mock.calls.filter(
+        (call) => call[0].listProps?.['data-test-subj'] === 'sts-form-space-selector'
+      );
+      return selectableCalls.at(-1)![0].options;
+    }
 
     const expectActiveSpace = (option: any, { spaceId }: { spaceId: string }) => {
       expect(option['data-space-id']).toEqual(spaceId);
@@ -684,10 +763,9 @@ describe('ShareToSpaceFlyout', () => {
     describe('with behaviorContext="within-space" (default)', () => {
       it('correctly defines space selection options', async () => {
         const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
-        const { wrapper } = await setup({ mockSpaces, namespaces });
+        await setup({ mockSpaces, namespaces });
 
-        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-        const options = selectable.prop('options');
+        const options = getSelectableOptions();
         expect(options).toHaveLength(5);
         expectActiveSpace(options[0], { spaceId: 'my-active-space' });
         expectInactiveSpace(options[1], { spaceId: 'space-1', checked: true });
@@ -699,10 +777,9 @@ describe('ShareToSpaceFlyout', () => {
       describe('with a SpacesContext for a specific feature', () => {
         it('correctly defines space selection options when affected spaces are not selected', async () => {
           const namespaces = ['my-active-space']; // the saved object's current namespaces
-          const { wrapper } = await setup({ mockSpaces, namespaces, mockFeatureId });
+          await setup({ mockSpaces, namespaces, mockFeatureId });
 
-          const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-          const options = selectable.prop('options');
+          const options = getSelectableOptions();
           expect(options).toHaveLength(3);
           expectActiveSpace(options[0], { spaceId: 'my-active-space' });
           expectInactiveSpace(options[1], { spaceId: 'space-1', checked: false });
@@ -712,10 +789,9 @@ describe('ShareToSpaceFlyout', () => {
 
         it('correctly defines space selection options when affected spaces are already selected', async () => {
           const namespaces = ['my-active-space', 'space-1', 'space-2', 'space-3', 'space-4']; // the saved object's current namespaces
-          const { wrapper } = await setup({ mockSpaces, namespaces, mockFeatureId });
+          await setup({ mockSpaces, namespaces, mockFeatureId });
 
-          const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-          const options = selectable.prop('options');
+          const options = getSelectableOptions();
           expect(options).toHaveLength(5);
           expectActiveSpace(options[0], { spaceId: 'my-active-space' });
           expectInactiveSpace(options[1], { spaceId: 'space-1', checked: true });
@@ -736,10 +812,9 @@ describe('ShareToSpaceFlyout', () => {
 
       it('correctly defines space selection options', async () => {
         const namespaces = ['my-active-space', 'space-1', 'space-3']; // the saved object's current namespaces
-        const { wrapper } = await setup({ behaviorContext, mockSpaces, namespaces });
+        await setup({ behaviorContext, mockSpaces, namespaces });
 
-        const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
-        const options = selectable.prop('options');
+        const options = getSelectableOptions();
         expect(options).toHaveLength(5);
         expectInactiveSpace(options[0], { spaceId: 'space-1', checked: true });
         expectInactiveSpace(options[1], { spaceId: 'space-2', checked: false });
@@ -753,7 +828,7 @@ describe('ShareToSpaceFlyout', () => {
   describe('alias list', () => {
     it('shows only aliases for spaces that exist', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({
+      await setup({
         namespaces,
         additionalShareableReferences: [
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
@@ -767,11 +842,11 @@ describe('ShareToSpaceFlyout', () => {
         ],
       });
 
-      changeSpaceSelection(wrapper, ['*']);
-      await clickButton(wrapper, 'continue');
+      changeSpaceSelection(['*']);
+      await clickButton('continue');
 
-      const aliasTable = wrapper.find(AliasTable);
-      expect(aliasTable.prop('aliasesToDisable')).toEqual([
+      const lastAliasCall = MockedAliasTable.mock.calls.at(-1)!;
+      expect(lastAliasCall[0].aliasesToDisable).toEqual([
         { targetType: 'foo', sourceId: '1', targetSpace: 'space-1', spaceExists: true },
         {
           // this alias is present, and it will be disabled, but it is not displayed in the table below due to the 'spaceExists' field
@@ -781,14 +856,13 @@ describe('ShareToSpaceFlyout', () => {
           spaceExists: false,
         },
       ]);
-      expect(aliasTable.find(EuiCallOut).text()).toMatchInlineSnapshot(
-        `"Legacy URL conflict1 legacy URL will be disabled."`
-      );
+      expect(screen.getByText('Legacy URL conflict')).toBeInTheDocument();
+      expect(screen.getByText(/1 legacy URL will be disabled/)).toBeInTheDocument();
     });
 
     it('shows only aliases for selected spaces', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({
+      await setup({
         namespaces,
         additionalShareableReferences: [
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
@@ -802,32 +876,30 @@ describe('ShareToSpaceFlyout', () => {
         ],
       });
 
-      changeSpaceSelection(wrapper, ['space-1']);
-      await clickButton(wrapper, 'continue');
+      changeSpaceSelection(['space-1']);
+      await clickButton('continue');
 
-      const aliasTable = wrapper.find(AliasTable);
-      expect(aliasTable.prop('aliasesToDisable')).toEqual([
+      const lastAliasCall = MockedAliasTable.mock.calls.at(-1)!;
+      expect(lastAliasCall[0].aliasesToDisable).toEqual([
         { targetType: 'foo', sourceId: '1', targetSpace: 'space-1', spaceExists: true },
         // even though an alias exists for space-2, it will not be disabled, because we aren't sharing to that space
       ]);
-      expect(aliasTable.find(EuiCallOut).text()).toMatchInlineSnapshot(
-        `"Legacy URL conflict1 legacy URL will be disabled."`
-      );
+      expect(screen.getByText('Legacy URL conflict')).toBeInTheDocument();
+      expect(screen.getByText(/1 legacy URL will be disabled/)).toBeInTheDocument();
     });
   });
 
   describe('footer', () => {
     it('does not show a description of relatives (references) if there are none', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({ namespaces });
+      await setup({ namespaces });
 
-      const relativesControl = wrapper.find(RelativesFooter);
-      expect(relativesControl.isEmptyRender()).toBe(true);
+      expect(screen.queryByText(/related.*will also change/)).not.toBeInTheDocument();
     });
 
     it('shows a description of filtered relatives (references)', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({
+      await setup({
         namespaces,
         additionalShareableReferences: [
           // the saved object target is already included in the mock results by default; it will not be counted
@@ -837,29 +909,30 @@ describe('ShareToSpaceFlyout', () => {
         ],
       });
 
-      const relativesControl = wrapper.find(RelativesFooter);
-      expect(relativesControl.isEmptyRender()).toBe(false);
-      expect(relativesControl.text()).toMatchInlineSnapshot(`"1 related object will also change."`);
+      expect(screen.getByText(/1 related object will also change/)).toBeInTheDocument();
     });
 
-    function expectButton(wrapper: ReactWrapper, button: 'save' | 'continue') {
-      const saveButton = findTestSubject(wrapper, 'sts-save-button');
-      const continueButton = findTestSubject(wrapper, 'sts-continue-button');
-      expect(saveButton).toHaveLength(button === 'save' ? 1 : 0);
-      expect(continueButton).toHaveLength(button === 'continue' ? 1 : 0);
+    function expectButton(button: 'save' | 'continue') {
+      if (button === 'save') {
+        expect(screen.queryByTestId('sts-save-button')).toBeInTheDocument();
+        expect(screen.queryByTestId('sts-continue-button')).not.toBeInTheDocument();
+      } else {
+        expect(screen.queryByTestId('sts-save-button')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('sts-continue-button')).toBeInTheDocument();
+      }
     }
 
     it('shows a save button if there are no legacy URL aliases to disable', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({ namespaces });
+      await setup({ namespaces });
 
-      changeSpaceSelection(wrapper, ['*']);
-      expectButton(wrapper, 'save');
+      changeSpaceSelection(['*']);
+      expectButton('save');
     });
 
     it('shows a save button if there are legacy URL aliases to disable, but none for existing spaces', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({
+      await setup({
         namespaces,
         additionalShareableReferences: [
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
@@ -873,13 +946,13 @@ describe('ShareToSpaceFlyout', () => {
         ],
       });
 
-      changeSpaceSelection(wrapper, ['*']);
-      expectButton(wrapper, 'save');
+      changeSpaceSelection(['*']);
+      expectButton('save');
     });
 
     it('shows a continue button if there are legacy URL aliases to disable for existing spaces', async () => {
       const namespaces = ['my-active-space']; // the saved object's current namespaces
-      const { wrapper } = await setup({
+      await setup({
         namespaces,
         additionalShareableReferences: [
           // it doesn't matter if aliases are for the saved object target or for references; this is easier to mock
@@ -893,8 +966,8 @@ describe('ShareToSpaceFlyout', () => {
         ],
       });
 
-      changeSpaceSelection(wrapper, ['*']);
-      expectButton(wrapper, 'continue');
+      changeSpaceSelection(['*']);
+      expectButton('continue');
     });
   });
 });

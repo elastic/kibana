@@ -137,5 +137,11 @@ export const useTimelineEventsDetails = ({
     };
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+    }
+  }, [skip]);
+
   return [loading, timelineDetailsResponse, rawEventData, ecsData, refetch.current];
 };

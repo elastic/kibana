@@ -8,9 +8,9 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 const REFETCH_INTERVAL_MS = 5000;
 
@@ -23,19 +23,28 @@ export function useStepExecution(
   stepExecutionId: string | undefined,
   stepStatus: ExecutionStatus | undefined
 ) {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
   const isStepFinished = stepStatus ? isTerminalStatus(stepStatus) : false;
 
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
-      );
-      return response;
+      if (!workflowExecutionId || !stepExecutionId) {
+        throw new Error('Workflow execution ID and step execution ID are required');
+      }
+      return api.getStepExecution(workflowExecutionId, stepExecutionId);
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
     staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS, // will be cleared when switching to a different execution
-    refetchInterval: isStepFinished ? false : REFETCH_INTERVAL_MS,
+    // Use the fetched data's own status to decide when to stop polling, rather than
+    // relying solely on the lightweight polling status. This handles the case where
+    // the execution polling already reports the step as finished, but ES hasn't
+    // refreshed the full step document (with input/output) for the detailed fetch yet.
+    refetchInterval: (data) => {
+      if (data && isTerminalStatus(data.status)) {
+        return false;
+      }
+      return REFETCH_INTERVAL_MS;
+    },
   });
 }

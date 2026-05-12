@@ -73,6 +73,10 @@ export async function buildApmToolResources({
 
   const apmEventClientPromise = getApmEventClient({
     context: contextAdapter,
+    core: {
+      setup: core,
+      start: () => core.getStartServices().then(([cs]) => cs),
+    },
     request,
     params: {
       query: {

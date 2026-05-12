@@ -45,6 +45,7 @@
                 "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -104,6 +105,7 @@
                 "lineNumber": 52,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "QueryApiKeyParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -220,6 +222,7 @@
                 "lineNumber": 64,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -260,6 +263,7 @@
                 "lineNumber": 70,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -565,6 +569,7 @@
             "lineNumber": 1021,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiKeyFormValues",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -654,6 +659,7 @@
             "lineNumber": 1047,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ApiKeyFormValues",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1018,7 +1024,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"expired\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"realm\" | \"expired\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
             "lineNumber": 42,
@@ -1217,7 +1223,7 @@
           "CreateCrossClusterAPIKeyParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 94,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1236,7 +1242,7 @@
           "SecurityCreateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 99,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1250,7 +1256,7 @@
         "label": "QueryApiKeySortOptions",
         "description": [],
         "signature": [
-          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"expired\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"realm\" | \"expired\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
         "lineNumber": 37,
@@ -1276,7 +1282,7 @@
           "UpdateRestAPIKeyWithKibanaPrivilegesParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 218,
+        "lineNumber": 246,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1295,7 +1301,7 @@
           "SecurityUpdateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 213,
+        "lineNumber": 241,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

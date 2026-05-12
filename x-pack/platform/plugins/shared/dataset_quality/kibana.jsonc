@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/dataset-quality-plugin",
   "owner": [
-    "@elastic/obs-onboarding-team"
+    "@elastic/kibana-management"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -27,6 +27,7 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
+      "licensing",
       "share",
       "triggersActionsUi",
       "unifiedSearch",

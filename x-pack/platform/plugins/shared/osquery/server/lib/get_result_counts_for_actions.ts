@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { chunk } from 'lodash';
 import { ACTION_RESPONSES_DATA_STREAM_INDEX } from '../../common/constants';
+import { prefixIndexPatternsWithCcs } from '../utils/ccs_utils';
 
 const MAX_ACTION_IDS_PER_BATCH = 1000;
 
@@ -40,7 +41,8 @@ interface ActionResponseAggregation {
 export const getResultCountsForActions = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  namespace = 'default'
+  namespace = 'default',
+  ccsEnabled = false
 ): Promise<ResultCountsMap> => {
   if (actionIds.length === 0) {
     return new Map();
@@ -49,7 +51,7 @@ export const getResultCountsForActions = async (
   const batches = chunk(actionIds, MAX_ACTION_IDS_PER_BATCH);
 
   const batchResults = await Promise.all(
-    batches.map((batchIds) => fetchResultCountsBatch(esClient, batchIds, namespace))
+    batches.map((batchIds) => fetchResultCountsBatch(esClient, batchIds, namespace, ccsEnabled))
   );
 
   const result: ResultCountsMap = new Map();
@@ -65,9 +67,13 @@ export const getResultCountsForActions = async (
 const fetchResultCountsBatch = async (
   esClient: ElasticsearchClient,
   actionIds: string[],
-  namespace: string
+  namespace: string,
+  ccsEnabled: boolean
 ): Promise<ResultCountsMap> => {
-  const index = `${ACTION_RESPONSES_DATA_STREAM_INDEX}-${namespace}`;
+  const index = prefixIndexPatternsWithCcs(
+    `${ACTION_RESPONSES_DATA_STREAM_INDEX}-${namespace}`,
+    ccsEnabled
+  );
 
   const response = await esClient.search<unknown, ActionResponseAggregation>({
     index,

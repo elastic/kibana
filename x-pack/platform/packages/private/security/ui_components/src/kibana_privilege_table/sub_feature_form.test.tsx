@@ -71,42 +71,8 @@ describe('SubFeatureForm', () => {
     const role = createRole([
       {
         base: [],
-        feature: {},
-        spaces: [],
-      },
-    ]);
-    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
-    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
-
-    const onChange = jest.fn();
-
-    const wrapper = mountWithIntl(
-      <SubFeatureForm
-        featureId={featureId}
-        subFeature={securedSubFeature}
-        selectedFeaturePrivileges={[]}
-        privilegeCalculator={calculator}
-        privilegeIndex={0}
-        onChange={onChange}
-        disabled={false}
-      />
-    );
-
-    const checkbox = wrapper.find('EuiCheckbox[id="with_sub_features_cool_toggle_1"] input');
-
-    act(() => {
-      checkbox.simulate('change', { target: { checked: true } });
-    });
-
-    expect(onChange).toHaveBeenCalledWith(['cool_toggle_1']);
-  });
-
-  it('fires onChange when an independent privilege is deselected', () => {
-    const role = createRole([
-      {
-        base: [],
         feature: {
-          with_sub_features: ['cool_toggle_1', 'cool_toggle_2'],
+          with_sub_features: ['cool_all'],
         },
         spaces: [],
       },
@@ -120,7 +86,43 @@ describe('SubFeatureForm', () => {
       <SubFeatureForm
         featureId={featureId}
         subFeature={securedSubFeature}
-        selectedFeaturePrivileges={['cool_toggle_1', 'cool_toggle_2']}
+        selectedFeaturePrivileges={['cool_all']}
+        privilegeCalculator={calculator}
+        privilegeIndex={0}
+        onChange={onChange}
+        disabled={false}
+      />
+    );
+
+    const checkbox = wrapper.find('EuiCheckbox[id="with_sub_features_cool_toggle_1"] input');
+
+    act(() => {
+      checkbox.simulate('change', { target: { checked: true } });
+    });
+
+    expect(onChange).toHaveBeenCalledWith(['cool_all', 'cool_toggle_1']);
+  });
+
+  it('fires onChange when an independent privilege is deselected', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['cool_all', 'cool_toggle_1', 'cool_toggle_2'],
+        },
+        spaces: [],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <SubFeatureForm
+        featureId={featureId}
+        subFeature={securedSubFeature}
+        selectedFeaturePrivileges={['cool_all', 'cool_toggle_1', 'cool_toggle_2']}
         privilegeCalculator={calculator}
         privilegeIndex={0}
         onChange={onChange}
@@ -134,7 +136,7 @@ describe('SubFeatureForm', () => {
       checkbox.simulate('change', { target: { checked: false } });
     });
 
-    expect(onChange).toHaveBeenCalledWith(['cool_toggle_2']);
+    expect(onChange).toHaveBeenCalledWith(['cool_all', 'cool_toggle_2']);
   });
 
   it('fires onChange when a mutually exclusive privilege is selected', () => {
@@ -300,6 +302,100 @@ describe('SubFeatureForm', () => {
     );
 
     expect(wrapper.children()).toMatchInlineSnapshot(`null`);
+  });
+
+  it('disables independent checkboxes when no mutually exclusive privilege is selected', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {},
+        spaces: [],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const wrapper = mountWithIntl(
+      <SubFeatureForm
+        featureId={featureId}
+        subFeature={securedSubFeature}
+        selectedFeaturePrivileges={[]}
+        privilegeCalculator={calculator}
+        privilegeIndex={0}
+        onChange={jest.fn()}
+        disabled={false}
+      />
+    );
+
+    const checkboxes = wrapper.find(EuiCheckbox);
+    expect(checkboxes.length).toBeGreaterThan(0);
+    expect(checkboxes.everyWhere((checkbox) => checkbox.props().disabled === true)).toBe(true);
+  });
+
+  it('enables independent checkboxes when a mutually exclusive privilege is selected', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['cool_all'],
+        },
+        spaces: [],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const wrapper = mountWithIntl(
+      <SubFeatureForm
+        featureId={featureId}
+        subFeature={securedSubFeature}
+        selectedFeaturePrivileges={['cool_all']}
+        privilegeCalculator={calculator}
+        privilegeIndex={0}
+        onChange={jest.fn()}
+        disabled={false}
+      />
+    );
+
+    const checkboxes = wrapper.find(EuiCheckbox);
+    expect(checkboxes.length).toBeGreaterThan(0);
+    expect(checkboxes.everyWhere((checkbox) => checkbox.props().disabled === false)).toBe(true);
+  });
+
+  it('clears independent privileges when mutually exclusive is set to none', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_sub_features: ['cool_all', 'cool_toggle_1'],
+        },
+        spaces: [],
+      },
+    ]);
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <SubFeatureForm
+        featureId={featureId}
+        subFeature={securedSubFeature}
+        selectedFeaturePrivileges={['cool_all', 'cool_toggle_1']}
+        privilegeCalculator={calculator}
+        privilegeIndex={0}
+        onChange={onChange}
+        disabled={false}
+      />
+    );
+
+    const button = wrapper.find(EuiButtonGroup);
+
+    act(() => {
+      button.props().onChange('none');
+    });
+
+    expect(onChange).toHaveBeenCalledWith([]);
   });
 
   it('correctly renders privileges that require all spaces to be enabled', () => {

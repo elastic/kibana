@@ -35,7 +35,7 @@ describe('INLINESTATS', () => {
       previousCommandFields,
       queryString,
       additionalFieldsMock,
-      UnmappedFieldsStrategy.FAIL
+      UnmappedFieldsStrategy.DEFAULT
     );
 
     expect(result).toEqual<ESQLColumnData[]>([

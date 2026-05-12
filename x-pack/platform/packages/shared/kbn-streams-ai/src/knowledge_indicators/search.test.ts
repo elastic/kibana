@@ -26,6 +26,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
 function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
   return {
     id: 'query-id',
+    type: 'match',
     title: 'Query title',
     description: 'Query description',
     esql: { query: 'FROM logs-*' },
@@ -115,6 +116,22 @@ describe('searchKnowledgeIndicators', () => {
     expect(getFeatures).toHaveBeenCalledTimes(1);
     expect(getFeatures).toHaveBeenCalledWith('logs.allowed', expect.any(Object));
     expect(getQueries).toHaveBeenCalledWith(['logs.allowed'], undefined);
+  });
+
+  it('returns empty when requested stream_names are not accessible', async () => {
+    const getFeatures = jest.fn(async () => []);
+    const getQueries = jest.fn(async () => []);
+
+    const res = await searchKnowledgeIndicators({
+      params: { stream_names: ['logs.missing'] },
+      getStreamNames: async () => ['logs.allowed'],
+      getFeatures,
+      getQueries,
+    });
+
+    expect(res.knowledge_indicators).toHaveLength(0);
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getQueries).not.toHaveBeenCalled();
   });
 
   it('applies limit to the merged output', async () => {

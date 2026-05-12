@@ -424,6 +424,93 @@ describe('SecureSpacesClientWrapper', () => {
     });
   });
 
+  describe('#getPersistedFeatureVisibility', () => {
+    it('delegates to base client when security is not enabled', async () => {
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
+        securityEnabled: false,
+      });
+
+      const response = await wrapper.getPersistedFeatureVisibility('default');
+      expect(baseClient.getPersistedFeatureVisibility).toHaveBeenCalledTimes(1);
+      expect(baseClient.getPersistedFeatureVisibility).toHaveBeenCalledWith('default');
+      expect(response).toEqual([]);
+      expectNoAuthorizationCheck(authorization);
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
+        type: 'space',
+        id: 'default',
+      });
+    });
+
+    test(`throws a forbidden error when unauthorized`, async () => {
+      const username = 'some_user';
+      const spaceId = 'default';
+
+      const { wrapper, baseClient, authorization, request } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: false,
+        privileges: {
+          kibana: [
+            { resource: spaceId, privilege: authorization.actions.login, authorized: false },
+          ],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
+
+      await expect(
+        wrapper.getPersistedFeatureVisibility(spaceId)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized to get default space"`);
+
+      expect(baseClient.getPersistedFeatureVisibility).not.toHaveBeenCalled();
+
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+
+      expect(checkPrivileges).toHaveBeenCalledWith(spaceId, {
+        kibana: authorization.actions.login,
+      });
+    });
+
+    it('returns the persisted feature visibility when authorized', async () => {
+      const username = 'some_user';
+      const spaceId = 'default';
+
+      const { wrapper, baseClient, authorization, request, auditLogger } = setup({
+        securityEnabled: true,
+      });
+
+      const checkPrivileges = jest.fn().mockResolvedValue({
+        username,
+        hasAllRequested: true,
+        privileges: {
+          kibana: [{ resource: spaceId, privilege: authorization.actions.login, authorized: true }],
+        },
+      } as CheckPrivilegesResponse);
+      authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpace: checkPrivileges });
+
+      const response = await wrapper.getPersistedFeatureVisibility(spaceId);
+
+      expect(baseClient.getPersistedFeatureVisibility).toHaveBeenCalledTimes(1);
+      expect(baseClient.getPersistedFeatureVisibility).toHaveBeenCalledWith(spaceId);
+
+      expect(response).toEqual([]);
+
+      expect(authorization.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+      expect(authorization.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+
+      expect(checkPrivileges).toHaveBeenCalledWith(spaceId, {
+        kibana: authorization.actions.login,
+      });
+      expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
+        type: 'space',
+        id: spaceId,
+      });
+    });
+  });
+
   describe('#create', () => {
     const space = Object.freeze({
       id: 'new_space',

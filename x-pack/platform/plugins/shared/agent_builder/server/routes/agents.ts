@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
 import { AgentVisibility } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -60,16 +59,15 @@ const PLUGINS_SCHEMA = schema.arrayOf(
   }
 );
 
-const VISIBILITY_DISABLED_MESSAGE =
-  'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
-
-const isVisibilityBlockedByExperimentalGate = ({
-  experimentalFeaturesEnabled,
-  visibility,
-}: {
-  experimentalFeaturesEnabled: boolean;
-  visibility: AgentVisibility | undefined;
-}): boolean => !experimentalFeaturesEnabled && visibility !== undefined;
+const CONNECTORS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Connector ID to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of connector IDs to associate with the agent.' },
+  }
+);
 
 export function registerAgentRoutes({
   router,
@@ -251,6 +249,7 @@ export function registerAgentRoutes({
                     )
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                  connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -266,23 +265,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.create(request.body);
@@ -411,6 +393,7 @@ export function registerAgentRoutes({
                       )
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                    connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -427,23 +410,6 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const { uiSettings } = await ctx.core;
-        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-
-        if (
-          isVisibilityBlockedByExperimentalGate({
-            experimentalFeaturesEnabled,
-            visibility: request.body.visibility,
-          })
-        ) {
-          return response.badRequest({
-            body: {
-              message: VISIBILITY_DISABLED_MESSAGE,
-            },
-          });
-        }
 
         try {
           const profile = await service.update(request.params.id, request.body);

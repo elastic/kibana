@@ -19,9 +19,10 @@ Use this provider when:
 This adapter is designed for easy migration from `TableListView`. It:
 
 - **Passes only `searchQuery`** to your existing `findItems` function (matching `TableListView` behavior).
-- **Applies client-side sorting and pagination** on the returned results — your `findItems` fetches all matching items, and the adapter sorts and paginates in memory.
+- **Caches the server response by `searchQuery`** — changing filters, sort, or page reuses the cached items and does not trigger a new server round-trip.
+- **Applies client-side filtering, sorting, and pagination** in memory on the cached items. Your `findItems` returns all matching items; the adapter narrows them.
 - **Does not forward** `sort`, `page`, or `filters` parameters to your `findItems` implementation.
-- **Caches by `searchQuery`** — React Query caches results based on the search query. Changing sort or page reuses cached data.
+- **Exposes `onInvalidate`** on the data source so the core provider can force a fresh server fetch after mutations (e.g. delete). The consumer never calls this directly — it happens automatically.
 
 ## Usage
 
@@ -36,7 +37,7 @@ import { ContentListClientProvider } from '@kbn/content-list-provider-client';
 const findItems = useCallback(
   async (searchTerm) => {
     return dashboardClient.search({
-      search: searchTerm,
+      query: searchTerm,
     }).then(({ total, dashboards }) => ({
       total,
       hits: dashboards.map(transformToDashboardUserContent),
@@ -66,40 +67,19 @@ const findItems = useCallback(
 </ContentListClientProvider>
 ```
 
-### Using the Adapter Function Directly
-
-If you need more control, you can use the adapter function directly:
-
-```tsx
-import { createFindItemsFn } from '@kbn/content-list-provider-client';
-import { ContentListProvider } from '@kbn/content-list-provider';
-
-// Wrap your existing findItems.
-const findItems = createFindItemsFn(myExistingFindItems);
-
-// Use with the base provider.
-<ContentListProvider
-  id="dashboard"
-  labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-  dataSource={{ findItems }}
->
-  <MyListComponent />
-</ContentListProvider>
-```
-
 ## Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `id` | `string` | Yes* | Unique identifier. `queryKeyScope` derived as `${id}-listing` if not provided. |
-| `queryKeyScope` | `string` | Yes* | Explicit React Query cache key scope. |
-| `labels` | `ContentListLabels` | Yes | User-facing entity labels (should be i18n-translated). |
-| `findItems` | `TableListViewFindItemsFn` | Yes | Your existing `TableListView` findItems function. |
-| `features` | `ContentListFeatures` | No | Feature configuration. |
-| `item` | `ContentListItemConfig` | No | Per-item configuration for links. |
-| `isReadOnly` | `boolean` | No | Disable mutation actions. |
+| Prop            | Type                       | Required | Description                                                                    |
+| --------------- | -------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `id`            | `string`                   | Yes\*    | Unique identifier. `queryKeyScope` derived as `${id}-listing` if not provided. |
+| `queryKeyScope` | `string`                   | Yes\*    | Explicit React Query cache key scope.                                          |
+| `labels`        | `ContentListLabels`        | Yes      | User-facing entity labels (should be i18n-translated).                         |
+| `findItems`     | `TableListViewFindItemsFn` | Yes      | Your existing `TableListView` findItems function.                              |
+| `features`      | `ContentListFeatures`      | No       | Feature configuration.                                                         |
+| `item`          | `ContentListItemConfig`    | No       | Per-item configuration for links.                                              |
+| `isReadOnly`    | `boolean`                  | No       | Disable mutation actions.                                                      |
 
-*At least one of `id` or `queryKeyScope` is required.
+\*At least one of `id` or `queryKeyScope` is required.
 
 ## findItems Function Signature
 
@@ -125,6 +105,108 @@ This is the same signature expected by `TableListView.findItems`.
 
 > **Note:** The `refs` parameter (for tag filtering) is not yet supported in the new `ContentListProvider` architecture. Only `searchQuery` is forwarded in this initial version. Tag filtering support is planned for a future release.
 
+## Saved-object listing services
+
+`ContentListClientProvider` is a generic primitive — it accepts plain `services`/`features`/`contentEditor`/`findItems` args. For typical saved-object listings (Dashboards, Maps, Visualize, Graph, etc.) the wiring of those args is repetitive: build a tags service from the tagging API, instantiate a favorites client, decorate `findItems` with EBT performance metrics, format duplicate-title validators, and so on.
+
+The `services/` folder ships small, single-purpose helpers — one per capability area. Each helper builds exactly one piece of the args you already pass to `ContentListClientProvider`. They are not a wrapper, hook, or "preset"; they are the building blocks of the existing API surface.
+
+Each subfolder is named after the `ContentListClientProvider` field it serves:
+
+| Helper                                | Subfolder                | Fills                                |
+| ------------------------------------- | ------------------------ | ------------------------------------ |
+| `createTagsService(api)`              | `services/tags/`         | `services.tags`                      |
+| `createFavoritesService(opts)`        | `services/favorites/`    | `services.favorites`                 |
+| `createUserProfilesService(profile)`  | `services/user_profiles/`| `services.userProfiles`              |
+| `createContentInsightsService(opts)` + `<SavedObjectActivityRow>` | `services/content_insights/` | `contentEditor.appendRows`            |
+| `createDuplicateTitleValidator(opts)` | `services/duplicate_title/` | `contentEditor.customValidators.title`|
+| `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` |
+| `withPerformanceMetrics(fn, opts)`    | `services/performance_metrics/` | wraps `findItems` / `onDelete` |
+
+Each helper is tested in isolation and is independently optional. Use one, several, or none — `ContentListClientProvider` accepts the raw types either way.
+
+### Composing them in a consumer
+
+```tsx
+import {
+  ContentListClientProvider,
+  createTagsService,
+  createFavoritesService,
+  createUserProfilesService,
+  createContentInsightsService,
+  createDuplicateTitleValidator,
+  useRecentlyAccessedDecoration,
+  withPerformanceMetrics,
+  SavedObjectActivityRow,
+} from '@kbn/content-list-provider-client';
+
+const tags = createTagsService(savedObjectsTagging.getTaggingApi()?.ui);
+const favorites = createFavoritesService({
+  appId: 'dashboards',
+  savedObjectType: 'dashboard',
+  http: coreServices.http,
+  userProfile: coreServices.userProfile,
+  usageCollection: usageCollectionService,
+});
+const userProfiles = createUserProfilesService(coreServices.userProfile);
+const insights = createContentInsightsService({
+  http: coreServices.http,
+  logger,
+  domainId: 'dashboard',
+});
+const search = useMemo(
+  () =>
+    withPerformanceMetrics(rawSearch, {
+      analytics: coreServices.analytics,
+      eventName: SAVED_OBJECT_LOADED_TIME,
+      savedObjectType: 'dashboard',
+    }),
+  [rawSearch]
+);
+const recents = useRecentlyAccessedDecoration(getDashboardRecentlyAccessedService());
+
+return (
+  <ContentListClientProvider
+    services={{ uiSettings: core.uiSettings, tags, favorites, userProfiles }}
+    findItems={async (q, opts) => recents.decorate(await search(q, opts))}
+    features={{ flags: [recents.flag] }}
+    contentEditor={{
+      openContentEditor,
+      onSave: updateItemMeta,
+      customValidators: {
+        title: [
+          createDuplicateTitleValidator({
+            findCurrentTitle: (id) =>
+              findService.findById(id).then((r) =>
+                r.status === 'error' ? undefined : r.attributes.title
+              ),
+            checkForDuplicate: ({ title, lastSavedTitle }) =>
+              checkForDuplicateDashboardTitle({
+                title,
+                lastSavedTitle,
+                copyOnSave: false,
+                isTitleDuplicateConfirmed: false,
+              }),
+          }),
+        ],
+      },
+      appendRows: (item) => (
+        <SavedObjectActivityRow service={insights} item={item} entityNamePlural="dashboards" />
+      ),
+    }}
+  >
+    <ContentListToolbar>
+      <Filters>
+        <Filters.Starred />
+        <recents.RecentsFilter />
+        <Filters.Tags />
+      </Filters>
+    </ContentListToolbar>
+    <ContentListTable>{/* ... */}</ContentListTable>
+  </ContentListClientProvider>
+);
+```
+
 ## Exports
 
 ```typescript
@@ -132,8 +214,9 @@ This is the same signature expected by `TableListView.findItems`.
 export { ContentListClientProvider } from './provider';
 export type { ContentListClientProviderProps } from './provider';
 
-// Adapter for direct usage.
-export { createFindItemsFn } from './strategy';
+// Strategy.
+export { createClientStrategy } from './strategy';
+export type { ClientStrategy } from './strategy';
 
 // Types.
 export type {
@@ -141,8 +224,22 @@ export type {
   TableListViewFindItemsResult,
   SavedObjectReference,
 } from './types';
+
+// Saved-object listing services (see "Saved-object listing services" above).
+export {
+  createTagsService,
+  createFavoritesService,
+  createUserProfilesService,
+  createContentInsightsService,
+  SavedObjectActivityRow,
+  createDuplicateTitleValidator,
+  useRecentlyAccessedDecoration,
+  RecentsFilterRenderer,
+  withPerformanceMetrics,
+} from './services';
 ```
 
 ## Related Packages
 
 - [`@kbn/content-list-provider`](../kbn-content-list-provider) — Core provider and hooks.
+- [`@kbn/content-list-toolbar`](../kbn-content-list-toolbar) — Toolbar components consumed by `<recents.RecentsFilter />`.

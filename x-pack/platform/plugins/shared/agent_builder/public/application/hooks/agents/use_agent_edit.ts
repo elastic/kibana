@@ -119,10 +119,7 @@ export function useAgentEdit({
 
   const submit = useCallback(
     async (data: AgentEditState) => {
-      const cleanedData = cleanInvalidToolReferences(data, tools);
-      const requestData = isExperimentalFeaturesEnabled
-        ? cleanedData
-        : { ...cleanedData, visibility: undefined };
+      const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
         const { id, ...updatedAgent } = requestData;
@@ -131,13 +128,13 @@ export function useAgentEdit({
         await createMutation.mutateAsync(requestData);
       }
     },
-    [editingAgentId, createMutation, updateMutation, tools, isExperimentalFeaturesEnabled]
+    [editingAgentId, createMutation, updateMutation, tools]
   );
 
   const isLoading = agentId
     ? agentLoading ||
       toolsLoading ||
-      (isExperimentalFeaturesEnabled && skillsLoading) ||
+      skillsLoading ||
       (isExperimentalFeaturesEnabled && pluginsLoading)
     : false;
 
@@ -151,7 +148,7 @@ export function useAgentEdit({
     plugins,
     error:
       toolsError ||
-      (isExperimentalFeaturesEnabled ? skillsError : undefined) ||
+      skillsError ||
       (isExperimentalFeaturesEnabled ? pluginsError : undefined) ||
       agentError,
   };

@@ -16,14 +16,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AgentIcon } from '@kbn/custom-icons';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
-import { SpanLinksBadge, SyncBadge, ColdStartBadge } from './badges';
 
 const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
@@ -38,7 +40,8 @@ const ORPHAN_CONTENT = i18n.translate(
 
 export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: number }) {
   const theme = useEuiTheme();
-  const { getRelatedErrorsHref, onErrorClick, onClick } = useTraceWaterfallContext();
+  const { getRelatedErrorsHref, onErrorClick, onClick, getServiceBadgeHref, ebt } =
+    useTraceWaterfallContext();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
   const errorCount = item.errors.length;
 
@@ -93,7 +96,11 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiText css={{ overflow: 'hidden', whiteSpace: 'nowrap' }} size="s">
+          <EuiText
+            css={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+            size="s"
+            data-test-subj="apmBarDetailsName"
+          >
             <TruncateWithTooltip content={displayName} text={displayName} />
           </EuiText>
         </EuiFlexItem>
@@ -101,16 +108,32 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
           <EuiFlexItem grow={false} style={{ maxWidth: '30%', flexShrink: 0 }}>
             <EuiBadge
               color="hollow"
-              iconType="dot"
               data-test-subj="apmBarDetailsServiceNameBadge"
-              css={css`
-                max-width: 100%;
-                & .euiBadge__icon {
-                  color: ${item.color};
-                }
-              `}
+              {...(getServiceBadgeHref && ebt?.serviceBadge
+                ? getEbtProps({
+                    action: EBT_CLICK_ACTIONS.VIEW_SERVICE,
+                    element: ebt.serviceBadge.element,
+                  })
+                : {})}
+              data-prevent-row-click={getServiceBadgeHref ? true : undefined}
+              href={getServiceBadgeHref?.(item.serviceName) as any}
+              aria-label={
+                getServiceBadgeHref
+                  ? i18n.translate('xpack.apm.trace.barDetails.serviceBadge.ariaLabel', {
+                      defaultMessage: 'Go to {serviceName} service overview',
+                      values: { serviceName: item.serviceName },
+                    })
+                  : undefined
+              }
             >
-              {item.serviceName}
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <AgentIcon agentName={item.agentName} size="m" role="presentation" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="eui-textTruncate">
+                  <span className="eui-textTruncate">{item.serviceName}</span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiBadge>
           </EuiFlexItem>
         )}
@@ -137,12 +160,18 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
+                {...(ebt
+                  ? getEbtProps({
+                      action: EBT_CLICK_ACTIONS.VIEW_ERROR,
+                      element: ebt.errorBadge.element,
+                    })
+                  : {})}
+                data-prevent-row-click
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
                     e.preventDefault();
-                    e.stopPropagation();
                     onErrorClick({
                       traceId: item.traceId,
                       docId: item.id,
@@ -162,7 +191,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               </EuiBadge>
             ) : (
               <EuiIcon
-                type="errorFilled"
+                type="errorFill"
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"

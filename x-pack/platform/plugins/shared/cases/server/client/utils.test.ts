@@ -21,6 +21,7 @@ import {
   convertSortField,
   transformTemplateCustomFields,
   removeAttributesFromFilter,
+  getCaseToUpdate,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
@@ -1901,6 +1902,32 @@ describe('utils', () => {
 
       // Result should have modified value
       expect(result?.arguments[0].arguments[0].value).toBe('cases.tags');
+    });
+  });
+
+  describe('getCaseToUpdate', () => {
+    it('includes a plain-object field when currentValue is undefined (first write)', () => {
+      const result = getCaseToUpdate(
+        { id: '1', version: 'v1', title: 'existing' },
+        { id: '1', version: 'v1', extended_fields: { risk_score: 'high' } }
+      );
+      expect(result).toEqual({ id: '1', version: 'v1', extended_fields: { risk_score: 'high' } });
+    });
+
+    it('excludes a plain-object field when it has not changed', () => {
+      const result = getCaseToUpdate(
+        { id: '1', version: 'v1', extended_fields: { risk_score: 'high' } },
+        { id: '1', version: 'v1', extended_fields: { risk_score: 'high' } }
+      );
+      expect(result).toEqual({ id: '1', version: 'v1' });
+    });
+
+    it('includes a plain-object field when it has changed', () => {
+      const result = getCaseToUpdate(
+        { id: '1', version: 'v1', extended_fields: { risk_score: 'low' } },
+        { id: '1', version: 'v1', extended_fields: { risk_score: 'high' } }
+      );
+      expect(result).toEqual({ id: '1', version: 'v1', extended_fields: { risk_score: 'high' } });
     });
   });
 });

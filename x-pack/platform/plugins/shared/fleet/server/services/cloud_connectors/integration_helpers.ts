@@ -20,6 +20,7 @@ import {
 import {
   AWS_ACCOUNT_TYPE_VAR_NAME,
   AZURE_ACCOUNT_TYPE_VAR_NAME,
+  GCP_ACCOUNT_TYPE_VAR_NAME,
   SINGLE_ACCOUNT,
   ORGANIZATION_ACCOUNT,
   CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
@@ -62,6 +63,8 @@ export function extractAccountType(
       rawAccountType = vars[AWS_ACCOUNT_TYPE_VAR_NAME]?.value;
     } else if (cloudProvider === 'azure') {
       rawAccountType = vars[AZURE_ACCOUNT_TYPE_VAR_NAME]?.value;
+    } else if (cloudProvider === 'gcp') {
+      rawAccountType = vars[GCP_ACCOUNT_TYPE_VAR_NAME]?.value;
     }
 
     const validated = validateAccountType(rawAccountType);

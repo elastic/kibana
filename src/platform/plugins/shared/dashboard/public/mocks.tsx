@@ -99,8 +99,8 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
     filters: [],
     title: 'My Dashboard',
     query: {
-      language: 'kuery',
-      query: 'hi',
+      language: 'kql',
+      expression: 'hi',
     },
     time_range: {
       to: 'now',
@@ -115,13 +115,13 @@ export function getMockPanels() {
     {
       grid: { x: 0, y: 0, w: 6, h: 6 },
       config: { title: 'panel One' },
-      uid: '1',
+      id: '1',
       type: 'testPanelType',
     },
     {
       grid: { x: 6, y: 0, w: 6, h: 6 },
       config: { title: 'panel Two' },
-      uid: '2',
+      id: '2',
       type: 'testPanelType',
     },
   ];
@@ -136,12 +136,12 @@ export function getMockPanelsWithSections() {
       grid: {
         y: 6,
       },
-      uid: 'section1',
+      id: 'section1',
       panels: [
         {
           grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel Three' },
-          uid: '3',
+          id: '3',
           type: 'testPanelType',
         },
       ],
@@ -152,12 +152,12 @@ export function getMockPanelsWithSections() {
       grid: {
         y: 7,
       },
-      uid: 'section2',
+      id: 'section2',
       panels: [
         {
           grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel Four' },
-          uid: '4',
+          id: '4',
           type: 'testPanelType',
         },
       ],

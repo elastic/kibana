@@ -18,46 +18,67 @@ Where:
 
 ## Use the `tags` helper [scout-deployment-tags-using]
 
-Prefer the `tags` helper exported by Scout instead of writing raw strings. It returns arrays of Playwright tags you can use directly or combine.
+Use the `tags` helper (see the full list below) to declare where your tests should run. By default, each helper expands to **both** `@local-*` and `@cloud-*` targets:
 
 ```ts
-import { test, tags } from '@kbn/scout';
-
-test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
-  test('works', async () => {
+test.describe(
+  'My suite',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
     // ...
-  });
-});
+  }
+);
 ```
 
-Combine multiple targets by spreading:
+This is equivalent to assigning all of these tags:
+
+- `@local-stateful-*` (local stateful)
+- `@cloud-stateful-*` (Elastic Cloud)
+- `@local-serverless-security_complete` (local serverless)
+- `@cloud-serverless-security_complete` (Elastic Cloud)
+
+To restrict a test to **local environments** only, write the tag strings explicitly:
 
 ```ts
-test.describe('My suite', { tag: [...tags.stateful.classic, ...tags.serverless.search] }, () => {
-  // ...
-});
+test.describe(
+  'My suite',
+  { tag: ['@local-stateful-classic', '@local-serverless-security_complete'] },
+  () => {
+    // ...
+  }
+);
 ```
+
+This test will only run locally (stateful classic and serverless Security complete tier), and will be skipped by Elastic Cloud pipelines.
 
 ## Common shortcuts [scout-deployment-tags-shortcuts]
 
-Unless stated otherwise, these helpers include **both** `@local-*` and `@cloud-*` targets.
+### `tags.deploymentAgnostic` [scout-deployment-tags-deployment-agnostic]
 
-### Cross-cutting helpers [scout-deployment-tags-cross-cutting]
+Use this tag for **platform** specs that need to run across every standard deployment type. It expands to:
 
-| Helper                    | What it targets                                                                                                                                                                               |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tags.deploymentAgnostic` | **Recommended if your test can run (almost) everywhere**: includes stateful + serverless `*.complete`. Excludes serverless Workplace AI projects (as they don't have a stateful counterpart). |
-| `tags.performance`        | Performance tests (`@perf`)                                                                                                                                                                   |
+- `tags.stateful.all`
+- `tags.serverless.search`
+- `tags.serverless.observability.complete`
+- `tags.serverless.security.complete`
 
-### Stateful (by domain) [scout-deployment-tags-stateful]
+Workplace AI is excluded because it has no stateful counterpart.
 
-| Helper                        | Domain                                   |
+::::{warning}
+`tags.deploymentAgnostic` runs your test across all solutions, which is expensive. If your test lives in a solution module, use explicit targets instead (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`).
+::::
+
+### Stateful [scout-deployment-tags-stateful]
+
+| Helper                        | Compatible with solution view            |
 | ----------------------------- | ---------------------------------------- |
-| `tags.stateful.all`           | All stateful targets                     |
-| `tags.stateful.classic`       | Classic                                  |
-| `tags.stateful.search`        | {icon}`logo_elasticsearch` Search        |
+| `tags.stateful.all`           | All space solution views                 |
+| `tags.stateful.classic`       | {icon}`logo_elastic_stack` Classic       |
+| `tags.stateful.search`        | {icon}`logo_elasticsearch` Elasticsearch |
 | `tags.stateful.observability` | {icon}`logo_observability` Observability |
 | `tags.stateful.security`      | {icon}`logo_security` Security           |
+
+The target solution view indicates the **solution view** the test is intended for, but is not enforced at test execution time. To set the solution view in a test, use `scoutSpace.setSolutionView()`.
 
 ### Serverless (by solution) [scout-deployment-tags-serverless]
 
@@ -77,22 +98,28 @@ Unless stated otherwise, these helpers include **both** `@local-*` and `@cloud-*
 
 | Helper                                          | Project type                                               |
 | ----------------------------------------------- | ---------------------------------------------------------- |
-| `tags.serverless.observability.complete`        | {icon}`logo_observability` Observability (complete)        |
-| `tags.serverless.observability.logs_essentials` | {icon}`logo_observability` Observability (logs_essentials) |
+| `tags.serverless.observability.all`             | {icon}`logo_observability` All Observability project tiers |
+| `tags.serverless.observability.complete`        | {icon}`logo_observability` Observability (Complete)        |
+| `tags.serverless.observability.logs_essentials` | {icon}`logo_observability` Observability (Logs Essentials) |
 
 #### Security [scout-deployment-tags-serverless-security]
 
-| Helper                                | Project type                                |
-| ------------------------------------- | ------------------------------------------- |
-| `tags.serverless.security.complete`   | {icon}`logo_security` Security (complete)   |
-| `tags.serverless.security.essentials` | {icon}`logo_security` Security (essentials) |
-| `tags.serverless.security.ease`       | {icon}`logo_security` Security (ease)       |
+| Helper                                | Project type                                     |
+| ------------------------------------- | ------------------------------------------------ |
+| `tags.serverless.security.all`        | {icon}`logo_security` All Security project tiers |
+| `tags.serverless.security.complete`   | {icon}`logo_security` Security (Complete)        |
+| `tags.serverless.security.essentials` | {icon}`logo_security` Security (Essentials)      |
+| `tags.serverless.security.ease`       | {icon}`logo_security` Security (EASE)            |
 
 #### Workplace AI [scout-deployment-tags-serverless-workplaceai]
 
 | Helper                        | Project type                               |
 | ----------------------------- | ------------------------------------------ |
 | `tags.serverless.workplaceai` | {icon}`logo_workplace_search` Workplace AI |
+
+### `tags.performance` [scout-deployment-tags-performance]
+
+Use `tags.performance` for performance tests. It assigns the `@perf` tag.
 
 For the authoritative list (and the exact tag strings), see `src/platform/packages/shared/kbn-scout/src/playwright/tags.ts` or just rely on editor autocomplete.
 

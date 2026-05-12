@@ -14,19 +14,21 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const GetPrivilegedAccessDetectionPackageStatusResponse = lazySchema(() =>
+  z.object({
+    package_installation_status: z.enum(['complete', 'incomplete']),
+    ml_module_setup_status: z.enum(['complete', 'incomplete']),
+    jobs: z.array(
+      z.object({
+        job_id: z.string(),
+        description: z.string().optional(),
+        state: z.enum(['closing', 'closed', 'opened', 'failed', 'opening']),
+      })
+    ),
+  })
+);
 export type GetPrivilegedAccessDetectionPackageStatusResponse = z.infer<
   typeof GetPrivilegedAccessDetectionPackageStatusResponse
 >;
-export const GetPrivilegedAccessDetectionPackageStatusResponse = z.object({
-  package_installation_status: z.enum(['complete', 'incomplete']),
-  ml_module_setup_status: z.enum(['complete', 'incomplete']),
-  jobs: z.array(
-    z.object({
-      job_id: z.string(),
-      description: z.string().optional(),
-      state: z.enum(['closing', 'closed', 'opened', 'failed', 'opening']),
-    })
-  ),
-});

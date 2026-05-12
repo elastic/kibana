@@ -99,7 +99,7 @@ describe(`useActions`, () => {
           return 'mockExtraAction';
         },
         getIconType(): string | undefined {
-          return 'editorRedo';
+          return 'redo';
         },
         type: 'actionButton',
         async isCompatible(): Promise<boolean> {

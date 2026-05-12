@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ReadInstallationStatusResponse = lazySchema(() => z.object({}));
 export type ReadInstallationStatusResponse = z.infer<typeof ReadInstallationStatusResponse>;
-export const ReadInstallationStatusResponse = z.object({});

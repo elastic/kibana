@@ -72,6 +72,13 @@ export const GAP_STATUS_FILLED_LABEL = i18n.translate(
   }
 );
 
+export const GAP_STATUS_ERROR_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.error',
+  {
+    defaultMessage: 'Error',
+  }
+);
+
 export const gapStatusTooltipInProgress = (duration: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.columns.gapStatus.tooltip.inProgress',

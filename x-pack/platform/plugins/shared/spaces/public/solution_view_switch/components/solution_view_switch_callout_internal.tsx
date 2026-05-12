@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -23,9 +33,13 @@ export const SolutionViewSwitchCalloutInternal = ({
   manageSpacesUrl,
   updateSpace,
   showError,
+  onDismiss,
 }: SolutionViewSwitchCalloutProps & SolutionViewSwitchCalloutInternalProps) => {
+  const { euiTheme } = useEuiTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const narrowTopMargin = currentSolution === 'security';
 
   const handleSwitch = async (selectedSolution: SupportedSolutionView) => {
     setIsLoading(true);
@@ -40,26 +54,60 @@ export const SolutionViewSwitchCalloutInternal = ({
 
   return (
     <>
+      <EuiHorizontalRule
+        margin="m"
+        css={
+          narrowTopMargin
+            ? css`
+                margin-block-start: ${euiTheme.size.xs};
+              `
+            : undefined
+        }
+      />
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.spaces.solutionViewSwitch.callout.title', {
-                defaultMessage: 'New navigation available',
-              })}
-            </strong>
-          </EuiText>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('xpack.spaces.solutionViewSwitch.callout.title', {
+                    defaultMessage: 'New navigation available',
+                  })}
+                </strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                data-test-subj="solutionViewSwitchCalloutDismissButton"
+                iconType="cross"
+                size="xs"
+                color="text"
+                aria-label={i18n.translate(
+                  'xpack.spaces.solutionViewSwitch.callout.dismissButton',
+                  {
+                    defaultMessage: 'Dismiss',
+                  }
+                )}
+                onClick={onDismiss}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s">
             {i18n.translate('xpack.spaces.solutionViewSwitch.callout.description', {
               defaultMessage:
-                'A simplified left nav built for {solutionName} with easier access to analytics and management.',
+                'Switch to {solutionName} nav for easier access to analytics and management.',
               values: { solutionName: SOLUTION_VIEW_CONFIG[currentSolution].name },
             })}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" fullWidth onClick={() => setIsModalOpen(true)}>
+          <EuiButton
+            data-test-subj="solutionViewSwitchCalloutLearnMoreButton"
+            size="s"
+            fullWidth
+            onClick={() => setIsModalOpen(true)}
+          >
             {i18n.translate('xpack.spaces.solutionViewSwitch.callout.learnMoreButton', {
               defaultMessage: 'Learn more',
             })}

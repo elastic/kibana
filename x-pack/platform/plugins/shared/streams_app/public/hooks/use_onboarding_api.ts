@@ -6,15 +6,20 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import type { OnboardingStep } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
-export interface UseOnboardingApiOptions {
-  saveQueries?: boolean;
+export interface ScheduleOnboardingOptions {
+  steps?: OnboardingStep[];
+  connectors?: {
+    features?: string;
+    queries?: string;
+  };
 }
 
-export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions = {}) {
+export function useOnboardingApi() {
   const {
     dependencies: {
       start: {
@@ -27,7 +32,7 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
 
   return useMemo(
     () => ({
-      scheduleOnboardingTask: async (streamName: string) => {
+      scheduleOnboardingTask: async (streamName: string, options?: ScheduleOnboardingOptions) => {
         const { from, to } = getLast24HoursTimeRange();
 
         return streamsRepositoryClient.fetch(
@@ -36,11 +41,12 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'schedule' as const,
                 from,
                 to,
+                ...(options?.steps !== undefined && { steps: options.steps }),
+                ...(options?.connectors !== undefined && { connectors: options.connectors }),
               },
             },
           }
@@ -53,7 +59,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
             },
           }
         );
@@ -65,7 +70,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'cancel' as const,
               },
@@ -80,7 +84,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
             signal,
             params: {
               path: { streamName },
-              query: { saveQueries },
               body: {
                 action: 'acknowledge' as const,
               },
@@ -89,6 +92,6 @@ export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions
         );
       },
     }),
-    [saveQueries, signal, streamsRepositoryClient]
+    [signal, streamsRepositoryClient]
   );
 }

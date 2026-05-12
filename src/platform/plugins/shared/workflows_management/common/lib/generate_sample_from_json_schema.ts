@@ -35,15 +35,18 @@ export function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
       }
       return [];
     }
-    case 'object': {
+    case 'object':
+    // No explicit type but has properties — valid JSON Schema implicit-object form.
+    case undefined: {
+      if (!schema.properties) {
+        return schema.type === 'object' ? {} : undefined;
+      }
       const sample: Record<string, unknown> = {};
-      if (schema.properties) {
-        for (const [key, propSchema] of Object.entries(schema.properties)) {
-          const prop = propSchema as JSONSchema7;
-          const isRequired = schema.required?.includes(key) ?? false;
-          if (isRequired || prop.default !== undefined) {
-            sample[key] = generateSampleFromJsonSchema(prop);
-          }
+      for (const [key, propSchema] of Object.entries(schema.properties)) {
+        const prop = propSchema as JSONSchema7;
+        const isRequired = schema.required?.includes(key) ?? false;
+        if (isRequired || prop.default !== undefined) {
+          sample[key] = generateSampleFromJsonSchema(prop);
         }
       }
       return sample;

@@ -16,6 +16,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -26,19 +27,26 @@ import { useObservedHostFields } from '../hooks/use_observed_host_fields';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import type { HostItem } from '../../../../../common/search_strategy';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
+import type { IdentityFields } from '../../../document_details/shared/utils';
+import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
 
-type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
+type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'> & {
+  entityRecord?: EntityStoreRecord | null;
+};
 
 export const ObservedDataSection = memo(
   ({
-    hostName,
+    identityFields,
+    entityRecord,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
-    hostName: string;
+    identityFields: IdentityFields;
+    entityRecord?: EntityStoreRecord | null;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -52,7 +60,7 @@ export const ObservedDataSection = memo(
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.observedDataTitle"
-            defaultMessage="Observed data"
+            defaultMessage="Observed attributes"
           />
         </h3>
       </EuiTitle>
@@ -70,7 +78,7 @@ export const ObservedDataSection = memo(
             title={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.entityDetails.observedDataInspectTitle"
-                defaultMessage="Observed data"
+                defaultMessage="Observed attributes"
               />
             }
           />
@@ -123,7 +131,8 @@ export const ObservedDataSection = memo(
             <EuiLoadingSpinner data-test-subj="observedDataSectionLoadingSpinner" />
           ) : (
             <ObservedDataSectionContent
-              hostName={hostName}
+              identityFields={identityFields}
+              entityRecord={entityRecord}
               observedHost={observedHost}
               contextID={contextID}
               scopeId={scopeId}
@@ -139,13 +148,15 @@ ObservedDataSection.displayName = 'ObservedDataSection';
 
 const ObservedDataSectionContent = memo(
   ({
-    hostName,
+    identityFields,
+    entityRecord,
     observedHost,
     contextID,
     scopeId,
     queryId,
   }: {
-    hostName: string;
+    identityFields: IdentityFields;
+    entityRecord?: EntityStoreRecord | null;
     observedHost: ObservedHostData;
     contextID: string;
     scopeId: string;
@@ -155,8 +166,19 @@ const ObservedDataSectionContent = memo(
 
     const { jobNameById } = useInstalledSecurityJobNameById();
     const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
+    const euidApi = useEntityStoreEuidApi();
+    const euid = euidApi?.euid;
+    const hostNameFallback = observedHost.details?.host?.name?.[0];
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
-      criteriaFields: hostToCriteria(observedHost.details),
+      criteriaFields: hostToCriteria({ hostItem: observedHost.details, entityRecord, euid }),
+      filterQuery: buildAnomaliesTableInfluencersFilterQuery({
+        euid,
+        entityType: 'host',
+        isScopedToEntity: true,
+        identityFields,
+        entityRecord,
+        fallbackDisplayName: hostNameFallback,
+      }),
       startDate: from,
       endDate: to,
       skip: isInitializing,
@@ -167,6 +189,7 @@ const ObservedDataSectionContent = memo(
     const observedHostWithAnomalies = useMemo(
       (): ObservedEntityData<HostItem> => ({
         ...observedHost,
+        entityId: observedHost.entityRecord?.entity.id,
         anomalies: {
           isLoading: isLoadingAnomaliesData,
           anomalies: anomaliesData,

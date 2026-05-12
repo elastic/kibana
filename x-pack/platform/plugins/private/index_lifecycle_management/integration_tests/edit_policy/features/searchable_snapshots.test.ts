@@ -72,6 +72,87 @@ describe('<EditPolicy /> searchable snapshots', () => {
     httpRequestsMockHelpers.setDefaultResponses();
   });
 
+  test('force_merge_on_clone is hidden when force_merge_index is disabled', async () => {
+    await setup();
+    const actions = createActions();
+
+    await actions.togglePhase('cold');
+    await actions.cold.setMinAgeValue('10');
+    await actions.cold.toggleSearchableSnapshot();
+    await actions.cold.setSearchableSnapshot('myRepo');
+
+    expect(await actions.cold.forceMergeIndexSwitchExists()).toBe(true);
+    expect(await actions.cold.forceMergeOnCloneSwitchExists()).toBe(true);
+
+    await actions.cold.toggleForceMergeIndex();
+
+    expect(await actions.cold.forceMergeIndexIsChecked()).toBe(false);
+    expect(await actions.cold.forceMergeOnCloneSwitchExists()).toBe(false);
+  });
+
+  test('saving strips force_merge_on_clone when force_merge_index is false', async () => {
+    await setup();
+    const actions = createActions();
+
+    await actions.togglePhase('cold');
+    await actions.cold.setMinAgeValue('10');
+    await actions.cold.toggleSearchableSnapshot();
+    await actions.cold.setSearchableSnapshot('myRepo');
+
+    // Toggle opt-out first (sets `force_merge_on_clone: false`)
+    await actions.cold.toggleForceMergeOnClone();
+    expect(await actions.cold.forceMergeOnCloneIsChecked()).toBe(false);
+
+    // Now disable force merge index (ES disallows force_merge_on_clone when force_merge_index is false)
+    await actions.cold.toggleForceMergeIndex();
+    expect(await actions.cold.forceMergeIndexIsChecked()).toBe(false);
+    expect(await actions.cold.forceMergeOnCloneSwitchExists()).toBe(false);
+
+    await actions.savePolicy();
+    await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
+
+    const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+    const [requestUrl, requestBody] = lastReq;
+    const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+    expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe(
+      'myRepo'
+    );
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.force_merge_index).toBe(false);
+    expect(
+      parsedReqBody.phases.cold.actions.searchable_snapshot.force_merge_on_clone
+    ).toBeUndefined();
+  });
+
+  test('saving includes force_merge_on_clone=false when force_merge_index is enabled', async () => {
+    await setup();
+    const actions = createActions();
+
+    await actions.togglePhase('cold');
+    await actions.cold.setMinAgeValue('10');
+    await actions.cold.toggleSearchableSnapshot();
+    await actions.cold.setSearchableSnapshot('myRepo');
+
+    // Default is checked (true, omitted), so toggle once to set it to false
+    await actions.cold.toggleForceMergeOnClone();
+    expect(await actions.cold.forceMergeOnCloneIsChecked()).toBe(false);
+
+    await actions.savePolicy();
+    await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
+
+    const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+    const [requestUrl, requestBody] = lastReq;
+    const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+    expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe(
+      'myRepo'
+    );
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.force_merge_index).toBeUndefined();
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.force_merge_on_clone).toBe(false);
+  });
+
   test('enabling searchable snapshot should hide force merge, readonly and shrink in subsequent phases', async () => {
     await setup();
     const actions = createActions();

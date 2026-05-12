@@ -28,6 +28,8 @@ import {
   monitoringEntitySourceType,
 } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { watchlistConfigType } from './lib/entity_analytics/watchlists/management/saved_object/watchlist_config_type';
+import { watchlistEntitySourceType } from './lib/entity_analytics/watchlists/entity_sources/infra';
+import { leadGenerationConfigType } from './lib/entity_analytics/lead_generation/saved_object';
 import {
   PrivilegeMonitoringApiKeyEncryptionParams,
   PrivilegeMonitoringApiKeyType,
@@ -55,6 +57,8 @@ const types = [
   watchlistConfigType,
   PrivilegeMonitoringApiKeyType,
   monitoringEntitySourceType,
+  watchlistEntitySourceType,
+  leadGenerationConfigType,
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,

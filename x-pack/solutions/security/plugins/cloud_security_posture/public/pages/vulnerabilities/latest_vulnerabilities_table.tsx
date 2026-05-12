@@ -133,7 +133,7 @@ export const LatestVulnerabilitiesTable = ({
       const actions: MultiValueCellAction[] = [
         {
           onClick: () => onAddFilter(field, item, '+'),
-          iconType: 'plusInCircle',
+          iconType: 'plusCircle',
           ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.addFilter', {
             defaultMessage: 'Add filter',
           }),
@@ -144,7 +144,7 @@ export const LatestVulnerabilitiesTable = ({
         },
         {
           onClick: () => onAddFilter(field, item, '-'),
-          iconType: 'minusInCircle',
+          iconType: 'minusCircle',
           ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.removeFilter', {
             defaultMessage: 'Remove filter',
           }),
@@ -157,7 +157,7 @@ export const LatestVulnerabilitiesTable = ({
           ? [
               {
                 onClick: () => window.open(findReferenceLink(references, item)!, '_blank'),
-                iconType: 'popout',
+                iconType: 'external',
                 ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.openUrlInWindow', {
                   defaultMessage: 'Open URL in window',
                 }),

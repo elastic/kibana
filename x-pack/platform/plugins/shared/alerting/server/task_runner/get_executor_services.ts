@@ -11,7 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { SpaceNPRERouting } from '@kbn/core-elasticsearch-server';
+import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
 import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
@@ -58,7 +58,7 @@ export interface ExecutorServices {
 // Default project routing for rules when CPS is enabled is 'space'
 // If there is no default routing defined for the space, it falls back to 'all' when CPS is enabled
 const PROJECT_ROUTING_FOR_RULES = 'space';
-const projectRouting: SpaceNPRERouting = {
+const projectRouting: AsScopedOptions = {
   projectRouting: PROJECT_ROUTING_FOR_RULES,
 };
 
@@ -87,7 +87,7 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
   const uiSettingsClient = context.uiSettings.asScopedToClient(savedObjectsClient);
 
   return {
-    ruleMonitoringService: opts.ruleMonitoringService.getLastRunMetricsSetters(),
+    ruleMonitoringService: opts.ruleMonitoringService.getSetters(),
     ruleResultService: opts.ruleResultService.getLastRunSetters(),
     savedObjectsClient,
     uiSettingsClient,

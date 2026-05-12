@@ -46,6 +46,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -86,6 +87,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -274,6 +276,7 @@
             "lineNumber": 33,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "EmptyPlaceholderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -507,6 +510,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -547,6 +551,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -769,6 +774,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActiveCursor",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -788,6 +794,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RefObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -805,6 +812,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ActiveCursorSyncOption",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1833,7 +1841,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "\"Background\" | \"Labels\" | \"None\""
+          "\"Labels\" | \"Background\" | \"None\""
         ],
         "path": "src/platform/plugins/shared/charts/common/static/components/collections.ts",
         "lineNumber": 18,
@@ -1922,10 +1930,10 @@
         "label": "paletteIds",
         "description": [],
         "signature": [
-          "string[]"
+          "SystemPaletteId[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2830,10 +2838,10 @@
         "label": "paletteIds",
         "description": [],
         "signature": [
-          "string[]"
+          "SystemPaletteId[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3701,7 +3709,7 @@
         "label": "AllowedSettingsOverrides",
         "description": [],
         "signature": [
-          "{ settings?: { onResize?: \"ignore\" | undefined; theme?: ",
+          "{ settings?: { locale?: string | undefined; onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -3729,7 +3737,7 @@
           "PointerUpdateTrigger",
           " | undefined; brushAxis?: ",
           "BrushAxis",
-          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; locale?: string | undefined; dow?: number | undefined; legendValues?: ",
+          " | undefined; minBrushDelta?: number | undefined; allowBrushingLastHistogramBin?: boolean | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; dow?: number | undefined; legendValues?: ",
           "MakeOverridesSerializable",
           "<",
           "LegendValue",
@@ -3758,7 +3766,7 @@
         "label": "ColorMode",
         "description": [],
         "signature": [
-          "\"Background\" | \"Labels\" | \"None\""
+          "\"Labels\" | \"Background\" | \"None\""
         ],
         "path": "src/platform/plugins/shared/charts/common/static/components/collections.ts",
         "lineNumber": 18,
@@ -3816,7 +3824,7 @@
           "string[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3847,10 +3855,10 @@
         "label": "paletteIds",
         "description": [],
         "signature": [
-          "string[]"
+          "SystemPaletteId[]"
         ],
         "path": "src/platform/plugins/shared/charts/common/constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
