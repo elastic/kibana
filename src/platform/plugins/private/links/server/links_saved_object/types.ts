@@ -18,7 +18,7 @@ import type {
   linksSearchOptionsSchema,
   linksUpdateOptionsSchema,
   externalLinkOptionsSchema,
-} from './cm_services';
+} from './schemas';
 
 export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
 export type ExternalLink = TypeOf<typeof externalLinkSchema>;

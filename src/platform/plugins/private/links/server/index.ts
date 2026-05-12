@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core-plugins-server';
-
 export type {
   DashboardLink,
   ExternalLink,
@@ -24,9 +22,9 @@ export type {
   LinksByValueState,
   LinksByReferenceState,
   LinksEmbeddableState,
-} from './embeddable_schemas';
+} from './links_saved_object/embeddable_schemas';
 
-export const plugin = async (initContext: PluginInitializerContext) => {
+export const plugin = async () => {
   const { LinksServerPlugin } = await import('./plugin');
-  return new LinksServerPlugin(initContext);
+  return new LinksServerPlugin();
 };

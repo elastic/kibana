@@ -14,7 +14,7 @@ import {
   BY_VALUE_SCHEMA_META,
   serializedTitlesSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { linksArraySchema, layoutSchema } from './links_saved_object/schema/v1/cm_services';
+import { layoutSchema, linksArraySchema } from '../api/schemas';
 
 // Links by-value state schema (contains layout and links)
 const linksByValueStateSchema = schema.object({
