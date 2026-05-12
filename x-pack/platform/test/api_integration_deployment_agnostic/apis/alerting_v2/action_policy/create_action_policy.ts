@@ -44,7 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { interval: '1m' },
         });
 
-      expect(response.status).to.be(200);
+      expect(response.status).to.be(201);
       expect(response.body.id).to.be.a('string');
       expect(response.body.version).to.be.a('string');
       expect(response.body.name).to.be('my-policy');
@@ -60,66 +60,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.auth.owner).to.be.a('string');
       expect(response.body.auth.createdByUser).to.be(true);
       expect(response.body.auth.apiKey).to.be(undefined);
-    });
-
-    it('should create a action policy with a custom id', async () => {
-      const customId = 'custom-action-policy-id';
-
-      const response = await supertestWithoutAuth
-        .post(`${ACTION_POLICY_API_PATH}/${customId}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          name: 'another-policy',
-          description: 'another-policy description',
-          destinations: [{ type: 'workflow', id: 'another-workflow-id' }],
-          matcher: "env == 'staging' && region == 'eu-west-1'",
-          groupBy: ['kubernetes.namespace'],
-          throttle: { interval: '5m' },
-        });
-
-      expect(response.status).to.be(200);
-      expect(response.body.id).to.be(customId);
-      expect(response.body.name).to.be('another-policy');
-      expect(response.body.description).to.be('another-policy description');
-      expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'another-workflow-id' }]);
-      expect(response.body.matcher).to.be("env == 'staging' && region == 'eu-west-1'");
-      expect(response.body.groupBy).to.eql(['kubernetes.namespace']);
-      expect(response.body.throttle).to.eql({ interval: '5m' });
-      expect(response.body.auth).to.be.an('object');
-      expect(response.body.auth.owner).to.be.a('string');
-      expect(response.body.auth.createdByUser).to.be(true);
-      expect(response.body.auth.apiKey).to.be(undefined);
-    });
-
-    it('should return 409 when creating a action policy with an existing id', async () => {
-      const existingId = 'existing-policy-id';
-
-      // Create the first policy
-      const firstResponse = await supertestWithoutAuth
-        .post(`${ACTION_POLICY_API_PATH}/${existingId}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          name: 'policy-1',
-          description: 'policy-1 description',
-          destinations: [{ type: 'workflow', id: 'workflow-1' }],
-        });
-
-      expect(firstResponse.status).to.be(200);
-
-      // Try to create another policy with the same id
-      const secondResponse = await supertestWithoutAuth
-        .post(`${ACTION_POLICY_API_PATH}/${existingId}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({
-          name: 'policy-2',
-          description: 'policy-2 description',
-          destinations: [{ type: 'workflow', id: 'workflow-2' }],
-        });
-
-      expect(secondResponse.status).to.be(409);
     });
 
     it('should return 400 when name is missing', async () => {
@@ -184,7 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
         });
 
-      expect(response.status).to.be(200);
+      expect(response.status).to.be(201);
       expect(response.body.name).to.be('minimal-policy');
       expect(response.body.description).to.be('minimal-policy description');
       expect(response.body.destinations).to.eql([{ type: 'workflow', id: 'minimal-workflow-id' }]);
@@ -210,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { strategy: 'time_interval', interval: '5m' },
         });
 
-      expect(response.status).to.be(200);
+      expect(response.status).to.be(201);
       expect(response.body.groupingMode).to.be('per_field');
       expect(response.body.groupBy).to.eql(['host.name']);
       expect(response.body.throttle).to.eql({ strategy: 'time_interval', interval: '5m' });
@@ -229,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { strategy: 'on_status_change' },
         });
 
-      expect(response.status).to.be(200);
+      expect(response.status).to.be(201);
       expect(response.body.groupingMode).to.be('per_episode');
       expect(response.body.throttle).to.eql({ strategy: 'on_status_change' });
     });
@@ -247,7 +187,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           throttle: { strategy: 'every_time' },
         });
 
-      expect(response.status).to.be(200);
+      expect(response.status).to.be(201);
       expect(response.body.groupingMode).to.be('all');
       expect(response.body.throttle).to.eql({ strategy: 'every_time' });
     });

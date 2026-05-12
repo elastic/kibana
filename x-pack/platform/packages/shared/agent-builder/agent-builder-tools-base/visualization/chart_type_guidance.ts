@@ -12,23 +12,23 @@ export const getChartTypeSelectionPromptContent = () =>
   [
     'Available chart types:',
     ...Object.entries(chartTypeRegistry).map(
-      ([chartType, { guidance }]) => `- ${chartType}: ${guidance.description}`
+      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection.description}`
     ),
     '',
     'Guidelines:',
-    ...Object.entries(chartTypeRegistry).map(([, { guidance }]) => `- ${guidance.guideline}`),
+    ...Object.entries(chartTypeRegistry).map(([, { prompt }]) => `- ${prompt.selection.guideline}`),
     "- Consider the user's intent and the nature of the data being visualized",
   ].join('\n');
 
 export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const configPromptRules = chartTypeRegistry[chartType].configPromptRules;
+  const perChartTypeRules = chartTypeRegistry[chartType].prompt.config?.perChartTypeRules;
 
-  if (!configPromptRules?.length) {
+  if (!perChartTypeRules?.length) {
     return '';
   }
 
   return [
     `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...configPromptRules.map((rule) => `- ${rule}`),
+    ...perChartTypeRules.map((rule) => `- ${rule}`),
   ].join('\n');
 };
