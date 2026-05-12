@@ -24,8 +24,12 @@ export const RECONCILIATION_TASK_TYPE = 'cases.analyticsV2.reconciliation';
  * how many Kibana nodes are running. Task Manager assigns it to one node at a
  * time. The id is constant so concurrent boots converge on the same scheduled
  * task rather than each scheduling its own.
+ *
+ * Exported because operator routes (`/reconcile/run_soon`, `/reset`) need to
+ * pass it to `taskManager.runSoon(id)` — that API takes the task **instance**
+ * id, not the task **type**.
  */
-const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
+export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
 
 /**
  * Default reconciliation cadence. 30 minutes balances "catch up quickly when

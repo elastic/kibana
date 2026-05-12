@@ -13,7 +13,7 @@ import {
   CASES_ANALYTICS_V2_STATE_URL,
   CASE_INDEX_NAME,
 } from '../constants';
-import { RECONCILIATION_TASK_TYPE } from '../reconciliation';
+import { RECONCILIATION_TASK_ID, RECONCILIATION_TASK_TYPE } from '../reconciliation';
 import { ensureCaseIndex } from '../ensure_indices/case';
 
 interface RegisterArgs {
@@ -141,8 +141,11 @@ export const registerCasesAnalyticsV2Routes = ({
         });
       }
       try {
-        const result = await taskManager.runSoon(RECONCILIATION_TASK_TYPE);
-        return response.ok({ body: { id: RECONCILIATION_TASK_TYPE, result } });
+        // `runSoon` expects the task **instance** id (the persisted task SO's
+        // id), not the task **type**. The singleton task instance id is
+        // exported from the reconciliation module.
+        const result = await taskManager.runSoon(RECONCILIATION_TASK_ID);
+        return response.ok({ body: { id: RECONCILIATION_TASK_ID, result } });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         log.warn(`reconcile run_soon failed: ${message}`);
@@ -194,7 +197,9 @@ export const registerCasesAnalyticsV2Routes = ({
         let reconcileResult: string | null = null;
         if (taskManager != null) {
           try {
-            const result = await taskManager.runSoon(RECONCILIATION_TASK_TYPE);
+            // Pass the task **instance** id (not the type) — same as
+            // /reconcile/run_soon.
+            const result = await taskManager.runSoon(RECONCILIATION_TASK_ID);
             reconcileResult = result.id;
           } catch (err) {
             log.warn(
