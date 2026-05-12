@@ -112,10 +112,6 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       throw new Error('OAuthAuthCodeStrategy received non-oauth token opts');
     }
 
-    if (!opts.clientSecret) {
-      throw new Error('clientSecret is required for OAuth authorization code flow');
-    }
-
     const {
       connectorId,
       connectorTokenClient,
