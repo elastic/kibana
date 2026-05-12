@@ -41,7 +41,7 @@ export interface MetricsExperienceGridContentProps
   metricItems: ParsedMetricItem[];
   activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
-  isTabSelected?: boolean;
+  isTabSelected: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
@@ -55,7 +55,7 @@ export const MetricsExperienceGridContent = ({
   actions,
   histogramCss,
   isDiscoverLoading = false,
-  isTabSelected = true,
+  isTabSelected,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();

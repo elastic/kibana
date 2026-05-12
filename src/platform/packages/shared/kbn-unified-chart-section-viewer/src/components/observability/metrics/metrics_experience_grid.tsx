@@ -34,7 +34,7 @@ export const MetricsExperienceGrid = ({
   fetch$: discoverFetch$,
   fetchParams,
   isComponentVisible,
-  isTabSelected = true,
+  isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) => {

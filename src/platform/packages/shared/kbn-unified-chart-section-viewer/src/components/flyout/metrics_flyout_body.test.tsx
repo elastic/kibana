@@ -26,7 +26,10 @@ jest.mock('./tabs', () => ({
 
 const useMetricsExperienceStateMock = useMetricsExperienceState as jest.Mock;
 
-const buildContext = (overrides: { flyoutState?: FlyoutState; onFlyoutTabChange?: jest.Mock }) => ({
+const buildContext = (overrides: {
+  flyoutState?: FlyoutState;
+  onFlyoutSelectedTabChange?: jest.Mock;
+}) => ({
   profileId: 'test-profile',
   currentPage: 0,
   searchTerm: '',
@@ -38,7 +41,7 @@ const buildContext = (overrides: { flyoutState?: FlyoutState; onFlyoutTabChange?
   onSearchTermChange: jest.fn(),
   onToggleFullscreen: jest.fn(),
   onFlyoutStateChange: jest.fn(),
-  onFlyoutTabChange: overrides.onFlyoutTabChange ?? jest.fn(),
+  onFlyoutSelectedTabChange: overrides.onFlyoutSelectedTabChange ?? jest.fn(),
 });
 
 const metricItem: ParsedMetricItem = {
@@ -84,8 +87,8 @@ describe('MetricFlyoutBody', () => {
     expect(queryByTestId('overviewTab')).not.toBeInTheDocument();
   });
 
-  it('calls onFlyoutTabChange with the clicked tab id', () => {
-    const onFlyoutTabChange = jest.fn();
+  it('calls onFlyoutSelectedTabChange with the clicked tab id', () => {
+    const onFlyoutSelectedTabChange = jest.fn();
     useMetricsExperienceStateMock.mockReturnValue(
       buildContext({
         flyoutState: {
@@ -94,16 +97,16 @@ describe('MetricFlyoutBody', () => {
           esqlQuery: 'FROM test',
           selectedTabId: 'overview',
         },
-        onFlyoutTabChange,
+        onFlyoutSelectedTabChange,
       })
     );
 
     const { getByTestId } = render(<MetricFlyoutBody metricItem={metricItem} />);
 
     fireEvent.click(getByTestId('metricsExperienceFlyoutEsqlQueryTab'));
-    expect(onFlyoutTabChange).toHaveBeenCalledWith('esql-query');
+    expect(onFlyoutSelectedTabChange).toHaveBeenCalledWith('esql-query');
 
     fireEvent.click(getByTestId('metricsExperienceFlyoutOverviewTab'));
-    expect(onFlyoutTabChange).toHaveBeenCalledWith('overview');
+    expect(onFlyoutSelectedTabChange).toHaveBeenCalledWith('overview');
   });
 });

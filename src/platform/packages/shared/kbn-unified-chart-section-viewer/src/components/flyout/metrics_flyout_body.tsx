@@ -11,15 +11,14 @@ import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ParsedMetricItem } from '../../types';
+import type { FlyoutTabId } from '../../restorable_state';
 import { useMetricsExperienceState } from '../observability/metrics/context/metrics_experience_state_provider';
 import { OverviewTab, EsqlQueryTab } from './tabs';
 
 const tabIds = {
   OVERVIEW: 'overview',
   ESQL_QUERY: 'esql-query',
-} as const;
-
-type TabId = (typeof tabIds)[keyof typeof tabIds];
+} as const satisfies Record<string, FlyoutTabId>;
 
 const OverviewTabName = i18n.translate('metricsExperience.metricFlyout.overviewTab', {
   defaultMessage: 'Overview',
@@ -49,14 +48,18 @@ interface MetricFlyoutBodyProps {
 }
 
 export const MetricFlyoutBody = ({ metricItem, esqlQuery, description }: MetricFlyoutBodyProps) => {
-  const { flyoutState, onFlyoutTabChange } = useMetricsExperienceState();
-  const selectedTabId: TabId = flyoutState?.selectedTabId ?? tabIds.OVERVIEW;
+  const { flyoutState, onFlyoutSelectedTabChange } = useMetricsExperienceState();
+  const selectedTabId: FlyoutTabId = flyoutState?.selectedTabId ?? tabIds.OVERVIEW;
+
+  const onSelectedTabChanged = (id: FlyoutTabId) => {
+    onFlyoutSelectedTabChange(id);
+  };
 
   const renderTabs = () => {
     return tabs.map((tab, index) => (
       <EuiTab
         key={index}
-        onClick={() => onFlyoutTabChange(tab.id)}
+        onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
         data-test-subj={tab['data-test-subj']}
       >

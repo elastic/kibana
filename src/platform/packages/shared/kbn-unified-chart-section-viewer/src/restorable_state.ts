@@ -14,13 +14,13 @@ export type FlyoutTabId = 'overview' | 'esql-query';
 
 export interface FlyoutState {
   // Position of the metric in the grid when the flyout was opened.
-  gridPosition: number;
+  readonly gridPosition: number;
   // Stable identifier for the metric being shown.
-  metricUniqueKey: string;
+  readonly metricUniqueKey: string;
   // ES|QL query rendered for the metric in the flyout.
-  esqlQuery: string;
+  readonly esqlQuery: string;
   // Selected tab inside the flyout body.
-  selectedTabId?: FlyoutTabId;
+  readonly selectedTabId?: FlyoutTabId;
 }
 
 export interface MetricsExperienceRestorableState {

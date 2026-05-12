@@ -102,6 +102,7 @@ describe('MetricsGrid', () => {
     fetchParams,
     services,
     actions,
+    isTabSelected: true,
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {

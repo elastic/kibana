@@ -21,15 +21,10 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable } from '../../../common/utils';
+import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
-
-// Stable, serializable identifier for a metric item that is robust enough to
-// survive grid reorders/pagination so the flyout can be restored across navigation.
-const getMetricUniqueKey = (metricItem: ParsedMetricItem) =>
-  `${metricItem.dataStream}::${metricItem.metricName}`;
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -53,9 +48,8 @@ export type MetricsGridProps = Pick<
    * tabs (e.g. opening a flyout in tab A would close the flyout in tab B,
    * and duplicating a tab would lose the persisted flyout).
    *
-   * Defaults to `true` for non-Discover consumers that don't manage tab state.
    */
-  isTabSelected?: boolean;
+  isTabSelected: boolean;
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -75,7 +69,7 @@ export const MetricsGrid = ({
   searchTerm,
   getUserMessages,
   getDescription,
-  isTabSelected = true,
+  isTabSelected,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();

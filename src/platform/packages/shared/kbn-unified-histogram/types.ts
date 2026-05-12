@@ -331,5 +331,5 @@ export interface ChartSectionProps {
   /**
    * Indicates whether the current tab is selected/active.
    */
-  isTabSelected?: boolean;
+  isTabSelected: boolean;
 }

@@ -110,6 +110,7 @@ describe('MetricsExperienceGridContent', () => {
         updateESQLQuery: jest.fn(),
       },
       histogramCss: { name: '', styles: '' },
+      isTabSelected: true,
     };
 
     useMetricsExperienceStateMock.mockReturnValue({
@@ -123,7 +124,7 @@ describe('MetricsExperienceGridContent', () => {
       onToggleFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
-      onFlyoutTabChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -186,7 +187,7 @@ describe('MetricsExperienceGridContent', () => {
       onToggleFullscreen: jest.fn(),
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
-      onFlyoutTabChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 

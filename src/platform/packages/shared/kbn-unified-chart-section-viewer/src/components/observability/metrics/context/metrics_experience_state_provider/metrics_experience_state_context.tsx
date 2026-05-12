@@ -24,7 +24,7 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
   onFlyoutStateChange: (value: FlyoutState | undefined) => void;
-  onFlyoutTabChange: (value: FlyoutTabId) => void;
+  onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -72,7 +72,7 @@ export function MetricsExperienceStateProvider({
     [setFlyoutState]
   );
 
-  const onFlyoutTabChange = useCallback(
+  const onFlyoutSelectedTabChange = useCallback(
     (nextTabId: FlyoutTabId) => {
       setFlyoutState((prev) => (prev ? { ...prev, selectedTabId: nextTabId } : prev));
     },
@@ -93,7 +93,7 @@ export function MetricsExperienceStateProvider({
         onSearchTermChange,
         onToggleFullscreen,
         onFlyoutStateChange,
-        onFlyoutTabChange,
+        onFlyoutSelectedTabChange,
       }}
     >
       {children}
