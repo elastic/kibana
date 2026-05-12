@@ -17,6 +17,7 @@ const createMockParentApi = ({
   indicateRelatedPanelsId?: string;
 } = {}) => {
   const mock = {
+    viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
     indicateRelatedPanelsId$: new BehaviorSubject<string | undefined>(indicateRelatedPanelsId),
     setIndicateRelatedPanelsId: jest.fn((id?: string) => {
       mock.indicateRelatedPanelsId$.next(id);
