@@ -15,11 +15,6 @@
  * Discover tab navigation/duplication, and that stale state is cleared when
  * the underlying metric disappears from a populated grid.
  *
- * The "grid is empty" branch of the cleanup effect (the duplicated-tab
- * initial-render scenario where `metricItems.length === 0`) is intentionally
- * not exercised here; it is locked in by the `metrics_grid.test.tsx` unit test
- * "preserves restored flyoutState during initial render when metric items are
- * empty (duplicate-tab scenario)".
  */
 
 import { expect } from '@kbn/scout/ui';

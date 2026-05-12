@@ -560,9 +560,6 @@ export class DiscoverApp {
    */
   async createNewTab() {
     await this.page.testSubj.click(UNIFIED_TABS_TEST_SUBJ.newTabBtn);
-    // The newly created tab becomes active automatically; wait for the
-    // active-tab marker to appear before letting the caller proceed, so
-    // subsequent assertions are not racing the tab activation.
     await this.activeTabLocator.waitFor({ state: 'visible' });
   }
 

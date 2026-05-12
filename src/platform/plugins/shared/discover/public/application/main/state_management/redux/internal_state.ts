@@ -673,9 +673,6 @@ const createMiddleware = (options: InternalStateDependencies) => {
   startListening({
     actionCreator: discardFlyoutsOnTabChange,
     effect: () => {
-      // The metric insights flyout is intentionally not dismissed here because its
-      // open/selected metric/tab state is persisted via the Metrics restorable state
-      // and must survive Discover tab navigation.
       dismissFlyouts([DiscoverFlyouts.lensEdit]);
     },
   });

@@ -99,12 +99,9 @@ export const MetricsGrid = ({
     return { metricItem: matchedItem, esqlQuery: flyoutState.esqlQuery };
   }, [flyoutState, metricItems]);
 
-  // Clear stale flyout state when the referenced metric is no longer present
-  // (e.g. after a search/filter change that removed it from the grid).
-  // Only run AFTER metric items have loaded at least once so the initial render
-  // of a duplicated tab (which mounts with empty items before the per-tab fetch
-  // completes) does not erase a freshly cloned flyoutState carried over via
-  // tab.uiState.metricsGrid.
+  // Discard flyoutState when its metric is filtered out of the grid.
+  // `metricItems.length > 0` avoids clearing state on a duplicated tab's first
+  // render, where items are momentarily empty before the per-tab fetch resolves.
   useEffect(() => {
     if (flyoutState && metricItems.length > 0 && !flyoutData) {
       onFlyoutStateChange(undefined);
