@@ -41,7 +41,7 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(TOTAL_MARKDOWNS);
-    expect(response.body.markdowns.length).toBeGreaterThan(1);
+    expect(response.body.markdowns.length).toBe(20);
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
