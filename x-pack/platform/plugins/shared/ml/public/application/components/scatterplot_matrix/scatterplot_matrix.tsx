@@ -540,13 +540,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             {splom ? (
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.splom.exploreInCustomVisualizationLabel',
-                    {
-                      defaultMessage:
-                        'Explore scatterplot charts in Vega based custom visualization',
-                    }
-                  )}
+                  content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
+                    defaultMessage: 'Explore scatterplot charts in Vega based custom visualization',
+                  })}
                 >
                   <EuiButtonIcon
                     role="link"
