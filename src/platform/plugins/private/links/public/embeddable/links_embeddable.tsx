@@ -38,11 +38,11 @@ import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 
-import { checkForDuplicateTitle, linksClient } from '../content_management';
+import { checkForDuplicateTitle, linksClient } from '../links_client';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
 import { coreServices } from '../services/kibana_services';
-import { loadFromLibrary } from '../content_management/load_from_library';
+import { loadFromLibrary } from '../links_client/load_from_library';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 

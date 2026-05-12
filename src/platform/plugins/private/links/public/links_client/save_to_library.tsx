@@ -16,7 +16,7 @@ import {
 } from '@kbn/saved-objects-plugin/public';
 import { LINKS_EMBEDDABLE_TYPE, CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
-import { linksClient } from './links_content_management_client';
+import { linksClient } from './links_client';
 import { serializeResolvedLinks } from '../lib/resolve_links';
 import type { EditorState } from '../editor/get_editor_flyout';
 

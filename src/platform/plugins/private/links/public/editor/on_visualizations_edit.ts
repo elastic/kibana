@@ -8,7 +8,7 @@
  */
 
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { loadFromLibrary } from '../content_management/load_from_library';
+import { loadFromLibrary } from '../links_client/load_from_library';
 import { getEditorFlyout } from './get_editor_flyout';
 import { resolveLinks } from '../lib/resolve_links';
 import { coreServices } from '../services/kibana_services';

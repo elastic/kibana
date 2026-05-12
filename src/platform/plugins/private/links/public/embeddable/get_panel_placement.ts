@@ -12,7 +12,7 @@ import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import { LINKS_HORIZONTAL_LAYOUT } from '../../common/content_management';
 import type { LinksEmbeddableState } from '../../common';
 import type { LinksState } from '../../server';
-import { loadFromLibrary } from '../content_management/load_from_library';
+import { loadFromLibrary } from '../links_client/load_from_library';
 
 export async function getPanelPlacement(serializedState?: LinksEmbeddableState) {
   if (!serializedState) return {};

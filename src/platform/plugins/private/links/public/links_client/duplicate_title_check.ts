@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { linksClient } from './links_content_management_client';
+import { linksClient } from './links_client';
 
 const rejectErrorMessage = i18n.translate('links.saveDuplicateRejectedDescription', {
   defaultMessage: 'Save with duplicate title confirmation was rejected',
@@ -40,17 +40,11 @@ export const checkForDuplicateTitle = async ({
       return true;
     }
 
-    const { hits } = await linksClient.search(
-      {
-        text: `"${title}"`,
-        limit: 10,
-      },
-      { onlyTitle: true }
-    );
+    const { data } = await linksClient.search({
+      query: `"${title}"`,
+    });
 
-    const existing = hits.find(
-      (obj) => obj.attributes.title?.toLowerCase() === title.toLowerCase()
-    );
+    const existing = data.find((obj) => obj.data.title?.toLowerCase() === title.toLowerCase());
 
     if (!existing || existing.id === id) {
       return true;

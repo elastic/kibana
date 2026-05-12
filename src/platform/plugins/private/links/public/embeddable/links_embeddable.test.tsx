@@ -15,7 +15,7 @@ import type { LinksEmbeddableState } from '../../common';
 import { LINKS_EMBEDDABLE_TYPE } from '../../common';
 import type { Link } from '../../server';
 import type { LinksApi, ResolvedLink } from '../types';
-import { linksClient } from '../content_management';
+import { linksClient } from '../links_client';
 import { getMockLinksParentApi } from '../mocks';
 
 const getLinks = (): Link[] => [

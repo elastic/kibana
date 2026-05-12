@@ -31,7 +31,7 @@ import {
   LINKS_SAVED_OBJECT_TYPE,
 } from '../common';
 import type { LinksCrudTypes } from '../common/content_management';
-import { getLinksClient } from './content_management/links_content_management_client';
+import { getLinksClient } from './links_client/links_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
 

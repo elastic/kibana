@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { LinksLayoutType } from '../../common/content_management';
-import { linksClient, runSaveToLibrary } from '../content_management';
+import { linksClient, runSaveToLibrary } from '../links_client';
 import type { ResolvedLink } from '../types';
 import LinksEditor from '../components/editor/links_editor';
 import { serializeResolvedLinks } from '../lib/resolve_links';

@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { linksClient } from './links_content_management_client';
+export { linksClient } from './links_client';
 export { checkForDuplicateTitle } from './duplicate_title_check';
 export { runSaveToLibrary } from './save_to_library';
