@@ -110,7 +110,7 @@ stack: ga 9.3
 :    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
 
 `xpack.fleet.integrationRollbackTTL`
-:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, `1w`). Defaults to `7d`.
+:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
 
 `xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
 : The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
