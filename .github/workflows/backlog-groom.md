@@ -2,16 +2,12 @@
 name: Backlog Grooming Agent
 timeout-minutes: 45
 description: >-
-  Reacts to issues labeled `backlog-groom`, determines if the issue is stale or still valid,
-  and either recommends closing or implements a fix with a linked pull request.
+  Reacts to issues labeled `backlog-groom`, requests clarification when requirements
+  are ambiguous, or implements a fix with a linked pull request.
 on:
   issues:
     types: [labeled]
   status-comment: true
-  permissions:
-    contents: read
-    issues: write
-    pull-requests: read
 if: github.event.label.name == 'backlog-groom'
 steps:
   - uses: actions/setup-node@v4
@@ -23,9 +19,9 @@ steps:
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
 permissions:
-  contents: read
+  contents: write
   issues: read
-  pull-requests: read
+  pull-requests: write
 engine:
   id: claude
   version: "2.1.111"
@@ -54,62 +50,80 @@ safe-outputs:
 
 # Backlog Grooming Agent
 
-You process GitHub issues labeled `backlog-groom` in the Kibana repository. For each issue, you determine whether it is **stale** (should be closed) or **still valid** (should be fixed), and take the appropriate action.
+This workflow is triggered after an issue is labeled `backlog-groom`. Process that issue and produce **exactly one** outcome:
 
-## Issue context
+- **Ambiguous / needs design** → use `noop`
+- **Clear and fixable** → implement, validate, and open one PR with `create-pull-request`
 
-Read the issue identified by `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` in the `<github-context>` block using the GitHub tools.
+## Phase 0: Load issue context
 
-## Phase 1: Staleness analysis
+Use GitHub tools. Read the issue whose number is `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` from `<github-context>`. Extract the reported behavior, expected behavior, acceptance criteria, and code areas to change.
 
-Before attempting any implementation, determine whether the issue is still valid:
+## Phase 1: Ambiguity / design check → `noop`
 
-1. **Read the issue** carefully — understand what bug or feature is described.
-2. **Search the codebase** for the files, functions, or components mentioned in the issue.
-3. **Check git history** — use `git log` on the relevant files to see if the problem has already been fixed or if the code has been significantly refactored since the issue was filed.
-4. **Check for duplicates** — search open/closed issues for similar titles or descriptions.
+Use `noop` when **any** of these is true (non-exhaustive; apply judgment):
 
-### If the issue is stale
+- Multiple **valid** technical approaches with materially different behavior or maintenance cost, and the issue does not specify which product behavior is intended.
+- Requires **API design** (new endpoints, request/response shape, breaking changes) or **public contract** changes without an agreed spec.
+- Touches **user-visible behavior** (copy, defaults, UX flows) and the issue does not define acceptance criteria.
+- Needs **policy or permission** decisions (security, authz, data retention) not stated in the issue.
+- Depends on **information only a human can supply** (account state, cluster config, intended deprecation timeline).
 
-An issue is stale if any of these are true:
-- The code referenced in the issue no longer exists or has been substantially rewritten
-- A recent commit or merged PR already addresses the described problem
-- The feature or behavior described has been intentionally removed or replaced
-- The issue references a version or configuration that is no longer supported
+**If ambiguous:** use `noop` (see **noop output** below). List specific questions and exactly what decision is needed to proceed. Tags: `needs-clarification`, plus `api-design` | `ux` | `product` | `security` | `breaking-change` as applicable.
 
-If stale, use `noop` with a detailed explanation including:
-- What evidence you found (commit SHAs, PR numbers, file changes)
-- A recommended action (close as fixed, close as outdated, close as duplicate with link)
+**If clear:** proceed to Phase 2.
 
-### If the issue is still valid
+## Phase 2: Implementation → `create-pull-request`
 
-Proceed to Phase 2.
+1. Read surrounding production code until you can state the **root cause** in one sentence tied to file/line logic—do not guess.
+2. Implement the minimal fix on branch `backlog-groom/issue-<issue_number>` (issue number from `<github-context>`).
+3. Validate using these commands (scope paths to changed packages/plugins):
 
-## Phase 2: Implementation
+```bash
+node scripts/eslint --fix $(git diff --name-only)
+node scripts/type_check --project <path/to/tsconfig.json>
+node scripts/jest <path/to/affected.test.ts>
+node scripts/check_changes.ts
+```
 
-Follow the Kibana contribution guidelines:
+Run **each** that applies after edits. Fix failures before opening a PR. If a check is not applicable (no TS change), skip it and say why in the PR body.
 
-1. **Identify the root cause** — read the relevant code thoroughly. Do not guess.
-2. **Create or update your implementation** on branch `backlog-groom/issue-<issue_number>` (using the issue number from `<github-context>`).
-3. **Validate your changes** — run linting, type-checking, and tests for affected code.
-4. **Open exactly one PR** using the `create-pull-request` safe output.
+4. Open **exactly one** PR via `create-pull-request` safe output:
+   - `head`: `backlog-groom/issue-<issue_number>`
+   - `base`: `main`
+   - `draft`: `true`
+   - include required PR body content from the contract below
 
-## Pull request contract
+## Pull request contract (MUST)
 
-The linked pull request must:
-- Use branch `backlog-groom/issue-<issue_number>`
-- Include `Closes #<issue_number>` in the PR body
-- Be opened as a **draft**
-- Include a summary of what was changed and why
-- Stay focused on the triggering issue only
+- MUST use branch `backlog-groom/issue-<issue_number>`.
+- MUST target base branch `main`.
+- MUST include `Closes #<issue_number>` in the PR body.
+- MUST be opened as a **draft**.
+- MUST summarize what changed, why, and how it maps to the issue—no unrelated work.
+- MUST reference which validation commands ran and their results (pass/skip + reason).
+- MUST use `create-pull-request` safe output (do NOT open the PR by other means).
+
+## noop output (MUST)
+
+Every `noop` MUST include:
+
+- **Why blocked:** one sentence stating why implementation cannot proceed safely.
+- **Questions:** explicit decisions needed from maintainers.
+- **Tags:** 1–3 short labels from `needs-clarification`, `api-design`, `ux`, `product`, `security`, `breaking-change`.
 
 ## Guardrails
 
-Additional workflow-specific rules:
+Do NOT re-check trigger eligibility or actor trust (pre-activation handled this).
 
-- Do not re-check trigger eligibility or actor trust; pre-activation handled those.
-- Do not open a second PR for the same issue.
-- Do not change the branch naming convention.
-- If you cannot make progress safely, use `noop` with a concise explanation.
-- If the issue is ambiguous or requires design decisions, use `noop` explaining what clarification is needed.
+Do NOT open more than one PR for the same issue.
 
+Do NOT change the branch naming convention.
+
+Do NOT run deduplication or staleness analysis in this workflow.
+
+Do NOT implement when Phase 1 applies—use `noop` instead.
+
+Do NOT broaden scope beyond the triggering issue.
+
+Do NOT land changes without running the applicable commands in Phase 2.
