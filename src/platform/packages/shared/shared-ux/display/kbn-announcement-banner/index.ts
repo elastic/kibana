@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// These are the html tags that will replace the highlight tags.
-export const htmlTags = {
-  pre: '<mark class="ffSearch__highlight">',
-  post: '</mark>',
-};
+export { AnnouncementBanner } from './announcement_banner';
+export type {
+  AnnouncementBannerProps,
+  AnnouncementBannerSize,
+  AnnouncementBannerHeadingElement,
+  AnnouncementBannerActionPrimaryProps,
+  AnnouncementBannerActionSecondaryProps,
+  AnnouncementBannerDismissButtonProps,
+} from './types';

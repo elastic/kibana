@@ -42,6 +42,7 @@ function buildColorProps(
     return { colorMode, palette: fromColorByValueAPIToLensState(config.color) };
   }
 
+  // defer resolution of default color configuration (mapping/palette) to runtime
   return { colorMode };
 }
 
