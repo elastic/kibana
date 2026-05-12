@@ -109,21 +109,16 @@ Set `classification` based on where the evidence points:
 - **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
-Set `fixability` to exactly one of:
-
-- **`fixable`** — a concrete fix was identified.
-- **`not-a-flake`** — real product bug. Ideally back this with a recent commit, a feature-flag-exposed race, or a consistent reproducible failure.
-- **`env-issue`**: failure caused by CI/infrastructure (matches `classification: external`), or a stale failure with no recent recurrence.
-- **`noop`** — no further action needed.
-- **`inconclusive`** — none of the above apply with enough confidence.
-
 ## Assign label `ai:auto-flaky-fix` in specific cases
 
-Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when these conditions are met:
+Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all** of these conditions hold:
 
 - The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
 - The test failed in the `kibana-on-merge` pipeline
-- `fixability` is equal to `fixable`
+- `classification` is `test-design`
+- A concrete fix has been identified — you can name the specific test file plus the assertion, wait, fixture, setup/teardown, helper, or selector to change
+- No open PR already targets the same test file with a `flaky-fix:` label
+- The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
 
 No other side-effects beyond posting the comment and updating the label.
 
@@ -159,21 +154,20 @@ The visible section is a _distillation_ of the collapsed one. Do not repeat cont
 
 ### Visible (top), in this order:
 
-1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `fixability` but not templated. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
+1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `classification` but not templated. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
 
 2. **A 3–5 sentence prose paragraph** (no headings, no bullets) covering: what broke and where (name the test file/name), the most likely root cause, and any evidence-backed author attribution with `@username` so they get notified on first read. Hard ceiling: 5 sentences.
 
 3. **One-line action hint**: the proposed fix, recommended action, or missing evidence. Skip if the paragraph already covers it.
 
-4. **Flakiness Finding bullets** — exactly these five, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
+4. **Flakiness Finding bullets** — exactly these four, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
 
    - `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
    - `confidence`: `high` | `medium` | `low`
-   - `fixability`: `fixable` | `not-a-flake` | `env-issue` | `inconclusive` | `noop`
    - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
    - `test.file`: repo-relative path, or `unknown`
 
-5. **Suspected root cause** — 2–4 short bullets, each tied to a specific piece of evidence. Skip the section entirely when `fixability` is `not-a-flake`, `env-issue`, or `inconclusive` and there is nothing concrete to assert.
+5. **Suspected root cause** — 2–4 short bullets, each tied to a specific piece of evidence. Skip the section entirely when `classification` is `external` or `inconclusive` and there is nothing concrete to assert.
 
 6. **Key references** — at most 3 Markdown links: the failing test file, the failing CI run, and the implicated commit (when one exists). Skip any of the three that are not applicable; skip the section entirely when none apply.
 
