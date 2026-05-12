@@ -1,6 +1,6 @@
 ---
 name: Failed Test Investigator
-description: Investigate failed-test issues, classify whether the flakiness is in the test or underlying code, and propose the most likely fix.
+description: Investigate a failed-test issue, classify the failure, and propose a fix when appropriate.
 on:
   workflow_dispatch:
     inputs:
@@ -106,8 +106,10 @@ Set `classification` based on where the evidence points:
 - **`test-design`**: issue lives in the test code — timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape.
 - **`test-environment`**: test code is fine, but its surroundings are wrong — leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference.
 - **`application`**: real product bug exposed by the test — race, regression, broken contract, feature-flag bug.
-- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
+- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry. Failures on `local-*` targets are less likely to be external; weigh that when classifying.
 - **`inconclusive`**: evidence does not support a defensible call.
+
+Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
 
 ## Assign label `ai:auto-flaky-fix` in specific cases
 
@@ -115,10 +117,8 @@ Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all*
 
 - The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
 - The test failed in the `kibana-on-merge` pipeline
-- `classification` is `test-design`
-- A concrete fix has been identified — you can name the specific test file plus the assertion, wait, fixture, setup/teardown, helper, or selector to change
-- No open PR already targets the same test file with a `flaky-fix:` label
-- The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
+- `classification` is `test-design` or `application`
+- A concrete fix has been identified.
 
 No other side-effects beyond posting the comment and updating the label.
 
@@ -154,13 +154,13 @@ The visible section is a _distillation_ of the collapsed one. Do not repeat cont
 
 ### Visible (top), in this order:
 
-1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `classification` but not templated. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
+1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `classification` but not templated. Example: `**Likely test-design fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
 
-2. **A 3–5 sentence prose paragraph** (no headings, no bullets) covering: what broke and where (name the test file/name), the most likely root cause, and any evidence-backed author attribution with `@username` so they get notified on first read. Hard ceiling: 5 sentences.
+2. **A 3–5 sentence prose paragraph** (no headings, no bullets) covering: what broke and where (name the test file/name), the most likely root cause, and any evidence-backed author attribution with `@username` so they get notified on first read.
 
 3. **One-line action hint**: the proposed fix, recommended action, or missing evidence. Skip if the paragraph already covers it.
 
-4. **Flakiness Finding bullets** — exactly these four, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
+4. **Findings bullets** — exactly these four, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
 
    - `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
    - `confidence`: `high` | `medium` | `low`
