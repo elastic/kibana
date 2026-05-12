@@ -56,6 +56,20 @@ export const EPISODES_ASSIGNEE_UNKNOWN_USER = i18n.translate(
   }
 );
 
+export const EPISODES_FILTER_BAR_RESET_FILTERS = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.resetFilters',
+  {
+    defaultMessage: 'Reset filters',
+  }
+);
+
+export const EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchPlaceholder',
+  {
+    defaultMessage: 'Search episodes…',
+  }
+);
+
 export const BULK_ACKNOWLEDGE = i18n.translate(
   'xpack.alertingV2.episodes.bulkActions.acknowledge',
   { defaultMessage: 'Acknowledge' }

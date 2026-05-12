@@ -15,7 +15,7 @@ import { tmpdir } from 'os';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import {
-  MOCK_IDP_KIBANA_BASE_PATH,
+  MOCK_IDP_KIBANA_URL,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_ATTRIBUTE_PRINCIPAL,
@@ -31,9 +31,6 @@ import { parseTimeoutToMs } from '../utils';
 import { createCliError } from '../errors';
 import { EIS_ES_ARG, resolveCcmApiKey, setCcmApiKey } from '../eis/eis_setup';
 import type { Command } from './types';
-
-// Matches the fixed base path applied to stateful Kibana when running with the SAML Mock IdP.
-const DEFAULT_KIBANA_URL = `http://localhost:5601${MOCK_IDP_KIBANA_BASE_PATH}`;
 
 export const snapshot: Command = {
   description: 'Downloads and run from a nightly snapshot',
@@ -56,7 +53,7 @@ export const snapshot: Command = {
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
       --kibana-url      Fully qualified URL where Kibana is hosted (including base path). Used to configure
-                        the SAML Mock IdP realm so SP/ACS endpoints match Kibana. [default: ${DEFAULT_KIBANA_URL}]
+                        the SAML Mock IdP realm so SP/ACS endpoints match Kibana. [default: ${MOCK_IDP_KIBANA_URL}]
       --use-cached      Skips cache verification and use cached ES snapshot.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -97,7 +94,7 @@ export const snapshot: Command = {
       string: ['version', 'ready-timeout', 'es-log-level', 'kibana-url'],
       boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill', 'eis'],
 
-      default: { kibanaUrl: DEFAULT_KIBANA_URL, ...defaults },
+      default: { kibanaUrl: MOCK_IDP_KIBANA_URL, ...defaults },
     });
 
     // --eis implies trial license and the EIS inference URL ES argument.
@@ -151,7 +148,7 @@ export const snapshot: Command = {
         arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
       );
 
-      const kibanaUrl: string = options.kibanaUrl || DEFAULT_KIBANA_URL;
+      const kibanaUrl: string = options.kibanaUrl || MOCK_IDP_KIBANA_URL;
 
       if (!hasSamlConfig && options.license !== 'basic') {
         log.info('Configuring SAML realm for Mock IdP with Kibana at %s', kibanaUrl);

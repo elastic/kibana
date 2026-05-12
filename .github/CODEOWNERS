@@ -749,6 +749,7 @@ src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/column-presets @elastic/eui @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
+src/platform/packages/shared/shared-ux/display/kbn-announcement-banner @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/document_data_cascade/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/context @elastic/appex-sharedux
@@ -1032,7 +1033,7 @@ x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-t
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
-x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-pds-deployment @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra @elastic/search-inference-team
 x-pack/platform/packages/shared/kbn-inference-connectors @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/search-kibana
@@ -1165,7 +1166,7 @@ x-pack/platform/plugins/shared/fields_metadata @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
-x-pack/platform/plugins/shared/inbox @elastic/security-pds-deployment @elastic/security-generative-ai
+x-pack/platform/plugins/shared/inbox @elastic/security-generative-ai
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/search-kibana
 x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
@@ -2876,7 +2877,9 @@ x-pack/solutions/security/plugins/entity_store @elastic/core-analysis
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/timeline.tsx @elastic/security-threat-hunting
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/timeline.ts @elastic/security-threat-hunting
 
 /x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-threat-hunting
 
@@ -3432,6 +3435,9 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
 /.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
+
+# Inbox FTR test directory (no kibana.jsonc — manual entry)
+/x-pack/platform/test/inbox_api_integration/ @elastic/security-generative-ai
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
