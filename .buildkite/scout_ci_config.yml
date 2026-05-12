@@ -11,6 +11,7 @@ plugins:
     - index_management
     - infra
     - logstash
+    - lens
     - maps
     - observability
     - observability_onboarding
