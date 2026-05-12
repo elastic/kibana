@@ -25,7 +25,9 @@ import type { FormValues } from '../../form/types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import { RuleDetailsFieldGroup, RuleExecutionFieldGroup } from '../../form';
+import { RuleDetailsFieldGroup } from '../../form';
+import { ScheduleField } from '../../form/fields/schedule_field';
+import { LookbackWindowField } from '../../form/fields/lookback_window_field';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -133,8 +135,10 @@ function AlertConditionStep({
         />
       </EuiFormRow>
 
-      {/* Schedule and lookback — connected to RHF via useFormContext() internally */}
-      <RuleExecutionFieldGroup />
+      <EuiSpacer size="m" />
+      <ScheduleField />
+      <EuiSpacer size="m" />
+      <LookbackWindowField />
     </>
   );
 }
