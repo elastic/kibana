@@ -12,9 +12,11 @@ import {
   EuiFilterGroup,
   EuiFieldSearch,
   EuiSuperDatePicker,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { INCLUDE_BUILDING_BLOCKS_LABEL } from '../translations';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
 import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
@@ -34,6 +36,8 @@ export interface EpisodesFilterBarProps {
   onRefresh?: () => void;
   isLoading?: boolean;
   services: { http: HttpStart; expressions: ExpressionsStart };
+  includeBuildingBlocks?: boolean;
+  onIncludeBuildingBlocksChange?: (value: boolean) => void;
 }
 
 export const EpisodesFilterBar = ({
@@ -46,6 +50,8 @@ export const EpisodesFilterBar = ({
   onRefresh,
   isLoading = false,
   services,
+  includeBuildingBlocks = false,
+  onIncludeBuildingBlocksChange,
 }: EpisodesFilterBarProps) => {
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
 
@@ -139,6 +145,18 @@ export const EpisodesFilterBar = ({
           />
         </EuiFilterGroup>
       </EuiFlexItem>
+
+      {onIncludeBuildingBlocksChange && (
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={INCLUDE_BUILDING_BLOCKS_LABEL}
+            checked={includeBuildingBlocks}
+            onChange={(e) => onIncludeBuildingBlocksChange(e.target.checked)}
+            data-test-subj="episodesFilterBar-includeBuildingBlocks"
+          />
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker

@@ -116,7 +116,9 @@ export const AlertEpisodesListPage = () => {
 
   const { timeRange, handleTimeChange } = useEpisodesTimeRange(timefilter);
 
-  const [filterState, setFilterState] = useState<EpisodesFilterState>({});
+  const [filterState, setFilterState] = useState<EpisodesFilterState>({
+    includeBuildingBlocks: false,
+  });
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
@@ -304,6 +306,10 @@ export const AlertEpisodesListPage = () => {
             onRefresh={() => refetch()}
             isLoading={isLoading}
             services={services}
+            includeBuildingBlocks={filterState.includeBuildingBlocks ?? false}
+            onIncludeBuildingBlocksChange={(value) =>
+              setFilterState((prev) => ({ ...prev, includeBuildingBlocks: value }))
+            }
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>

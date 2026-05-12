@@ -13,6 +13,6 @@ export const getAlertEpisodesViewDefinition = (): EsqlViewDefinition => ({
   query: `FROM .rule-events
 | INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id
 | EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)
-| WHERE @timestamp == last_timestamp AND type == "alert"
+| WHERE @timestamp == last_timestamp AND type == "alert" AND building_block IS NULL
 | SORT @timestamp DESC`,
 });
