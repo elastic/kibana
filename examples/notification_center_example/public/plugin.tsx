@@ -9,33 +9,49 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { type Observable, of } from 'rxjs';
+import { map } from 'rxjs';
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hooks';
 import { registerDemoTypes } from './event_types';
 import { notificationCenterAppId } from './notification_center_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  spaces?: SpacesPluginSetup;
 }
 
-export class NotificationCenterExamplePlugin implements Plugin<void, void, SetupDeps> {
-  public setup(core: CoreSetup, deps: SetupDeps) {
+interface StartDeps {
+  spaces?: SpacesPluginStart;
+}
+
+export class NotificationCenterExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: notificationCenterAppId,
       // Notification state lives on core.notifications.events, not in a sidebar store.
       restoreOnReload: false,
       loadComponent: async () => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, startDeps] = await core.getStartServices();
         const { NotificationCenterApp } = await import('./notification_center_app');
         const events = coreStart.notifications.events;
+        const activeSpaceId$: Observable<string> | undefined = startDeps.spaces
+          ? startDeps.spaces.getActiveSpace$().pipe(map((s) => s.id))
+          : undefined;
+        const spacesEnabled = Boolean(startDeps.spaces);
 
         // Wrap the sidebar app's render so the hooks have a provider in scope.
         return function NotificationCenterAppWithProvider(props: SidebarComponentProps) {
           return (
             <NotificationEventsProvider value={events}>
-              <NotificationCenterApp {...props} />
+              <NotificationCenterApp
+                {...props}
+                activeSpaceId$={activeSpaceId$ ?? of<string | undefined>(undefined)}
+                spacesEnabled={spacesEnabled}
+              />
             </NotificationEventsProvider>
           );
         };

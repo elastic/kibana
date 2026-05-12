@@ -21,6 +21,7 @@
     "@kbn/core-chrome-sidebar-components",
     "@kbn/core-notifications-browser",
     "@kbn/core-notifications-browser-components",
-    "@kbn/core-notifications-browser-hooks"
+    "@kbn/core-notifications-browser-hooks",
+    "@kbn/spaces-plugin"
   ]
 }

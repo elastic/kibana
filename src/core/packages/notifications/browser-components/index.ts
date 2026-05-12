@@ -12,3 +12,17 @@ export {
   type NotificationEventProps,
   type NotificationHeadingLevel,
 } from './src/events/notification_event';
+
+export {
+  NotificationTypeFilter,
+  type NotificationTypeFilterProps,
+} from './src/filters/notification_type_filter';
+export {
+  NotificationReadStateFilter,
+  type NotificationReadState,
+  type NotificationReadStateFilterProps,
+} from './src/filters/notification_read_state_filter';
+export {
+  NotificationSpacesFilter,
+  type NotificationSpacesFilterProps,
+} from './src/filters/notification_spaces_filter';

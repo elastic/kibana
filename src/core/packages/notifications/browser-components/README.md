@@ -59,22 +59,89 @@ import { NotificationEvent } from '@kbn/core-notifications-browser-components';
 | `onClickPrimaryAction` | `(id) => void` | Required to render the primary action button. |
 | `onClickTitle` | `(id) => void` | If set, the title renders inside an `EuiLink`. |
 
+### Filter components
+
+Three small, props-controlled filter components that can be composed inside
+any notification surface (sidebar, popover, header drop-down). State is owned
+by the caller; each component is pure presentation.
+
+#### `NotificationTypeFilter`
+
+Chip row of typeId filters with a "Clear all" link. Empty selection means
+"no filter applied — show every type".
+
+```tsx
+import { NotificationTypeFilter } from '@kbn/core-notifications-browser-components';
+
+<NotificationTypeFilter
+  typeIds={['notificationExampleReport', 'notificationExampleAlert']}
+  selectedTypeIds={selected}
+  labels={{ notificationExampleReport: 'Report', notificationExampleAlert: 'Alert' }}
+  onChange={setSelected}
+/>
+```
+
+| Prop | Type | Notes |
+| :--- | :--- | :--- |
+| `typeIds` | `readonly string[]` | Required. Type ids present in the stream; rendered in order. |
+| `selectedTypeIds` | `ReadonlySet<string>` | Required. Empty = no filter. |
+| `labels` | `Record<string, string>` | Optional. Missing entries render the typeId itself. |
+| `onChange` | `(next: ReadonlySet<string>) => void` | Required. Called on each chip toggle and on Clear all. |
+
+#### `NotificationReadStateFilter`
+
+Single-select filter group for read state. Replaces the older All/Unread/Read
+tabs above the event list.
+
+```tsx
+import {
+  NotificationReadStateFilter,
+  type NotificationReadState,
+} from '@kbn/core-notifications-browser-components';
+
+<NotificationReadStateFilter value={readFilter} onChange={setReadFilter} />
+```
+
+| Prop | Type | Notes |
+| :--- | :--- | :--- |
+| `value` | `'all' \| 'unread' \| 'read'` | Required. Currently selected option. |
+| `onChange` | `(next) => void` | Required. |
+
+#### `NotificationSpacesFilter`
+
+Subdued panel with a "Current only" switch. The component does **not** depend
+on the spaces plugin — the parent decides whether to render it (typically
+only when `spaces` is available at runtime).
+
+```tsx
+import { NotificationSpacesFilter } from '@kbn/core-notifications-browser-components';
+
+<NotificationSpacesFilter currentOnly={spacesCurrentOnly} onChange={setSpacesCurrentOnly} />
+```
+
+| Prop | Type | Notes |
+| :--- | :--- | :--- |
+| `currentOnly` | `boolean` | Required. Whether the toggle is on. |
+| `onChange` | `(next: boolean) => void` | Required. |
+
 ## Storybook
 
 ```bash
 yarn storybook shared_ux
 ```
 
-Browse to **Notifications → Event**. Variants:
+Browse to **Notifications →**:
 
-- `Event` — base, unread.
-- `Pinned` — unread + pinned, with the pin button visible.
-- `PinnedAndRead` — read + pinned, showing the read-state contrast.
+- **Event** — base, `Pinned`, `PinnedAndRead`.
+- **TypeFilter** — `Empty`, `OneSelected`, `AllSelected`, `NoLabelsKnown`.
+- **ReadStateFilter** — `All`, `Unread`, `Read`.
+- **SpacesFilter** — `Off`, `On`.
 
 ## Internationalization
 
-All strings use `i18n.translate` from `@kbn/i18n` under the
-`core.notifications.event*` token namespace
-(`core.notifications.eventMeta.*`, `core.notifications.eventMessages.*`,
-`core.notifications.eventReadButton.*`, `core.notifications.eventReadIcon.*`,
-`core.notifications.eventPinButton.*`).
+All strings use `i18n.translate` from `@kbn/i18n`:
+
+- Event UI: `core.notifications.event*` (`eventMeta.*`, `eventMessages.*`,
+  `eventReadButton.*`, `eventReadIcon.*`, `eventPinButton.*`).
+- Filter UI: `core.notifications.filters.*` (`filters.types.*`,
+  `filters.readState.*`, `filters.spaces.*`).

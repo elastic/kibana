@@ -8,21 +8,52 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiButtonIcon, EuiEmptyPrompt, EuiSpacer, EuiTab, EuiTabs, EuiText } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
+import { type Observable, of as rxOf } from 'rxjs';
+import { useObservable } from '@kbn/use-observable';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
-import { NotificationEvent } from '@kbn/core-notifications-browser-components';
+import {
+  NotificationEvent,
+  NotificationReadStateFilter,
+  type NotificationReadState,
+  NotificationSpacesFilter,
+  NotificationTypeFilter,
+} from '@kbn/core-notifications-browser-components';
 import {
   useNotificationEventsService,
   useNotifications,
-  useReadNotifications,
   useUnreadNotifications,
 } from '@kbn/core-notifications-browser-hooks';
 import type { NotificationEvent as NotificationEventType } from '@kbn/core-notifications-browser';
+import { alertTypeId, cloudTypeId, reportTypeId } from './event_types';
 
 export const notificationCenterAppId = 'sidebarExampleNotificationCenter';
 
-type TabId = 'all' | 'unread' | 'read';
+interface NotificationCenterAppProps extends SidebarComponentProps {
+  /** Active spaceId observable. Emits `undefined` when the spaces plugin is unavailable. */
+  activeSpaceId$?: Observable<string | undefined>;
+  /** Whether the spaces plugin is enabled at runtime. */
+  spacesEnabled?: boolean;
+}
+
+const EMPTY_SPACE$ = rxOf<string | undefined>(undefined);
+
+const TYPE_LABELS: Readonly<Record<string, string>> = {
+  [reportTypeId]: 'Report',
+  [alertTypeId]: 'Alert',
+  [cloudTypeId]: 'Cloud',
+};
 
 const formatTime = (timestamp: number) => {
   const diff = Date.now() - timestamp;
@@ -35,19 +66,56 @@ const formatTime = (timestamp: number) => {
   return new Date(timestamp).toLocaleString();
 };
 
-export function NotificationCenterApp({ onClose }: SidebarComponentProps) {
+/**
+ * Collect distinct typeIds present in the events stream (preserving insertion
+ * order) and derive a display label for each — preferring the static
+ * `TYPE_LABELS` map, then the first event's `eventName`, then the typeId itself.
+ */
+function deriveTypeIdMeta(events: readonly NotificationEventType[]) {
+  const typeIds: string[] = [];
+  const labels: Record<string, string> = { ...TYPE_LABELS };
+  for (const event of events) {
+    if (!event.typeId) continue;
+    if (!typeIds.includes(event.typeId)) {
+      typeIds.push(event.typeId);
+    }
+    if (labels[event.typeId] === undefined && event.eventName) {
+      labels[event.typeId] = event.eventName;
+    }
+  }
+  return { typeIds, labels };
+}
+
+export function NotificationCenterApp({
+  onClose,
+  activeSpaceId$,
+  spacesEnabled = false,
+}: NotificationCenterAppProps) {
   const events = useNotificationEventsService();
   const all = useNotifications();
   const unread = useUnreadNotifications();
-  const read = useReadNotifications();
+  const activeSpaceId = useObservable(activeSpaceId$ ?? EMPTY_SPACE$, undefined);
 
-  const [tab, setTab] = useState<TabId>('all');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<ReadonlySet<string>>(new Set());
+  const [readFilter, setReadFilter] = useState<NotificationReadState>('all');
+  const [currentSpaceOnly, setCurrentSpaceOnly] = useState(false);
+
+  const { typeIds, labels } = useMemo(() => deriveTypeIdMeta(all), [all]);
 
   const items = useMemo(() => {
-    if (tab === 'unread') return unread;
-    if (tab === 'read') return read;
-    return all;
-  }, [tab, all, unread, read]);
+    return all.filter((event) => {
+      if (selectedTypes.size > 0 && (!event.typeId || !selectedTypes.has(event.typeId))) {
+        return false;
+      }
+      if (readFilter === 'unread' && event.isRead) return false;
+      if (readFilter === 'read' && !event.isRead) return false;
+      if (currentSpaceOnly && activeSpaceId && event.spaceId !== activeSpaceId) {
+        return false;
+      }
+      return true;
+    });
+  }, [all, selectedTypes, readFilter, currentSpaceOnly, activeSpaceId]);
 
   const markAllAsRead = () => {
     unread.forEach((e) => events.markAsRead(e.id, true));
@@ -59,29 +127,61 @@ export function NotificationCenterApp({ onClose }: SidebarComponentProps) {
         title="Notifications"
         onClose={onClose}
         actions={
-          <EuiButtonIcon
-            iconType="check"
-            aria-label="Mark all as read"
-            title="Mark all as read"
-            isDisabled={unread.length === 0}
-            onClick={markAllAsRead}
-          />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType={filtersOpen ? 'arrowUp' : 'arrowDown'}
+                iconSide="right"
+                onClick={() => setFiltersOpen((open) => !open)}
+                data-test-subj="notificationCenterToggleFilters"
+              >
+                Filters
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <HeaderSeparator />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                isDisabled={unread.length === 0}
+                onClick={markAllAsRead}
+                data-test-subj="notificationCenterMarkAllRead"
+              >
+                Mark all as read
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
       />
       <SidebarBody>
-        <EuiTabs size="s">
-          <EuiTab isSelected={tab === 'all'} onClick={() => setTab('all')}>
-            All ({all.length})
-          </EuiTab>
-          <EuiTab isSelected={tab === 'unread'} onClick={() => setTab('unread')}>
-            Unread ({unread.length})
-          </EuiTab>
-          <EuiTab isSelected={tab === 'read'} onClick={() => setTab('read')}>
-            Read ({read.length})
-          </EuiTab>
-        </EuiTabs>
-
-        <EuiSpacer size="s" />
+        <EuiAccordion
+          id="notificationCenterFilters"
+          arrowDisplay="none"
+          buttonContent={null}
+          forceState={filtersOpen ? 'open' : 'closed'}
+          paddingSize="none"
+        >
+          <NotificationTypeFilter
+            typeIds={typeIds}
+            selectedTypeIds={selectedTypes}
+            labels={labels}
+            onChange={setSelectedTypes}
+          />
+          <EuiSpacer size="m" />
+          <NotificationReadStateFilter value={readFilter} onChange={setReadFilter} />
+          {spacesEnabled && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <NotificationSpacesFilter
+                currentOnly={currentSpaceOnly}
+                onChange={setCurrentSpaceOnly}
+              />
+            </>
+          )}
+          <EuiSpacer size="m" />
+        </EuiAccordion>
 
         {items.length === 0 ? (
           <EuiEmptyPrompt
@@ -108,7 +208,6 @@ export function NotificationCenterApp({ onClose }: SidebarComponentProps) {
               title={event.title}
               messages={[event.message]}
               isRead={event.isRead}
-              onRead={(id, isRead) => events.markAsRead(id, !isRead)}
               isPinned={event.isPinned ?? false}
               onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
             />
@@ -116,5 +215,24 @@ export function NotificationCenterApp({ onClose }: SidebarComponentProps) {
         )}
       </SidebarBody>
     </>
+  );
+}
+
+/**
+ * Thin vertical rule for the header. EUI doesn't ship a vertical-divider
+ * primitive, so we render an inline-styled span.
+ */
+function HeaderSeparator() {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: 'inline-block',
+        width: 1,
+        height: 16,
+        backgroundColor: euiTheme.colors.borderBaseSubdued,
+      }}
+    />
   );
 }
