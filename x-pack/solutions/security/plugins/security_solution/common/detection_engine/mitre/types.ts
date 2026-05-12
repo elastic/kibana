@@ -5,18 +5,34 @@
  * 2.0.
  */
 
-export interface MitreTactic {
-  id: string;
-  name: string;
-  reference: string; // A link to the tactic's page
-  value: string; // A camelCased version of the name we use to reference the tactic
-  label: string; // An i18n internationalized version of the name we use for rendering
+import type {
+  MitreSubTechnique as SlimMitreSubTechnique,
+  MitreTactic as SlimMitreTactic,
+  MitreTechnique as SlimMitreTechnique,
+} from '@kbn/securitysolution-mitre-catalog';
+
+/**
+ * The catalog's structural shape (id, name, reference, value, tactics, …)
+ * lives in `@kbn/securitysolution-mitre-catalog`, where it is shared with
+ * other Kibana security-domain consumers (e.g. the threat-intelligence
+ * skill) without forcing them to depend on `@kbn/security-solution-plugin`.
+ *
+ * The Security Solution adds an `i18n` `label` field on top, used by the
+ * detection-rule UI and other in-app rendering. The shapes below extend the
+ * slim package types with that field — keeping the data definition single-
+ * sourced while preserving the existing labeled API consumed across the plugin.
+ */
+export interface MitreTactic extends SlimMitreTactic {
+  /** An i18n internationalized version of the name we use for rendering. */
+  label: string;
 }
 
-export interface MitreTechnique extends MitreTactic {
-  tactics: string[]; // Tactics this technique assigned to (lowercase dash separated)
+export interface MitreTechnique extends SlimMitreTechnique {
+  /** An i18n internationalized version of the name we use for rendering. */
+  label: string;
 }
 
-export interface MitreSubTechnique extends MitreTechnique {
-  techniqueId: string; // A technique id this subtechnique assigned to
+export interface MitreSubTechnique extends SlimMitreSubTechnique {
+  /** An i18n internationalized version of the name we use for rendering. */
+  label: string;
 }

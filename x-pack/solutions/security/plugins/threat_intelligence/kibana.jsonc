@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/threat-intelligence-plugin",
+  "owner": ["@elastic/security-solution"],
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "threatIntelligence",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "threatIntelligence"],
+    "requiredPlugins": ["agentBuilder"],
+    "optionalPlugins": ["workflowsManagement", "securitySolution", "taskManager"]
+  }
+}

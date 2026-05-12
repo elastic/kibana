@@ -266,6 +266,7 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:invalidate_api_keys',
         'task_manager:mark_removed_tasks_as_unrecognized',
+        'threat_intelligence:ioc_indicator_sync',
         'unusedUrlsCleanupTask',
         'workflow:resume',
         'workflow:run',

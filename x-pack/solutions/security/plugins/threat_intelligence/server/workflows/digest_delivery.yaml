@@ -1,0 +1,105 @@
+# =============================================================================
+# Workflow 3 — digest_delivery
+#
+# Schedule: per-subscription cron (the per-sub schedule lives in
+# threat-intel-subscriptions.schedule_rrule). This wrapper runs hourly and
+# fans out to subscriptions whose RRULE next-fire window matches "now".
+#
+# Purpose:  For each due subscription, ask the default agent to load the
+#           threat-intelligence skill, build a digest matching the
+#           subscription's tags+severity, and deliver it via the configured
+#           channel. The agent — not this workflow — picks the right tools
+#           and attachment types.
+# =============================================================================
+name: threat_intel.digest_delivery
+description: Render and deliver per-subscription threat intelligence digests
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: "1h"
+steps:
+  - name: load_subscriptions
+    type: elasticsearch.search
+    with:
+      index: threat-intel-subscriptions
+      size: 500
+
+  - name: deliver_each
+    type: foreach
+    foreach: "{{ steps.load_subscriptions.output.hits.hits }}"
+    steps:
+      # NOTE: cron evaluation against schedule_rrule is intentionally simplified
+      # in the v1 wrapper — a follow-up PR can add a pre-filter step (e.g. via
+      # a small `data.transform` step or an `ai.agent` call) that evaluates the
+      # RRULE for the current hour and short-circuits non-due subscriptions.
+      - name: render_digest
+        type: ai.agent
+        with:
+          agentId: default
+          skills:
+            - threat-intelligence
+          prompt: >-
+            Build the recurring digest for subscription {{ item._id }}.
+            Tags: {{ item._source.tags | join: ", " }}.
+            Min severity: {{ item._source.severity_threshold }}.
+            Time range: last 7 days.
+
+            Use threat_intel.search_reports to gather the matching reports.
+            Render the result as a threat-intel-mitre-heatmap attachment, then a
+            threat-intel-report-table attachment, then a short prose summary
+            and (if time range > 7 days) a threat-intel-severity-timeline.
+
+            Then return the rendered digest content as plain markdown so this
+            workflow can deliver it.
+
+      - name: archive_digest
+        type: elasticsearch.index
+        with:
+          index: threat-intel-digests
+          document:
+            "@timestamp": "{{ now }}"
+            subscription_id: "{{ item._id }}"
+            time_range:
+              from: "{{ now | date_minus: 7, 'days' }}"
+              to: "{{ now }}"
+            content_markdown: "{{ steps.render_digest.output.text }}"
+            report_ids: "{{ steps.render_digest.output.report_ids }}"
+            delivered: false
+        on-failure:
+          continue: true
+
+      # Delivery dispatched per subscription delivery.type. For now only
+      # email/slack are supported; the connector wiring lives in follow-up PRs
+      # because it depends on the actions plugin being wired into the workflow
+      # engine's `connector` step. Keep this branch present so the schema and
+      # wiring are validated end-to-end.
+      - name: deliver
+        type: switch
+        with:
+          expression: "{{ item._source.delivery.type }}"
+          cases:
+            - match: email
+              steps:
+                - name: email_send_placeholder
+                  type: data.set
+                  with:
+                    key: delivery
+                    value: >-
+                      Email delivery to {{ item._source.delivery.target }} -
+                      wire to actions/email connector in a follow-up PR.
+            - match: slack
+              steps:
+                - name: slack_send_placeholder
+                  type: data.set
+                  with:
+                    key: delivery
+                    value: >-
+                      Slack delivery to {{ item._source.delivery.target }} -
+                      wire to actions/slack connector in a follow-up PR.
+          default:
+            - name: log_unknown_delivery
+              type: data.set
+              with:
+                key: warning
+                value: "Subscription {{ item._id }} has unknown delivery.type"

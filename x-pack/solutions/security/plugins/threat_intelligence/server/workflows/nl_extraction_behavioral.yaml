@@ -1,0 +1,133 @@
+# =============================================================================
+# Workflow 2 — nl_extraction_behavioral
+#
+# Schedule: every 6 hours (offset from Workflow 1 by ~30m so newly-ingested
+# documents are available).
+# Purpose:  For each freshly-ingested report (where extraction_method == 'pending'),
+#           extract IOCs via the registry tool and behaviors via the LLM-driven
+#           hunt_behavior delegated through the AI agent. Skip documents whose
+#           content_fingerprint has already been processed (dedup gate).
+# =============================================================================
+name: threat_intel.nl_extraction_behavioral
+description: Extract IOCs + behaviors from freshly ingested threat reports (deduped by content_fingerprint)
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: "6h"
+steps:
+  - name: load_pending_reports
+    type: elasticsearch.search
+    with:
+      index: threat-reports-*
+      size: 200
+      query:
+        bool:
+          must:
+            - term:
+                provenance.extraction_method: pending
+      sort:
+        - "@timestamp": asc
+
+  - name: load_already_extracted_fingerprints
+    type: elasticsearch.search
+    with:
+      index: threat-reports-*
+      size: 0
+      query:
+        bool:
+          must_not:
+            - term:
+                provenance.extraction_method: pending
+      aggs:
+        fingerprints:
+          terms:
+            field: content_fingerprint
+            size: 10000
+
+  - name: extract_each_report
+    type: foreach
+    foreach: "{{ steps.load_pending_reports.output.hits.hits }}"
+    steps:
+      - name: skip_if_extracted
+        type: if
+        with:
+          condition: >-
+            {{ steps.load_already_extracted_fingerprints.output.aggregations.fingerprints.buckets
+               | map: "key"
+               | includes: item._source.content_fingerprint }}
+        then:
+          - name: log_skipped
+            type: data.set
+            with:
+              key: skipped_report
+              value: "{{ item._id }} - duplicate content_fingerprint"
+          - name: skip
+            type: loop.continue
+
+      - name: extract_iocs
+        type: builtin
+        with:
+          tool: threat_intel.extract_iocs
+          input:
+            text: "{{ item._source.content.body_text }}"
+            defang: true
+
+      - name: extract_behaviors
+        type: ai.agent
+        with:
+          # The agent loads the threat-intelligence skill and invokes
+          # hunt_behavior with the report text. The agent is responsible for
+          # delegating valid behaviors to security.create_detection_rule (or
+          # emitting copy-paste rule definitions when aiRuleCreationEnabled
+          # is off).
+          agentId: default
+          skills:
+            - threat-intelligence
+          prompt: >-
+            Run threat_intel.hunt_behavior on this report. Report id is
+            {{ item._id }}. Report text:
+            {{ item._source.content.body_text }}
+
+      # Cross-report correlation: find OTHER reports that already share this
+      # report's IOC set hash. The exact-set match is cheap (one terms query
+      # against the keyword field) and high-signal — it catches RSS-syndicated
+      # variants and same-campaign reports that hit different feeds. Future
+      # iterations can layer a partial-overlap correlation on top.
+      - name: find_related_reports
+        type: elasticsearch.search
+        with:
+          index: threat-reports-*
+          size: 25
+          _source: false
+          query:
+            bool:
+              must:
+                - term:
+                    extracted.ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+              must_not:
+                - ids:
+                    values:
+                      - "{{ item._id }}"
+        on-failure:
+          # If the field doesn't exist yet (first run after the v2 mapping bump)
+          # treat the related-reports list as empty rather than failing the doc.
+          continue: true
+
+      - name: persist_extractions
+        type: elasticsearch.update
+        with:
+          index: threat-reports-*
+          id: "{{ item._id }}"
+          doc:
+            extracted:
+              iocs: "{{ steps.extract_iocs.output.iocs }}"
+              ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+              behaviors: "{{ steps.extract_behaviors.output.behaviors }}"
+            provenance:
+              extracted_at: "{{ now }}"
+              extraction_method: workflow_v1
+              related_reports: "{{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
+              related_reports_count: "{{ steps.find_related_reports.output.hits.total.value }}"
+        on-failure:
+          continue: true

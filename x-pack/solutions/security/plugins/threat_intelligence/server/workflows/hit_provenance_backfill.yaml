@@ -1,0 +1,142 @@
+# =============================================================================
+# Workflow 4 — hit_provenance_backfill
+#
+# Schedule: every hour.
+# Purpose:  Walk back from Detection Engine alerts to the originating
+#           `threat-reports-*` doc and update `provenance.environment_hits[]` +
+#           `provenance.environment_hits_total` so the report-table attachment
+#           can render the already-defined "Env. hits" column with real values.
+#
+# Two sources of hits, mapped to the two implemented layers of the detection
+# model. (Layer 3 — Streams Query KIs — is intentionally not handled here;
+# see `docs/rfcs/0001_streams_layer3_grounded_hypothesis_flow.md` for the
+# proposed contract. Once the streams-side primitives land, a Layer-3 step
+# will be re-introduced and `provenance.environment_hits.layer_3_streams_ki`
+# re-added to the mapping.)
+#
+#   - **Layer 1 (IOC match)** — alerts produced by Indicator Match rules
+#     (`kibana.alert.rule.type == "threat_match"`). The IOC indicator-sync
+#     Task Manager task writes a `threat.indicator.reference` of the form
+#     `threat-report:<report_id>` onto every indicator it syncs from
+#     `threat-reports-*`, so Indicator Match alerts carry that backlink
+#     through to `kibana.alert.threat.indicator.reference`.
+#
+#   - **Layer 2 (behavioral DE rule)** — alerts whose
+#     `kibana.alert.rule.threat.technique[].id` overlaps with this report's
+#     `extracted.ttps.techniques`. The match is technique-level, not
+#     report-level, so we attribute the hit to every report that surfaced the
+#     same technique in the lookback window. This is intentional — the
+#     "Env. hits" badge measures the in-the-wild signal, not authorship.
+#
+# Bounded to reports with at least one extracted IOC OR behavior. Reports
+# with neither cannot produce env hits and are skipped.
+# =============================================================================
+name: threat_intel.hit_provenance_backfill
+description: Attribute Detection Engine alerts back to their originating threat-reports-* docs (Layers 1/2)
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: "1h"
+steps:
+  - name: load_reports_with_extractions
+    type: elasticsearch.search
+    with:
+      index: threat-reports-*
+      size: 500
+      _source:
+        - extracted.ttps.techniques
+        - extracted.iocs.value
+      query:
+        bool:
+          filter:
+            - range:
+                provenance.extracted_at:
+                  gte: "now-30d"
+          should:
+            - exists:
+                field: extracted.iocs
+            - exists:
+                field: extracted.behaviors
+          minimum_should_match: 1
+      sort:
+        - provenance.extracted_at: desc
+
+  - name: backfill_each_report
+    type: foreach
+    foreach: "{{ steps.load_reports_with_extractions.output.hits.hits }}"
+    steps:
+      # Layer 1 — Indicator Match alerts that reference this report_id.
+      # The indicator-sync Task Manager task writes
+      # `threat.indicator.reference = "threat-report:<report_id>"` on every
+      # row in the `.threat-intel-indicators-*` index so the join is exact.
+      - name: count_layer1_hits
+        type: elasticsearch.search
+        with:
+          index: .alerts-security.alerts-*
+          size: 0
+          query:
+            bool:
+              filter:
+                - range:
+                    "@timestamp":
+                      gte: "now-7d"
+                - term:
+                    kibana.alert.rule.type: threat_match
+                - term:
+                    kibana.alert.threat.indicator.reference: "threat-report:{{ item._id }}"
+        on-failure:
+          # If the alerts index doesn't exist yet (fresh deployment) or RBAC
+          # blocks the read, treat as zero rather than failing the loop.
+          continue: true
+
+      # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
+      # with this report's extracted techniques. Skipped when the report has
+      # no techniques because the terms query would be malformed.
+      - name: count_layer2_hits
+        type: if
+        with:
+          condition: >-
+            {{ item._source.extracted.ttps.techniques
+               | default: []
+               | size > 0 }}
+        then:
+          - name: layer2_search
+            type: elasticsearch.search
+            with:
+              index: .alerts-security.alerts-*
+              size: 0
+              query:
+                bool:
+                  filter:
+                    - range:
+                        "@timestamp":
+                          gte: "now-7d"
+                    - terms:
+                        kibana.alert.rule.threat.technique.id: "{{ item._source.extracted.ttps.techniques }}"
+                  must_not:
+                    - term:
+                        kibana.alert.rule.type: threat_match
+            on-failure:
+              continue: true
+
+      - name: write_provenance
+        type: elasticsearch.update
+        with:
+          index: threat-reports-*
+          id: "{{ item._id }}"
+          doc:
+            provenance:
+              environment_hits:
+                window: "7d"
+                computed_at: "{{ now }}"
+                layer_1_ioc_match: "{{ steps.count_layer1_hits.output.hits.total.value | default: 0 }}"
+                layer_2_behavioral: "{{ steps.count_layer2_hits.output.layer2_search.output.hits.total.value | default: 0 }}"
+              environment_hits_total: >-
+                {{ (steps.count_layer1_hits.output.hits.total.value | default: 0)
+                  + (steps.count_layer2_hits.output.layer2_search.output.hits.total.value | default: 0) }}
+        on-failure:
+          # Doc deleted mid-run, mapping mismatch on first run after template
+          # bump, or version conflict from a concurrent ingest. Backfill is
+          # idempotent — the next hourly run will overwrite cleanly.
+          continue: true
