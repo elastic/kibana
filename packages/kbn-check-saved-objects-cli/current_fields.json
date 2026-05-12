@@ -1360,6 +1360,21 @@
     "tags",
     "version"
   ],
+  "slo-composite": [
+    "budgetingMethod",
+    "compositeMethod",
+    "createdAt",
+    "description",
+    "enabled",
+    "id",
+    "members",
+    "members.instanceId",
+    "members.sloId",
+    "members.weight",
+    "name",
+    "tags",
+    "updatedAt"
+  ],
   "slo-settings": [],
   "slo_template": [
     "name",

@@ -4440,6 +4440,56 @@
       }
     }
   },
+  "slo-composite": {
+    "dynamic": false,
+    "properties": {
+      "budgetingMethod": {
+        "type": "keyword"
+      },
+      "compositeMethod": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "members": {
+        "properties": {
+          "instanceId": {
+            "type": "keyword"
+          },
+          "sloId": {
+            "type": "keyword"
+          },
+          "weight": {
+            "type": "float"
+          }
+        }
+      },
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      }
+    }
+  },
   "slo-settings": {
     "dynamic": false,
     "properties": {}
