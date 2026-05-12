@@ -10,7 +10,12 @@
 export { ExecutionError } from './errors/execution_error';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
-export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
+export type {
+  WorkflowsApiRequestHandlerContext,
+  WorkflowsClient,
+  HookResult,
+  HookHandler,
+} from './types';
 
 export {
   getStepExecutionsByIds,

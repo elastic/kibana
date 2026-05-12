@@ -7,7 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+
+export interface HookResult {
+  status: 'completed' | 'pass_through' | 'failed';
+  output: Record<string, unknown>;
+  error?: string;
+}
+
+/**
+ * A synchronous hook handler registered for a trigger.
+ * Receives the current payload and an optional capabilities map, and returns a
+ * (possibly modified) payload. In chained mode the output of handler N becomes
+ * the input to handler N+1. Capabilities are opaque to the YAML layer — they
+ * carry call-scoped objects (e.g. AnonymizationContext) that handlers can use
+ * without surfacing sensitive material in the workflow event.
+ */
+export type HookHandler = (
+  payload: Record<string, unknown>,
+  capabilities?: Record<string, unknown>
+) => Promise<Record<string, unknown>>;
 
 /**
  * The workflows client.
@@ -17,13 +36,24 @@ import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/serve
 export interface WorkflowsClient {
   isWorkflowsAvailable: boolean;
   emitEvent: (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
+  /**
+   * Invoke a synchronous hook for a trigger that has a `sync` block defined.
+   * All registered handlers run inline (no task manager), in registration order.
+   * Returns the final output payload after all handlers have run.
+   *
+   * `capabilities` is an opaque map of call-scoped objects (e.g. AnonymizationContext)
+   * passed to handlers without appearing in the YAML event payload.
+   *
+   * Throws if the trigger was not registered with a `sync` block.
+   */
+  invokeHook: (
+    triggerId: string,
+    payload: Record<string, unknown>,
+    capabilities?: Record<string, unknown>
+  ) => Promise<HookResult>;
 }
 
 // Exporting using Kibana naming convention
 export type WorkflowsApiRequestHandlerContext = WorkflowsClient;
-
-export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
-  workflows: WorkflowsApiRequestHandlerContext;
-}>;
 
 export type WorkflowsClientProvider = (request: KibanaRequest) => Promise<WorkflowsClient>;
