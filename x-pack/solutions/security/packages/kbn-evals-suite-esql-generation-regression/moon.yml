@@ -17,6 +17,8 @@ project:
   owner: '@elastic/security-detection-platform'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression
 dependsOn:
+  - '@kbn/core'
+  - '@kbn/esql-language'
   - '@kbn/evals'
   - '@kbn/inference-common'
   - '@kbn/tooling-log'
