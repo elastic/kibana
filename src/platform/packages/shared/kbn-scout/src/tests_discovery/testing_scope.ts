@@ -199,25 +199,19 @@ export const resolveScoutTestingScope = (
 
 /**
  * JSON shape produced by `scout resolve-testing-scope` and read by every
- * downstream step (configs CLI, lanes CLI, FTR/Jest skip check).
+ * downstream step (configs CLI, lanes CLI).
  *
  * Field semantics:
- *   - `kind` / `reason`   : the decision (mirrors ScoutTestingScope).
- *   - `skipNonScoutTests` : actionable boolean for non-Scout consumers (e.g.
- *                           the FTR/Jest skip step). True only when BOTH
- *                           `kind: 'tests-only'` AND the producer was invoked
- *                           with `allowSkipNonScoutTests` (gated by the
- *                           `ci:skip-non-scout-tests` GitHub label upstream).
- *   - `affectedModules`   : ALWAYS present (sorted, possibly empty). Used both as
- *                           the dependency-tree filter set AND for generic
- *                           "isAffected" labeling regardless of kind.
- *   - `affectedConfigs`   : present only when `kind === 'tests-only'`; the exact
- *                           set of Playwright configs to run.
+ *   - `kind` / `reason` : the decision (mirrors ScoutTestingScope).
+ *   - `affectedModules` : ALWAYS present (sorted, possibly empty). Used both as
+ *                         the dependency-tree filter set AND for generic
+ *                         "isAffected" labeling regardless of kind.
+ *   - `affectedConfigs` : present only when `kind === 'tests-only'`; the exact
+ *                         set of Playwright configs to run.
  */
 export interface SerializedScoutTestingScope {
   kind: ScoutTestingScope['kind'];
   reason?: 'selective-disabled' | 'critical-files';
-  skipNonScoutTests: boolean;
   affectedModules: readonly string[];
   affectedConfigs?: readonly string[];
 }
@@ -226,14 +220,10 @@ export interface SerializedScoutTestingScope {
  * Convert a `ScoutTestingScope` into the JSON shape shared across pipeline
  * steps. `affectedModules` is always included (even for `full` / `tests-only`
  * scopes) so consumers can label items as "affected" regardless of kind.
- *
- * `allowSkipNonScoutTests` gates the actionable `skipNonScoutTests` field —
- * see `SerializedScoutTestingScope` for the policy.
  */
 export const serializeScoutTestingScope = (
   scope: ScoutTestingScope,
-  affectedModules: ReadonlySet<string>,
-  allowSkipNonScoutTests: boolean
+  affectedModules: ReadonlySet<string>
 ): SerializedScoutTestingScope => {
   const sortedModules = Array.from(affectedModules).sort();
   switch (scope.kind) {
@@ -241,13 +231,11 @@ export const serializeScoutTestingScope = (
       return {
         kind: 'full',
         reason: scope.reason,
-        skipNonScoutTests: false,
         affectedModules: sortedModules,
       };
     case 'tests-only':
       return {
         kind: 'tests-only',
-        skipNonScoutTests: allowSkipNonScoutTests,
         affectedModules: sortedModules,
         affectedConfigs: Array.from(scope.affectedConfigPaths).sort(),
       };
@@ -257,7 +245,6 @@ export const serializeScoutTestingScope = (
       // array instead of allocating + sorting a fresh copy.
       return {
         kind: 'dependency-tree',
-        skipNonScoutTests: false,
         affectedModules: sortedModules,
       };
   }
@@ -270,17 +257,12 @@ export const serializeScoutTestingScope = (
 export const writeScoutTestingScope = (
   scope: ScoutTestingScope,
   affectedModules: ReadonlySet<string>,
-  allowSkipNonScoutTests: boolean,
   outputPath: string
 ): void => {
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(
     outputPath,
-    `${JSON.stringify(
-      serializeScoutTestingScope(scope, affectedModules, allowSkipNonScoutTests),
-      null,
-      2
-    )}\n`
+    `${JSON.stringify(serializeScoutTestingScope(scope, affectedModules), null, 2)}\n`
   );
 };
 
@@ -297,7 +279,6 @@ const isSerializedScoutTestingScope = (value: unknown): value is SerializedScout
   ) {
     return false;
   }
-  if (typeof candidate.skipNonScoutTests !== 'boolean') return false;
   if (!isStringArray(candidate.affectedModules)) return false;
   if (candidate.affectedConfigs !== undefined && !isStringArray(candidate.affectedConfigs)) {
     return false;
@@ -330,7 +311,7 @@ export const readScoutTestingScope = (filePath: string): SerializedScoutTestingS
 
   if (!isSerializedScoutTestingScope(parsed)) {
     throw createFailError(
-      `Testing-scope file '${filePath}' must contain { kind: 'full'|'tests-only'|'dependency-tree', skipNonScoutTests: boolean, affectedModules: string[], affectedConfigs?: string[] }`
+      `Testing-scope file '${filePath}' must contain { kind: 'full'|'tests-only'|'dependency-tree', affectedModules: string[], affectedConfigs?: string[] }`
     );
   }
 

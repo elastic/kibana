@@ -466,7 +466,7 @@ export const createTestTracks: Command<void> = {
     const testingScopePath = flagsReader.string('testing-scope');
     const scope: SerializedScoutTestingScope = testingScopePath
       ? readScoutTestingScope(testingScopePath)
-      : { kind: 'full', skipNonScoutTests: false, affectedModules: [] };
+      : { kind: 'full', affectedModules: [] };
 
     let filter: TestLoadFilter = null;
     if (scope.kind === 'tests-only') {

@@ -25,13 +25,12 @@ export const runResolveTestingScope = (flagsReader: FlagsReader, log: ToolingLog
   const codeChangesPath = flagsReader.string('code-changes');
   const outputPath = flagsReader.requiredString('scope-output');
   const selectiveTesting = flagsReader.boolean('selective-testing');
-  const allowSkipNonScoutTests = flagsReader.boolean('allow-skip-non-scout-tests');
 
   const codeChanges = codeChangesPath ? readCodeChanges(codeChangesPath) : null;
   const scope = resolveScoutTestingScope(codeChanges, selectiveTesting, log);
   const affectedModules = new Set(codeChanges?.affectedModules ?? []);
 
-  writeScoutTestingScope(scope, affectedModules, allowSkipNonScoutTests, outputPath);
+  writeScoutTestingScope(scope, affectedModules, outputPath);
   log.info(`Scout testing scope written to '${outputPath}' (kind: ${scope.kind})`);
 };
 
@@ -42,7 +41,6 @@ export const resolveTestingScopeCmd: Command<void> = {
   as a hand-off artifact. The output is consumed by:
     - 'discover-playwright-configs' (configs strategy filter)
     - 'create-test-tracks'          (lanes strategy filter)
-    - PR-pipeline FTR/Jest pick step (skip when 'skipNonScoutTests' is true)
 
   Options:
     --code-changes <file>     Path to a JSON file describing the PR's diff:
@@ -58,12 +56,6 @@ export const resolveTestingScopeCmd: Command<void> = {
                                 1. Critical Scout files touched -> kind: 'full'
                                 2. Diff is exclusively Scout tests -> 'tests-only'
                                 3. Otherwise -> 'dependency-tree'
-    --allow-skip-non-scout-tests
-                              Mark 'skipNonScoutTests: true' in the artifact when
-                              the resolved scope is 'tests-only'. Consumers (the
-                              FTR/Jest pick step) treat this as a signal to skip
-                              non-Scout test runs entirely. Gated upstream by the
-                              'ci:skip-non-scout-tests' GitHub PR label.
 
   Example:
     node scripts/scout resolve-testing-scope \\
@@ -73,10 +65,9 @@ export const resolveTestingScopeCmd: Command<void> = {
   `,
   flags: {
     string: ['code-changes', 'scope-output'],
-    boolean: ['selective-testing', 'allow-skip-non-scout-tests'],
+    boolean: ['selective-testing'],
     default: {
       'selective-testing': false,
-      'allow-skip-non-scout-tests': false,
     },
   },
   run: ({ flagsReader, log }) => {

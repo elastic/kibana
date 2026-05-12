@@ -35,7 +35,6 @@ describe('runResolveTestingScope', () => {
     codeChanges?: string;
     scopeOutput?: string;
     selectiveTesting?: boolean;
-    allowSkipNonScoutTests?: boolean;
   }) => {
     flagsReader.string.mockImplementation((name: string) => {
       if (name === 'code-changes') return overrides.codeChanges ?? '';
@@ -48,7 +47,6 @@ describe('runResolveTestingScope', () => {
     });
     flagsReader.boolean.mockImplementation((name: string) => {
       if (name === 'selective-testing') return overrides.selectiveTesting ?? false;
-      if (name === 'allow-skip-non-scout-tests') return overrides.allowSkipNonScoutTests ?? false;
       return false;
     });
   };
@@ -84,7 +82,6 @@ describe('runResolveTestingScope', () => {
     expect(readScoutTestingScope(scopeOutputPath)).toEqual({
       kind: 'full',
       reason: 'selective-disabled',
-      skipNonScoutTests: false,
       affectedModules: ['@kbn/bar', '@kbn/foo'],
     });
     expect(log.info).toHaveBeenCalledWith(expect.stringContaining(scopeOutputPath));
@@ -98,7 +95,6 @@ describe('runResolveTestingScope', () => {
     expect(readScoutTestingScope(scopeOutputPath)).toEqual({
       kind: 'full',
       reason: 'selective-disabled',
-      skipNonScoutTests: false,
       affectedModules: [],
     });
   });
@@ -119,12 +115,11 @@ describe('runResolveTestingScope', () => {
     expect(readScoutTestingScope(scopeOutputPath)).toEqual({
       kind: 'full',
       reason: 'critical-files',
-      skipNonScoutTests: false,
       affectedModules: ['@kbn/scout'],
     });
   });
 
-  it('writes a tests-only scope (skipNonScoutTests=false by default) for a Scout-tests-only diff', () => {
+  it('writes a tests-only scope for a Scout-tests-only diff', () => {
     // We can't override REPO_ROOT trivially here; the test asserts the
     // kind=tests-only outcome plus the affectedModules pass-through.
     // affectedConfigs may be empty if the on-disk resolver lookup misses tmpRoot.
@@ -139,43 +134,7 @@ describe('runResolveTestingScope', () => {
     const written = readScoutTestingScope(scopeOutputPath);
 
     expect(written.kind).toBe('tests-only');
-    // Default: even on a tests-only diff, non-Scout tests still run unless the
-    // caller opts in via --allow-skip-non-scout-tests (gated upstream by the
-    // 'ci:skip-non-scout-tests' label).
-    expect(written.skipNonScoutTests).toBe(false);
     expect(written.affectedModules).toEqual(['@kbn/pkg']);
-  });
-
-  it('sets skipNonScoutTests=true on a tests-only diff when --allow-skip-non-scout-tests is set', () => {
-    writeCodeChanges(['pkg/test/scout/ui/tests/foo.spec.ts'], ['@kbn/pkg']);
-    setFlags({
-      codeChanges: codeChangesPath,
-      scopeOutput: scopeOutputPath,
-      selectiveTesting: true,
-      allowSkipNonScoutTests: true,
-    });
-
-    runResolveTestingScope(flagsReader, log);
-    const written = readScoutTestingScope(scopeOutputPath);
-
-    expect(written.kind).toBe('tests-only');
-    expect(written.skipNonScoutTests).toBe(true);
-  });
-
-  it('keeps skipNonScoutTests=false for non-tests-only scopes even with --allow-skip-non-scout-tests', () => {
-    writeCodeChanges(['pkg/test/scout/ui/tests/foo.spec.ts', 'pkg/public/foo.ts'], ['@kbn/foo']);
-    setFlags({
-      codeChanges: codeChangesPath,
-      scopeOutput: scopeOutputPath,
-      selectiveTesting: true,
-      allowSkipNonScoutTests: true,
-    });
-
-    runResolveTestingScope(flagsReader, log);
-    const written = readScoutTestingScope(scopeOutputPath);
-
-    expect(written.kind).toBe('dependency-tree');
-    expect(written.skipNonScoutTests).toBe(false);
   });
 
   it('writes a dependency-tree scope for a mixed source+test diff', () => {
@@ -193,7 +152,6 @@ describe('runResolveTestingScope', () => {
 
     expect(readScoutTestingScope(scopeOutputPath)).toEqual({
       kind: 'dependency-tree',
-      skipNonScoutTests: false,
       affectedModules: ['@kbn/bar', '@kbn/foo'],
     });
   });

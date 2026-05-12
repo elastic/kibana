@@ -1436,7 +1436,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
       setupTestingScope({
         kind: 'full',
         reason: 'critical-files',
-        skipNonScoutTests: false,
         affectedModules: ['@kbn/scout'],
       });
 
@@ -1455,7 +1454,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       setupTestingScope({
         kind: 'tests-only',
-        skipNonScoutTests: true,
         affectedModules: ['@kbn/pluginA'],
         affectedConfigs: [
           'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
@@ -1478,7 +1476,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
       );
       setupTestingScope({
         kind: 'dependency-tree',
-        skipNonScoutTests: false,
         affectedModules: ['@kbn/pluginA'],
       });
 
@@ -1499,7 +1496,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
       setupTestingScope({
         kind: 'full',
         reason: 'selective-disabled',
-        skipNonScoutTests: false,
         affectedModules: ['@kbn/pluginA'],
       });
 
@@ -1539,7 +1535,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       flagsReader.string.mockImplementation((name: string) =>
         name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
       );
-      setupTestingScope({ kind: 'full' }); // missing skipNonScoutTests + affectedModules
+      setupTestingScope({ kind: 'full' }); // missing affectedModules
 
       expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(/testing-scope file/i);
     });
