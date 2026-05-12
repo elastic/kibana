@@ -213,16 +213,23 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await test.step('verify only KEEP-listed fields are present in the sidebar', async () => {
       await pageObjects.discover.waitUntilFieldListHasCountOfFields();
-      // Kept fields render in both "Selected fields" and "Available fields" groups,
-      // so scope to one group to avoid strict-mode locator violations.
-      const availableFields = page.testSubj.locator('fieldListGroupedAvailableFields');
+      // KEEP-listed fields render under the "Selected fields" group as
+      // `dscFieldListPanelField-<field>` entries. Scope the assertions to that
+      // group so we only match selected (KEEP'd) fields.
+      const selectedFields = page.testSubj.locator('fieldListGroupedSelectedFields');
+      await expect(selectedFields).toBeVisible();
+
+      const selectedFieldEntries = selectedFields.getByTestId(/^dscFieldListPanelField-/);
+      await expect(selectedFieldEntries).toHaveCount(KEPT_FIELDS.length);
+
       for (const field of KEPT_FIELDS) {
-        await expect(availableFields.getByTestId(`field-${field}`)).toBeVisible();
+        await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toBeVisible();
       }
-      // Fields not present in the KEEP clause must be absent from the sidebar.
+
+      // Fields not present in the KEEP clause must be absent from the selected group.
       const droppedFields = ['bytes', 'clientip', 'extension', 'response'];
       for (const field of droppedFields) {
-        await expect(availableFields.getByTestId(`field-${field}`)).toHaveCount(0);
+        await expect(selectedFields.getByTestId(`dscFieldListPanelField-${field}`)).toHaveCount(0);
       }
     });
 
@@ -248,7 +255,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(HISTOGRAM_QUERY);
 
     await test.step('verify a histogram (xy chart) is rendered for the ES|QL query', async () => {
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+      await pageObjects.discover.expectXYVisChartVisible();
     });
 
     await test.step('save the histogram to a new dashboard', async () => {

@@ -430,6 +430,10 @@ export class DiscoverApp {
     await this.page.testSubj.click('dscHideHistogramButton');
   }
 
+  async expectXYVisChartVisible() {
+    await expect(this.page.testSubj.locator('xyVisChart')).toBeVisible();
+  }
+
   async navigateToLensEditor() {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
