@@ -30,7 +30,11 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { ToolingLog } from '@kbn/tooling-log';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
+
+const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
 
 const mergeBase = process.env.AFFECTED_MERGE_BASE;
 const outPath = process.env.CODE_CHANGES_FILE;
@@ -46,15 +50,20 @@ if (!outPath) {
 }
 
 (async () => {
-  // List changed files once; reused for every Scout selective-testing decision.
+  // List changed files once; reuse for both affected-packages and critical-files check.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
   // Compute affected @kbn/ modules (replaces the legacy `list_affected` binary).
-  const affectedPackages = await getAffectedPackages(mergeBase, {
-    strategy: 'git',
-    includeDownstream: true,
-    ignoreUncategorizedChanges: true,
-  });
+  // Overlay implicit runtime-registry consumers — see scout_implicit_consumers.ts.
+  const affectedPackages = expandWithImplicitConsumers(
+    await getAffectedPackages(mergeBase, {
+      strategy: 'git',
+      includeDownstream: true,
+      ignoreUncategorizedChanges: true,
+    }),
+    changedFiles,
+    log
+  );
 
   const codeChanges = {
     mergeBase,
