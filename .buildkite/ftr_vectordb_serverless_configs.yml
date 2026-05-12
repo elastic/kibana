@@ -1,0 +1,6 @@
+# VectorDB project FTR configs.
+# Placeholder — fill in once vectordb-specific FTR configs exist.
+# Reference: ftr_workplace_ai_serverless_configs.yml
+disabled: []
+defaultQueue: 'n2-4-spot'
+enabled: []

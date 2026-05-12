@@ -24,6 +24,7 @@ import {
   createAIMessage,
   createUserMessage,
   sanitizeToolId,
+  wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -257,7 +258,7 @@ const createGroupedToolCallMessages = async (
     toolMessages.push(
       new ToolMessage({
         tool_call_id: toolCall.tool_call_id,
-        content: JSON.stringify({ results: processedResults }),
+        content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
       })
     );
   }
@@ -292,7 +293,7 @@ export const createToolCallMessages = async (
 
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: JSON.stringify({ results: processedResults }),
+    content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
   });
 
   return [toolCallMessage, toolResultMessage];

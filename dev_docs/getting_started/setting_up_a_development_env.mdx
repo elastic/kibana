@@ -78,6 +78,52 @@ yarn start
 Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
 You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
 
+### Stateful startup options
+
+The following combinations cover the most common local development scenarios.
+
+**Default** — both SAML and basic login are supported; SAML is the default:
+
+```sh
+yarn es snapshot
+yarn start
+```
+
+**Without SAML login** — only basic login:
+
+```sh
+yarn es snapshot
+yarn start --mockIdpPlugin.enabled=false
+```
+
+**Basic license** — only basic login is supported:
+
+```sh
+yarn es snapshot --license basic
+yarn start --mockIdpPlugin.enabled=false
+```
+
+**No base path** — basic license, basic login, no random dev basepath:
+
+```sh
+yarn es snapshot --license basic
+yarn start --mockIdpPlugin.enabled=false --no-base-path
+```
+
+**Custom base path** — both SAML and basic login are supported; SAML is the default.
+
+```sh
+yarn es snapshot --kibanaUrl http://localhost:5601/your_path
+yarn start --server.basePath=/your_path
+```
+
+**No base path with SAML** — both SAML and basic login are supported; SAML is the default:
+
+```sh
+yarn es snapshot --kibanaUrl http://localhost:5601
+yarn start --no-base-path
+```
+
 ## Run in serverless mode
 
 To develop against serverless projects, you need to start both Elasticsearch and Kibana in serverless mode with matching project types.

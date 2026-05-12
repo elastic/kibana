@@ -73,6 +73,10 @@ export const generateLeadsRoute = (
             `[LeadGeneration] Connector resolved successfully (connectorId=${connectorId}, executionUuid=${executionUuid})`
           );
 
+          // The pipeline runs in the background after the 202 is returned.
+          // ES index-level permission errors (security_exception) thrown by
+          // createLeads are caught here, not propagated to the HTTP response.
+          // They surface via the status endpoint's `lastError` field instead.
           void (async () => {
             try {
               await runLeadGenerationPipeline({

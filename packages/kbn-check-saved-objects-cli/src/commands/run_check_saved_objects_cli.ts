@@ -9,16 +9,9 @@
 
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
-import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
+import { getKibanaServer, startElasticsearch, stopElasticsearch } from '../util';
 import type { MigrationAlgorithm, TaskContext } from './types';
-import {
-  automatedRollbackTests,
-  checkRemovedTypes,
-  getSnapshots,
-  validateNewTypes,
-  validateUpdatedTypes,
-} from './tasks';
-import { getTestSnapshots, TEST_TYPES } from './test';
+import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
@@ -70,15 +63,18 @@ export function runCheckSavedObjectsCli() {
         [
           {
             title: 'Start ES',
-            task: async (ctx) => (ctx.esServer = await startElasticsearch()),
+            // we launch the ES server in the background and store a promise that resolves when the server is ready
+            task: (ctx) => (ctx.esServer = startElasticsearch()),
             enabled: !client, // we skip this step if '--client' is passed
           },
           {
             title: `Wait for ES startup`,
-            task: async (ctx, task) =>
+            task: async (ctx, task) => {
+              const esServer = await ctx.esServer!;
               await new Promise(
-                () => (task.title = `Running on ${ctx.esServer!.hosts}. Press Ctrl+C to stop`)
-              ),
+                () => (task.title = `Running on ${esServer.hosts}. Press Ctrl+C to stop`)
+              );
+            },
             enabled: (ctx) => server && Boolean(ctx.esServer),
           },
           /**
@@ -90,12 +86,13 @@ export function runCheckSavedObjectsCli() {
            * ==================================================================
            */
           {
-            title: 'Start Kibana to obtain type registry',
+            title: 'Setup Kibana to obtain type registry',
             task: async (ctx) => {
-              ctx.kibanaServer = await setupKibana();
-              const coreStart = await ctx.kibanaServer.start();
-              ctx.registeredTypes = coreStart!.savedObjects.getTypeRegistry().getAllTypes();
-              ctx.encryptedSavedObjects = coreStart._plugins?.get('encryptedSavedObjects');
+              ctx.kibanaServer = await getKibanaServer();
+              await ctx.kibanaServer.preboot();
+              const coreSetup = await ctx.kibanaServer.setup();
+              ctx.registeredTypes = coreSetup!.savedObjects.getTypeRegistry().getAllTypes();
+              ctx.encryptedSavedObjects = coreSetup._plugins?.get('encryptedSavedObjects');
             },
             enabled: !server && !test,
           },
@@ -106,40 +103,41 @@ export function runCheckSavedObjectsCli() {
           },
           /**
            * ==================================================================
-           * The following tasks only run in "--test mode".
+           * Validate SO changes.
            *
-           * Instead of starting Kibana and getting the actual typeRegistry
-           * we use a test registry with a bunch of fake SO types.
+           * Checks for removed types, new types, and updated types.
            * ==================================================================
            */
           {
-            title: 'Obtain type registry (test mode)',
-            task: async (ctx) => (ctx.registeredTypes = TEST_TYPES),
-            enabled: !server && test,
+            title: 'Validate SO changes',
+            task: validateSOChanges,
+            enabled: !server && !test,
           },
           {
-            title: 'Get type registry snapshots (test mode)',
-            task: getTestSnapshots,
-            enabled: !server && test,
+            title: 'Fallback to test mode (no updated types detected)',
+            task: (ctx) => {
+              ctx.test = true;
+            },
+            enabled: !server && !test,
+            skip: (ctx) => ctx.updatedTypes.length > 0,
           },
           /**
            * ==================================================================
-           * The following tasks run systematically
+           * Validate test flow (runs in test mode or after fallback).
+           *
+           * Sets up a test type registry and test snapshots, then runs
+           * the same validation pipeline with test data.
            * ==================================================================
            */
           {
-            title: 'Check removed SO types',
-            task: checkRemovedTypes,
+            title: 'Validate test flow',
+            task: validateTestFlow,
             enabled: !server,
+            skip: (ctx) => !ctx.test,
           },
           {
-            title: 'Validate new SO types',
-            task: validateNewTypes,
-            enabled: !server,
-          },
-          {
-            title: 'Validate existing SO types',
-            task: validateUpdatedTypes,
+            title: 'Wait for ES startup',
+            task: async (ctx) => await ctx.esServer,
             enabled: !server,
           },
           {
@@ -172,13 +170,8 @@ export function runCheckSavedObjectsCli() {
         await new Listr<TaskContext, 'default', 'simple'>(
           [
             {
-              title: 'Stop Kibana',
-              task: async (ctx) => await stopKibana(ctx.kibanaServer!),
-              enabled: (ctx) => Boolean(ctx.kibanaServer),
-            },
-            {
               title: 'Stop ES',
-              task: async (ctx) => await stopElasticsearch(ctx.esServer!),
+              task: async (ctx) => await stopElasticsearch(await ctx.esServer!),
               enabled: (ctx) => Boolean(ctx.esServer),
             },
           ],

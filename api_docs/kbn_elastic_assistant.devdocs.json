@@ -3537,7 +3537,7 @@
         "label": "ManagementSettingsTabs",
         "description": [],
         "signature": [
-          "\"anonymization\" | \"connectors\" | \"knowledge_base\" | \"conversations\" | \"evaluation\" | \"quick_prompts\" | \"system_prompts\""
+          "\"evaluation\" | \"anonymization\" | \"connectors\" | \"knowledge_base\" | \"conversations\" | \"quick_prompts\" | \"system_prompts\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/settings/types.ts",
         "lineNumber": 20,

@@ -43,7 +43,7 @@ interface PageResult<B> {
 
 type SearchPage<B> = (afterKey: AfterKey, pageSize: number) => Promise<PageResult<B>>;
 
-type MapBucket<B> = (bucket: B) => MappedBucket | null;
+type MapBucket<B> = (bucket: B) => MappedBucket[];
 
 const pickLaterTimestamp = (
   current: string | undefined,
@@ -69,11 +69,7 @@ const paginatedDetection = async <B>(
     const buckets = page.buckets;
 
     if (buckets.length > 0) {
-      const mapped = buckets.reduce<MappedBucket[]>((acc, bucket) => {
-        const result = mapBucket(bucket);
-        if (result) acc.push(result);
-        return acc;
-      }, []);
+      const mapped = buckets.flatMap(mapBucket);
 
       for (const { entity, timestamp } of mapped) {
         maxTimestamp = pickLaterTimestamp(maxTimestamp, timestamp);
@@ -151,7 +147,7 @@ export const createUpdateDetectionService = ({
       }
 
       const ts = bucket.latest_doc?.hits?.hits?.[0]?._source?.['@timestamp'];
-      return { euid, entity, timestamp: typeof ts === 'string' ? ts : undefined };
+      return [{ euid, entity, timestamp: typeof ts === 'string' ? ts : undefined }];
     };
 
     return paginatedDetection(search, mapBucket);
@@ -194,11 +190,11 @@ export const createUpdateDetectionService = ({
 
     const mapBucket: MapBucket<{ key: { identifier: string }; doc_count: number }> = (bucket) => {
       const entry = correlationMap.get(bucket.key.identifier);
-      if (!entry) return null;
-      return {
-        euid: entry.euid,
-        entity: { euid: entry.euid, type: entry.entityType, sourceId: source.id },
-      };
+      if (!entry) return [];
+      return entry.euids.map((euid) => ({
+        euid,
+        entity: { euid, type: entry.entityType, sourceId: source.id },
+      }));
     };
 
     return paginatedDetection(search, mapBucket);

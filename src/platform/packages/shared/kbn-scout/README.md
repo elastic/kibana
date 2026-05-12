@@ -107,6 +107,8 @@ export default createPlaywrightConfig({
 
 Scout relies on configuration to determine the test files and opt-in [parallel test execution](https://playwright.dev/docs/test-parallel) against the single Elastic cluster.
 
+When `runGlobalSetup: true` is set, Scout also auto-discovers an optional `global.teardown.ts` next to `global.setup.ts`. Use `globalTeardownHook(...)` in that file to reset shared cluster/Kibana state once after all workers finish (even on failure) — for example, dropping legacy/hand-indexed data ingested by `global.setup.ts` or reverting feature-flag overrides. The teardown surface intentionally excludes `esArchiver`; use `esClient`/`kbnClient`/`apiServices` instead. See [`docs/extend/scout/global-setup-hook.md`](../../../../docs/extend/scout/global-setup-hook.md#global-teardown-hook) for the contract and examples.
+
 The Playwright configuration should only be created this way to ensure compatibility with Scout functionality. For configuration verification, we use a marker `VALID_CONFIG_MARKER`, and Scout will throw an error if the configuration is invalid.
 
 #### Fixtures
@@ -415,6 +417,36 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
   }
 }
 ```
+
+For `security` and `oblt` MKI projects, `productTier` is **required** (one of `complete | essentials | logs_essentials | search_ai_lake`). Example for an Observability "logs essentials" project:
+
+```json
+{
+  "serverless": true,
+  "projectType": "oblt",
+  "productTier": "logs_essentials",
+  "isCloud": true,
+  "cloudHostName": "elastic_cloud_hostname_qa_staging_prod",
+  "cloudUsersFilePath": "/path_to_your_cloud_users/role_users.json",
+  "hosts": {
+    "kibana": "https://my.oblt.project.kb.co",
+    "elasticsearch": "https://my.oblt.project.es.co"
+  },
+  "auth": {
+    "username": "operator_username",
+    "password": "operator_password"
+  }
+}
+```
+
+#### Cloud config validation
+
+`cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
+
+- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
+- `license` is optional and defaults to `"trial"`.
+- You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
 
 #### Starting Servers Only
 

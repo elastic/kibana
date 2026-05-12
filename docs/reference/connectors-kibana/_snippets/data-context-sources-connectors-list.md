@@ -14,6 +14,7 @@
 * [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
 * [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
+* [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
 * [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
 * [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 * [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
@@ -34,4 +35,4 @@
 * [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 * [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
 * [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
-* [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL analysis, and threat intelligence lookups.
+* [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.

@@ -68,6 +68,7 @@ const previouslyRegisteredTypes = [
   'entity-definition',
   'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-store-ccs-state',
   'entity-engine-descriptor-v2',
   'entity-store-global-state',
   'epm-packages',
@@ -152,6 +153,7 @@ const previouslyRegisteredTypes = [
   'security-rule',
   'security-solution-signals-migration',
   'security:reference-data',
+  'security:endpoint-scripts-library',
   'risk-engine-configuration',
   'entity-engine-status',
   'server',
@@ -190,6 +192,8 @@ const previouslyRegisteredTypes = [
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'
+  'user-storage',
+  'user-storage-global',
   'user_connector_token',
   'visualization',
   'workplace_search_telemetry',

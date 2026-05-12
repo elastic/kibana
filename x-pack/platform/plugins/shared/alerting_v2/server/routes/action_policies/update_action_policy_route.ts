@@ -7,6 +7,7 @@
 
 import {
   actionPolicyResponseSchema,
+  ID_MAX_LENGTH,
   updateActionPolicyBodySchema,
   type UpdateActionPolicyBody,
 } from '@kbn/alerting-v2-schemas';
@@ -22,12 +23,12 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateActionPolicyParamsSchema = z.object({
-  id: z.string().describe('The action policy identifier.'),
+  id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
 });
 
 @injectable()
 export class UpdateActionPolicyRoute extends BaseAlertingRoute {
-  static method = 'put' as const;
+  static method = 'patch' as const;
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
@@ -35,8 +36,9 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Update an action policy',
-    description: 'Update an existing action policy by identifier.',
+    summary: 'Partially update an action policy.',
+    description:
+      'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
   } as const;
   static validate = {
     request: {
