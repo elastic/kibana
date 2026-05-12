@@ -36,15 +36,14 @@ export const IMPACT_COLORS: Record<Impact, string> = {
   low: 'hollow',
 };
 
-export const getVerdictColor = (verdict: string): string => {
-  const colors: Record<string, string> = VERDICT_COLORS;
-  return colors[verdict] ?? 'default';
-};
+const isVerdict = (v: string): v is Verdict => v in VERDICT_COLORS;
+const isImpact = (v: string): v is Impact => v in IMPACT_COLORS;
 
-export const getImpactColor = (impact: string): string => {
-  const colors: Record<string, string> = IMPACT_COLORS;
-  return colors[impact] ?? 'hollow';
-};
+export const getVerdictColor = (verdict: string): string =>
+  isVerdict(verdict) ? VERDICT_COLORS[verdict] : 'default';
+
+export const getImpactColor = (impact: string): string =>
+  isImpact(impact) ? IMPACT_COLORS[impact] : 'hollow';
 
 // ---------------------------------------------------------------------------
 // Shared sub-schemas (reused by both SigEvent and Lifecycle schemas)

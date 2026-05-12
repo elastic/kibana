@@ -69,6 +69,13 @@ const esDiscoverySourceSchema = z.object({
   kind: z.string().optional(),
   change_point_occurrence: z.string().optional(),
   conversation_id: z.string().nullable().optional(),
+  detections: z
+    .array(
+      z.object({
+        detection_id: z.string(),
+      })
+    )
+    .optional(),
 });
 
 const esVerdictSourceSchema = z.object({
@@ -87,15 +94,13 @@ const esVerdictSourceSchema = z.object({
 
 const esEventSourceSchema = z.object({
   discovery_id: z.string().optional(),
-  rule_names: z.array(z.string()).optional(),
-  stream_names: z.array(z.string()).optional(),
 });
 
 const esDetectionSourceSchema = z.object({
   '@timestamp': z.string(),
   detection_id: z.string(),
   rule_name: z.string(),
-  stream_name: z.string().optional(),
+  stream: z.string().optional(),
   alert_count: z.number().optional(),
   superseded: z.boolean().optional(),
   detection_evidence: z
@@ -128,7 +133,7 @@ const mapDetection = (hit: { _id?: string; _source?: unknown }): LifecycleDetect
     detection_id: src.detection_id,
     timestamp: src['@timestamp'],
     rule_name: src.rule_name,
-    stream_name: src.stream_name ?? '',
+    stream_name: src.stream ?? '',
     alert_count: src.alert_count ?? 0,
     change_point_type: src.detection_evidence?.change_point_type ?? null,
     p_value: src.detection_evidence?.p_value ?? null,
@@ -185,7 +190,7 @@ const DETECTION_SOURCE_FIELDS = [
   '@timestamp',
   'detection_id',
   'rule_name',
-  'stream_name',
+  'stream',
   'alert_count',
   'superseded',
   'detection_evidence.change_point_type',
@@ -217,17 +222,13 @@ const getLifecycleRoute = createServerRoute({
 
     const eventResponse = await client.get({ index: EVENTS_INDEX, id: eventId });
     const eventSource = esEventSourceSchema.parse(eventResponse._source);
-    const {
-      discovery_id: discoveryId,
-      rule_names: ruleNames = [],
-      stream_names: streamNames = [],
-    } = eventSource;
+    const { discovery_id: discoveryId } = eventSource;
 
     if (!discoveryId) {
       return { event_id: eventId, detections: [], discoveries: [], verdicts: [] };
     }
 
-    const [discoveriesResult, verdictsResult, detectionsResult] = await Promise.all([
+    const [discoveriesResult, verdictsResult] = await Promise.all([
       client.search({
         index: DISCOVERIES_INDEX,
         size: 50,
@@ -240,30 +241,27 @@ const getLifecycleRoute = createServerRoute({
         sort: [{ '@timestamp': 'asc' }],
         query: { bool: { filter: [{ term: { discovery_id: discoveryId } }] } },
       }),
-      ruleNames.length > 0
-        ? client.search({
-            index: DETECTIONS_INDEX,
-            size: 500,
-            sort: [{ '@timestamp': 'asc' }],
-            _source: DETECTION_SOURCE_FIELDS,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { rule_name: ruleNames } },
-                  ...(streamNames.length > 0 ? [{ terms: { stream_name: streamNames } }] : []),
-                ],
-              },
-            },
-          })
-        : Promise.resolve(null),
     ]);
-
-    const detections: LifecycleDetection[] = detectionsResult
-      ? detectionsResult.hits.hits.map(mapDetection)
-      : [];
 
     const discoveries = discoveriesResult.hits.hits.map(mapDiscovery);
     const verdicts = verdictsResult.hits.hits.map(mapVerdict);
+
+    const detectionIds = discoveriesResult.hits.hits.flatMap((hit) => {
+      const src = esDiscoverySourceSchema.parse(hit._source);
+      return (src.detections ?? []).map((d) => d.detection_id);
+    });
+
+    let detections: LifecycleDetection[] = [];
+    if (detectionIds.length > 0) {
+      const detectionsResult = await client.search({
+        index: DETECTIONS_INDEX,
+        size: 500,
+        sort: [{ '@timestamp': 'asc' }],
+        _source: DETECTION_SOURCE_FIELDS,
+        query: { bool: { filter: [{ terms: { detection_id: detectionIds } }] } },
+      });
+      detections = detectionsResult.hits.hits.map(mapDetection);
+    }
 
     return { event_id: eventId, detections, discoveries, verdicts };
   },

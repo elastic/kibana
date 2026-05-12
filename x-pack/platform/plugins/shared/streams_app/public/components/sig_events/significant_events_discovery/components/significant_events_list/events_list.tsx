@@ -283,12 +283,16 @@ export const SignificantEventsList = () => {
     [sort]
   );
 
+  const clickableRowCss = css`
+    cursor: pointer;
+  `;
+
   const rowProps = useCallback(
     (item: SigEvent) => ({
       onClick: () => setSelectedEvent(item),
-      style: { cursor: 'pointer' },
+      css: clickableRowCss,
     }),
-    []
+    [clickableRowCss]
   );
 
   return (

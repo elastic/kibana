@@ -13,6 +13,19 @@ import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
+interface SigEventsQueryParams {
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+  verdict?: Verdict[];
+  impact?: Impact[];
+  stream?: string[];
+  search?: string;
+  from?: string;
+  to?: string;
+}
+
 export interface SigEventsFilters {
   verdict: Verdict[];
   impact: Impact[];
@@ -62,8 +75,8 @@ export const useSigEventsList = () => {
 
   const debouncedSearch = useDebouncedValue(filters.search, SEARCH_DEBOUNCE_MS);
 
-  const queryParams = useMemo(() => {
-    const params: Record<string, unknown> = {
+  const queryParams = useMemo((): SigEventsQueryParams => {
+    const params: SigEventsQueryParams = {
       page: pagination.page,
       perPage: pagination.perPage,
       sortField: sort.field,
@@ -78,7 +91,7 @@ export const useSigEventsList = () => {
 
   const fetchState = useStreamsAppFetch(
     async ({ signal, timeState }) => {
-      const query = { ...queryParams };
+      const query: SigEventsQueryParams = { ...queryParams };
       if (timeState) {
         query.from = timeState.asAbsoluteTimeRange.from;
         query.to = timeState.asAbsoluteTimeRange.to;
