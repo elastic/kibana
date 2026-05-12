@@ -119,26 +119,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const stepTitles = getStepTitles();
   const isLastStep = uiState.step === stepTitles.length - 1;
 
-  // Sync reducer-owned query fields into RHF whenever the user commits a query
-  // from the Discover Sandbox. This bridges the gap between the two state systems
-  // so that mapFormValuesToCreateRequest/UpdateRequest receives current values.
+  // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
+  // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
     if (uiState.queryCommitted && uiState.fullQuery) {
       methods.setValue('evaluation', { query: { base: uiState.fullQuery } });
     }
   }, [uiState.fullQuery, uiState.queryCommitted, methods]);
-
-  // Sync time field and group fields from the reducer into RHF as they change.
-  useEffect(() => {
-    methods.setValue('timeField', uiState.timeField);
-  }, [uiState.timeField, methods]);
-
-  useEffect(() => {
-    methods.setValue(
-      'grouping',
-      uiState.groupFields.length > 0 ? { fields: uiState.groupFields } : undefined
-    );
-  }, [uiState.groupFields, methods]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {

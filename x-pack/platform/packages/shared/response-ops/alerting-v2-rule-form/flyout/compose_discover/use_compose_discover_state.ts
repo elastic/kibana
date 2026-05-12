@@ -21,17 +21,6 @@ const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => 
   mode,
   step: 0,
   fullQuery: mode === 'create' ? SAMPLE_QUERY : '',
-  notificationsEnabled: false,
-  name: '',
-  tags: [],
-  schedule: '1m',
-  lookback: '5m',
-  timeField: '@timestamp',
-  groupFields: [],
-  alertDelayMode: 'immediate',
-  alertDelayValue: 1,
-  recoveryDelayMode: 'immediate',
-  recoveryDelayValue: 1,
   activeTab: 'alert',
   yamlMode: false,
   childOpen: mode === 'create',
@@ -53,45 +42,21 @@ export function getStepTitles(): string[] {
  * Always single for now — tabs (Base/Alert/Recovery) added in custom recovery follow-up.
  */
 export function getSandboxTabConfig(_state: ComposeDiscoverState): SandboxTabConfig {
-  // Tabs (Base/Alert/Recovery) added in custom recovery follow-up
   return { type: 'single' };
 }
 
 function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): ComposeDiscoverState {
   switch (action.type) {
-    case 'SET_NAME':
-      return { ...state, name: action.name };
-    case 'SET_TAGS':
-      return { ...state, tags: action.tags };
     case 'SET_FULL_QUERY':
       return { ...state, fullQuery: action.query };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
-    case 'SET_SCHEDULE':
-      return { ...state, schedule: action.schedule };
-    case 'SET_LOOKBACK':
-      return { ...state, lookback: action.lookback };
-    case 'SET_TIME_FIELD':
-      return { ...state, timeField: action.timeField };
-    case 'SET_GROUP_FIELDS':
-      return { ...state, groupFields: action.fields };
-    case 'SET_ALERT_DELAY_MODE':
-      return { ...state, alertDelayMode: action.mode };
-    case 'SET_ALERT_DELAY_VALUE':
-      return { ...state, alertDelayValue: action.value };
-    case 'SET_RECOVERY_DELAY_MODE':
-      return { ...state, recoveryDelayMode: action.mode };
-    case 'SET_RECOVERY_DELAY_VALUE':
-      return { ...state, recoveryDelayValue: action.value };
     case 'SET_YAML_MODE':
       return {
         ...state,
         yamlMode: action.enabled,
-        // YAML mode force-opens the Sandbox
         childOpen: action.enabled ? true : state.childOpen,
       };
-    case 'SET_NOTIFICATIONS_ENABLED':
-      return { ...state, notificationsEnabled: action.enabled };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {

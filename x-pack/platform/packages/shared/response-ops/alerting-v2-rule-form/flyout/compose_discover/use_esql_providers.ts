@@ -43,8 +43,8 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
 
   useEffect(() => {
     const stableCallbacks: ESQLCallbacks = {
-      getSources: (...args) => callbacksRef.current.getSources?.(...args),
-      getColumnsFor: (...args) => callbacksRef.current.getColumnsFor?.(...args),
+      getSources: (...args) => callbacksRef.current.getSources?.(...args) ?? [],
+      getColumnsFor: (...args) => callbacksRef.current.getColumnsFor?.(...args) ?? [],
     };
 
     const disposables: monaco.IDisposable[] = [];

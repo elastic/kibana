@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
@@ -21,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
+import type { FormValues } from '../../form/types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
@@ -31,12 +33,6 @@ interface ComposeDiscoverFormProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }
-
-const NO_DATA_OPTIONS = [
-  { value: 'no-longer-present', text: 'Alert as "no longer present"' },
-  { value: 'do-nothing', text: 'Do nothing' },
-  { value: 'keep-last', text: 'Keep last known state' },
-];
 
 // ── Step content renderers ────────────────────────────────────────────────────
 
@@ -49,8 +45,17 @@ function AlertConditionStep({
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }) {
+  const { setValue, watch } = useFormContext<FormValues>();
+  const timeField = watch('timeField') ?? '@timestamp';
+  const grouping = watch('grouping');
+  const groupFields = grouping?.fields ?? [];
+
+  // Only fetch date fields when the query has a committed, valid index pattern
+  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.fullQuery) && state.queryCommitted
+    ? state.fullQuery
+    : '';
   const { data: fieldMap } = useDataFields({
-    query: state.queryCommitted ? state.fullQuery : '',
+    query: queryForFields,
     http: services.http,
     dataViews: services.dataViews,
   });
@@ -103,14 +108,13 @@ function AlertConditionStep({
         </>
       )}
 
-      {/* Time field and group fields sit close to query definitions */}
       <EuiSpacer size="m" />
       <EuiFormRow label="Time field" fullWidth>
         <EuiSelect
           fullWidth
           options={timeFieldOptions}
-          value={state.timeField}
-          onChange={(e) => dispatch({ type: 'SET_TIME_FIELD', timeField: e.target.value })}
+          value={timeField}
+          onChange={(e) => setValue('timeField', e.target.value)}
           disabled={state.childOpen}
           data-test-subj="composeDiscoverTimeField"
         />
@@ -119,30 +123,25 @@ function AlertConditionStep({
       <EuiFormRow label="Group fields" fullWidth>
         <EuiComboBox
           fullWidth
-          selectedOptions={state.groupFields.map((f) => ({ label: f }))}
+          selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
-            dispatch({ type: 'SET_GROUP_FIELDS', fields: opts.map((o) => o.label) })
+            setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
           }
           onCreateOption={(val) =>
-            dispatch({ type: 'SET_GROUP_FIELDS', fields: [...state.groupFields, val] })
+            setValue('grouping', { fields: [...groupFields, val] })
           }
           placeholder="Add group fields"
           data-test-subj="composeDiscoverGroupFields"
         />
       </EuiFormRow>
 
+      {/* Schedule and lookback — connected to RHF via useFormContext() internally */}
       <RuleExecutionFieldGroup />
     </>
   );
 }
 
-function DetailsAndArtifactsStep({
-  state,
-  dispatch,
-}: {
-  state: ComposeDiscoverState;
-  dispatch: React.Dispatch<ComposeDiscoverAction>;
-}) {
+function DetailsAndArtifactsStep() {
   return (
     <>
       {/* Name, description, tags — connected to RHF via useFormContext() internally */}
@@ -175,13 +174,7 @@ function DetailsAndArtifactsStep({
 
 // TODO (#268770): Notifications step — wire workflow selector and notification policy fields
 // to FormValues once the action policy API integration is in place.
-function NotificationsStep({
-  state: _state,
-  dispatch: _dispatch,
-}: {
-  state: ComposeDiscoverState;
-  dispatch: React.Dispatch<ComposeDiscoverAction>;
-}) {
+function NotificationsStep() {
   return (
     <EuiCallOut
       title="Notifications configuration coming soon"
@@ -199,37 +192,38 @@ function NotificationsStep({
 
 // ── Main form component ───────────────────────────────────────────────────────
 
-function buildYaml(state: ComposeDiscoverState): string {
-  const fullQuery = state.fullQuery || '';
+function buildYaml(values: FormValues, fullQuery: string): string {
   const indent = (s: string) => s.split('\n').join('\n      ');
 
   return `kind: alert
 metadata:
-  name: "${state.name}"
-  tags: [${state.tags.map((t) => `"${t}"`).join(', ')}]
+  name: "${values.metadata?.name ?? ''}"
+  tags: [${(values.metadata?.tags ?? []).map((t) => `"${t}"`).join(', ')}]
   description: ""
 evaluation:
   query:
     base: |
       ${indent(fullQuery)}
 grouping:
-  fields: [${state.groupFields.map((f) => `"${f}"`).join(', ')}]
-timeField: "${state.timeField}"
+  fields: [${(values.grouping?.fields ?? []).map((f) => `"${f}"`).join(', ')}]
+timeField: "${values.timeField ?? '@timestamp'}"
 schedule:
-  every: "${state.schedule}"
-  lookback: "${state.lookback}"
+  every: "${values.schedule?.every ?? '1m'}"
+  lookback: "${values.schedule?.lookback ?? '5m'}"
 stateTransition:
-  alertDelay: { type: "${state.alertDelayMode}" }
-  recoveryDelay: { type: "${state.recoveryDelayMode}" }
+  alertDelay: { type: "${values.stateTransitionAlertDelayMode ?? 'immediate'}" }
+  recoveryDelay: { type: "${values.stateTransitionRecoveryDelayMode ?? 'immediate'}" }
 `;
 }
 
-export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
-  state,
-  dispatch,
-  services,
-}) => {
-  const yamlValue = useMemo(() => buildYaml(state), [state]);
+export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({ state, dispatch, services }) => {
+  const { watch } = useFormContext<FormValues>();
+  const formValues = watch();
+  const yamlValue = useMemo(
+    () => buildYaml(formValues, state.fullQuery),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(formValues), state.fullQuery]
+  );
 
   if (state.yamlMode) {
     return (
@@ -237,8 +231,7 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
         languageId="yaml"
         value={yamlValue}
         onChange={(val) => {
-          // Two-way sync: update name field as a simple proof-of-concept
-          // Full YAML→state parsing is out of scope for this prototype
+          // TODO: Full YAML→form parsing wired in the YAML follow-up PR
           void val;
         }}
         height={600}
@@ -253,14 +246,14 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
     );
   }
 
-  // Route by step index, not by string title — avoids silent breakage if step titles change
+  // Route by step index — avoids silent breakage if step titles change
   switch (state.step) {
     case 0:
       return <AlertConditionStep state={state} dispatch={dispatch} services={services} />;
     case 1:
-      return <DetailsAndArtifactsStep state={state} dispatch={dispatch} />;
+      return <DetailsAndArtifactsStep />;
     case 2:
-      return <NotificationsStep state={state} dispatch={dispatch} />;
+      return <NotificationsStep />;
     default:
       return null;
   }

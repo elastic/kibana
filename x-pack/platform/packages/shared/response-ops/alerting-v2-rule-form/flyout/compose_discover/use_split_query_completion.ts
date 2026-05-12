@@ -51,8 +51,8 @@ export function useSplitQueryCompletion({ baseQuery, search }: UseSplitQueryComp
 
   const onEditorMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     const callbacks: ESQLCallbacks = {
-      getColumnsFor: async ({ query } = {}) =>
-        getEsqlColumns({ esqlQuery: query ?? '', search: searchRef.current }),
+      getColumnsFor: async (ctx) =>
+        getEsqlColumns({ esqlQuery: ctx?.query ?? '', search: searchRef.current }),
     };
 
     disposableRef.current = monaco.languages.registerCompletionItemProvider(ESQL_LANG_ID, {

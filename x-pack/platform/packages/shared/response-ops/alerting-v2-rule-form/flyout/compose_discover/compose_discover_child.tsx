@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import type { FormValues } from '../../form/types';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -73,6 +75,10 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   // Single-editor mode: always use localQuery
   const activeQuery = localQuery;
 
+  // Read timeField from RHF — it lives there, not in the UI reducer
+  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
+  const timeField = watchForm('timeField') ?? '@timestamp';
+
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
   const { data: fieldMap } = useDataFields({
@@ -94,22 +100,13 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
-  const {
-    columns,
-    rows,
-    totalRowCount,
-    isLoading,
-    isError,
-    error,
-    run,
-    hasRun,
-    lastExecutedQuery,
-  } = useQueryExecution({
-    query: activeQuery,
-    timeField: state.timeField,
-    timeRange,
-    data: services.data,
-  });
+  const { columns, rows, totalRowCount, isLoading, isError, error, run, hasRun, lastExecutedQuery } =
+    useQueryExecution({
+      query: activeQuery,
+      timeField,
+      timeRange,
+      data: services.data,
+    });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -192,7 +189,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         )}
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody paddingSize="none">
+      <EuiFlyoutBody>
         {/* ── 1. Search / date picker / time field row — one line ──────── */}
         <div style={{ padding: '8px 16px' }}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
@@ -223,8 +220,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
               <EuiSelect
                 options={timeFieldOptions}
-                value={state.timeField}
-                onChange={(e) => dispatch({ type: 'SET_TIME_FIELD', timeField: e.target.value })}
+                value={timeField}
+                onChange={(e) => setFormValue('timeField', e.target.value)}
                 compressed
                 prepend="Time field"
                 data-test-subj="composeDiscoverTimeField"
@@ -301,7 +298,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             <>
               <ComposeDiscoverChart
                 query={lastExecutedQuery ?? activeQuery}
-                timeField={state.timeField}
+                timeField={timeField}
                 timeRange={timeRange}
                 columns={columns}
                 lens={services.lens}
