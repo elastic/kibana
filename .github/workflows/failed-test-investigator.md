@@ -119,9 +119,15 @@ Set `fixability` to exactly one of:
 - **`noop`** — no further action needed.
 - **`inconclusive`** — none of the above apply with enough confidence.
 
-## Action
+## Assign label `ai:auto-flaky-fix` in specific cases
 
-Apply the `ai:auto-flaky-fix` label to the triggering issue **only if** `fixability` = `fixable` and if the failure happened on Scout tests on the `kibana-on-merge` pipeline. We may change these settings in the future. No other side-effects beyond posting the comment.
+Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when these conditions are met:
+
+- The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
+- The test failed in the `kibana-on-merge` pipeline
+- `fixability` is equal to `fixable`
+
+No other side-effects beyond posting the comment and updating the label.
 
 ## Fix proposal
 
