@@ -18,25 +18,6 @@ import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
 
-/**
- * Filesystem events the rspack watcher must ignore: paths that are not part of
- * the browser bundle's module graph and would otherwise cause spurious rebuilds
- * (and, with HMR, browser refreshes) every time tsc / jest / a contributor's
- * editor writes them.
- *
- *   - node_modules/: package-manager-owned, never our source
- *   - target/: tsc declaration emit (`node scripts/type_check`) +
- *     project-ref build outputs + this optimizer's own bundle output
- *   - *.tsbuildinfo: tsc incremental cache
- *   - *.test.*, *.stories.*, *.mock.*: sibling files that, by Kibana
- *     convention, must never be imported from production source
- *   - __mocks__ / __snapshots__ / __fixtures__ / __jest__ dirs: test scaffolding
- *   - jest.config.* / jest.integration.config.*: jest-only config
- *
- * If a regex here ever masks a real source change, that is a bug — but it also
- * means production code is importing test/mock/storybook code, which is its
- * own bug worth surfacing.
- */
 export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]node_modules[\\/]/,
   /[\\/]target[\\/]/,
