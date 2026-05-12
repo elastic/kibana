@@ -34,10 +34,13 @@ interface ConverseParams {
 
 /**
  * Thin wrapper around the Agent Builder `converse` HTTP API that drives the
- * alerts-rag evaluation suite. Mirrors the pattern used by
- * `@kbn/evals-suite-agent-builder`'s chat client; kept local so this suite owns
- * its own behaviour and doesn't take a cross-suite dependency on a sibling
- * functional-tests package.
+ * alerts-rag evaluation suite. Mirrors `AgentBuilderEvaluationChatClient` in
+ * `@kbn/evals-suite-agent-builder` (same endpoint, retry policy, default
+ * agent id, and fallback response shape). A local copy is required because
+ * that package is a sibling `functional-tests` module under
+ * `group: "platform"` with `visibility: "private"` and no public entry
+ * point, so it cannot be imported from a `group: "security"` package under
+ * Kibana's module-visibility rules.
  *
  * The Agent Builder endpoint is the supported successor to the deprecated
  * `/api/security_ai_assistant/chat/complete` route the suite used to call.
