@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Evaluator, EvaluationResult, Example, TaskOutput } from '../../types';
+import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
 
 export const ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Result Equivalence';
 

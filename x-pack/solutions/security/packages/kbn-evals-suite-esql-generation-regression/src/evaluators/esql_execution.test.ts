@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { Example } from '../../types';
-import { createEsqlExecutionEvaluator, ESQL_EXECUTION_EVALUATOR_NAME } from './execution';
+import type { Example } from '@kbn/evals';
+import { createEsqlExecutionEvaluator, ESQL_EXECUTION_EVALUATOR_NAME } from './esql_execution';
 
 const params = <T>(output: T) => ({
   input: {},

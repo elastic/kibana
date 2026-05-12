@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createEsqlResultEquivalenceEvaluator,
   ESQL_RESULT_EQUIVALENCE_EVALUATOR_NAME,
-} from './result_equivalence';
+} from './esql_result_equivalence';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -155,9 +155,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
   // -------------------------------------------------------------------------
   describe('partial-overlap rows', () => {
     it('returns Jaccard score for partially overlapping results', async () => {
-      // Gold: [alice,10], [bob,5], [carol,3]
-      // Candidate: [alice,10], [bob,5], [dave,8]
-      // Intersection: 2, Union: 4, Jaccard: 0.5
       const esClient = createEsClient({
         [GOLD_QUERY]: {
           columns: twoColumns,
@@ -195,11 +192,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
     });
 
     it('handles duplicate rows correctly using multiset semantics', async () => {
-      // Gold has row 'alice' twice — candidate has it once
-      // Gold: [[alice,1],[alice,1],[bob,2]] — 3 rows
-      // Candidate: [[alice,1],[carol,3]] — 2 rows
-      // Intersection: min(2,1)=1 for alice, 0 for bob/carol → 1
-      // Union: 3+2-1=4, Jaccard: 1/4=0.25
       const esClient = createEsClient({
         [GOLD_QUERY]: {
           columns: twoColumns,
@@ -402,8 +394,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
   // -------------------------------------------------------------------------
   describe('normalization — ignoreFields', () => {
     it('produces exact-match when only the ignored column differs', async () => {
-      // Gold has a @timestamp column that candidate doesn't match exactly —
-      // but when @timestamp is ignored both rows are equivalent.
       const columnsWithTs = [
         { name: '@timestamp', type: 'date' },
         { name: 'user.name', type: 'keyword' },
@@ -490,8 +480,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
   // -------------------------------------------------------------------------
   describe('normalization — floatTolerance', () => {
     it('produces exact-match when floats differ within tolerance', async () => {
-      // Gold: avg_cpu = 0.7234, Candidate: avg_cpu = 0.7248
-      // Both round to 0.72 at 2 decimal places (3rd digit < 5) → exact match
       const columns = [{ name: 'avg_cpu', type: 'double' }];
       const esClient = createEsClient({
         [GOLD_QUERY]: { columns, values: [[0.7234]] },
@@ -510,7 +498,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
     });
 
     it('does NOT match when floats differ beyond tolerance', async () => {
-      // Gold: 0.72, Candidate: 0.85 — both round to different values at 2 dp
       const columns = [{ name: 'avg_cpu', type: 'double' }];
       const esClient = createEsClient({
         [GOLD_QUERY]: { columns, values: [[0.72]] },
@@ -581,8 +568,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
       const result = await evaluator.evaluate(params(CANDIDATE_QUERY, GOLD_QUERY));
 
-      // With @timestamp ignored and floatTolerance=1:
-      // Gold row: [142.3, 'web-01'], Candidate row: [142.4, 'web-01'] → no match
       expect(result.score).toBe(0);
     });
 
@@ -610,8 +595,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
       const result = await evaluator.evaluate(params(CANDIDATE_QUERY, GOLD_QUERY));
 
-      // With @timestamp ignored and floatTolerance=1:
-      // Gold: [142.4, 'web-01'], Candidate: [142.4, 'web-01'] → exact match
       expect(result.score).toBe(1);
       expect(result.label).toBe('exact-match');
     });
@@ -679,7 +662,6 @@ describe('createEsqlResultEquivalenceEvaluator', () => {
 
       await evaluator.evaluate(params(CANDIDATE_QUERY, GOLD_QUERY));
 
-      // Both gold and candidate queries should be in-flight at the same time
       expect(maxConcurrent).toBe(2);
     });
   });

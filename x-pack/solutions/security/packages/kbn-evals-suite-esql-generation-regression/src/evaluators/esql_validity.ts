@@ -6,12 +6,8 @@
  */
 
 import { validateQuery } from '@kbn/esql-language';
-import type { Evaluator, EvaluationResult, Example, TaskOutput } from '../../types';
+import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
 
-/**
- * Default evaluator name. Title case is the convention for evaluators registered
- * in `@kbn/evals` and surfaced in eval reports.
- */
 export const ESQL_VALIDITY_EVALUATOR_NAME = 'ES|QL Validity';
 
 interface QueryValidationDetail {
@@ -134,7 +130,7 @@ export function createEsqlValidityEvaluator<
 
 function truncate(str: string, maxLen: number): string {
   const oneLine = str.replace(/\n/g, ' ').trim();
-  return oneLine.length <= maxLen ? oneLine : oneLine.slice(0, maxLen - 3) + '...';
+  return oneLine.length <= maxLen ? oneLine : `${oneLine.slice(0, maxLen - 3)}...`;
 }
 
 function pluralize(

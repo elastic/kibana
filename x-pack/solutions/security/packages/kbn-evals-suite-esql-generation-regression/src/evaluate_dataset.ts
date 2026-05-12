@@ -7,17 +7,14 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Evaluator, EvalsExecutorClient } from '@kbn/evals';
-import {
-  createEsqlEquivalenceEvaluator,
-  createEsqlExecutionEvaluator,
-  createEsqlResultEquivalenceEvaluator,
-  createEsqlValidityEvaluator,
-  withEvaluatorSpan,
-} from '@kbn/evals';
+import { createEsqlEquivalenceEvaluator, withEvaluatorSpan } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { esqlGenerationDataset } from './dataset';
+import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
+import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
+import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
 
 const ESQL_GENERATION_SYSTEM_PROMPT = `You are an Elastic ES|QL query generation expert.
 Given a natural language question about data stored in Elasticsearch, generate the corresponding ES|QL query.

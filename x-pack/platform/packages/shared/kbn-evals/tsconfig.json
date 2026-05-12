@@ -27,7 +27,6 @@
     "@kbn/evals-common",
     "@kbn/safer-lodash-set",
     "@kbn/test",
-    "@kbn/es-errors",
-    "@kbn/esql-language"
+    "@kbn/es-errors"
   ]
 }

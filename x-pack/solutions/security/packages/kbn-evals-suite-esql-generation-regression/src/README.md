@@ -19,9 +19,9 @@ A system prompt instructs the LLM to return only the raw ES|QL query text. The g
 | Evaluator | Kind | Score | Description |
 |---|---|---|---|
 | **ES\|QL Equivalence** | `LLM` | 0 or 1 | Judges whether the generated query is *functionally equivalent* to the reference query — same results, not necessarily same syntax. Uses `createEsqlEquivalenceEvaluator` from `@kbn/evals`. |
-| **ES\|QL Validity** | `CODE` | 0–1 | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network. Uses `createEsqlValidityEvaluator` from `@kbn/evals`. |
-| **ES\|QL Execution** | `CODE` | 0–1 | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. Uses `createEsqlExecutionEvaluator` from `@kbn/evals`. |
-| **ES\|QL Result Equivalence** | `CODE` | 0–1 | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. Uses `createEsqlResultEquivalenceEvaluator` from `@kbn/evals`. |
+| **ES\|QL Validity** | `CODE` | 0–1 | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network. Suite-local — see `src/evaluators/esql_validity.ts`. |
+| **ES\|QL Execution** | `CODE` | 0–1 | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. Suite-local — see `src/evaluators/esql_execution.ts`. |
+| **ES\|QL Result Equivalence** | `CODE` | 0–1 | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. Suite-local — see `src/evaluators/esql_result_equivalence.ts`. |
 
 ---
 
@@ -88,10 +88,10 @@ To update `src/dataset.ts` with a new LangSmith export:
 
 | LangSmith evaluator | `@kbn/evals` equivalent |
 |---|---|
-| ES\|QL Equivalence (LLM-as-judge) | ✅ `ES\|QL Equivalence` via `createEsqlEquivalenceEvaluator` |
-| ES\|QL Syntax Validity (deterministic) | ✅ `ES\|QL Validity` via `createEsqlValidityEvaluator` |
-| ES\|QL Execution (live cluster) | ✅ `ES\|QL Execution` via `createEsqlExecutionEvaluator` |
-| Result-row equivalence | ✅ `ES\|QL Result Equivalence` via `createEsqlResultEquivalenceEvaluator` |
+| ES\|QL Equivalence (LLM-as-judge) | ✅ `ES\|QL Equivalence` via `createEsqlEquivalenceEvaluator` (`@kbn/evals`) |
+| ES\|QL Syntax Validity (deterministic) | ✅ `ES\|QL Validity` via `createEsqlValidityEvaluator` (suite-local) |
+| ES\|QL Execution (live cluster) | ✅ `ES\|QL Execution` via `createEsqlExecutionEvaluator` (suite-local) |
+| Result-row equivalence | ✅ `ES\|QL Result Equivalence` via `createEsqlResultEquivalenceEvaluator` (suite-local) |
 
 All four LangSmith evaluator dimensions are covered. The three CODE-kind evaluators (`Validity`, `Execution`, `Result Equivalence`) are deterministic and require no LLM call; the LLM-kind `Equivalence` evaluator calls the inference API to judge functional equivalence.
 

@@ -8,6 +8,6 @@
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
-  testMatch: /evals\/.*\.spec\.ts/,
+  testDir: `${__dirname}/evals`,
   timeout: 30 * 60_000,
 });

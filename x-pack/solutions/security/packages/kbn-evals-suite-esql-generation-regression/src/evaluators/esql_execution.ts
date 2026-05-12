@@ -7,20 +7,8 @@
 
 import { validateQuery } from '@kbn/esql-language';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type {
-  Evaluator,
-  EvaluationResult,
-  EvaluatorParams,
-  Example,
-  TaskOutput,
-} from '../../types';
+import type { Evaluator, EvaluationResult, Example, TaskOutput } from '@kbn/evals';
 
-/**
- * Default evaluator name. Title case is the convention for evaluators registered
- * in `@kbn/evals` and surfaced in eval reports. Suite-specific consumers that
- * need a stable existing identity (e.g. `syntax_validation`) can override via
- * the `name` config.
- */
 export const ESQL_EXECUTION_EVALUATOR_NAME = 'ES|QL Execution Validity';
 
 interface QueryExecutionDetail {
@@ -33,13 +21,25 @@ interface QueryExecutionDetail {
 }
 
 /**
+ * Local mirror of the framework's `EvaluatorParams` shape. Inlined here
+ * because `@kbn/evals` does not re-export the type from its public entry,
+ * and the suite-local evaluators must not depend on framework subpaths.
+ */
+interface EvaluateArgs<TExample extends Example, TTaskOutput extends TaskOutput> {
+  input: TExample['input'];
+  output: TTaskOutput;
+  expected: TExample['output'];
+  metadata: TExample['metadata'];
+}
+
+/**
  * Resolves the per-example decision of whether to score hit-rate as part of
  * the composite. Either a static boolean or a function that inspects the
  * evaluator params (so callers can opt in via dataset metadata).
  */
 type IncludeHitDetection<TExample extends Example, TTaskOutput extends TaskOutput> =
   | boolean
-  | ((params: EvaluatorParams<TExample, TTaskOutput>) => boolean);
+  | ((params: EvaluateArgs<TExample, TTaskOutput>) => boolean);
 
 function extractErrorMessages(errors: ReadonlyArray<unknown>): string[] {
   return errors.map((e) => {
@@ -126,11 +126,10 @@ async function evaluateSingleQuery(
  * ### Empty-output behavior
  *
  * The default `scoreOnEmptyQueries` is `0`: if the extractor returns an empty
- * array, the evaluator scores 0 with label `no-queries`. This matches the
- * original significant-events semantics ("the task should have generated
- * queries — none is a failure"). Set `scoreOnEmptyQueries: 1` (or any other
- * value) when an empty extractor result is legitimately a pass — e.g. when
- * the same dataset mixes ES|QL-producing and non-ES|QL examples.
+ * array, the evaluator scores 0 with label `no-queries`. Set
+ * `scoreOnEmptyQueries: 1` (or any other value) when an empty extractor
+ * result is legitimately a pass — e.g. when the same dataset mixes
+ * ES|QL-producing and non-ES|QL examples.
  *
  * @param config.esClient - Elasticsearch client used to execute each query.
  * @param config.queryExtractor - Extracts ES|QL strings from the task output.
@@ -139,8 +138,7 @@ async function evaluateSingleQuery(
  *   on the evaluator params (e.g. dataset metadata).
  * @param config.logger - Optional logger for execution failures.
  * @param config.name - Override the evaluator name (defaults to
- *   `ES|QL Execution Validity`). Useful for preserving stable evaluator
- *   identity in existing eval reports (e.g. legacy snake_case names).
+ *   `ES|QL Execution Validity`).
  * @param config.scoreOnEmptyQueries - Score returned when the extractor yields
  *   no queries. Defaults to `0`.
  */

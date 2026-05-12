@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEsqlValidityEvaluator, ESQL_VALIDITY_EVALUATOR_NAME } from './validity';
+import { createEsqlValidityEvaluator, ESQL_VALIDITY_EVALUATOR_NAME } from './esql_validity';
 
 const params = (output: unknown) => ({
   input: {},
