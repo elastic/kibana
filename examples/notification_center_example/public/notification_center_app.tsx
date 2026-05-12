@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiNotificationBadge,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -117,6 +118,17 @@ export function NotificationCenterApp({
     });
   }, [all, selectedTypes, stateFilter, currentSpaceOnly, activeSpaceId]);
 
+  // Count of distinct filters that are currently narrowing the list. Each
+  // selected type chip counts as one filter; a non-default state filter or
+  // an active "current space only" toggle each adds one.
+  const activeFilterCount = useMemo(
+    () =>
+      selectedTypes.size +
+      (stateFilter !== 'all' ? 1 : 0) +
+      (currentSpaceOnly ? 1 : 0),
+    [selectedTypes, stateFilter, currentSpaceOnly]
+  );
+
   const markAllAsRead = () => {
     unread.forEach((e) => events.markAsRead(e.id, true));
   };
@@ -137,6 +149,17 @@ export function NotificationCenterApp({
                 data-test-subj="notificationCenterToggleFilters"
               >
                 Filters
+                {activeFilterCount > 0 && (
+                  <>
+                    {' '}
+                    <EuiNotificationBadge
+                      color="accent"
+                      data-test-subj="notificationCenterActiveFilterCount"
+                    >
+                      {activeFilterCount}
+                    </EuiNotificationBadge>
+                  </>
+                )}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -155,35 +178,31 @@ export function NotificationCenterApp({
           </EuiFlexGroup>
         }
       />
-      <SidebarBody>
-        <EuiAccordion
-          id="notificationCenterFilters"
-          arrowDisplay="none"
-          buttonContent={null}
-          forceState={filtersOpen ? 'open' : 'closed'}
-          paddingSize="none"
-        >
-          <NotificationTypeFilter
-            typeIds={typeIds}
-            selectedTypeIds={selectedTypes}
-            labels={labels}
-            onChange={setSelectedTypes}
-          />
-          <EuiSpacer size="m" />
-          <NotificationStateFilter value={stateFilter} onChange={setStateFilter} />
-          {spacesEnabled && (
-            <>
-              <EuiHorizontalRule margin="m" />
-              <NotificationSpacesFilter
-                currentOnly={currentSpaceOnly}
-                onChange={setCurrentSpaceOnly}
-              />
-            </>
-          )}
-          <EuiSpacer size="m" />
-        </EuiAccordion>
-
-        {items.length === 0 ? (
+      <SidebarBody scrollable>
+        {filtersOpen ? (
+          <div
+            style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+            data-test-subj="notificationCenterFiltersPanel"
+          >
+            <NotificationTypeFilter
+              typeIds={typeIds}
+              selectedTypeIds={selectedTypes}
+              labels={labels}
+              onChange={setSelectedTypes}
+            />
+            <EuiSpacer size="m" />
+            <NotificationStateFilter value={stateFilter} onChange={setStateFilter} />
+            {spacesEnabled && (
+              <>
+                <EuiHorizontalRule margin="m" />
+                <NotificationSpacesFilter
+                  currentOnly={currentSpaceOnly}
+                  onChange={setCurrentSpaceOnly}
+                />
+              </>
+            )}
+          </div>
+        ) : items.length === 0 ? (
           <EuiEmptyPrompt
             iconType="bell"
             titleSize="xs"
