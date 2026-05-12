@@ -43,7 +43,7 @@ const detailsData = endpointAlertDataMock.generateEndpointAlertDetailsItemData()
 
 describe('<HostIsolation />', () => {
   it('renders the isolate title and agent integration', () => {
-    console.log('bla')
+    console.log('bla');
     const { getByTestId } = render(
       <HostIsolation
         hit={hit}
