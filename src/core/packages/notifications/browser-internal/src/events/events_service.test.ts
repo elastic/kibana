@@ -205,4 +205,57 @@ describe('EventsService', () => {
       expect(emissions).toEqual([0, 1, 2, 1]);
     });
   });
+
+  describe('event persistence', () => {
+    it('seeds events$ from the store on start', async () => {
+      // Pre-seed the store as if persisted by a previous page session.
+      const seeded = new LocalStorageNotificationStateStore();
+      await seeded.preload();
+      await seeded.saveEvent(baseEvent({ id: 'a', isRead: false }));
+      await seeded.saveEvent(baseEvent({ id: 'b', isRead: true }));
+
+      // Fresh service starting against the same backing storage.
+      const service = new EventsService(new LocalStorageNotificationStateStore());
+      await service.start();
+      const events = await firstValueFrom(service.get$());
+      expect(events.map((e) => e.id)).toEqual(['a', 'b']);
+      expect(service.getUnreadCount()).toBe(1);
+    });
+
+    it('writes through to the store on notify', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      const saveSpy = jest.spyOn(store, 'saveEvent');
+      const service = new EventsService(store);
+      await service.start();
+      service.notify(baseEvent({ id: 'evt-1' }));
+      // saveEvent is fire-and-forget inside notify(); flush the microtask queue.
+      await Promise.resolve();
+      expect(saveSpy).toHaveBeenCalledTimes(1);
+      expect(saveSpy.mock.calls[0][0].id).toBe('evt-1');
+      expect(store.getStoredEvents().map((e) => e.id)).toEqual(['evt-1']);
+    });
+
+    it('writes through to the store on markAsRead', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      const service = new EventsService(store);
+      await service.start();
+      service.notify(baseEvent({ id: 'evt-1' }));
+      await Promise.resolve();
+      await service.markAsRead('evt-1', true);
+      const stored = store.getStoredEvents().find((e) => e.id === 'evt-1');
+      expect(stored?.isRead).toBe(true);
+    });
+
+    it('writes through to the store on pin / unpin', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      const service = new EventsService(store);
+      await service.start();
+      service.notify(baseEvent({ id: 'evt-1' }));
+      await Promise.resolve();
+      await service.pin('evt-1');
+      expect(store.getStoredEvents().find((e) => e.id === 'evt-1')?.isPinned).toBe(true);
+      await service.unpin('evt-1');
+      expect(store.getStoredEvents().find((e) => e.id === 'evt-1')?.isPinned).toBe(false);
+    });
+  });
 });

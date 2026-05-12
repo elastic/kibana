@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { NotificationEvent } from './events_types';
 
 /**
  * `undefined` — the event is global (no spaceId).
@@ -16,18 +17,42 @@ import type { Observable } from 'rxjs';
 export type NotificationStateScope = string | undefined;
 
 /**
- * Persistence abstraction for notification user state (read receipts, pins).
+ * Persistence abstraction for the notification center.
  *
- * Shape-aligned with the in-review `core.userStorage` service so that the
- * current localStorage-backed implementation can be swapped for a
- * UserStorage-backed implementation without changing `EventsService`, the
- * hooks, or the components.
+ * Owns:
+ *  - The events array (persisted; survives page reload).
+ *  - Read-state set per scope (`readIds`).
+ *  - Pinned-state set per scope (`pinnedIds`).
  *
- * Only non-default values are persisted: an event whose id is in neither
- * `readIds` nor `pinnedIds` defaults to unread + unpinned. This keeps the
- * persisted footprint minimal.
+ * Shape-aligned with the future `core.userStorage` service so the current
+ * localStorage-backed implementation can be swapped without changing
+ * `EventsService`, the hooks, or the components.
  */
 export interface NotificationStateStore {
+  // --------------------------------------------------------------------------
+  // Events array — the canonical persisted list.
+  //
+  // After `preload()` resolves, `getStoredEvents()` returns the persisted list
+  // that survived the last page reload. `EventsService.start()` seeds its
+  // in-memory `events$` from this snapshot.
+  //
+  // `saveEvent` / `removeEvent` are called on every mutation that affects an
+  // event's contents (notify, markAsRead, pin/unpin). They keep storage in
+  // lock-step with the live in-memory state.
+  // --------------------------------------------------------------------------
+
+  /** Synchronous snapshot of the persisted events list (post-`preload`). */
+  getStoredEvents(): readonly NotificationEvent[];
+
+  /** Upsert an event by `id` into the backing store. */
+  saveEvent(event: NotificationEvent): Promise<void>;
+  /** Remove an event from the backing store. */
+  removeEvent(id: string): Promise<void>;
+
+  // --------------------------------------------------------------------------
+  // Read & pin state — scoped sets of event ids.
+  // --------------------------------------------------------------------------
+
   /**
    * Reactive observables. Emit on every internal mutation.
    * (Future: also emit on cross-tab `storage` events.)
@@ -54,31 +79,26 @@ export interface NotificationStateStore {
    * Mutations. Return `Promise<void>` because the write — not the read — hits
    * the backing store. Today: localStorage wrapped in `Promise.resolve()`.
    * Future (UserStorage backend): a network call to a server-backed store.
-   *
-   * Each mutation updates the in-memory subject synchronously *first*, so a
-   * sync `getReadIds()` call right after `markRead()` reflects the new value
-   * without waiting for the Promise.
    */
   markRead(eventId: string, scope: NotificationStateScope): Promise<void>;
   markUnread(eventId: string, scope: NotificationStateScope): Promise<void>;
   pin(eventId: string, scope: NotificationStateScope): Promise<void>;
   unpin(eventId: string, scope: NotificationStateScope): Promise<void>;
 
+  // --------------------------------------------------------------------------
+  // Lifecycle.
+  // --------------------------------------------------------------------------
+
   /**
    * Idempotent one-shot called by `EventsService.start()` before any
-   * `notify()` can fire. This is what makes the subsequent sync getters
-   * (`getReadIds`, `getPinnedIds`) viable — without a `preload()`, those
-   * getters wouldn't have the data ready and the publish path would have to
-   * go async.
+   * `notify()` can fire. After this resolves, `getStoredEvents`,
+   * `getReadIds`, and `getPinnedIds` all return useful data synchronously.
    *
-   * - LocalStorage impl: no-op (reads are lazy, populated on first access
-   *   from `localStorage.getItem`, which is itself synchronous).
-   * - UserStorage impl (future): awaits the page-metadata injection so
+   * - LocalStorage impl: reads the persisted events array. Id sets remain
+   *   lazy (populated on first access from the same synchronous backing
+   *   store).
+   * - UserStorage impl (future): awaits the page-metadata injection so all
    *   subsequent sync getters have data.
-   *
-   * The name comes from uiSettings / userStorage where values are
-   * pre-loaded into page metadata during rendering so consumers can read
-   * them synchronously from first render.
    */
   preload(): Promise<void>;
 }

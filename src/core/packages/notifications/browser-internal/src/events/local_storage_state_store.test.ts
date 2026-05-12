@@ -7,21 +7,101 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { NotificationEvent } from '@kbn/core-notifications-browser';
 import { LocalStorageNotificationStateStore } from './local_storage_state_store';
 
 const GLOBAL_READ_KEY = 'core.notifications.events.readIds';
 const GLOBAL_PINNED_KEY = 'core.notifications.events.pinnedIds';
 const SPACE_READ_KEY = 'core.notifications.events.default.readIds';
+const EVENTS_KEY = 'core.notifications.events.events';
+
+const makeEvent = (overrides: Partial<NotificationEvent> = {}): NotificationEvent => ({
+  id: overrides.id ?? 'evt-1',
+  timestamp: overrides.timestamp ?? 1000,
+  title: overrides.title ?? 'Title',
+  message: overrides.message ?? 'Message',
+  isRead: overrides.isRead ?? false,
+  severity: overrides.severity ?? 'info',
+  eventName: overrides.eventName ?? 'demo',
+  ...overrides,
+});
 
 describe('LocalStorageNotificationStateStore', () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
 
-  describe('preload', () => {
-    it('resolves without doing anything (localStorage reads are lazy)', async () => {
+  describe('preload + events', () => {
+    it('resolves cleanly when storage is empty', async () => {
       const store = new LocalStorageNotificationStateStore();
       await expect(store.preload()).resolves.toBeUndefined();
+      expect(store.getStoredEvents()).toEqual([]);
+    });
+
+    it('reads persisted events into the in-memory snapshot', async () => {
+      const seeded = [makeEvent({ id: 'a' }), makeEvent({ id: 'b' })];
+      window.localStorage.setItem(EVENTS_KEY, JSON.stringify(seeded));
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      expect(store.getStoredEvents().map((e) => e.id)).toEqual(['a', 'b']);
+    });
+
+    it('returns an empty list when stored events JSON is corrupt', async () => {
+      window.localStorage.setItem(EVENTS_KEY, '{not json');
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      expect(store.getStoredEvents()).toEqual([]);
+    });
+
+    it('filters out malformed entries from the stored events array', async () => {
+      const valid = makeEvent({ id: 'a' });
+      window.localStorage.setItem(
+        EVENTS_KEY,
+        JSON.stringify([valid, { id: 1, timestamp: 1 }, null, valid])
+      );
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      expect(store.getStoredEvents()).toHaveLength(2);
+      expect(store.getStoredEvents()[0].id).toBe('a');
+    });
+
+    it('saveEvent appends new events and persists', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      await store.saveEvent(makeEvent({ id: 'a' }));
+      await store.saveEvent(makeEvent({ id: 'b' }));
+      expect(store.getStoredEvents().map((e) => e.id)).toEqual(['a', 'b']);
+      const persisted = JSON.parse(window.localStorage.getItem(EVENTS_KEY)!);
+      expect(persisted).toHaveLength(2);
+    });
+
+    it('saveEvent upserts in place when the id already exists', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      await store.saveEvent(makeEvent({ id: 'a', title: 'first' }));
+      await store.saveEvent(makeEvent({ id: 'a', title: 'second' }));
+      expect(store.getStoredEvents()).toHaveLength(1);
+      expect(store.getStoredEvents()[0].title).toBe('second');
+    });
+
+    it('removeEvent removes the matching id and persists', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      await store.saveEvent(makeEvent({ id: 'a' }));
+      await store.saveEvent(makeEvent({ id: 'b' }));
+      await store.removeEvent('a');
+      expect(store.getStoredEvents().map((e) => e.id)).toEqual(['b']);
+      expect(JSON.parse(window.localStorage.getItem(EVENTS_KEY)!).map((e: any) => e.id)).toEqual([
+        'b',
+      ]);
+    });
+
+    it('removeEvent is a no-op for unknown ids', async () => {
+      const store = new LocalStorageNotificationStateStore();
+      await store.preload();
+      await store.saveEvent(makeEvent({ id: 'a' }));
+      await store.removeEvent('missing');
+      expect(store.getStoredEvents()).toHaveLength(1);
     });
   });
 
