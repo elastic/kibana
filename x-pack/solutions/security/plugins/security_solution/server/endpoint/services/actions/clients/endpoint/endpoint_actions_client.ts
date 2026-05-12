@@ -223,7 +223,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             throw new ResponseActionsClientError(
               `Endpoint [${endpointMeta.host.hostname || endpointMeta.host.name} / ${
                 endpointMeta.agent.id
-              }] running  [v${endpointMeta.agent.version}] does not support cancel action.`,
+              }] running [v${endpointMeta.agent.version}] does not support cancel action.`,
               400
             );
           }
