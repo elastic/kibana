@@ -6,7 +6,8 @@
  */
 
 import type { FlattenRecord, ProcessingSimulationResponse } from '@kbn/streams-schema';
-import type { GrokProcessor, StreamlangStep } from '@kbn/streamlang';
+import type { GrokProcessor } from '@kbn/streamlang';
+import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 
 // These mocks must be declared before the import below — `jest.mock` is
 // hoisted, but the local references must come from `require(...)` once
@@ -50,16 +51,20 @@ beforeAll(() => {
 
 import {
   buildKeyValueHints,
-  buildOverwriteWarning,
   computeKvMinSamples,
-  getStepWriteTargets,
   isBlockedKvField,
-  isExtractionStepOnField,
   runExtractFieldsFlow,
-  stepWritesOrRemovesField,
   type RunExtractFieldsDeps,
   type RunExtractFieldsParams,
 } from './extract_fields_handler';
+import {
+  buildDuplicationWarning,
+  buildOverwriteWarning,
+  buildPlacementWarning,
+  getStepWriteTargets,
+  isExtractionStepOnField,
+  stepWritesOrRemovesField,
+} from './extract_fields_warnings';
 import {
   suggestProcessingPipeline,
   mergeSeedParsingProcessorIntoSuggestedPipeline,
@@ -702,6 +707,109 @@ describe('getStepWriteTargets', () => {
         })
       ).sort()
     ).toEqual(['attributes.kept', 'attributes.redacted']);
+  });
+});
+
+describe('buildPlacementWarning', () => {
+  const stepList = (steps: object[]) => steps as unknown as StreamlangStep[];
+
+  it('returns null when there are no existing steps (placement is vacuous)', () => {
+    expect(
+      buildPlacementWarning({
+        existingSteps: [],
+        sourceFieldUsedByExisting: false,
+        fieldName: 'body.text',
+      })
+    ).toBeNull();
+  });
+
+  it('reports BEFORE-placement when an existing step touches the source field', () => {
+    const warning = buildPlacementWarning({
+      existingSteps: stepList([
+        { action: 'set', to: 'attributes.env', value: 'prod' },
+        { action: 'set', to: 'body.text', value: 'replaced' },
+      ]),
+      sourceFieldUsedByExisting: true,
+      fieldName: 'body.text',
+    });
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('placed BEFORE the 2 existing step(s)');
+    expect(warning).toContain('"body.text"');
+    expect(warning).toContain('Review that the new extraction does not duplicate');
+  });
+
+  it('reports appended placement when no existing step touches the source field', () => {
+    const warning = buildPlacementWarning({
+      existingSteps: stepList([{ action: 'set', to: 'attributes.env', value: 'prod' }]),
+      sourceFieldUsedByExisting: false,
+      fieldName: 'body.text',
+    });
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('1 existing step(s) kept their original position');
+    expect(warning).toContain('appended at the end');
+  });
+});
+
+describe('buildDuplicationWarning', () => {
+  const stepList = (steps: object[]) => steps as unknown as StreamlangStep[];
+
+  it('returns null when no existing step extracts from the same field', () => {
+    expect(
+      buildDuplicationWarning({
+        existingSteps: stepList([{ action: 'set', to: 'attributes.env', value: 'prod' }]),
+        fieldName: 'body.text',
+      })
+    ).toBeNull();
+  });
+
+  it('returns null when an existing extraction targets a different field', () => {
+    expect(
+      buildDuplicationWarning({
+        existingSteps: stepList([
+          { action: 'grok', from: 'attributes.raw', patterns: ['%{IP:client.ip}'] },
+        ]),
+        fieldName: 'body.text',
+      })
+    ).toBeNull();
+  });
+
+  it('flags a top-level grok duplicate with the action label', () => {
+    const warning = buildDuplicationWarning({
+      existingSteps: stepList([
+        { action: 'grok', from: 'body.text', patterns: ['%{IP:client.ip}'] },
+      ]),
+      fieldName: 'body.text',
+    });
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('"body.text"');
+    expect(warning).toContain('(grok)');
+    expect(warning).toContain('may duplicate work');
+  });
+
+  it('flags a top-level dissect duplicate with the action label', () => {
+    const warning = buildDuplicationWarning({
+      existingSteps: stepList([{ action: 'dissect', from: 'body.text', pattern: '%{ts} %{msg}' }]),
+      fieldName: 'body.text',
+    });
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('(dissect)');
+  });
+
+  it('marks a duplicate nested inside a condition block as such', () => {
+    const warning = buildDuplicationWarning({
+      existingSteps: stepList([
+        {
+          condition: {
+            field: 'log.level',
+            eq: 'error',
+            steps: [{ action: 'grok', from: 'body.text', patterns: ['%{IP:client.ip}'] }],
+          },
+        },
+      ]),
+      fieldName: 'body.text',
+    });
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('(inside a condition block)');
   });
 });
 

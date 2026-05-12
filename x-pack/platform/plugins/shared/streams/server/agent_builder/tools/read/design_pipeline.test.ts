@@ -103,6 +103,11 @@ describe('createDesignPipelineTool', () => {
       // present to the user.
       expect(data).toHaveProperty('steps');
       expect(data).toHaveProperty('simulation');
+      // `extract_fields_*` are scoped to the heuristic path — LLM-only
+      // results must NOT carry them or the skill prompt will branch as
+      // if heuristics ran.
+      expect(data.extract_fields_outcome).toBeUndefined();
+      expect(data.extract_fields_reason).toBeUndefined();
     });
 
     it('forwards the inline-samples payload through to nlToStreamlang verbatim', async () => {
@@ -162,6 +167,9 @@ describe('createDesignPipelineTool', () => {
       expect(data.hints).toEqual(
         expect.arrayContaining([expect.stringContaining('Seed parsing was discovered')])
       );
+      // The structured outcome lets the skill prompt branch deterministically.
+      expect(data.extract_fields_outcome).toBe('success');
+      expect(data.extract_fields_reason).toBeUndefined();
     });
 
     it('returns the heuristic result on `kind: "unsupported"` (e.g. query stream) without falling back', async () => {
@@ -197,9 +205,13 @@ describe('createDesignPipelineTool', () => {
       expect(data.warnings).toEqual(
         expect.arrayContaining([expect.stringContaining('only supported for ingest streams')])
       );
+      // The structured outcome is the source-of-truth for skill prompt
+      // branching — not the warning prose.
+      expect(data.extract_fields_outcome).toBe('unsupported');
+      expect(data.extract_fields_reason).toBe('unsupported_stream_type');
     });
 
-    it('falls back to nlToStreamlang and prepends a fallback hint on `kind: "fallback"`', async () => {
+    it('falls back to nlToStreamlang and surfaces structured outcome=fallback on `kind: "fallback"`', async () => {
       const { tool, context } = setup({
         patternExtractionService: {} as IPatternExtractionService,
       });
@@ -220,18 +232,23 @@ describe('createDesignPipelineTool', () => {
       expect(mockNlToStreamlang).toHaveBeenCalledTimes(1);
 
       if (!('results' in result)) throw new Error('Expected results return');
-      const data = result.results[0].data as { hints?: string[] };
-      // The fallback reason MUST be merged in front of the LLM's own
-      // hints so the user can see the heuristic path was attempted but
-      // produced no usable seed.
-      expect(data.hints?.[0]).toEqual(
-        expect.stringContaining('Heuristic field extraction did not yield a usable seed pattern')
+      const data = result.results[0].data as {
+        hints?: string[];
+        extract_fields_outcome?: string;
+        extract_fields_reason?: string;
+      };
+      // Structured fields carry the outcome — the skill prompt branches on
+      // these instead of sniffing English from `hints`. The English
+      // duplicate that used to live in `hints[0]` was removed by #12.
+      expect(data.extract_fields_outcome).toBe('fallback');
+      expect(data.extract_fields_reason).toBe('no_candidate');
+      expect(data.hints).toEqual(['llm hint']);
+      expect(data.hints?.[0]).not.toEqual(
+        expect.stringContaining('Heuristic field extraction did not yield')
       );
-      expect(data.hints?.[0]).toEqual(expect.stringContaining('no_candidate'));
-      expect(data.hints).toContain('llm hint');
     });
 
-    it('merges `outcome.extraHints` (inline-processed-no-text-field caveat) into the fallback hints', async () => {
+    it('merges `outcome.extraHints` (inline-processed-no-text-field caveat) alongside structured outcome', async () => {
       const { tool, context } = setup({
         patternExtractionService: {} as IPatternExtractionService,
       });
@@ -252,10 +269,18 @@ describe('createDesignPipelineTool', () => {
       );
 
       if (!('results' in result)) throw new Error('Expected results return');
-      const data = result.results[0].data as { hints?: string[] };
+      const data = result.results[0].data as {
+        hints?: string[];
+        extract_fields_outcome?: string;
+        extract_fields_reason?: string;
+      };
+      // Reason flows to the structured field, not into prose.
+      expect(data.extract_fields_outcome).toBe('fallback');
+      expect(data.extract_fields_reason).toBe('no_text_field');
+      // `extraHints` carries genuinely additional context (not a reason
+      // restatement) so it is preserved alongside the LLM's hints.
       expect(data.hints).toEqual(
         expect.arrayContaining([
-          expect.stringContaining('Heuristic field extraction did not yield a usable seed pattern'),
           expect.stringContaining('inline samples were marked status: "processed"'),
           'llm hint',
         ])
@@ -292,10 +317,11 @@ describe('createDesignPipelineTool', () => {
       );
     });
 
-    it('falls back to LLM-only with a hint when patternExtractionService is not available', async () => {
+    it('falls back to LLM-only with structured outcome=fallback when patternExtractionService is not available', async () => {
       // Stateless / serverless environments may not have the heuristic
       // worker pool. The tool must degrade gracefully instead of throwing,
-      // and surface to the user that the heuristic path was unavailable.
+      // and surface (via the structured outcome field) that the heuristic
+      // path was unavailable.
       const { tool, context } = setup(); // no patternExtractionService
 
       mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult({ hints: [] }));
@@ -310,12 +336,12 @@ describe('createDesignPipelineTool', () => {
       expect(mockNlToStreamlang).toHaveBeenCalledTimes(1);
 
       if (!('results' in result)) throw new Error('Expected results return');
-      const data = result.results[0].data as { hints?: string[] };
-      expect(data.hints).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('heuristic pattern extraction is not available'),
-        ])
-      );
+      const data = result.results[0].data as {
+        extract_fields_outcome?: string;
+        extract_fields_reason?: string;
+      };
+      expect(data.extract_fields_outcome).toBe('fallback');
+      expect(data.extract_fields_reason).toBe('service_unavailable');
     });
   });
 

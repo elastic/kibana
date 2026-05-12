@@ -24,12 +24,8 @@ import {
   postParsePipelineDefinitionSchema,
   suggestProcessingPipeline,
 } from '@kbn/streams-ai';
-import {
-  addDeterministicCustomIdentifiers,
-  isActionBlock,
-  isConditionBlock,
-  type StreamlangStep,
-} from '@kbn/streamlang';
+import { addDeterministicCustomIdentifiers } from '@kbn/streamlang';
+import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import {
   PRIORITIZED_CONTENT_FIELDS,
   extractMessagesFromField,
@@ -55,12 +51,18 @@ import {
   extractSimulationErrors,
   injectIgnoreFailure,
   resolveSamples,
-  type FieldChange,
   type NlToStreamlangResult,
   type SamplesConfig,
   type SimulationMode,
 } from './nl_to_streamlang';
 import { buildDropWarnings, computePipelineDiff } from './pipeline_diff';
+import {
+  buildDuplicationWarning,
+  buildOverwriteWarning,
+  buildPlacementWarning,
+  isExtractionStepOnField,
+  stepWritesOrRemovesField,
+} from './extract_fields_warnings';
 
 /**
  * `extract_fields: true` mode for the `design_pipeline` tool. Mirrors the
@@ -490,23 +492,16 @@ export const runExtractFieldsFlow = async (
       );
     }
     if (existingSteps.length > 0) {
-      const placement = sourceFieldUsedByExisting
-        ? `New extraction was placed BEFORE the ${existingSteps.length} existing step(s) because at least one existing step writes to, renames, or removes the source field "${fieldName}".`
-        : `${existingSteps.length} existing step(s) kept their original position; new extraction was appended at the end.`;
-      warnings.push(
-        `${placement} Review that the new extraction does not duplicate or conflict with existing steps before applying.`
-      );
-      const conflictingExistingStep = existingSteps.find((step) =>
-        isExtractionStepOnField(step, fieldName)
-      );
-      if (conflictingExistingStep) {
-        const conflictingLabel = isConditionBlock(conflictingExistingStep)
-          ? 'inside a condition block'
-          : (conflictingExistingStep as { action?: string }).action ?? 'step';
-        warnings.push(
-          `An existing step already extracts from field "${fieldName}" (${conflictingLabel}). The new extraction may duplicate work — confirm with the user before applying.`
-        );
-      }
+      const placementWarning = buildPlacementWarning({
+        existingSteps,
+        sourceFieldUsedByExisting,
+        fieldName,
+      });
+      if (placementWarning) warnings.push(placementWarning);
+
+      const duplicationWarning = buildDuplicationWarning({ existingSteps, fieldName });
+      if (duplicationWarning) warnings.push(duplicationWarning);
+
       const overwriteWarning = buildOverwriteWarning(existingSteps, fieldChanges);
       if (overwriteWarning) warnings.push(overwriteWarning);
     }
@@ -590,234 +585,6 @@ export const detectSourceFieldConflict = (
   existingSteps.some(
     (step) => isExtractionStepOnField(step, fieldName) || stepWritesOrRemovesField(step, fieldName)
   );
-
-/**
- * Detect whether an existing pipeline step already performs grok or dissect
- * extraction from the given source field. Used to warn the agent (and the
- * user) when running heuristic extraction would duplicate or conflict with
- * pre-existing parsing on the same field.
- *
- * Condition blocks recurse into their nested `steps` and `else` branches:
- * a duplicate extraction hidden inside `if log.level == error then grok…`
- * is still worth surfacing to the user. The downstream warning marks the
- * match as "inside a condition block" so the user can judge whether the
- * predicate scopes the duplication.
- */
-export const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
-  if (typeof step !== 'object' || step === null) return false;
-  if (isConditionBlock(step as StreamlangStep)) {
-    const inner = (step as { condition: { steps?: unknown[]; else?: unknown[] } }).condition;
-    return [...(inner.steps ?? []), ...(inner.else ?? [])].some((nested) =>
-      isExtractionStepOnField(nested, fieldName)
-    );
-  }
-  const obj = step as { action?: unknown; from?: unknown };
-  return (obj.action === 'grok' || obj.action === 'dissect') && obj.from === fieldName;
-};
-
-/**
- * Detect whether an existing pipeline step could mutate or remove the seed
- * source field before the new extraction runs. Used by the merge step to
- * decide whether existing steps can keep their position (safe) or must be
- * pushed after the new extraction.
- *
- * Exhaustive over the full `StreamlangProcessorDefinition` discriminated
- * union — adding a new streamlang action without updating this switch is a
- * compile error (the `assertNever` branch). False negatives are unsafe
- * (they let an existing step clobber the seed source before extraction
- * reads it); false positives are merely suboptimal placement.
- *
- * Condition blocks recurse into their nested `steps` and `else` branches:
- * a `set body.text` hidden inside a `where` block must still force
- * defensive prepending.
- */
-export const stepWritesOrRemovesField = (step: StreamlangStep, fieldName: string): boolean => {
-  if (isConditionBlock(step)) {
-    const inner = step.condition.steps ?? [];
-    const elseInner = step.condition.else ?? [];
-    return [...inner, ...elseInner].some((s) => stepWritesOrRemovesField(s, fieldName));
-  }
-  if (!isActionBlock(step)) return false;
-
-  switch (step.action) {
-    case 'set':
-    case 'append':
-    case 'math':
-    case 'concat':
-    case 'enrich':
-    case 'join':
-      // Always have a required `to` and never mutate a `from`-shaped field.
-      return step.to === fieldName;
-    case 'rename':
-      return step.from === fieldName || step.to === fieldName;
-    case 'remove':
-      return step.from === fieldName;
-    case 'remove_by_prefix':
-      return fieldName === step.from || fieldName.startsWith(`${step.from}.`);
-    case 'convert':
-    case 'date':
-    case 'uppercase':
-    case 'lowercase':
-    case 'trim':
-    case 'sort':
-    case 'split':
-    case 'replace':
-      // Optional `to` — when omitted, write happens in-place on `from`.
-      return step.to === fieldName || (step.to == null && step.from === fieldName);
-    case 'redact':
-      // No `to` field — always rewrites `from` in-place.
-      return step.from === fieldName;
-    case 'network_direction':
-      // Default `target_field` in ES is "network.direction" but the
-      // streamlang type leaves it optional. If unset we cannot know the
-      // resolved field, so be conservative.
-      return step.target_field === fieldName || step.target_field == null;
-    case 'json_extract':
-      return step.extractions.some((extraction) => extraction.target_field === fieldName);
-    case 'grok': {
-      // Grok READS `from` and writes to whatever names appear in
-      // `%{PATTERN:fieldName}` capture syntax. String scan is sufficient —
-      // full pattern parsing isn't justified for this conservative check.
-      const needle = `:${fieldName}}`;
-      return step.patterns.some((pattern) => pattern.includes(needle));
-    }
-    case 'dissect':
-      // Dissect READS `from` and writes to `%{fieldName}` captures (the bare
-      // form — modifiers like `%{?ignored}`, `%{+continued}` don't write).
-      return step.pattern.includes(`%{${fieldName}}`);
-    case 'drop_document':
-      // Drops the whole doc, not a specific field — orthogonal to placement.
-      return false;
-    case 'manual_ingest_pipeline':
-      // Opaque — raw ES processors can do anything. Prepend defensively.
-      return true;
-    default:
-      return assertNever(step);
-  }
-};
-
-/**
- * Enumerate the fields a step is known to write to. Used by the overwrite
- * warning to detect when an existing step's output would clobber a field
- * the new extraction is about to produce.
- *
- * Exhaustive over `StreamlangProcessorDefinition` — adding a new action
- * without updating this switch is a compile error. Returns `[]` for
- * read-only / doc-level / opaque actions: a missing target means "we don't
- * know what this writes, so we cannot specifically warn". The placement
- * decision still protects against silent clobbering of the seed source
- * (see {@link stepWritesOrRemovesField}).
- *
- * Condition blocks union their inner branches' write targets — a nested
- * `set my.field` should still surface in the overwrite warning.
- */
-export const getStepWriteTargets = (step: StreamlangStep): string[] => {
-  if (isConditionBlock(step)) {
-    const inner = step.condition.steps ?? [];
-    const elseInner = step.condition.else ?? [];
-    return [...new Set([...inner, ...elseInner].flatMap(getStepWriteTargets))];
-  }
-  if (!isActionBlock(step)) return [];
-
-  switch (step.action) {
-    case 'set':
-    case 'append':
-    case 'math':
-    case 'concat':
-    case 'enrich':
-    case 'join':
-      return [step.to];
-    case 'rename':
-      return [step.to];
-    case 'convert':
-    case 'date':
-    case 'uppercase':
-    case 'lowercase':
-    case 'trim':
-    case 'sort':
-    case 'split':
-    case 'replace':
-      return [step.to ?? step.from];
-    case 'redact':
-      return [step.from];
-    case 'network_direction':
-      return step.target_field ? [step.target_field] : [];
-    case 'json_extract':
-      return [...new Set(step.extractions.map((extraction) => extraction.target_field))];
-    case 'grok': {
-      // Capture syntax: `%{PATTERN_NAME:field.name}` (with optional
-      // `:type` qualifier). The field name is whatever sits between `:`
-      // and the closing `}`.
-      const targets = new Set<string>();
-      const re = /%\{[^:}]+:([^:}]+)(?::[^}]+)?\}/g;
-      for (const pattern of step.patterns) {
-        let match: RegExpExecArray | null;
-        while ((match = re.exec(pattern)) !== null) targets.add(match[1]);
-      }
-      return [...targets];
-    }
-    case 'dissect': {
-      // Capture syntax: bare `%{field.name}` — modifiers (`+`, `?`, `&`,
-      // `*`) don't create a field of that name.
-      const targets = new Set<string>();
-      const re = /%\{([^?+&*}][^}]*)\}/g;
-      let match: RegExpExecArray | null;
-      while ((match = re.exec(step.pattern)) !== null) targets.add(match[1]);
-      return [...targets];
-    }
-    case 'remove':
-    case 'remove_by_prefix':
-    case 'drop_document':
-    case 'manual_ingest_pipeline':
-      // Removes / drops / opaque — no enumerable write target.
-      return [];
-    default:
-      return assertNever(step);
-  }
-};
-
-/**
- * Compile-time exhaustiveness guard. The `default` branch of the switches
- * above must call this so adding a new streamlang processor type without
- * updating both helpers fails the type check.
- */
-const assertNever = (step: never): never => {
-  throw new Error(`Unhandled streamlang step: ${JSON.stringify(step)}`);
-};
-
-/**
- * Compose the "may overwrite extracted field" warning when an existing
- * step writes to a field the new extraction is creating. Returns `null`
- * when there is no overlap so the caller can omit the warning entirely.
- *
- * Surfaced regardless of placement order: in either order, the agent and
- * user need to decide whether the existing step is now redundant or
- * should retain precedence.
- */
-export const buildOverwriteWarning = (
-  existingSteps: StreamlangStep[],
-  fieldChanges: FieldChange[]
-): string | null => {
-  const createdFields = new Set(
-    fieldChanges.filter((c) => c.change === 'created').map((c) => c.field)
-  );
-  if (createdFields.size === 0) return null;
-
-  const overlaps = new Set<string>();
-  for (const step of existingSteps) {
-    for (const target of getStepWriteTargets(step)) {
-      if (createdFields.has(target)) overlaps.add(target);
-    }
-  }
-  if (overlaps.size === 0) return null;
-
-  const fieldList = [...overlaps].map((f) => `"${f}"`).join(', ');
-  return (
-    `Existing step(s) write to field(s) ${fieldList} that the new extraction also produces. ` +
-    `Depending on the step order one will overwrite the other — confirm whether the existing step ` +
-    `should be kept, removed, or reordered before applying.`
-  );
-};
 
 /**
  * Preferred minimum number of non-null sample values required to consider a

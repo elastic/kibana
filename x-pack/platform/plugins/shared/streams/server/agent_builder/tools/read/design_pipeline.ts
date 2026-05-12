@@ -169,6 +169,12 @@ export const createDesignPipelineTool = ({
 
       const typedSamples = samples as Parameters<typeof nlToStreamlang>[0]['samples'];
 
+      // Extra prose surfaced to the LLM alongside the structured
+      // `extract_fields_outcome` field on the response. We deliberately do
+      // NOT duplicate the outcome / reason in here — the skill prompt
+      // branches on the structured fields. `fallbackHints` is reserved for
+      // genuinely additional context (e.g. `outcome.extraHints` explaining
+      // why the field was unusable).
       const fallbackHints: string[] = [];
 
       if (extractFields) {
@@ -176,9 +182,6 @@ export const createDesignPipelineTool = ({
 
         if (!patternExtractionService) {
           extractFieldsFallbackReason = 'service_unavailable';
-          fallbackHints.push(
-            'extract_fields was requested but heuristic pattern extraction is not available in this environment. Falling back to LLM-only design.'
-          );
         } else {
           const outcome = await runExtractFieldsFlow(
             {
@@ -214,6 +217,10 @@ export const createDesignPipelineTool = ({
                   data: {
                     stream: streamName,
                     ...outcome.result,
+                    extract_fields_outcome: outcome.kind,
+                    ...(outcome.kind === 'unsupported' && {
+                      extract_fields_reason: 'unsupported_stream_type',
+                    }),
                     status: 'proposal_not_applied',
                     note: 'This is a proposed pipeline change. Present the simulation results to the user for review before applying.',
                   },
@@ -225,9 +232,6 @@ export const createDesignPipelineTool = ({
           // outcome.kind === 'fallback' — heuristics produced no usable seed.
           // Fall through to nlToStreamlang so the LLM still gets a chance.
           extractFieldsFallbackReason = outcome.reason;
-          fallbackHints.push(
-            `Heuristic field extraction did not yield a usable seed pattern (${outcome.reason}). Falling back to LLM-only pipeline design.`
-          );
           if (outcome.extraHints && outcome.extraHints.length > 0) {
             fallbackHints.push(...outcome.extraHints);
           }
@@ -278,6 +282,15 @@ export const createDesignPipelineTool = ({
               stream: streamName,
               ...result,
               ...(mergedHints.length > 0 && { hints: mergedHints }),
+              // Only surfaced when the caller asked for extract_fields. The
+              // structured pair lets the skill prompt and evals branch
+              // deterministically without sniffing English from `hints`.
+              ...(extractFields && {
+                extract_fields_outcome: 'fallback' as const,
+                ...(extractFieldsFallbackReason && {
+                  extract_fields_reason: extractFieldsFallbackReason,
+                }),
+              }),
               status: 'proposal_not_applied',
               note: 'This is a proposed pipeline change. Present the simulation results to the user for review before applying.',
             },
