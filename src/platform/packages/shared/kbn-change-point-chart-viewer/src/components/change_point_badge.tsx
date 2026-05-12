@@ -54,7 +54,7 @@ const CHANGE_POINT_TYPE_DESCRIPTIONS: Record<string, string> = {
 
 /**
  * Badge showing the change-point type(s) for a chart card, colour-coded by the card's minimum
- * p-value to match the significance colours in the Discover results table.
+ * pvalue to match the significance colours in the Discover results table.
  *
  * Renders nothing when no type data is available (BY mode) or when minPvalue is undefined.
  * Positioning is handled by the parent — this component renders only the EuiBadge itself.

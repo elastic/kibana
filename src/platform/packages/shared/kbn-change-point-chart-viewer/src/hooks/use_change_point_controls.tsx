@@ -88,7 +88,7 @@ export const useChangePointControls = (
     [cards]
   );
 
-  // Options: Default always present; P-value when data exists; one entry per sortable column.
+  // Options: Default always present; pvalue when data exists; one entry per sortable column.
   const sortOptions = useMemo(() => {
     const opts: Array<{ value: string; text: string }> = [
       {
@@ -102,7 +102,7 @@ export const useChangePointControls = (
       opts.push({
         value: 'pvalue',
         text: i18n.translate('changePointChartViewer.controls.sort.pvalue', {
-          defaultMessage: 'p-value',
+          defaultMessage: 'pvalue',
         }),
       });
     }

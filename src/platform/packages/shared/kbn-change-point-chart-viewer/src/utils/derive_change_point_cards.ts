@@ -26,7 +26,7 @@ export interface ChangePointCardModel {
   readonly byColumns?: readonly string[];
   readonly annotationEvents: Array<{ name: string; datetime: string }>;
   /**
-   * The lowest (most significant) p-value across all annotation events for this card.
+   * The lowest (most significant) pvalue across all annotation events for this card.
    * Undefined when type/pvalue are absent from the result schema (e.g. BY mode with WHERE type IS NOT NULL).
    */
   readonly minPvalue?: number;
@@ -102,7 +102,7 @@ export const formatAnnotationTimestamp = (value: unknown): string | undefined =>
   return undefined;
 };
 
-/** Change-point rows: non-empty type and a defined p-value column. */
+/** Change-point rows: non-empty type and a defined pvalue column. */
 const isChangePointTableRow = (
   row: Record<string, unknown>,
   typeColumnId: string,
@@ -242,7 +242,7 @@ const getChangePointCardsBuildContext = (params: {
  *   visible regardless of whether any change points were detected.
  * - Split (entity columns present via BY clause or heuristic): true when at least one entity
  *   group contains at least one valid annotation event (row with a parseable timestamp and, for
- *   non-BY mode, a non-empty type and defined p-value). Mirrors the skip logic in
+   *   non-BY mode, a non-empty type and defined pvalue). Mirrors the skip logic in
  *   {@link buildChangePointCards} so the predicate never returns `true` when the builder would
  *   return `undefined`.
  */
@@ -348,9 +348,9 @@ export const buildChangePointCards = (params: {
         ? i18n.translate('changePointChartViewer.card.changePointLabel', {
             defaultMessage: 'Change point',
           })
-        : `${serializeCell(row[typeColumnId])} (p=${formatPvalueLabel(row[pvalueColumnId])})`;
+        : `${serializeCell(row[typeColumnId])} (pvalue=${formatPvalueLabel(row[pvalueColumnId])})`;
       annotationEvents.push({ name: label, datetime });
-      // Track the most significant (lowest) p-value and distinct types for sorting/filtering.
+      // Track the most significant (lowest) pvalue and distinct types for sorting/filtering.
       if (!isByMode) {
         const p = row[pvalueColumnId];
         if (typeof p === 'number' && Number.isFinite(p)) {

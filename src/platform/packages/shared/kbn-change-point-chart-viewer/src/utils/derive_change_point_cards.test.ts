@@ -88,7 +88,7 @@ describe('derive_change_point_cards', () => {
       expect(cards![0].lineEsql).toContain('STATS avg_bytes');
       expect(cards![0].annotationEvents).toHaveLength(1);
       expect(cards![0].annotationEvents[0].name).toContain('mean_shift');
-      expect(cards![0].annotationEvents[0].name).toContain('p=');
+      expect(cards![0].annotationEvents[0].name).toContain('pvalue=');
     });
 
     it('builds separate line queries per entity via WHERE', () => {
@@ -193,7 +193,7 @@ describe('derive_change_point_cards', () => {
       );
     });
 
-    it('skips annotation markers when type is set but p-value is null', () => {
+    it('skips annotation markers when type is set but pvalue is null', () => {
       const table = {
         type: 'datatable' as const,
         columns: [

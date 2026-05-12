@@ -13,14 +13,14 @@ import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
 
 const TOOLTIP_TITLE = i18n.translate(
   'discover.contextAwareness.changePointPvalueColumnHeader.tooltipTitle',
-  { defaultMessage: 'p-value' }
+  { defaultMessage: 'pvalue' }
 );
 
 const TOOLTIP_CONTENT = i18n.translate(
   'discover.contextAwareness.changePointPvalueColumnHeader.tooltipContent',
   {
     defaultMessage:
-      'Statistical significance of the change point. Lower values indicate a more extreme change. The impact badge reflects this (e.g. very high for p < 0.001).',
+      'Statistical significance of the change point. Lower values indicate a more significant change. Impact levels: high (< 0.0001), moderate (< 0.005), minimal (< 0.03).',
   }
 );
 

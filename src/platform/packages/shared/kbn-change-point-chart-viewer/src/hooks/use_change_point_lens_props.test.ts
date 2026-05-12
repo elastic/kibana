@@ -268,9 +268,7 @@ describe('useChangePointLensProps', () => {
     let query = 'FROM logs | CHANGE_POINT metric';
     const props = makeDefaultProps({ query });
 
-    const { result, rerender } = renderHook(() =>
-      useChangePointLensProps({ ...props, query })
-    );
+    const { result, rerender } = renderHook(() => useChangePointLensProps({ ...props, query }));
 
     await waitFor(() => expect(result.current).toBeDefined());
     const buildCallsAfterMount = mockBuild.mock.calls.length;

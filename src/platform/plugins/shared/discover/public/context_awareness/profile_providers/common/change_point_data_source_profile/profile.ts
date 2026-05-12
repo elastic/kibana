@@ -21,19 +21,13 @@ import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { ChangePointPvalueCell } from './change_point_pvalue_cell';
 import { ChangePointPvalueColumnHeader } from './change_point_pvalue_column_header';
-import {
-  CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
-  type ChangePointLensDataSourceContext,
-} from './change_point_context';
+import { CHANGE_POINT_DATA_SOURCE_PROFILE_ID } from './change_point_context';
 import type { ChangePointPvalueCellContext } from './change_point_pvalue_cell';
 
 const CHANGE_POINT_CHART_LOCAL_STORAGE_KEY = 'discover:changePointExperience';
 
-export type ChangePointDataSourceResolvedContext = ChangePointPvalueCellContext &
-  ChangePointLensDataSourceContext;
-
 export const createChangePointDataSourceProfileProvider =
-  (): DataSourceProfileProvider<ChangePointDataSourceResolvedContext> => ({
+  (): DataSourceProfileProvider<ChangePointPvalueCellContext> => ({
     profileId: CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
     profile: {
       getChartSectionConfiguration:
@@ -59,6 +53,8 @@ export const createChangePointDataSourceProfileProvider =
             ...base,
             [pvalueColumnId]: ({ column, headerRowHeight }: CustomGridColumnProps) => ({
               ...column,
+              // Prevents EUI from right-aligning the header as a numeric column.
+              schema: undefined,
               display: React.createElement(ChangePointPvalueColumnHeader, {
                 columnDisplayName: column.displayAsText,
                 headerRowHeight,
