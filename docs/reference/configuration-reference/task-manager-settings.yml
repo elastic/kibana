@@ -139,7 +139,7 @@ groups:
 
       - setting: xpack.task_manager.ephemeral_tasks.request_capacity
         description: |
-          The maximum number of ephemeral task requests that can be queued. Deprecated in 8.8 and removed in 9.0; any value is silently ignored on 9.0 and later.
+          The maximum number of ephemeral task requests that can be queued.
         datatype: int
         default: 10
         applies_to:
