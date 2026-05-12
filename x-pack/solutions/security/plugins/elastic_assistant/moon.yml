@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/search-inference-endpoints'
   - '@kbn/controls-constants'
+  - '@kbn/ai-assistant-common'
 tags:
   - plugin
   - prod
