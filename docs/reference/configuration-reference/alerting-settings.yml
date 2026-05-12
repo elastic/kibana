@@ -1340,7 +1340,7 @@ groups:
 
       - setting: xpack.alerting.defaultRuleTaskTimeout
         description: |
-          The default timeout for rule tasks. Accepts a duration string such as `5m` or `1h`. Removed in 8.2; use `xpack.alerting.rules.run.timeout` instead.
+          The default timeout for rule tasks. Accepts a duration string such as `5m` or `1h`.
         datatype: string
         applies_to:
           - "stack: ga 7.16, removed 8.2"
