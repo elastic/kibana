@@ -190,6 +190,11 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
               kuery={kuery}
+              // Seed the in-memory router with the alert's environment so SPA
+              // navigation from the embedded popover/badges (e.g. the alerts
+              // badge) carries it into the destination tab. The badges query
+              // itself already gets `environment` via prop.
+              environment={environment}
             >
               <ServiceMapEmbeddable
                 rangeFrom={rangeFrom}

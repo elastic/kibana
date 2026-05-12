@@ -294,4 +294,85 @@ describe('useServiceMapBadges()', () => {
       expect(result.current.status).toBe(FETCH_STATUS.SUCCESS);
     });
   });
+
+  // ── Badges-vs-graph kuery decoupling contract ──────────────────────────────
+  //
+  // The standalone service map and the alert-details preview both pass `kuery: ''`
+  // to this hook so badges aggregate across every visible service regardless of
+  // the user's KQL filter on the map. These tests pin the request shape and the
+  // re-fetch deps the rest of the UI relies on.
+
+  describe('when the caller passes an empty kuery (badges decoupled from the map filter)', () => {
+    function invokeLastFetcherCallback(callApmApi: jest.Mock) {
+      // useFetcher receives (cb, fnDeps, options) — we re-invoke the callback with a
+      // mock `callApmApi` and a dummy AbortSignal to inspect the request the hook
+      // would have made.
+      const calls = mockedUseFetcher.mock.calls;
+      const cb = calls[calls.length - 1][0] as (
+        callApmApiArg: unknown,
+        signal: AbortSignal
+      ) => unknown;
+      const signal = new AbortController().signal;
+      return cb(callApmApi, signal);
+    }
+
+    it('does not forward `kuery` to the badges endpoint', () => {
+      const callApmApi = jest.fn();
+
+      renderHook(() => useServiceMapBadges({ ...defaultParams, kuery: '' }));
+      invokeLastFetcherCallback(callApmApi);
+
+      expect(callApmApi).toHaveBeenCalledWith(
+        'POST /internal/apm/service-map/service_badges',
+        expect.anything()
+      );
+      const [, requestArgs] = callApmApi.mock.calls[0];
+      expect(requestArgs.params.query).not.toHaveProperty('kuery');
+    });
+
+    it('still forwards `environment` to the badges endpoint', () => {
+      const callApmApi = jest.fn();
+
+      renderHook(() =>
+        useServiceMapBadges({ ...defaultParams, kuery: '', environment: 'production' })
+      );
+      invokeLastFetcherCallback(callApmApi);
+
+      const [, requestArgs] = callApmApi.mock.calls[0];
+      expect(requestArgs.params.query).toMatchObject({ environment: 'production' });
+    });
+
+    it('changing `environment` re-fires the badges fetcher (new fnDeps array)', () => {
+      const { rerender } = renderHook(
+        (props: Parameters<typeof useServiceMapBadges>[0]) => useServiceMapBadges(props),
+        { initialProps: { ...defaultParams, kuery: '', environment: 'production' } }
+      );
+
+      const initialDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+
+      rerender({ ...defaultParams, kuery: '', environment: 'staging' });
+
+      const nextDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+      // Same array identity would short-circuit useFetcher and skip the re-run.
+      expect(nextDeps).not.toBe(initialDeps);
+      expect(nextDeps).toEqual(expect.arrayContaining(['staging']));
+    });
+
+    it('changing `kuery` (when caller keeps using it for the topology) still flows through fnDeps', () => {
+      // The hook itself doesn't decide to ignore kuery — that's the caller's choice.
+      // Verify the dep array still tracks kuery so non-standalone callers (which DO
+      // pass a kuery) keep getting re-fetches when the user types in the search bar.
+      const { rerender } = renderHook(
+        (props: Parameters<typeof useServiceMapBadges>[0]) => useServiceMapBadges(props),
+        { initialProps: { ...defaultParams, kuery: 'service.name: "a"' } }
+      );
+
+      const initialDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+
+      rerender({ ...defaultParams, kuery: 'service.name: "b"' });
+
+      const nextDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+      expect(nextDeps).not.toBe(initialDeps);
+    });
+  });
 });
