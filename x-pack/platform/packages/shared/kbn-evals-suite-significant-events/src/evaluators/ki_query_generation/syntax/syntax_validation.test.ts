@@ -23,7 +23,7 @@ describe('syntax_validation evaluator', () => {
     });
 
     expect(result.score).toBe(1);
-    expect(result.details).toMatchObject({
+    expect(result.metadata).toMatchObject({
       astSyntaxValidityRate: 1,
       executionSuccessRate: 1,
       includesHitRate: false,
@@ -53,7 +53,7 @@ describe('syntax_validation evaluator', () => {
     });
 
     expect(result.score).toBe(0.5);
-    const details = result.details as Record<string, unknown>;
+    const details = result.metadata as Record<string, unknown>;
     expect(details.astSyntaxValidityRate).toBe(1);
     expect(details.executionSuccessRate).toBe(0);
     expect(result.explanation).toContain('failed ES execution');
@@ -93,7 +93,7 @@ describe('syntax_validation evaluator', () => {
       metadata: { failure_mode: 'some_failure' },
     });
 
-    const details = result.details as Record<string, unknown>;
+    const details = result.metadata as Record<string, unknown>;
     expect(details.includesHitRate).toBe(true);
     expect(details.executionHitRate).toBe(0.5);
     expect(result.score).toBeCloseTo((1 + 1 + 0.5) / 3, 5);
@@ -111,7 +111,7 @@ describe('syntax_validation evaluator', () => {
       metadata: { difficulty: 'easy', failure_domain: 'none' },
     });
 
-    const details = result.details as Record<string, unknown>;
+    const details = result.metadata as Record<string, unknown>;
     expect(details.includesHitRate).toBe(false);
     expect(result.score).toBe(1);
     expect(result.explanation).not.toContain('no hits');
