@@ -118,9 +118,9 @@ steps:
     run: |
       set -euo pipefail
 
-      source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.merge_commit_sha')"
-      if [ -z "${source_sha}" ] || [ "${source_sha}" = "null" ]; then
-        echo "No merge_commit_sha found for PR ${PR_NUMBER}" >&2
+      source_sha="$(jq -r '.mergeCommit.oid // empty' /tmp/gh-aw/agent/pr-metadata.json)"
+      if [ -z "${source_sha}" ]; then
+        echo "No mergeCommit.oid found for PR ${PR_NUMBER} in prefetched metadata" >&2
         exit 1
       fi
       git fetch --no-tags --depth=2 origin "${source_sha}"
