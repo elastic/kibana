@@ -13,12 +13,17 @@ import type {
 import { RULE_HISTORY_URL } from '../../../../../../../common/api/detection_engine/rule_management';
 import { ruleHistoryRoute } from './route';
 
-const buildHistoryRequest = (
-  query: Record<string, string> = { id: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' }
-) =>
+const buildHistoryRequest = ({
+  params = {},
+  query = {},
+}: {
+  params: Record<string, string>;
+  query: Record<string, string>;
+}) =>
   requestMock.create({
     method: 'get',
     path: RULE_HISTORY_URL,
+    params,
     query,
   });
 
@@ -44,7 +49,10 @@ describe('Rule changes history route', () => {
     clients.detectionRulesClient.getHistoryForRule.mockResolvedValueOnce(responseBody);
 
     const response = await server.inject(
-      buildHistoryRequest({ id: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' }),
+      buildHistoryRequest({
+        params: { ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' },
+        query: {},
+      }),
       requestContextMock.convertContext(context)
     );
 
@@ -67,9 +75,11 @@ describe('Rule changes history route', () => {
 
     await server.inject(
       buildHistoryRequest({
-        id: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd',
-        page: '3',
-        per_page: '50',
+        params: { ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' },
+        query: {
+          page: '3',
+          per_page: '50',
+        },
       }),
       requestContextMock.convertContext(context)
     );
@@ -82,13 +92,16 @@ describe('Rule changes history route', () => {
   });
 
   test('rejects requests with missing id at validation', () => {
-    const result = server.validate(buildHistoryRequest({}));
+    const result = server.validate(buildHistoryRequest({ params: {}, query: {} }));
     expect(result.badRequest).toHaveBeenCalled();
   });
 
   test('rejects per_page above the upper bound at validation', () => {
     const result = server.validate(
-      buildHistoryRequest({ id: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd', per_page: '101' })
+      buildHistoryRequest({
+        params: { ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' },
+        query: { per_page: '101' },
+      })
     );
     expect(result.badRequest).toHaveBeenCalled();
   });
@@ -99,7 +112,10 @@ describe('Rule changes history route', () => {
     });
 
     const response = await server.inject(
-      buildHistoryRequest({ id: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' }),
+      buildHistoryRequest({
+        params: { ruleId: '6399a03a-9ec2-4c42-8e2a-9e622683cfcd' },
+        query: {},
+      }),
       requestContextMock.convertContext(context)
     );
 

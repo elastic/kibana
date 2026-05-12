@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await refreshHistory();
 
       const { body } = await detectionsApi
-        .ruleChangesHistory({ query: { id: rule.id } })
+        .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
         .expect(200);
 
       expect(body.page).toBe(1);
@@ -66,12 +66,14 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('returns 404 when the rule does not exist', async () => {
-      await detectionsApi.ruleChangesHistory({ query: { id: uuidv4() } }).expect(404);
+      await detectionsApi
+        .ruleChangesHistory({ params: { ruleId: uuidv4() }, query: {} })
+        .expect(404);
     });
 
-    it('rejects the request when the `id` query parameter is missing', async () => {
+    it('rejects the request when the "ruleId" path parameter is missing', async () => {
       // @ts-expect-error testing missing id
-      await detectionsApi.ruleChangesHistory({ query: {} }).expect(400);
+      await detectionsApi.ruleChangesHistory({ params: {}, query: {} }).expect(400);
     });
 
     it('rejects the request when per_page exceeds the maximum', async () => {
@@ -81,7 +83,9 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      await detectionsApi.ruleChangesHistory({ query: { id: rule.id, per_page: 101 } }).expect(400);
+      await detectionsApi
+        .ruleChangesHistory({ params: { ruleId: rule.id }, query: { per_page: 101 } })
+        .expect(400);
     });
 
     describe('pagination', () => {
@@ -111,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns the requested page with the right size and total', async () => {
         const { body } = await detectionsApi
-          .ruleChangesHistory({ query: { id: ruleId, page: 1, per_page: 2 } })
+          .ruleChangesHistory({ params: { ruleId }, query: { page: 1, per_page: 2 } })
           .expect(200);
 
         expect(body.total).toBe(5);
@@ -124,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns subsequent pages without overlap', async () => {
         const { body: page2 } = await detectionsApi
-          .ruleChangesHistory({ query: { id: ruleId, page: 2, per_page: 2 } })
+          .ruleChangesHistory({ params: { ruleId }, query: { page: 2, per_page: 2 } })
           .expect(200);
 
         expect(page2.items).toHaveLength(2);
@@ -134,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('returns fewer items on the last partial page', async () => {
         const { body: page3 } = await detectionsApi
-          .ruleChangesHistory({ query: { id: ruleId, page: 3, per_page: 2 } })
+          .ruleChangesHistory({ params: { ruleId }, query: { page: 3, per_page: 2 } })
           .expect(200);
 
         expect(page3.items).toHaveLength(1);
@@ -147,7 +151,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // Oldest item on page 1 (revision 3) should still see revision 2 as
         // its predecessor — provided by the perPage+1 lookback fetch.
         const { body: page1 } = await detectionsApi
-          .ruleChangesHistory({ query: { id: ruleId, page: 1, per_page: 2 } })
+          .ruleChangesHistory({ params: { ruleId }, query: { page: 1, per_page: 2 } })
           .expect(200);
 
         expect(page1.items[1].old_values).not.toBeNull();
@@ -172,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await refreshHistory();
 
         const { body } = await detectionsApi
-          .ruleChangesHistory({ query: { id: rule.id } })
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
         expect(body.total).toBe(2);
@@ -202,7 +206,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await refreshHistory();
 
         const { body } = await detectionsApi
-          .ruleChangesHistory({ query: { id: rule.id } })
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
         expect(body.items[0].old_values?.name).toBe('name-A');
@@ -219,7 +223,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await refreshHistory();
 
         const { body } = await detectionsApi
-          .ruleChangesHistory({ query: { id: rule.id } })
+          .ruleChangesHistory({ params: { ruleId: rule.id }, query: {} })
           .expect(200);
 
         expect(body.items[0].old_values).toBeNull();
