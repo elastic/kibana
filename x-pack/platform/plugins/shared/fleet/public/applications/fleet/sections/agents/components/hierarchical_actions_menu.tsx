@@ -115,7 +115,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
           return {
             name: item.name,
             icon: item.icon ? (
-              <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+              <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
             ) : undefined,
             disabled: item.disabled,
             panel: itemPath,
@@ -126,7 +126,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
         return {
           name: item.name,
           icon: item.icon ? (
-            <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+            <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
           ) : undefined,
           disabled: item.disabled,
           onClick: (event: React.MouseEvent) => {
