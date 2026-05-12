@@ -64,13 +64,19 @@ export const MonitorLocationSelect = ({
           onClick={openLocationList}
           disabled={isDisabled}
         >
-          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" /> : null}
+          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" aria-hidden={true} /> : null}
         </EuiLink>
       );
 
       const menuItems =
         loadingLocationsStatus && !locationsStatus
-          ? [<span key="loading">Loading...</span>]
+          ? [
+              <span key="loading">
+                {i18n.translate('xpack.synthetics.locationList.span.loadingLabel', {
+                  defaultMessage: 'Loading...',
+                })}
+              </span>,
+            ]
           : locationsStatus
               .map((location) => {
                 return (

@@ -118,7 +118,7 @@ const MonitorDetailLinkForLocation = ({
 
   return (
     <EuiBadge
-      iconType={() => <EuiIcon size="m" type="dot" color={color} />}
+      iconType={() => <EuiIcon size="m" type="dot" color={color} aria-hidden={true} />}
       color="hollow"
       href={monitorDetailLinkUrl ?? '/'}
       aria-label={i18n.translate('xpack.synthetics.management.location.ariaLabel', {
