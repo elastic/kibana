@@ -29,6 +29,7 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { useKibana } from '../../../common/lib/kibana';
+import type { HostIsolationAction } from '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useHostIsolationAction } from '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
@@ -102,7 +103,7 @@ export const TakeActionButton = memo(
     const history = useHistory();
 
     const openHostIsolation = useCallback(
-      (isolateAction: 'isolateHost' | 'unisolateHost') => {
+      (isolateAction: HostIsolationAction) => {
         const historyKey = isInSecurityApp
           ? documentFlyoutHistoryKey
           : DOC_VIEWER_FLYOUT_HISTORY_KEY;
@@ -139,7 +140,7 @@ export const TakeActionButton = memo(
       onAddIsolationStatusClick: openHostIsolation,
     });
 
-    const documentId = hit.raw._id as string;
+    const documentId = hit.raw._id ?? '';
     const isRemoteDocument = useMemo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]

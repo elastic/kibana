@@ -14,6 +14,7 @@ import {
   EndpointIsolateSuccess,
   HostIsolationPanel,
 } from '../../../common/components/endpoint/host_isolation';
+import type { HostIsolationAction } from '../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useWithCaseDetailsRefresh } from '../../../common/components/endpoint';
 import { HOST_ISOLATION_PANEL_TEST_ID } from '../test_ids';
 
@@ -29,7 +30,7 @@ export interface HostIsolationViewProps {
   /**
    * Whether to render the isolate or release host form.
    */
-  isolateAction: 'isolateHost' | 'unisolateHost';
+  isolateAction: HostIsolationAction;
   /**
    * Closes the surrounding system flyout when the user cancels the form.
    */
@@ -46,7 +47,7 @@ export const HostIsolationView: FC<HostIsolationViewProps> = ({
   isolateAction,
   onClose,
 }) => {
-  const alertId = hit.raw._id as string;
+  const alertId = hit.raw._id ?? '';
   const hostName = getFieldValue(hit, HOST_NAME_FIELD) as string;
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
   const [isSuccess, setIsSuccess] = useState(false);

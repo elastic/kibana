@@ -26,6 +26,7 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useEventFilterAction } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation';
+import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
@@ -78,7 +79,7 @@ export interface TakeActionDropdownProps {
   /**
    * Callback to let parent know when the user interacts with the exception panel
    */
-  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+  onAddIsolationStatusClick: (action: HostIsolationAction) => void;
   /**
    * Callback to let parent know when the user interacts with event filter
    */
@@ -190,7 +191,7 @@ export const TakeActionDropdown = memo(
 
     // host isolation interaction
     const handleOnAddIsolationStatusClick = useCallback(
-      (action: 'isolateHost' | 'unisolateHost') => {
+      (action: HostIsolationAction) => {
         onAddIsolationStatusClick(action);
         setIsPopoverOpen(false);
       },

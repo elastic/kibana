@@ -18,10 +18,12 @@ import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
 
+export type HostIsolationAction = 'isolateHost' | 'unisolateHost';
+
 export interface UseHostIsolationActionProps {
   closePopover: () => void;
   detailsData: TimelineEventsDetailsItem[] | null;
-  onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
+  onAddIsolationStatusClick: (action: HostIsolationAction) => void;
 }
 
 const emptyArray: AlertTableContextMenuItem[] = [];

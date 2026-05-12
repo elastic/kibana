@@ -20,10 +20,6 @@ jest.mock('./components/host_isolation_view', () => ({
   HostIsolationView: () => <div data-test-subj={mockHostIsolationPanelTestId} />,
 }));
 
-jest.mock('../shared/components/tools_flyout_title', () => ({
-  ToolsFlyoutTitle: () => <div data-test-subj="toolsFlyoutTitleMock" />,
-}));
-
 jest.mock('../../common/hooks/endpoint/use_alert_response_actions_support', () => ({
   useAlertResponseActionsSupport: () => ({
     details: { agentType: 'endpoint' },
@@ -47,6 +43,7 @@ const detailsData = endpointAlertDataMock.generateEndpointAlertDetailsItemData()
 
 describe('<HostIsolation />', () => {
   it('renders the isolate title and agent integration', () => {
+    console.log('bla')
     const { getByTestId } = render(
       <HostIsolation
         hit={hit}

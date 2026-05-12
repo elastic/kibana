@@ -30,6 +30,7 @@ import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_
 import { defaultToolsFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
 import { HostIsolation } from '../../../../flyout_v2/host_isolation';
+import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 
 interface AlertSummaryData {
   /**
@@ -79,7 +80,7 @@ export const TakeActionButton: FC = () => {
   );
 
   const openHostIsolation = useCallback(
-    (action: 'isolateHost' | 'unisolateHost') => {
+    (action: HostIsolationAction) => {
       if (!hit || !dataFormattedForFieldBrowser) {
         return;
       }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AgentTypeIntegration } from '../../common/components/endpoint/agents/agent_type_integration';
 import { useAlertResponseActionsSupport } from '../../common/hooks/endpoint/use_alert_response_actions_support';
+import type { HostIsolationAction } from '../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
@@ -34,7 +34,7 @@ export interface HostIsolationProps {
   /**
    * Whether the user is isolating or releasing the host.
    */
-  isolateAction: 'isolateHost' | 'unisolateHost';
+  isolateAction: HostIsolationAction;
   /**
    * Closes the surrounding system flyout. Wired to the form's cancel button.
    */
@@ -48,7 +48,6 @@ export interface HostIsolationProps {
  */
 export const HostIsolation: FC<HostIsolationProps> = memo(
   ({ hit, detailsData, isolateAction, onClose }) => {
-    const { euiTheme } = useEuiTheme();
     const {
       details: { agentType },
     } = useAlertResponseActionsSupport(detailsData);
@@ -57,12 +56,7 @@ export const HostIsolation: FC<HostIsolationProps> = memo(
 
     return (
       <>
-        <EuiFlyoutHeader
-          hasBorder
-          css={css`
-            padding-block: ${euiTheme.size.s} !important;
-          `}
-        >
+        <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             hit={hit}
             title={<span data-test-subj={HOST_ISOLATION_TITLE_TEST_ID}>{title}</span>}
