@@ -311,12 +311,12 @@ steps:
               limit: 3
 
       - label: 'Evals: Security ES|QL Generation Regression'
-        key: kbn-evals-weekly-esql-generation-regression
+        key: kbn-evals-weekly-security-esql-generation-regression
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'esql-generation-regression'
+          EVAL_SUITE_ID: 'security-esql-generation-regression'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models

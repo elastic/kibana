@@ -1,10 +1,10 @@
-# Security ES|QL Generation Regression Suite (`esql-generation-regression`)
+# Security ES|QL Generation Regression Suite (`security-esql-generation-regression`)
 
 Playwright-based regression suite for the ES|QL generation feature in Elastic Security, built on `@kbn/evals` — the source of truth for eval framework primitives (fixtures, evaluators, dataset typing, reporting).
 
 ## Suite ID
 
-**`esql-generation-regression`**
+**`security-esql-generation-regression`**
 
 Registered in `.buildkite/pipelines/evals/evals.suites.json`.
 
@@ -46,7 +46,7 @@ interface Example<TInput, TOutput, TMetadata> {
 Edit `src/dataset.ts` directly: append/replace entries in the array and update the count assertion in `src/dataset.test.ts`. There is no external dataset to sync from — this file IS the source of truth.
 
 ```bash
-node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/src/dataset.test.ts
+node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/src/dataset.test.ts
 ```
 
 ---
@@ -78,7 +78,7 @@ nvm use && node scripts/evals scout
 
 ```bash
 nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
-  node scripts/evals run --suite esql-generation-regression
+  node scripts/evals run --suite security-esql-generation-regression
 ```
 
 ### 4) Smoke test (single example)
@@ -88,7 +88,7 @@ Set `ESQL_GENERATION_DATASET_LIMIT=1` and `ESQL_GENERATION_DATASET_OFFSET=<n>` t
 ```bash
 nvm use && EVALUATION_CONNECTOR_ID=<connector-id> \
   ESQL_GENERATION_DATASET_LIMIT=1 ESQL_GENERATION_DATASET_OFFSET=2 \
-  node scripts/evals run --suite esql-generation-regression
+  node scripts/evals run --suite security-esql-generation-regression
 ```
 
 ---
@@ -126,17 +126,17 @@ GET .kibana-evaluations/_search
 ### Unit tests
 
 ```bash
-node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression
+node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
 ```
 
 ### Type check
 
 ```bash
-node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/tsconfig.json
+node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/tsconfig.json
 ```
 
 ### Lint
 
 ```bash
-node scripts/eslint --fix x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression
+node scripts/eslint --fix x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression
 ```

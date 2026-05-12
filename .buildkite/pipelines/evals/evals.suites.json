@@ -188,11 +188,11 @@
       "ciLabels": ["evals:security-automatic-migrations"]
     },
     {
-      "id": "esql-generation-regression",
+      "id": "security-esql-generation-regression",
       "name": "Security ES|QL Generation Regression",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
       "tags": ["security", "esql-generation"],
-      "ciLabels": ["evals:esql-generation-regression"]
+      "ciLabels": ["evals:security-esql-generation-regression"]
     }
   ]
 }
