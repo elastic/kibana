@@ -11,7 +11,7 @@ import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, EuiPanel, useEuiTheme } fro
 import { useRunWorkflow, WorkflowSelector } from '@kbn/workflows-ui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { RenderingService } from '@kbn/core-rendering-browser';
@@ -29,6 +29,12 @@ export interface RunWorkflowPanelProps {
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
 }
+
+const workflowHasRequiredManualInputs = (workflow: WorkflowListItemDto): boolean => {
+  const inputs = workflow.definition?.inputs;
+  if (!inputs?.required?.length) return false;
+  return inputs.required.some((name) => inputs.properties?.[name]?.default === undefined);
+};
 
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
@@ -109,7 +115,13 @@ export const RunWorkflowPanel = ({
     () => (
       <WorkflowSelector
         config={{
-          filterFunction: (workflows) => workflows.filter((w) => w.enabled),
+          filterFunction: (workflows) =>
+            workflows.filter(
+              (w) =>
+                w.enabled &&
+                w.definition?.triggers?.some((t) => t.type === sortTriggerType) &&
+                !workflowHasRequiredManualInputs(w)
+            ),
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
               const aHasType = a.definition?.triggers?.some((t) => t.type === sortTriggerType);

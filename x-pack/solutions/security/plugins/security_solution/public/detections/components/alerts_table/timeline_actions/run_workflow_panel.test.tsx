@@ -11,19 +11,29 @@ import { RunWorkflowPanel, type RunWorkflowPanelProps } from './run_workflow_pan
 import * as i18n from '../translations';
 
 const mockMutate = jest.fn();
+let capturedFilterFn: ((workflows: any[]) => any[]) | undefined;
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => ({ mutate: mockMutate }),
-  WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
-    <div data-test-subj="workflow-selector-mock">
-      <button
-        data-test-subj="select-workflow-option"
-        type="button"
-        onClick={() => onWorkflowChange('test-workflow-id')}
-      >
-        {'Select workflow'}
-      </button>
-    </div>
-  ),
+  WorkflowSelector: ({
+    onWorkflowChange,
+    config,
+  }: {
+    onWorkflowChange: (id: string) => void;
+    config?: { filterFunction?: (workflows: any[]) => any[] };
+  }) => {
+    capturedFilterFn = config?.filterFunction;
+    return (
+      <div data-test-subj="workflow-selector-mock">
+        <button
+          data-test-subj="select-workflow-option"
+          type="button"
+          onClick={() => onWorkflowChange('test-workflow-id')}
+        >
+          {'Select workflow'}
+        </button>
+      </div>
+    );
+  },
 }));
 
 const mockNavigateToApp = jest.fn();
@@ -59,9 +69,31 @@ const defaultProps: RunWorkflowPanelProps = {
 const renderComponent = (props: Partial<RunWorkflowPanelProps> = {}) =>
   render(<RunWorkflowPanel {...defaultProps} {...props} />);
 
+const makeWorkflow = (overrides: {
+  enabled?: boolean;
+  triggers?: Array<{ type: string }>;
+  inputs?: Record<string, unknown>;
+}) => ({
+  id: 'wf-1',
+  name: 'workflow-1',
+  description: 'desc',
+  enabled: overrides.enabled ?? true,
+  createdAt: '2024-01-01T00:00:00Z',
+  valid: true,
+  definition: {
+    version: '1' as const,
+    name: 'workflow-1',
+    enabled: overrides.enabled ?? true,
+    triggers: overrides.triggers ?? [{ type: 'alert' }],
+    steps: [],
+    ...(overrides.inputs !== undefined && { inputs: overrides.inputs }),
+  },
+});
+
 describe('RunWorkflowPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedFilterFn = undefined;
   });
 
   it('should render the workflow selector', () => {
@@ -187,6 +219,84 @@ describe('RunWorkflowPanel', () => {
 
     expect(mockAddError).toHaveBeenCalledWith(error, {
       title: i18n.WORKFLOW_START_FAILED_TOAST,
+    });
+  });
+
+  describe('filterFunction', () => {
+    it('keeps workflows with the matching trigger type', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [makeWorkflow({ triggers: [{ type: 'alert' }] })];
+      expect(capturedFilterFn!(workflows)).toHaveLength(1);
+    });
+
+    it('filters out workflows without the matching trigger type', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [makeWorkflow({ triggers: [{ type: 'scheduled' }] })];
+      expect(capturedFilterFn!(workflows)).toHaveLength(0);
+    });
+
+    it('filters out disabled workflows', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [makeWorkflow({ enabled: false, triggers: [{ type: 'alert' }] })];
+      expect(capturedFilterFn!(workflows)).toHaveLength(0);
+    });
+
+    it('keeps workflows with no inputs defined', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [makeWorkflow({ triggers: [{ type: 'alert' }] })];
+      expect(capturedFilterFn!(workflows)).toHaveLength(1);
+    });
+
+    it('keeps workflows whose required inputs all have defaults', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [
+        makeWorkflow({
+          triggers: [{ type: 'alert' }],
+          inputs: {
+            required: ['severity'],
+            properties: { severity: { type: 'string', default: 'low' } },
+          },
+        }),
+      ];
+      expect(capturedFilterFn!(workflows)).toHaveLength(1);
+    });
+
+    it('filters out workflows with required inputs that have no default', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [
+        makeWorkflow({
+          triggers: [{ type: 'alert' }],
+          inputs: {
+            required: ['message'],
+            properties: { message: { type: 'string' } },
+          },
+        }),
+      ];
+      expect(capturedFilterFn!(workflows)).toHaveLength(0);
+    });
+
+    it('filters out workflows with any required input missing a default even when others have defaults', () => {
+      renderComponent({ sortTriggerType: 'alert' });
+
+      const workflows = [
+        makeWorkflow({
+          triggers: [{ type: 'alert' }],
+          inputs: {
+            required: ['severity', 'message'],
+            properties: {
+              severity: { type: 'string', default: 'low' },
+              message: { type: 'string' },
+            },
+          },
+        }),
+      ];
+      expect(capturedFilterFn!(workflows)).toHaveLength(0);
     });
   });
 });
