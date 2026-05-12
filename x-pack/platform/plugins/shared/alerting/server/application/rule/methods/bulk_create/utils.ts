@@ -107,7 +107,7 @@ export const buildTaskInstance = (
     alertInstances: {},
   },
   scope: ['alerting'],
-  // Created disabled (and enable later) to avoid stampede 
+  // Created disabled (and enable later) to avoid stampede
   // @see https://github.com/elastic/kibana/pull/174656
   enabled: false,
 });
@@ -356,9 +356,8 @@ export const bulkEnableScheduledTasks = async ({
   if (scheduledIds.length === 0) return;
 
   try {
-    const enableResult = await withSpan(
-      { name: 'taskManager.bulkEnable', type: 'tasks' },
-      () => context.taskManager.bulkEnable(scheduledIds)
+    const enableResult = await withSpan({ name: 'taskManager.bulkEnable', type: 'tasks' }, () =>
+      context.taskManager.bulkEnable(scheduledIds)
     );
     const failedIds = enableResult?.errors?.map((e) => e.id) ?? [];
     if (failedIds.length === 0) return;
