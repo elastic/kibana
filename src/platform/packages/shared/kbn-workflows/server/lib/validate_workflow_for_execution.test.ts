@@ -60,7 +60,7 @@ describe('validateWorkflowForExecution', () => {
 
   it('should throw when workflow is disabled', () => {
     const workflow = createMockWorkflow({ enabled: false });
-    // catched like this to assert on the error properties, since it's a custom error class
+    // caught like this to assert on the error properties, since it's a custom error class
     const error = (() => {
       try {
         validateWorkflowForExecution(workflow, 'test-workflow-id');

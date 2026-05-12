@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 
-import { createExternalService } from './service';
+import { classifyJiraAxiosError, createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ExternalService } from './types';
 import type { Logger } from '@kbn/core/server';
@@ -15,7 +16,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { TaskErrorSource, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -25,7 +25,7 @@ interface ResponseError extends Error {
   };
 }
 
-jest.mock('axios');
+jest.mock('axios', () => jest.requireActual<typeof import('axios')>('axios'));
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
@@ -33,6 +33,22 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
     request: jest.fn(),
   };
 });
+
+const minimalAxiosRequestConfig = { headers: {} } as InternalAxiosRequestConfig;
+
+const jiraAxios400Error = new AxiosError(
+  'Request failed with status code 400',
+  'ERR_BAD_REQUEST',
+  minimalAxiosRequestConfig,
+  undefined,
+  {
+    status: 400,
+    statusText: 'Bad Request',
+    data: {},
+    headers: {},
+    config: minimalAxiosRequestConfig,
+  }
+);
 
 axios.create = jest.fn(() => axios);
 const requestMock = request as jest.Mock;
@@ -60,6 +76,29 @@ const issueResponse = {
 };
 
 const issuesResponse = [issueResponse];
+
+describe('classifyJiraAxiosError', () => {
+  test('returns true for AxiosError with HTTP 400 response', () => {
+    expect(classifyJiraAxiosError(jiraAxios400Error)).toBe(true);
+  });
+
+  test('returns false for AxiosError with non-400 response', () => {
+    const error = new AxiosError(
+      'Request failed with status code 500',
+      'ERR_BAD_RESPONSE',
+      minimalAxiosRequestConfig,
+      undefined,
+      {
+        status: 500,
+        statusText: 'Internal Server Error',
+        data: {},
+        headers: {},
+        config: minimalAxiosRequestConfig,
+      }
+    );
+    expect(classifyJiraAxiosError(error)).toBe(false);
+  });
+});
 
 describe('Jira service', () => {
   let service: ExternalService;
@@ -439,19 +478,6 @@ describe('Jira service', () => {
       await expect(service.createIncident(incident)).rejects.toThrow(
         '[Action][Jira]: Unable to create incident. Error: Response is missing at least one of the expected fields: id. Reason: unknown: errorResponse was null'
       );
-    });
-
-    test('it should throw a user error for 400 responses', async () => {
-      const mockError: ResponseError = new Error('Request failed with status code 400');
-      mockError.response = {
-        status: 400,
-        data: { errors: { project: 'Project is required' }, errorMessages: [] },
-      };
-      requestMock.mockRejectedValue(mockError);
-
-      const error = await service.createIncident(incident).catch((err) => err);
-
-      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
     });
 
     describe('otherFields', () => {

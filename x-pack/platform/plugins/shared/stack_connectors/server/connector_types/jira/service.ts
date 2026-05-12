@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import type { AxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
@@ -18,7 +19,6 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CONNECTOR_NAME } from '@kbn/connector-schemas/jira';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type {
   CreateCommentParams,
   CreateIncidentParams,
@@ -40,6 +40,10 @@ const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;
 
 const VIEW_INCIDENT_URL = `browse`;
+
+export function classifyJiraAxiosError(error: unknown): error is AxiosError {
+  return isAxiosError(error) && error.response?.status === 400;
+}
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
@@ -257,10 +261,6 @@ export const createExternalService = (
           error.response?.data
         )}`
       );
-
-      if (error?.response?.status === 400) {
-        throw createTaskRunError(error, TaskErrorSource.USER);
-      }
 
       throw error;
     }
