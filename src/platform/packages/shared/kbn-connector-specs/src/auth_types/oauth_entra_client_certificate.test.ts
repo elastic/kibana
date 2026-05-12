@@ -11,6 +11,7 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import {
   CLIENT_ASSERTION_TYPE,
+  OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
   OAuthEntraClientCertificate,
 } from './oauth_entra_client_certificate';
 
@@ -161,7 +162,7 @@ describe('OAuthEntraClientCertificate', () => {
       });
 
       expect(ctx.getToken).toHaveBeenCalledWith({
-        authType: 'oauth',
+        authType: OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
         tokenUrl: SECRETS.tokenUrl,
         scope: SECRETS.scope,
         clientId: SECRETS.clientId,

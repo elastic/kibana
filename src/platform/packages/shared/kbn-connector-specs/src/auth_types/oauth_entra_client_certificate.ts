@@ -12,6 +12,7 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
+export const OAUTH_ENTRA_CLIENT_CERTIFICATE_ID = 'oauth_entra_client_certificate';
 export const CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer';
 
 // Accepted PEM markers. Private keys may be PKCS#1 ("RSA PRIVATE KEY"),
@@ -28,6 +29,7 @@ const PRIVATE_KEY_MARKER = /-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----/;
  */
 export class EntraAuthError extends Error {
   public readonly kind: 'assertion' | 'exchange';
+
   constructor(kind: 'assertion' | 'exchange', message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = 'EntraAuthError';
@@ -87,7 +89,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * `oauth_private_key_jwt` auth type that supersedes this one.
  */
 export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
-  id: 'oauth_entra_client_certificate',
+  id: OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
   schema: authSchema,
   configure: async (
     ctx: AuthContext,
@@ -114,7 +116,7 @@ export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
-        authType: 'oauth_entra_client_certificate',
+        authType: OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
