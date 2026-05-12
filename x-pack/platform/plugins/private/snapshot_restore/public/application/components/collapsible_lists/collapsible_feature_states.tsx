@@ -71,10 +71,7 @@ export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ f
                 values={{ count: hiddenItemsCount }}
               />
             )}{' '}
-            <EuiIcon
-              type={isShowingFullList ? 'arrowUp' : 'arrowDown'}
-              aria-hidden={true}
-            />
+            <EuiIcon type={isShowingFullList ? 'arrowUp' : 'arrowDown'} aria-hidden={true} />
           </EuiLink>
         </>
       ) : null}
