@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import type { FormValues } from '../../form/types';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -32,6 +31,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { ESQL_LANG_ID } from '@kbn/monaco';
+import type { FormValues } from '../../form/types';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
@@ -100,13 +100,22 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
-  const { columns, rows, totalRowCount, isLoading, isError, error, run, hasRun, lastExecutedQuery } =
-    useQueryExecution({
-      query: activeQuery,
-      timeField,
-      timeRange,
-      data: services.data,
-    });
+  const {
+    columns,
+    rows,
+    totalRowCount,
+    isLoading,
+    isError,
+    error,
+    run,
+    hasRun,
+    lastExecutedQuery,
+  } = useQueryExecution({
+    query: activeQuery,
+    timeField,
+    timeRange,
+    data: services.data,
+  });
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

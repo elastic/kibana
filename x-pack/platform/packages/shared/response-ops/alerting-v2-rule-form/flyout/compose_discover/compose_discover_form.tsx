@@ -51,9 +51,10 @@ function AlertConditionStep({
   const groupFields = grouping?.fields ?? [];
 
   // Only fetch date fields when the query has a committed, valid index pattern
-  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.fullQuery) && state.queryCommitted
-    ? state.fullQuery
-    : '';
+  const queryForFields =
+    /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.fullQuery) && state.queryCommitted
+      ? state.fullQuery
+      : '';
   const { data: fieldMap } = useDataFields({
     query: queryForFields,
     http: services.http,
@@ -127,9 +128,7 @@ function AlertConditionStep({
           onChange={(opts) =>
             setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
           }
-          onCreateOption={(val) =>
-            setValue('grouping', { fields: [...groupFields, val] })
-          }
+          onCreateOption={(val) => setValue('grouping', { fields: [...groupFields, val] })}
           placeholder="Add group fields"
           data-test-subj="composeDiscoverGroupFields"
         />
@@ -216,7 +215,11 @@ stateTransition:
 `;
 }
 
-export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({ state, dispatch, services }) => {
+export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
+  state,
+  dispatch,
+  services,
+}) => {
   const { watch } = useFormContext<FormValues>();
   const formValues = watch();
   const yamlValue = useMemo(
