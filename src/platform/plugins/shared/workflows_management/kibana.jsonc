@@ -32,8 +32,8 @@
       "embeddable",
       "licensing"
     ],
-    "optionalPlugins": ["alerting", "serverless", "cloud"],
-    "runtimePluginDependencies": ["agentBuilder"],
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
+    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer"],
     "extraPublicDirs": ["common"]
   }
 }
