@@ -12,81 +12,49 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 
-export type SupportedLogo =
-  | 'aws'
-  | 'aws_ecs'
-  | 'azure'
-  | 'docker'
-  | 'dotnet'
-  | 'prometheus'
-  | 'gcp'
-  | 'java'
-  | 'javascript'
-  | 'kubernetes'
-  | 'nginx'
-  | 'apache'
-  | 'system'
-  | 'opentelemetry'
-  | 'mysql'
-  | 'postgresql'
-  | 'redis'
-  | 'ruby'
-  | 'haproxy'
-  | 'rabbitmq'
-  | 'kafka'
-  | 'mongodb'
-  | 'apache_tomcat'
-  | 'couchbase'
-  | 'logstash'
-  | 'firehose'
-  | 'fluentbit'
-  | 'linux'
-  | 'windows'
-  | 'apple_black'
-  | 'apple_white'
-  | 'slack'
-  | 'jira'
-  | 'confluence'
-  | 'salesforce'
-  | 'splunk';
+const SUPPORTED_LOGOS = [
+  'aws',
+  'aws_ecs',
+  'azure',
+  'docker',
+  'dotnet',
+  'prometheus',
+  'gcp',
+  'java',
+  'javascript',
+  'kubernetes',
+  'nginx',
+  'apache',
+  'system',
+  'opentelemetry',
+  'mysql',
+  'postgresql',
+  'redis',
+  'ruby',
+  'haproxy',
+  'rabbitmq',
+  'kafka',
+  'mongodb',
+  'apache_tomcat',
+  'couchbase',
+  'logstash',
+  'firehose',
+  'fluentbit',
+  'linux',
+  'windows',
+  'apple_black',
+  'apple_white',
+  'slack',
+  'jira',
+  'confluence',
+  'salesforce',
+  'splunk',
+] as const;
+
+export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
-  return [
-    'aws',
-    'aws_ecs',
-    'azure',
-    'docker',
-    'dotnet',
-    'prometheus',
-    'gcp',
-    'java',
-    'javascript',
-    'kubernetes',
-    'nginx',
-    'system',
-    'apache',
-    'opentelemetry',
-    'mysql',
-    'postgresql',
-    'redis',
-    'ruby',
-    'haproxy',
-    'rabbitmq',
-    'kafka',
-    'mongodb',
-    'apache_tomcat',
-    'couchbase',
-    'logstash',
-    'fluentbit',
-    'linux',
-    'windows',
-    'apple',
-    'slack',
-    'jira',
-    'confluence',
-    'salesforce',
-    'splunk',
-  ].includes(logo);
+  return (SUPPORTED_LOGOS as readonly string[]).includes(logo);
 }
 
 // Logos that EUI ships natively. Anything not listed here falls through to a
