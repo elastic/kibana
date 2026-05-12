@@ -19,12 +19,13 @@ export const aiPromptStepDefinition = (
   createServerStepDefinition({
     ...AiPromptStepCommonDefinition,
     handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],
         inference,
-        context.contextManager.getFakeRequest()
+        context.contextManager.getFakeRequest(),
+        { featureId: 'ai.prompt', searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({

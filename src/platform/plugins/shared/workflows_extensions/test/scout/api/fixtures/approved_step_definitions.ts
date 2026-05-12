@@ -30,15 +30,15 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
   },
   {
     id: 'ai.classify',
-    handlerHash: '544ebbf2b32840510958ced5ddc6109712a11b260ab22d13fa8c83d5265aa481',
+    handlerHash: '32d80591e16d320f0e66964df252510bc4b11f21536f86e9f954fd10cb2a1d6e',
   },
   {
     id: 'ai.prompt',
-    handlerHash: 'a9315bd19fcf4c2ac4d05f652a52bc1c8073b9a7d2dd289a69bedabb827f3249',
+    handlerHash: '9882fcc78a7c3a28037299d35ffde315f18446d0f3a862b89ffa0cf546817cd3',
   },
   {
     id: 'ai.summarize',
-    handlerHash: 'aa1db14ff6af424a3f66f5528e18c7b8d1f462ca8ba8e6feb01221e6fa1518ea',
+    handlerHash: '63e624a3e49a59fdc5062259c3d678dda52ad51da48cb4bf114c7496f9bc66f8',
   },
   {
     id: 'data.aggregate',

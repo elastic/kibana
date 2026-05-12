@@ -26,12 +26,13 @@ export const aiSummarizeStepDefinition = (
   createServerStepDefinition({
     ...AiSummarizeStepCommonDefinition,
     handler: async (context) => {
-      const [, { inference }] = await coreSetup.getStartServices();
+      const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
       const resolvedConnectorId = await resolveConnectorId(
         context.config['connector-id'],
         inference,
-        context.contextManager.getFakeRequest()
+        context.contextManager.getFakeRequest(),
+        { featureId: 'ai.summarize', searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({
