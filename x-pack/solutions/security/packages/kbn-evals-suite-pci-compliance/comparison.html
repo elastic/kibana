@@ -508,6 +508,72 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   someone else's engine.
 </p>
 
+<h3>v6 hardening — audit fixes + engine unit tests</h3>
+<p>
+  After the v6 engine landed, an internal audit raised seven items spanning
+  code quality, missing test coverage, and report reproducibility. All seven
+  are closed in the audit-fix commit; this subsection captures what changed
+  so the deep-autonomy claim is backed by more than just eval scores.
+</p>
+<h4 style="margin:0.8rem 0 0.2rem;font-size:0.95rem">Code-quality cleanups in the v6 engine</h4>
+<ul>
+  <li><code>pci_autonomous_requirements.ts</code> — catalog re-typed as
+      <code>Partial&lt;Record&lt;string, AutonomousRequirementDef&gt;&gt;</code> so undefined
+      lookups must be handled at call sites; the redundant
+      <code>| LIMIT 1</code> on un-grouped <code>STATS</code> queries removed;
+      stale internal docstring references cleared.</li>
+  <li><code>pci_autonomous_evaluator.ts</code> — <code>scoreFor</code> is
+      exhaustive over the typed <code>SCORE_TABLE</code>, so the unreachable
+      <code>?? 0</code> fallback was removed; <code>runAutonomousWithConcurrency</code>
+      now awaits every in-flight task before re-throwing the first error, so
+      one rejection no longer orphans siblings (semantics documented in the
+      function's JSDoc).</li>
+  <li><code>pci_autonomous_schemas.ts</code> — <code>REQUIREMENT_ID_PATTERN</code>
+      tightened so malformed IDs like <code>all.1</code> no longer match.</li>
+</ul>
+<h4 style="margin:0.8rem 0 0.2rem;font-size:0.95rem">Engine unit tests (85 specs, ~2 s) — pure-unit cover independent of evals</h4>
+<ul>
+  <li><code>pci_autonomous_schemas.test.ts</code> — provenance constants;
+      index-pattern refinements (ESQL injection, reserved chars, length
+      bounds); time-range clamping including the 48-hour future-date guard;
+      requirement-ID regex; <code>buildAutonomousScopeClaim</code> dedup +
+      sort stability.</li>
+  <li><code>pci_autonomous_requirements.test.ts</code> — catalog completeness,
+      self-referential <code>id</code> fields, <code>AUTONOMOUS_TIME_WINDOW</code>
+      placeholder presence, every <code>detect_violations</code> requirement
+      carries a <code>violation</code> query, default-lookback sanity, plus a
+      <strong>runtime catalog↔schema sync invariant</strong> that parses every
+      catalog key through <code>pciAutonomousRequirementIdSchema</code>
+      (replacing a prior compile-time anchor that was being suppressed by an
+      <code>as</code> cast — a true sync check now runs every CI build).</li>
+  <li><code>pci_autonomous_evaluator.test.ts</code> — concurrency-runner
+      ordering and failure semantics; ordered
+      <code>?_window_start</code> / <code>?_window_end</code> binding;
+      <code>RED</code>, <code>GREEN</code>, <code>AMBER+HIGH</code>,
+      <code>AMBER+LOW</code>, and <code>NOT_ASSESSABLE</code> branches all
+      exercised via <code>mockResolvedValueOnce</code>; ES|QL failure ⇒
+      <code>query_failed</code> data gap (no crash); evidence rows clamped to
+      50.</li>
+</ul>
+<h4 style="margin:0.8rem 0 0.2rem;font-size:0.95rem">Reproducibility — one results.json regenerates this report</h4>
+<p>
+  <code>build_comparison_html.mjs</code> now accepts
+  <code>--combined-run &lt;label&gt;=&lt;dir&gt;</code>. When a single
+  <code>results.json</code> contains both <code>pci-compliance:*</code>
+  (iteration) and <code>pci-holdout:*</code> (holdout) scenarios, the script
+  splits them internally and folds them into the iteration and holdout sets
+  as if they came from two separate run directories. The v6 numbers in §4 +
+  §5 can therefore be regenerated from one committed <code>results.json</code>
+  — no out-of-band splitter required:
+</p>
+<pre>node x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/build_comparison_html.mjs \
+  --runs hw-sonnet46=runs/sonnet46-handwritten,hw-opus47=runs/opus47-handwritten \
+  --holdout-runs hw-holdout=runs/sonnet46-handwritten-holdout \
+  --runs au-v5=runs/sonnet46-autonomous-v5-full \
+  --holdout-runs au-v5-holdout=runs/sonnet46-autonomous-holdout \
+  --combined-run au-v6=runs/sonnet46-autonomous-v6-full \
+  --out comparison.html</pre>
+
 <h2>9 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
 <p class="lead">
   Running the suite against Claude 4.7 Opus on Bedrock requires omitting the

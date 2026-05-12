@@ -46,7 +46,7 @@ const REPO_ROOT = resolve(PKG_DIR, '../../../../..');
  * checkout.
  */
 function repoRelative(absPath) {
-  const root = REPO_ROOT.endsWith('/') ? REPO_ROOT : REPO_ROOT + '/';
+  const root = REPO_ROOT.endsWith('/') ? REPO_ROOT : `${REPO_ROOT}/`;
   return absPath.startsWith(root) ? absPath.slice(root.length) : absPath;
 }
 
@@ -247,12 +247,13 @@ function loadCombinedRun(dir) {
 function normaliseScenarios(raw) {
   if (Array.isArray(raw)) return raw;
   if (raw && Array.isArray(raw.scenarios)) return raw.scenarios;
-  if (raw && Array.isArray(raw.experiments)) return raw.experiments.map((e) => ({
-    scenario: e.name,
-    score: e.score,
-    criteria: e.evaluators?.[0]?.criteria ?? [],
-    errors: e.errors ?? [],
-  }));
+  if (raw && Array.isArray(raw.experiments))
+    return raw.experiments.map((e) => ({
+      scenario: e.name,
+      score: e.score,
+      criteria: e.evaluators?.[0]?.criteria ?? [],
+      errors: e.errors ?? [],
+    }));
   // ES `_search` shape: { hits: { hits: [{ _source: { evaluator, example, task, ... } }] } }
   if (raw && raw.hits && Array.isArray(raw.hits.hits)) {
     const byScenario = new Map();
@@ -346,10 +347,8 @@ if (args.combinedRuns) {
   }
 }
 
-const multiRunsAvailable =
-  multiRuns && Object.values(multiRuns).every((r) => r.populated);
-const holdoutRunsAvailable =
-  holdoutRuns && Object.values(holdoutRuns).every((r) => r.populated);
+const multiRunsAvailable = multiRuns && Object.values(multiRuns).every((r) => r.populated);
+const holdoutRunsAvailable = holdoutRuns && Object.values(holdoutRuns).every((r) => r.populated);
 
 /**
  * Compute the mean score across an array of scenario rows, ignoring NaN /
@@ -388,7 +387,7 @@ function gapVerdict(gap) {
   if (!Number.isFinite(gap)) return { label: '—', cls: '' };
   const abs = Math.abs(gap);
   if (abs < 0.05) return { label: 'CLEAN — skill generalises', cls: 'delta-positive' };
-  if (abs < 0.10) return { label: 'CAUTION — audit last few edits', cls: '' };
+  if (abs < 0.1) return { label: 'CAUTION — audit last few edits', cls: '' };
   return { label: 'OVERFIT ALERT — revert + reformulate', cls: 'delta-negative' };
 }
 
@@ -543,15 +542,23 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
 <div class="kpi-grid">
   <div class="kpi"><div class="label">Hand-written content</div>
     <div class="value">${handwrittenMetrics.chars.toLocaleString()} chars</div>
-    <div class="footnote">${handwrittenMetrics.lines} lines · ${handwrittenMetrics.sections} sections · ${handwrittenMetrics.bullets} bullets</div></div>
+    <div class="footnote">${handwrittenMetrics.lines} lines · ${
+  handwrittenMetrics.sections
+} sections · ${handwrittenMetrics.bullets} bullets</div></div>
   <div class="kpi"><div class="label">Autonomous content</div>
     <div class="value">${autonomousMetrics.chars.toLocaleString()} chars</div>
-    <div class="footnote">${autonomousMetrics.lines} lines · ${autonomousMetrics.sections} sections · ${autonomousMetrics.bullets} bullets</div></div>
+    <div class="footnote">${autonomousMetrics.lines} lines · ${
+  autonomousMetrics.sections
+} sections · ${autonomousMetrics.bullets} bullets</div></div>
   <div class="kpi"><div class="label">v4.0.1 anchors</div>
-    <div class="value">HW: ${handwrittenMetrics.v401Mentions} / Auto: ${autonomousMetrics.v401Mentions}</div>
+    <div class="value">HW: ${handwrittenMetrics.v401Mentions} / Auto: ${
+  autonomousMetrics.v401Mentions
+}</div>
     <div class="footnote">Both pin to v4.0.1 (June 2024 limited revision).</div></div>
   <div class="kpi"><div class="label">Do-not-use boundaries</div>
-    <div class="value">HW: ${handwrittenMetrics.doNotUseBullets} / Auto: ${autonomousMetrics.doNotUseBullets}</div>
+    <div class="value">HW: ${handwrittenMetrics.doNotUseBullets} / Auto: ${
+  autonomousMetrics.doNotUseBullets
+}</div>
     <div class="footnote">More boundaries → less activation drift on adjacent topics.</div></div>
   <div class="kpi"><div class="label">Skill-contract tests</div>
     <div class="value">HW: ${handwrittenTestCount} / Auto: ${autonomousTestCount}</div>
@@ -714,99 +721,153 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
 <table>
   <thead><tr><th>Domain knowledge</th><th>HW present?</th><th>Auto present?</th><th>Source</th></tr></thead>
   <tbody>
-    <tr><td>SAQ taxonomy (A, A-EP, D-MER, D-SP, …)</td><td>${/SAQ/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/SAQ/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>v3.2.1 → v4.0.1 net-new requirements (3.4.1, 8.4.2, 11.4.1)</td><td>${/3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>Scope-reduction levers (tokenisation, P2PE, segmentation)</td><td>${/[Tt]okenisation|[Tt]okenization/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/[Tt]okenisation|[Tt]okenization/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>Technical-vs-process requirement classification</td><td>${/[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>Tiered remediation SLA per status (RED/AMBER/GREEN)</td><td>${/Remediation SLA|remediation SLA|30 days/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/Remediation SLA|remediation SLA|30 days/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-internal-corroborated (Splunk PCI dashboard)</td></tr>
+    <tr><td>SAQ taxonomy (A, A-EP, D-MER, D-SP, …)</td><td>${
+      /SAQ/.test(handwrittenContent) ? '✓' : '✗'
+    }</td><td>${
+  /SAQ/.test(autonomousContent) ? '✓' : '✗'
+}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>v3.2.1 → v4.0.1 net-new requirements (3.4.1, 8.4.2, 11.4.1)</td><td>${
+      /3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(handwrittenContent) ? '✓' : '✗'
+    }</td><td>${
+  /3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(autonomousContent) ? '✓' : '✗'
+}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>Scope-reduction levers (tokenisation, P2PE, segmentation)</td><td>${
+      /[Tt]okenisation|[Tt]okenization/.test(handwrittenContent) ? '✓' : '✗'
+    }</td><td>${
+  /[Tt]okenisation|[Tt]okenization/.test(autonomousContent) ? '✓' : '✗'
+}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>Technical-vs-process requirement classification</td><td>${
+      /[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(handwrittenContent) ? '✓' : '✗'
+    }</td><td>${
+  /[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(autonomousContent) ? '✓' : '✗'
+}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>Tiered remediation SLA per status (RED/AMBER/GREEN)</td><td>${
+      /Remediation SLA|remediation SLA|30 days/.test(handwrittenContent) ? '✓' : '✗'
+    }</td><td>${
+  /Remediation SLA|remediation SLA|30 days/.test(autonomousContent) ? '✓' : '✗'
+}</td><td>model-internal-corroborated (Splunk PCI dashboard)</td></tr>
   </tbody>
 </table>
 
 <h2>4 · Live eval results (per-scenario, LLM-judge scored)</h2>
-${
-  multiRunsAvailable
-    ? (() => {
-        const ORDER = [
-          ['opus47-handwritten', 'HW · Claude 4.7 Opus'],
-          ['opus47-autonomous', 'Auto · Claude 4.7 Opus (shared HW tools)'],
-          ['sonnet46-handwritten', 'HW · Claude 4.6 Sonnet'],
-          ['sonnet46-autonomous', 'Auto v1 · Claude 4.6 Sonnet (shared tools)'],
-          ['sonnet46-autonomous-v3', 'Auto v3 · Claude 4.6 Sonnet (tool-first, shared)'],
-          ['sonnet46-autonomous-v5', 'Auto v5 · Claude 4.6 Sonnet (own 4 tools, shared engine)'],
-          ['sonnet46-autonomous-v6', 'Auto v6 · Claude 4.6 Sonnet (own 4 tools + own engine)'],
-        ].filter(([k]) => multiRuns[k]?.populated);
-        const allScenarios = new Set();
-        for (const [k] of ORDER) for (const s of multiRuns[k].scenarios) allScenarios.add(s.scenario);
-        const rows = [...allScenarios].sort();
-        const headerCells = ORDER.map(([, label]) => `<th>${escapeHtml(label)}</th>`).join('');
-        const bodyRows = rows
-          .map((scn) => {
-            const cells = ORDER.map(([k]) => {
-              const found = multiRuns[k].scenarios.find((x) => x.scenario === scn);
-              const score = found && Number.isFinite(found.score) ? found.score : NaN;
-              return Number.isFinite(score)
-                ? `<td class="num">${score.toFixed(3)}</td>`
-                : `<td class="num">—</td>`;
-            }).join('');
-            return `<tr><td>${escapeHtml(scn)}</td>${cells}</tr>`;
-          })
-          .join('\n');
-        const sums = ORDER.map(([k]) => {
-          let total = 0;
-          let n = 0;
-          for (const s of multiRuns[k].scenarios)
-            if (Number.isFinite(s.score)) {
-              total += s.score;
-              n += 1;
+${(() => {
+  if (multiRunsAvailable) {
+    return (() => {
+      const ORDER = [
+        ['opus47-handwritten', 'HW · Claude 4.7 Opus'],
+        ['opus47-autonomous', 'Auto · Claude 4.7 Opus (shared HW tools)'],
+        ['sonnet46-handwritten', 'HW · Claude 4.6 Sonnet'],
+        ['sonnet46-autonomous', 'Auto v1 · Claude 4.6 Sonnet (shared tools)'],
+        ['sonnet46-autonomous-v3', 'Auto v3 · Claude 4.6 Sonnet (tool-first, shared)'],
+        ['sonnet46-autonomous-v5', 'Auto v5 · Claude 4.6 Sonnet (own 4 tools, shared engine)'],
+        ['sonnet46-autonomous-v6', 'Auto v6 · Claude 4.6 Sonnet (own 4 tools + own engine)'],
+      ].filter(([k]) => multiRuns[k]?.populated);
+      const allScenarios = new Set();
+      for (const [k] of ORDER) for (const s of multiRuns[k].scenarios) allScenarios.add(s.scenario);
+      const rows = [...allScenarios].sort();
+      const headerCells = ORDER.map(([, label]) => `<th>${escapeHtml(label)}</th>`).join('');
+      const bodyRows = rows
+        .map((scn) => {
+          const cells = ORDER.map(([k]) => {
+            const found = multiRuns[k].scenarios.find((x) => x.scenario === scn);
+            const score = found && Number.isFinite(found.score) ? found.score : NaN;
+            return Number.isFinite(score)
+              ? `<td class="num">${score.toFixed(3)}</td>`
+              : `<td class="num">—</td>`;
+          }).join('');
+          return `<tr><td>${escapeHtml(scn)}</td>${cells}</tr>`;
+        })
+        .join('\n');
+      const sums = ORDER.map(([k]) => {
+        let total = 0;
+        let n = 0;
+        for (const s of multiRuns[k].scenarios)
+          if (Number.isFinite(s.score)) {
+            total += s.score;
+            n += 1;
+          }
+        return { mean: n ? total / n : NaN, n };
+      });
+      const meanRow =
+        `<tr><td><strong>Mean</strong></td>${sums
+          .map((s) => {
+            let cls = '';
+            if (Number.isFinite(s.mean)) {
+              if (s.mean >= 0.9) cls = 'delta-positive';
+              else if (s.mean < 0.75) cls = 'delta-negative';
             }
-          return { mean: n ? total / n : NaN, n };
-        });
-        const meanRow =
-          `<tr><td><strong>Mean</strong></td>` +
-          sums
-            .map((s) => {
-              const cls = Number.isFinite(s.mean)
-                ? s.mean >= 0.9
-                  ? 'delta-positive'
-                  : s.mean >= 0.75
-                  ? ''
-                  : 'delta-negative'
-                : '';
-              return `<td class="num ${cls}"><strong>${Number.isFinite(s.mean) ? s.mean.toFixed(3) : '—'}</strong></td>`;
-            })
-            .join('') +
-          `</tr>` +
-          `<tr><td class="footnote">scenarios scored</td>` +
-          sums.map((s) => `<td class="num footnote">${s.n}</td>`).join('') +
-          `</tr>`;
-        const hwOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-handwritten')]?.mean ?? NaN;
-        const auOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-autonomous')]?.mean ?? NaN;
-        const hwSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-handwritten')]?.mean ?? NaN;
-        const auSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous')]?.mean ?? NaN;
-        const auSonnetV3 = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v3')]?.mean ?? NaN;
-        const auSonnetV5 = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v5')]?.mean ?? NaN;
-        const auSonnetV6 = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v6')]?.mean ?? NaN;
-        const opusDelta = hwOpus - auOpus;
-        const sonnetDelta = hwSonnet - auSonnet;
-        const sonnetDeltaV3 = Number.isFinite(auSonnetV3) ? hwSonnet - auSonnetV3 : NaN;
-        const sonnetDeltaV5 = Number.isFinite(auSonnetV5) ? hwSonnet - auSonnetV5 : NaN;
-        const sonnetDeltaV6 = Number.isFinite(auSonnetV6) ? hwSonnet - auSonnetV6 : NaN;
-        const v5HitParity = Number.isFinite(sonnetDeltaV5) && Math.abs(sonnetDeltaV5) < 0.005;
-        const v6HitParity = Number.isFinite(sonnetDeltaV6) && Math.abs(sonnetDeltaV6) < 0.02;
-        const verdictV3 = Number.isFinite(auSonnetV3)
-          ? ` After the first round of fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>${auSonnetV3.toFixed(3)}</strong> on Sonnet 4.6, ${(sonnetDeltaV3 * 100).toFixed(1)} pts behind the hand-written variant (down from ${(sonnetDelta * 100).toFixed(1)} pts).`
-          : '';
-        const verdictV5 = Number.isFinite(auSonnetV5)
-          ? ` <strong>Surface autonomy (Auto v5).</strong> Auto v5 ships an independently-authored 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) registered behind its own allowlist entry. The agent router has no path to the hand-written tool IDs when the autonomous feature flag is on. Result: <strong>${auSonnetV5.toFixed(3)} on Sonnet 4.6 — ${v5HitParity ? 'matching the hand-written baseline of ' + hwSonnet.toFixed(3) + ' exactly' : (sonnetDeltaV5 >= 0 ? (sonnetDeltaV5 * 100).toFixed(1) + ' pts behind' : Math.abs(sonnetDeltaV5 * 100).toFixed(1) + ' pts ahead of') + ' the hand-written variant'}</strong>. The handler bodies in v5 still imported the PCI requirement catalog, evaluator engine, and ScopeClaim builder from the hand-written variant's modules — v5 validates surface autonomy on a shared engine (see §1.5).`
-          : '';
-        const verdictV6 = Number.isFinite(auSonnetV6)
-          ? ` <strong>Deep autonomy (Auto v6).</strong> The architect re-authored the engine too: <code>pci_autonomous_requirements.ts</code> (independent v4.0.1 catalog), <code>pci_autonomous_evaluator.ts</code> (independent assessment pipeline), <code>pci_autonomous_schemas.ts</code> (independent zod + ScopeClaim builder). A CI lockdown test asserts zero imports from the hand-written engine modules anywhere under <code>pci_autonomous_tools/</code>. Result: <strong>${auSonnetV6.toFixed(3)} on Sonnet 4.6 — ${v6HitParity ? 'matching the hand-written baseline of ' + hwSonnet.toFixed(3) + ' within noise' : (sonnetDeltaV6 >= 0 ? (sonnetDeltaV6 * 100).toFixed(1) + ' pts behind' : Math.abs(sonnetDeltaV6 * 100).toFixed(1) + ' pts ahead of') + ' the hand-written variant'}</strong>. The autonomous workflow carried the entire feature — agent contract <em>and</em> domain engine — from the public PCI DSS v4.0.1 spec without imports from the hand-written variant.`
-          : '';
-        const bannerClass = v6HitParity || v5HitParity ? 'banner-success' : (hwOpus > auOpus && hwSonnet > auSonnet ? 'banner-info' : 'banner-warn');
-        const verdict = `<div class="banner ${bannerClass}">
-<strong>Headline result.</strong> First pass (Auto v1): the hand-written skill outperformed the autonomous variant on both models — by ${(opusDelta * 100).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(sonnetDelta * 100).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(3)}). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses.${verdictV3}${verdictV5}${verdictV6}
+            return `<td class="num ${cls}"><strong>${
+              Number.isFinite(s.mean) ? s.mean.toFixed(3) : '—'
+            }</strong></td>`;
+          })
+          .join('')}</tr>` +
+        `<tr><td class="footnote">scenarios scored</td>${sums
+          .map((s) => `<td class="num footnote">${s.n}</td>`)
+          .join('')}</tr>`;
+      const hwOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-handwritten')]?.mean ?? NaN;
+      const auOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-autonomous')]?.mean ?? NaN;
+      const hwSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-handwritten')]?.mean ?? NaN;
+      const auSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous')]?.mean ?? NaN;
+      const auSonnetV3 =
+        sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v3')]?.mean ?? NaN;
+      const auSonnetV5 =
+        sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v5')]?.mean ?? NaN;
+      const auSonnetV6 =
+        sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v6')]?.mean ?? NaN;
+      const opusDelta = hwOpus - auOpus;
+      const sonnetDelta = hwSonnet - auSonnet;
+      const sonnetDeltaV3 = Number.isFinite(auSonnetV3) ? hwSonnet - auSonnetV3 : NaN;
+      const sonnetDeltaV5 = Number.isFinite(auSonnetV5) ? hwSonnet - auSonnetV5 : NaN;
+      const sonnetDeltaV6 = Number.isFinite(auSonnetV6) ? hwSonnet - auSonnetV6 : NaN;
+      const v5HitParity = Number.isFinite(sonnetDeltaV5) && Math.abs(sonnetDeltaV5) < 0.005;
+      const v6HitParity = Number.isFinite(sonnetDeltaV6) && Math.abs(sonnetDeltaV6) < 0.02;
+      const verdictV3 = Number.isFinite(auSonnetV3)
+        ? ` After the first round of fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>${auSonnetV3.toFixed(
+            3
+          )}</strong> on Sonnet 4.6, ${(sonnetDeltaV3 * 100).toFixed(
+            1
+          )} pts behind the hand-written variant (down from ${(sonnetDelta * 100).toFixed(1)} pts).`
+        : '';
+      const verdictV5 = Number.isFinite(auSonnetV5)
+        ? ` <strong>Surface autonomy (Auto v5).</strong> Auto v5 ships an independently-authored 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) registered behind its own allowlist entry. The agent router has no path to the hand-written tool IDs when the autonomous feature flag is on. Result: <strong>${auSonnetV5.toFixed(
+            3
+          )} on Sonnet 4.6 — ${
+            v5HitParity
+              ? `matching the hand-written baseline of ${hwSonnet.toFixed(3)} exactly`
+              : `${
+                  sonnetDeltaV5 >= 0
+                    ? `${(sonnetDeltaV5 * 100).toFixed(1)} pts behind`
+                    : `${Math.abs(sonnetDeltaV5 * 100).toFixed(1)} pts ahead of`
+                } the hand-written variant`
+          }</strong>. The handler bodies in v5 still imported the PCI requirement catalog, evaluator engine, and ScopeClaim builder from the hand-written variant's modules — v5 validates surface autonomy on a shared engine (see §1.5).`
+        : '';
+      const verdictV6 = Number.isFinite(auSonnetV6)
+        ? ` <strong>Deep autonomy (Auto v6).</strong> The architect re-authored the engine too: <code>pci_autonomous_requirements.ts</code> (independent v4.0.1 catalog), <code>pci_autonomous_evaluator.ts</code> (independent assessment pipeline), <code>pci_autonomous_schemas.ts</code> (independent zod + ScopeClaim builder). A CI lockdown test asserts zero imports from the hand-written engine modules anywhere under <code>pci_autonomous_tools/</code>. Result: <strong>${auSonnetV6.toFixed(
+            3
+          )} on Sonnet 4.6 — ${
+            v6HitParity
+              ? `matching the hand-written baseline of ${hwSonnet.toFixed(3)} within noise`
+              : `${
+                  sonnetDeltaV6 >= 0
+                    ? `${(sonnetDeltaV6 * 100).toFixed(1)} pts behind`
+                    : `${Math.abs(sonnetDeltaV6 * 100).toFixed(1)} pts ahead of`
+                } the hand-written variant`
+          }</strong>. The autonomous workflow carried the entire feature — agent contract <em>and</em> domain engine — from the public PCI DSS v4.0.1 spec without imports from the hand-written variant.`
+        : '';
+      let bannerClass;
+      if (v6HitParity || v5HitParity) bannerClass = 'banner-success';
+      else if (hwOpus > auOpus && hwSonnet > auSonnet) bannerClass = 'banner-info';
+      else bannerClass = 'banner-warn';
+      const verdict = `<div class="banner ${bannerClass}">
+<strong>Headline result.</strong> First pass (Auto v1): the hand-written skill outperformed the autonomous variant on both models — by ${(
+        opusDelta * 100
+      ).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(
+        sonnetDelta * 100
+      ).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(
+        3
+      )}). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses.${verdictV3}${verdictV5}${verdictV6}
 </div>`;
-        return `<p class="lead">
+      return `<p class="lead">
   Both variants ran through the same ${specScenarioCount}-scenario suite end-to-end
   against a real Scout cluster, with two production Bedrock connectors — Claude
   4.7 Opus and Claude 4.6 Sonnet. The only variable across each pair of columns
@@ -840,11 +901,14 @@ ${meanRow}
 </ul>
 
 <details><summary>Raw evaluator artefacts</summary>
-<pre>${ORDER.map(([k]) => `${k.padEnd(22)}: ${escapeHtml(repoRelative(multiRuns[k].file))}`).join('\n')}</pre>
+<pre>${ORDER.map(([k]) => `${k.padEnd(22)}: ${escapeHtml(repoRelative(multiRuns[k].file))}`).join(
+        '\n'
+      )}</pre>
 </details>`;
-      })()
-    : liveResultsAvailable && scenarioDiff
-    ? `<p class="lead">
+    })();
+  }
+  if (liveResultsAvailable && scenarioDiff) {
+    return `<p class="lead">
   Both variants ran through the same 8-scenario suite back-to-back against the same
   cluster, same dataset, same connector — the only difference is which PCI skill the
   agent router had available. The <em>PCI Criteria</em> column is the numeric
@@ -873,7 +937,11 @@ ${scenarioDiff
         ? `<strong>${pci}/${total}</strong> pci skill`
         : `0/${total} pci skill (<em>generic only</em>)`;
     };
-    return `<tr><td>${escapeHtml(s.scenario)}</td><td class="num">${hwCell}</td><td class="num">${auCell}</td><td class="num ${deltaClassFor(s.delta)}">${deltaCell}</td><td>${fmtRouting('hw')}</td><td>${fmtRouting('au')}</td></tr>`;
+    return `<tr><td>${escapeHtml(
+      s.scenario
+    )}</td><td class="num">${hwCell}</td><td class="num">${auCell}</td><td class="num ${deltaClassFor(
+      s.delta
+    )}">${deltaCell}</td><td>${fmtRouting('hw')}</td><td>${fmtRouting('au')}</td></tr>`;
   })
   .join('\n')}
 </tbody>
@@ -883,10 +951,18 @@ ${scenarioDiff
 <table>
 <thead><tr><th>Signal</th><th>Hand-written run</th><th>Autonomous run</th></tr></thead>
 <tbody>
-<tr><td>Scenarios completed</td><td class="num">${handwrittenRouting?.scenarioCount ?? '—'}</td><td class="num">${autonomousRouting?.scenarioCount ?? '—'}</td></tr>
-<tr><td>Total tool calls observed</td><td class="num">${handwrittenRouting?.totalToolCalls ?? '—'}</td><td class="num">${autonomousRouting?.totalToolCalls ?? '—'}</td></tr>
-<tr><td>PCI-skill tool calls (<code>security.pci_*</code>)</td><td class="num">${handwrittenRouting?.pciSkillToolCalls ?? '—'}</td><td class="num">${autonomousRouting?.pciSkillToolCalls ?? '—'}</td></tr>
-<tr><td>Scenarios with ≥1 PCI-skill call</td><td class="num">${handwrittenRouting?.scenariosWithPciToolCall ?? '—'}</td><td class="num">${autonomousRouting?.scenariosWithPciToolCall ?? '—'}</td></tr>
+<tr><td>Scenarios completed</td><td class="num">${
+      handwrittenRouting?.scenarioCount ?? '—'
+    }</td><td class="num">${autonomousRouting?.scenarioCount ?? '—'}</td></tr>
+<tr><td>Total tool calls observed</td><td class="num">${
+      handwrittenRouting?.totalToolCalls ?? '—'
+    }</td><td class="num">${autonomousRouting?.totalToolCalls ?? '—'}</td></tr>
+<tr><td>PCI-skill tool calls (<code>security.pci_*</code>)</td><td class="num">${
+      handwrittenRouting?.pciSkillToolCalls ?? '—'
+    }</td><td class="num">${autonomousRouting?.pciSkillToolCalls ?? '—'}</td></tr>
+<tr><td>Scenarios with ≥1 PCI-skill call</td><td class="num">${
+      handwrittenRouting?.scenariosWithPciToolCall ?? '—'
+    }</td><td class="num">${autonomousRouting?.scenariosWithPciToolCall ?? '—'}</td></tr>
 </tbody>
 </table>
 
@@ -909,10 +985,15 @@ re-renders this section with discriminating numbers.
 }
 
 <details><summary>Raw evaluator artefacts</summary>
-<pre>handwritten: ${escapeHtml(handwrittenResults.file ? repoRelative(handwrittenResults.file) : '(none)')}
-autonomous : ${escapeHtml(autonomousResults.file ? repoRelative(autonomousResults.file) : '(none)')}</pre>
-</details>`
-    : `<div class="banner banner-info">
+<pre>handwritten: ${escapeHtml(
+      handwrittenResults.file ? repoRelative(handwrittenResults.file) : '(none)'
+    )}
+autonomous : ${escapeHtml(
+      autonomousResults.file ? repoRelative(autonomousResults.file) : '(none)'
+    )}</pre>
+</details>`;
+  }
+  return `<div class="banner banner-info">
 <strong>Live eval data not yet attached</strong> — the framework is fully wired; only the cluster-with-AI-connector run is missing. Two ways to populate this section:
 <ol>
   <li>Run the side-by-side script (recommended):
@@ -923,12 +1004,18 @@ autonomous : ${escapeHtml(autonomousResults.file ? repoRelative(autonomousResult
     <pre>${escapeHtml(repoRelative(args.handwritten))}/results.json
 ${escapeHtml(repoRelative(args.autonomous))}/results.json</pre>
     then re-run:
-    <pre>node ${escapeHtml(repoRelative(args.out).replace(/comparison\.html$/, 'scripts/build_comparison_html.mjs'))} \\\n  --handwritten ${escapeHtml(repoRelative(args.handwritten))} \\\n  --autonomous ${escapeHtml(repoRelative(args.autonomous))} \\\n  --out ${escapeHtml(repoRelative(args.out))}</pre>
+    <pre>node ${escapeHtml(
+      repoRelative(args.out).replace(/comparison\.html$/, 'scripts/build_comparison_html.mjs')
+    )} \\\n  --handwritten ${escapeHtml(
+    repoRelative(args.handwritten)
+  )} \\\n  --autonomous ${escapeHtml(repoRelative(args.autonomous))} \\\n  --out ${escapeHtml(
+    repoRelative(args.out)
+  )}</pre>
   </li>
 </ol>
 The handwritten variant is the existing <code>kbn-evals-weekly-pci-compliance</code> Buildkite step (no change). The autonomous variant is the new <code>kbn-evals-weekly-pci-compliance-autonomous</code> step. Both run the SAME ${specScenarioCount}-scenario spec — the only thing different is which Kibana skill the agent router has available.
-</div>`
-}
+</div>`;
+})()}
 
 <h2>5 · Generalisation gap — iteration vs holdout</h2>
 ${
@@ -939,9 +1026,7 @@ ${
           ['sonnet46-autonomous-v5', 'Autonomous v5 · Sonnet 4.6 (own tools, shared engine)'],
           ['sonnet46-autonomous-v6', 'Autonomous v6 · Sonnet 4.6 (own tools + own engine)'],
         ].filter(
-          ([k]) =>
-            holdoutRuns[k.replace(/-v[0-9]+$/, '')]?.populated ||
-            holdoutRuns[k]?.populated
+          ([k]) => holdoutRuns[k.replace(/-v[0-9]+$/, '')]?.populated || holdoutRuns[k]?.populated
         );
         // Per-variant rows.
         const rows = PAIRS.map(([k, label]) => {
@@ -950,9 +1035,7 @@ ${
           // variant-family label (strip -vN). That lets v5 and v6 each pair
           // with their own holdout run when present.
           const iterStats = meanScore(multiRuns[k]?.scenarios ?? []);
-          const holdoutKey = holdoutRuns[k]?.populated
-            ? k
-            : k.replace(/-v[0-9]+$/, '');
+          const holdoutKey = holdoutRuns[k]?.populated ? k : k.replace(/-v[0-9]+$/, '');
           const holdoutStats = meanScore(holdoutRuns[holdoutKey]?.scenarios ?? []);
           const gap = iterStats.mean - holdoutStats.mean;
           const verdict = gapVerdict(gap);
@@ -970,9 +1053,15 @@ ${
             (r) =>
               `<tr>
   <td>${escapeHtml(r.label)}</td>
-  <td class="num">${Number.isFinite(r.iter.mean) ? r.iter.mean.toFixed(3) : '—'} <span class="footnote">(n=${r.iter.n})</span></td>
-  <td class="num">${Number.isFinite(r.holdout.mean) ? r.holdout.mean.toFixed(3) : '—'} <span class="footnote">(n=${r.holdout.n})</span></td>
-  <td class="num ${r.verdict.cls}">${Number.isFinite(r.gap) ? (r.gap >= 0 ? '+' : '') + r.gap.toFixed(3) : '—'}</td>
+  <td class="num">${
+    Number.isFinite(r.iter.mean) ? r.iter.mean.toFixed(3) : '—'
+  } <span class="footnote">(n=${r.iter.n})</span></td>
+  <td class="num">${
+    Number.isFinite(r.holdout.mean) ? r.holdout.mean.toFixed(3) : '—'
+  } <span class="footnote">(n=${r.holdout.n})</span></td>
+  <td class="num ${r.verdict.cls}">${
+                Number.isFinite(r.gap) ? (r.gap >= 0 ? '+' : '') + r.gap.toFixed(3) : '—'
+              }</td>
   <td>${escapeHtml(r.verdict.label)}</td>
 </tr>`
           )
@@ -980,32 +1069,39 @@ ${
 
         // Aggregate verdict — worst (most negative) gap drives the banner.
         const worst = rows.reduce(
-          (acc, r) => (Number.isFinite(r.gap) && r.gap > acc.gap ? { gap: r.gap, label: r.label, verdict: r.verdict } : acc),
+          (acc, r) =>
+            Number.isFinite(r.gap) && r.gap > acc.gap
+              ? { gap: r.gap, label: r.label, verdict: r.verdict }
+              : acc,
           { gap: -Infinity, label: null, verdict: { label: '—', cls: '' } }
         );
-        const bannerCls =
-          worst.verdict.cls === 'delta-positive'
-            ? 'banner-success'
-            : worst.verdict.cls === 'delta-negative'
-            ? 'banner-warn'
-            : 'banner-info';
+        let bannerCls;
+        if (worst.verdict.cls === 'delta-positive') bannerCls = 'banner-success';
+        else if (worst.verdict.cls === 'delta-negative') bannerCls = 'banner-warn';
+        else bannerCls = 'banner-info';
+        let gapAdvice;
+        if (Math.abs(worst.gap) < 0.05) {
+          gapAdvice =
+            'Both variants generalise from the iteration set to the holdout set. The iteration loop has stayed principled — fixes have been encoded as general PCI knowledge, not as patches that match the iteration fixtures.';
+        } else if (Math.abs(worst.gap) < 0.1) {
+          gapAdvice =
+            'The skill scores noticeably lower on the holdout than on the iteration set. Audit the last few skill edits for fixture-coupling: do any of them reference specific user names, IP addresses, exact counts, or index-naming patterns from the iteration set? Reformulate as general principles.';
+        } else {
+          gapAdvice =
+            'The skill has overfit to the iteration fixtures. Revert the last skill edit and re-author it as a general principle. Consider also whether the holdout dataset has revealed a genuinely new capability the skill lacks (in which case extend the skill to teach it, then re-measure).';
+        }
         const banner = Number.isFinite(worst.gap)
           ? `<div class="banner ${bannerCls}">
-<strong>${worst.label} drives the worst gap: ${(worst.gap >= 0 ? '+' : '') + worst.gap.toFixed(3)} (${worst.verdict.label}).</strong>
-${
-  Math.abs(worst.gap) < 0.05
-    ? 'Both variants generalise from the iteration set to the holdout set. The iteration loop has stayed principled — fixes have been encoded as general PCI knowledge, not as patches that match the iteration fixtures.'
-    : Math.abs(worst.gap) < 0.1
-    ? 'The skill scores noticeably lower on the holdout than on the iteration set. Audit the last few skill edits for fixture-coupling: do any of them reference specific user names, IP addresses, exact counts, or index-naming patterns from the iteration set? Reformulate as general principles.'
-    : 'The skill has overfit to the iteration fixtures. Revert the last skill edit and re-author it as a general principle. Consider also whether the holdout dataset has revealed a genuinely new capability the skill lacks (in which case extend the skill to teach it, then re-measure).'
-}
+<strong>${worst.label} drives the worst gap: ${
+              (worst.gap >= 0 ? '+' : '') + worst.gap.toFixed(3)
+            } (${worst.verdict.label}).</strong>
+${gapAdvice}
 </div>`
           : '';
 
         // Per-scenario holdout details.
         const holdoutScenarios = new Set();
-        for (const r of rows)
-          for (const s of r.holdoutScenarios) holdoutScenarios.add(s.scenario);
+        for (const r of rows) for (const s of r.holdoutScenarios) holdoutScenarios.add(s.scenario);
         const holdoutDetailRows = [...holdoutScenarios].sort().map((scn) => {
           const cells = rows
             .map((r) => {
@@ -1018,9 +1114,7 @@ ${
             .join('');
           return `<tr><td>${escapeHtml(scn)}</td>${cells}</tr>`;
         });
-        const holdoutDetailHeader = rows
-          .map((r) => `<th>${escapeHtml(r.label)}</th>`)
-          .join('');
+        const holdoutDetailHeader = rows.map((r) => `<th>${escapeHtml(r.label)}</th>`).join('');
 
         return `<p class="lead">
   Section §4 above scores against the iteration dataset — the fixtures we
@@ -1158,7 +1252,11 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Hand-written skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance/pci_compliance_skill.ts</code></li>
   <li>Autonomous skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance_autonomous/pci_compliance_autonomous_skill.ts</code></li>
   <li>Eval spec: <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/evals/pci_compliance/pci_compliance.spec.ts</code></li>
-  <li>Live results (when present): <code>${escapeHtml(repoRelative(handwrittenResults.dir))}/results.json</code> &amp; <code>${escapeHtml(repoRelative(autonomousResults.dir))}/results.json</code></li>
+  <li>Live results (when present): <code>${escapeHtml(
+    repoRelative(handwrittenResults.dir)
+  )}/results.json</code> &amp; <code>${escapeHtml(
+  repoRelative(autonomousResults.dir)
+)}/results.json</code></li>
 </ul>
 
 <h3>How the deep-autonomy experiment was constructed (v6)</h3>
@@ -1212,6 +1310,72 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   someone else's engine.
 </p>
 
+<h3>v6 hardening — audit fixes + engine unit tests</h3>
+<p>
+  After the v6 engine landed, an internal audit raised seven items spanning
+  code quality, missing test coverage, and report reproducibility. All seven
+  are closed in the audit-fix commit; this subsection captures what changed
+  so the deep-autonomy claim is backed by more than just eval scores.
+</p>
+<h4 style="margin:0.8rem 0 0.2rem;font-size:0.95rem">Code-quality cleanups in the v6 engine</h4>
+<ul>
+  <li><code>pci_autonomous_requirements.ts</code> — catalog re-typed as
+      <code>Partial&lt;Record&lt;string, AutonomousRequirementDef&gt;&gt;</code> so undefined
+      lookups must be handled at call sites; the redundant
+      <code>| LIMIT 1</code> on un-grouped <code>STATS</code> queries removed;
+      stale internal docstring references cleared.</li>
+  <li><code>pci_autonomous_evaluator.ts</code> — <code>scoreFor</code> is
+      exhaustive over the typed <code>SCORE_TABLE</code>, so the unreachable
+      <code>?? 0</code> fallback was removed; <code>runAutonomousWithConcurrency</code>
+      now awaits every in-flight task before re-throwing the first error, so
+      one rejection no longer orphans siblings (semantics documented in the
+      function's JSDoc).</li>
+  <li><code>pci_autonomous_schemas.ts</code> — <code>REQUIREMENT_ID_PATTERN</code>
+      tightened so malformed IDs like <code>all.1</code> no longer match.</li>
+</ul>
+<h4 style="margin:0.8rem 0 0.2rem;font-size:0.95rem">Engine unit tests (85 specs, ~2 s) — pure-unit cover independent of evals</h4>
+<ul>
+  <li><code>pci_autonomous_schemas.test.ts</code> — provenance constants;
+      index-pattern refinements (ESQL injection, reserved chars, length
+      bounds); time-range clamping including the 48-hour future-date guard;
+      requirement-ID regex; <code>buildAutonomousScopeClaim</code> dedup +
+      sort stability.</li>
+  <li><code>pci_autonomous_requirements.test.ts</code> — catalog completeness,
+      self-referential <code>id</code> fields, <code>AUTONOMOUS_TIME_WINDOW</code>
+      placeholder presence, every <code>detect_violations</code> requirement
+      carries a <code>violation</code> query, default-lookback sanity, plus a
+      <strong>runtime catalog↔schema sync invariant</strong> that parses every
+      catalog key through <code>pciAutonomousRequirementIdSchema</code>
+      (replacing a prior compile-time anchor that was being suppressed by an
+      <code>as</code> cast — a true sync check now runs every CI build).</li>
+  <li><code>pci_autonomous_evaluator.test.ts</code> — concurrency-runner
+      ordering and failure semantics; ordered
+      <code>?_window_start</code> / <code>?_window_end</code> binding;
+      <code>RED</code>, <code>GREEN</code>, <code>AMBER+HIGH</code>,
+      <code>AMBER+LOW</code>, and <code>NOT_ASSESSABLE</code> branches all
+      exercised via <code>mockResolvedValueOnce</code>; ES|QL failure ⇒
+      <code>query_failed</code> data gap (no crash); evidence rows clamped to
+      50.</li>
+</ul>
+<h4 style="margin:0.8rem 0 0.2rem;font-size:0.95rem">Reproducibility — one results.json regenerates this report</h4>
+<p>
+  <code>build_comparison_html.mjs</code> now accepts
+  <code>--combined-run &lt;label&gt;=&lt;dir&gt;</code>. When a single
+  <code>results.json</code> contains both <code>pci-compliance:*</code>
+  (iteration) and <code>pci-holdout:*</code> (holdout) scenarios, the script
+  splits them internally and folds them into the iteration and holdout sets
+  as if they came from two separate run directories. The v6 numbers in §4 +
+  §5 can therefore be regenerated from one committed <code>results.json</code>
+  — no out-of-band splitter required:
+</p>
+<pre>node x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/build_comparison_html.mjs \\
+  --runs hw-sonnet46=runs/sonnet46-handwritten,hw-opus47=runs/opus47-handwritten \\
+  --holdout-runs hw-holdout=runs/sonnet46-handwritten-holdout \\
+  --runs au-v5=runs/sonnet46-autonomous-v5-full \\
+  --holdout-runs au-v5-holdout=runs/sonnet46-autonomous-holdout \\
+  --combined-run au-v6=runs/sonnet46-autonomous-v6-full \\
+  --out comparison.html</pre>
+
 <h2>9 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
 <p class="lead">
   Running the suite against Claude 4.7 Opus on Bedrock requires omitting the
@@ -1255,5 +1419,13 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
 
 writeFileSync(args.out, html, 'utf8');
 process.stdout.write(`Wrote ${args.out} (${html.length.toLocaleString()} bytes)\n`);
-process.stdout.write(`  hand-written results: ${handwrittenResults.populated ? 'present' : 'NOT YET — run script to populate'}\n`);
-process.stdout.write(`  autonomous results : ${autonomousResults.populated ? 'present' : 'NOT YET — run script to populate'}\n`);
+process.stdout.write(
+  `  hand-written results: ${
+    handwrittenResults.populated ? 'present' : 'NOT YET — run script to populate'
+  }\n`
+);
+process.stdout.write(
+  `  autonomous results : ${
+    autonomousResults.populated ? 'present' : 'NOT YET — run script to populate'
+  }\n`
+);

@@ -1191,11 +1191,12 @@ export const resolveAutonomousRequirementIds = (requirements?: string[]): string
   const expanded = new Set<string>();
   for (const req of requirements) {
     const canonical = normalizeAutonomousRequirementId(req);
-    if (!canonical || canonical === 'all') continue;
-    expanded.add(canonical);
-    for (const key of Object.keys(AUTONOMOUS_PCI_REQUIREMENTS)) {
-      if (key.startsWith(`${canonical}.`)) {
-        expanded.add(key);
+    if (canonical && canonical !== 'all') {
+      expanded.add(canonical);
+      for (const key of Object.keys(AUTONOMOUS_PCI_REQUIREMENTS)) {
+        if (key.startsWith(`${canonical}.`)) {
+          expanded.add(key);
+        }
       }
     }
   }
