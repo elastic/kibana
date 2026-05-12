@@ -83,6 +83,7 @@ const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
 const CSP_INSIGHTS_TAB_ID = 'csp_insights';
 const MISCONFIGURATIONS_TAB_ID = 'misconfigurationTabId';
+const ALERTS_TAB_ID = 'alertsTabId';
 
 export interface UserEntityOverviewProps {
   userName: string;
@@ -416,6 +417,15 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         identityFields={userIdentityFields}
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
+        onShowAlertCountDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: ALERTS_TAB_ID,
+                } as UserDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight

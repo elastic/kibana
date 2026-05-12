@@ -20,6 +20,7 @@ import {
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
@@ -265,6 +266,39 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId } = renderUserEntityOverview();
       expect(getByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('opens user alert details when clicking alert count with enableEntityLinks', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+      mockFlyoutApi.openFlyout.mockClear();
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            enableEntityLinks
+          />
+        </TestProviders>
+      );
+
+      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          left: expect.objectContaining({
+            params: expect.objectContaining({
+              path: {
+                tab: 'csp_insights',
+                subTab: 'alertsTabId',
+              },
+            }),
+          }),
+        })
+      );
     });
 
     it('should render misconfiguration when data is available', () => {

@@ -22,6 +22,7 @@ import {
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
   ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
@@ -271,6 +272,39 @@ describe('<HostEntityContent />', () => {
 
       const { getByTestId } = renderHostEntityContent();
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('opens host alert details when clicking alert count with enableEntityLinks', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+      mockFlyoutApi.openFlyout.mockClear();
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HostEntityOverview
+            hostName={hostName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            enableEntityLinks
+          />
+        </TestProviders>
+      );
+
+      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          left: expect.objectContaining({
+            params: expect.objectContaining({
+              path: {
+                tab: 'csp_insights',
+                subTab: 'alertsTabId',
+              },
+            }),
+          }),
+        })
+      );
     });
 
     it('should render misconfiguration when data is available', () => {

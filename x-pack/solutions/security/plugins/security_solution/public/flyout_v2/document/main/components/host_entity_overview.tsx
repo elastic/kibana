@@ -91,6 +91,7 @@ const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
 const CSP_INSIGHTS_TAB_ID = 'csp_insights';
 const MISCONFIGURATIONS_TAB_ID = 'misconfigurationTabId';
 const VULNERABILITIES_TAB_ID = 'vulnerabilitiesTabId';
+const ALERTS_TAB_ID = 'alertsTabId';
 
 export interface HostEntityOverviewProps {
   /**
@@ -434,6 +435,15 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         identityFields={hostIdentityFields}
         entityType={EntityType.host}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}
+        onShowAlertCountDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: ALERTS_TAB_ID,
+                } as HostDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
