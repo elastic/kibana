@@ -53,7 +53,18 @@ export function useMonitorDetailLocator({
       ...getMonitorSpaceToAppend(space, spaces),
     });
     setMonitorUrl(url);
-  }, [locator, configId, locationId, spaces, space, timeRange, tabId, useAbsoluteDate, remoteName, remoteKibanaUrl]);
+  }, [
+    locator,
+    configId,
+    locationId,
+    spaces,
+    space,
+    timeRange,
+    tabId,
+    useAbsoluteDate,
+    remoteName,
+    remoteKibanaUrl,
+  ]);
 
   return monitorUrl;
 }

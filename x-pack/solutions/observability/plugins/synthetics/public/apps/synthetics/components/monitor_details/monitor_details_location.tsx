@@ -24,10 +24,9 @@ import { MonitorLocationSelect } from '../common/components/monitor_location_sel
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 
-const LOCATION_LABEL = i18n.translate(
-  'xpack.synthetics.monitorDetailsLocation.locationLabel',
-  { defaultMessage: 'Location' }
-);
+const LOCATION_LABEL = i18n.translate('xpack.synthetics.monitorDetailsLocation.locationLabel', {
+  defaultMessage: 'Location',
+});
 
 export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean }) => {
   const { monitor, isRemote } = useSelectedMonitor();

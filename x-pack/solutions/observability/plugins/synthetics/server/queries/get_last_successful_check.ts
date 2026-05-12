@@ -41,10 +41,7 @@ export const getLastSuccessfulStepParams = ({
           },
           {
             bool: {
-              should: [
-                { term: { 'monitor.id': monitorId } },
-                { term: { config_id: monitorId } },
-              ],
+              should: [{ term: { 'monitor.id': monitorId } }, { term: { config_id: monitorId } }],
               minimum_should_match: 1,
             },
           },

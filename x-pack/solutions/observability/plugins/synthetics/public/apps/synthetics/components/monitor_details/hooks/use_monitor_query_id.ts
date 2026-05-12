@@ -18,5 +18,8 @@ export const useMonitorQueryId = () => {
   // For remote monitors, prefer the explicit monitorQueryId URL param (the `monitor.id`
   // field in ping documents, which may differ from configId for project monitors).
   // Fall back to the URL path monitorId (configId) if monitorQueryId isn't provided.
-  return monitor?.[ConfigKey.MONITOR_QUERY_ID] ?? (isRemote ? (urlMonitorQueryId || urlMonitorId) : undefined);
+  return (
+    monitor?.[ConfigKey.MONITOR_QUERY_ID] ??
+    (isRemote ? urlMonitorQueryId || urlMonitorId : undefined)
+  );
 };

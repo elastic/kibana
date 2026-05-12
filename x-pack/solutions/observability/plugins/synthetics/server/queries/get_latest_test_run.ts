@@ -34,10 +34,7 @@ export async function getLatestTestRun<F>({
   // query with a `should` clause that matches either field.
   const monitorFilter: QueryDslQueryContainer = {
     bool: {
-      should: [
-        { term: { 'monitor.id': monitorId } },
-        { term: { config_id: monitorId } },
-      ],
+      should: [{ term: { 'monitor.id': monitorId } }, { term: { config_id: monitorId } }],
       minimum_should_match: 1,
     },
   };

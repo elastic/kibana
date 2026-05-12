@@ -131,8 +131,8 @@ export const LastTestRunComponent = ({
 
       <EuiSpacer size="m" />
 
-      {(monitor?.type === MonitorTypeEnum.BROWSER ||
-        latestPing?.monitor?.type === MonitorTypeEnum.BROWSER) ? (
+      {monitor?.type === MonitorTypeEnum.BROWSER ||
+      latestPing?.monitor?.type === MonitorTypeEnum.BROWSER ? (
         <BrowserStepsList
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}

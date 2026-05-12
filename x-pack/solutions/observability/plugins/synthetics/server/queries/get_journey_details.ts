@@ -28,9 +28,7 @@ export const getJourneyDetails = async ({
   // For remote monitors, target the remote cluster's synthetics indices via
   // CCS syntax. Apply to all three queries (current journey + previous/next
   // sibling journeys).
-  const ccsIndexOverride = remoteName
-    ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` }
-    : {};
+  const ccsIndexOverride = remoteName ? { index: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : {};
   const params = createEsParams({
     ...ccsIndexOverride,
     query: {

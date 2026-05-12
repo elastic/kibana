@@ -105,10 +105,9 @@ export const RemoteMonitorDetailsPanel = () => {
   );
 };
 
-const MONITOR_DETAILS_LABEL = i18n.translate(
-  'xpack.synthetics.remoteMonitorDetailsPanel.title',
-  { defaultMessage: 'Monitor details' }
-);
+const MONITOR_DETAILS_LABEL = i18n.translate('xpack.synthetics.remoteMonitorDetailsPanel.title', {
+  defaultMessage: 'Monitor details',
+});
 
 const URL_LABEL = i18n.translate('xpack.synthetics.remoteMonitorDetailsPanel.url', {
   defaultMessage: 'URL',

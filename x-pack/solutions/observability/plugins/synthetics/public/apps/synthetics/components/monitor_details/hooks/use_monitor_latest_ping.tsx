@@ -35,7 +35,10 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   // For remote monitors, there is no local saved object so monitor?.id is null.
   // Use monitorQueryId from URL (the `monitor.id` field in ping docs) if available,
   // as it may differ from configId for project monitors.
-  const monitorId = params?.monitorId ?? monitor?.id ?? (isRemote && urlMonitorQueryId ? urlMonitorQueryId : urlMonitorId);
+  const monitorId =
+    params?.monitorId ??
+    monitor?.id ??
+    (isRemote && urlMonitorQueryId ? urlMonitorQueryId : urlMonitorId);
   const locationLabel = location?.label;
 
   const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);

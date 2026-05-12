@@ -46,8 +46,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
   //     ping, mirroring how `useMonitorQueryFilters` resolves the location
   //     for remote monitors.
   const monitorId = monitor?.id ?? (isRemote ? urlMonitorId : undefined);
-  const locationLabel =
-    location?.label ?? (isRemote ? latestPing?.observer?.geo?.name : undefined);
+  const locationLabel = location?.label ?? (isRemote ? latestPing?.observer?.geo?.name : undefined);
 
   const statusFilter = useSelector(selectStatusFilter);
 

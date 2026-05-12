@@ -29,10 +29,7 @@ export function RemoteMonitorCallout() {
 
   return (
     <>
-      <EuiCallOut
-        title={REMOTE_MONITOR_TITLE}
-        data-test-subj="syntheticsRemoteMonitorCallout"
-      >
+      <EuiCallOut title={REMOTE_MONITOR_TITLE} data-test-subj="syntheticsRemoteMonitorCallout">
         <p>
           {remoteKibanaUrl ? (
             <FormattedMessage
@@ -78,12 +75,9 @@ export function RemoteMonitorCallout() {
   );
 }
 
-const REMOTE_MONITOR_TITLE = i18n.translate(
-  'xpack.synthetics.monitorDetails.remoteCallout.title',
-  {
-    defaultMessage: 'Remote monitor',
-  }
-);
+const REMOTE_MONITOR_TITLE = i18n.translate('xpack.synthetics.monitorDetails.remoteCallout.title', {
+  defaultMessage: 'Remote monitor',
+});
 
 const VIEW_REMOTE_MONITOR_DETAILS = i18n.translate(
   'xpack.synthetics.monitorDetails.remoteCallout.viewButton',
