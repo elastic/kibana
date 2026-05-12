@@ -179,3 +179,11 @@ export const VIEW_TIME_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.rulesV2.viewTimeFieldLabel',
   { defaultMessage: 'Time field' }
 );
+
+export const TAB_OVERVIEW = i18n.translate('xpack.securitySolution.rulesV2.tabOverview', {
+  defaultMessage: 'Overview',
+});
+
+export const TAB_ALERTS = i18n.translate('xpack.securitySolution.rulesV2.tabAlerts', {
+  defaultMessage: 'Alerts',
+});
