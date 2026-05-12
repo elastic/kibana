@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// This package is intentionally empty at scaffold time.
-// Subsequent commits in this PR will populate it with extracted utilities
-// (parseDuration, computeRetryDelayMs, UrlValidator, trigger filter, telemetry
-// schemas, etc.). Prefer subpath imports over this barrel where possible.
-export {};
+export {
+  parseDuration,
+  computeRetryDelayMs,
+  buildStepExecutionId,
+  stringifyStackFrames,
+  generateExecutionTaskScope,
+  TimeoutAbortedError,
+  abortableTimeout,
+  isTemplateExpression,
+  isTextContentType,
+  readResponseStream,
+  isSerializedError,
+} from './src';
+export type { RetryDelayConfig, ReadStreamResult } from './src';

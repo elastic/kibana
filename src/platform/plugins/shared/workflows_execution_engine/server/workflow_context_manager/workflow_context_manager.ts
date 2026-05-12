@@ -21,13 +21,16 @@ import {
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { IWorkflowContextManager } from '@kbn/workflows-execution-engine-core';
+import {
+  buildStepExecutionId,
+  isSerializedError,
+  isTemplateExpression,
+} from '@kbn/workflows-execution-engine-utils';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, isTemplateExpression } from '../utils';
-import { isSerializedError } from '../utils/errors';
 
 export interface ContextManagerInit {
   // New properties for logging

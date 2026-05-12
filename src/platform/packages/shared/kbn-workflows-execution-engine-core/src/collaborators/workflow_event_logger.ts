@@ -18,7 +18,7 @@ import type { WorkflowLogEvent } from './workflow_log_event';
  * non-throwing on every method except `flushEvents()`.
  */
 export interface IWorkflowEventLogger {
-  logEvent(event: WorkflowLogEvent): void;
+  logEvent(event: Partial<WorkflowLogEvent>): void;
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
   logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;

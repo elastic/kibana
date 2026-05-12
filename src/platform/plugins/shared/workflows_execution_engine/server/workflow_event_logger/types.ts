@@ -92,7 +92,7 @@ export interface WorkflowEventLoggerOptions {
 // pure logic depends on. Subset compliance is enforced at compile time
 // by the `extends` clause.
 export interface IWorkflowEventLogger extends ICoreWorkflowEventLogger {
-  logEvent(event: WorkflowLogEvent): void;
+  logEvent(event: Partial<WorkflowLogEvent>): void;
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
   logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
