@@ -24,8 +24,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
-  CASE_ATTACHMENT_TYPE} from '../../../common/types/agent_builder/attachment_schemas';
-import {
+  CASE_ATTACHMENT_TYPE,
   type CaseAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
 import { SeverityBadge } from './severity_badge';
@@ -133,146 +132,141 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
     hasObservablesCount ||
     Boolean(data.connector_name);
 
-    return (
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="case-attachment-inline">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="casesApp" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{i18nStrings.caseHeader}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              iconType="popout"
-              iconSide="right"
-              onClick={goToCase}
-              data-test-subj="case-attachment-go-to-case"
-            >
-              {i18nStrings.goToCase}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+  return (
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="case-attachment-inline">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="casesApp" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>{i18nStrings.caseHeader}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="popout"
+            iconSide="right"
+            onClick={goToCase}
+            data-test-subj="case-attachment-go-to-case"
+          >
+            {i18nStrings.goToCase}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        <EuiFlexGroup alignItems="baseline" gutterSize="s" wrap responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>{data.title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {i18nStrings.idLabel(idLabel)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexGroup alignItems="baseline" gutterSize="s" wrap responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h3>{data.title}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {i18nStrings.idLabel(idLabel)}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
+      <EuiSpacer size="s" />
 
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <SeverityBadge severity={data.severity} />
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <SeverityBadge severity={data.severity} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CaseMetaRow data={data} />
+        </EuiFlexItem>
+        {visibleTags.map((tag: string) => (
+          <EuiFlexItem grow={false} key={tag}>
+            <EuiBadge color="hollow">{tag}</EuiBadge>
           </EuiFlexItem>
+        ))}
+        {overflowTags > 0 && (
           <EuiFlexItem grow={false}>
-            <CaseMetaRow data={data} />
+            <EuiBadge color="hollow">{`+${overflowTags}`}</EuiBadge>
           </EuiFlexItem>
-          {visibleTags.map((tag: string) => (
-            <EuiFlexItem grow={false} key={tag}>
-              <EuiBadge color="hollow">{tag}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-          {overflowTags > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{`+${overflowTags}`}</EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-
-        {data.description && !expanded && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText
-              size="s"
-              color="subdued"
-              css={{
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {data.description}
-            </EuiText>
-          </>
         )}
+      </EuiFlexGroup>
 
-        {expanded && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {data.description && (
-                <EuiFlexItem>
-                  <DetailRow
-                    label={i18nStrings.description}
-                    value={
-                      <span style={{ whiteSpace: 'pre-wrap' }}>{data.description}</span>
-                    }
-                  />
-                </EuiFlexItem>
-              )}
-              {data.category && (
-                <EuiFlexItem>
-                  <DetailRow label={i18nStrings.category} value={data.category} />
-                </EuiFlexItem>
-              )}
-              {createdAt && (
-                <EuiFlexItem>
-                  <DetailRow label={i18nStrings.created} value={createdAt} />
-                </EuiFlexItem>
-              )}
-              {updatedAt && (
-                <EuiFlexItem>
-                  <DetailRow label={i18nStrings.updated} value={updatedAt} />
-                </EuiFlexItem>
-              )}
-              {hasObservablesCount && (
-                <EuiFlexItem>
-                  <DetailRow
-                    label={i18nStrings.observables}
-                    value={String(data.total_observables)}
-                  />
-                </EuiFlexItem>
-              )}
-              {data.connector_name && (
-                <EuiFlexItem>
-                  <DetailRow label={i18nStrings.connector} value={data.connector_name} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </>
-        )}
+      {data.description && !expanded && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="s"
+            color="subdued"
+            css={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {data.description}
+          </EuiText>
+        </>
+      )}
 
-        {hasDetails && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiButtonEmpty
-              size="xs"
-              iconType={expanded ? 'arrowUp' : 'arrowDown'}
-              iconSide="right"
-              onClick={() => setExpanded((prev) => !prev)}
-              data-test-subj="case-attachment-toggle-details"
-            >
-              {expanded ? i18nStrings.showLess : i18nStrings.showMore}
-            </EuiButtonEmpty>
-          </>
-        )}
-      </EuiPanel>
-    );
+      {expanded && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {data.description && (
+              <EuiFlexItem>
+                <DetailRow
+                  label={i18nStrings.description}
+                  value={<span style={{ whiteSpace: 'pre-wrap' }}>{data.description}</span>}
+                />
+              </EuiFlexItem>
+            )}
+            {data.category && (
+              <EuiFlexItem>
+                <DetailRow label={i18nStrings.category} value={data.category} />
+              </EuiFlexItem>
+            )}
+            {createdAt && (
+              <EuiFlexItem>
+                <DetailRow label={i18nStrings.created} value={createdAt} />
+              </EuiFlexItem>
+            )}
+            {updatedAt && (
+              <EuiFlexItem>
+                <DetailRow label={i18nStrings.updated} value={updatedAt} />
+              </EuiFlexItem>
+            )}
+            {hasObservablesCount && (
+              <EuiFlexItem>
+                <DetailRow label={i18nStrings.observables} value={String(data.total_observables)} />
+              </EuiFlexItem>
+            )}
+            {data.connector_name && (
+              <EuiFlexItem>
+                <DetailRow label={i18nStrings.connector} value={data.connector_name} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </>
+      )}
+
+      {hasDetails && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            size="xs"
+            iconType={expanded ? 'arrowUp' : 'arrowDown'}
+            iconSide="right"
+            onClick={() => setExpanded((prev) => !prev)}
+            data-test-subj="case-attachment-toggle-details"
+          >
+            {expanded ? i18nStrings.showLess : i18nStrings.showMore}
+          </EuiButtonEmpty>
+        </>
+      )}
+    </EuiPanel>
+  );
 };
 
 export const createCaseInlineContent = ({ application }: Services) => {

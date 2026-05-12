@@ -14,10 +14,7 @@ import {
   type CasesAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
 
-export const toCaseAttachmentData = (
-  theCase: Case,
-  url?: string | null
-): CaseAttachmentData => ({
+export const toCaseAttachmentData = (theCase: Case, url?: string | null): CaseAttachmentData => ({
   id: theCase.id,
   incremental_id: theCase.incremental_id ?? null,
   title: theCase.title,
@@ -111,9 +108,7 @@ export const emitFromStepResult = async (
   attachments: ToolHandlerContext['attachments'],
   toolResult: { results: Array<{ data?: unknown }> }
 ): Promise<string[]> => {
-  const data = toolResult.results?.[0]?.data as
-    | { case?: Case; cases?: Case[] }
-    | undefined;
+  const data = toolResult.results?.[0]?.data as { case?: Case; cases?: Case[] } | undefined;
   if (!data) return [];
   if (data.case) {
     const id = await emitCaseAttachment(attachments, toCaseAttachmentData(data.case));

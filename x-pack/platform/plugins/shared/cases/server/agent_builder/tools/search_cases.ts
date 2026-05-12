@@ -195,12 +195,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         if (case_ids && case_ids.length > 0) {
           logger.info(`[Cases Tool] Bulk-getting ${case_ids.length} cases`);
           const bulkResult = await casesClient.cases.bulkGet({ ids: case_ids });
-          const enrichedCases = enhanceCases(
-            bulkResult.cases,
-            request,
-            coreServices,
-            logger
-          );
+          const enrichedCases = enhanceCases(bulkResult.cases, request, coreServices, logger);
           const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
           return injectAttachmentIds(
             createResult(
@@ -221,12 +216,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
             page: page ?? 1,
             perPage: perPage ?? 20,
           });
-          const enrichedSimilar = enhanceCases(
-            similarResult.cases,
-            request,
-            coreServices,
-            logger
-          );
+          const enrichedSimilar = enhanceCases(similarResult.cases, request, coreServices, logger);
           const similarAttachmentIds = await emitSearchAttachments(enrichedSimilar, attachments);
           return injectAttachmentIds(
             {
@@ -276,13 +266,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         // Mode 1: Get case by ID
         if (case_id) {
           logger.info(`[Cases Tool] Getting case by ID: ${case_id}`);
-          const caseData = await fetchCaseById(
-            case_id,
-            casesClient,
-            request,
-            coreServices,
-            logger
-          );
+          const caseData = await fetchCaseById(case_id, casesClient, request, coreServices, logger);
           const singleAttachmentId = await emitCaseAttachment(
             attachments,
             toCaseAttachmentData(caseData, caseData.url)
@@ -323,10 +307,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
           findResult.total > casesData.length
             ? `Showing page ${requestedPage} of ${totalPages} (${casesData.length} of ${findResult.total} matches). Pass \`page\` to fetch additional pages.`
             : undefined;
-        return injectAttachmentIds(
-          createResult(casesData, null, message),
-          searchAttachmentIds
-        );
+        return injectAttachmentIds(createResult(casesData, null, message), searchAttachmentIds);
       } catch (error) {
         return createErrorResponse(
           error,

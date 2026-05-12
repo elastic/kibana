@@ -31,7 +31,10 @@ const buildAttachment = (overrides: Partial<CaseAttachment['data']> = {}): CaseA
   },
 });
 
-const renderInline = (attachment: CaseAttachment, application = applicationServiceMock.createStartContract()) => {
+const renderInline = (
+  attachment: CaseAttachment,
+  application = applicationServiceMock.createStartContract()
+) => {
   const Inline = createCaseInlineContent({ application });
   return {
     application,

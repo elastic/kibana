@@ -47,10 +47,7 @@ export const observablesTool = (
   return {
     id: platformCoreCasesTools.observables,
     type: ToolType.builtin,
-    description:
-      'Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: `add`, `update`, `delete`. See `mode` field for required inputs.\n\n' +
-      CASES_SOLUTION_CONTEXT_INSTRUCTION +
-      CASES_TOOL_TEXT_INSTRUCTION,
+    description: `Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: \`add\`, \`update\`, \`delete\`. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     schema: observablesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

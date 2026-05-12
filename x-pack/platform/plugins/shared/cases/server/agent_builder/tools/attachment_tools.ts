@@ -53,10 +53,7 @@ export const attachmentsTool = (
   return {
     id: platformCoreCasesTools.attachments,
     type: ToolType.builtin,
-    description:
-      'Case attachments. Modes: `add_comment` (user comment), `add_alerts` (link SIEM/detection alerts), `add_events` (link log/event docs), `get_all` (fetch all comments, alerts, events). See `mode` field for required inputs.\n\n' +
-      CASES_SOLUTION_CONTEXT_INSTRUCTION +
-      CASES_TOOL_TEXT_INSTRUCTION,
+    description: `Case attachments. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`get_all\` (fetch all comments, alerts, events). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     schema: attachmentsSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

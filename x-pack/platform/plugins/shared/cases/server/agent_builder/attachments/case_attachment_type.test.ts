@@ -36,7 +36,9 @@ const formatContext: AttachmentFormatContext = {
   spaceId: 'default',
 };
 
-const buildCaseAttachment = (data: CaseAttachmentData): Attachment<typeof CASE_ATTACHMENT_TYPE, CaseAttachmentData> => ({
+const buildCaseAttachment = (
+  data: CaseAttachmentData
+): Attachment<typeof CASE_ATTACHMENT_TYPE, CaseAttachmentData> => ({
   id: data.id,
   type: CASE_ATTACHMENT_TYPE,
   data,

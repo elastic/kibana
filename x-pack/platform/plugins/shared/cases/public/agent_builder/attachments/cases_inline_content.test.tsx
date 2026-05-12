@@ -16,7 +16,7 @@ import {
 } from '../../../common/types/agent_builder/attachment_schemas';
 
 const buildCase = (overrides: Partial<CaseAttachmentData> = {}): CaseAttachmentData => ({
-  id: 'c-' + Math.random().toString(36).slice(2),
+  id: `c-${Math.random().toString(36).slice(2)}`,
   incremental_id: 100 + Math.floor(Math.random() * 100),
   title: 'A Case',
   description: 'desc',

@@ -99,10 +99,7 @@ export const manageCasesTool = (
   return {
     id: platformCoreCasesTools.manage,
     type: ToolType.builtin,
-    description:
-      'Cases CRUD + assign/tags/custom fields. Modes: `create`, `create_from_template`, `update`, `update_bulk` (≥2 cases), `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`. See `mode` field for required inputs.\n\n' +
-      CASES_SOLUTION_CONTEXT_INSTRUCTION +
-      CASES_TOOL_TEXT_INSTRUCTION,
+    description: `Cases CRUD + assign/tags/custom fields. Modes: \`create\`, \`create_from_template\`, \`update\`, \`update_bulk\` (≥2 cases), \`delete\`, \`assign\`, \`unassign\`, \`add_tags\`, \`set_custom_field\`. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     schema: manageCasesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {

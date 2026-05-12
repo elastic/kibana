@@ -21,8 +21,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
-  CASES_ATTACHMENT_TYPE} from '../../../common/types/agent_builder/attachment_schemas';
-import {
+  CASES_ATTACHMENT_TYPE,
   type CaseAttachmentData,
   type CasesAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  caseAttachmentDataSchema,
-  casesAttachmentDataSchema,
-} from './attachment_schemas';
+import { caseAttachmentDataSchema, casesAttachmentDataSchema } from './attachment_schemas';
 
 const validCase = {
   id: 'abc',
