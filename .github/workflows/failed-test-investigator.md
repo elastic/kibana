@@ -116,15 +116,14 @@ Your job is to determine:
 
 ## Fixability classification
 
-Beyond the root-cause `classification` above, decide whether this failure should be picked up by the **Flaky Test Auto-Fix** pipeline. Set the `fixability` field to exactly one of:
+Set the `fixability` field to exactly one of:
 
-- `auto-fixable` — the Auto-Fix agent should attempt a patch. **All** of these must hold:
+- `fixable`: a fix was identified for this test failure. **All** of these must hold:
 
   - `classification` is `test`
   - `confidence` is `high` or `medium`
   - You can identify a concrete test file path that currently exists on the default branch
   - Failure happened on the `kibana-on-merge` Buildkite pipeline
-  - The proposed fix is small and test-side: timing/wait, selector, fixture, cleanup, intercept, retry, `data-test-subj`, `localStorage` sync, `.within()` → `.find()`, etc.
   - No open PR already targets the same test file with a `flaky-fix:` label (search PRs to verify)
   - The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
 
@@ -146,6 +145,7 @@ Beyond the root-cause `classification` above, decide whether this failure should
   - Stale failure: no new failures in the last 2–3 weeks and no PR in flight
 
 - `inconclusive` — none of the above apply with enough confidence; evidence is missing.
+- `noop` — no further action (e.g., fixing) is necessary.
 
 ## Fix proposal rules
 
@@ -194,11 +194,11 @@ Emit these elements in this order, with no other content between them:
 
 - `classification`: one of `test`, `code`, `external`, `inconclusive`
 - `confidence`: one of `high`, `medium`, `low`
-- `fixability`: one of `auto-fixable`, `needs-human`, `not-a-flake`, `env-issue`, `inconclusive`
+- `fixability`: one of `fixable`, `needs-human`, `not-a-flake`, `env-issue`, `inconclusive`
 - `test.type`: one of `scout`, `ftr`, `jest`, `unknown`. Use `scout` if the issue carries the `scout-playwright` label; otherwise `ftr` for an FTR-style failure, `jest` for a Jest failure, or `unknown` if you cannot tell.
 - `test.file`: repo-relative path to the failing test, or `unknown`.
 
-If `fixability` is `auto-fixable`, you must also apply the `ai:auto-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
+If `fixability` is `fixable`, you must also apply the `ai:auto-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
 
 ### More details (collapsed)
 
