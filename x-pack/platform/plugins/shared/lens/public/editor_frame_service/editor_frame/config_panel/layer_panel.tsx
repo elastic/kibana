@@ -39,6 +39,7 @@ import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
 import { useFocusUpdate } from './use_focus_update';
 import {
   useLensSelector,
+  selectCanEditTextBasedQuery,
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
@@ -98,6 +99,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
 
@@ -295,6 +297,10 @@ export function LayerPanel(props: LayerPanelProps) {
     datasource?.isTextBasedLanguage() ||
     isOfAggregateQueryType(editorProps.attributes?.state.query) ||
     false;
+  const shouldRenderESQLEditor =
+    isTextBasedLanguage &&
+    canEditTextBasedQuery &&
+    isOfAggregateQueryType(editorProps.attributes?.state.query);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -478,14 +484,16 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            <ESQLEditor
-              uiSettings={core.uiSettings}
-              http={core.http}
-              isTextBasedLanguage={isTextBasedLanguage}
-              framePublicAPI={framePublicAPI}
-              layerId={layerId}
-              {...editorProps}
-            />
+            {shouldRenderESQLEditor ? (
+              <ESQLEditor
+                uiSettings={core.uiSettings}
+                http={core.http}
+                isTextBasedLanguage={isTextBasedLanguage}
+                framePublicAPI={framePublicAPI}
+                layerId={layerId}
+                {...editorProps}
+              />
+            ) : null}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{

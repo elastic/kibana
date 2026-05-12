@@ -406,8 +406,6 @@ export const runSaveLensVisualization = async (
       isLinkedToOriginatingApp: false,
     };
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.dir(e);
     throw e;
   }
 };

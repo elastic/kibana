@@ -33,6 +33,20 @@ jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   };
 });
 
+// EuiDataGrid's react-window virtualized body produces NaN height values in JSDOM
+// because elements have no real dimensions. This is harmless and internal to EUI.
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('NaN') &&
+      args[0].includes('css style property')
+    ) {
+      return;
+    }
+  });
+});
+
 const { theme: setUpMockTheme } = coreMock.createSetup();
 
 function sampleArgs() {

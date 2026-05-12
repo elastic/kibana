@@ -258,7 +258,10 @@ describe('chart_switch', () => {
       }
     );
 
-    const user = userEvent.setup();
+    // Disable pointer-events check: JSDOM doesn't compute CSS styles, so
+    // elements rendered with pointer-events:none (e.g. EUI overlays) would
+    // otherwise cause userEvent clicks to fail even though they work in browsers.
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
 
     const openChartSwitch = async () => {
       await user.click(screen.getByTestId('lnsChartSwitchPopover'));

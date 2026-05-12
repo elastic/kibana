@@ -29,7 +29,6 @@ import {
   onActiveDataChange,
   useLensDispatch,
   useLensSelector,
-  selectCanEditTextBasedQuery,
   selectSearchSessionId,
 } from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
@@ -97,7 +96,6 @@ export function ESQLEditor({
 
   const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
-  const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
   // Updated when the workspace kicks off a new search (manual refresh, auto-refresh,
   // or when chart requests run under a new session). Used as an effect dependency to
   // re-fetch the ES|QL results grid for the last submitted query.
@@ -275,8 +273,7 @@ export function ESQLEditor({
     adHocDataViews,
   ]);
 
-  // Early exit if it's not in TextBased mode or the editor should be hidden
-  if (!isTextBasedLanguage || !canEditTextBasedQuery || !isOfAggregateQueryType(query)) {
+  if (!isOfAggregateQueryType(query)) {
     return null;
   }
 

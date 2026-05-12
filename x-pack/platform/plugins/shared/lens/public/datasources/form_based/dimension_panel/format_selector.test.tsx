@@ -11,7 +11,7 @@ import { FormatSelector } from './format_selector';
 import type { GenericIndexPatternColumn } from '../../..';
 import { renderWithProviders } from '../../../test_utils/test_utils';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 const props = {
@@ -43,7 +43,7 @@ describe('FormatSelector', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     jest.useRealTimers();
   });
   it('updates the format decimals', async () => {
@@ -64,7 +64,7 @@ describe('FormatSelector', () => {
   it('updates the suffix', async () => {
     renderFormatSelector();
     await user.type(screen.getByTestId('indexPattern-dimension-formatSuffix'), 'GB');
-    jest.advanceTimersByTime(256);
+    await act(async () => jest.advanceTimersByTime(256));
     expect(props.onChange).toBeCalledWith({ id: 'bytes', params: { suffix: 'GB' } });
   });
 
@@ -84,7 +84,7 @@ describe('FormatSelector', () => {
       ).getByRole('combobox');
       await user.click(durationEndInput);
       fireEvent.click(screen.getByText('Hours'));
-      jest.advanceTimersByTime(256);
+      await act(async () => jest.advanceTimersByTime(256));
       expect(props.onChange).toBeCalledWith({
         id: 'duration',
         params: { toUnit: 'asHours' },
