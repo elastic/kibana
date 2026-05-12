@@ -18,10 +18,14 @@ import {
   retrieveLatestVersion,
   getErrorMessage,
   resolvePanelsFromAttachments,
+  hasValidCreateMetadataOperations,
   type VisualizationFailure,
 } from './utils';
 import { createVisualizationResolver } from './inline_visualization';
 import { dashboardOperationSchema, executeDashboardOperations } from './operations';
+
+const newDashboardMetadataErrorMessage =
+  'New dashboards require a set_metadata operation with a non-empty title.';
 
 const manageDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -43,13 +47,11 @@ This tool executes ordered dashboard operations against a dashboard attachment i
 
 Use operations[] to:
 1. set metadata
-2. add markdown
-3. add panels from attachments
-4. create Lens visualization panels inline from natural language
-5. edit existing Lens visualization panels
-6. update panel layouts without changing content
-7. add / remove sections, including inline section panels during add_section
-8. remove panels`,
+2. add panels (markdown, attachments, or inline Lens visualizations)
+3. edit existing Lens visualization panels
+4. update panel layouts without changing content
+5. add / remove sections, including inline section panels during add_section
+6. remove panels`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -58,6 +60,11 @@ Use operations[] to:
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
+
+        if (isNewDashboard && !hasValidCreateMetadataOperations(operations)) {
+          logger.error(newDashboardMetadataErrorMessage);
+          return missingNewDashboardMetadataErrorResult;
+        }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
         const resolveVisualizationConfig = createVisualizationResolver({
@@ -82,11 +89,6 @@ Use operations[] to:
 
         const failures: VisualizationFailure[] = operationResult.failures;
         const updatedDashboardData = operationResult.dashboardData;
-
-        if (isNewDashboard && (!updatedDashboardData.title || !updatedDashboardData.description)) {
-          logger.error('Title and description are required when creating a new dashboard.');
-          return noTitleOrDescriptionErrorResult;
-        }
 
         const attachmentInput = {
           id: dashboardAttachmentId,
@@ -178,12 +180,12 @@ Use operations[] to:
   };
 };
 
-const noTitleOrDescriptionErrorResult = {
+const missingNewDashboardMetadataErrorResult = {
   results: [
     {
       type: ToolResultType.error,
       data: {
-        message: 'Title and description are required when creating a new dashboard.',
+        message: newDashboardMetadataErrorMessage,
       },
     },
   ],

@@ -196,7 +196,7 @@ describe('formatPrivileges', () => {
       kibana: [],
     };
 
-    const result = hasReadWritePermissions(privileges.elasticsearch, TEST_INDEX_PATTERN);
+    const result = hasReadWritePermissions(privileges.elasticsearch, [TEST_INDEX_PATTERN]);
 
     expect(result).toEqual({
       has_read_permissions: true,

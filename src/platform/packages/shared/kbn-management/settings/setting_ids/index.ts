@@ -150,7 +150,6 @@ export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY =
 export const OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS = 'observability:streamsEnableGroupStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS = 'observability:streamsEnableQueryStreams';
 export const OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS = 'observability:streamsEnableContentPacks';
-export const OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS = 'observability:streamsEnableAttachments';
 export const OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS =
   'observability:streamsEnableWiredStreamViews';
 export const OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE = 'observability:streamsEnableOverviewPage';

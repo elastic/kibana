@@ -11,8 +11,8 @@ import {
   INTERNAL_API_ACCESS,
   UpdateEvaluationDatasetRequestBody,
   UpdateEvaluationDatasetRequestParams,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,

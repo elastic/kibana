@@ -16,3 +16,4 @@ export {
   getStepExecutionsByIds,
   getStepExecutionsByWorkflowExecution,
 } from './repositories/step_execution_repository';
+export { WorkflowRepository } from './repositories/workflow_repository';

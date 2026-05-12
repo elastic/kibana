@@ -35,6 +35,8 @@ Use the **component palette** below the tree to add columns, actions, or filters
 | `Column (Type)` | Custom column rendering `item.type` as a badge — demonstrates the base `Column` API. |
 | `Column.Actions` | Row-level action buttons (edit, delete, custom). |
 
+> **Tip:** Each preset (`Column.Name`, `Column.UpdatedAt`, `Column.CreatedBy`, `Column.Starred`, `Column.Actions`) ships with sensible default `width` / `minWidth` / `maxWidth`, so the `width` input in the builder is an **override** — leave it blank to use the default. See the package README's _Defaults_ section for the full table.
+
 ## Available actions
 
 Actions are children of `Column.Actions`:
