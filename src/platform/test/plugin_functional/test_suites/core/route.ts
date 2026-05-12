@@ -12,7 +12,7 @@ import http from 'node:http';
 import https from 'node:https';
 import type { ClientRequest } from 'http';
 import type { Socket } from 'net';
-import { format as formatUrl } from 'node:url';
+import { format as formatUrl, type UrlObject } from 'node:url';
 import type { Test } from 'supertest';
 import type { PluginFunctionalProviderContext } from '../../services';
 
@@ -122,9 +122,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           // Supertest's `ClientRequest` + `writeBodyCharAtATime` can hang for the full Mocha timeout
           // on this suite while the Fastify backend still enforces `timeout.payload` correctly.
           await new Promise<void>((resolve, reject) => {
-            const kibana = config.get('servers.kibana') as {
-              certificateAuthorities?: string[];
-            };
+            const kibana = config.get('servers.kibana');
             const baseUrl = formatUrl(kibana);
             const target = new URL('/short_payload_timeout', baseUrl);
             const useHttps = target.protocol === 'https:';
