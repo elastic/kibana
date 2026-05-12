@@ -8,13 +8,29 @@ Playwright-based regression suite for the ES|QL generation feature in Elastic Se
 
 Registered in `.buildkite/pipelines/evals/evals.suites.json`.
 
+Failures alert `#security-generative-ai-evals` (shared with the Security Automatic Migrations suite).
+
 ---
 
 ## What this suite evaluates
 
-The core task is: **generate a correct ES|QL query from a natural-language question**.
+The core task is: **generate a correct ES|QL query from a natural-language question, via the same agent the production assistant uses**.
 
-A system prompt instructs the LLM to return only the raw ES|QL query text. Generated queries are scored by two tiers of evaluators — the first measures *quality*, the second measures *observability metrics* derived from OTel traces. The set is pinned in `evaluate_dataset.test.ts` so a silent drop or rename surfaces in CI.
+Each example drives one round-trip through `/api/agent_builder/converse` with `agent_id: 'elastic-ai-agent'` (Kibana's default agent), so the suite measures the full agent loop — `list_indices` / `get_index_mapping` / `generate_esql` / `execute_esql` — not a raw `inferenceClient.chatComplete` call. This is the supported successor to the LangSmith-era `DefaultAssistantGraph.invoke()` path and keeps the regression story anchored to the same production surface end users hit from the assistant UI.
+
+Generated queries are scored by two tiers of evaluators — the first measures *quality*, the second measures *observability metrics* derived from OTel traces. The set is pinned in `evaluate_dataset.test.ts` so a silent drop or rename surfaces in CI.
+
+### How ES|QL is extracted from the agent response
+
+`extractEsqlFromConverseResponse` (`src/extract_esql.ts`) tries three strategies in order, first match wins:
+
+1. **Structured tool result** — pulls `esql` from a `platform.core.generate_esql` tool-call step's `results[].data.esql`; falls back to `platform.core.execute_esql`'s `results[].data.query` if the agent chose to execute directly without surfacing the intermediate `generate_esql` call.
+2. **Fenced markdown block** — extracts the first triple-backtick block from the final assistant message (handles cases where the agent answers in prose with the query embedded).
+3. **`FROM` heuristic** — slices the final message from the first `FROM` keyword. Last resort; the `ES|QL Validity` evaluator scores the result so a bad slice cannot silently inflate the suite.
+
+### Fixture indices
+
+Spec `beforeAll` materialises **six index mappings** (`postgres-logs-*`, `packetbeat-*`, `nyc_taxis-*`, `metricbeat-*`, `employees-*`, `logs-*`) and **two sample documents** (`traces-apm-*`, `metrics-apm-*`). These are the indices the dataset's gold queries reference; without them the `ES|QL Execution Validity` and `ES|QL Result Equivalence` evaluators score 0 for every example (`verification_exception` — unknown column / unknown index). Ported from the LangSmith-era `PrepareIndicesForAssistantGraphEvaluations`, collapsed to a single environment+date pair (`production.evaluations.2025.01.01`) since the gold queries only reference bare wildcards. `afterAll` deletes everything by wildcard so cross-run drift is swept.
 
 ### Quality (LLM- and code-judged)
 

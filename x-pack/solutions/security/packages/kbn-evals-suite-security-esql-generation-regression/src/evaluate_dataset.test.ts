@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { EsqlRegressionAgentBuilderChatClient } from './chat_client';
 import { createEvaluateEsqlGenerationDataset } from './evaluate_dataset';
 
 function buildEvaluator(name: string): Evaluator {
@@ -19,9 +20,21 @@ function buildEvaluator(name: string): Evaluator {
   };
 }
 
+function buildChatClient() {
+  return {
+    converse: jest.fn().mockResolvedValue({
+      messages: [{ message: 'Here is the query.' }],
+      steps: [],
+      errors: [],
+      traceId: 'trace-id-fixture',
+    }),
+  } as unknown as EsqlRegressionAgentBuilderChatClient;
+}
+
 function buildDeps() {
   const runExperiment = jest.fn().mockResolvedValue(undefined);
   const executorClient = { runExperiment } as unknown as EvalsExecutorClient;
+  const chatClient = buildChatClient();
   const inferenceClient = {} as unknown as BoundInferenceClient;
   const esClient = {} as unknown as EsClient;
   const traceEsClient = {} as unknown as EsClient;
@@ -37,6 +50,7 @@ function buildDeps() {
   } as unknown as DefaultEvaluators;
   return {
     runExperiment,
+    chatClient,
     evaluators,
     executorClient,
     inferenceClient,
@@ -58,28 +72,13 @@ describe('createEvaluateEsqlGenerationDataset', () => {
   });
 
   it('registers the quality and trace-based evaluator stack in the expected order', async () => {
-    const {
-      runExperiment,
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    } = buildDeps();
+    const deps = buildDeps();
 
-    const evaluateDataset = createEvaluateEsqlGenerationDataset({
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    });
+    const evaluateDataset = createEvaluateEsqlGenerationDataset(deps);
     await evaluateDataset();
 
-    expect(runExperiment).toHaveBeenCalledTimes(1);
-    const [, evaluatorArray] = runExperiment.mock.calls[0];
+    expect(deps.runExperiment).toHaveBeenCalledTimes(1);
+    const [, evaluatorArray] = deps.runExperiment.mock.calls[0];
     expect(evaluatorArray).toHaveLength(9);
 
     expect(evaluatorArray[0].name).toBe('ES|QL Functional Equivalence');
@@ -102,29 +101,56 @@ describe('createEvaluateEsqlGenerationDataset', () => {
     expect(evaluatorArray[8].name).toBe('Cached tokens');
   });
 
+  it('drives the agent builder converse client for each example', async () => {
+    process.env.ESQL_GENERATION_DATASET_LIMIT = '1';
+    const deps = buildDeps();
+
+    await createEvaluateEsqlGenerationDataset(deps)();
+
+    const [{ task, dataset }] = deps.runExperiment.mock.calls[0];
+    expect(dataset.examples).toHaveLength(1);
+
+    const result = await task({ input: { question: 'show me top 10 hosts' } });
+
+    expect(deps.chatClient.converse).toHaveBeenCalledTimes(1);
+    expect(deps.chatClient.converse).toHaveBeenCalledWith({ message: 'show me top 10 hosts' });
+    // No tool call result and no fenced block → extractor returns empty.
+    expect(result.esql).toBe('');
+    expect(result.traceId).toBe('trace-id-fixture');
+    expect(result.messages).toEqual([{ message: 'Here is the query.' }]);
+  });
+
+  it('extracts ES|QL from a generate_esql tool result returned by the agent', async () => {
+    const deps = buildDeps();
+    (deps.chatClient.converse as jest.Mock).mockResolvedValue({
+      messages: [{ message: 'Done.' }],
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.generate_esql',
+          results: [{ type: 'query', data: { esql: 'FROM logs-*\n| LIMIT 10' } }],
+        },
+      ],
+      errors: [],
+      traceId: 'trace-id-fixture',
+    });
+
+    process.env.ESQL_GENERATION_DATASET_LIMIT = '1';
+    await createEvaluateEsqlGenerationDataset(deps)();
+    const [{ task }] = deps.runExperiment.mock.calls[0];
+
+    const result = await task({ input: { question: 'top 10 hosts' } });
+    expect(result.esql).toBe('FROM logs-*\n| LIMIT 10');
+  });
+
   it('passes the full dataset to runExperiment when no env vars are set', async () => {
     delete process.env.ESQL_GENERATION_DATASET_OFFSET;
     delete process.env.ESQL_GENERATION_DATASET_LIMIT;
-    const {
-      runExperiment,
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    } = buildDeps();
+    const deps = buildDeps();
 
-    await createEvaluateEsqlGenerationDataset({
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    })();
+    await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = runExperiment.mock.calls[0];
+    const [{ dataset }] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(31);
     expect(dataset.description).toContain('31 examples');
   });
@@ -132,26 +158,11 @@ describe('createEvaluateEsqlGenerationDataset', () => {
   it('honors ESQL_GENERATION_DATASET_LIMIT to cap dataset size', async () => {
     process.env.ESQL_GENERATION_DATASET_LIMIT = '1';
     delete process.env.ESQL_GENERATION_DATASET_OFFSET;
-    const {
-      runExperiment,
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    } = buildDeps();
+    const deps = buildDeps();
 
-    await createEvaluateEsqlGenerationDataset({
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    })();
+    await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = runExperiment.mock.calls[0];
+    const [{ dataset }] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(1);
     expect(dataset.description).toContain('1 examples');
   });
@@ -159,52 +170,22 @@ describe('createEvaluateEsqlGenerationDataset', () => {
   it('honors ESQL_GENERATION_DATASET_OFFSET combined with LIMIT', async () => {
     process.env.ESQL_GENERATION_DATASET_OFFSET = '5';
     process.env.ESQL_GENERATION_DATASET_LIMIT = '2';
-    const {
-      runExperiment,
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    } = buildDeps();
+    const deps = buildDeps();
 
-    await createEvaluateEsqlGenerationDataset({
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    })();
+    await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = runExperiment.mock.calls[0];
+    const [{ dataset }] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(2);
   });
 
   it('ignores non-numeric env values and falls back to the full dataset', async () => {
     process.env.ESQL_GENERATION_DATASET_LIMIT = 'not-a-number';
     process.env.ESQL_GENERATION_DATASET_OFFSET = '-3';
-    const {
-      runExperiment,
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    } = buildDeps();
+    const deps = buildDeps();
 
-    await createEvaluateEsqlGenerationDataset({
-      evaluators,
-      executorClient,
-      inferenceClient,
-      esClient,
-      traceEsClient,
-      log,
-    })();
+    await createEvaluateEsqlGenerationDataset(deps)();
 
-    const [{ dataset }] = runExperiment.mock.calls[0];
+    const [{ dataset }] = deps.runExperiment.mock.calls[0];
     expect(dataset.examples).toHaveLength(31);
   });
 });

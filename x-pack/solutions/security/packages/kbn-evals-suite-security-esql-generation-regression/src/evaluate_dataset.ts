@@ -7,24 +7,39 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { DefaultEvaluators, Evaluator, EvalsExecutorClient } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator, getCurrentTraceId, withEvaluatorSpan } from '@kbn/evals';
+import { createEsqlEquivalenceEvaluator, withEvaluatorSpan } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { EsqlRegressionAgentBuilderChatClient } from './chat_client';
 import { esqlGenerationDataset } from './dataset';
 import { createEsqlValidityEvaluator } from './evaluators/esql_validity';
 import { createEsqlExecutionEvaluator } from './evaluators/esql_execution';
 import { createEsqlResultEquivalenceEvaluator } from './evaluators/esql_result_equivalence';
+import { extractEsqlFromConverseResponse } from './extract_esql';
 
-const ESQL_GENERATION_SYSTEM_PROMPT = `You are an Elastic ES|QL query generation expert.
-Given a natural language question about data stored in Elasticsearch, generate the corresponding ES|QL query.
-Return ONLY the raw ES|QL query text with no markdown code fences, no explanation, and no surrounding text.
-If the request cannot be fulfilled with ES|QL (for example, pagination is not natively supported in ES|QL), briefly explain why instead of generating a query.`;
+/**
+ * Task output shape. Mirrors the alerts-rag suite so the framework's
+ * trace-based evaluators (`toolCalls`, `latency`, `inputTokens`, …) can
+ * resolve the OTel trace by `traceId`. `esql` is the extracted prediction
+ * the quality evaluators read.
+ */
+interface EsqlTaskOutput {
+  esql: string;
+  traceId?: string;
+  messages: Array<{ message: string }>;
+  steps: Array<{
+    type?: string;
+    tool_id?: string;
+    results?: unknown[];
+    [k: string]: unknown;
+  }>;
+}
 
-const predictionExtractor = (output: unknown): string => (output as { esql: string }).esql ?? '';
+const predictionExtractor = (output: unknown): string =>
+  (output as EsqlTaskOutput | undefined)?.esql ?? '';
 
 const groundTruthExtractor = (expected: unknown): string =>
-  (expected as { query: string }).query ?? '';
+  (expected as { query: string } | undefined)?.query ?? '';
 
 const queryExtractor = (output: unknown): string[] => {
   const query = predictionExtractor(output);
@@ -52,6 +67,7 @@ function sliceDataset<T>(examples: readonly T[]): T[] {
 export type EvaluateEsqlGenerationDataset = () => Promise<void>;
 
 export function createEvaluateEsqlGenerationDataset({
+  chatClient,
   evaluators,
   executorClient,
   inferenceClient,
@@ -59,15 +75,22 @@ export function createEvaluateEsqlGenerationDataset({
   traceEsClient,
   log,
 }: {
+  chatClient: EsqlRegressionAgentBuilderChatClient;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
   esClient: EsClient;
+  // `traceEsClient` is wired through for symmetry with the alerts-rag suite
+  // and so trace-based evaluators sourced from `evaluators.traceBasedEvaluators`
+  // can resolve OTel traces. It is intentionally unused here directly.
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateEsqlGenerationDataset {
+  void traceEsClient;
+
   const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
     evaluators.traceBasedEvaluators;
+
   const baseEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
@@ -127,14 +150,23 @@ export function createEvaluateEsqlGenerationDataset({
         },
         task: async ({ input }) => {
           const question = input?.question ?? '';
-          const response = await inferenceClient.chatComplete({
-            system: ESQL_GENERATION_SYSTEM_PROMPT,
-            messages: [{ role: MessageRole.User, content: question }],
-          });
-          // Capture the active task span's traceId so trace-based evaluators
-          // (latency, token usage, tool calls) can query the OTel traces
-          // captured by the EDOT collector. Mirrors the alerts-rag suite.
-          return { esql: response.content, traceId: getCurrentTraceId() };
+          // Drive the full Agent Builder default agent (`elastic-ai-agent`)
+          // via `/api/agent_builder/converse`, mirroring the alerts-rag
+          // suite. This is the supported successor to the LangSmith-era
+          // `DefaultAssistantGraph.invoke()` path: the agent runs its own
+          // tool loop (list_indices, get_index_mapping, generate_esql)
+          // before surfacing a result, so the suite measures the same
+          // production code path users hit from the assistant UI.
+          const response = await chatClient.converse({ message: question });
+          const esql = extractEsqlFromConverseResponse(response);
+
+          const output: EsqlTaskOutput = {
+            esql,
+            traceId: response.traceId,
+            messages: response.messages,
+            steps: response.steps,
+          };
+          return output;
         },
       },
       [

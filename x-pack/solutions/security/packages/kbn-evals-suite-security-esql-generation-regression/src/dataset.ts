@@ -29,7 +29,7 @@ export const esqlGenerationDataset: Array<Example<{ question: string }, { query:
       question: `I want to see an ES|QL query for metrics-apm-*, filtering on metricset.name:transaction and metricset.interval:1m, showing the average duration (via transaction.duration.us), in 50 buckets.`,
     },
     output: {
-      query: `FROM metrics-apm-*\n| WHERE metricset.name == "transaction" AND metricset.interval == "1m"\n| EVAL bucket = BUCKET(transaction.duration.us, 50, <start-date>, <end-date>)\n| STATS avg_duration = AVG(transaction.duration.us) BY bucket`,
+      query: `FROM metrics-apm-*\n| WHERE metricset.name == "transaction" AND metricset.interval == "1m"\n| EVAL bucket = BUCKET(@timestamp, 50, "2024-04-02T00:00:00.000Z", "2024-04-03T00:00:00.000Z")\n| STATS avg_duration = AVG(transaction.duration.us) BY bucket`,
     },
   },
   {

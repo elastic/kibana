@@ -7,7 +7,19 @@
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export default createPlaywrightEvalsConfig({
+const config = createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
+  // Each example now drives a full Agent Builder `converse` round-trip
+  // (tool loop: list_indices / get_index_mapping / generate_esql) plus
+  // up to 4 quality evaluators + 5 trace-based evaluators. 30 min for
+  // the whole 31-example suite leaves headroom for slow/larger models.
   timeout: 30 * 60_000,
 });
+
+// Agent loops introduce LLM-side timing variance (parallel tool calls,
+// occasional rate-limit retries). Two retries match the alerts-rag suite's
+// budget and keep the suite robust against transient failures without
+// masking real regressions.
+config.retries = 2;
+
+export default config;

@@ -190,6 +190,7 @@
     {
       "id": "security-esql-generation-regression",
       "name": "Security ES|QL Generation Regression",
+      "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression/playwright.config.ts",
       "tags": ["security", "esql-generation"],
       "ciLabels": ["evals:security-esql-generation-regression"]

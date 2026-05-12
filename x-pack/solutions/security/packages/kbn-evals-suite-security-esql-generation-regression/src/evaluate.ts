@@ -6,19 +6,31 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
+import { EsqlRegressionAgentBuilderChatClient } from './chat_client';
 import type { EvaluateEsqlGenerationDataset } from './evaluate_dataset';
 import { createEvaluateEsqlGenerationDataset } from './evaluate_dataset';
 
 export const evaluate = base.extend<
   {},
   {
+    chatClient: EsqlRegressionAgentBuilderChatClient;
     evaluateDataset: EvaluateEsqlGenerationDataset;
   }
 >({
+  chatClient: [
+    async ({ fetch, log, connector }, use) => {
+      await use(new EsqlRegressionAgentBuilderChatClient(fetch, log, connector.id));
+    },
+    { scope: 'worker' },
+  ],
   evaluateDataset: [
-    ({ evaluators, executorClient, inferenceClient, esClient, traceEsClient, log }, use) => {
+    (
+      { chatClient, evaluators, executorClient, inferenceClient, esClient, traceEsClient, log },
+      use
+    ) => {
       use(
         createEvaluateEsqlGenerationDataset({
+          chatClient,
           evaluators,
           executorClient,
           inferenceClient,
