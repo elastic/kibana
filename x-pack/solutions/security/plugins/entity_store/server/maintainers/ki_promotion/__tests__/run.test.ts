@@ -37,7 +37,16 @@ interface FakeEntityDoc {
   entityId: string;
   engineMetadataType: 'generic' | 'host' | 'service' | 'user';
   entityType?: string;
-  entitySource: string[];
+  /**
+   * `entity.source` is `keyword`-mapped in ES, so the field is multi-value at
+   * the mapping layer but the `_source` shape depends on what was written.
+   * KI extraction writes a single string (single-value literal-source
+   * evaluation), so promotion candidates that have NEVER been written by the
+   * maintainer carry a `string` here. The maintainer's own writes use a
+   * one-element array (because it goes through bulk update with a partial
+   * doc). Tests must exercise both shapes — they do, via this widened type.
+   */
+  entitySource: string | string[];
   entityConfidence?: 'low' | 'medium' | 'high';
   entityPreviousId?: string;
   hostId?: string;
@@ -211,6 +220,71 @@ describe('runKiPromotion', () => {
         previous_id: 'generic:demo@stream:logs.svc:service',
       },
     });
+  });
+
+  // Regression: KI extraction writes `entity.source` as a single string via a
+  // literal-source field evaluation, but the maintainer originally only handled
+  // the `string[]` shape. Real production candidates were getting bucketed into
+  // `skippedLowConfidenceFeature` because `findMatchingLineageTag` iterated
+  // over an empty array. See `toLineageTagsArray` in run.ts.
+  it('promotes a candidate whose entity.source is a plain string (single-value literal-source shape)', async () => {
+    const reader = buildReader([buildEntityFeature()]);
+    const esClient = buildEsClient({
+      promotionHits: [
+        {
+          _id: 'doc-string-source',
+          entityId: 'generic:demo@stream:logs.svc:service',
+          engineMetadataType: 'generic',
+          entityType: 'Service',
+          entitySource: 'stream:logs.svc:service',
+          serviceName: 'demo',
+        },
+      ],
+    });
+    const globalStateClient = buildGlobalStateClient();
+
+    const result = await runKiPromotion({
+      reader,
+      esClient,
+      logger,
+      namespace: NAMESPACE,
+      abortController,
+      globalStateClient: globalStateClient as unknown as EntityStoreGlobalStateClient,
+    });
+
+    expect(result.promoted).toBe(1);
+    expect(result.skippedLowConfidenceFeature).toBe(0);
+    expect(result.skippedMissingIdentityField).toBe(0);
+    expect(result.skippedNonEcsGroupingField).toBe(0);
+  });
+
+  it('demotes a candidate whose entity.source is a plain string when its lineage falls below threshold', async () => {
+    const reader = buildReader([]);
+    const esClient = buildEsClient({
+      demotionHits: [
+        {
+          _id: 'doc-string-source-demote',
+          entityId: 'service:demo',
+          engineMetadataType: 'service',
+          entitySource: 'stream:logs.svc:service',
+          entityConfidence: 'low',
+          entityPreviousId: 'generic:demo@stream:logs.svc:service',
+          serviceName: 'demo',
+        },
+      ],
+    });
+    const globalStateClient = buildGlobalStateClient();
+
+    const result = await runKiPromotion({
+      reader,
+      esClient,
+      logger,
+      namespace: NAMESPACE,
+      abortController,
+      globalStateClient: globalStateClient as unknown as EntityStoreGlobalStateClient,
+    });
+
+    expect(result.demoted).toBe(1);
   });
 
   it("promotes a generic entity with entity.type 'Host' and host.id present", async () => {

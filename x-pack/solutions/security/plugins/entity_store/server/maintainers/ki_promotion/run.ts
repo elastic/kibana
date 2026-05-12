@@ -531,7 +531,15 @@ interface EntityDocSource {
   entity?: {
     id?: string;
     type?: string;
-    source?: string[];
+    /**
+     * `entity.source` is mapped as `keyword`, so ES treats it as set-valued,
+     * but `_source` reflects whatever was written. KI extraction writes a
+     * single lineage tag (`stream:<name>:<subtype>`) via a literal-source
+     * field evaluation, so the value comes back as a plain `string` here;
+     * promoted/demoted docs written by this maintainer may carry an array.
+     * The reader normalizes both shapes through {@link toLineageTagsArray}.
+     */
+    source?: string | string[];
     confidence?: string;
     previous_id?: string;
     EngineMetadata?: { Type?: string };
@@ -539,6 +547,20 @@ interface EntityDocSource {
   host?: { id?: string; name?: string; hostname?: string };
   service?: { name?: string };
 }
+
+/**
+ * Normalizes `_source.entity.source` into an array of lineage tags. Required
+ * because KI extraction writes the field as a single string while the schema
+ * allows multi-value, and `findMatchingLineageTag` iterates over a `string[]`.
+ * A regression in this normalization is what caused the v1 release to skip
+ * every promotion candidate with `skippedLowConfidenceFeature`, even when
+ * the matching feature was actually above threshold.
+ */
+const toLineageTagsArray = (value: string | string[] | undefined): string[] => {
+  if (Array.isArray(value)) return value.filter((v): v is string => typeof v === 'string');
+  if (typeof value === 'string' && value.length > 0) return [value];
+  return [];
+};
 
 const toPromotionCandidate = (hit: {
   _id?: string;
@@ -549,7 +571,7 @@ const toPromotionCandidate = (hit: {
   if (!docId || !src?.entity?.id || typeof src.entity.type !== 'string') {
     return undefined;
   }
-  const entitySource = Array.isArray(src.entity.source) ? src.entity.source : [];
+  const entitySource = toLineageTagsArray(src.entity.source);
   return {
     docId,
     entityId: src.entity.id,
@@ -577,7 +599,7 @@ const toDemotionCandidate = (hit: {
   ) {
     return undefined;
   }
-  const entitySource = Array.isArray(src.entity.source) ? src.entity.source : [];
+  const entitySource = toLineageTagsArray(src.entity.source);
   return {
     docId,
     entityEngineType: engineType,
