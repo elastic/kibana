@@ -327,6 +327,7 @@ export function useOnSubmit({
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -623,6 +624,7 @@ export function useOnSubmit({
       force?: boolean;
       skipConfirmModal?: boolean;
     } = {}) => {
+      setSubmitAttempted(true);
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -905,5 +907,6 @@ export function useOnSubmit({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    submitAttempted,
   };
 }
