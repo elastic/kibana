@@ -34,7 +34,8 @@ engine:
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
 tools:
   github:
-    toolsets: [issues, pull_requests, repos]
+    toolsets: [default]
+    min-integrity: none
 network:
   allowed: [defaults, node, elastic.litellm-prod.ai]
 checkout:
