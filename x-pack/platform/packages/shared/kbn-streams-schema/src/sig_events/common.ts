@@ -8,9 +8,9 @@
 import { z } from '@kbn/zod/v4';
 
 export const verdictEnum = z.enum(['promoted', 'demoted', 'acknowledged']);
-export const verdictWithGroupedEnum = z.enum(['promoted', 'demoted', 'acknowledged', 'grouped']);
 export const recommendedActionEnum = z.enum(['escalate', 'investigate', 'monitor']);
 export const impactEnum = z.enum(['low', 'medium', 'high', 'critical']);
+export const changePointOccurrenceEnum = z.enum(['first', 'recurring']);
 
 export const dependencyEdgeSchema = z.object({
   source: z.string(),

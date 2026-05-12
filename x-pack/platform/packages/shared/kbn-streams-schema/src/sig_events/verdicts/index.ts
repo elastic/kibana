@@ -14,36 +14,48 @@ import {
   infraComponentSchema,
   recommendedActionEnum,
   verdictEnum,
-  verdictWithGroupedEnum,
 } from '../common';
 
-export const verdictSchema = z.object({
+const sharedVerdictFields = {
   '@timestamp': z.iso.datetime(),
-  verdict: verdictWithGroupedEnum,
-  verdict_id: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  workflow_execution_id: z.string(),
   criticality: z.number().int(),
+  confidence: z.number().int(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
-  recommended_action: recommendedActionEnum.optional(),
   title: z.string(),
   summary: z.string(),
   root_cause: z.string(),
   verdict_summary: z.string(),
-  assessment_note: z.string().optional(),
-  recommendations: z.array(z.string()).optional(),
-  impact: impactEnum.optional(),
-  confidence: z.number().int(),
-  original_verdict: verdictEnum.optional(),
-  verdict_source: z.string().optional(),
-  workflow_execution_id: z.string(),
-  conversation_id: z.string().optional(),
-  grouped_discovery_ids: z.array(z.string()).optional(),
-  dependency_edges: z.array(dependencyEdgeSchema).optional(),
-  infra_components: z.array(infraComponentSchema).optional(),
   cause_kis: z.array(causeKiSchema),
-  evidences: z.array(evidenceSchema).optional(),
+};
+
+const judgeVerdictSchema = z.object({
+  ...sharedVerdictFields,
+  verdict: verdictEnum,
+  verdict_id: z.string(),
+  recommended_action: recommendedActionEnum,
+  assessment_note: z.string(),
+  recommendations: z.array(z.string()),
+  impact: impactEnum,
+  original_verdict: verdictEnum,
+  verdict_source: z.literal('judge_discoveries'),
+  conversation_id: z.string(),
+  dependency_edges: z.array(dependencyEdgeSchema),
+  infra_components: z.array(infraComponentSchema),
+  evidences: z.array(evidenceSchema),
+  // Populated only when the judge emits a group verdict.
+  grouped_discovery_ids: z.array(z.string()).optional(),
 });
+
+const groupedSourceVerdictSchema = z.object({
+  ...sharedVerdictFields,
+  verdict: z.literal('grouped'),
+  grouped_into: z.string(),
+});
+
+export const verdictSchema = z.union([judgeVerdictSchema, groupedSourceVerdictSchema]);
 
 export type Verdict = z.infer<typeof verdictSchema>;
