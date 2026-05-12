@@ -43,11 +43,8 @@ const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
 ];
 // LOCKSTEP:scout-info END
 
-// Type left inferred so this module works against either the legacy
-// `@types/minimatch` (where `Minimatch` is a value and the instance type is
-// `IMinimatch`) or the bundled types in modern `minimatch` releases
-// (where `Minimatch` is both value and type). The .buildkite/ workspace
-// currently resolves to the legacy variant via `@types/minimatch@3.x`.
+// Instance type left inferred — keeps the module portable across minimatch
+// type-package variants (legacy @types/minimatch vs. modern bundled types).
 const compile = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 
