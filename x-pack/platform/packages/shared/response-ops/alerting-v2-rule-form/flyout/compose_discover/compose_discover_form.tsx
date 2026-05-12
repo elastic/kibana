@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { Parser, isColumn } from '@elastic/esql';
+import { Parser, isColumn, isOptionNode } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
@@ -100,14 +100,7 @@ function AlertConditionStep({
     try {
       const { root } = Parser.parse(state.sandbox.query);
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
-      interface AstNode {
-        type: string;
-        name: string;
-        args?: unknown[];
-      }
-      const byOption = (statsCmd?.args as AstNode[] | undefined)?.find(
-        (a) => a.type === 'option' && a.name === 'by'
-      );
+      const byOption = statsCmd?.args.filter(isOptionNode).find((a) => a.name === 'by');
       const byFields = (byOption?.args ?? []).filter(isColumn).map((a) => a.name);
       if (byFields.length > 0) setValue('grouping', { fields: byFields });
     } catch {
