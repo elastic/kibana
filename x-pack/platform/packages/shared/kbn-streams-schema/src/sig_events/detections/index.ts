@@ -9,13 +9,13 @@ import { z } from '@kbn/zod/v4';
 
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  detection_id: z.string().optional(),
+  detection_id: z.string(),
   silent: z.boolean().optional(),
   superseded: z.boolean().optional(),
   superseded_at: z.iso.datetime().optional(),
-  rule_uuid: z.string().optional(),
-  rule_name: z.string().optional(),
-  stream: z.string().optional(),
+  rule_uuid: z.string(),
+  rule_name: z.string(),
+  stream: z.string(),
 });
 
 export type Detection = z.infer<typeof detectionSchema>;

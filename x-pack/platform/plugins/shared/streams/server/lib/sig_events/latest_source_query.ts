@@ -35,11 +35,11 @@ export const runLatestSourceEsqlQuery = async <T>({
   let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
 
   if (options.from !== undefined) {
-    query = query.where`@timestamp >= ${esql.exp(options.from)}`;
+    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
   }
 
   if (options.to !== undefined) {
-    query = query.where`@timestamp <= ${esql.exp(options.to)}`;
+    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
   }
 
   if (where) {

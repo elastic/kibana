@@ -29,12 +29,9 @@ export interface DetectionsSearchOptions extends CommonSearchOptions {
   silent?: boolean;
   superseded?: boolean;
   superseded_at?: {
-    /**
-     * ES|QL-compatible date strings, for example:
-     * - ISO 8601 formatted datetime
-     * - Relative expression, like NOW() - 15 MINUTES
-     */
+    /** ISO 8601 formatted datetime */
     from?: string;
+    /** ISO 8601 formatted datetime */
     to?: string;
   };
 }
@@ -89,14 +86,16 @@ export class DetectionClient {
     if (options.superseded_at?.from) {
       where = andWhere(
         where,
-        esql.exp`${esql.col('superseded_at')} >= ${esql.exp(options.superseded_at.from)}`
+        esql.exp`${esql.col('superseded_at')} >= TO_DATETIME(${esql.str(
+          options.superseded_at.from
+        )})`
       );
     }
 
     if (options.superseded_at?.to) {
       where = andWhere(
         where,
-        esql.exp`${esql.col('superseded_at')} <= ${esql.exp(options.superseded_at.to)}`
+        esql.exp`${esql.col('superseded_at')} <= TO_DATETIME(${esql.str(options.superseded_at.to)})`
       );
     }
 

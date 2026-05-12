@@ -10,9 +10,9 @@ import { z } from '@kbn/zod/v4';
 export const verdictSchema = z.object({
   '@timestamp': z.iso.datetime(),
   verdict: z.string().optional(),
-  verdict_id: z.string().optional(),
-  discovery_id: z.string().optional(),
-  discovery_slug: z.string().optional(),
+  verdict_id: z.string(),
+  discovery_id: z.string(),
+  discovery_slug: z.string(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
   recommended_action: z.string().optional(),

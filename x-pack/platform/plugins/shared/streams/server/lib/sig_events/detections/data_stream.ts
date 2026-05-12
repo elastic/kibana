@@ -34,7 +34,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     priority: 500,

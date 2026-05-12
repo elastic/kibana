@@ -10,8 +10,8 @@ import { z } from '@kbn/zod/v4';
 export const discoverySchema = z.object({
   '@timestamp': z.iso.datetime(),
   status: z.string().optional(),
-  discovery_id: z.string().optional(),
-  discovery_slug: z.string().optional(),
+  discovery_id: z.string(),
+  discovery_slug: z.string(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
   grouped_discovery_ids: z.array(z.string()),

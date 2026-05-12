@@ -26,8 +26,8 @@ const detectionsSearchRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      from: z.string().optional(),
-      to: z.string().optional(),
+      from: z.iso.datetime().optional(),
+      to: z.iso.datetime().optional(),
       rule_uuid: z
         .union([z.string().transform((value) => [value]), z.array(z.string())])
         .optional(),
@@ -37,8 +37,8 @@ const detectionsSearchRoute = createServerRoute({
       superseded: BooleanFromString.optional(),
       superseded_at: z
         .object({
-          from: z.string().optional(),
-          to: z.string().optional(),
+          from: z.iso.datetime().optional(),
+          to: z.iso.datetime().optional(),
         })
         .optional(),
     }),

@@ -25,8 +25,8 @@ const eventsSearchRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      from: z.string().optional(),
-      to: z.string().optional(),
+      from: z.iso.datetime().optional(),
+      to: z.iso.datetime().optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: SigEvent[] }> => {
