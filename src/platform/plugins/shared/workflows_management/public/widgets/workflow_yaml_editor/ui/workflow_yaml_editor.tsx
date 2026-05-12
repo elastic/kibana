@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
+import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
@@ -111,10 +112,6 @@ import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },

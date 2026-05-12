@@ -18,7 +18,7 @@
 @elastic/esql@3.0.0
 @elastic/eui-theme-borealis@7.0.0
 @elastic/eui-theme-common@9.0.0
-@elastic/eui@114.3.0
+@elastic/eui@115.0.0
 @elastic/numeral@2.5.1
 @elastic/prismjs-esql@1.1.2
 @emotion/babel-plugin@11.13.5
@@ -369,7 +369,7 @@ postcss-modules-scope@3.2.0
 postcss-modules-values@4.0.0
 postcss-selector-parser@6.1.2
 postcss-value-parser@4.2.0
-postcss@8.5.8
+postcss@8.5.14
 prismjs@1.27.0
 process-nextick-args@2.0.1
 process@0.11.10
