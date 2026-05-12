@@ -123,13 +123,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     validateAndSetConversationId,
   ]);
 
-  const onConversationCreated = useCallback(
-    ({ conversationId: id }: { conversationId: string }) => {
-      setConversationId(id);
-    },
-    [setConversationId]
-  );
-
   const onDeleteConversation = useCallback(() => {
     setConversationId(undefined);
   }, [setConversationId]);
@@ -147,7 +140,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     conversationId,
     queryClient,
     conversationsService: services.conversationsService,
-    onConversationCreated,
     onDeleteConversation,
   });
 
@@ -229,10 +221,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
-              <ConversationContext.Provider value={conversationContextValue}>
-                <ConversationChangeNotifier />
-                <SendMessageProvider>{children}</SendMessageProvider>
-              </ConversationContext.Provider>
+              <SendMessageProvider>
+                <ConversationContext.Provider value={conversationContextValue}>
+                  <ConversationChangeNotifier />
+                  {children}
+                </ConversationContext.Provider>
+              </SendMessageProvider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>

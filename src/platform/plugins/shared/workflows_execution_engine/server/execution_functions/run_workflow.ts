@@ -32,7 +32,6 @@ export async function runWorkflow({
   dependencies,
   workflowsExecutionEngine,
   meteringService,
-  isEventDrivenExecutionEnabled,
 }: {
   workflowRunId: string;
   spaceId: string;
@@ -41,9 +40,8 @@ export async function runWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
-  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
-  isEventDrivenExecutionEnabled?: () => boolean;
 }): Promise<void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
@@ -51,6 +49,7 @@ export async function runWorkflow({
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
@@ -67,6 +66,7 @@ export async function runWorkflow({
     fakeRequest,
     workflowsExecutionEngine
   );
+
   setupSpan?.end();
 
   const execution = workflowExecutionState.getWorkflowExecution();
@@ -80,34 +80,31 @@ export async function runWorkflow({
     return;
   }
 
-  // Execution-time gate: skip event-driven runs when the kill switch is disabled
-  if (isEventDrivenExecutionEnabled) {
-    const triggeredBy = execution.triggeredBy;
-    const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
-    if (isEventDriven && !isEventDrivenExecutionEnabled()) {
-      const cancelledAt = new Date().toISOString();
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowRunId,
+  const triggeredBy = execution.triggeredBy;
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
+  if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
+    const cancelledAt = new Date().toISOString();
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason: 'Event-driven execution disabled by operator',
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    logger.debug(
+      `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+    );
+    telemetryClient.reportEventDrivenExecutionSuppressed({
+      workflowExecution: {
+        ...execution,
         status: ExecutionStatus.SKIPPED,
         cancellationReason: 'Event-driven execution disabled by operator',
         cancelledAt,
         cancelledBy: 'system',
-      });
-      logger.debug(
-        `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
-      );
-      telemetryClient.reportEventDrivenExecutionSuppressed({
-        workflowExecution: {
-          ...execution,
-          status: ExecutionStatus.SKIPPED,
-          cancellationReason: 'Event-driven execution disabled by operator',
-          cancelledAt,
-          cancelledBy: 'system',
-        },
-        logTriggerEventsEnabled: workflowsExecutionEngine?.isLogTriggerEventsEnabled() ?? false,
-      });
-      return;
-    }
+      },
+      logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
+    });
+    return;
   }
 
   // Span for runtime initialization (graph building, topsort, etc.)
@@ -135,6 +132,7 @@ export async function runWorkflow({
       workflowRuntime,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
+      stepIoService,
       workflowExecutionRepository,
       workflowLogger,
       nodesFactory,
@@ -155,8 +153,7 @@ export async function runWorkflow({
     await emitWorkflowExecutionFailedEventIfFailed({
       workflowRuntime,
       workflowExecutionState,
-      workflowsExtensions: dependencies.workflowsExtensions,
-      spaceId,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
       request: fakeRequest,
       logger,
       workflowRunId,

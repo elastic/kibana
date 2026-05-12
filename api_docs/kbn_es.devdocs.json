@@ -710,7 +710,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 774,
+        "lineNumber": 782,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -726,7 +726,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 779,
+            "lineNumber": 787,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -747,7 +747,7 @@
           "(nameSuffix: string, portOffset: number) => Omit<ServerlessEsNodeArgs, \"image\">[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 345,
+        "lineNumber": 353,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -763,7 +763,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 346,
+            "lineNumber": 354,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -780,7 +780,7 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 347,
+            "lineNumber": 355,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -801,7 +801,7 @@
           "(nameSuffix: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 234,
+        "lineNumber": 242,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -817,8 +817,82 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 234,
+            "lineNumber": 242,
             "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.isServerlessProjectTier",
+        "type": "Function",
+        "tags": [],
+        "label": "isServerlessProjectTier",
+        "description": [],
+        "signature": [
+          "(value: string) => value is \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\""
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.isServerlessProjectTier.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 112,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.isServerlessProjectType",
+        "type": "Function",
+        "tags": [],
+        "label": "isServerlessProjectType",
+        "description": [],
+        "signature": [
+          "(value: string) => value is \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 104,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.isServerlessProjectType.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+            "lineNumber": 104,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -848,7 +922,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 475,
+        "lineNumber": 483,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -870,7 +944,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 478,
+            "lineNumber": 486,
             "columnNumber": 48,
             "deprecated": false,
             "docsReferencedTypeName": "ToolingLog",
@@ -1013,7 +1087,7 @@
           ") => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 460,
+        "lineNumber": 468,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1035,7 +1109,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 463,
+            "lineNumber": 471,
             "columnNumber": 45,
             "deprecated": false,
             "docsReferencedTypeName": "ToolingLog",
@@ -1112,7 +1186,7 @@
           "10"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 1132,
+        "lineNumber": 1140,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1129,7 +1203,7 @@
           "Omit<ServerlessEsNodeArgs, \"image\">[]"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 411,
+        "lineNumber": 419,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1151,16 +1225,33 @@
       },
       {
         "parentPluginId": "@kbn/es",
+        "id": "def-common.ServerlessProductTier",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerlessProductTier",
+        "description": [],
+        "signature": [
+          "\"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\""
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
         "id": "def-common.ServerlessProjectType",
         "type": "Type",
         "tags": [],
         "label": "ServerlessProjectType",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 77,
+        "lineNumber": 83,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1195,6 +1286,41 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.serverlessProductTiers",
+        "type": "Object",
+        "tags": [],
+        "label": "serverlessProductTiers",
+        "description": [],
+        "signature": [
+          "readonly [\"essentials\", \"logs_essentials\", \"complete\", \"search_ai_lake\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 96,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.serverlessProjectTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "serverlessProjectTypes",
+        "description": [],
+        "signature": [
+          "readonly [\"es\", \"oblt\", \"security\", \"workplaceai\", \"vectordb\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
+        "lineNumber": 76,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -6,10 +6,8 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type {
-  WorkflowsExtensionsPublicPluginSetup,
-  PublicStepDefinition,
-} from '@kbn/workflows-extensions/public';
+import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
@@ -20,10 +18,7 @@ import {
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
-const createWorkflowsExtensionsMock = (): jest.Mocked<WorkflowsExtensionsPublicPluginSetup> => ({
-  registerStepDefinition: jest.fn(),
-  registerTriggerDefinition: jest.fn(),
-});
+const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (public)', () => {
   const buildCoreMock = (featureFlagEnabled: boolean) => {

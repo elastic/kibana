@@ -268,7 +268,7 @@ class VisEditorVisualizationUI extends Component {
               defaultMessage: 'Press up/down to adjust the chart size',
             })}
           >
-            <EuiIcon type="dragVertical" />
+            <EuiIcon type="dragVertical" aria-hidden={true} />
           </button>
         </div>
       </div>

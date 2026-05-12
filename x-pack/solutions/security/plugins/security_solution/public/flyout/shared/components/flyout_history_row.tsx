@@ -29,7 +29,7 @@ import { getAlertTitle, getEventTitle } from '../../../flyout_v2/document/utils/
 import { getField } from '../../document_details/shared/utils';
 import { RulePanelKey } from '../../rule_details/right';
 import { NetworkPanelKey } from '../../network_details';
-import { useRuleDetails } from '../../rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/hooks/use_rule_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,

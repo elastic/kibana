@@ -15,11 +15,16 @@ import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { QueryNotFoundError } from '../../../lib/streams/errors/query_not_found_error';
 import {
+  upsertStreamQueryRequest,
+  bulkStreamQueriesRequest,
+  listStreamQueriesResponse,
+} from '../../../oas_examples';
+import {
   EsqlQueryValidationError,
   validateEsqlQueryForStreamOrThrow,
 } from '../../../lib/sig_events/validate_esql_query';
 import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -46,10 +51,24 @@ const listQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'List of queries linked to the stream.',
+          content: {
+            'application/json': {
+              examples: {
+                listQueries: { value: listStreamQueriesResponse },
+              },
+            },
+          },
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
   }),
   security: {
@@ -57,9 +76,11 @@ const listQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { getQueryClient, streamsClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+  async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -85,6 +106,22 @@ const upsertQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              upsertQuery: { value: upsertStreamQueryRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'The query was added or updated successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -93,18 +130,20 @@ const upsertQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query.'),
     }),
     body: upsertStreamQueryRequestSchema,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -140,6 +179,13 @@ const deleteQueryRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'The query was removed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -148,15 +194,21 @@ const deleteQueryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
-      queryId: z.string(),
+      name: z.string().describe('The name of the stream.'),
+      queryId: z.string().describe('The identifier of the query to remove.'),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+    server,
+  }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { queryId, name: streamName },
@@ -190,6 +242,22 @@ const bulkQueriesRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              bulkQueries: { value: bulkStreamQueriesRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Bulk operation completed successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -198,7 +266,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream.'),
     }),
     body: z.object({
       operations: z.array(
@@ -218,9 +286,12 @@ const bulkQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
+    server,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name: streamName },

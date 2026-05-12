@@ -31,6 +31,12 @@ export interface EpisodeActionFlyoutProps {
   subtitle?: ReactNode;
   children: ReactNode;
   footer: ReactNode;
+  /**
+   * When true, render only the header/body/footer fragment without the outer
+   * `EuiFlyout`. Use this when mounting through `overlays.openFlyout`, which
+   * already provides the flyout shell — wrapping again would nest two flyouts.
+   */
+  embedded?: boolean;
 }
 
 export function EpisodeActionFlyout({
@@ -43,16 +49,10 @@ export function EpisodeActionFlyout({
   subtitle,
   children,
   footer,
+  embedded = false,
 }: EpisodeActionFlyoutProps) {
-  return (
-    <EuiFlyout
-      ownFocus
-      onClose={onClose}
-      aria-labelledby={ariaLabelledBy}
-      data-test-subj={dataTestSubj}
-      size="s"
-      paddingSize="m"
-    >
+  const body = (
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={titleId} data-test-subj={titleDataTestSubj}>
@@ -73,6 +73,23 @@ export function EpisodeActionFlyout({
         {children}
       </EuiFlyoutBody>
       {footer}
+    </>
+  );
+
+  if (embedded) {
+    return body;
+  }
+
+  return (
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={ariaLabelledBy}
+      data-test-subj={dataTestSubj}
+      size="s"
+      paddingSize="m"
+    >
+      {body}
     </EuiFlyout>
   );
 }

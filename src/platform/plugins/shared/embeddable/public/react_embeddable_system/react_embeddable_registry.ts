@@ -14,6 +14,8 @@ const registry: { [key: string]: () => Promise<EmbeddableFactory<any, any>> } = 
 
 export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
 
+let isSetupComplete = false;
+
 /**
  * Registers an embeddable public defintion. This should be called at plugin setup time.
  * Be sure to register an embeddable server definition for this type.
@@ -30,6 +32,13 @@ export const registerEmbeddablePublicDefinition = <
   type: string,
   getFactory: () => Promise<EmbeddableFactory<SerializedState, Api>>
 ) => {
+  if (isSetupComplete)
+    throw new Error(
+      i18n.translate('embeddableApi.reactEmbeddable.setCompleteError', {
+        defaultMessage:
+          'Embeddables must be registered during plugin setup phase. Do not register embeddables asynchronously',
+      })
+    );
   if (registry[type] !== undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryAlreadyExistsError', {
@@ -53,13 +62,10 @@ export const getReactEmbeddableFactory = async <
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   key: string
-): Promise<EmbeddableFactory<SerializedState, Api>> => {
-  if (registry[key] === undefined)
-    throw new Error(
-      i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
-        defaultMessage: 'No embeddable factory found for type: {key}',
-        values: { key },
-      })
-    );
-  return registry[key]();
+): Promise<EmbeddableFactory<SerializedState, Api> | undefined> => {
+  return registry[key]?.();
 };
+
+export function closeSetup() {
+  isSetupComplete = true;
+}

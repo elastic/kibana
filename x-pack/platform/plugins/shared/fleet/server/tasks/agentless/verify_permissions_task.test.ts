@@ -90,6 +90,9 @@ describe('verify_permissions_task', () => {
     jest.clearAllMocks();
     mockSoClient.find.mockReset();
     mockSoClient.update.mockReset();
+    mockedAgentPolicyService.list.mockReset();
+    mockedAgentPolicyService.createVerifierPolicy.mockReset();
+    mockedAgentPolicyService.deleteVerifierPolicy.mockReset();
     const mockContext = createAppContextStartContractMock();
     appContextService.start(mockContext);
 
@@ -185,7 +188,6 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip verification when an active non-expired verifier policy exists', async () => {
-      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
       mockedAgentPolicyService.list.mockResolvedValueOnce({
         items: [
           {
@@ -205,15 +207,10 @@ describe('verify_permissions_task', () => {
     it('should proceed past gate check when verifier policy has expired', async () => {
       const sixMinutesAgo = minutesAgo(6);
 
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({
-          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
-        } as any)
-        .mockResolvedValueOnce({
-          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
-        } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({
+        items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
+      } as any);
 
-      mockedAgentPolicyService.deleteVerifierPolicy.mockResolvedValue();
       mockSoClient.find.mockResolvedValue({ saved_objects: [] });
 
       await taskRunner.run();
@@ -224,9 +221,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should complete when no connectors have installed packages', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockSoClient.find.mockResolvedValue({ saved_objects: [] });
 
@@ -237,9 +232,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should filter out empty connector IDs from package policy map', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockSoClient.find
         .mockResolvedValueOnce({
@@ -258,9 +251,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip connector when not eligible', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockSoClient.find
         .mockResolvedValueOnce({
@@ -282,9 +273,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should skip connector with empty policy templates', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockSoClient.find
         .mockResolvedValueOnce({
@@ -308,9 +297,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should verify eligible connector and update status on success', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -351,9 +338,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should mark connector as failed when createVerifierPolicy throws', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockRejectedValueOnce(
         new Error('deployment failed')
@@ -382,9 +367,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should log error but not throw when updateConnectorStatus fails', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -408,9 +391,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should aggregate multiple policy templates for the same connector', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -442,9 +423,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should deduplicate identical policy templates for the same connector', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -475,32 +454,8 @@ describe('verify_permissions_task', () => {
       );
     });
 
-    it('should cleanup expired verifier policies', async () => {
-      const sixMinutesAgo = minutesAgo(6);
-
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({
-          items: [{ id: 'expired-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
-        } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
-
-      mockedAgentPolicyService.deleteVerifierPolicy.mockResolvedValue();
-
-      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
-
-      await taskRunner.run();
-
-      expect(mockedAgentPolicyService.deleteVerifierPolicy).toHaveBeenCalledWith(
-        mockSoClient,
-        mockEsClient,
-        'expired-verifier'
-      );
-    });
-
-    it('should query verifier policies across all spaces during cleanup and gate check', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+    it('should query verifier policies across all spaces during gate check', async () => {
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockSoClient.find.mockResolvedValue({ saved_objects: [] });
 
@@ -513,70 +468,25 @@ describe('verify_permissions_task', () => {
           spaceId: '*',
         })
       );
-      // Both the cleanup (Phase 1) and the gate check (Phase 2) must fan out across spaces,
-      // otherwise verifier policies in non-default spaces are invisible and leak forever.
-      expect(mockedAgentPolicyService.list).toHaveBeenCalledTimes(2);
+      expect(mockedAgentPolicyService.list).toHaveBeenCalledTimes(1);
       expect(mockedAgentPolicyService.list.mock.calls[0][1]).toMatchObject({ spaceId: '*' });
-      expect(mockedAgentPolicyService.list.mock.calls[1][1]).toMatchObject({ spaceId: '*' });
     });
 
-    it('should not cleanup verifier policies within TTL', async () => {
+    it('should skip verification when gate sees a verifier policy within TTL', async () => {
       const twoMinutesAgo = minutesAgo(2);
 
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({
-          items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
-        } as any)
-        .mockResolvedValueOnce({
-          items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
-        } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({
+        items: [{ id: 'fresh-verifier', created_at: twoMinutesAgo, updated_at: twoMinutesAgo }],
+      } as any);
 
       await taskRunner.run();
 
+      expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
       expect(mockedAgentPolicyService.deleteVerifierPolicy).not.toHaveBeenCalled();
     });
 
-    it('should continue to Phase 2 even when cleanup deletion fails', async () => {
-      const sixMinutesAgo = minutesAgo(6);
-
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({
-          items: [{ id: 'bad-verifier', created_at: sixMinutesAgo, updated_at: sixMinutesAgo }],
-        } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
-
-      mockedAgentPolicyService.deleteVerifierPolicy.mockRejectedValue(new Error('delete failed'));
-
-      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
-
-      await taskRunner.run();
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to delete verifier policy bad-verifier')
-      );
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('No connectors with installed packages found')
-      );
-    });
-
-    it('should continue to Phase 2 even when entire cleanup phase throws', async () => {
-      mockedAgentPolicyService.list
-        .mockRejectedValueOnce(new Error('list exploded'))
-        .mockResolvedValueOnce({ items: [] } as any);
-
-      mockSoClient.find.mockResolvedValue({ saved_objects: [] });
-
-      await taskRunner.run();
-
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to cleanup verifier policies')
-      );
-    });
-
     it('should verify only one connector per task run (one verifier deploy at a time)', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -607,9 +517,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should request a follow-up run (runAt ~TTL+buffer) when more eligible connectors remain', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -642,10 +550,8 @@ describe('verify_permissions_task', () => {
       expect(result!.runAt.getTime()).toBeLessThanOrEqual(after + TTL_MS + BUFFER_MS + 100);
     });
 
-    it('should NOT request a follow-up run when only one eligible connector existed', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+    it('should request a follow-up run when only one eligible connector existed (verifier TTL cleanup)', async () => {
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-1',
@@ -661,26 +567,30 @@ describe('verify_permissions_task', () => {
 
       mockSoClient.update.mockResolvedValue({});
 
-      const result = await taskRunner.run();
+      const before = Date.now();
+      const result = (await taskRunner.run()) as { runAt: Date } | undefined;
+      const after = Date.now();
 
-      // Without a return value the task falls back to its 12 h cron.
-      expect(result).toBeUndefined();
+      expect(result).toBeDefined();
+      expect(result!.runAt).toBeInstanceOf(Date);
+      const TTL_MS = 5 * 60 * 1000;
+      const BUFFER_MS = 30 * 1000;
+      expect(result!.runAt.getTime()).toBeGreaterThanOrEqual(before + TTL_MS + BUFFER_MS - 100);
+      expect(result!.runAt.getTime()).toBeLessThanOrEqual(after + TTL_MS + BUFFER_MS + 100);
     });
 
     it('should request a follow-up run when the gate blocks because a verifier is still in flight', async () => {
       const twoMinutesAgo = minutesAgo(2);
 
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({
-          items: [
-            {
-              id: 'in-flight-verifier',
-              created_at: twoMinutesAgo,
-              updated_at: twoMinutesAgo,
-            },
-          ],
-        } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'in-flight-verifier',
+            created_at: twoMinutesAgo,
+            updated_at: twoMinutesAgo,
+          },
+        ],
+      } as any);
 
       const result = (await taskRunner.run()) as { runAt: Date } | undefined;
 
@@ -702,9 +612,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should NOT request a follow-up run when an earlier verification fails with no other eligibles', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockRejectedValueOnce(
         new Error('agentless provisioning limit')
@@ -729,17 +637,15 @@ describe('verify_permissions_task', () => {
     it('should skip all verifications when a non-expired verifier deployment is in flight', async () => {
       const twoMinutesAgo = minutesAgo(2);
 
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({
-          items: [
-            {
-              id: 'in-flight-verifier',
-              created_at: twoMinutesAgo,
-              updated_at: twoMinutesAgo,
-            },
-          ],
-        } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({
+        items: [
+          {
+            id: 'in-flight-verifier',
+            created_at: twoMinutesAgo,
+            updated_at: twoMinutesAgo,
+          },
+        ],
+      } as any);
 
       await taskRunner.run();
 
@@ -750,9 +656,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should not retry a recently failed connector until the backoff window elapses', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       const twoMinutesAgo = minutesAgo(2);
 
@@ -779,9 +683,7 @@ describe('verify_permissions_task', () => {
     });
 
     it('should retry a failed connector after the backoff window elapses', async () => {
-      mockedAgentPolicyService.list
-        .mockResolvedValueOnce({ items: [] } as any)
-        .mockResolvedValueOnce({ items: [] } as any);
+      mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
       mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
         policyId: 'verifier-policy-retry',
@@ -813,7 +715,7 @@ describe('verify_permissions_task', () => {
     });
 
     describe('abort handling', () => {
-      it('should exit gracefully when aborted before Phase 2', async () => {
+      it('should exit gracefully when aborted before gate and verification', async () => {
         const abortCtrl = new AbortController();
         taskRunner = createTaskRunner(abortCtrl);
 
@@ -827,11 +729,10 @@ describe('verify_permissions_task', () => {
         expect(mockedAgentPolicyService.createVerifierPolicy).not.toHaveBeenCalled();
       });
 
-      it('should exit gracefully when aborted after cleanup but before verification', async () => {
+      it('should exit gracefully when aborted during gate list before verification', async () => {
         const abortCtrl = new AbortController();
         taskRunner = createTaskRunner(abortCtrl);
 
-        mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
         mockedAgentPolicyService.list.mockImplementationOnce(async () => {
           abortCtrl.abort();
           return { items: [] } as any;
@@ -847,9 +748,7 @@ describe('verify_permissions_task', () => {
 
     describe('isConnectorEligible (integration via task runner)', () => {
       const setupEligibilityTest = (connectorAttrs: Record<string, unknown>) => {
-        mockedAgentPolicyService.list
-          .mockResolvedValueOnce({ items: [] } as any)
-          .mockResolvedValueOnce({ items: [] } as any);
+        mockedAgentPolicyService.list.mockResolvedValueOnce({ items: [] } as any);
 
         mockedAgentPolicyService.createVerifierPolicy.mockResolvedValueOnce({
           policyId: 'verifier-policy-elig',

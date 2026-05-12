@@ -24,6 +24,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   // Streams / Significant Events
   ...Object.values(platformStreamsSigEventsTools),
 
+  // Alerting
+  `${internalNamespaces.platformAlerting}.manage_rule`,
+
   // Observability
   `${internalNamespaces.observability}.get_anomaly_detection_jobs`,
   `${internalNamespaces.observability}.run_log_rate_analysis`,
@@ -50,24 +53,19 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.alerts`,
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
+  `${internalNamespaces.security}.pci_scope_discovery`,
+  `${internalNamespaces.security}.pci_compliance`,
+  `${internalNamespaces.security}.pci_field_mapper`,
 
-  // Streams – read
-  `${internalNamespaces.streams}.list_streams`,
-  `${internalNamespaces.streams}.get_stream`,
-  `${internalNamespaces.streams}.get_schema`,
-  `${internalNamespaces.streams}.get_data_quality`,
-  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  // Streams
+  `${internalNamespaces.streams}.inspect_streams`,
+  `${internalNamespaces.streams}.diagnose_stream`,
   `${internalNamespaces.streams}.query_documents`,
-  `${internalNamespaces.streams}.get_failed_documents`,
-
-  // Streams – write
-  `${internalNamespaces.streams}.set_retention`,
-  `${internalNamespaces.streams}.fork_stream`,
+  `${internalNamespaces.streams}.design_pipeline`,
+  `${internalNamespaces.streams}.list_ilm_policies`,
+  `${internalNamespaces.streams}.update_stream`,
+  `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
-  `${internalNamespaces.streams}.update_processors`,
-  `${internalNamespaces.streams}.map_fields`,
-  `${internalNamespaces.streams}.set_failure_store`,
-  `${internalNamespaces.streams}.update_stream_description`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -83,6 +81,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.workflow_modify_property`,
   `${internalNamespaces.workflows}.workflow_delete_step`,
   `${internalNamespaces.workflows}.workflow_set_yaml`,
+  `${internalNamespaces.workflows}.workflow_execute_step`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -119,6 +118,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Cases
   'cases-management',
 
+  // Platform – Alerting
+  'rule-management',
+
   // Platform – Dashboard
   'dashboard-management',
 
@@ -141,6 +143,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'pci-compliance',
 
   // O11Y
   'observability.rca',

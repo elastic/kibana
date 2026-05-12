@@ -22,15 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 
 const getJobTypeList = () => (
-  <>
-    <EuiListGroup flush>
-      <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
-
-      <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
-
-      <EuiListGroupItem iconType="classificationJob" label="Classification" size="xs" />
-    </EuiListGroup>
-  </>
+  <EuiListGroup flush>
+    <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" size="xs" />
+    <EuiListGroupItem iconType="regressionJob" label="Regression" size="xs" />
+    <EuiListGroupItem iconType="classificationJob" label="Classification" size="xs" />
+  </EuiListGroup>
 );
 
 export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJobNode }) => {
@@ -158,7 +154,7 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
             <span
-              style={{
+              css={{
                 display: 'inline-block',
                 width: '0px',
                 height: '0px',
