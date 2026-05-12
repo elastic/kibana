@@ -326,4 +326,63 @@ describe('ServiceMapEmbeddable', () => {
       );
     });
   });
+
+  // Drives the parent panel's hide-when-empty behaviour in the alert details preview.
+  // The contract: fire ONLY when the topology query has settled (status === SUCCESS),
+  // and report the final emptiness so callers can decide whether to keep the host
+  // panel visible. Loading and error states must NOT fire — they don't tell us anything
+  // about whether the eventual result will be empty.
+  describe('onEmptyStateChange callback', () => {
+    it('does not fire while the topology query is loading', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.LOADING,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).not.toHaveBeenCalled();
+    });
+
+    it('does not fire on FAILURE — error state carries no signal about emptiness', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.FAILURE,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).not.toHaveBeenCalled();
+    });
+
+    it('fires with `true` on SUCCESS + zero nodes', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).toHaveBeenCalledWith(true);
+    });
+
+    it('fires with `false` on SUCCESS + non-zero nodes', () => {
+      const onEmptyStateChange = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: {
+          nodes: [
+            {
+              id: 'node-1',
+              data: { id: 'node-1', label: 'service-a', isService: true as const },
+              position: { x: 0, y: 0 },
+              type: 'service',
+            },
+          ],
+          edges: [],
+          nodesCount: 1,
+          tracesCount: 10,
+        },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      renderEmbeddable({ onEmptyStateChange });
+      expect(onEmptyStateChange).toHaveBeenCalledWith(false);
+    });
+  });
 });

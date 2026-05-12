@@ -65,6 +65,15 @@ export interface ServiceMapEmbeddableProps {
    * service map of the clicked node.
    */
   showFocusMapInPopover?: boolean;
+  /**
+   * Fires whenever the embeddable transitions between "has data" and "definitively empty"
+   * (i.e. `status === SUCCESS && nodes.length === 0`). Loading and error states do NOT
+   * fire — they don't tell us whether the result will be empty. Used by the alert details
+   * preview to hide its whole panel when there are no services to draw, so the user
+   * doesn't see an awkward in-card empty prompt. Dashboard/standalone embeddable callers
+   * leave it unset and the embeddable keeps rendering its built-in `EmptyPrompt`.
+   */
+  onEmptyStateChange?: (isEmpty: boolean) => void;
 }
 
 function LoadingSpinner() {
@@ -89,6 +98,7 @@ export function ServiceMapEmbeddable({
   badgesRangeTo,
   badgesKuery,
   showFocusMapInPopover,
+  onEmptyStateChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -141,6 +151,15 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
     serviceName,
   });
+
+  // Notify the host whenever we transition to a known empty/non-empty topology.
+  // Skipped while loading or on errors — those carry no signal about emptiness,
+  // and firing during loading would briefly hide the host's panel during refresh.
+  useEffect(() => {
+    if (!onEmptyStateChange) return;
+    if (status !== FETCH_STATUS.SUCCESS) return;
+    onEmptyStateChange(data.nodes.length === 0);
+  }, [onEmptyStateChange, status, data.nodes.length]);
 
   // Defaults to the graph `kuery` so dashboard/standalone callers keep applying the
   // user's filter to both queries. Callers like the alert details preview pass `""` to
