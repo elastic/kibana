@@ -9,7 +9,7 @@ import {
   ANONYMIZATION_CONTEXT_CAPABILITY_KEY,
   type AnonymizationContextHandle,
 } from './context_handle';
-import { defaultAfterCompletionHandler, defaultBeforePromptSendHandler } from './default_handlers';
+import { defaultAfterCompletionHandler, defaultBeforeCompletionHandler } from './default_handlers';
 import { anonymizeText } from '../steps/pii/ai_pii/executor';
 
 const createCtx = (salt = 'test-salt'): AnonymizationContextHandle => ({
@@ -90,7 +90,7 @@ describe('defaultAfterCompletionHandler — restore safety net', () => {
 
     // Populate the tokenMap by running anonymization over a payload that
     // contains the same values.
-    await defaultBeforePromptSendHandler(
+    await defaultBeforeCompletionHandler(
       {
         messages: [{ role: 'user', content: JSON.stringify(originalResponse) }],
       },
@@ -100,7 +100,7 @@ describe('defaultAfterCompletionHandler — restore safety net', () => {
     // Build an anonymized structured response by walking the same values
     // through the ctx (deterministic — tokens collide with the ones we just put
     // in the map).
-    const anonymizedEcho = await defaultBeforePromptSendHandler(
+    const anonymizedEcho = await defaultBeforeCompletionHandler(
       {
         messages: [{ role: 'user', content: JSON.stringify(originalResponse) }],
       },
@@ -131,13 +131,13 @@ describe('defaultAfterCompletionHandler — restore safety net', () => {
 
   it('still restores a plain string response (legacy behavior preserved)', async () => {
     const ctx = createCtx();
-    await defaultBeforePromptSendHandler(
+    await defaultBeforeCompletionHandler(
       { messages: [{ role: 'user', content: 'ping claude.ai please' }] },
       wrap(ctx)
     );
     // Build the anonymized echo string by re-running anonymization (same ctx,
     // deterministic tokens).
-    const anon = await defaultBeforePromptSendHandler(
+    const anon = await defaultBeforeCompletionHandler(
       { messages: [{ role: 'user', content: 'ping claude.ai please' }] },
       wrap(ctx)
     );
@@ -157,12 +157,12 @@ describe('defaultAfterCompletionHandler — restore safety net', () => {
   });
 });
 
-describe('defaultBeforePromptSendHandler — built-in HOST_NAME false-positive guards', () => {
+describe('defaultBeforeCompletionHandler — built-in HOST_NAME false-positive guards', () => {
   it('does not tokenize file extensions or dotted identifiers as HOST_NAME', async () => {
     const ctx = createCtx();
     const content =
       'open package.json then read executor.test.ts and kibana.jsonc; call platform.core.search';
-    const out = await defaultBeforePromptSendHandler(
+    const out = await defaultBeforeCompletionHandler(
       { messages: [{ role: 'user', content }] },
       wrap(ctx)
     );
@@ -176,7 +176,7 @@ describe('defaultBeforePromptSendHandler — built-in HOST_NAME false-positive g
   it('tokenizes a real hostname and restores it on the way back', async () => {
     const ctx = createCtx();
     const content = 'ping claude.ai to verify';
-    const before = await defaultBeforePromptSendHandler(
+    const before = await defaultBeforeCompletionHandler(
       { messages: [{ role: 'user', content }] },
       wrap(ctx)
     );

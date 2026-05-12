@@ -24,9 +24,9 @@ export interface AfterCompletionHookArgs {
   anonymizationHookInvoker: InvokeHookFn;
   config: InferenceConfig;
   logger: Logger;
-  /** Must be the exact sessionId resolved by invokeBeforePromptSend. */
+  /** Must be the exact sessionId resolved by invokeBeforeCompletion. */
   sessionId: string;
-  /** Context from the beforePromptSend hook — carries the token map for restoration. */
+  /** Context from the beforeCompletion hook — carries the token map for restoration. */
   anonymizationContext: AnonymizationContext;
 }
 

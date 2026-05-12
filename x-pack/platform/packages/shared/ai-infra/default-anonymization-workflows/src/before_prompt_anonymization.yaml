@@ -14,7 +14,7 @@
 version: '1'
 name: Default PII Anonymization (before prompt)
 triggers:
-  - type: inference.beforePromptSend
+  - type: inference.beforeCompletion
 
 steps:
   - name: anonymize_system

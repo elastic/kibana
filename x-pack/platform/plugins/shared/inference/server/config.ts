@@ -27,7 +27,7 @@ export const configSchema = schema.object({
      */
     enabled: schema.boolean({ defaultValue: false }),
     /**
-     * Controls what happens when the beforePromptSend hook fails.
+     * Controls what happens when the beforeCompletion hook fails.
      * - 'block': throw `InferenceAnonymizationUnavailableError` (fail-safe)
      * - 'allow_unsafe': log a warning and pass the raw prompt to the LLM
      */

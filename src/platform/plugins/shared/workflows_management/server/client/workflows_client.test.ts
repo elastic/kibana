@@ -118,13 +118,13 @@ describe('createWorkflowsClientProvider', () => {
       const provider = createWorkflowsClientProvider(service, config, logger);
 
       const client = await provider(mockRequest);
-      const result = await client.invokeHook('inference.beforePromptSend', {
+      const result = await client.invokeHook('inference.beforeCompletion', {
         sessionId: 'abc',
         system: 'raw text',
         messages: [],
       });
 
-      expect(invokeHook).toHaveBeenCalledWith('inference.beforePromptSend', {
+      expect(invokeHook).toHaveBeenCalledWith('inference.beforeCompletion', {
         sessionId: 'abc',
         system: 'raw text',
         messages: [],
@@ -140,7 +140,7 @@ describe('createWorkflowsClientProvider', () => {
 
       const client = await provider(mockRequest);
       const payload = { sessionId: 'abc', messages: [] };
-      const result = await client.invokeHook('inference.beforePromptSend', payload);
+      const result = await client.invokeHook('inference.beforeCompletion', payload);
 
       expect(invokeHook).not.toHaveBeenCalled();
       expect(result.status).toBe('pass_through');

@@ -9,12 +9,12 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const BEFORE_PROMPT_SEND_TRIGGER_ID = 'inference.beforePromptSend' as const;
+export const BEFORE_COMPLETION_TRIGGER_ID = 'inference.beforeCompletion' as const;
 export const AFTER_COMPLETION_TRIGGER_ID = 'inference.afterCompletion' as const;
 
 const messageSchema = z.object({ role: z.string(), content: z.string().optional() }).passthrough();
 
-export const beforePromptSendEventSchema = z
+export const beforeCompletionEventSchema = z
   .object({
     sessionId: z.string().describe('Session/conversation identifier for cross-turn determinism'),
     system: z.string().optional().describe('System prompt, if any'),

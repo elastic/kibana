@@ -136,7 +136,7 @@ const anonymizeMessageContent = (
 };
 
 /**
- * Default hook handler for `inference.beforePromptSend`.
+ * Default hook handler for `inference.beforeCompletion`.
  * Applies PII detection using built-in regex rules (IP, EMAIL, HOST_NAME) uniformly
  * to the system prompt and all messages. Tokens are deterministic within a session
  * (HMAC-keyed by sessionId), so the LLM receives consistent tokens across turns and
@@ -149,7 +149,7 @@ const anonymizeMessageContent = (
  * Reads salt from the AnonymizationContext capability; writes tokens to its tokenMap.
  * Neither the salt nor the tokenMap appears in the YAML event payload.
  */
-export const defaultBeforePromptSendHandler: HookHandler = async (payload, capabilities) => {
+export const defaultBeforeCompletionHandler: HookHandler = async (payload, capabilities) => {
   const ctx = capabilities?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
     | AnonymizationContextHandle
     | undefined;

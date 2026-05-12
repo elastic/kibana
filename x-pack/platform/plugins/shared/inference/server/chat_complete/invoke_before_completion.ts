@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ChatCompleteOptions } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { BeforePromptSendOutputSchema } from '../anonymization/trigger_schemas';
+import { BeforeCompletionOutputSchema } from '../anonymization/trigger_schemas';
 import { AnonymizationContext } from '../anonymization/context';
 import { deriveSalt } from '../anonymization/derive_salt';
 import { InferenceAnonymizationUnavailableError } from '../anonymization/errors';
@@ -16,7 +16,7 @@ import type { InvokeHookFn } from '../types';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceConfig } from '../config';
 
-export interface BeforePromptSendArgs {
+export interface BeforeCompletionArgs {
   anonymizationHookInvoker: InvokeHookFn;
   config: InferenceConfig;
   logger: Logger;
@@ -26,7 +26,7 @@ export interface BeforePromptSendArgs {
   anonymization?: InferenceAnonymizationOptions;
 }
 
-export interface BeforePromptSendResult {
+export interface BeforeCompletionResult {
   hookSystem: ChatCompleteOptions['system'];
   hookMessages: ChatCompleteOptions['messages'];
   /** Resolved sessionId — pass to applyAfterCompletionHook to avoid a second uuidv4() call. */
@@ -75,14 +75,14 @@ const logDebugDone = (
   const tokenKeys = [...ctx.tokenMap.keys()].slice(0, MAX_TOKEN_KEYS_LOGGED);
   logger.debug(
     () =>
-      `[hook-anon-debug] beforePromptSend done (${outcome}) sessionId=${sessionId} ` +
+      `[hook-anon-debug] beforeCompletion done (${outcome}) sessionId=${sessionId} ` +
       `tokenMapSize=${ctx.tokenMap.size}` +
       (tokenKeys.length > 0 ? ` tokenKeys=${JSON.stringify(tokenKeys)}` : '')
   );
 };
 
 /**
- * Invokes the `inference.beforePromptSend` hook.
+ * Invokes the `inference.beforeCompletion` hook.
  * Creates an `AnonymizationContext` (salt + token map) and passes it via `capabilities` —
  * the YAML workflow event never sees the salt or tokenMap.
  *
@@ -90,7 +90,7 @@ const logDebugDone = (
  *   - `'block'`: throws `InferenceAnonymizationUnavailableError`
  *   - `'allow_unsafe'`: logs a warning and returns the original system/messages
  */
-export const invokeBeforePromptSend = async ({
+export const invokeBeforeCompletion = async ({
   anonymizationHookInvoker,
   config,
   logger,
@@ -98,7 +98,7 @@ export const invokeBeforePromptSend = async ({
   system,
   messages,
   anonymization,
-}: BeforePromptSendArgs): Promise<BeforePromptSendResult> => {
+}: BeforeCompletionArgs): Promise<BeforeCompletionResult> => {
   const sessionId = resolveSessionId(metadata);
 
   const estimatedTokens = estimatePromptTokens(system, messages);
@@ -120,10 +120,10 @@ export const invokeBeforePromptSend = async ({
   const anonymizationContext = await createAnonymizationContext(sessionId, anonymization);
   const capabilities = { anonymizationContext };
 
-  logger.debug(`[hook-anon] invoking inference.beforePromptSend sessionId=${sessionId}`);
+  logger.debug(`[hook-anon] invoking inference.beforeCompletion sessionId=${sessionId}`);
 
   const result = await anonymizationHookInvoker(
-    'inference.beforePromptSend',
+    'inference.beforeCompletion',
     { sessionId, system, messages },
     capabilities
   );
@@ -133,7 +133,7 @@ export const invokeBeforePromptSend = async ({
       throw new InferenceAnonymizationUnavailableError(result.error);
     }
     logger.warn(
-      `[hook-anon] beforePromptSend hook failed (failureMode: allow_unsafe): ${
+      `[hook-anon] beforeCompletion hook failed (failureMode: allow_unsafe): ${
         result.error ?? 'unknown error'
       }. Passing raw prompt to LLM.`
     );
@@ -146,9 +146,9 @@ export const invokeBeforePromptSend = async ({
     return { sessionId, hookSystem: system, hookMessages: messages, anonymizationContext };
   }
 
-  const parsed = BeforePromptSendOutputSchema.safeParse(result.output);
+  const parsed = BeforeCompletionOutputSchema.safeParse(result.output);
   if (!parsed.success) {
-    const errorMsg = `beforePromptSend hook returned invalid output: ${parsed.error.message}`;
+    const errorMsg = `beforeCompletion hook returned invalid output: ${parsed.error.message}`;
     if (config.anonymization.failureMode === 'block') {
       throw new InferenceAnonymizationUnavailableError(errorMsg);
     }

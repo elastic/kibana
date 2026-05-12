@@ -8,13 +8,13 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import {
-  BEFORE_PROMPT_SEND_TRIGGER_ID,
+  BEFORE_COMPLETION_TRIGGER_ID,
   AFTER_COMPLETION_TRIGGER_ID,
-  beforePromptSendEventSchema,
+  beforeCompletionEventSchema,
   afterCompletionEventSchema,
 } from '@kbn/workflows-extensions/common';
 import {
-  defaultBeforePromptSendHandler,
+  defaultBeforeCompletionHandler,
   defaultAfterCompletionHandler,
 } from './anonymization/default_handlers';
 import {
@@ -61,8 +61,8 @@ export class InferenceWorkflowsServerPlugin
 
     // Register inference lifecycle trigger definitions
     workflowsExtensions.registerTriggerDefinition({
-      id: BEFORE_PROMPT_SEND_TRIGGER_ID,
-      eventSchema: beforePromptSendEventSchema,
+      id: BEFORE_COMPLETION_TRIGGER_ID,
+      eventSchema: beforeCompletionEventSchema,
       sync: {
         outputSchema: z
           .object({ system: z.string().optional(), messages: messagesSchema })
@@ -85,8 +85,8 @@ export class InferenceWorkflowsServerPlugin
 
     // Register default anonymization hook handlers
     workflowsExtensions.registerHookHandler(
-      BEFORE_PROMPT_SEND_TRIGGER_ID,
-      defaultBeforePromptSendHandler
+      BEFORE_COMPLETION_TRIGGER_ID,
+      defaultBeforeCompletionHandler
     );
     workflowsExtensions.registerHookHandler(
       AFTER_COMPLETION_TRIGGER_ID,

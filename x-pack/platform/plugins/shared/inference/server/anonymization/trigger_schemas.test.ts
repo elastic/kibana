@@ -6,16 +6,16 @@
  */
 
 import {
-  BeforePromptSendEventSchema,
-  BeforePromptSendOutputSchema,
+  BeforeCompletionEventSchema,
+  BeforeCompletionOutputSchema,
   AfterCompletionEventSchema,
   AfterCompletionOutputSchema,
 } from './trigger_schemas';
 
 describe('inference trigger schemas', () => {
-  describe('BeforePromptSendEventSchema', () => {
+  describe('BeforeCompletionEventSchema', () => {
     it('accepts a valid event with system prompt and messages', () => {
-      const result = BeforePromptSendEventSchema.safeParse({
+      const result = BeforeCompletionEventSchema.safeParse({
         sessionId: 'session-1',
         system: 'You are a helpful assistant.',
         messages: [{ role: 'user', content: 'Hello' }],
@@ -24,7 +24,7 @@ describe('inference trigger schemas', () => {
     });
 
     it('accepts an event without a system prompt (optional)', () => {
-      const result = BeforePromptSendEventSchema.safeParse({
+      const result = BeforeCompletionEventSchema.safeParse({
         sessionId: 'session-2',
         messages: [],
       });
@@ -32,16 +32,16 @@ describe('inference trigger schemas', () => {
     });
 
     it('rejects an event missing sessionId', () => {
-      const result = BeforePromptSendEventSchema.safeParse({
+      const result = BeforeCompletionEventSchema.safeParse({
         messages: [{ role: 'user', content: 'Hi' }],
       });
       expect(result.success).toBe(false);
     });
   });
 
-  describe('BeforePromptSendOutputSchema', () => {
+  describe('BeforeCompletionOutputSchema', () => {
     it('accepts valid output with system and messages', () => {
-      const result = BeforePromptSendOutputSchema.safeParse({
+      const result = BeforeCompletionOutputSchema.safeParse({
         system: 'IP_abc123 connected.',
         messages: [{ role: 'user', content: 'Tell me about IP_abc123' }],
       });
@@ -49,7 +49,7 @@ describe('inference trigger schemas', () => {
     });
 
     it('accepts output without system (pass-through when no system prompt)', () => {
-      const result = BeforePromptSendOutputSchema.safeParse({
+      const result = BeforeCompletionOutputSchema.safeParse({
         messages: [],
       });
       expect(result.success).toBe(true);

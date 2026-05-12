@@ -7,16 +7,16 @@
 
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import {
-  BEFORE_PROMPT_SEND_TRIGGER_ID,
+  BEFORE_COMPLETION_TRIGGER_ID,
   AFTER_COMPLETION_TRIGGER_ID,
-  beforePromptSendEventSchema,
+  beforeCompletionEventSchema,
   afterCompletionEventSchema,
 } from '@kbn/workflows-extensions/common';
 
-export const beforePromptSendPublicTriggerDefinition: PublicTriggerDefinition = {
-  id: BEFORE_PROMPT_SEND_TRIGGER_ID,
-  eventSchema: beforePromptSendEventSchema,
-  title: 'Before prompt send',
+export const beforeCompletionPublicTriggerDefinition: PublicTriggerDefinition = {
+  id: BEFORE_COMPLETION_TRIGGER_ID,
+  eventSchema: beforeCompletionEventSchema,
+  title: 'Before completion',
   description:
     'Fires before an LLM prompt is sent. Use to transform messages or apply anonymization.',
 };

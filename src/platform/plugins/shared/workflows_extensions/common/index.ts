@@ -19,9 +19,9 @@ export {
   WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
   workflowExecutionFailedEventSchema,
   commonWorkflowExecutionFailedTriggerDefinition,
-  BEFORE_PROMPT_SEND_TRIGGER_ID,
+  BEFORE_COMPLETION_TRIGGER_ID,
   AFTER_COMPLETION_TRIGGER_ID,
-  beforePromptSendEventSchema,
+  beforeCompletionEventSchema,
   afterCompletionEventSchema,
 } from './triggers';
 export type { WorkflowExecutionFailedEvent } from './triggers';

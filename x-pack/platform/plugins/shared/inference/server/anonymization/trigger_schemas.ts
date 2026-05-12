@@ -19,10 +19,10 @@ export const MessageSchema = z
   .passthrough();
 
 /**
- * Event schema for the `inference.beforePromptSend` trigger.
+ * Event schema for the `inference.beforeCompletion` trigger.
  * Workflows subscribed to this trigger receive the prompt before it is sent to the LLM.
  */
-export const BeforePromptSendEventSchema = z
+export const BeforeCompletionEventSchema = z
   .object({
     sessionId: z.string().describe('Session/conversation identifier for cross-turn determinism'),
     system: z.string().optional().describe('System prompt, if any'),
@@ -31,10 +31,10 @@ export const BeforePromptSendEventSchema = z
   .passthrough();
 
 /**
- * Output schema for the `inference.beforePromptSend` trigger.
+ * Output schema for the `inference.beforeCompletion` trigger.
  * The hook chain must return a (possibly modified) system prompt and messages.
  */
-export const BeforePromptSendOutputSchema = z
+export const BeforeCompletionOutputSchema = z
   .object({
     system: z.string().optional().describe('Potentially anonymized system prompt'),
     messages: z.array(MessageSchema).describe('Potentially anonymized messages'),

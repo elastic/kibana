@@ -11,7 +11,7 @@ export const registerInferenceWorkflowExtensions = (
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void => {
   workflowsExtensions.registerTriggerDefinition(() =>
-    import('../triggers').then((m) => m.beforePromptSendPublicTriggerDefinition)
+    import('../triggers').then((m) => m.beforeCompletionPublicTriggerDefinition)
   );
   workflowsExtensions.registerTriggerDefinition(() =>
     import('../triggers').then((m) => m.afterCompletionPublicTriggerDefinition)

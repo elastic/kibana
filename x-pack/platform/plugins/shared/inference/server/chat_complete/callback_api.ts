@@ -56,7 +56,7 @@ import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
 import type { InferenceConfig } from '../config';
-import { invokeBeforePromptSend } from './invoke_before_prompt_send';
+import { invokeBeforeCompletion } from './invoke_before_completion';
 import { applyAfterCompletionHook } from './apply_after_completion_hook';
 
 interface CreateChatCompleteApiOptions {
@@ -246,7 +246,7 @@ function createChatCompletePipeline({
 
       if (hookPathEnabled) {
         return from(
-          invokeBeforePromptSend({
+          invokeBeforeCompletion({
             anonymizationHookInvoker: anonymizationHookInvoker!,
             config: config!,
             logger,
