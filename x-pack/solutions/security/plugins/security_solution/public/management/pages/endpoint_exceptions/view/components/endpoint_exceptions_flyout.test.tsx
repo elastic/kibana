@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { EndpointExceptionContentProps } from './endpoint_exception_content';
-import { EndpointExceptionContent } from './endpoint_exception_content';
+import type { EndpointExceptionsFlyoutProps } from './endpoint_exceptions_flyout';
+import { EndpointExceptionsFlyout } from './endpoint_exceptions_flyout';
 import { cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -41,12 +41,12 @@ jest.mock('../../../../hooks/artifacts/use_endpoint_per_policy_opt_in');
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/hooks/use_license');
 
-describe('Endpoint exception content', () => {
+describe('Endpoint exceptions flyout', () => {
   jest.setTimeout(10000);
 
   let mockedContext: AppContextTestRender;
   let render: (
-    props?: Partial<EndpointExceptionContentProps>
+    props?: Partial<EndpointExceptionsFlyoutProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let mockOnCancel: jest.Mock;
@@ -135,7 +135,7 @@ describe('Endpoint exception content', () => {
 
     render = (props) => {
       renderResult = mockedContext.render(
-        <EndpointExceptionContent
+        <EndpointExceptionsFlyout
           rules={null}
           onCancel={mockOnCancel}
           onConfirm={mockOnConfirm}

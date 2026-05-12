@@ -11,10 +11,14 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
+  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type {
@@ -47,14 +51,12 @@ import { EndpointExceptionsApiClient } from '../../service/api_client';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS, getCreationErrorMessage } from '../../translations';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-export type EndpointExceptionContentProps = Pick<
+export type EndpointExceptionsFlyoutProps = Pick<
   AddExceptionFlyoutProps,
   'onCancel' | 'onConfirm' | 'alertData' | 'isAlertDataLoading' | 'alertStatus' | 'rules'
 >;
 
-// The outer EuiFlyout is provided by the caller (e.g. Flyout v2's system flyout); this
-// renders only the body + footer + confirm modal so it can be slotted into that shell.
-export const EndpointExceptionContent: React.FC<EndpointExceptionContentProps> = ({
+export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> = ({
   onCancel,
   onConfirm,
   alertData,
@@ -62,7 +64,14 @@ export const EndpointExceptionContent: React.FC<EndpointExceptionContentProps> =
   isAlertDataLoading,
   rules,
 }) => {
+  const endpointExceptionsFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'endpointExceptionsCreateFlyoutTitle',
+  });
   const { euiTheme } = useEuiTheme();
+  const maskProps = useMemo(
+    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
+    [euiTheme.levels.flyout]
+  );
   const toasts = useToasts();
   const http = useHttp();
   const { isLoading: isSubmittingData, createOrUpdateArtifact } = useCreateOrUpdateArtifact(
@@ -171,8 +180,22 @@ export const EndpointExceptionContent: React.FC<EndpointExceptionContentProps> =
   }, [confirmModalLabels, submitException]);
 
   return (
-    <>
-      <EuiFlyoutBody data-test-subj="addEndpointExceptionFlyout">
+    <EuiFlyout
+      size="l"
+      onClose={handleCloseFlyout}
+      aria-labelledby={endpointExceptionsFlyoutTitleId}
+      data-test-subj="addEndpointExceptionFlyout"
+      maskProps={maskProps}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2 id={endpointExceptionsFlyoutTitleId} data-test-subj="exceptionFlyoutTitle">
+            {ENDPOINT_EXCEPTIONS_PAGE_LABELS.flyoutCreateTitle}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
         {exception && (
           <EndpointExceptionsForm
             allowSelectOs={!alertData}
@@ -240,7 +263,7 @@ export const EndpointExceptionContent: React.FC<EndpointExceptionContentProps> =
           data-test-subj="endpointExceptionConfirmModal"
         />
       )}
-    </>
+    </EuiFlyout>
   );
 };
-EndpointExceptionContent.displayName = 'EndpointExceptionContent';
+EndpointExceptionsFlyout.displayName = 'EndpointExceptionsFlyout';
