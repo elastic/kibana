@@ -11,7 +11,7 @@ import { findCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import type { Paginated } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type { CompositeSLODefinition } from '../../../domain/models';
-import { type CompositeSLORepository, DefaultCompositeSLORepository } from '../../../services';
+import type { CompositeSLORepository } from '../../../services';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -114,11 +114,10 @@ export const findCompositeSLORoute = createSloServerRoute({
   handler: async ({ params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({
+    const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
       request,
       logger,
     });
-    const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
 
     const query = params?.query ?? {};
     const page = query.page ? Number(query.page) : 1;

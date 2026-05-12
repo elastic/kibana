@@ -8,7 +8,6 @@
 import { batchGetCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import {
   DefaultBurnRatesClient,
-  DefaultCompositeSLORepository,
   DefaultSummaryClient,
   GetCompositeSLO,
 } from '../../../services';
@@ -27,12 +26,12 @@ export const batchGetCompositeSLORoute = createSloServerRoute({
   handler: async ({ params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, repository, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
+      await getScopedClients({
+        request,
+        logger,
+      });
 
-    const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
       scopedClusterClient.asCurrentUser,

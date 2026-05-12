@@ -10,7 +10,6 @@ import { createCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
 import { IllegalArgumentError } from '../../../errors';
 import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
-import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
 import { persistCompositeSummaryDoc } from '../../../services/composite_summary_writer';
 import { DefaultSummaryClient } from '../../../services/summary_client';
 import { createSloServerRoute } from '../../create_slo_server_route';
@@ -53,11 +52,11 @@ export const createCompositeSLORoute = createSloServerRoute({
 
     validateCompositeSloMembers(params.body.members);
 
-    const { soClient, scopedClusterClient, repository, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
-    const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
+    const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
+      await getScopedClients({
+        request,
+        logger,
+      });
 
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username ?? 'unknown';

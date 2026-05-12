@@ -46,6 +46,7 @@ import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
 } from './services';
+import { DefaultCompositeSLORepository } from './services/composite_slo_repository';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
@@ -222,6 +223,7 @@ export class SLOPlugin
           ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
+          const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
@@ -244,6 +246,7 @@ export class SLOPlugin
             rulesClient,
             spaceId,
             repository,
+            compositeSloRepository,
             settingsRepository,
             templateRepository,
             transformManager,

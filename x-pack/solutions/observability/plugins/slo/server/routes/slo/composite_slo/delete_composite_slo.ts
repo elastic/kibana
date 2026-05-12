@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { deleteCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
-import { DefaultCompositeSLORepository } from '../../../services/composite_slo_repository';
 import { buildCompositeSloSummaryDocId } from '../../../services/composite_slo_summary_index';
 import { retryTransientEsErrors } from '../../../utils/retry';
 import { createSloServerRoute } from '../../create_slo_server_route';
@@ -52,10 +51,12 @@ export const deleteCompositeSLORoute = createSloServerRoute({
   handler: async ({ response, params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, spaceId } = await getScopedClients({ request, logger });
-    const repository = new DefaultCompositeSLORepository(soClient, logger);
+    const { scopedClusterClient, compositeSloRepository, spaceId } = await getScopedClients({
+      request,
+      logger,
+    });
 
-    await repository.deleteById(params.path.id);
+    await compositeSloRepository.deleteById(params.path.id);
     await deleteCompositeSummaryDoc(
       scopedClusterClient.asCurrentUser,
       spaceId,
