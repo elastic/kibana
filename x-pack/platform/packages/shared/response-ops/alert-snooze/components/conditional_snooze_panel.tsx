@@ -9,13 +9,16 @@ import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import moment from 'moment';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   ConditionalSnoozeSchedule,
   DataConditionEntry,
@@ -61,6 +64,17 @@ export const ConditionalSnoozePanel = ({
   onScheduleChange,
   dataConditionTypes = DEFAULT_DATA_CONDITION_TYPES,
 }: ConditionalSnoozePanelProps) => {
+  const { euiTheme } = useEuiTheme();
+  const logicalOperatorCss = useMemo(
+    () =>
+      css({
+        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+        borderRadius: 999,
+        minWidth: 'unset',
+      }),
+    [euiTheme]
+  );
+
   const descriptorById = useMemo(
     () => new Map(dataConditionTypes.map((d) => [d.id, d])),
     [dataConditionTypes]
@@ -132,15 +146,16 @@ export const ConditionalSnoozePanel = ({
             .reduce((acc, part) => `${acc} ${dataConnector} ${part}`)
         : null;
 
-    const sentences = [
-      dataPreviewPart && i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart),
-      formattedTimeDate &&
-        (dataPreviewPart
-          ? i18n.getUnsnoozeAlsoAfterMessage(formattedTimeDate)
-          : i18n.getUnsnoozeOnDateMessage(formattedTimeDate)),
-    ].filter((s): s is string => Boolean(s));
+    let sentence: string | null = null;
+    if (dataPreviewPart && formattedTimeDate) {
+      sentence = i18n.getUnsnoozeIfConditionsOrOnDateMessage(dataPreviewPart, formattedTimeDate);
+    } else if (dataPreviewPart) {
+      sentence = i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart);
+    } else if (formattedTimeDate) {
+      sentence = i18n.getUnsnoozeOnDateMessage(formattedTimeDate);
+    }
 
-    return sentences.length > 0 ? sentences : [i18n.CONDITIONS_FOOTER_HINT];
+    return sentence ? [sentence] : [i18n.CONDITIONS_FOOTER_HINT];
   })();
 
   const addDataCondition = useCallback(() => {
@@ -242,15 +257,15 @@ export const ConditionalSnoozePanel = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {index === 1 ? (
-                  <EuiButton
-                    size="s"
+                  <EuiButtonEmpty
+                    size="xs"
                     color="text"
-                    style={{ borderRadius: '999px', minWidth: 'unset' }}
+                    css={logicalOperatorCss}
                     onClick={toggleLogicalOperator}
                     data-test-subj="logicalOperator"
                   >
                     {i18n.LOGICAL_SEPARATOR(conditionOperator)}
-                  </EuiButton>
+                  </EuiButtonEmpty>
                 ) : (
                   <EuiText size="xs" color="subdued" style={{ padding: '0 8px' }}>
                     {i18n.LOGICAL_SEPARATOR(conditionOperator)}

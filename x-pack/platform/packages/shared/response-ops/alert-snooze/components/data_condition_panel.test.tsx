@@ -8,11 +8,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { DataConditionPanel } from './data_condition_panel';
 import type { DataConditionEntry, DataConditionTypeDescriptor } from './types';
 import { DataConditionType } from './types';
-import { fieldChangeDescriptor, severityChangeDescriptor } from './built_in_data_conditions';
+import {
+  fieldChangeDescriptor,
+  severityChangeDescriptor,
+  severityEqualsDescriptor,
+} from './built_in_data_conditions';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -300,6 +305,26 @@ describe('DataConditionPanel', () => {
       const offered = Array.from(select.options).map((o) => o.value);
       expect(offered).toContain(DataConditionType.SEVERITY_CHANGE);
       expect(offered).toContain(DataConditionType.FIELD_CHANGE);
+    });
+  });
+
+  describe('severity_equals dropdown', () => {
+    it('lists every canonical severity value in the same order as ALERT_SEVERITY_VALUES', () => {
+      render(
+        <DataConditionPanel
+          entry={createEntry({ type: DataConditionType.SEVERITY_EQUALS, value: undefined })}
+          descriptors={[severityEqualsDescriptor]}
+          onChange={onChangeMock}
+        />,
+        { wrapper }
+      );
+
+      const select = screen.getByTestId('dataConditionValue-dc-1') as HTMLSelectElement;
+      const offered = Array.from(select.options)
+        .map((o) => o.value)
+        .filter(Boolean);
+
+      expect(offered).toEqual([...ALERT_SEVERITY_VALUES]);
     });
   });
 });

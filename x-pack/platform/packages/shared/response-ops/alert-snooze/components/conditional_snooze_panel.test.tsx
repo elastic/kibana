@@ -606,8 +606,9 @@ describe('ConditionalSnoozePanel', () => {
       });
 
       const previewEl = await screen.findByTestId('conditionsPreviewText');
-      expect(previewEl).toHaveTextContent('Alert will unsnooze if severity is changed.');
-      expect(previewEl).toHaveTextContent(`Alert will also unsnooze after ${expiresAtFormatted}.`);
+      expect(previewEl).toHaveTextContent(
+        `Alert will unsnooze if severity is changed, OR on ${expiresAtFormatted}.`
+      );
     });
   });
 });

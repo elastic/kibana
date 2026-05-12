@@ -54,6 +54,7 @@ export const SnoozeDurationPicker = ({
           isInvalid={isDurationInvalid}
           error={isDurationInvalid ? i18n.INVALID_DURATION_ERROR : undefined}
           data-test-subj="durationInputs"
+          fullWidth
         >
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
@@ -67,7 +68,7 @@ export const SnoozeDurationPicker = ({
                 data-test-subj="durationValue"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem>
               <EuiSelect
                 value={durationUnit}
                 onChange={(e) => onChange({ unit: e.target.value as SnoozeUnit })}
@@ -84,8 +85,9 @@ export const SnoozeDurationPicker = ({
           isInvalid={isDateTimeInvalid}
           error={isDateTimeInvalid ? i18n.PAST_DATETIME_ERROR : undefined}
           data-test-subj="dateTimeInputs"
+          fullWidth
         >
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiDatePicker
                 showTimeSelect
@@ -94,6 +96,8 @@ export const SnoozeDurationPicker = ({
                 minDate={moment()}
                 isInvalid={isDateTimeInvalid}
                 data-test-subj="dateTimePicker"
+                placeholder={i18n.SELECT_DATE_AND_TIME}
+                fullWidth
               />
             </EuiFlexItem>
             {dateTime !== null && (

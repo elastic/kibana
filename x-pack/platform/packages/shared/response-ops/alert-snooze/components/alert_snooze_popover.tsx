@@ -102,7 +102,6 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
           options={TAB_OPTIONS.map(({ id, label }) => ({ id, label }))}
           idSelected={activeTab}
           onChange={(id) => setActiveTab(id as SnoozePanelTab)}
-          buttonSize="compressed"
           isFullWidth
           data-test-subj="alertSnoozeTabs"
         />
@@ -127,7 +126,7 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
           onClick={handleApply}
           data-test-subj="alertSnoozeApplyButton"
         >
-          {i18n.APPLY_BUTTON}
+          {i18n.SNOOZE_ALERT_BUTTON}
         </EuiButton>
       </EuiPopoverFooter>
     </EuiPopover>

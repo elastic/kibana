@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import {
   DataConditionType,
   type AlertSeverityLevel,
@@ -15,26 +16,42 @@ import {
 import { truncateMiddle } from '../utils/truncate';
 import * as i18n from './translations';
 
-interface SelectOption {
-  value: string;
-  text: string;
-}
+// Per-severity i18n labels and badge colors. Kept as `Record`s typed by
+// `AlertSeverityLevel` so adding a new severity in `@kbn/rule-data-utils`
+// produces a TypeScript error here until both maps are extended — the
+// dropdown can never silently render an unlabeled value, and the chip can
+// never fall back to `'default'` accidentally for a known level.
+const SEVERITY_LABELS: Record<AlertSeverityLevel, string> = {
+  critical: i18n.SEVERITY_CRITICAL,
+  major: i18n.SEVERITY_MAJOR,
+  high: i18n.SEVERITY_HIGH,
+  medium: i18n.SEVERITY_MEDIUM,
+  minor: i18n.SEVERITY_MINOR,
+  low: i18n.SEVERITY_LOW,
+  warning: i18n.SEVERITY_WARNING,
+  info: i18n.SEVERITY_INFO,
+};
 
-const SEVERITY_OPTIONS: SelectOption[] = [
-  { value: 'critical', text: i18n.SEVERITY_CRITICAL },
-  { value: 'high', text: i18n.SEVERITY_HIGH },
-  { value: 'medium', text: i18n.SEVERITY_MEDIUM },
-  { value: 'low', text: i18n.SEVERITY_LOW },
-  { value: 'info', text: i18n.SEVERITY_INFO },
-];
-
+// Mapped to EUI badge color tokens.
+// These groupings reflect the UX order in `ALERT_SEVERITY_VALUES`
+// (highest → lowest) and avoid inventing new color tokens.
 const SEVERITY_COLORS: Record<AlertSeverityLevel, string> = {
   critical: 'danger',
+  major: 'danger',
   high: 'warning',
   medium: 'success',
+  minor: 'success',
   low: 'primary',
+  warning: 'primary',
   info: 'default',
 };
+
+// Driven from the canonical ordered list so a future re-ordering or
+// additions to `ALERT_SEVERITY_VALUES` flow through automatically.
+const SEVERITY_OPTIONS = ALERT_SEVERITY_VALUES.map((value) => ({
+  value,
+  text: SEVERITY_LABELS[value],
+}));
 
 /**
  * Built-in descriptor: matches when an alert's value for a user-supplied

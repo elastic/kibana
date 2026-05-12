@@ -72,6 +72,10 @@ export const CLEAR_DATETIME_ARIA_LABEL = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.clearDatetimeAriaLabel',
   { defaultMessage: 'Clear date and time' }
 );
+export const SELECT_DATE_AND_TIME = i18n.translate(
+  'responseOpsAlertSnooze.quickSnoozePanel.selectDateTime',
+  { defaultMessage: 'Select a date and time' }
+);
 export const INDEFINITELY_MESSAGE = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.indefinitelyMessage',
   { defaultMessage: 'Alert will be snoozed indefinitely or until manual unsnooze.' }
@@ -200,6 +204,18 @@ export const SEVERITY_INFO = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityInfo',
   { defaultMessage: 'Info' }
 );
+export const SEVERITY_MAJOR = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMajor',
+  { defaultMessage: 'Major' }
+);
+export const SEVERITY_MINOR = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMinor',
+  { defaultMessage: 'Minor' }
+);
+export const SEVERITY_WARNING = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.severityWarning',
+  { defaultMessage: 'Warning' }
+);
 export const CONDITIONAL_OPERATOR = (operator: string) =>
   i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.operator', {
     defaultMessage: operator,
@@ -240,11 +256,14 @@ export const getUnsnoozeIfConditionsMessage = (conditions: string) =>
     defaultMessage: 'Alert will unsnooze if {conditions}.',
     values: { conditions },
   });
-export const getUnsnoozeAlsoAfterMessage = (date: string) =>
-  i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.unsnoozeAlsoAfterMessage', {
-    defaultMessage: 'Alert will also unsnooze after {date}.',
-    values: { date },
-  });
+export const getUnsnoozeIfConditionsOrOnDateMessage = (conditions: string, date: string) =>
+  i18n.translate(
+    'responseOpsAlertSnooze.conditionalSnoozePanel.unsnoozeIfConditionsOrOnDateMessage',
+    {
+      defaultMessage: 'Alert will unsnooze if {conditions}, OR on {date}.',
+      values: { conditions, date },
+    }
+  );
 export const CONFLICTING_SEVERITY_EQUALS_WARNING = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conflictingSeverityEqualsWarning',
   {
@@ -270,9 +289,9 @@ export const CONDITIONAL_SNOOZE_TAB = i18n.translate(
   'responseOpsAlertSnooze.alertSnoozePanel.conditionalTab',
   { defaultMessage: 'Condition based' }
 );
-export const APPLY_BUTTON = i18n.translate(
-  'responseOpsAlertSnooze.alertSnoozePopover.applyButton',
-  { defaultMessage: 'Apply' }
+export const SNOOZE_ALERT_BUTTON = i18n.translate(
+  'responseOpsAlertSnooze.alertSnoozePopover.snoozeAlertButton',
+  { defaultMessage: 'Snooze alert' }
 );
 export const SNOOZE_TRIGGER_BUTTON = i18n.translate(
   'responseOpsAlertSnooze.alertSnoozePopover.triggerButton',
