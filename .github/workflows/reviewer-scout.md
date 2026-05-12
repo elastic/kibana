@@ -19,13 +19,13 @@ imports:
   - .github/agents/scout-reviewer.md
 engine:
   id: claude
-  version: "2.1.111"
+  version: '2.1.111'
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: "1"
+    ENABLE_PROMPT_CACHING_1H: '1'
     # Route Claude Code's 1M Opus alias through LiteLLM.
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
@@ -130,12 +130,12 @@ safe-outputs:
     max: 10
     target: ${{ env.PR_NUMBER }}
   submit-pull-request-review:
-    max: 1
+    max: 5
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
     footer: none
   add-comment:
-    max: 1
+    max: 5
     target: ${{ env.PR_NUMBER }}
     discussions: false
     footer: false
@@ -150,5 +150,6 @@ safe-outputs:
 # Scout Test Reviewer
 
 Using the imported reviewer instructions:
+
 - Run in review mode for `pull_request_target` and `workflow_dispatch` workflow events.
 - Run in follow-up response mode for `issue_comment` and `pull_request_review_comment` events that mention `@scout`.
