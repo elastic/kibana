@@ -31,7 +31,7 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Signal Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  evaluation: { query: { base: 'FROM logs-* | STATS count() BY host.name' } },
+  query: { format: 'standalone', breach: 'FROM logs-* | STATS count() BY host.name' },
   createdBy: 'alice@example.com',
   createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: 'bob@example.com',
@@ -43,18 +43,13 @@ const alertRule: RuleApiResponse = {
   id: 'rule-2',
   kind: 'alert',
   metadata: { name: 'Test Alert Rule' },
-  evaluation: {
-    query: {
-      base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
-    },
+  query: {
+    format: 'standalone',
+    breach: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+    recover: 'FROM metrics-* | WHERE avg(cpu) < 0.5',
   },
   grouping: { fields: ['host.name', 'service.name'] },
-  recovery_policy: {
-    type: 'query',
-    query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
-  },
   state_transition: { pending_count: 3, pending_timeframe: '5m' },
-  no_data: { behavior: 'no_data', timeframe: '15m' },
 };
 
 const renderConditions = (rule: RuleApiResponse, variant?: 'full' | 'summary') =>
@@ -88,7 +83,6 @@ describe('RuleConditions', () => {
       'After 3 matches or 5m'
     );
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
-    expect(screen.getByTestId('alertingV2RuleDetailsNoDataConfig')).toHaveTextContent('No data');
   });
 
   it('renders Immediate for alert and recovery delay when counts are zero', () => {
@@ -193,16 +187,14 @@ describe('RuleConditions', () => {
   it('renders fallback values for missing optional fields', () => {
     renderConditions({
       ...baseRule,
-      evaluation: { query: { base: 'FROM logs-*' } },
+      query: { format: 'standalone', breach: 'FROM logs-*' },
       grouping: undefined,
       schedule: { every: '5m' },
-      no_data: undefined,
     });
     expect(screen.getByTestId('alertingV2RuleDetailsDataSource')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsGroupBy')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Detect only');
-    expect(screen.getByTestId('alertingV2RuleDetailsNoDataConfig')).toHaveTextContent('-');
     expect(screen.queryByTestId('alertingV2RuleDetailsAlertDelay')).not.toBeInTheDocument();
   });
 });

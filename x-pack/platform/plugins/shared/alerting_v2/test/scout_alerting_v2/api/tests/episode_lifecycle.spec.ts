@@ -66,12 +66,10 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           metadata: { name: 'e2e-lifecycle-pending-active' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          recovery_policy: { type: 'no_breach' },
           grouping: { fields: ['host.name'] },
           state_transition: null,
         })
@@ -133,12 +131,10 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           metadata: { name: 'e2e-lifecycle-recovery' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-1" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-1" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          recovery_policy: { type: 'no_breach' },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
@@ -198,12 +194,10 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         metadata: { name: 'e2e-lifecycle-multi-group' },
         time_field: '@timestamp',
         schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-        evaluation: {
-          query: {
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-a", "host-multi-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-          },
+        query: {
+          format: 'standalone',
+          breach: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-a", "host-multi-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
         },
-        recovery_policy: { type: 'no_breach' },
         grouping: { fields: ['host.name'] },
         state_transition: { pending_count: 0, recovering_count: 0 },
       })
@@ -260,12 +254,10 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           metadata: { name: 'e2e-lifecycle-threshold' },
           time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-threshold-1" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-threshold-1" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          recovery_policy: { type: 'no_breach' },
           grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 2 },
         })

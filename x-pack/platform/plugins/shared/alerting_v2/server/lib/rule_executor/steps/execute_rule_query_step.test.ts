@@ -44,7 +44,7 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
   });
 
-  it('passes correct parameters to ES client', async () => {
+  it('passes correct parameters to ES client for standalone format', async () => {
     mockEsClient.esql.query.mockResolvedValue(
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
     );
@@ -57,8 +57,32 @@ describe('ExecuteRuleQueryStep', () => {
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({ query: rule.evaluation.query.base.trimEnd() }),
+      expect.objectContaining({ query: (rule.query as { breach: string }).breach.trimEnd() }),
       expect.objectContaining({ signal: abortController.signal })
+    );
+  });
+
+  it('concatenates base and breach block for composed format rules', async () => {
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
+    );
+
+    const rule = createRuleResponse({
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        blocks: { breach: ' | WHERE avg(cpu) > 0.9' },
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: 'FROM metrics-* | STATS avg(cpu) BY host.name | WHERE avg(cpu) > 0.9',
+      }),
+      expect.any(Object)
     );
   });
 

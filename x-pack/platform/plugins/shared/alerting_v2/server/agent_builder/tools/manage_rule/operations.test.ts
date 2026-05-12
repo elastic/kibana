@@ -28,7 +28,10 @@ describe('executeRuleOperations', () => {
       } as never);
 
       const ops: RuleOperation[] = [
-        { operation: 'set_query', base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+        },
       ];
 
       const result = await executeRuleOperations({}, ops, esClient);
@@ -37,7 +40,10 @@ describe('executeRuleOperations', () => {
         query: 'FROM metrics-* | STATS avg(cpu) BY host.name | LIMIT 0',
         format: 'json',
       });
-      expect(result.evaluation?.query?.base).toBe('FROM metrics-* | STATS avg(cpu) BY host.name');
+      expect(result.query).toEqual({
+        breach: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        format: 'standalone',
+      });
     });
 
     it('throws with the ES error message when the query is invalid', async () => {
@@ -47,7 +53,10 @@ describe('executeRuleOperations', () => {
       );
 
       const ops: RuleOperation[] = [
-        { operation: 'set_query', base: 'FROM nonexistent-* | STATS COUNT(*)' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: 'FROM nonexistent-* | STATS COUNT(*)' },
+        },
       ];
 
       await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
@@ -57,12 +66,18 @@ describe('executeRuleOperations', () => {
 
     it('skips validation when esClient is not provided', async () => {
       const ops: RuleOperation[] = [
-        { operation: 'set_query', base: 'FROM metrics-* | STATS COUNT(*)' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: 'FROM metrics-* | STATS COUNT(*)' },
+        },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
-      expect(result.evaluation?.query?.base).toBe('FROM metrics-* | STATS COUNT(*)');
+      expect(result.query).toEqual({
+        breach: 'FROM metrics-* | STATS COUNT(*)',
+        format: 'standalone',
+      });
     });
   });
 
@@ -78,7 +93,10 @@ describe('executeRuleOperations', () => {
       } as never);
 
       const ops: RuleOperation[] = [
-        { operation: 'set_query', base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+        },
         { operation: 'set_grouping', fields: ['host.name'] },
       ];
 
@@ -98,7 +116,10 @@ describe('executeRuleOperations', () => {
       } as never);
 
       const ops: RuleOperation[] = [
-        { operation: 'set_query', base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+        {
+          operation: 'set_query',
+          query: { format: 'standalone', breach: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+        },
         { operation: 'set_grouping', fields: ['service.name'] },
       ];
 
@@ -150,11 +171,39 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('throws when recovery_policy type is query but no query is provided', async () => {
-      const ops: RuleOperation[] = [{ operation: 'set_recovery_policy', type: 'query' }];
+    it('throws when signal rule uses composed query format', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            blocks: { breach: '| WHERE error = true' },
+          },
+        },
+      ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'recovery_policy.query.base is required when recovery_policy.type is "query"'
+        'kind "signal" requires query.format "standalone"'
+      );
+    });
+
+    it('throws when signal rule sets a recover query', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_kind', kind: 'signal' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: 'FROM logs-* | WHERE error = true',
+            recover: 'FROM logs-* | WHERE error = false',
+          },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'Signal rules cannot set recover or no_data queries'
       );
     });
   });
@@ -168,7 +217,11 @@ describe('executeRuleOperations', () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockRejectedValueOnce(new Error('boom'));
       await expectValidationError(
-        executeRuleOperations({}, [{ operation: 'set_query', base: 'FROM x' }], esClient)
+        executeRuleOperations(
+          {},
+          [{ operation: 'set_query', query: { format: 'standalone', breach: 'FROM x' } }],
+          esClient
+        )
       );
     });
 
@@ -182,7 +235,7 @@ describe('executeRuleOperations', () => {
         executeRuleOperations(
           {},
           [
-            { operation: 'set_query', base: 'FROM x' },
+            { operation: 'set_query', query: { format: 'standalone', breach: 'FROM x' } },
             { operation: 'set_grouping', fields: ['bar'] },
           ],
           esClient
@@ -207,9 +260,35 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('wraps recovery_policy missing query', async () => {
+    it('wraps composed query on signal kind', async () => {
       await expectValidationError(
-        executeRuleOperations({}, [{ operation: 'set_recovery_policy', type: 'query' }])
+        executeRuleOperations({}, [
+          { operation: 'set_kind', kind: 'signal' },
+          {
+            operation: 'set_query',
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*',
+              blocks: { breach: '| WHERE error = true' },
+            },
+          },
+        ])
+      );
+    });
+
+    it('wraps recover query on signal kind', async () => {
+      await expectValidationError(
+        executeRuleOperations({}, [
+          { operation: 'set_kind', kind: 'signal' },
+          {
+            operation: 'set_query',
+            query: {
+              format: 'standalone',
+              breach: 'FROM logs-* | WHERE error = true',
+              recover: 'FROM logs-* | WHERE error = false',
+            },
+          },
+        ])
       );
     });
   });

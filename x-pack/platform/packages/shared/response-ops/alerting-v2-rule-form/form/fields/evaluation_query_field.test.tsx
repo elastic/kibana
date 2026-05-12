@@ -71,7 +71,7 @@ describe('EvaluationQueryField', () => {
   it('displays initial value from form context', () => {
     render(<EvaluationQueryField />, {
       wrapper: createFormWrapper({
-        evaluation: { query: { base: 'FROM logs-* | STATS count = COUNT(*)' } },
+        query: { breach: 'FROM logs-* | STATS count = COUNT(*)' },
       }),
     });
 
@@ -98,7 +98,7 @@ describe('EvaluationQueryField', () => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
-          evaluation: { query: { base: '' } },
+          query: { breach: '' },
         },
         mode: 'onSubmit',
       });
@@ -135,7 +135,7 @@ describe('EvaluationQueryField', () => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
-          evaluation: { query: { base: 'INVALID QUERY' } },
+          query: { breach: 'INVALID QUERY' },
         },
         mode: 'onSubmit',
       });
@@ -172,7 +172,7 @@ describe('EvaluationQueryField', () => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
-          evaluation: { query: { base: 'FROM logs-* |' } },
+          query: { breach: 'FROM logs-* |' },
         },
         mode: 'onSubmit',
       });

@@ -69,13 +69,8 @@ export const defaultTestFormValues: FormValues = {
   },
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: '',
-    },
-  },
-  recoveryPolicy: {
-    type: 'no_breach',
+  query: {
+    breach: '',
   },
   stateTransitionAlertDelayMode: DELAY_MODE.immediate,
   stateTransitionRecoveryDelayMode: DELAY_MODE.immediate,

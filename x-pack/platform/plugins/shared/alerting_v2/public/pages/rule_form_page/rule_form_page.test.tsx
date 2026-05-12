@@ -177,7 +177,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Stale Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isFetching: true,
@@ -201,7 +201,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Fresh Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isFetching: false,
@@ -227,7 +227,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isFetching: true,
@@ -265,7 +265,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isError: false,
@@ -286,7 +286,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isError: false,
@@ -307,13 +307,8 @@ describe('RuleFormPage', () => {
           metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
-          evaluation: {
-            query: {
-              base: 'FROM logs-* | STATS count() BY host.name',
-            },
-          },
+          query: { format: 'standalone', breach: 'FROM logs-* | STATS count() BY host.name' },
           grouping: { fields: ['host.name'] },
-          recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 3, pending_timeframe: '5m' },
         },
         isLoading: false,
@@ -338,17 +333,13 @@ describe('RuleFormPage', () => {
       expect(schedule.every).toBe('10m');
       expect(schedule.lookback).toBe('2m');
 
-      // Evaluation
-      const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
-      expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
+      // Query
+      const query = initialValues.query as { breach: string };
+      expect(query.breach).toBe('FROM logs-* | STATS count() BY host.name');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };
       expect(grouping.fields).toEqual(['host.name']);
-
-      // Recovery policy
-      const recoveryPolicy = initialValues.recoveryPolicy as Record<string, unknown>;
-      expect(recoveryPolicy.type).toBe('no_breach');
 
       // State transition
       const stateTransition = initialValues.stateTransition as Record<string, unknown>;
@@ -367,7 +358,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM metrics-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM metrics-* | LIMIT 10' },
         },
         isLoading: false,
         isError: false,
@@ -417,7 +408,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Source Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isError: false,
@@ -438,7 +429,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Source Rule' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
-          evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+          query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
         },
         isLoading: false,
         isError: false,
@@ -459,13 +450,8 @@ describe('RuleFormPage', () => {
           metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
-          evaluation: {
-            query: {
-              base: 'FROM logs-* | STATS count() BY host.name',
-            },
-          },
+          query: { format: 'standalone', breach: 'FROM logs-* | STATS count() BY host.name' },
           grouping: { fields: ['host.name'] },
-          recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 3, pending_timeframe: '5m' },
         },
         isLoading: false,
@@ -491,13 +477,8 @@ describe('RuleFormPage', () => {
           metadata: { name: 'My Alert Rule', tags: ['prod'], owner: 'team-a' },
           time_field: '@timestamp',
           schedule: { every: '10m', lookback: '2m' },
-          evaluation: {
-            query: {
-              base: 'FROM logs-* | STATS count() BY host.name',
-            },
-          },
+          query: { format: 'standalone', breach: 'FROM logs-* | STATS count() BY host.name' },
           grouping: { fields: ['host.name'] },
-          recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 3, pending_timeframe: '5m' },
         },
         isLoading: false,
@@ -519,17 +500,13 @@ describe('RuleFormPage', () => {
       expect(schedule.every).toBe('10m');
       expect(schedule.lookback).toBe('2m');
 
-      // Evaluation
-      const evaluation = initialValues.evaluation as { query: Record<string, unknown> };
-      expect(evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
+      // Query
+      const query = initialValues.query as { breach: string };
+      expect(query.breach).toBe('FROM logs-* | STATS count() BY host.name');
 
       // Grouping
       const grouping = initialValues.grouping as { fields: string[] };
       expect(grouping.fields).toEqual(['host.name']);
-
-      // Recovery policy
-      const recoveryPolicy = initialValues.recoveryPolicy as Record<string, unknown>;
-      expect(recoveryPolicy.type).toBe('no_breach');
 
       // State transition
       const stateTransition = initialValues.stateTransition as Record<string, unknown>;
@@ -548,7 +525,7 @@ describe('RuleFormPage', () => {
           metadata: { name: 'Test' },
           time_field: '@timestamp',
           schedule: { every: '5m' },
-          evaluation: { query: { base: 'FROM metrics-* | LIMIT 10' } },
+          query: { format: 'standalone', breach: 'FROM metrics-* | LIMIT 10' },
         },
         isLoading: false,
         isError: false,

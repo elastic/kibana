@@ -32,11 +32,7 @@ const baseRule: RuleApiResponse = {
     every: '',
     lookback: 'now-1h',
   },
-  evaluation: {
-    query: {
-      base: '',
-    },
-  },
+  query: { format: 'standalone', breach: '' },
 };
 
 const renderMetadata = (rule: RuleApiResponse) =>

@@ -39,20 +39,14 @@ const baseCreateData: CreateRuleParams['data'] = {
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-* | LIMIT 1',
-    },
-  },
+  query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1' },
-  },
+  query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
 });
 
 describe('RulesClient', () => {
@@ -237,9 +231,7 @@ describe('RulesClient', () => {
         client.createRule({
           data: {
             ...baseCreateData,
-            evaluation: {
-              query: { base: 'FROM |' },
-            },
+            query: { format: 'standalone', breach: 'FROM |' },
           },
           options: { id: 'rule-id-5' },
         })

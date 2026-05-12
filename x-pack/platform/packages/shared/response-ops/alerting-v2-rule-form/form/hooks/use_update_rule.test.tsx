@@ -48,10 +48,8 @@ describe('useUpdateRule', () => {
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
-    evaluation: {
-      query: {
-        base: 'FROM logs | LIMIT 10',
-      },
+    query: {
+      breach: 'FROM logs | LIMIT 10',
     },
     grouping: { fields: ['host.name'] },
     stateTransitionAlertDelayMode: 'immediate',
@@ -100,7 +98,7 @@ describe('useUpdateRule', () => {
       metadata: { name: 'Minimal Rule', enabled: true },
       timeField: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: { query: { base: 'FROM logs | LIMIT 10' } },
+      query: { breach: 'FROM logs | LIMIT 10' },
       stateTransitionAlertDelayMode: 'immediate',
       stateTransitionRecoveryDelayMode: 'immediate',
     };
@@ -112,7 +110,6 @@ describe('useUpdateRule', () => {
     await waitFor(() => {
       const body = getLastPatchedBody(http);
       expect(body.grouping).toBeNull();
-      expect(body.recovery_policy).toBeNull();
       expect(body.state_transition).toBeNull();
     });
   });
@@ -130,9 +127,8 @@ describe('useUpdateRule', () => {
       metadata: { name: 'Updated Rule', tags: ['tag1', 'tag2'] },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: { query: { base: 'FROM logs | LIMIT 10' } },
+      query: { format: 'standalone', breach: 'FROM logs | LIMIT 10' },
       grouping: { fields: ['host.name'] },
-      recovery_policy: null,
       state_transition: null,
       artifacts: null,
     };
@@ -165,42 +161,6 @@ describe('useUpdateRule', () => {
     await waitFor(() => {
       const body = getLastPatchedBody(http);
       expect(body.metadata.description).toBe('Updated description');
-    });
-  });
-
-  it('maps recovery_policy with base query', async () => {
-    const { http, result } = setupUseUpdateRule();
-
-    http.patch.mockResolvedValue({ id: ruleId, metadata: { name: 'Recovery Rule' } });
-
-    const formData: FormValues = {
-      ...validFormData,
-      kind: 'alert',
-      evaluation: {
-        query: {
-          base: 'FROM logs | STATS count() BY host',
-        },
-      },
-      recoveryPolicy: {
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
-        },
-      },
-    };
-
-    await act(async () => {
-      result.current.updateRule(formData);
-    });
-
-    await waitFor(() => {
-      const body = getLastPatchedBody(http);
-      expect(body.recovery_policy).toEqual({
-        type: 'query',
-        query: {
-          base: 'FROM logs | STATS count() BY host | WHERE count <= 50',
-        },
-      });
     });
   });
 

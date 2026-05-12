@@ -21,7 +21,7 @@ const validCreateData = {
   kind: 'alert',
   metadata: { name: 'test rule' },
   schedule: { every: '5m' },
-  evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+  query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
 };
 
 describe('createRuleDataSchema', () => {
@@ -34,7 +34,7 @@ describe('createRuleDataSchema', () => {
         metadata: { name: 'test rule' },
         time_field: '@timestamp',
         schedule: { every: '5m' },
-        evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+        query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
       });
     });
 
@@ -45,8 +45,6 @@ describe('createRuleDataSchema', () => {
         time_field: 'event.created',
         schedule: { every: '5m', lookback: '10m' },
         grouping: { fields: ['host.name'] },
-        recovery_policy: { type: 'no_breach' },
-        no_data: { behavior: 'recover', timeframe: '15m' },
         state_transition: {
           pending_operator: 'AND',
           pending_count: 3,
@@ -272,19 +270,69 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('evaluation.query.base', () => {
-    it('rejects an empty query', () => {
+  describe('query', () => {
+    it('rejects an empty breach query', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        evaluation: { query: { base: '' } },
+        query: { format: 'standalone', breach: '' },
       });
       expect(result.success).toBe(false);
     });
 
-    it('rejects an invalid ES|QL query', () => {
+    it('rejects an invalid ES|QL breach query', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        evaluation: { query: { base: 'FROM |' } },
+        query: { format: 'standalone', breach: 'FROM |' },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a standalone query with a recover query', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'standalone',
+          breach: 'FROM logs-* | LIMIT 1',
+          recover: 'FROM logs-* | WHERE status = "ok"',
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a composed query with breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          blocks: { breach: ' | WHERE cpu > 0.9' },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a signal rule with composed format', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          blocks: { breach: ' | WHERE error = true' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a signal rule with a recover query', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        kind: 'signal',
+        query: {
+          format: 'standalone',
+          breach: 'FROM logs-* | LIMIT 1',
+          recover: 'FROM logs-* | WHERE status = "ok"',
+        },
       });
       expect(result.success).toBe(false);
     });
@@ -503,53 +551,6 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('recovery_policy', () => {
-    it('accepts recovery_policy with type "no_breach"', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'no_breach' },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('accepts recovery_policy with type "query" when query.base is provided', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: {
-          type: 'query',
-          query: { base: 'FROM logs-* | LIMIT 1' },
-        },
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('rejects recovery_policy with type "query" when query is missing', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'query' },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['recovery_policy', 'query', 'base']);
-    });
-
-    it('rejects recovery_policy with type "query" when query.base is missing', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'query', query: {} },
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues[0].path).toEqual(['recovery_policy', 'query', 'base']);
-    });
-
-    it('rejects recovery_policy with type "query" when query.base is empty', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        recovery_policy: { type: 'query', query: { base: '' } },
-      });
-      expect(result.success).toBe(false);
-    });
-  });
-
   describe('artifacts value length', () => {
     it('accepts a runbook artifact at the maximum allowed length', () => {
       const result = createRuleDataSchema.safeParse({
@@ -629,7 +630,7 @@ describe('createRuleDataSchema', () => {
   });
 
   describe('required fields', () => {
-    it.each(['kind', 'metadata', 'schedule', 'evaluation'] as const)(
+    it.each(['kind', 'metadata', 'schedule', 'query'] as const)(
       'rejects when required field "%s" is missing',
       (field) => {
         const { [field]: _, ...data } = validCreateData;
@@ -755,7 +756,7 @@ describe('updateRuleDataSchema', () => {
 
     it('rejects an invalid ES|QL query', () => {
       const result = updateRuleDataSchema.safeParse({
-        evaluation: { query: { base: 'FROM |' } },
+        query: { format: 'standalone', breach: 'FROM |' },
       });
       expect(result.success).toBe(false);
     });
@@ -945,11 +946,9 @@ describe('rule field immutability classification', () => {
     expect(mutable).toMatchInlineSnapshot(`
       Array [
         "artifacts",
-        "evaluation",
         "grouping",
         "metadata",
-        "no_data",
-        "recovery_policy",
+        "query",
         "schedule",
         "state_transition",
         "time_field",

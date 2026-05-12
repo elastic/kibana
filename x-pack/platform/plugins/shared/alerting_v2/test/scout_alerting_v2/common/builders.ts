@@ -9,8 +9,9 @@ import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 
 const DEFAULT_METADATA: CreateRuleData['metadata'] = { name: 'scout-rule' };
 
-const DEFAULT_EVALUATION: CreateRuleData['evaluation'] = {
-  query: { base: 'FROM logs-* | LIMIT 10' },
+const DEFAULT_QUERY: CreateRuleData['query'] = {
+  format: 'standalone',
+  breach: 'FROM logs-* | LIMIT 10',
 };
 
 const DEFAULT_SCHEDULE: CreateRuleData['schedule'] = { every: '5m' };
@@ -24,9 +25,9 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
     kind = 'alert',
     metadata = DEFAULT_METADATA,
     schedule = DEFAULT_SCHEDULE,
-    evaluation = DEFAULT_EVALUATION,
+    query = DEFAULT_QUERY,
     time_field = DEFAULT_TIME_FIELD,
     ...rest
   } = input;
-  return { kind, metadata, schedule, evaluation, time_field, ...rest };
+  return { kind, metadata, schedule, query, time_field, ...rest };
 };

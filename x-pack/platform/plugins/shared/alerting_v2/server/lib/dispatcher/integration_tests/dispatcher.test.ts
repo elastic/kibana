@@ -1344,7 +1344,7 @@ async function seedRulesAndPolicies(
     metadata: { name: 'Test Rule' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM test' } },
+    query: { format: 'standalone', breach: 'FROM test' },
     enabled: true,
     createdBy: null,
     updatedBy: null,
