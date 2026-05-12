@@ -13,14 +13,10 @@ import type {
   SandboxTabConfig,
 } from './types';
 
-const SAMPLE_QUERY = `FROM logs-*
-| STATS count = COUNT(*) BY host.name
-| WHERE count > 0`;
-
 const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => ({
   mode,
   step: 0,
-  fullQuery: mode === 'create' ? SAMPLE_QUERY : '',
+  fullQuery: '',
   activeTab: 'alert',
   yamlMode: false,
   childOpen: mode === 'create',
