@@ -89,7 +89,7 @@ Your job is to determine:
 - the most likely root cause
 - whether the flakiness is more likely in the test, in the underlying product code, due to an external cause, or inconclusive
 - the smallest credible fix to try next
-- whether this failure is a good candidate for the **automated Flaky Test Auto-Fix** pipeline (the `fixability` field — see "Fixability classification" below). If yes, apply the `ai:auto-flaky-fix` label so a downstream agent picks it up.
+- whether a fix was identified for this test failure (the `fixability` field — see "Fixability classification" below). If yes, apply the `ai:auto-flaky-fix` label so a downstream agent picks it up.
 
 ## What to inspect
 
