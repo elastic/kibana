@@ -122,8 +122,11 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   // Golden snapshots: any future template change will surface here in PR review.
   // Update with `--ci=false -u` only when the change is intentional and reviewed.
   describe('golden snapshots', () => {
-    it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)('$id: targets-per-actor ES|QL is locked', (config) => {
-      expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
-    });
+    it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: targets-per-actor ES|QL is locked',
+      (config) => {
+        expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
+      }
+    );
   });
 });
