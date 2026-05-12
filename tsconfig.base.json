@@ -134,6 +134,8 @@
       "@kbn/anonymization-ui/*": ["x-pack/platform/packages/shared/ai-infra/anonymization-ui/*"],
       "@kbn/api-contracts": ["packages/kbn-api-contracts"],
       "@kbn/api-contracts/*": ["packages/kbn-api-contracts/*"],
+      "@kbn/apm-common": ["src/platform/packages/shared/kbn-apm-common"],
+      "@kbn/apm-common/*": ["src/platform/packages/shared/kbn-apm-common/*"],
       "@kbn/apm-config-loader": ["src/platform/packages/private/kbn-apm-config-loader"],
       "@kbn/apm-config-loader/*": ["src/platform/packages/private/kbn-apm-config-loader/*"],
       "@kbn/apm-data-access-plugin": ["x-pack/solutions/observability/plugins/apm_data_access"],
