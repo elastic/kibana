@@ -7,4 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { linksSavedObjectType } from './links';
+export type {
+  DashboardLink,
+  ExternalLink,
+  ExternalLinkOptions,
+  Link,
+  LinkOptions,
+  LinksState,
+  StoredDashboardLink,
+  StoredLinksState,
+} from './schema/v1';
+export { LinksStorage } from './links_storage';
+export { linksSavedObjectType } from './links_saved_object';

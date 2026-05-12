@@ -18,7 +18,7 @@ export type {
   LinksState,
   StoredDashboardLink,
   StoredLinksState,
-} from './content_management';
+} from './links_saved_object';
 
 export type {
   LinksByValueState,

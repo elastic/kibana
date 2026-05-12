@@ -11,7 +11,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksReadResponseBody } from './types';
-import type { StoredLinksState } from '../../content_management';
+import type { StoredLinksState } from '../../links_saved_object';
 
 export async function read(
   requestCtx: RequestHandlerContext,

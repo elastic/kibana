@@ -9,7 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_SAVED_OBJECT_TYPE, transformIn } from '../../../common';
-import type { StoredLinksState } from '../../content_management';
+import type { StoredLinksState } from '../../links_saved_object';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from './types';
 

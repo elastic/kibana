@@ -10,7 +10,7 @@
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import { linksSchema } from './schemas';
-import type { StoredLinksState } from '../content_management';
+import type { StoredLinksState } from '../links_saved_object';
 import { transformOut } from '../../common/embeddable/transforms/transform_out';
 
 // CRU is Create, Read, Update

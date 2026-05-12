@@ -87,7 +87,7 @@ jest.mock('../lib/resolve_links', () => {
   };
 });
 
-jest.mock('../content_management', () => {
+jest.mock('../links_client', () => {
   return {
     linksClient: {
       create: jest.fn().mockResolvedValue({ item: { id: '333' } }),
@@ -96,7 +96,7 @@ jest.mock('../content_management', () => {
   };
 });
 
-jest.mock('../content_management/load_from_library', () => {
+jest.mock('../links_client/load_from_library', () => {
   return {
     loadFromLibrary: jest.fn((refId) => {
       return Promise.resolve({

@@ -12,7 +12,7 @@ import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from './types';
 import { transformIn } from '../../../common';
-import type { StoredLinksState } from '../../content_management';
+import type { StoredLinksState } from '../../links_saved_object';
 
 export async function create(
   requestCtx: RequestHandlerContext,

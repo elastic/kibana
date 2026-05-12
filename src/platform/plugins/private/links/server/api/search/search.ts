@@ -11,7 +11,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { LinksSearchRequestQuery, LinksSearchResponseBody } from './types';
-import type { StoredLinksState } from '../../content_management';
+import type { StoredLinksState } from '../../links_saved_object';
 
 export async function search(
   requestCtx: RequestHandlerContext,
