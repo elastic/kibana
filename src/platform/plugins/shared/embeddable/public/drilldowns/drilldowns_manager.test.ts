@@ -15,21 +15,17 @@ describe('initializeDrilldownsManager', () => {
       const { anyStateChange$, api, getLatestState } = initializeDrilldownsManager('embeddable1', {
         drilldowns: [],
       });
-      let emitCount = 0;
       anyStateChange$.subscribe(() => {
-        emitCount++;
-        if (emitCount === 1) {
-          try {
-            const { drilldowns } = getLatestState();
-            expect(drilldowns?.length).toBe(1);
-          } catch (error) {
-            // drilldowns assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
+        try {
+          const { drilldowns } = getLatestState();
+          expect(drilldowns?.length).toBe(1);
+        } catch (error) {
+          // drilldowns assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
         }
+        done();
       });
       api.setDrilldowns([{ label: 'myDrilldown', trigger: 'on_click', type: 'test_drilldown' }]);
     });

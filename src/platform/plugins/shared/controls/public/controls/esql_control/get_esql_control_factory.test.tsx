@@ -282,21 +282,17 @@ describe('ESQLControlApi', () => {
     });
 
     test('should not emit on subscribe and emit when any state changes', (done) => {
-      let emitCount = 0;
       embeddableApi.anyStateChange$.subscribe(() => {
-        emitCount++;
-        if (emitCount === 1) {
-          try {
-            const { title } = embeddableApi.serializeState();
-            expect(title).toBe('cute puppies');
-          } catch (error) {
-            // title assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
+        try {
+          const { title } = embeddableApi.serializeState();
+          expect(title).toBe('cute puppies');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
         }
+        done();
       });
       embeddableApi.setTitle('cute puppies');
     });

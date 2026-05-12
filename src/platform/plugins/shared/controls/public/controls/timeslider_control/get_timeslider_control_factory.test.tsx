@@ -340,21 +340,17 @@ describe('TimeSliderControlApi', () => {
     });
 
     test('should not emit on subscribe and emit when any state changes', (done) => {
-      let emitCount = 0;
       embeddableApi.anyStateChange$.subscribe(() => {
-        emitCount++;
-        if (emitCount === 1) {
-          try {
-            const { start_percentage_of_time_range } = embeddableApi.serializeState();
-            expect(start_percentage_of_time_range).toBe(0);
-          } catch (error) {
-            // start_percentage_of_time_range assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
+        try {
+          const { start_percentage_of_time_range } = embeddableApi.serializeState();
+          expect(start_percentage_of_time_range).toBe(0);
+        } catch (error) {
+          // start_percentage_of_time_range assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
         }
+        done();
       });
       embeddableApi.clearSelections();
     });

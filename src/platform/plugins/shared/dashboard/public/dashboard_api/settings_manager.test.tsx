@@ -18,21 +18,17 @@ describe('initializeSettingsManager', () => {
   describe('anyStateChange$', () => {
     test('should not emit on subscribe and emit when any state changes', (done) => {
       const settingsManager = initializeSettingsManager(DEFAULT_DASHBOARD_STATE);
-      let emitCount = 0;
       settingsManager.internalApi.anyStateChange$.subscribe(() => {
-        emitCount++;
-        if (emitCount === 1) {
-          try {
-            const { title } = settingsManager.internalApi.serializeSettings();
-            expect(title).toBe('new title');
-          } catch (error) {
-            // title assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
+        try {
+          const { title } = settingsManager.internalApi.serializeSettings();
+          expect(title).toBe('new title');
+        } catch (error) {
+          // title assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
         }
+        done();
       });
       settingsManager.api.setSettings({
         ...settingsManager.internalApi.serializeSettings(),

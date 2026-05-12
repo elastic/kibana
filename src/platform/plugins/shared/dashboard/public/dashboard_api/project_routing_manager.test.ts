@@ -202,21 +202,17 @@ describe('projectRouting', () => {
     test('should not emit on subscribe and emit when any state changes', (done) => {
       const { manager } = initManager(true, '_alias:_origin');
 
-      let emitCount = 0;
       manager!.internalApi.anyStateChange$.subscribe(() => {
-        emitCount++;
-        if (emitCount === 1) {
-          try {
-            const { project_routing } = manager!.internalApi.getState();
-            expect(project_routing).toBe('_alias:*');
-          } catch (error) {
-            // project_routing assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
+        try {
+          const { project_routing } = manager!.internalApi.getState();
+          expect(project_routing).toBe('_alias:*');
+        } catch (error) {
+          // project_routing assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
         }
+        done();
       });
 
       manager!.api.setProjectRouting('_alias:*');

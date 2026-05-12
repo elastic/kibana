@@ -25,24 +25,20 @@ describe('initializeUnifiedSearchManager', () => {
           useUnifiedSearchIntegration: false,
         }
       );
-      let emitCount = 0;
       unifiedSearchManager.internalApi.anyStateChange$.subscribe(() => {
-        emitCount++;
-        if (emitCount === 1) {
-          try {
-            const { time_range } = unifiedSearchManager.internalApi.getState();
-            expect(time_range).toEqual({
-              to: 'now',
-              from: 'now-7m',
-            });
-          } catch (error) {
-            // time_range assertion fails when
-            // anyStateChange$ emits on subscribe
-            done(error);
-            return;
-          }
-          done();
+        try {
+          const { time_range } = unifiedSearchManager.internalApi.getState();
+          expect(time_range).toEqual({
+            to: 'now',
+            from: 'now-7m',
+          });
+        } catch (error) {
+          // time_range assertion fails when
+          // anyStateChange$ emits on subscribe
+          done(error);
+          return;
         }
+        done();
       });
       unifiedSearchManager.api.setTimeRange({
         to: 'now',
