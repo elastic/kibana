@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import * as t from 'io-ts';
+import { defineRoute } from '../types';
+import { alertParamsRt, type PreviewChartResponse } from './types';
+
+export interface TransactionDurationChartPreviewResponse {
+  latencyChartPreview: PreviewChartResponse;
+}
+
+export const transactionDurationChartPreviewRoute =
+  defineRoute<TransactionDurationChartPreviewResponse>()({
+    endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+    params: t.type({ query: alertParamsRt }),
+  });
