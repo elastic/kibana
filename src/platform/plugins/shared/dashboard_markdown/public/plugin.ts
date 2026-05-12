@@ -68,7 +68,7 @@ export class DashboardMarkdownPlugin
       getSavedObjects: async (searchRequest) => {
         const { markdownClient } = await import('./async_services');
         const result = await markdownClient.search({ ...searchRequest });
-        return result.markdowns.map(({ id, data, meta }) => {
+        return result.data.map(({ id, data, meta }) => {
           return {
             type: MARKDOWN_SAVED_OBJECT_TYPE,
             id,
