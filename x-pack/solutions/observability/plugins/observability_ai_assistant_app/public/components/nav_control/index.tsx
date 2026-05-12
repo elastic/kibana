@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiShowFor, EuiToolTip } from '@elastic/eui';
+import { EuiShowFor, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -141,7 +141,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     hideConversationList: false,
   };
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<EuiToolTip>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
   const [tooltipVisible, setTooltipVisible] = useState(true);
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {

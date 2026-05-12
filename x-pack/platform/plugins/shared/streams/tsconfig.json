@@ -44,7 +44,6 @@
     "@kbn/features-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/es-query",
-    "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
     "@kbn/inference-prompt-utils",
@@ -94,6 +93,8 @@
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/data-streams",
+    "@kbn/es-mappings"
   ]
 }

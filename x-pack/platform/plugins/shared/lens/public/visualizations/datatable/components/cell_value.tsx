@@ -75,8 +75,11 @@ export const createGridCell = (
     );
 
     const badgeColor = useMemo(() => {
-      if (renderMode !== 'badge' || (!palette && !colorMapping)) return null;
+      if (renderMode !== 'badge') return null;
       if (isNonColorableValue(rawValue)) return null;
+      // Always delegate to getCellColor: when no palette/colorMapping is configured
+      // (e.g. via the as-code Lens API) the factory resolves sensible defaults so badges
+      // are colored automatically, mirroring the cell/text coloring behavior.
       const color = getCellColor(columnId, palette, colorMapping)(rawValue);
       return color || null;
     }, [renderMode, columnId, palette, colorMapping, rawValue]);
