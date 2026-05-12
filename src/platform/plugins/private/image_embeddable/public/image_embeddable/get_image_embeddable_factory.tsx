@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -58,7 +58,10 @@ export const getImageEmbeddableFactory = () => {
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          imageConfig$.pipe(map(() => undefined)),
+          imageConfig$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
           drilldownsManager.anyStateChange$
         ),
         getComparators: () => {
@@ -75,7 +78,7 @@ export const getImageEmbeddableFactory = () => {
         },
       });
 
-      const embeddable = finalizeApi({
+      const embeddableApi = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
         ...unsavedChangesApi,
@@ -108,18 +111,16 @@ export const getImageEmbeddableFactory = () => {
           }),
         serializeState,
       });
-      return {
-        api: embeddable,
-        Component: () => {
-          const privateImageEmbeddableApi = useMemo(() => {
-            /** Memoize the API so that the reference stays consistent and it can be used as a dependency */
-            return {
-              ...embeddable,
-              imageConfig$,
-              setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
-            };
-          }, []);
 
+      const privateImageEmbeddableApi = {
+        ...embeddableApi,
+        imageConfig$,
+        setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
+      };
+
+      return {
+        api: embeddableApi,
+        Component: () => {
           useEffect(() => {
             return () => {
               drilldownsManager.cleanup();

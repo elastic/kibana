@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { MaybePromise } from '@kbn/utility-types';
-import { combineLatestWith, debounceTime, map, of } from 'rxjs';
+import { combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
 import type { HasSerializableState } from '../../has_serializable_state';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
@@ -26,7 +26,6 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   defaultState,
   serializeState,
   anyStateChange$,
-  checkRefEquality,
 }: {
   uuid: string;
   parentApi: unknown;
@@ -35,7 +34,6 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   getComparators: () => StateComparators<StateType>;
   defaultState?: Partial<StateType>;
   onReset?: (lastSavedPanelState?: StateType) => MaybePromise<void>;
-  checkRefEquality?: boolean;
 }): PublishesUnsavedChanges & Pick<HasSerializableState<StateType>, 'anyStateChange$' | 'applySerializedState'> => {
   const applySerializedState = async (state?: StateType) => {
     await onReset?.(state);
@@ -50,6 +48,9 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   }
 
   const hasUnsavedChanges$ = anyStateChange$.pipe(
+    // anyStateChange$ does not emit on subscribe
+    // use startWith to compare unsaved changes on subscribe
+    startWith(undefined),
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
