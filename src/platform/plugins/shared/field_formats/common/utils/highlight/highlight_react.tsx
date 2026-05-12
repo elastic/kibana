@@ -11,16 +11,14 @@ import React from 'react';
 import { highlightTags } from './highlight_tags';
 
 /**
- * React equivalent of getHighlightHtml. Mirrors the same two-step algorithm:
+ * Applies search highlighting to a field value, returning React nodes.
  *
- * Step 1 (identical to getHighlightHtml): for each highlight, strip its Kibana
- * tags to get the plain substring, then replace every occurrence of that
- * substring in the working string with the tagged version. Note: getHighlightHtml
- * HTML-escapes each highlight before this step; that is omitted here because
- * React automatically escapes text node content.
+ * Step 1: for each highlight, strip its Kibana tags to get the plain substring,
+ * then replace every occurrence of that substring in the working string with
+ * the tagged version. React automatically escapes text node content.
  *
- * Step 2 (React-specific): convert the tag-substituted string to React nodes,
- * wrapping each highlighted span in a <mark> element instead of an HTML string.
+ * Step 2: convert the tag-substituted string to React nodes, wrapping each
+ * highlighted span in a <mark> element.
  */
 export function getHighlightReact(
   fieldValue: string,
@@ -28,7 +26,7 @@ export function getHighlightReact(
 ): React.ReactNode {
   if (!highlights?.length) return fieldValue;
 
-  // Step 1 — mirror of getHighlightHtml's replacement loop.
+  // Step 1 — replacement loop.
   //
   // ES highlight snippets are fragments of the field value, not the full value.
   // We locate each highlighted substring within the full value and inject the
