@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
-  unknown = 'unknown',
+export enum AnomalyDetectorType {
+  txLatency = 'txLatency',
+  txThroughput = 'txThroughput',
+  txFailureRate = 'txFailureRate',
 }

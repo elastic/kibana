@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
-  unknown = 'unknown',
+export enum AnnotationType {
+  VERSION = 'version',
+}
+
+export interface Annotation {
+  type: AnnotationType;
+  id: string;
+  '@timestamp': number;
+  text: string;
 }

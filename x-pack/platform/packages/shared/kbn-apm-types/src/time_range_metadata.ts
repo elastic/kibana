@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmDataSource } from './data_source';
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
-  unknown = 'unknown',
+export interface TimeRangeMetadata {
+  isUsingServiceDestinationMetrics: boolean;
+  sources: Array<ApmDataSource & { hasDocs: boolean; hasDurationSummaryField: boolean }>;
 }

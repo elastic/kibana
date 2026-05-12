@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
-  unknown = 'unknown',
+export enum ServerlessType {
+  AWS_LAMBDA = 'aws.lambda',
+  AZURE_FUNCTIONS = 'azure.functions',
 }

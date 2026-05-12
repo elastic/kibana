@@ -14,5 +14,9 @@
   ],
   "kbn_references": [
     "@kbn/elastic-agent-utils",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/io-ts-utils",
+    "@kbn/config-schema",
   ]
 }

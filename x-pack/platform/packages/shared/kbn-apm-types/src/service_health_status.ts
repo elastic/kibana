@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
+export enum ServiceHealthStatus {
+  healthy = 'healthy',
+  critical = 'critical',
+  warning = 'warning',
   unknown = 'unknown',
 }

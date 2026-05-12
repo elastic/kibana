@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
-  unknown = 'unknown',
+export interface OverallLatencyDistributionResponse {
+  durationMin?: number;
+  durationMax?: number;
+  totalDocCount?: number;
+  percentileThresholdValue?: number | null;
+  overallHistogram?: Array<{
+    key: number;
+    doc_count: number;
+  }>;
 }
