@@ -18,8 +18,10 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { AlertEventStatusKind, StorageMetricsRecorder } from '../../execution_context';
+import type { ExecutionContext } from '../../execution_context';
 import { guardedMapStep } from '../stream_utils';
+import { emitEvent } from '../events';
+import type { AlertEventStatusKind, AlertEventStoredEvent } from '../events';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -41,12 +43,16 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         docs: state.alertEventsBatch,
       });
 
-      // Telemetry is owned by the step. StorageService is a generic bulk
-      // indexer and must not know about alert-event `status` semantics. We
-      // tally the batch we just successfully wrote (the bulk call returned
-      // without throwing); per-item bulk errors are surfaced via service
-      // logs and intentionally not subtracted here for the PoC.
-      recordWrittenEvents(state.alertEventsBatch, state.input.executionContext.metrics.storage);
+      // Step emits one `alert_event_stored` per persisted document. The
+      // StorageService stays a generic bulk indexer — it does not know
+      // about alert-event `status` semantics. Per-item bulk errors are
+      // surfaced via service logs and intentionally not subtracted here
+      // for the PoC.
+      emitStoredEvents(
+        state.alertEventsBatch,
+        state.input.executionContext,
+        state.input.executionUuid
+      );
 
       this.logger.debug({
         message: `[${this.name}] Successfully stored alert events batch`,
@@ -63,14 +69,18 @@ const STATUS_TO_KIND: Record<string, AlertEventStatusKind> = {
   [alertEventStatus.no_data]: 'no_data',
 };
 
-const recordWrittenEvents = (
+const emitStoredEvents = (
   events: ReadonlyArray<AlertEvent>,
-  metrics: StorageMetricsRecorder
+  executionContext: ExecutionContext,
+  executionUuid: string
 ): void => {
   for (const event of events) {
-    const kind = STATUS_TO_KIND[event.status];
-    if (kind != null) {
-      metrics.recordEventWritten(kind);
+    const status = STATUS_TO_KIND[event.status];
+    if (status != null) {
+      emitEvent<AlertEventStoredEvent>(executionContext, executionUuid, {
+        kind: 'alert_event_stored',
+        status,
+      });
     }
   }
 };

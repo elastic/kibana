@@ -22,28 +22,28 @@ import {
 } from '../services/logger_service/logger_service';
 import { EsServiceInternalToken } from '../services/es_service/tokens';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
-import {
-  createExecutionContext,
-  noopExecutionMetricsRecorders,
-  type ExecutionMetricsRecorders,
-} from '../execution_context';
+import { createExecutionContext } from '../execution_context';
+import { RuleExecutionObserverHub } from './events';
 
 /**
- * Raw input from the task runner (or pipeline decorator).
+ * Raw input from the task runner.
  *
- * The pipeline builds the {@link ExecutionContext} from the abort signal and
- * the optional metrics recorders bag. `executionUuid` and `metrics` are
- * supplied by the {@link TelemetryRecorderDecorator}; when the pipeline is
- * invoked directly (e.g. unit tests), they default to a fresh UUID-less
- * placeholder and no-op recorders.
+ * `executionUuid` is minted by the task runner (it is a TM-runner concern
+ * — the same uuid is used for logging, error correlation, and any other
+ * per-execution identifier needs). The pipeline threads it through to
+ * every step via {@link RuleExecutionInput.executionUuid} so emitted
+ * events can join the run.
+ *
+ * The pipeline is the only place that wires
+ * `executionContext.emit → observerHub.emit`; steps and services use
+ * `state.input.executionContext.emit` and stay unaware of the hub.
  */
 export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
+  readonly executionUuid: string;
   readonly abortSignal: AbortSignal;
-  readonly executionUuid?: string;
-  readonly metrics?: ExecutionMetricsRecorders;
 }
 
 export interface RuleExecutionPipelineResult {
@@ -52,30 +52,26 @@ export interface RuleExecutionPipelineResult {
   readonly finalState: RulePipelineState;
 }
 
-export interface RuleExecutionPipelineContract {
-  execute(input: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult>;
-}
-
 @injectable()
-export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
+export class RuleExecutionPipeline {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    @inject(RuleExecutionObserverHub) private readonly observerHub: RuleExecutionObserverHub,
     @multiInject(RuleExecutionStepsToken) private readonly steps: RuleExecutionStep[],
     @multiInject(RuleExecutionMiddlewaresToken)
     private readonly middlewares: RuleExecutionMiddleware[]
   ) {}
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
-    const executionContext = createExecutionContext(
-      rawInput.abortSignal,
-      rawInput.metrics ?? noopExecutionMetricsRecorders
+    const executionContext = createExecutionContext(rawInput.abortSignal, (event) =>
+      this.observerHub.emit(event)
     );
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
       spaceId: rawInput.spaceId,
       scheduledAt: rawInput.scheduledAt,
-      executionUuid: rawInput.executionUuid ?? '',
+      executionUuid: rawInput.executionUuid,
       executionContext,
     };
 
@@ -124,7 +120,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       await this.esClient.indices.refresh({ index: ALERT_EVENTS_DATA_STREAM });
     } catch (error) {
       this.logger.error({
-        error,
+        error: error instanceof Error ? error : new Error(String(error)),
         code: 'INDEX_REFRESH_ERROR',
         type: 'RuleExecutionPipelineError',
       });

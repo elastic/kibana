@@ -68,6 +68,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [],
       });
 
@@ -87,6 +88,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -121,6 +123,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -155,6 +158,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -187,6 +191,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -219,6 +224,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -251,6 +257,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -290,6 +297,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents,
       });
 
@@ -329,6 +337,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -359,6 +368,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -376,6 +386,7 @@ describe('DirectorService', () => {
         directorService.run({
           rule,
           executionContext: abortedContext,
+          executionUuid: 'test-execution-uuid',
           alertEvents: [alertEvent],
         })
       ).rejects.toThrow(/aborted/i);
@@ -391,6 +402,7 @@ describe('DirectorService', () => {
         directorService.run({
           rule,
           executionContext: testExecutionContext,
+          executionUuid: 'test-execution-uuid',
           alertEvents: [alertEvent],
         })
       ).rejects.toThrow('Query failed');
@@ -423,6 +435,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 
@@ -460,6 +473,7 @@ describe('DirectorService', () => {
       const result = await directorService.run({
         rule: ruleWithTransition,
         executionContext: testExecutionContext,
+        executionUuid: 'test-execution-uuid',
         alertEvents: [alertEvent],
       });
 

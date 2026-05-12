@@ -9,13 +9,15 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task'
 import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 
 import { RuleExecutorTaskRunner } from './task_runner';
-import type { RuleExecutionPipelineContract } from './execution_pipeline';
+import type { RuleExecutionPipeline } from './execution_pipeline';
+import type { RuleExecutionObserverHub } from './events';
 import { createRulePipelineState } from './test_utils';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 
 describe('RuleExecutorTaskRunner', () => {
   let runner: RuleExecutorTaskRunner;
-  let pipeline: jest.Mocked<RuleExecutionPipelineContract>;
+  let pipeline: jest.Mocked<Pick<RuleExecutionPipeline, 'execute'>>;
+  let observerHub: jest.Mocked<Pick<RuleExecutionObserverHub, 'emit'>>;
   let abortController: AbortController;
 
   // @ts-expect-error: not all fields are required
@@ -29,8 +31,13 @@ describe('RuleExecutorTaskRunner', () => {
 
   beforeEach(() => {
     pipeline = { execute: jest.fn() };
+    observerHub = { emit: jest.fn() };
     const mockLoggerService = createLoggerService();
-    runner = new RuleExecutorTaskRunner(pipeline, mockLoggerService.loggerService);
+    runner = new RuleExecutorTaskRunner(
+      pipeline as unknown as RuleExecutionPipeline,
+      observerHub as unknown as RuleExecutionObserverHub,
+      mockLoggerService.loggerService
+    );
     abortController = new AbortController();
   });
 
@@ -47,6 +54,7 @@ describe('RuleExecutorTaskRunner', () => {
         ruleId: 'rule-1',
         spaceId: 'default',
         scheduledAt: taskInstance.scheduledAt?.toISOString(),
+        executionUuid: expect.any(String),
         abortSignal: abortController.signal,
       });
     });
@@ -138,6 +146,52 @@ describe('RuleExecutorTaskRunner', () => {
 
       await expect(runner.run({ taskInstance, abortController })).rejects.toThrow(
         'Pipeline failed'
+      );
+    });
+  });
+
+  describe('observer events', () => {
+    it('emits execution_started before invoking the pipeline and execution_completed after success', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: true,
+        finalState: createRulePipelineState(),
+      });
+
+      await runner.run({ taskInstance, abortController });
+
+      expect(observerHub.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kind: 'execution_started',
+          ruleId: 'rule-1',
+          spaceId: 'default',
+        })
+      );
+      expect(observerHub.emit).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'execution_completed', haltReason: undefined })
+      );
+    });
+
+    it('emits execution_completed with haltReason when the pipeline halts', async () => {
+      pipeline.execute.mockResolvedValue({
+        completed: false,
+        haltReason: 'rule_disabled',
+        finalState: createRulePipelineState(),
+      });
+
+      await runner.run({ taskInstance, abortController });
+
+      expect(observerHub.emit).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'execution_completed', haltReason: 'rule_disabled' })
+      );
+    });
+
+    it('emits execution_failed when the pipeline rejects with a generic error', async () => {
+      pipeline.execute.mockRejectedValue(new Error('boom'));
+
+      await runner.run({ taskInstance, abortController }).catch(() => undefined);
+
+      expect(observerHub.emit).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'execution_failed' })
       );
     });
   });

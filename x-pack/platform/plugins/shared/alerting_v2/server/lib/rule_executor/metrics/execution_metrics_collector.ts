@@ -9,10 +9,8 @@ import type {
   AlertEventStatusKind,
   CancellationReason,
   EpisodeTransitionKind,
-  ExecutionMetricsRecorders,
-  RecordSearchInput,
   RecoveryMode,
-} from '../../execution_context';
+} from '../events';
 import type { ExecutionMetricsCollectorContract, ExecutionMetricsSnapshot } from './types';
 
 interface QueryCounters {
@@ -46,16 +44,12 @@ interface CancellationState {
 }
 
 /**
- * Per-execution metrics sink.
+ * Per-execution metrics sink. Owned and driven by `TelemetryObserver`,
+ * which feeds it as it consumes domain events from the observer hub.
  *
- * Implements all the role-segregated recorder interfaces from
- * `lib/execution_context/metrics_recorders.ts` and exposes a single
- * `snapshot()` accessor that returns the RFC-shaped metrics tree.
- *
- * The collector has no knowledge of the event_log plugin or any other
- * downstream consumer — it is pure data. The
- * `TelemetryRecorderDecorator` reads the snapshot after the pipeline
- * completes and turns it into an event-log document.
+ * The collector has no knowledge of the event log, of the observer
+ * protocol, or of any specific event shape. It is pure data: increment
+ * counters via `record*` methods and read them out via `snapshot()`.
  */
 export class ExecutionMetricsCollector implements ExecutionMetricsCollectorContract {
   private readonly query: QueryCounters = {
@@ -84,46 +78,48 @@ export class ExecutionMetricsCollector implements ExecutionMetricsCollectorContr
 
   private cancellation: CancellationState | undefined;
 
-  public readonly recorders: ExecutionMetricsRecorders = {
-    query: {
-      recordSearch: ({ esTookMs, durationMs, rowCount }: RecordSearchInput) => {
-        this.query.numberOfSearches += 1;
-        this.query.esSearchDurationMs += esTookMs;
-        this.query.totalSearchDurationMs += durationMs;
-        this.query.numberOfRowsReturned += rowCount;
-      },
-      recordBatch: () => {
-        this.query.numberOfBatches += 1;
-      },
-    },
-    recovery: {
-      recordRecoveryMode: (mode: RecoveryMode) => {
-        this.recovery.mode = mode;
-      },
-      recordRecoveryEvent: () => {
-        this.recovery.eventsEmitted += 1;
-      },
-    },
-    director: {
-      recordEpisodeTransition: (kind: EpisodeTransitionKind) => {
-        this.episodes[kind] += 1;
-      },
-    },
-    storage: {
-      recordEventWritten: (kind: AlertEventStatusKind) => {
-        this.eventsWritten[kind] += 1;
-      },
-    },
-    cancellation: {
-      recordCancellation: ({ step, reason }) => {
-        // First cancellation wins: the abort always fires at the boundary of
-        // the step that was running.
-        if (this.cancellation == null) {
-          this.cancellation = { step, reason };
-        }
-      },
-    },
-  };
+  public recordSearch({
+    esTookMs,
+    durationMs,
+    rowCount,
+  }: {
+    esTookMs: number;
+    durationMs: number;
+    rowCount: number;
+  }): void {
+    this.query.numberOfSearches += 1;
+    this.query.esSearchDurationMs += esTookMs;
+    this.query.totalSearchDurationMs += durationMs;
+    this.query.numberOfRowsReturned += rowCount;
+  }
+
+  public recordBatch(): void {
+    this.query.numberOfBatches += 1;
+  }
+
+  public recordRecoveryMode(mode: RecoveryMode): void {
+    this.recovery.mode = mode;
+  }
+
+  public recordRecoveryEvent(): void {
+    this.recovery.eventsEmitted += 1;
+  }
+
+  public recordEpisodeTransition(kind: EpisodeTransitionKind): void {
+    this.episodes[kind] += 1;
+  }
+
+  public recordEventWritten(kind: AlertEventStatusKind): void {
+    this.eventsWritten[kind] += 1;
+  }
+
+  public recordCancellation(input: { step: string; reason: CancellationReason }): void {
+    // First cancellation wins: the abort always fires at the boundary of
+    // the step that was running.
+    if (this.cancellation == null) {
+      this.cancellation = { step: input.step, reason: input.reason };
+    }
+  }
 
   public snapshot(): ExecutionMetricsSnapshot {
     const total =

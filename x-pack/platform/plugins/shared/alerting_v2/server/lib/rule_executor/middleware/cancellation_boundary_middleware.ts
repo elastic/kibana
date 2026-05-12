@@ -9,6 +9,8 @@ import { injectable } from 'inversify';
 import type { RuleExecutionMiddleware, RuleExecutionMiddlewareContext } from './types';
 import type { PipelineStateStream, RulePipelineState } from '../types';
 import { isRuleExecutionCancellationError } from '../../execution_context';
+import { emitEvent } from '../events';
+import type { StepCancelledEvent } from '../events';
 
 /**
  * Global middleware that enforces cancellation checks at step boundaries.
@@ -17,11 +19,11 @@ import { isRuleExecutionCancellationError } from '../../execution_context';
  * - Cancellation is detected before a step receives data.
  * - Cancellation is detected after a step yields data.
  *
- * When a cancellation does fire, the middleware records the name of the step
- * that was running into the per-execution metrics collector
- * (`metrics.cancellation`). The telemetry recorder reads that value when it
- * builds the `execute` event-log document so the operator dashboard can
- * answer the "which step was cancelled?" question.
+ * When a cancellation does fire, the middleware emits a `step_cancelled`
+ * event carrying the name of the step that was running. The
+ * `TelemetryObserver` consumes that event to populate the
+ * `metrics.cancelled.{step,reason}` channel on the `execute` event-log
+ * document so the operator dashboard can answer "which step was cancelled?".
  */
 @injectable()
 export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
@@ -45,7 +47,7 @@ export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
             result.state.input.executionContext.throwIfAborted();
           } catch (error) {
             if (isRuleExecutionCancellationError(error)) {
-              recordCancellation(result.state, stepName);
+              emitStepCancelled(result.state, stepName);
             }
             throw error;
           }
@@ -61,8 +63,9 @@ export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
   }
 }
 
-const recordCancellation = (state: RulePipelineState, stepName: string): void => {
-  state.input.executionContext.metrics.cancellation.recordCancellation({
+const emitStepCancelled = (state: RulePipelineState, stepName: string): void => {
+  emitEvent<StepCancelledEvent>(state.input.executionContext, state.input.executionUuid, {
+    kind: 'step_cancelled',
     step: stepName,
     reason: 'cancelled_timeout',
   });

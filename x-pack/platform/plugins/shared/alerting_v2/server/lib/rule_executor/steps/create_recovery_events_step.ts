@@ -25,6 +25,12 @@ import { guardedExpandStep } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../../execution_context';
+import { emitEvent } from '../events';
+import type {
+  QueryExecutedEvent,
+  RecoveryEventBuiltEvent,
+  RecoveryModeSelectedEvent,
+} from '../events';
 
 @injectable()
 export class CreateRecoveryEventsStep implements RuleExecutionStep {
@@ -50,13 +56,14 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const recoveryMetrics = input.executionContext.metrics.recovery;
       const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
-      // Record the mode regardless of whether any active episodes need recovery
-      // — the operator dashboard wants to know which recovery flavour ran.
-      recoveryMetrics.recordRecoveryMode(
-        recoveryType === recoveryPolicyType.query ? 'query' : 'no_breach'
-      );
+      // Emit the mode regardless of whether any active episodes need
+      // recovery — the operator dashboard wants to know which recovery
+      // flavour ran.
+      emitEvent<RecoveryModeSelectedEvent>(input.executionContext, input.executionUuid, {
+        kind: 'recovery_mode_selected',
+        mode: recoveryType === recoveryPolicyType.query ? 'query' : 'no_breach',
+      });
 
       const activeGroupHashes = await step.fetchActiveAlertGroupHashes(
         rule.id,
@@ -84,7 +91,9 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
             });
 
       for (let i = 0; i < recoveryEvents.length; i += 1) {
-        recoveryMetrics.recordRecoveryEvent();
+        emitEvent<RecoveryEventBuiltEvent>(input.executionContext, input.executionUuid, {
+          kind: 'recovery_event_built',
+        });
       }
 
       step.logger.debug({
@@ -128,11 +137,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         })}`,
     });
 
-    // Telemetry for the recovery query is owned by the step, not QueryService
-    // (the service is a generic ES|QL client and must not depend on
-    // rule-executor concepts). We measure wall-clock around the call and
-    // prefer ES `took` for `es_search_duration_ms` when surfaced.
-    const queryMetrics = input.executionContext.metrics.query;
+    // Step owns the query telemetry, not the QueryService — see
+    // `ExecuteRuleQueryStep` for the same pattern. We emit one
+    // `query_executed` after the call returns; the telemetry observer
+    // tallies them across all steps that issue queries.
     const startedAt = Date.now();
     const esqlResponse = await this.scopedQueryService.executeQuery({
       query: effectiveQuery,
@@ -141,7 +149,9 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       abortSignal: input.executionContext.signal,
     });
     const durationMs = Date.now() - startedAt;
-    queryMetrics.recordSearch({
+    emitEvent<QueryExecutedEvent>(input.executionContext, input.executionUuid, {
+      kind: 'query_executed',
+      step: this.name,
       esTookMs: typeof esqlResponse.took === 'number' ? esqlResponse.took : durationMs,
       durationMs,
       rowCount: esqlResponse.values?.length ?? 0,

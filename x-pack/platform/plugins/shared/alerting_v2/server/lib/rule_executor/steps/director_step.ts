@@ -50,8 +50,8 @@ export class DirectorStep implements RuleExecutionStep {
       const processedBatch = await step.director.run({
         rule,
         executionContext: input.executionContext,
+        executionUuid: input.executionUuid,
         alertEvents: alertEventsBatch,
-        metrics: input.executionContext.metrics.director,
       });
 
       yield {

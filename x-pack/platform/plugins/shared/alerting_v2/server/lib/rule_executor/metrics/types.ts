@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CancellationReason,
-  ExecutionMetricsRecorders,
-  RecoveryMode,
-} from '../../execution_context';
+import type { CancellationReason, RecoveryMode } from '../events';
 
 /**
  * Immutable, RFC-shaped snapshot returned by
@@ -50,13 +46,10 @@ export interface ExecutionMetricsSnapshot {
 /**
  * Public contract of the execution metrics collector.
  *
- * It exposes:
- * - The {@link ExecutionMetricsRecorders} bag (for use as the
- *   `metrics` slot on {@link ExecutionContext}).
- * - A `snapshot()` accessor for the telemetry recorder decorator to read at
- *   the end of a run.
+ * Exposes `snapshot()` for the `TelemetryObserver` to read at the end of a
+ * run. Counter writes happen through the concrete collector's `record*`
+ * methods (kept off the contract so consumers are obviously read-only).
  */
 export interface ExecutionMetricsCollectorContract {
-  readonly recorders: ExecutionMetricsRecorders;
   snapshot(): ExecutionMetricsSnapshot;
 }

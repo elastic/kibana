@@ -7,8 +7,9 @@
 
 /**
  * Wraps an error thrown by a pipeline step so downstream consumers (notably
- * {@link TelemetryRecorderDecorator}) can map it back to the step that
- * raised it without resorting to `Error` shape sniffing.
+ * the `TelemetryObserver` mapping outcome → reason via `mapOutcome`) can
+ * recover the originating step name without resorting to `Error` shape
+ * sniffing.
  *
  * Cancellation errors are intentionally **not** wrapped — they are routed
  * through {@link CancellationBoundaryMiddleware} and identified via

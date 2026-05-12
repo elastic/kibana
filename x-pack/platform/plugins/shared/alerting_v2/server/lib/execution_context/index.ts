@@ -13,19 +13,6 @@ export {
 export {
   AbortSignalExecutionContext,
   createExecutionContext,
+  type EmitRuleExecutionEvent,
   type ExecutionContext,
 } from './execution_context';
-export {
-  noopExecutionMetricsRecorders,
-  type AlertEventStatusKind,
-  type CancellationReason,
-  type CancellationRecorder,
-  type DirectorMetricsRecorder,
-  type EpisodeTransitionKind,
-  type ExecutionMetricsRecorders,
-  type QueryMetricsRecorder,
-  type RecordSearchInput,
-  type RecoveryMetricsRecorder,
-  type RecoveryMode,
-  type StorageMetricsRecorder,
-} from './metrics_recorders';

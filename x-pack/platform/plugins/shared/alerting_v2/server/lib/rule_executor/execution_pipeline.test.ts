@@ -10,6 +10,7 @@ import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mock
 import { RuleExecutionPipeline } from './execution_pipeline';
 import type { RulePipelineState } from './types';
 import type { RuleExecutionMiddleware } from './middleware';
+import type { RuleExecutionObserverHub } from './events';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { pipeStream } from './stream_utils';
 import {
@@ -20,11 +21,16 @@ import {
   createRuleResponse,
 } from './test_utils';
 
+const createMockObserverHub = (): RuleExecutionObserverHub =>
+  ({ emit: jest.fn() } as unknown as RuleExecutionObserverHub);
+
 describe('RuleExecutionPipeline', () => {
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
+  let mockObserverHub: RuleExecutionObserverHub;
 
   beforeEach(() => {
     mockEsClient = createMockEsClient();
+    mockObserverHub = createMockObserverHub();
   });
 
   describe('execute', () => {
@@ -56,6 +62,7 @@ describe('RuleExecutionPipeline', () => {
       const pipeline = new RuleExecutionPipeline(
         loggerService,
         mockEsClient,
+        mockObserverHub,
         [step1, step2, step3],
         []
       );
@@ -96,6 +103,7 @@ describe('RuleExecutionPipeline', () => {
       const pipeline = new RuleExecutionPipeline(
         loggerService,
         mockEsClient,
+        mockObserverHub,
         [step1, step2, step3],
         []
       );
@@ -137,6 +145,7 @@ describe('RuleExecutionPipeline', () => {
       const pipeline = new RuleExecutionPipeline(
         loggerService,
         mockEsClient,
+        mockObserverHub,
         [step1, step2, step3],
         []
       );
@@ -178,7 +187,13 @@ describe('RuleExecutionPipeline', () => {
         pipeStream(input, (state) => ({ type: 'continue', state }))
       );
 
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [step1, step2], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [step1, step2],
+        []
+      );
       const input = createRuleExecutionPipelineInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step failed');
@@ -186,7 +201,13 @@ describe('RuleExecutionPipeline', () => {
 
     it('returns empty completed result when no steps', async () => {
       const { loggerService } = createLoggerService();
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [],
+        []
+      );
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -238,6 +259,7 @@ describe('RuleExecutionPipeline', () => {
       const pipeline = new RuleExecutionPipeline(
         loggerService,
         mockEsClient,
+        mockObserverHub,
         [step1],
         [middleware1, middleware2]
       );
@@ -269,7 +291,13 @@ describe('RuleExecutionPipeline', () => {
         })
       );
 
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [step], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [step],
+        []
+      );
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -289,7 +317,13 @@ describe('RuleExecutionPipeline', () => {
         })
       );
 
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [step], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [step],
+        []
+      );
       const input = createRuleExecutionPipelineInput({ abortSignal: abortController.signal });
 
       await pipeline.execute(input);
@@ -323,6 +357,7 @@ describe('RuleExecutionPipeline', () => {
       const pipeline = new RuleExecutionPipeline(
         loggerService,
         mockEsClient,
+        mockObserverHub,
         [step1],
         [errorMiddleware]
       );
@@ -339,7 +374,13 @@ describe('RuleExecutionPipeline', () => {
         pipeStream(input, (state) => ({ type: 'continue', state }))
       );
 
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [step], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [step],
+        []
+      );
       const input = createRuleExecutionPipelineInput();
 
       await pipeline.execute(input);
@@ -358,7 +399,13 @@ describe('RuleExecutionPipeline', () => {
         pipeStream(input, (state) => ({ type: 'continue', state }))
       );
 
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [step], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [step],
+        []
+      );
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -374,7 +421,13 @@ describe('RuleExecutionPipeline', () => {
         pipeStream(input, (state) => ({ type: 'halt', reason: 'rule_disabled', state }))
       );
 
-      const pipeline = new RuleExecutionPipeline(loggerService, mockEsClient, [step], []);
+      const pipeline = new RuleExecutionPipeline(
+        loggerService,
+        mockEsClient,
+        mockObserverHub,
+        [step],
+        []
+      );
       const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);

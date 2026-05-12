@@ -6,13 +6,9 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import {
-  RuleExecutionPipeline,
-  type RuleExecutionPipelineContract,
-} from '../lib/rule_executor/execution_pipeline';
+import { RuleExecutionPipeline } from '../lib/rule_executor/execution_pipeline';
 import {
   RuleExecutionMiddlewaresToken,
-  RuleExecutionPipelineContractToken,
   RuleExecutionStepsToken,
 } from '../lib/rule_executor/tokens';
 import {
@@ -27,28 +23,34 @@ import {
   CancellationBoundaryMiddleware,
   ErrorHandlingMiddleware,
   ApmMiddleware,
+  LifecycleEmitterMiddleware,
 } from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
-import {
-  RuleExecutionPipelineDecoratorToken,
-  TelemetryRecorderDecorator,
-  type RuleExecutionPipelineDecorator,
-} from '../lib/rule_executor/decorators';
+import { RuleExecutionObserverHub, RuleExecutionObserverToken } from '../lib/rule_executor/events';
+import { TelemetryObserver } from '../lib/services/event_log_service/telemetry_observer';
 
 export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
   /**
    * Middlewares
    */
   bind(CancellationBoundaryMiddleware).toSelf().inSingletonScope();
+  bind(LifecycleEmitterMiddleware).toSelf().inSingletonScope();
   bind(ApmMiddleware).toSelf().inSingletonScope();
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
 
   /**
    * Middleware list via multi-injection.
-   * Binding order defines execution order.
+   * Binding order defines execution order (first = outermost wrapper).
+   *
+   * Cancellation guards are outermost so they always fire at the boundary.
+   * LifecycleEmitter sits just inside so per-step duration includes inner
+   * middleware overhead (matches what an operator sees as "step duration").
+   * ApmMiddleware and ErrorHandlingMiddleware are innermost so they wrap
+   * the actual step work.
    */
   bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware).inSingletonScope();
+  bind(RuleExecutionMiddlewaresToken).to(LifecycleEmitterMiddleware).inSingletonScope();
   bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware).inSingletonScope();
   bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
 
@@ -66,40 +68,26 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 
   /**
-   * Inner pipeline. Bound to the concrete class so decorators can resolve it
-   * directly.
+   * Pipeline. Bound directly — no decorator chain. The task runner injects
+   * `RuleExecutionPipeline` as-is and observes the run via the event hub.
    */
   bind(RuleExecutionPipeline).toSelf().inRequestScope();
 
   /**
-   * Around-pipeline decorators via multi-injection.
+   * Event-driven observability.
    *
-   * Each decorator wraps the inner contract once and may run logic before /
-   * after / around `execute(input)`. Add new decorators by appending another
-   * `bind(RuleExecutionPipelineDecoratorToken).to(NewDecorator)` line.
+   * The hub is a singleton broadcaster: it multi-injects every observer
+   * bound to {@link RuleExecutionObserverToken} and fans every emitted
+   * {@link RuleExecutionEvent} out to all of them. Errors from observers
+   * are caught by the hub so a misbehaving probe cannot break the rule.
    *
-   * Order = the order they are bound here. The first registered decorator
-   * becomes the **outermost** wrapper after the fold below.
+   * To add a new observer (audit logging, performance profiling, debug
+   * tracing, dynamic sampling, anything else), implement
+   * {@link RuleExecutionObserver} and append a single bind line below.
+   * No changes are required to the pipeline, the steps, or the task runner.
    */
-  bind(TelemetryRecorderDecorator).toSelf().inSingletonScope();
-  bind(RuleExecutionPipelineDecoratorToken).to(TelemetryRecorderDecorator).inSingletonScope();
+  bind(RuleExecutionObserverHub).toSelf().inSingletonScope();
 
-  /**
-   * Decorated contract.
-   *
-   * Folds the registered decorators around the inner pipeline:
-   *   reduce((acc, dec) => dec.wrap(acc), inner)
-   *
-   * Consumers (`RuleExecutorTaskRunner`) inject the contract token rather
-   * than the concrete class so they always pick up the decorator chain.
-   */
-  bind(RuleExecutionPipelineContractToken)
-    .toDynamicValue(({ get, getAll }) => {
-      const inner: RuleExecutionPipelineContract = get(RuleExecutionPipeline);
-      const decorators = getAll<RuleExecutionPipelineDecorator>(
-        RuleExecutionPipelineDecoratorToken
-      );
-      return decorators.reduce<RuleExecutionPipelineContract>((acc, dec) => dec.wrap(acc), inner);
-    })
-    .inRequestScope();
+  bind(TelemetryObserver).toSelf().inSingletonScope();
+  bind(RuleExecutionObserverToken).to(TelemetryObserver).inSingletonScope();
 };

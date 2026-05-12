@@ -21,23 +21,20 @@ import {
 } from '../../resources/datastreams/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
-import type {
-  DirectorMetricsRecorder,
-  EpisodeTransitionKind,
-  ExecutionContext,
-} from '../execution_context';
+import type { ExecutionContext } from '../execution_context';
+import { emitEvent } from '../rule_executor/events';
+import type { EpisodeTransitionedEvent, EpisodeTransitionKind } from '../rule_executor/events';
 
 interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEvent[];
   executionContext: ExecutionContext;
   /**
-   * Optional sink for episode-transition counters. Receives one increment per
-   * processed alert event whose episode transitioned to `active`,
-   * `recovering`, or `inactive` (i.e. a new lifecycle status — `pending` is
-   * intentionally ignored to align with the RFC's `transitioned_to_*` shape).
+   * Identifier of the rule execution this director run belongs to. Used
+   * exclusively to attach `executionUuid` to emitted events; the director's
+   * domain logic does not depend on it.
    */
-  metrics?: DirectorMetricsRecorder;
+  executionUuid: string;
 }
 
 interface CalculateNextStateParams {
@@ -65,7 +62,7 @@ export class DirectorService {
     rule,
     alertEvents,
     executionContext,
-    metrics,
+    executionUuid,
   }: RunDirectorParams): Promise<AlertEvent[]> {
     if (alertEvents.length === 0) {
       return [];
@@ -73,7 +70,7 @@ export class DirectorService {
 
     const strategy = this.strategyFactory.getStrategy(rule);
     executionContext.throwIfAborted();
-    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, metrics);
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, executionUuid);
   }
 
   private async processAlertEvents(
@@ -81,7 +78,7 @@ export class DirectorService {
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
     executionContext: ExecutionContext,
-    metrics: DirectorMetricsRecorder | undefined
+    executionUuid: string
   ): Promise<AlertEvent[]> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
@@ -105,14 +102,18 @@ export class DirectorService {
           strategy,
         });
 
-        if (metrics != null) {
-          const transition = toEpisodeTransitionKind(
-            previousAlertEvent?.last_episode_status,
-            result.episode?.status
-          );
-          if (transition != null) {
-            metrics.recordEpisodeTransition(transition);
-          }
+        const transition = toEpisodeTransitionKind(
+          previousAlertEvent?.last_episode_status,
+          result.episode?.status
+        );
+        if (transition != null) {
+          // Emit a domain event rather than calling a recorder. Telemetry
+          // observer subscribes; future audit / debug-trace observers can
+          // subscribe too without changes here.
+          emitEvent<EpisodeTransitionedEvent>(executionContext, executionUuid, {
+            kind: 'episode_transitioned',
+            transition,
+          });
         }
 
         return result;

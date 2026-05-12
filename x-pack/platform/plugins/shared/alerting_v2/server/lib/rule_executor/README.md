@@ -37,19 +37,26 @@ That split is the most important branch in the executor.
 The executor combines three mechanisms:
 
 - **steps** for domain work
-- **middleware** for global cross-cutting concerns
-- **decorators** for step-specific wrapping when needed
+- **middleware** for global cross-cutting concerns wrapping each step
+- **events + observers** for fan-out observability (telemetry, audit, debug tracing, ...)
 
 ```text
 Task Manager
    |
    v
-RuleExecutorTaskRunner
-   |
-   v
-RuleExecutionPipeline
-   |
-   +--> middleware chain wraps each step
+RuleExecutorTaskRunner ─── mints executionUuid ───┐
+   |                                              |
+   |   emits execution_started                    |
+   v                                              v
+RuleExecutionPipeline               RuleExecutionObserverHub
+   |                                  |   ^
+   +--> middleware chain wraps step   |   | onEvent(...)
+   |     (Cancellation,               |   |
+   |      LifecycleEmitter,           |   +-- TelemetryObserver
+   |      Apm, ErrorHandling)         |   +-- (future) AuditObserver
+   |                                  |   +-- (future) ...
+   +--> steps emit domain events      |
+   |     via executionContext.emit ───+
    |
    +--> WaitForResourcesStep
    +--> FetchRuleStep
@@ -81,20 +88,23 @@ Each run starts with Task Manager task params:
 - `spaceId`
 - schedule metadata
 
-`RuleExecutorTaskRunner` turns that into `RuleExecutionInput` with:
+`RuleExecutorTaskRunner` mints an `executionUuid` for the run, emits `execution_started` to the observer hub, then turns the task params into `RuleExecutionInput` with:
 
 - `ruleId`
 - `spaceId`
 - `scheduledAt`
-- `executionContext` for cancellation and scoped cleanup
+- `executionUuid`
+- `executionContext` carrying the abort signal and an `emit(event)` function wired to the observer hub
 
 `RuleExecutionPipeline` then:
 
 1. creates initial pipeline state
-2. wraps every step with the middleware chain
-3. streams state through the ordered steps
+2. wraps every step with the middleware chain (cancellation guards, lifecycle event emission, APM spans, error handling)
+3. streams state through the ordered steps; steps and services emit domain events (`batch_processed`, `episode_transitioned`, ...) along the way
 4. halts early on domain reasons when appropriate
 5. refreshes `.rule-events` after the stream completes so freshly written documents become searchable
+
+Once `pipeline.execute` resolves or rejects, the task runner emits the matching terminal event (`execution_completed`, `execution_failed`, or `execution_cancelled`). The hub guarantees one terminal event per started execution.
 
 ## Rule configuration
 
@@ -184,14 +194,69 @@ Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and
 | `rule_disabled` | The rule is present but disabled. |
 | `state_not_ready` | A step ran without required upstream state. Usually indicates ordering or stream wiring misuse. |
 
-## Middleware vs decorators
+## Middleware vs observers
 
 | Mechanism | Use it for | Current examples |
 | --- | --- | --- |
-| Middleware | Global cross-cutting behavior for every step | cancellation, APM, error handling |
-| Decorators | Optional wrapping for selected steps | step-specific extensions without changing middleware scope |
+| Middleware | Behavior that wraps every step's stream (transformation, error handling, abort guards) | cancellation, lifecycle emission, APM, error handling |
+| Observers | Pure consumers of the event stream — derive metrics, write logs, react to events without affecting the pipeline | telemetry → event_log document |
 
-Choose the smallest tool that matches the concern.
+Choose the smallest tool that matches the concern. If you need to inspect or react to what happened, use an observer. If you need to wrap or transform what happens, use middleware.
+
+## Events and observers
+
+The executor emits a typed stream of {@link RuleExecutionEvent}s. The pipeline and middlewares emit lifecycle events (`execution_started`, `step_started`, `step_completed`, `step_cancelled`, terminal events). Steps and services emit domain events (`batch_processed`, `query_executed`, `alert_event_stored`, `episode_transitioned`, `recovery_mode_selected`, `recovery_event_built`).
+
+Observers subscribe via DI multi-injection. The {@link RuleExecutionObserverHub} fans every event out to every observer; observer errors are caught by the hub and never affect the rule execution.
+
+### Adding a new metric (case A — derivable from existing events)
+
+Edit `TelemetryObserver` only. Add a switch arm for the event you need and update the `ExecutionMetricsCollector` if you're persisting a new counter. No other files change.
+
+### Adding a new metric (case B — needs a new domain event)
+
+1. Define a new event interface in `events/types.ts` extending `BaseEvent`, give it a unique `kind` literal, and append it to the `RuleExecutionEvent` union.
+2. Emit it from the relevant step or service:
+
+   ```typescript
+   import { emitEvent } from '../events';
+   import type { MyNewEvent } from '../events';
+
+   emitEvent<MyNewEvent>(state.input.executionContext, state.input.executionUuid, {
+     kind: 'my_new_event',
+     foo: 42,
+   });
+   ```
+
+3. Handle it in `TelemetryObserver` (or a new observer if it's a separate sink).
+
+### Adding a new observer (e.g. audit log, profiler, debug tracer)
+
+1. Implement `RuleExecutionObserver`:
+
+   ```typescript
+   import { injectable } from 'inversify';
+   import type { RuleExecutionEvent, RuleExecutionObserver } from '../rule_executor/events';
+
+   @injectable()
+   export class MyAuditObserver implements RuleExecutionObserver {
+     public readonly name = 'audit_observer';
+
+     public onEvent(event: RuleExecutionEvent): void {
+       if (event.kind !== 'execution_completed') return;
+       // ... write to audit sink
+     }
+   }
+   ```
+
+2. Bind it in `setup/bind_rule_executor.ts` with one line:
+
+   ```typescript
+   bind(MyAuditObserver).toSelf().inSingletonScope();
+   bind(RuleExecutionObserverToken).to(MyAuditObserver).inSingletonScope();
+   ```
+
+The pipeline, the steps, the task runner, and existing observers do not change.
 
 ## When to add a new step
 
@@ -370,9 +435,10 @@ Register middleware in `setup/bind_rule_executor.ts` on `RuleExecutionMiddleware
 
 | Middleware | Purpose |
 | --- | --- |
-| `CancellationBoundaryMiddleware` | Cooperative cancellation / abort handling |
-| `ApmMiddleware` | APM spans around step execution |
-| `ErrorHandlingMiddleware` | Centralized logging for step failures |
+| `CancellationBoundaryMiddleware` | Cooperative cancellation / abort handling. Emits `step_cancelled` when the abort signal fires inside a step boundary. |
+| `LifecycleEmitterMiddleware` | Emits `step_started` on entry and `step_completed` (with `durationMs`) on successful stream completion. |
+| `ApmMiddleware` | APM spans around step execution. |
+| `ErrorHandlingMiddleware` | Centralized logging for step failures; wraps thrown errors in `StepExecutionError` so observers can recover the originating step name. |
 
 ## Testing guidance
 

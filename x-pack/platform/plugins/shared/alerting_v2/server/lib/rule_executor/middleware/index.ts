@@ -9,4 +9,5 @@ export type { RuleExecutionMiddleware, RuleExecutionMiddlewareContext } from './
 export { CancellationBoundaryMiddleware } from './cancellation_boundary_middleware';
 export { ApmMiddleware } from './apm_middleware';
 export { ErrorHandlingMiddleware } from './error_handling_middleware';
+export { LifecycleEmitterMiddleware } from './lifecycle_emitter_middleware';
 export { StepExecutionError, isStepExecutionError } from './step_execution_error';

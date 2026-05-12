@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { isRuleExecutionCancellationError } from '../../execution_context';
-import { isStepExecutionError } from '../middleware';
+import { isStepExecutionError } from '../../rule_executor/middleware/step_execution_error';
 import {
   RULE_EXECUTOR_EXECUTION_STATUS,
   RULE_EXECUTOR_REASON,
   type RuleExecutorExecutionStatus,
   type RuleExecutorReason,
-} from '../event_log/constants';
-import type { HaltReason } from '../types';
-import type { RuleExecutionPipelineResult } from '../execution_pipeline';
+} from '../../rule_executor/event_log/constants';
+import type { HaltReason } from '../../rule_executor/types';
 
 const HALT_REASON_TO_REASON: Record<HaltReason, RuleExecutorReason> = {
   rule_deleted: RULE_EXECUTOR_REASON.RULE_DELETED,
@@ -30,8 +28,17 @@ const STEP_NAME_TO_REASON: Record<string, RuleExecutorReason> = {
 };
 
 export interface OutcomeInput {
-  readonly result: RuleExecutionPipelineResult | undefined;
-  readonly error: unknown;
+  /** Halt reason from a successful (but non-completed) pipeline run, if any. */
+  readonly haltReason?: HaltReason;
+  /** Throwable captured by the task runner — usually `StepExecutionError`. */
+  readonly error?: unknown;
+  /**
+   * `true` when the run terminated via the `execution_cancelled` event.
+   * The caller (`TelemetryObserver`) knows this from the event kind and
+   * passes it explicitly so this mapping doesn't need to sniff error
+   * shapes for cancellation.
+   */
+  readonly cancelled?: boolean;
 }
 
 export interface OutcomeOutput {
@@ -40,24 +47,24 @@ export interface OutcomeOutput {
 }
 
 /**
- * Pure mapping from a pipeline outcome (result-or-error) to the page-facing
+ * Pure mapping from a pipeline outcome (halt or error) to the page-facing
  * `(status, reason)` pair persisted on the `execute` event-log document.
  *
- * Kept separate from {@link TelemetryRecorderDecorator} so the mapping table
- * can be reasoned about and unit-tested in isolation.
+ * Kept separate from `TelemetryObserver` so the mapping table can be
+ * reasoned about and unit-tested in isolation.
  *
  * M2 only emits `success` / `failed` / `timeout`. `warning` and `skipped`
  * arrive in M3.
  */
-export const mapOutcome = ({ result, error }: OutcomeInput): OutcomeOutput => {
-  if (error != null) {
-    if (isRuleExecutionCancellationError(error)) {
-      return {
-        status: RULE_EXECUTOR_EXECUTION_STATUS.TIMEOUT,
-        reason: RULE_EXECUTOR_REASON.CANCELLED_TIMEOUT,
-      };
-    }
+export const mapOutcome = ({ haltReason, error, cancelled }: OutcomeInput): OutcomeOutput => {
+  if (cancelled === true) {
+    return {
+      status: RULE_EXECUTOR_EXECUTION_STATUS.TIMEOUT,
+      reason: RULE_EXECUTOR_REASON.CANCELLED_TIMEOUT,
+    };
+  }
 
+  if (error != null) {
     if (isStepExecutionError(error)) {
       const reason = STEP_NAME_TO_REASON[error.stepName];
       return {
@@ -66,19 +73,13 @@ export const mapOutcome = ({ result, error }: OutcomeInput): OutcomeOutput => {
       };
     }
 
-    // Unknown / unwrapped throw — still a failure but without a specific reason.
     return { status: RULE_EXECUTOR_EXECUTION_STATUS.FAILED };
   }
 
-  if (result == null) {
-    // Defensive: should never happen — execute() either resolves or throws.
-    return { status: RULE_EXECUTOR_EXECUTION_STATUS.FAILED };
-  }
-
-  if (!result.completed && result.haltReason != null) {
+  if (haltReason != null) {
     return {
       status: RULE_EXECUTOR_EXECUTION_STATUS.FAILED,
-      reason: HALT_REASON_TO_REASON[result.haltReason],
+      reason: HALT_REASON_TO_REASON[haltReason],
     };
   }
 
