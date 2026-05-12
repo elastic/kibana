@@ -171,15 +171,28 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       const result = await this._run(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
-      // This is the generic catch-all that protects every step type against context growth.
-      // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
+      // This is the generic catch-all that protects every step type against
+      // context growth. Layer 1 (pre-emptive I/O enforcement) may have
+      // already caught this at the transport level.
+      let measuredOutputSize: number | undefined;
       if (result.output != null && !result.error) {
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
-          if (outputSize > 0 && outputSize > maxBytes) {
+          // Fail closed on non-serializable outputs (null sentinel) — the
+          // value cannot be persisted to ES, so silently allowing it through
+          // would leak a payload of unknown size into in-memory state and
+          // bypass both the size limit and eviction.
+          if (outputSize === null) {
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
+          if (outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name);
+          }
+          // Forward the already-computed size to finishStep so the IO service
+          // can decide eviction without re-serialising. Zero-byte outputs are
+          // forwarded so the step still counts toward stats.
+          measuredOutputSize = outputSize;
         }
       }
 
@@ -198,7 +211,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
           stepSpan.setOutcome('failure');
         }
       } else {
-        this.stepExecutionRuntime.finishStep(result.output);
+        this.stepExecutionRuntime.finishStep(result.output, measuredOutputSize);
         if (stepSpan) {
           stepSpan.setOutcome('success');
         }
