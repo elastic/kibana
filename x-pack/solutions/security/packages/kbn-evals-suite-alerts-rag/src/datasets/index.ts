@@ -9,12 +9,7 @@ import type { AlertsRagCategory, AlertsRagExample } from '../dataset';
 import { alertsRagDataset } from './alerts_rag_dataset';
 
 export { alertsRagDataset };
-export type {
-  AlertsRagCategory,
-  AlertsRagExample,
-  AlertDocument,
-  AlertDocumentSource,
-} from '../dataset';
+export type { AlertsRagCategory, AlertsRagExample } from '../dataset';
 
 /**
  * Returns only examples belonging to the given category (or categories).

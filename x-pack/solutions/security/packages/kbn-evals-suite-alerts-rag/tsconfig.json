@@ -7,8 +7,10 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/agent-builder-common",
+    "@kbn/core",
+    "@kbn/es-snapshot-loader",
     "@kbn/evals",
     "@kbn/tooling-log",
-    "@kbn/inference-common",
   ]
 }

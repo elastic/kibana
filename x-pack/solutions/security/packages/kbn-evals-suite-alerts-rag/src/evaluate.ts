@@ -6,22 +6,30 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
+import { AlertsRagAgentBuilderChatClient } from './chat_client';
 import type { EvaluateAlertsRagDataset } from './evaluate_dataset';
 import { createEvaluateAlertsRagDataset } from './evaluate_dataset';
 
 export const evaluate = base.extend<
   {},
   {
+    chatClient: AlertsRagAgentBuilderChatClient;
     evaluateDataset: EvaluateAlertsRagDataset;
   }
 >({
+  chatClient: [
+    async ({ fetch, log, connector }, use) => {
+      await use(new AlertsRagAgentBuilderChatClient(fetch, log, connector.id));
+    },
+    { scope: 'worker' },
+  ],
   evaluateDataset: [
-    ({ evaluators, executorClient, inferenceClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient, log }, use) => {
       use(
         createEvaluateAlertsRagDataset({
-          executorClient,
+          chatClient,
           evaluators,
-          inferenceClient,
+          executorClient,
           log,
         })
       );

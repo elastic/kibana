@@ -8,52 +8,33 @@
 import { tags } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { alertsRagDataset, filterByCategory, getDatasetCategories } from '../src/datasets';
+import {
+  DEFAULT_ALERTS_SNAPSHOT_CONFIG,
+  resolveAlertsSnapshotConfig,
+  restoreAlertsSnapshot,
+} from '../src/data_generators/restore_alerts_snapshot';
 
-const ELASTIC_ASSISTANT_CAPABILITIES_PATH = '/internal/elastic_assistant/capabilities';
-const ACTIONS_CONNECTOR_PATH = '/api/actions/connector';
-
-const DATASET_NAME = 'Alerts RAG Regression (Episodes 1-8)';
+const DATASET_NAME = 'Security Alerts RAG Regression (Episodes 1-8)';
 const DATASET_DESCRIPTION =
-  'Security AI Assistant alerts RAG evaluation dataset migrated from LangSmith. ' +
-  'Tests retrieval relevance, answer faithfulness, and correctness across single-alert queries, ' +
-  'multi-alert correlation, temporal queries, and field-specific lookups.';
+  'Security Agent Builder alerts RAG evaluation. Migrated from the LangSmith ' +
+  'dataset (id: bd5bba1d-97aa-4512-bce7-b09aa943c651). Drives `/api/agent_builder/converse` ' +
+  'over the shared Security alerts snapshot (reused with the Attack Discovery eval suite).';
 
-evaluate.describe('Alerts RAG', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ kbnClient, evaluationConnector, log }) => {
-    log.info('[alerts-rag] beforeAll: verifying Security AI Assistant API reachability');
-    try {
-      await kbnClient.request({
-        path: ELASTIC_ASSISTANT_CAPABILITIES_PATH,
-        method: 'GET',
-        retries: 0,
-        headers: { 'elastic-api-version': '1' },
-      });
-      log.info('[alerts-rag] beforeAll: Security AI Assistant API is reachable');
-    } catch (error) {
-      throw new Error(
-        `Security AI Assistant API is not reachable at ${ELASTIC_ASSISTANT_CAPABILITIES_PATH}. ` +
-          `Ensure the elastic_assistant plugin is enabled and the Kibana instance is running. ` +
-          `Original error: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-
-    log.info(
-      `[alerts-rag] beforeAll: verifying evaluator connector availability (id=${evaluationConnector.id})`
-    );
-    try {
-      await kbnClient.request({
-        path: `${ACTIONS_CONNECTOR_PATH}/${encodeURIComponent(evaluationConnector.id)}`,
-        method: 'GET',
-        retries: 0,
-      });
+evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
+  evaluate.beforeAll(async ({ esClient, log }) => {
+    const snapshotConfig = resolveAlertsSnapshotConfig();
+    if (snapshotConfig) {
       log.info(
-        `[alerts-rag] beforeAll: evaluator connector is available (id=${evaluationConnector.id}, name="${evaluationConnector.name}")`
+        `[alerts-rag] restoring alerts snapshot for evaluation cluster ` +
+          `(gs://${snapshotConfig.bucket}/${snapshotConfig.basePath}, ` +
+          `snapshot="${snapshotConfig.snapshotName ?? 'latest'}")`
       );
-    } catch (error) {
-      throw new Error(
-        `Evaluator connector "${evaluationConnector.name}" (id=${evaluationConnector.id}) is not available. ` +
-          `Ensure the connector is configured in Kibana. ` +
-          `Original error: ${error instanceof Error ? error.message : String(error)}`
+      await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+    } else {
+      log.warning(
+        '[alerts-rag] skipping snapshot restore (missing GCS_CREDENTIALS or explicitly disabled). ' +
+          `Default snapshot is pinned to gs://${DEFAULT_ALERTS_SNAPSHOT_CONFIG.bucket}/${DEFAULT_ALERTS_SNAPSHOT_CONFIG.basePath}. ` +
+          'Agent Builder will be evaluated against whatever alerts already exist in the cluster.'
       );
     }
 
