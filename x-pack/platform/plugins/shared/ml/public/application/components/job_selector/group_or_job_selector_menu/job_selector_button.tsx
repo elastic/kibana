@@ -118,6 +118,9 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
   return (
     <EuiPopover
       id={popoverId}
+      aria-label={i18n.translate('xpack.ml.jobSelectorButton.popoverAriaLabel', {
+        defaultMessage: 'Job selector',
+      })}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
