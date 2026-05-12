@@ -12,11 +12,26 @@ import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type {
+  ServerVersion,
   ServiceStatusLevelId,
   StatusResponse,
   StatusInfoServiceStatus as ServiceStatus,
 } from '@kbn/core-status-common';
 import type { DataType } from './format_number';
+
+/**
+ * Wire shape of the `/api/status` payload as actually returned by the server.
+ * `core` and `plugins` are populated for full responses; the redacted body returned
+ * to unauthenticated callers (or callers lacking the `monitor` cluster privilege)
+ * only contains `status.overall.level`.
+ */
+type StatusApiResponse = Omit<Partial<StatusResponse>, 'status'> & {
+  status: {
+    overall: { level: ServiceStatusLevelId; summary?: string };
+    core?: StatusResponse['status']['core'];
+    plugins?: StatusResponse['status']['plugins'];
+  };
+};
 
 interface MetricMeta {
   title: string;
@@ -185,6 +200,26 @@ export const STATUS_LEVEL_UI_ATTRS: Record<ServiceStatusLevelId, StatusUIAttribu
   },
 };
 
+export type ProcessedServerResponse =
+  | { redacted: true; serverState: StatusState }
+  | {
+      redacted: false;
+      name: string;
+      version: ServerVersion;
+      coreStatus: FormattedStatus[];
+      pluginStatus: FormattedStatus[];
+      serverState: StatusState;
+      metrics: Metric[];
+    };
+
+const isRedactedResponse = (response: StatusApiResponse): boolean =>
+  response.status.core === undefined && response.status.plugins === undefined;
+
+const buildServerState = (level: ServiceStatusLevelId, summary?: string): StatusState => {
+  const { title, uiColor } = STATUS_LEVEL_UI_ATTRS[level];
+  return { id: level, title, message: summary ?? '', uiColor };
+};
+
 /**
  * Get the status from the server API and format it for display.
  */
@@ -194,8 +229,8 @@ export async function loadStatus({
 }: {
   http: Pick<HttpSetup, 'get'>;
   notifications: NotificationsSetup;
-}) {
-  let response: StatusResponse;
+}): Promise<ProcessedServerResponse> {
+  let response: StatusApiResponse;
 
   try {
     response = await http.get('/api/status');
@@ -205,7 +240,9 @@ export async function loadStatus({
     // display Kibana's status correctly.
     // 503 responses can happen for other reasons (such as proxies), so we make an educated
     // guess here to determine if the response payload looks like an appropriate `StatusResponse`.
-    const ignoreError = e.response?.status === 503 && typeof e.body?.name === 'string';
+    const ignoreError =
+      e.response?.status === 503 &&
+      (typeof e.body?.name === 'string' || typeof e.body?.status?.overall?.level === 'string');
 
     if (ignoreError) {
       response = e.body;
@@ -228,19 +265,22 @@ export async function loadStatus({
     }
   }
 
+  if (isRedactedResponse(response)) {
+    return { redacted: true, serverState: buildServerState(response.status.overall.level) };
+  }
+
+  const fullResponse = response as StatusResponse;
   return {
-    name: response.name,
-    version: response.version,
-    coreStatus: Object.entries(response.status.core).map(([serviceName, status]) =>
+    redacted: false,
+    name: fullResponse.name,
+    version: fullResponse.version,
+    coreStatus: Object.entries(fullResponse.status.core).map(([serviceName, status]) =>
       formatStatus(serviceName, status)
     ),
-    pluginStatus: Object.entries(response.status.plugins).map(([pluginName, status]) =>
+    pluginStatus: Object.entries(fullResponse.status.plugins).map(([pluginName, status]) =>
       formatStatus(pluginName, status)
     ),
-
-    serverState: formatStatus('overall', response.status.overall).state,
-    metrics: formatMetrics(response),
+    serverState: formatStatus('overall', fullResponse.status.overall).state,
+    metrics: formatMetrics(fullResponse),
   };
 }
-
-export type ProcessedServerResponse = Awaited<ReturnType<typeof loadStatus>>;

@@ -11,8 +11,13 @@ import path from 'node:path';
 import { type Observable, combineLatest, ReplaySubject, firstValueFrom, startWith } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { PackageInfo } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
 import type { PluginName } from '@kbn/core-base-common';
 import type { IRouter } from '@kbn/core-http-server';
+import type {
+  CoreRequestHandlerContext,
+  RequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
 import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from '@kbn/core-status-common';
@@ -23,7 +28,8 @@ import { statusResponse, type RedactedStatusHttpBody } from './status_response_s
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 
 interface Deps {
-  router: IRouter;
+  router: IRouter<RequestHandlerContext>;
+  logger: Logger;
   config: {
     allowAnonymous: boolean;
     packageInfo: PackageInfo;
@@ -56,8 +62,42 @@ const SERVICE_UNAVAILABLE_NOT_REPORTED: ServiceStatus = {
   summary: 'Status not yet reported',
 };
 
+type StatusDecision = 'unauthenticated' | 'no-monitor' | 'full';
+
+const resolveStatusDecision = async ({
+  authRequired,
+  isAuthenticated,
+  coreContext,
+  logger,
+}: {
+  authRequired: boolean;
+  isAuthenticated: boolean;
+  coreContext: CoreRequestHandlerContext;
+  logger: Logger;
+}): Promise<StatusDecision> => {
+  if (!authRequired) {
+    return 'full';
+  }
+  if (!isAuthenticated) {
+    return 'unauthenticated';
+  }
+  try {
+    const { has_all_requested: hasAllRequested } =
+      await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        cluster: ['monitor'],
+      });
+    return hasAllRequested ? 'full' : 'no-monitor';
+  } catch (error) {
+    logger.warn(
+      `Failed to check 'monitor' cluster privilege for /api/status, returning redacted response: ${error.message}`
+    );
+    return 'unauthenticated';
+  }
+};
+
 export const registerStatusRoute = ({
   router,
+  logger,
   config,
   metrics,
   status,
@@ -145,20 +185,34 @@ export const registerStatusRoute = ({
       },
     },
     async (context, req, res) => {
-      const authRequired = !config.allowAnonymous;
-      const isAuthenticated = req.auth.isAuthenticated;
-      const redactedStatus = authRequired && !isAuthenticated;
+      const decision = await resolveStatusDecision({
+        authRequired: !config.allowAnonymous,
+        isAuthenticated: req.auth.isAuthenticated,
+        coreContext: await context.core,
+        logger,
+      });
+
       const [overall, coreOverall, core, plugins] = await firstValueFrom(combinedStatus$);
 
-      const responseBody = redactedStatus
-        ? getRedactedStatusResponse({ coreOverall })
-        : await getFullStatusResponse({
+      let responseBody;
+      switch (decision) {
+        case 'no-monitor':
+          incrementUsageCounter({ counterName: 'status_redacted_no_monitor' });
+          responseBody = getRedactedStatusResponse({ coreOverall });
+          break;
+        case 'unauthenticated':
+          responseBody = getRedactedStatusResponse({ coreOverall });
+          break;
+        case 'full':
+          responseBody = await getFullStatusResponse({
             incrementUsageCounter,
             config,
             query: req.query,
             metrics,
             statuses: { overall, core, plugins },
           });
+          break;
+      }
 
       const statusCode = coreOverall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
       return res.custom({ body: responseBody, statusCode, bypassErrorFormat: true });
