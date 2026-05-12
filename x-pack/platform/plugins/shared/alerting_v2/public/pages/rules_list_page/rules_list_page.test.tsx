@@ -634,7 +634,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleSelector);
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleCreateOptions);
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

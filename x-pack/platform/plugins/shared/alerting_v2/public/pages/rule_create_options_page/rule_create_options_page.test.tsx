@@ -41,7 +41,7 @@ describe('RuleCreateOptionsPage', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Rules' })).toBeInTheDocument();
   });
 
-  it('renders the CreateRulePanel', () => {
+  it('renders the RuleCreateOptionsPanel', () => {
     renderPage();
 
     expect(
