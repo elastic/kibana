@@ -269,7 +269,6 @@ enabled:
   - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
-  - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts

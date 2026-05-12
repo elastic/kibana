@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Management', () => {});
-}
+export { IngestPipelinesPage } from './ingest_pipelines_page';
