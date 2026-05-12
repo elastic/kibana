@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { filterByAgent, settingDefinitions } from '.';
-import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {
