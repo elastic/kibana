@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
+
+const { LOOKBACK_WINDOW, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, SCHEDULE_INTERVAL } = testData;
 
 /**
  * E2E episode lifecycle tests for alerting_v2 alert rules.
@@ -28,127 +29,22 @@ import { apiTest, buildCreateRuleData, testData } from '../fixtures';
  */
 apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-e2e-source';
-  const SCHEDULE_INTERVAL = '5s';
-  const LOOKBACK_WINDOW = '1m';
-  // Rule executions go through task manager + the director; first events can take
-  // 30-40s on a freshly booted Kibana. Keep the budget slightly above that.
-  const POLL_TIMEOUT_MS = 45_000;
-  const POLL_INTERVAL_MS = 1000;
 
-  type AlertEvent = Record<string, unknown> & { episode: Record<string, unknown> };
-
-  const TOLERATE_MISSING_DATASTREAM = {
-    allow_no_indices: true,
-    ignore_unavailable: true,
-  } as const;
-
-  /**
-   * Returns all director-processed events (type=alert with episode.status set)
-   * for the given rule, sorted by @timestamp. Returns an empty array if the
-   * `.rule-events` data stream hasn't been created yet.
-   */
-  const getAlertEvents = async (esClient: EsClient, ruleId: string): Promise<AlertEvent[]> => {
-    await esClient.indices.refresh({
-      index: testData.ALERT_EVENTS_DATA_STREAM,
-      ...TOLERATE_MISSING_DATASTREAM,
-    });
-    const result = await esClient.search({
-      index: testData.ALERT_EVENTS_DATA_STREAM,
-      ...TOLERATE_MISSING_DATASTREAM,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'rule.id': ruleId } },
-            { term: { type: 'alert' } },
-            { exists: { field: 'episode.status' } },
-          ],
-        },
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.sourceIndex.create({
+      index: SOURCE_INDEX,
+      mappings: {
+        'host.name': { type: 'keyword' },
+        'http.response.status_code': { type: 'integer' },
+        value: { type: 'long' },
       },
-      sort: [{ '@timestamp': 'asc' }],
-      size: 100,
     });
-    return result.hits.hits.map((hit) => hit._source as AlertEvent);
-  };
-
-  /**
-   * Returns only the latest director-processed event per group_hash for a rule.
-   * Returns an empty map if the `.rule-events` data stream hasn't been created
-   * yet.
-   */
-  const getLatestEpisodeStates = async (
-    esClient: EsClient,
-    ruleId: string
-  ): Promise<Map<string, AlertEvent>> => {
-    await esClient.indices.refresh({
-      index: testData.ALERT_EVENTS_DATA_STREAM,
-      ...TOLERATE_MISSING_DATASTREAM,
-    });
-    const result = await esClient.search({
-      index: testData.ALERT_EVENTS_DATA_STREAM,
-      ...TOLERATE_MISSING_DATASTREAM,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'rule.id': ruleId } },
-            { term: { type: 'alert' } },
-            { exists: { field: 'episode.status' } },
-          ],
-        },
-      },
-      sort: [{ '@timestamp': 'desc' }],
-      size: 100,
-      collapse: { field: 'group_hash' },
-    });
-
-    const stateMap = new Map<string, AlertEvent>();
-    for (const hit of result.hits.hits) {
-      const doc = hit._source as AlertEvent;
-      stateMap.set(doc.group_hash as string, doc);
-    }
-    return stateMap;
-  };
-
-  const waitForAlertEvents = async (
-    esClient: EsClient,
-    ruleId: string,
-    count: number
-  ): Promise<AlertEvent[]> => {
-    await expect
-      .poll(() => getAlertEvents(esClient, ruleId).then((events) => events.length), {
-        timeout: POLL_TIMEOUT_MS,
-        intervals: [POLL_INTERVAL_MS],
-      })
-      .toBeGreaterThanOrEqual(count);
-    return getAlertEvents(esClient, ruleId);
-  };
-
-  apiTest.beforeAll(async ({ esClient }) => {
-    await esClient.indices.create(
-      {
-        index: SOURCE_INDEX,
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            'host.name': { type: 'keyword' },
-            'http.response.status_code': { type: 'integer' },
-            value: { type: 'long' },
-          },
-        },
-      },
-      { ignore: [400] }
-    );
   });
 
-  apiTest.beforeEach(async ({ apiServices }) => {
+  apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
-  });
-
-  apiTest.afterAll(async ({ esClient, apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-    await apiServices.alertingV2.ruleEvents.cleanUp();
-
-    await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
+    await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
   });
 
   apiTest(
@@ -181,18 +77,17 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         })
       );
 
-      const eventsAfterFirst = await apiTest.step(
-        'first execution emits a "pending" episode',
-        async () => {
-          const events = await waitForAlertEvents(esClient, rule.id, 1);
-          const firstEpisode = events[0].episode;
-          expect(firstEpisode.status).toBe('pending');
-          expect(firstEpisode.id).toBeDefined();
-          return events;
-        }
-      );
+      // First execution: should produce a "pending" episode
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'pending',
+      });
 
-      const episodeId = eventsAfterFirst[0].episode.id;
+      const eventsAfterFirst = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const firstEpisode = eventsAfterFirst[0].episode;
+      expect(firstEpisode?.status).toBe('pending');
+      expect(firstEpisode?.id).toBeDefined();
+
+      const episodeId = firstEpisode?.id;
 
       await esClient.index({
         index: SOURCE_INDEX,
@@ -205,32 +100,31 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         refresh: true,
       });
 
-      await apiTest.step(
-        'second execution transitions pending -> active on the same episode',
-        async () => {
-          const events = await waitForAlertEvents(esClient, rule.id, 2);
-          const secondEpisode = events[1].episode;
-          expect(secondEpisode.status).toBe('active');
-          expect(secondEpisode.id).toBe(episodeId);
-        }
-      );
+      // Second execution: pending -> active
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      const eventsAfterSecond = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const secondEpisode = eventsAfterSecond[1].episode;
+      expect(secondEpisode?.status).toBe('active');
+      expect(secondEpisode?.id).toBe(episodeId);
     }
   );
 
   apiTest(
     'should transition active -> recovering -> inactive when source data stops breaching',
     async ({ apiServices, esClient }) => {
-      // Bulk-index the breaching docs to avoid sequential round-trips.
-      const breachOperations = Array.from({ length: 3 }, (_value, i) => [
-        { index: { _index: SOURCE_INDEX } },
-        {
-          '@timestamp': new Date().toISOString(),
-          'host.name': 'host-recovery-1',
-          'http.response.status_code': 503,
-          value: i,
-        },
-      ]).flat();
-      await esClient.bulk({ operations: breachOperations, refresh: 'wait_for' });
+      const breachDocs = Array.from({ length: 3 }, (_value, i) => ({
+        '@timestamp': new Date().toISOString(),
+        'host.name': 'host-recovery-1',
+        'http.response.status_code': 503,
+        value: i,
+      }));
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: breachDocs,
+      });
 
       // pending_count=0 + recovering_count=0 makes the state machine skip the
       // intermediate states so we can assert active <-> inactive directly.
@@ -250,15 +144,16 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         })
       );
 
-      const activeEpisode = await apiTest.step(
-        'first execution goes directly to "active" (pending_count=0)',
-        async () => {
-          const events = await waitForAlertEvents(esClient, rule.id, 1);
-          const episode = events[0].episode;
-          expect(episode.status).toBe('active');
-          return episode;
-        }
-      );
+      expect(rule).toMatchObject({ id: expect.stringContaining('') });
+
+      // First execution: should go directly to active (pending_count=0)
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      const eventsAfterBreach = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const activeEpisode = eventsAfterBreach[0].episode;
+      expect(activeEpisode?.status).toBe('active');
 
       await esClient.deleteByQuery({
         index: SOURCE_INDEX,
@@ -267,29 +162,28 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         wait_for_completion: true,
       });
 
-      await apiTest.step(
-        'recovery execution transitions active -> inactive (recovering_count=0)',
-        async () => {
-          const events = await waitForAlertEvents(esClient, rule.id, 2);
-          const recovered = events[1].episode;
-          expect(recovered.status).toBe('inactive');
-          expect(recovered.id).toBe(activeEpisode.id);
-        }
-      );
+      // Recovery: active -> inactive (recovering_count=0 skips recovering)
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'inactive',
+      });
+
+      const eventsAfterRecovery = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      const recoveredEpisode = eventsAfterRecovery[1].episode;
+      expect(recoveredEpisode?.status).toBe('inactive');
+      expect(recoveredEpisode?.id).toBe(activeEpisode?.id);
     }
   );
 
   apiTest('should track multiple groups independently', async ({ apiServices, esClient }) => {
-    await esClient.bulk({
-      operations: [
-        { index: { _index: SOURCE_INDEX } },
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
         {
           '@timestamp': new Date().toISOString(),
           'host.name': 'host-multi-a',
           'http.response.status_code': 500,
           value: 1,
         },
-        { index: { _index: SOURCE_INDEX } },
         {
           '@timestamp': new Date().toISOString(),
           'host.name': 'host-multi-b',
@@ -297,7 +191,6 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
           value: 1,
         },
       ],
-      refresh: 'wait_for',
     });
 
     const rule = await apiServices.alertingV2.rules.create(
@@ -320,9 +213,9 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
       expect
         .poll(
           async () => {
-            const states = await getLatestEpisodeStates(esClient, rule.id);
+            const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
             return Array.from(states.values())
-              .map((doc) => doc.episode.status as string)
+              .map((doc) => doc.episode?.status as string)
               .sort();
           },
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
@@ -378,23 +271,24 @@ apiTest.describe('Episode lifecycle for alert rules', { tag: tags.stateful.class
         })
       );
 
-      await apiTest.step(
-        'first execution stays pending (statusCount=1, nextCount=1 < 2)',
-        async () => {
-          const events = await waitForAlertEvents(esClient, rule.id, 1);
-          expect(events[0].episode.status).toBe('pending');
-        }
-      );
+      // First execution: pending (statusCount=1, nextCount=1 < 2)
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'pending',
+      });
 
-      const events = await apiTest.step(
-        'second execution transitions to active (statusCount=1, nextCount=2 >= 2)',
-        async () => waitForAlertEvents(esClient, rule.id, 2)
-      );
+      const eventsAfterFirst = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      expect(eventsAfterFirst[0].episode?.status).toBe('pending');
 
-      expect(events[1].episode.status).toBe('active');
+      // Second execution: active (statusCount=1, nextCount=2 >= 2)
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+        episodeStatus: 'active',
+      });
+
+      const eventsAfterSecond = await apiServices.alertingV2.ruleEvents.find(rule.id);
+      expect(eventsAfterSecond[1].episode?.status).toBe('active');
 
       // Both events should share the same episode ID
-      const episodeIds = events.map((e) => e.episode.id);
+      const episodeIds = eventsAfterSecond.map((e) => e.episode?.id);
       expect(new Set(episodeIds).size).toBe(1);
     }
   );

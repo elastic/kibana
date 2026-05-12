@@ -4,34 +4,25 @@ The Field Formats plugin provides a service for formatting field values in Kiban
 
 ## Architecture Overview
 
-### React-First Approach (Current)
-
-Field formatters now use a **React-first architecture** that eliminates vulnerabilities while maintaining backward compatibility:
+Field formatters use a **React-first architecture**:
 
 ```
-User Data → Field Formatter → {text|html|react} → Consumer Component
+User Data → Field Formatter → {text|react} → Consumer Component
                                    ↓
                             React Elements (Safe)
                                    ↓
-                          Direct React Rendering ✅ SAFE
-                                   
-                            HTML Bridge (Legacy)
-                                   ↓
-                    ReactDOM.renderToStaticMarkup + Auto-escape
-                                   ↓
-                          Safe HTML String (Backward Compatible)
+                          Direct React Rendering
 ```
 
 ### Key Components
 
 - **`reactConvert`**: Primary conversion method that returns safe React elements
-- **`textConvert`**: Plain text conversion (unchanged)
-- **HTML Bridge**: Automatically converts React output to HTML for legacy consumers
+- **`textConvert`**: Plain text conversion
 - **`formatFieldValueReact()`**: Safe utility function for React rendering
 
 ## Usage
 
-### Recommended (Safe React Rendering)
+### React Rendering (Recommended)
 
 ```typescript
 import { formatFieldValueReact } from '@kbn/discover-utils';
@@ -41,15 +32,12 @@ const reactNode = formatFieldValueReact({ value, hit, fieldFormats, dataView, fi
 
 // Render directly in your component
 return <div className="my-cell">{reactNode}</div>;
-
-const text = formatter.convert(value, 'text');
 ```
 
-### Legacy (Still Supported)
+### Plain Text
 
 ```typescript
-// Still works, now backed by safe React conversion
-const html = formatter.convert(value, 'html');
+const text = formatter.convert(value, 'text');
 ```
 
 ## Built-in Formatters
@@ -111,7 +99,7 @@ export class MyCustomFormat extends FieldFormat {
     return `Custom: ${value}`;
   };
 
-  // React conversion (recommended) - use ReactContextTypeSingleConvert for single-value converters
+  // React conversion (recommended)
   reactConvertSingle: ReactContextTypeSingleConvert = (value) => {
     return <span style={{ fontWeight: 'bold' }}>Custom: {value}</span>;
   };
@@ -140,60 +128,13 @@ export class MyServerPlugin implements Plugin {
 
 - **Always implement `textConvert`** for plain text output
 - **Implement `reactConvertSingle`** for safe React rendering (recommended)
-- **Avoid `htmlConvert`** - it's deprecated and poses XSS risks
 - **Use `checkForMissingValueReact()`** to handle null/empty values
 - **Test both single values and arrays** - the base class handles array wrapping
 
-## Migration Guide
-
-### Deprecated APIs
-
-#### ❌ **Deprecated: `htmlConvert`**
-```typescript
-// DON'T USE
-htmlConvert = (value) => `<span style="color: red">${value}</span>`;
-```
-
-#### ✅ **Use Instead: `reactConvertSingle`**
-```typescript
-// SAFE
-reactConvertSingle = (value) => <span style={{ color: 'red' }}>{value}</span>;
-```
-
-#### ❌ **Deprecated: `dangerouslySetInnerHTML`**
-```typescript
-// DON'T USE
-<div dangerouslySetInnerHTML={{ __html: formatter.convert(value, 'html') }} />
-```
-
-#### ✅ **Use Instead: Direct React Rendering**
-```typescript
-// SAFE - No XSS risk
-<div>{formatFieldValueReact({ value, hit, fieldFormats, dataView, field })}</div>
-```
-
-### Migration Steps
-
-1. **Replace `htmlConvert` with `reactConvertSingle`**
-2. **Replace `dangerouslySetInnerHTML` with `formatFieldValueReact()`**
-3. **Update tests to check React output instead of HTML strings**
-4. **Remove HTML escaping logic** (handled automatically by the bridge)
-
 ## Security
 
-### Prevention
+The React-first architecture eliminates XSS vulnerabilities by:
 
-The React-first architecture eliminates vulnerabilities by:
-
-- **No raw HTML generation** in React formatters
-- **Automatic HTML escaping** in the backward compatibility bridge
+- **No raw HTML generation** in formatters
 - **Safe highlighting** using `<mark>` elements instead of raw HTML injection
 - **Type-safe React elements** that cannot contain malicious scripts
-
-### Backward Compatibility
-
-Legacy consumers using `formatter.convert(value, 'html')` continue to work safely through the HTML bridge, which:
-
-- Converts React elements to safe HTML via `ReactDOM.renderToStaticMarkup`
-- Automatically escapes plain text values
-- Preserves all existing functionality while eliminating XSS risks

@@ -78,6 +78,7 @@ export enum ConversationRoundStepType {
   reasoning = 'reasoning',
   compaction = 'compaction',
   backgroundAgentComplete = 'background_agent_complete',
+  updateTodos = 'update_todos',
 }
 
 // tool call step
@@ -208,11 +209,48 @@ export const isBackgroundAgentCompleteStep = (
   return step.type === ConversationRoundStepType.backgroundAgentComplete;
 };
 
+export interface TodosStepData {
+  todos: TodoItem[];
+  /** True when todos were inherited from the previous round, not written by the agent this round */
+  carried_over?: boolean;
+}
+
+export type TodosStep = ConversationRoundStepMixin<
+  ConversationRoundStepType.updateTodos,
+  TodosStepData
+>;
+
+export const isTodosStep = (step: ConversationRoundStep): step is TodosStep => {
+  return step.type === ConversationRoundStepType.updateTodos;
+};
+
+/**
+ * Returns the (single) todos step from a list of steps, if present.
+ * A round only ever has at most one todos step, which is updated in place.
+ */
+export const findTodosStep = (
+  steps: ConversationRoundStep[] | undefined
+): TodosStep | undefined => {
+  return steps?.find(isTodosStep);
+};
+
+/**
+ * Returns the todo list to carry over from the previous round, or undefined if nothing should carry over.
+ * Carryover only happens when at least one item is still incomplete (pending / in_progress).
+ * When carried over, both complete and incomplete items are included so the full plan is visible.
+ */
+export const carriedOverTodos = (todos: TodoItem[] | undefined): TodoItem[] | undefined => {
+  if (!todos?.length) return undefined;
+  const hasIncomplete = todos.some((t) => t.status !== 'completed' && t.status !== 'cancelled');
+  return hasIncomplete ? todos : undefined;
+};
+
 export type ConversationRoundStep =
   | ToolCallStep
   | ReasoningStep
   | CompactionStep
-  | BackgroundAgentCompleteStep;
+  | BackgroundAgentCompleteStep
+  | TodosStep;
 
 export enum ConversationRoundStatus {
   /** round is currently being processed */
@@ -309,6 +347,13 @@ export interface Conversation {
   state?: ConversationInternalState;
 }
 
+export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface TodoItem {
+  content: string;
+  status: TodoStatus;
+}
+
 /**
  * Internal storage for the conversation's arbitrary state.
  * Used for example to keep track of the prompt responses.
@@ -328,6 +373,8 @@ export interface ConversationInternalState {
   compaction_summary?: CompactionSummary;
   /** Background sub-agent executions keyed by execution ID. */
   background_executions?: Record<string, BackgroundExecutionState>;
+  /** Active todo list for the current conversation. Replaced wholesale on each write. */
+  todos?: TodoItem[];
 }
 
 export interface BackgroundExecutionCompletedAt {
