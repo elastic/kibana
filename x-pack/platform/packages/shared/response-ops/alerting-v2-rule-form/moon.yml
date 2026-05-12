@@ -42,7 +42,6 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/code-editor'
-  - '@kbn/monaco'
   - '@kbn/esql-language'
 tags:
   - shared-browser
