@@ -273,7 +273,7 @@ describe('getViewInAppUrl', () => {
   });
 
   it('should call getRedirectUrl with spaceId', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const args: GetViewInAppUrlArgs = {
       metrics: [
         {
@@ -304,7 +304,7 @@ describe('getViewInAppUrl', () => {
     );
   });
   it('should call getRedirectUrl with dataViewSpec of the AD-HOC data view', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const dataViewSpec = {
       id: 'mockedDataViewId',
       title: 'mockedDataViewTitle',
@@ -347,7 +347,7 @@ describe('getViewInAppUrl', () => {
     );
   });
   it('should call getRedirectUrl with the id of the SAVED data view ', () => {
-    const spaceId = 'mockedSpaceId';
+    const spaceId = 'mocked-space-id';
     const mockedDataViewId = 'uuid-mocked-dataView-id';
     const args: GetViewInAppUrlArgs = {
       dataViewId: mockedDataViewId,
