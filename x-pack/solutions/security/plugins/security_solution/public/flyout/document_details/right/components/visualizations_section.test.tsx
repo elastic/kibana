@@ -22,12 +22,12 @@ import {
 import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree';
 import { TestProviders } from '../../../../common/mock';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -40,9 +40,12 @@ import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_ses
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-jest.mock('../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree', () => ({
-  useAlertPrevalenceFromProcessTree: jest.fn(),
-}));
+jest.mock(
+  '../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree',
+  () => ({
+    useAlertPrevalenceFromProcessTree: jest.fn(),
+  })
+);
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
 jest.mock('../../../../common/hooks/use_experimental_features');

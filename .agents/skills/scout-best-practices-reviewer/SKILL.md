@@ -21,6 +21,7 @@ Important: Do not post GitHub comments unless explicitly stated.
 2. Neighboring Scout code in the same plugin/solution (existing specs + `test/scout/**/fixtures/**`) to spot reuse opportunities and avoid duplicating helpers.
 3. Removed/previous tests (if this is a migration) to verify behavior parity.
 4. Scout docs (open only what you need — best practices are split by test type so you can skip the irrelevant half):
+
    - **General best practices** (always relevant): `docs/extend/scout/best-practices.md`
    - **UI-only best practices** (open when reviewing UI tests): `docs/extend/scout/ui-best-practices.md`
    - **API-only best practices** (open when reviewing API tests): `docs/extend/scout/api-best-practices.md`
@@ -56,6 +57,7 @@ Open only the docs relevant to the test type(s) under review.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
 - **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
 - **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
+- **[general]** **Global teardown** (when `global.teardown.ts` is present): cleanup must use `esClient`/`kbnClient`/`apiServices`. `esArchiver` isn't on the teardown fixture surface — Scout intentionally never exposed archive-unloading (slow and unnecessary; leftover indexes don't break tests with idempotent `loadIfNeeded`). Flag teardowns that try to use `esArchiver` at all, that **load** new data (teardown is for state reset only), or that duplicate work belonging in `afterAll`/per-test cleanup.
 - **[general]** **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
 ### Files to skip
