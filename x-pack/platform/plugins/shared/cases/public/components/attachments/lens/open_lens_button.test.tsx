@@ -37,7 +37,7 @@ describe('OpenLensButton', () => {
       wrapperProps: { services },
     });
 
-    expect(screen.getByText('Open visualization')).toBeInTheDocument();
+    expect(screen.getByText('Open in Lens')).toBeInTheDocument();
   });
 
   it('calls navigateToPrefilledEditor correctly', async () => {
@@ -52,7 +52,7 @@ describe('OpenLensButton', () => {
       wrapperProps: { services },
     });
 
-    await userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
+    await userEvent.click(screen.getByTestId('cases-open-in-lens-btn'));
 
     const { timeRange, ...rest } = lensVisualization;
 
@@ -75,7 +75,7 @@ describe('OpenLensButton', () => {
       wrapperProps: { services },
     });
 
-    expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Open in Lens')).not.toBeInTheDocument();
   });
 
   it('does not show the button if the query is an ESQL', () => {
@@ -89,6 +89,6 @@ describe('OpenLensButton', () => {
     // @ts-expect-error: props are correct
     renderWithTestingProviders(<OpenLensButton {...esqlProps} />);
 
-    expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
+    expect(screen.queryByText('Open in Lens')).not.toBeInTheDocument();
   });
 });

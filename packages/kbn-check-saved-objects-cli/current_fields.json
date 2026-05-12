@@ -279,6 +279,20 @@
     "updated_by.profile_uid",
     "updated_by.username"
   ],
+  "cases-attachments": [
+    "attachmentId",
+    "created_at",
+    "created_by",
+    "created_by.username",
+    "data",
+    "data.content",
+    "metadata",
+    "metadata.actionType",
+    "owner",
+    "pushed_at",
+    "type",
+    "updated_at"
+  ],
   "cases-comments": [
     "actions",
     "actions.type",

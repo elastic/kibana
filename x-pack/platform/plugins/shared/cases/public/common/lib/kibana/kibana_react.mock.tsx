@@ -46,6 +46,13 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       canUseEditor: jest.fn(),
       navigateToPrefilledEditor: jest.fn(),
     }),
+    dashboard: lazyObject({
+      findDashboardsService: jest.fn().mockResolvedValue({
+        findById: jest
+          .fn()
+          .mockResolvedValue({ status: 'error', notFound: true, error: new Error('mock') }),
+      }),
+    }),
     security: securityMock.createStart(),
     triggersActionsUi: lazyObject({
       actionTypeRegistry: triggersActionsUi.actionTypeRegistry,

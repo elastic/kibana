@@ -13,9 +13,11 @@
     "requiredPlugins": [
       "alerting",
       "actions",
+      "dashboard",
       "data",
       "embeddable",
       "lens",
+      "maps",
       "licensing",
       "features",
       "triggersActionsUi",

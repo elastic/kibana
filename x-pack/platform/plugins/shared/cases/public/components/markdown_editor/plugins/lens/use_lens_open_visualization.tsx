@@ -15,7 +15,7 @@ import {
   parseCommentString,
   getLensVisualizations,
 } from '../../../../../common/utils/markdown_plugins/utils';
-import { OPEN_IN_VISUALIZATION } from '../../../attachments/lens/translations';
+import { OPEN_IN_LENS } from '../../../attachments/lens/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
@@ -59,7 +59,7 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     actionConfig: {
       type: AttachmentActionType.BUTTON as const,
       iconType: 'lensApp',
-      label: OPEN_IN_VISUALIZATION,
+      label: OPEN_IN_LENS,
       onClick: handleClick,
     },
   };

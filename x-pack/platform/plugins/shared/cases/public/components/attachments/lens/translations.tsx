@@ -7,27 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VISUALIZATIONS = i18n.translate('xpack.cases.caseView.visualizations.displayName', {
-  defaultMessage: 'Visualizations',
+export const LENS_VISUALIZATIONS = i18n.translate('xpack.cases.caseView.lens.displayName', {
+  defaultMessage: 'Lens',
 });
 
-export const ADDED_VISUALIZATION = i18n.translate(
-  'xpack.cases.caseView.visualizations.addedVisualization',
+export const ADDED_LENS_VISUALIZATION = i18n.translate(
+  'xpack.cases.caseView.lens.addedLensVisualization',
   {
-    defaultMessage: 'added visualization',
+    defaultMessage: 'added Lens visualization',
   }
 );
 
-export const REMOVED_VISUALIZATION = i18n.translate(
-  'xpack.cases.caseView.visualizations.removedVisualization',
+export const REMOVED_LENS_VISUALIZATION = i18n.translate(
+  'xpack.cases.caseView.lens.removedLensVisualization',
   {
-    defaultMessage: 'removed visualization',
+    defaultMessage: 'removed Lens visualization',
   }
 );
 
-export const OPEN_IN_VISUALIZATION = i18n.translate(
-  'xpack.cases.caseView.visualizations.openVisualizationButtonLabel',
-  {
-    defaultMessage: 'Open visualization',
-  }
-);
+export const OPEN_IN_LENS = i18n.translate('xpack.cases.caseView.lens.openInLensButtonLabel', {
+  defaultMessage: 'Open in Lens',
+});

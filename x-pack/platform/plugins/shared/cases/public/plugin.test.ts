@@ -15,6 +15,8 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -72,6 +74,18 @@ describe('Cases Ui Plugin', () => {
       data: dataPluginMock.createStartContract(),
       embeddable: embeddablePluginMock.createStartContract(),
       lens: lensPluginMock.createStartContract(),
+      dashboard: dashboardPluginMock.createStartContract(),
+      // Maps doesn't ship a public mock; stub the surface we don't exercise.
+      maps: {
+        Map: jest.fn(),
+        PassiveMap: jest.fn(),
+        createLayerDescriptors: {
+          createSecurityLayerDescriptors: jest.fn(),
+          createBasemapLayerDescriptor: jest.fn(),
+          createESSearchSourceLayerDescriptor: jest.fn(),
+        },
+        suggestEMSTermJoinConfig: jest.fn(),
+      } as unknown as MapsStartApi,
       contentManagement: contentManagementMock.createStartContract(),
       storage: {
         store: {

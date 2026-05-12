@@ -969,6 +969,50 @@
       }
     }
   },
+  "cases-attachments": {
+    "dynamic": false,
+    "properties": {
+      "attachmentId": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "properties": {
+          "username": {
+            "type": "keyword"
+          }
+        }
+      },
+      "data": {
+        "properties": {
+          "content": {
+            "type": "text"
+          }
+        }
+      },
+      "metadata": {
+        "properties": {
+          "actionType": {
+            "type": "keyword"
+          }
+        }
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "pushed_at": {
+        "type": "date"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  },
   "cases-comments": {
     "dynamic": false,
     "properties": {
