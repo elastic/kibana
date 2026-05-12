@@ -124,6 +124,18 @@ describe('PublicStepRegistry', () => {
       expect(registry.get(stepId)).toEqual(defaultDefinition);
     });
 
+    it('should not resolve loader until whenReady is called', async () => {
+      const mockLoader = jest.fn().mockResolvedValue(defaultDefinition);
+      registry.register(mockLoader);
+
+      expect(registry.has(stepId)).toBe(false);
+      expect(mockLoader).not.toHaveBeenCalled();
+
+      await registry.whenReady();
+      expect(registry.has(stepId)).toBe(true);
+      expect(mockLoader).toHaveBeenCalled();
+    });
+
     it('should log an error and skip registration when resolved definition duplicates an existing step type ID', async () => {
       registry.register(defaultDefinition);
       const loader = () => Promise.resolve({ ...defaultDefinition, label: 'Other' });

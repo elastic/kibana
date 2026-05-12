@@ -8,8 +8,7 @@
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import type { AssetDetailsPageTabName } from './asset_details_tab';
 import { AssetDetailsTab } from './asset_details_tab';
-
-const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
+import { KPI_METRICS } from '../../constants';
 
 export class OverviewTab extends AssetDetailsTab {
   public readonly tabName: AssetDetailsPageTabName = 'Overview';

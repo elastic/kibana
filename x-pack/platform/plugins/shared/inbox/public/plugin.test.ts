@@ -26,7 +26,9 @@ describe('InboxPublicPlugin', () => {
       const contract = plugin.setup(coreSetup, noopSetupDeps);
 
       expect(coreSetup.application.register).not.toHaveBeenCalled();
-      expect(contract).toEqual({});
+      expect(contract).toMatchObject({
+        registerActionDetailRenderer: expect.any(Function),
+      });
     });
 
     it('registers a standalone Inbox application at APP_PATH when enabled', () => {
@@ -56,14 +58,48 @@ describe('InboxPublicPlugin', () => {
       const [registration] = coreSetup.application.register.mock.calls[0];
       expect(registration.visibleIn).toEqual(expect.arrayContaining(['sideNav', 'globalSearch']));
     });
+
+    it('exposes registerActionDetailRenderer regardless of enabled state', () => {
+      const coreSetupEnabled = coreMock.createSetup();
+      const coreSetupDisabled = coreMock.createSetup();
+      const enabledContract = createPlugin({ enabled: true }).setup(
+        coreSetupEnabled,
+        noopSetupDeps
+      );
+      const disabledContract = createPlugin({ enabled: false }).setup(
+        coreSetupDisabled,
+        noopSetupDeps
+      );
+
+      expect(typeof enabledContract.registerActionDetailRenderer).toBe('function');
+      expect(typeof disabledContract.registerActionDetailRenderer).toBe('function');
+    });
+
+    it('throws when the same sourceApp is registered twice', () => {
+      const coreSetup = coreMock.createSetup();
+      const contract = createPlugin({ enabled: true }).setup(coreSetup, noopSetupDeps);
+      const loader = async () => (() => null) as unknown as never;
+
+      contract.registerActionDetailRenderer('workflows', loader);
+      expect(() => contract.registerActionDetailRenderer('workflows', loader)).toThrow(
+        /already registered/
+      );
+    });
   });
 
   describe('start()', () => {
-    it('returns the (currently empty) public start contract without throwing', () => {
-      const coreStart = coreMock.createStart();
+    it('exposes getActionDetailRenderer that returns the registered loader', () => {
+      const coreSetup = coreMock.createSetup();
       const plugin = createPlugin({ enabled: true });
+      const contract = plugin.setup(coreSetup, noopSetupDeps);
+      const loader = async () => (() => null) as unknown as never;
+      contract.registerActionDetailRenderer('workflows', loader);
 
-      expect(plugin.start(coreStart, {})).toEqual({});
+      const coreStart = coreMock.createStart();
+      const start = plugin.start(coreStart, {});
+
+      expect(start.getActionDetailRenderer('workflows')).toBe(loader);
+      expect(start.getActionDetailRenderer('unknown')).toBeUndefined();
     });
   });
 });
