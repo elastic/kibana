@@ -18,6 +18,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -34,7 +35,7 @@ import {
   DataLoadingState,
   type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
-  OPEN_DETAILS,
+  JSONCodeEditorCommonMemoized,
   SELECT_ROW,
   type SortOrder,
   UnifiedDataTable,
@@ -50,7 +51,12 @@ import {
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_event_log_grid_cells';
+import {
+  createTriggerEventSummaryCopyPayloadCellAction,
+  formatTriggerEventPayloadAsText,
+} from './trigger_event_summary_copy_payload_cell_action';
 import { getWorkflowCustomTriggerTypeIds } from './workflow_execute_modal_helpers';
+import { WorkflowTriggerEventDataGridCellPopover } from './workflow_trigger_event_data_grid_cell_popover';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
@@ -387,12 +393,35 @@ export const WorkflowExecuteEventForm = ({
   );
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
-      summary: ({ row }) => {
+      summary: ({ row, isDetails }) => {
         const source = (row.raw._source ?? {}) as Record<string, unknown>;
+        if (isDetails) {
+          const jsonValue = formatTriggerEventPayloadAsText(source.payload);
+          return (
+            <div
+              data-test-subj="workflowTriggerEventSummaryCellExpanded"
+              css={css({
+                minWidth: 0,
+                width: 'min(75vw, 640px)',
+              })}
+            >
+              <JSONCodeEditorCommonMemoized
+                jsonValue={jsonValue}
+                height={420}
+                hasLineNumbers
+                onEditorDidMount={() => {}}
+              />
+            </div>
+          );
+        }
         return <TriggerEventLogSummaryCell row={triggerSourceToGridRow(row.id, source)} />;
       },
     }),
     []
+  );
+  const summaryCopyPayloadCellAction = useMemo(
+    () => createTriggerEventSummaryCopyPayloadCellAction(services.notifications.toasts),
+    [services.notifications.toasts]
   );
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(
     () => ({
@@ -400,40 +429,46 @@ export const WorkflowExecuteEventForm = ({
         ...column,
         initialWidth: 240,
       }),
-      summary: ({ column }) => ({
-        ...column,
-        display: (
-          <span
-            css={css({
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: euiTheme.size.xs,
-            })}
-          >
-            {i18n.translate('workflows.workflowExecuteEventTriggerForm.summaryColumnHeader', {
-              defaultMessage: 'Summary',
-            })}
-            <EuiIconTip
-              type="question"
-              title={i18n.translate(
-                'workflows.workflowExecuteEventTriggerForm.summaryColumnHeader',
-                {
-                  defaultMessage: 'Summary',
-                }
-              )}
-              content={i18n.translate(
-                'workflows.workflowExecuteEventTriggerForm.summaryColumnHeaderTooltip',
-                {
-                  defaultMessage:
-                    'Shows trigger identifiers first (trigger ID and workflows that matched when the event was emitted), followed by payload content.',
-                }
-              )}
-            />
-          </span>
-        ),
-      }),
+      summary: ({ column }) => {
+        const defaultCellActions = column.cellActions ?? [];
+        const cellActionsWithoutDefaultCopy =
+          defaultCellActions.length > 0 ? defaultCellActions.slice(0, -1) : [];
+        return {
+          ...column,
+          display: (
+            <span
+              css={css({
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: euiTheme.size.xs,
+              })}
+            >
+              {i18n.translate('workflows.workflowExecuteEventTriggerForm.summaryColumnHeader', {
+                defaultMessage: 'Summary',
+              })}
+              <EuiIconTip
+                type="question"
+                title={i18n.translate(
+                  'workflows.workflowExecuteEventTriggerForm.summaryColumnHeader',
+                  {
+                    defaultMessage: 'Summary',
+                  }
+                )}
+                content={i18n.translate(
+                  'workflows.workflowExecuteEventTriggerForm.summaryColumnHeaderTooltip',
+                  {
+                    defaultMessage:
+                      'Shows trigger identifiers first (trigger ID and workflows that matched when the event was emitted), followed by payload content.',
+                  }
+                )}
+              />
+            </span>
+          ),
+          cellActions: [...cellActionsWithoutDefaultCopy, summaryCopyPayloadCellAction],
+        };
+      },
     }),
-    [euiTheme.size.xs]
+    [euiTheme.size.xs, summaryCopyPayloadCellAction]
   );
   const unifiedDataTableServices = useMemo(
     () => ({
@@ -535,6 +570,11 @@ export const WorkflowExecuteEventForm = ({
     renderTriggerEventToolbar.displayName = 'WorkflowTriggerEventsRenderCustomToolbar';
     return renderTriggerEventToolbar;
   }, [baseToolbarRenderer, dataTableRows, replaySpaceId, setErrors, setValue]);
+
+  const renderCellPopover = useCallback((popoverProps: EuiDataGridCellPopoverElementProps) => {
+    return <WorkflowTriggerEventDataGridCellPopover {...popoverProps} />;
+  }, []);
+
   const totalPages =
     searchResult && searchResult.total > 0
       ? Math.ceil(searchResult.total / (searchResult.size || PAGE_SIZE))
@@ -749,9 +789,10 @@ export const WorkflowExecuteEventForm = ({
                 showFullScreenButton={true}
                 showKeyboardShortcuts={false}
                 enableInTableSearch={true}
-                controlColumnIds={[SELECT_ROW, OPEN_DETAILS]}
+                controlColumnIds={[SELECT_ROW]}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 renderCustomToolbar={renderCustomToolbar}
+                renderCellPopover={renderCellPopover}
                 externalCustomRenderers={externalCustomRenderers}
               />
             </CellActionsProvider>
