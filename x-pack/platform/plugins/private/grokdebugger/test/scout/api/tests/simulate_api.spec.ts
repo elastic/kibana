@@ -44,7 +44,7 @@ apiTest.describe(
       expect(response.body.structuredEvent).toStrictEqual(
         BUILT_IN_PATTERN_TEST_DATA.structuredEvent
       );
-      expect(response.body.error).toBe('');
+      expect(response.body.error).toStrictEqual({});
     });
 
     apiTest('returns an error response for an invalid pattern', async ({ apiClient }) => {
@@ -81,7 +81,7 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.structuredEvent).toStrictEqual(CUSTOM_PATTERN_TEST_DATA.structuredEvent);
-      expect(response.body.error).toBe('');
+      expect(response.body.error).toStrictEqual({});
     });
   }
 );
