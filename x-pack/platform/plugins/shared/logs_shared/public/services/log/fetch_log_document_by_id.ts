@@ -79,7 +79,7 @@ export const fetchLogDocumentById = async (
     throw e;
   }
 
-  const hit = result!.rawResponse.hits.hits[0];
+  const hit = result?.rawResponse.hits.hits[0];
 
   if (!hit) {
     return undefined;
