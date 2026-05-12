@@ -35,7 +35,7 @@ export const getRiskInputTab = <T extends EntityType>({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
-      defaultMessage="Risk contributions"
+      defaultMessage="Risk score"
     />
   ),
   content: (
@@ -110,7 +110,7 @@ export const getResolutionGroupTab = ({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.resolutionGroupTab.tabLabel"
-      defaultMessage="Resolution group"
+      defaultMessage="Resolution"
     />
   ),
   content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
