@@ -11,7 +11,8 @@ import { test } from '../fixtures';
 
 const testIndexName = `index-test-${Math.random()}`;
 
-test.describe('Home page', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/267414
+test.describe.skip('Home page', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();
