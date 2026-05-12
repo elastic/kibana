@@ -8,7 +8,7 @@
 import { KI_AGGREGATION_GROUP_CAP_DEFAULT, KI_ENTITY_MIN_CONFIDENCE_DEFAULT } from './constants';
 import { backfillKnowledgeIndicators } from './types';
 
-describe('backfillKnowledgeIndicators (V2 model migration)', () => {
+describe('backfillKnowledgeIndicators (V3 model migration)', () => {
   it('adds platform defaults when knowledgeIndicators is missing', () => {
     const document = {
       attributes: {

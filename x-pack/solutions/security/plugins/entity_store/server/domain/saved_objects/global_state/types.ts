@@ -8,7 +8,11 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { KI_AGGREGATION_GROUP_CAP_DEFAULT, KI_ENTITY_MIN_CONFIDENCE_DEFAULT } from './constants';
+import {
+  KI_AGGREGATION_GROUP_CAP_DEFAULT,
+  KI_ENTITY_MIN_CONFIDENCE_DEFAULT,
+  LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
+} from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 
@@ -30,7 +34,7 @@ const historySnapshotSchema = schema.object({
   ),
 });
 
-const logExtractionSchema = schema.object({
+const logExtractionSchemaV1 = schema.object({
   filter: schema.maybe(schema.string()),
   // large max size to avoid unbounded array validation
   additionalIndexPatterns: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
@@ -50,13 +54,7 @@ const knowledgeIndicatorsSchema = schema.object({
 
 const globalStateSchemaV1 = schema.object({
   historySnapshot: historySnapshotSchema,
-  logsExtraction: logExtractionSchema,
-});
-
-const globalStateSchemaV2 = schema.object({
-  historySnapshot: historySnapshotSchema,
-  logsExtraction: logExtractionSchema,
-  knowledgeIndicators: knowledgeIndicatorsSchema,
+  logsExtraction: logExtractionSchemaV1,
 });
 
 const version1: SavedObjectsFullModelVersion = {
@@ -66,6 +64,39 @@ const version1: SavedObjectsFullModelVersion = {
     forwardCompatibility: globalStateSchemaV1.extends({}, { unknowns: 'ignore' }),
   },
 };
+
+const logExtractionSchemaV2 = logExtractionSchemaV1.extends({
+  excludedIndexPatterns: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+  maxTimeWindowSize: schema.maybe(schema.string()),
+});
+
+const globalStateSchemaV2 = globalStateSchemaV1.extends({
+  logsExtraction: logExtractionSchemaV2,
+});
+
+const version2: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          logsExtraction: {
+            excludedIndexPatterns: [],
+            maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV2,
+    forwardCompatibility: globalStateSchemaV2.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+const globalStateSchemaV3 = globalStateSchemaV2.extends({
+  knowledgeIndicators: knowledgeIndicatorsSchema,
+});
 
 /**
  * Backfills the `knowledgeIndicators` block on existing global state SOs with
@@ -98,7 +129,7 @@ export const backfillKnowledgeIndicators = (document: {
   };
 };
 
-const version2: SavedObjectsFullModelVersion = {
+const version3: SavedObjectsFullModelVersion = {
   changes: [
     {
       type: 'data_backfill' as const,
@@ -106,8 +137,8 @@ const version2: SavedObjectsFullModelVersion = {
     },
   ],
   schemas: {
-    create: globalStateSchemaV2,
-    forwardCompatibility: globalStateSchemaV2.extends({}, { unknowns: 'ignore' }),
+    create: globalStateSchemaV3,
+    forwardCompatibility: globalStateSchemaV3.extends({}, { unknowns: 'ignore' }),
   },
 };
 
@@ -116,6 +147,6 @@ export const EntityStoreGlobalStateType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2 },
+  modelVersions: { 1: version1, 2: version2, 3: version3 },
   hiddenFromHttpApis: true,
 };
