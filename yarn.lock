@@ -4766,6 +4766,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/announcement-banner@link:src/platform/packages/shared/shared-ux/display/kbn-announcement-banner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/anonymization-common@link:x-pack/platform/packages/shared/ai-infra/anonymization-common":
   version "0.0.0"
   uid ""
