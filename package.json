@@ -1546,6 +1546,7 @@
     "tree-dump": "1.1.0",
     "ts-easing": "0.2.0",
     "tslib": "2.8.1",
+    "tweakpane": "4.0.5",
     "type-detect": "4.1.0",
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",

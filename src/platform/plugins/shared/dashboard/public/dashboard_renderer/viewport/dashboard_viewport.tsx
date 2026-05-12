@@ -11,12 +11,14 @@ import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
+import { useDashboardLayoutTweakpane } from '../grid/use_dashboard_layout_tweakpane';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = () => {
@@ -62,6 +64,16 @@ export const DashboardViewport = () => {
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
+  const { marginGutterPx, horizontalPaddingPx } = useDashboardLayoutTweakpane();
+
+  const viewportSidePaddingStyle = useMemo(
+    () =>
+      css({
+        paddingLeft: `${horizontalPaddingPx}px`,
+        paddingRight: `${horizontalPaddingPx}px`,
+      }),
+    [horizontalPaddingPx]
+  );
 
   return (
     <div
@@ -78,14 +90,18 @@ export const DashboardViewport = () => {
       )}
       <div
         className={classes}
-        css={styles.viewport}
+        css={[styles.viewport, viewportSidePaddingStyle]}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
         data-shared-items-count={visiblePanelCount}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
+          <DashboardGrid marginGutterPx={marginGutterPx} />
+        )}
       </div>
     </div>
   );

@@ -27,6 +27,7 @@ import {
   getMockPanels,
   getMockPanelsWithSections,
 } from '../../mocks';
+import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 
@@ -86,7 +87,7 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
     <EuiThemeProvider>
       <DashboardContext.Provider value={api}>
         <DashboardInternalContext.Provider value={internalApi}>
-          <DashboardGrid />
+          <DashboardGrid marginGutterPx={DASHBOARD_MARGIN_SIZE} />
         </DashboardInternalContext.Provider>
       </DashboardContext.Provider>
     </EuiThemeProvider>

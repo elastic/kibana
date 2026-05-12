@@ -23,15 +23,16 @@ import type { GridData } from '../../../server';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import {
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
-} from './constants';
+import { DASHBOARD_GRID_HEIGHT, DEFAULT_DASHBOARD_DRAG_TOP_OFFSET } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
 
-export const DashboardGrid = () => {
+export interface DashboardGridProps {
+  /** Pixel gutter between cells when dashboard margins are enabled (from Tweakpane when opted in). */
+  marginGutterPx: number;
+}
+
+export const DashboardGrid = ({ marginGutterPx }: DashboardGridProps) => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
   const layoutRef = useRef<HTMLDivElement | null>(null);
@@ -166,7 +167,7 @@ export const DashboardGrid = () => {
         css={layoutStyles}
         layout={layout}
         gridSettings={{
-          gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
+          gutterSize: useMargins ? marginGutterPx : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
           keyboardDragTopLimit: topOffset,
@@ -182,6 +183,7 @@ export const DashboardGrid = () => {
     layoutStyles,
     layout,
     useMargins,
+    marginGutterPx,
     renderPanelContents,
     onLayoutChange,
     expandedPanelId,
@@ -256,8 +258,6 @@ const dashboardGridStyles = {
       // Adjust borders/etc... for non-spaced out and expanded panels
       '&.dshLayout-withoutMargins': {
         paddingTop: euiTheme.size.s,
-        paddingLeft: euiTheme.size.s,
-        paddingRight: euiTheme.size.s,
         '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
           borderRadius: 0,
         },

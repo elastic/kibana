@@ -9,4 +9,6 @@
 
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_MARGIN_SIZE = 8;
+/** Left/right padding of the dashboard viewport (content inset). */
+export const DASHBOARD_HORIZONTAL_PADDING_PX = 50;
 export const DEFAULT_DASHBOARD_DRAG_TOP_OFFSET = 200;

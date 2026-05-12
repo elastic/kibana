@@ -24,6 +24,18 @@ jest.mock('../grid', () => {
   };
 });
 
+jest.mock('../grid/use_dashboard_layout_tweakpane', () => {
+  const { DASHBOARD_MARGIN_SIZE, DASHBOARD_HORIZONTAL_PADDING_PX } =
+    jest.requireActual('../grid/constants');
+
+  return {
+    useDashboardLayoutTweakpane: () => ({
+      marginGutterPx: DASHBOARD_MARGIN_SIZE,
+      horizontalPaddingPx: DASHBOARD_HORIZONTAL_PADDING_PX,
+    }),
+  };
+});
+
 const renderDashboardViewport = async (internalApiOverrides?: Partial<DashboardInternalApi>) => {
   const panels = getMockPanels();
   const { api, internalApi } = buildMockDashboardApi({
