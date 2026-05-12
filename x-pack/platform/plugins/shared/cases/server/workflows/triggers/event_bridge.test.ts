@@ -25,12 +25,20 @@ describe('registerCasesWorkflowEventBridge', () => {
   const workflowsExtensions = workflowsExtensionsMock.createStart();
   const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
-  let mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
+  let mockClient = {
+    emitEvent: jest.fn(),
+    isWorkflowsAvailable: true,
+    invokeHook: jest.fn().mockResolvedValue({ status: 'pass_through', output: {} }),
+  };
   let eventBus = new CasesEventBus();
 
   beforeEach(() => {
     eventBus = new CasesEventBus();
-    mockClient = { emitEvent: jest.fn(), isWorkflowsAvailable: true };
+    mockClient = {
+      emitEvent: jest.fn(),
+      isWorkflowsAvailable: true,
+      invokeHook: jest.fn().mockResolvedValue({ status: 'pass_through', output: {} }),
+    };
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);
   });
@@ -152,6 +160,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     mockClient = {
       emitEvent: jest.fn().mockRejectedValue(new Error('boom')),
       isWorkflowsAvailable: true,
+      invokeHook: jest.fn().mockResolvedValue({ status: 'pass_through', output: {} }),
     };
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
     registerCasesWorkflowEventBridge(eventBus, workflowsExtensions, logger);

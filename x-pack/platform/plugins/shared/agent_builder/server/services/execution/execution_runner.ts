@@ -129,6 +129,7 @@ const handleConversationExecution = async ({
     agentId,
     connectorId,
     request,
+    conversationId,
     ...deps,
   });
 

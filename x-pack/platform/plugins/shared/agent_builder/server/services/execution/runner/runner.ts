@@ -203,6 +203,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState,
     abortSignal,
     executionMode,
+    conversationId: scopedConversationId,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
@@ -211,6 +212,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
     executionMode: AgentExecutionMode;
+    /** When set, used instead of `conversation.id` when wiring the inference chat model. */
+    conversationId?: string;
   }): Promise<ScopedRunner> => {
     const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
@@ -224,7 +227,11 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
 
-    const modelProvider = modelProviderFactory({ request, defaultConnectorId });
+    const modelProvider = modelProviderFactory({
+      request,
+      defaultConnectorId,
+      conversationId: scopedConversationId ?? conversation?.id,
+    });
 
     const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 

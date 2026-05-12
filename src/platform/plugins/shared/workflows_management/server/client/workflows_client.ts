@@ -19,7 +19,8 @@ export const createWorkflowsClientProvider = (
   logger: Logger
 ): WorkflowsClientProvider => {
   return async (request) => {
-    const { licensing, workflowsExecutionEngine } = await workflowsService.getPluginsStart();
+    const { licensing, workflowsExecutionEngine, workflowsExtensions } =
+      await workflowsService.getPluginsStart();
     const license = await licensing.getLicense();
 
     // License check for stateful and availability check for serverless
@@ -33,6 +34,15 @@ export const createWorkflowsClientProvider = (
           return;
         }
         return workflowsExecutionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
+      },
+      invokeHook: async (triggerId, payload) => {
+        if (!isWorkflowsAvailable) {
+          logger.debug(
+            'Workflows is not available in this environment. Hook invocation is a pass-through.'
+          );
+          return { status: 'pass_through', output: payload };
+        }
+        return workflowsExtensions.invokeHook(triggerId, payload);
       },
     };
   };

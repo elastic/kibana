@@ -14,9 +14,16 @@ import type { WorkflowsService } from '../api/workflows_management_service';
 import type { WorkflowsManagementConfig } from '../config';
 
 const createMockWorkflowsService = (
-  overrides: { hasAtLeast?: boolean; emitEvent?: jest.Mock } = {}
+  overrides: {
+    hasAtLeast?: boolean;
+    emitEvent?: jest.Mock;
+    invokeHook?: jest.Mock;
+  } = {}
 ) => {
   const emitEvent = overrides.emitEvent ?? jest.fn().mockResolvedValue(undefined);
+  const invokeHook =
+    overrides.invokeHook ??
+    jest.fn().mockResolvedValue({ status: 'completed', output: { processed: true } });
   return {
     getPluginsStart: jest.fn().mockResolvedValue({
       licensing: {
@@ -26,6 +33,9 @@ const createMockWorkflowsService = (
       },
       workflowsExecutionEngine: {
         triggerEvents: { emitEvent },
+      },
+      workflowsExtensions: {
+        invokeHook,
       },
     }),
   } as unknown as WorkflowsService;
@@ -96,5 +106,45 @@ describe('createWorkflowsClientProvider', () => {
     expect(logger.debug).toHaveBeenCalledWith(
       'Workflows is not available in this environment. Trigger event ignored.'
     );
+  });
+
+  describe('invokeHook', () => {
+    it('delegates invokeHook to workflowsExtensions when available', async () => {
+      const invokeHook = jest
+        .fn()
+        .mockResolvedValue({ status: 'completed', output: { system: 'tokenized' } });
+      const service = createMockWorkflowsService({ invokeHook });
+      const config = { available: true } as WorkflowsManagementConfig;
+      const provider = createWorkflowsClientProvider(service, config, logger);
+
+      const client = await provider(mockRequest);
+      const result = await client.invokeHook('inference.beforePromptSend', {
+        sessionId: 'abc',
+        system: 'raw text',
+        messages: [],
+      });
+
+      expect(invokeHook).toHaveBeenCalledWith('inference.beforePromptSend', {
+        sessionId: 'abc',
+        system: 'raw text',
+        messages: [],
+      });
+      expect(result).toEqual({ status: 'completed', output: { system: 'tokenized' } });
+    });
+
+    it('returns pass_through when workflows are unavailable', async () => {
+      const invokeHook = jest.fn();
+      const service = createMockWorkflowsService({ hasAtLeast: false, invokeHook });
+      const config = { available: true } as WorkflowsManagementConfig;
+      const provider = createWorkflowsClientProvider(service, config, logger);
+
+      const client = await provider(mockRequest);
+      const payload = { sessionId: 'abc', messages: [] };
+      const result = await client.invokeHook('inference.beforePromptSend', payload);
+
+      expect(invokeHook).not.toHaveBeenCalled();
+      expect(result.status).toBe('pass_through');
+      expect(result.output).toEqual(payload);
+    });
   });
 });

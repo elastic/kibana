@@ -27,6 +27,7 @@ export const resolveServices = async ({
   uiSettings,
   savedObjects,
   searchInferenceEndpoints,
+  conversationId,
 }: {
   agentId: string;
   connectorId?: string;
@@ -38,6 +39,7 @@ export const resolveServices = async ({
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  conversationId?: string;
 }) => {
   const selectedConnectorId = await resolveSelectedConnectorId({
     request,
@@ -68,6 +70,7 @@ export const resolveServices = async ({
     uiSettings,
     savedObjects,
     searchInferenceEndpoints,
+    conversationId,
   });
 
   const conversationClient = await conversationService.getScopedClient({ request });
