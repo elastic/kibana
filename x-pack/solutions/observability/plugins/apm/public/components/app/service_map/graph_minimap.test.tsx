@@ -28,6 +28,12 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () => ({
+  useServiceMapAlertsTabHref: jest.fn(() => '/app/apm/services/Test%20Service/alerts'),
+  useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
+  useServiceMapAlertsNavigateFactory: jest.fn(() => () => jest.fn()),
+}));
+
 let mockMinimapProps: Record<string, unknown> = {};
 
 jest.mock('@xyflow/react', () => {

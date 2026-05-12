@@ -11,6 +11,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import type { GetAlertsNavigateHandler } from '../../shared/service_map/service_map_alerts_navigate_context';
 
 /**
  * Alerts tab URL for a service on the service map, matching the service header
@@ -58,5 +59,46 @@ export function useServiceMapAlertsTabNavigate(serviceName: string) {
       navigateToUrl(alertsTabHref);
     },
     [alertsTabHref, navigateToUrl]
+  );
+}
+
+/**
+ * Factory hook used by `ServiceMapAlertsNavigateProvider` to expose a per-service
+ * navigate handler to the shared `ServiceNode`. Computes route-dependent values
+ * once and returns a stable factory function.
+ */
+export function useServiceMapAlertsNavigateFactory(): GetAlertsNavigateHandler {
+  const apmRouter = useApmRouter();
+  const routePath = useApmRoutePath();
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+  const {
+    core: {
+      application: { navigateToUrl },
+    },
+  } = useApmPluginContext();
+
+  return useCallback(
+    (serviceName: string) => {
+      const isMobileContext = String(routePath).includes('mobile-services');
+      const href = isMobileContext
+        ? apmRouter.link('/mobile-services/{serviceName}/alerts', {
+            path: { serviceName },
+            query,
+          })
+        : apmRouter.link('/services/{serviceName}/alerts', {
+            path: { serviceName },
+            query,
+          });
+      return (e: MouseEvent | KeyboardEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigateToUrl(href);
+      };
+    },
+    [apmRouter, routePath, query, navigateToUrl]
   );
 }
