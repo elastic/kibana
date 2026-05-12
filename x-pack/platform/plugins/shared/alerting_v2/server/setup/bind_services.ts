@@ -7,7 +7,9 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
@@ -22,12 +24,19 @@ import {
 import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced_settings';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
+import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import { RulesClient } from '../lib/rules_client';
+import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { MaintenanceWindowService } from '../lib/services/maintenance_window_service/maintenance_window_service';
+import {
+  MaintenanceWindowSavedObjectsClientToken,
+  MaintenanceWindowServiceInternalToken,
+} from '../lib/services/maintenance_window_service/tokens';
 import { ActionPolicySavedObjectService } from '../lib/services/action_policy_saved_object_service/action_policy_saved_object_service';
 import {
   ActionPolicySavedObjectsClientToken,
@@ -58,6 +67,11 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
+import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
+import {
+  WorkflowExtensionsServiceToken,
+  WorkflowsClientToken,
+} from '../lib/services/workflow_extensions_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -79,7 +93,28 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(RulesClient).toSelf().inRequestScope();
+  bind(RulesClient)
+    .toDynamicValue(({ get }) => {
+      return new RulesClient({
+        services: {
+          request: get(Request),
+          rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
+          taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
+          userService: get(UserService),
+        },
+        options: {
+          spaceId: get(RulesClientSpaceIdToken),
+        },
+      });
+    })
+    .inRequestScope();
+  bind(RulesClientSpaceIdToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      return spaces.spacesService.getSpaceId(request);
+    })
+    .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -99,6 +134,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       );
     })
     .inRequestScope();
+  bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
@@ -108,6 +144,17 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerServiceToken).toService(LoggerService);
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
+  bind(WorkflowsClientToken)
+    .toResolvedValue(
+      async (workflowsExtensionsStart, request) => workflowsExtensionsStart.getClient(request),
+      [
+        PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions'),
+        Request,
+      ]
+    )
+    .inRequestScope();
+  bind(WorkflowExtensionsService).toSelf().inRequestScope();
+  bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
@@ -147,6 +194,21 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
       const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
       return new RulesSavedObjectService(internalClient, spaces);
+    })
+    .inSingletonScope();
+
+  bind(MaintenanceWindowSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      return savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+    })
+    .inSingletonScope();
+
+  bind(MaintenanceWindowServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const client = get(MaintenanceWindowSavedObjectsClientToken);
+      const logger = get(LoggerServiceToken);
+      return new MaintenanceWindowService(client, logger);
     })
     .inSingletonScope();
 

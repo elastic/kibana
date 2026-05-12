@@ -17,7 +17,141 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorAuthorizationError",
+        "type": "Class",
+        "tags": [],
+        "label": "ConnectorAuthorizationError",
+        "description": [
+          "\nStructured error thrown when a connector fails to authorize, and should\nspecifically be used to signal that the connector requires user re-authorization."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorAuthorizationError",
+            "text": "ConnectorAuthorizationError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorAuthorizationError.authMethod",
+            "type": "string",
+            "tags": [],
+            "label": "authMethod",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorAuthorizationError.reason",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              "\"no_token\" | \"token_expired\" | \"refresh_token_expired\" | \"token_revoked\" | \"refresh_failed\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorAuthorizationError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ConnectorAuthorizationError.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    authMethod,\n    reason,\n    message,\n  }",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                "lineNumber": 31,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ConnectorAuthorizationError.Unnamed.$1.authMethod",
+                    "type": "string",
+                    "tags": [],
+                    "label": "authMethod",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                    "lineNumber": 32,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ConnectorAuthorizationError.Unnamed.$1.reason",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "reason",
+                    "description": [],
+                    "signature": [
+                      "\"no_token\" | \"token_expired\" | \"refresh_token_expired\" | \"token_revoked\" | \"refresh_failed\""
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                    "lineNumber": 33,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ConnectorAuthorizationError.Unnamed.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                    "lineNumber": 34,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/connector-specs",
@@ -157,6 +291,50 @@
       },
       {
         "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.isConnectorAuthorizationError",
+        "type": "Function",
+        "tags": [],
+        "label": "isConnectorAuthorizationError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => error is ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorAuthorizationError",
+            "text": "ConnectorAuthorizationError"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.isConnectorAuthorizationError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
         "id": "def-common.isToolAction",
         "type": "Function",
         "tags": [],
@@ -216,6 +394,45 @@
             "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
             "lineNumber": 306,
             "columnNumber": 56,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.normalizeAuthorizationHeaderValue",
+        "type": "Function",
+        "tags": [],
+        "label": "normalizeAuthorizationHeaderValue",
+        "description": [
+          "\nOAuth token responses often use `token_type: \"bearer\"` (lowercase). If the stored header begins\nwith `bearer ` (after trim), rewrites the scheme to `Bearer `; otherwise returns the trimmed value."
+        ],
+        "signature": [
+          "(value: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_authz_code_and_ears_helpers.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.normalizeAuthorizationHeaderValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_authz_code_and_ears_helpers.ts",
+            "lineNumber": 14,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2723,6 +2940,40 @@
       },
       {
         "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorAuthorizationReason",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorAuthorizationReason",
+        "description": [],
+        "signature": [
+          "\"no_token\" | \"token_expired\" | \"refresh_token_expired\" | \"token_revoked\" | \"refresh_failed\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.EARS_AUTH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EARS_AUTH_ID",
+        "description": [],
+        "signature": [
+          "\"ears\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
         "id": "def-common.GetTokenOpts",
         "type": "Type",
         "tags": [],
@@ -2775,6 +3026,23 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.OAUTH_AUTHORIZATION_CODE_AUTH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OAUTH_AUTHORIZATION_CODE_AUTH_ID",
+        "description": [],
+        "signature": [
+          "\"oauth_authorization_code\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_authorization_code.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -2789,7 +3057,7 @@
           "readonly [\"google\", \"microsoft\", \"slack\"]"
         ],
         "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts",
-        "lineNumber": 15,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

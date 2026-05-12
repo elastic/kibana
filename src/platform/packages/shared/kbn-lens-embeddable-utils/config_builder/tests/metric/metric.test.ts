@@ -8,12 +8,11 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { metricConfigSchema } from '../../schema/charts/metric';
+
+import { validator } from '../utils/validator';
 import type { MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
-import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
-import { validateAPIConverter, validateConverter } from '../validate';
 import {
   simpleMetricAttributes,
   breakdownMetricAttributes,
@@ -21,6 +20,7 @@ import {
   breakdownMetricWithFormulaRefColumnsAttributes,
   selectorColorByValueAttributes,
   defaultColorByValueAttributes,
+  dynamicColorsMetricAttributes,
 } from './lens_state_config.mock';
 import {
   simpleMetricAPIAttributes,
@@ -31,55 +31,56 @@ import {
 } from './lens_api_config.mock';
 
 describe('Metric', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     it('should convert a simple metric', () => {
-      validateConverter(simpleMetricAttributes, metricConfigSchema);
+      validator.metric.fromState(simpleMetricAttributes);
     });
 
     it('should convert a complex metric', () => {
-      validateConverter(complexMetricAttributes, metricConfigSchema);
+      validator.metric.fromState(complexMetricAttributes);
     });
 
     it('should convert a breakdown-by metric', () => {
-      validateConverter(breakdownMetricAttributes, metricConfigSchema);
+      validator.metric.fromState(breakdownMetricAttributes);
+    });
+
+    it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
+      validator.metric.fromState(breakdownMetricWithFormulaRefColumnsAttributes);
     });
 
     it('should convert a default color by value palette', () => {
-      validateConverter(defaultColorByValueAttributes, metricConfigSchema);
+      validator.metric.fromState(defaultColorByValueAttributes);
     });
 
     it('should convert a selector color by value palette', () => {
-      validateConverter(selectorColorByValueAttributes, metricConfigSchema);
+      validator.metric.fromState(selectorColorByValueAttributes);
+    });
+
+    it('should convert a dynamic colors metric', () => {
+      validator.metric.fromState(dynamicColorsMetricAttributes);
     });
   });
-  describe('validateAPIConverter', () => {
+
+  describe('api transform validation', () => {
     it('should convert a simple metric', () => {
-      validateAPIConverter(simpleMetricAPIAttributes, metricConfigSchema);
+      validator.metric.fromApi(simpleMetricAPIAttributes);
     });
 
     it('should convert a complex metric', () => {
-      validateAPIConverter(complexMetricAPIAttributes, metricConfigSchema);
+      validator.metric.fromApi(complexMetricAPIAttributes);
     });
 
     it('should convert a breakdown-by metric', () => {
-      validateAPIConverter(breakdownMetricAPIAttributes, metricConfigSchema);
+      validator.metric.fromApi(breakdownMetricAPIAttributes);
     });
 
     it('should convert a complex ESQL metric chart', () => {
-      validateAPIConverter(complexESQLMetricAPIAttributes, metricConfigSchema);
+      validator.metric.fromApi(complexESQLMetricAPIAttributes);
     });
 
     it('should convert a metric with a terms agg ranked by secondary metric', () => {
-      validateAPIConverter(metricAPIWithTermsRankedBySecondary, metricConfigSchema);
+      validator.metric.fromApi(metricAPIWithTermsRankedBySecondary);
     });
-  });
-
-  it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
-    validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricConfigSchema);
-  });
-
-  it('should convert a dynamic colors metric', () => {
-    validateConverter(dynamicColorsMetricAttributes, metricConfigSchema);
   });
 
   describe('color default application', () => {

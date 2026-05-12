@@ -20,6 +20,7 @@ export type {
   ObservabilityLogsAIAssistantFeatureRenderDeps,
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeatureRenderDeps,
+  ObservabilityStreamsFeatureRenderByStreamNameDeps,
   ObservabilityStreamsFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,

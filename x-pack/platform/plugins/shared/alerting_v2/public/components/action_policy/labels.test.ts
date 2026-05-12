@@ -46,15 +46,11 @@ describe('getThrottleStrategyLabel', () => {
   });
 
   it('returns the per-episode every-time label when mode is per_episode', () => {
-    expect(getThrottleStrategyLabel('every_time', 'per_episode')).toBe(
-      'Every evaluation (per episode, no throttle)'
-    );
+    expect(getThrottleStrategyLabel('every_time', 'per_episode')).toBe('Every evaluation');
   });
 
   it('returns the aggregate every-time label when mode is all', () => {
-    expect(getThrottleStrategyLabel('every_time', 'all')).toBe(
-      'Every evaluation (per group, no throttle)'
-    );
+    expect(getThrottleStrategyLabel('every_time', 'all')).toBe('Every evaluation');
   });
 
   it('returns the fallback for null or undefined strategy', () => {
