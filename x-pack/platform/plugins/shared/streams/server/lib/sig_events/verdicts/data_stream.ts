@@ -20,19 +20,6 @@ export const verdictsMappings = {
     verdict_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    criticality: mappings.integer(),
-    rule_names: mappings.keyword(),
-    stream_names: mappings.keyword(),
-    recommended_action: mappings.keyword(),
-    title: mappings.text({
-      fields: {
-        keyword: { type: 'keyword', ignore_above: 512 },
-      },
-    }),
-    summary: mappings.text(),
-    root_cause: mappings.text(),
-    verdict_summary: mappings.text(),
-    assessment_note: mappings.text(),
   },
 } satisfies MappingsDefinition;
 
@@ -41,7 +28,7 @@ export type { Verdict };
 
 export const verdictsDataStream: DataStreamDefinition<typeof verdictsMappings, StoredVerdict> = {
   name: VERDICTS_DATA_STREAM,
-  version: 2,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

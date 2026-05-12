@@ -27,7 +27,7 @@ export const detectionsMappings = {
     peak_30m_alert_count: mappings.integer(),
     detection_evidence: mappings.object({
       properties: {
-        p_value: { type: 'float' } as const,
+        p_value: { type: 'double' } as const,
       },
     }),
   },
@@ -41,7 +41,7 @@ export const detectionsDataStream: DataStreamDefinition<
   StoredDetection
 > = {
   name: DETECTIONS_DATA_STREAM,
-  version: 2,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,
