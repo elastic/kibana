@@ -98,7 +98,7 @@ export const MetricsExperienceGridContent = ({
       duplicateMetricNames.has(metricItem.metricName)
         ? i18n.translate('metricsExperience.grid.duplicateMetricDescription', {
             defaultMessage:
-              'Data stream: This metric exists across multiple streams. This chart is filtered to show data from the {dataStream} stream only.',
+              'This metric exists in multiple data streams.This chart shows data from {dataStream} only.',
             values: { dataStream: metricItem.dataStream },
           })
         : undefined,
