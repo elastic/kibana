@@ -146,7 +146,7 @@ export const runAgent = async ({
   };
   manager.deps.agentConfiguration = effectiveConfiguration;
 
-  const agentResult = await withAgentSpan({ agent }, async () => {
+  const agentResult = await withAgentSpan({ agent, conversationId: agentParams.conversation?.id }, async () => {
     const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
     const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
     return await agentHandler(

@@ -122,7 +122,8 @@ const handleConversationExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
+  const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
+    deps;
 
   // Resolve scoped services
   const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
@@ -194,6 +195,9 @@ const handleConversationExecution = async ({
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
+  const agentRegistry = await agentService.getRegistry({ request });
+  const { name: agentName } = await agentRegistry.get(agentId);
+
   const { headers } = request;
   const opikTraceId = headers.opik_trace_id as string | undefined;
   const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
@@ -202,60 +206,68 @@ const handleConversationExecution = async ({
       ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
       : undefined;
 
-  return withConverseSpan({ agentId, conversationId: effectiveConversationId, opikHeaders }, () =>
-    merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-      handleCancellation(abortSignal),
-      tap((event) => {
-        try {
-          if (isRoundCompleteEvent(event)) {
-            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
-            const currentRoundCount = isReplacingRound
-              ? conversation.rounds.length
-              : (conversation.rounds?.length ?? 0) + 1;
+  return withConverseSpan(
+    {
+      agentId,
+      agentName,
+      providerName: connectorProvider,
+      conversationId: effectiveConversationId,
+      opikHeaders,
+    },
+    () =>
+      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+        handleCancellation(abortSignal),
+        tap((event) => {
+          try {
+            if (isRoundCompleteEvent(event)) {
+              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+              const currentRoundCount = isReplacingRound
+                ? conversation.rounds.length
+                : (conversation.rounds?.length ?? 0) + 1;
 
-            // metering
-            meteringService
-              .reportExecution({
+              // metering
+              meteringService
+                .reportExecution({
+                  conversationId: effectiveConversationId,
+                  executionId: execution.executionId,
+                  roundCount: currentRoundCount,
+                  agentId,
+                  round: event.data.round,
+                  modelProvider: connectorProvider,
+                })
+                .catch((err) => {
+                  logger.warn(`Failed to report execution metering: ${err}`);
+                });
+
+              // snapshot telemetry tracking
+              if (effectiveConversationId) {
+                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+              }
+
+              // EBT tracking
+              analyticsService?.reportRoundComplete({
                 conversationId: effectiveConversationId,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
                 round: event.data.round,
                 modelProvider: connectorProvider,
-              })
-              .catch((err) => {
-                logger.warn(`Failed to report execution metering: ${err}`);
               });
-
-            // snapshot telemetry tracking
-            if (effectiveConversationId) {
-              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
             }
-
-            // EBT tracking
-            analyticsService?.reportRoundComplete({
-              conversationId: effectiveConversationId,
-              executionId: execution.executionId,
-              roundCount: currentRoundCount,
-              agentId,
-              round: event.data.round,
-              modelProvider: connectorProvider,
-            });
+          } catch (error) {
+            logger.error(`Failed to report round complete telemetry: ${error}`);
           }
-        } catch (error) {
-          logger.error(`Failed to report round complete telemetry: ${error}`);
-        }
-      }),
-      convertErrors({
-        agentId,
-        logger,
-        analyticsService,
-        trackingService,
-        modelProvider: connectorProvider,
-        conversationId: effectiveConversationId,
-        executionId: execution.executionId,
-      })
-    )
+        }),
+        convertErrors({
+          agentId,
+          logger,
+          analyticsService,
+          trackingService,
+          modelProvider: connectorProvider,
+          conversationId: effectiveConversationId,
+          executionId: execution.executionId,
+        })
+      )
   );
 };
 

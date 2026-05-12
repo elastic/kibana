@@ -166,7 +166,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
 
   const toolReturn = await withExecuteToolSpan(
     tool.id,
-    { tool: { input: toolParams } },
+    { tool: { input: toolParams, toolCallId, description: tool.description } },
     async (): Promise<ToolHandlerReturn> => {
       const schema = await tool.getSchema();
       const validation = schema.safeParse(toolParams);

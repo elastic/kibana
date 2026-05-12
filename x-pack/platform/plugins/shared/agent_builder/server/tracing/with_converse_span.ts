@@ -23,21 +23,25 @@ import {
 
 interface WithConverseSpanOptions {
   agentId: string;
+  agentName: string;
+  providerName: string;
   conversationId: string | undefined;
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
 export function withConverseSpan(
-  { agentId, conversationId, opikHeaders }: WithConverseSpanOptions,
+  { agentId, agentName, providerName, conversationId, opikHeaders }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
   return withActiveInferenceSpan(
-    'Converse',
+    `invoke_agent ${agentName}`,
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [ElasticGenAIAttributes.AgentId]: agentId,
-        [ElasticGenAIAttributes.AgentConversationId]: conversationId,
+        [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
+        [GenAISemanticConventions.GenAIAgentId]: agentId,
+        [GenAISemanticConventions.GenAIAgentName]: agentName,
+        [GenAISemanticConventions.GenAIProviderName]: providerName,
         [GenAISemanticConventions.GenAIConversationId]: conversationId,
       },
     },

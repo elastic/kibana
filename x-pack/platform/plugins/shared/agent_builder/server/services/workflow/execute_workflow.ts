@@ -9,7 +9,11 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { safeJsonStringify } from '@kbn/std';
 import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import {
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import {
   getExecutionState,
   type WorkflowExecutionState,
@@ -83,12 +87,13 @@ export const executeWorkflow = async ({
   };
 
   return withActiveInferenceSpan(
-    `Workflow: ${workflow.name}`,
+    `invoke_workflow ${workflow.name}`,
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        [GenAISemanticConventions.GenAIOperationName]: 'invoke_workflow',
         'elastic.workflow.id': workflow.id,
-        'elastic.workflow.name': workflow.name,
+        [GenAISemanticConventions.GenAIWorkflowName]: workflow.name,
         'input.value': safeJsonStringify(workflowParams) ?? '{}',
       },
     },

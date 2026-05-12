@@ -78,7 +78,7 @@ function setTokens(
   span.setAttributes({
     [GenAISemanticConventions.GenAIUsageInputTokens]: prompt,
     [GenAISemanticConventions.GenAIUsageOutputTokens]: completion,
-    [GenAISemanticConventions.GenAIUsageCachedInputTokens]: cached ?? 0,
+    [GenAISemanticConventions.GenAIUsageCacheReadInputTokens]: cached ?? 0,
   } satisfies GenAISemConvAttributes);
 }
 
@@ -178,16 +178,15 @@ export function withChatCompleteSpan(
   const modelId = model?.id ?? model?.family ?? 'unknown';
 
   const next = withActiveInferenceSpan(
-    'ChatComplete',
+    `chat ${modelId}`,
     {
       attributes: {
         ...attributes,
         [GenAISemanticConventions.GenAIOperationName]: 'chat',
         [GenAISemanticConventions.GenAIRequestModel]: modelId,
-        [GenAISemanticConventions.GenAISystem]: modelProvider,
         [GenAISemanticConventions.GenAIProviderName]: modelProvider,
         [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
-        [ElasticGenAIAttributes.Tools]: tools ? JSON.stringify(tools) : undefined,
+        [GenAISemanticConventions.GenAIToolDefinitions]: tools ? JSON.stringify(tools) : undefined,
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
       },
     },

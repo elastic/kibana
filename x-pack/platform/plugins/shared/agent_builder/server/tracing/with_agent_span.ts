@@ -17,20 +17,23 @@ import type { AgentHandlerReturn } from '@kbn/agent-builder-server';
 
 interface WithAgentSpanOptions {
   agent: AgentDefinition;
+  conversationId?: string;
 }
 
 export function withAgentSpan(
-  { agent }: WithAgentSpanOptions,
+  { agent, conversationId }: WithAgentSpanOptions,
   cb: (span?: Span) => Promise<AgentHandlerReturn>
 ): Promise<AgentHandlerReturn> {
-  const { id: agentId, configuration } = agent;
+  const { id: agentId, configuration, name } = agent;
   return withActiveInferenceSpan(
-    'ExecuteAgent',
+    `invoke_agent ${name}`,
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
-        [ElasticGenAIAttributes.AgentId]: agentId,
+        [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
         [GenAISemanticConventions.GenAIAgentId]: agentId,
+        [GenAISemanticConventions.GenAIAgentName]: name,
+        [GenAISemanticConventions.GenAIConversationId]: conversationId,
         [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
       },
     },
