@@ -66,7 +66,16 @@ This is especially important when:
 
 ### Step 3: Create or Modify the Rule
 
-If you are creating a new rule, use the following:
+If you are creating a new rule, first apply the clarification gate:
+
+**Clarification gate**: Before calling \`security.create_detection_rule\`, check whether the request is specific enough. A request is specific enough if it includes at least one of:
+- A concrete behavior or indicator (e.g., "PowerShell spawning cmd.exe", "failed logins from unusual countries")
+- A data source or index hint (e.g., "Windows event logs", "authentication data")
+- A frequency or count condition (e.g., "more than 10 failures in 5 minutes")
+
+If none of the above is present, ask the user one focused question — the single most important missing piece — before generating the rule. Do not ask multiple questions at once.
+
+Once the request is specific enough:
 - **Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\`.
 - after calling the \`security.create_detection_rule\` tool, move to step 4.
 - render the latest version of the attachment inline.
