@@ -1,0 +1,27 @@
+# Default workflow: restore PII tokens in the LLM response after completion.
+#
+# Trigger:  inference.afterCompletion
+# Outputs:  { response } — the deanonymized response text.
+#
+# The transform.pii_restore step replaces `<ENTITY_CLASS>_<32 hex chars>` tokens
+# with their original values.  The token map is managed internally via the
+# AnonymizationContext capability — it is never in this YAML.
+#
+# Usage: import this YAML via the Workflow Management UI → "Import workflow".
+
+version: '1'
+name: Default PII Deanonymization (after completion)
+triggers:
+  - type: inference.afterCompletion
+
+steps:
+  - name: restore_response
+    type: transform.pii_restore
+    with:
+      sessionId: '{{ event.sessionId }}'
+      input: '{{ event.response }}'
+
+  - name: emit_output
+    type: workflow.output
+    with:
+      response: '{{ steps.restore_response.output.output }}'

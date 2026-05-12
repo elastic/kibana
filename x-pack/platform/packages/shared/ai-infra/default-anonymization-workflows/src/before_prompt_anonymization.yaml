@@ -1,0 +1,45 @@
+# Default workflow: anonymize PII in the prompt before it is sent to the LLM.
+#
+# Trigger:  inference.beforePromptSend
+# Outputs:  { system?, messages[] }
+#
+# The ai.pii step replaces PII matches with deterministic HMAC tokens of the form
+# `<ENTITY_CLASS>_<32 hex chars>` (e.g. `IP_a1b2c3...`).  The salt and token map
+# are managed internally via the AnonymizationContext capability — neither appears
+# in this YAML.  The same value within the same session always produces the same
+# token (cross-turn determinism).
+#
+# Usage: import this YAML via the Workflow Management UI → "Import workflow".
+
+version: '1'
+name: Default PII Anonymization (before prompt)
+triggers:
+  - type: inference.beforePromptSend
+
+steps:
+  - name: anonymize_system
+    type: ai.pii
+    if: '{{ event.system }}'
+    with:
+      sessionId: '{{ event.sessionId }}'
+      input: '{{ event.system }}'
+      entities:
+        - IP
+        - EMAIL
+        - HOST_NAME
+
+  - name: anonymize_messages
+    type: ai.pii
+    with:
+      sessionId: '{{ event.sessionId }}'
+      input: '{{ event.messages }}'
+      entities:
+        - IP
+        - EMAIL
+        - HOST_NAME
+
+  - name: emit_output
+    type: workflow.output
+    with:
+      system: '{{ steps.anonymize_system.output.output }}'
+      messages: '{{ steps.anonymize_messages.output.output }}'

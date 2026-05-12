@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/inference-plugin",
+    "@kbn/inference-common",
+    "@kbn/inference-langchain",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/zod",
+    "@kbn/logging",
+    "@kbn/actions-plugin",
+    "@kbn/i18n"
+  ]
+}

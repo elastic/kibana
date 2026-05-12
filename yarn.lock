@@ -6544,6 +6544,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/default-anonymization-workflows@link:x-pack/platform/packages/shared/ai-infra/default-anonymization-workflows":
+  version "0.0.0"
+  uid ""
+
 "@kbn/default-tracer@link:src/platform/packages/shared/kbn-default-tracer":
   version "0.0.0"
   uid ""
@@ -7409,6 +7413,10 @@
   uid ""
 
 "@kbn/inference-tracing@link:x-pack/platform/packages/shared/kbn-inference-tracing":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inference-workflows-plugin@link:x-pack/platform/plugins/shared/inference_workflows":
   version "0.0.0"
   uid ""
 
