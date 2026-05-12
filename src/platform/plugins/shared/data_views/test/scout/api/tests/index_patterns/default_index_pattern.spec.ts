@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, SERVICE_PATH_LEGACY, SERVICE_KEY_LEGACY } from '../../fixtures/constants';
+
+type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
+type ApiClientFixture = ApiWorkerFixtures['apiClient'];
 
 apiTest.describe(
   `default ${SERVICE_KEY_LEGACY} API (legacy index pattern api)`,
