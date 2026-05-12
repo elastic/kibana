@@ -45,9 +45,9 @@ const SKILLS_CREATE_API_PATH = '/api/agent_builder/skills';
 const PREVIEW_MAX_LINES = 30;
 const PREVIEW_MAX_HEIGHT_PX = 240;
 
-const viewFullSkillLabel = i18n.translate(
-  'xpack.agentBuilderPlatform.attachments.skillDraft.viewFullSkillButtonLabel',
-  { defaultMessage: 'View full skill' }
+const previewButtonLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skillDraft.previewButtonLabel',
+  { defaultMessage: 'Preview' }
 );
 const createdLabel = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel',
@@ -205,7 +205,7 @@ const SkillDraftInstructions = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.agentBuilderPlatform.attachments.skillDraft.previewTruncated"
-              defaultMessage='Preview truncated to the first {lineCount} lines. Use "View full skill" to see the complete instructions.'
+              defaultMessage="Preview truncated to the first {lineCount} lines. The full instructions will be saved when you click Create skill."
               values={{ lineCount: PREVIEW_MAX_LINES }}
             />
           </EuiText>
@@ -395,20 +395,20 @@ export const createSkillDraftAttachmentDefinition = ({
 
       if (!isCanvas && openCanvas) {
         // As long as the canvas for the skill is not currently open, show the button
-        const viewFullSkillButton = {
-          label: viewFullSkillLabel,
-          icon: 'expand',
+        const previewButton = {
+          label: previewButtonLabel,
+          icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: openCanvas,
         };
-        actionButtons.push(viewFullSkillButton);
+        actionButtons.push(previewButton);
       }
 
       if (isLatest({ version, versionCount })) {
         // Only show create button for the latest draft
         const createButton: ActionButton = {
           label: isCreated ? createdLabel : createSkillLabel,
-          icon: isCreated ? 'check' : 'save',
+          icon: isCreated ? 'check' : 'plus',
           type: ActionButtonType.PRIMARY,
           disabled: isCreated || !canCreate,
           disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,

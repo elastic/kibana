@@ -118,7 +118,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
       >
         {icon && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiIcon type={icon} aria-hidden={true} />
+            <EuiIcon type={icon} size="l" aria-hidden={true} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
