@@ -8,11 +8,15 @@
  */
 
 /**
- * Tracks the editing state of a single element: its clone, transform offsets,
- * resize deltas, and original styles needed for reset.
+ * Tracks the editing state of a single editable instance: its visual clone,
+ * transform offsets, resize deltas, and original styles needed for reset.
+ *
+ * For regular elements, `el` is the original DOM node.
+ * For duplicates, `el` is a real DOM element inserted into the page that
+ * acts as an independent editable instance.
  */
 export interface ElementSession {
-  /** The original DOM element being edited. */
+  /** The editable DOM element — original or duplicate. */
   el: HTMLElement;
   /** The fixed-position clone visible on screen, or null before first interaction. */
   clone: HTMLElement | null;
@@ -28,6 +32,8 @@ export interface ElementSession {
   originalTransform: string;
   /** The element's bounding rect before any editing — used for snap calculations. */
   originalRect: DOMRect;
+  /** True when `el` is a duplicate inserted into the DOM (should be removed on reset). */
+  isDuplicate: boolean;
 }
 
 /**
@@ -67,7 +73,6 @@ export class ElementRegistry {
 
   /** Update the clone reference for a session (maintains the clone index). */
   setClone(session: ElementSession, clone: HTMLElement | null): void {
-    // Remove old clone from index
     if (session.clone) {
       this.byClone.delete(session.clone);
     }
@@ -82,13 +87,18 @@ export class ElementRegistry {
     return this.byElement.values();
   }
 
-  /** Reset all sessions: restore original styles, remove clones, clear registry. */
+  /** Reset all sessions: restore original styles, remove clones/duplicates, clear registry. */
   resetAll(): void {
     for (const session of this.byElement.values()) {
-      session.el.style.transform = session.originalTransform;
-      session.el.style.visibility = '';
-      session.el.style.pointerEvents = '';
       session.clone?.remove();
+      if (session.isDuplicate) {
+        // Duplicate elements are owned by the editor — remove from DOM entirely
+        session.el.remove();
+      } else {
+        session.el.style.transform = session.originalTransform;
+        session.el.style.visibility = '';
+        session.el.style.pointerEvents = '';
+      }
     }
     this.byElement.clear();
     this.byClone.clear();
@@ -105,6 +115,25 @@ export class ElementRegistry {
     if (session.clone) {
       this.byClone.delete(session.clone);
     }
+  }
+
+  /**
+   * Remove a session completely: detach clone from DOM, remove duplicate
+   * elements, and restore original element styles. Returns the original
+   * element for further cleanup (e.g. soft-delete).
+   */
+  removeSession(session: ElementSession): HTMLElement {
+    session.clone?.remove();
+    this.delete(session);
+
+    if (session.isDuplicate) {
+      session.el.remove();
+    } else {
+      session.el.style.pointerEvents = '';
+      session.el.style.transform = session.originalTransform;
+    }
+
+    return session.el;
   }
 
   /**

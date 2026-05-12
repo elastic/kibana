@@ -8,7 +8,7 @@
  */
 
 import { DEVTOOL_CLONE_ATTR } from '../../lib/constants';
-import { cloneElement } from '../../lib/dom/clone_element';
+import { cloneClean } from '../../lib/dom/clone_element';
 import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import type { ElementSession, ElementRegistry } from './element_registry';
@@ -54,6 +54,7 @@ export const startDragFromElement = (
   let session = registry.get(target);
 
   if (!session) {
+    const rect = target.getBoundingClientRect();
     session = {
       el: target,
       clone: null,
@@ -62,7 +63,8 @@ export const startDragFromElement = (
       dw: 0,
       dh: 0,
       originalTransform: target.style.transform || '',
-      originalRect: target.getBoundingClientRect(),
+      originalRect: rect,
+      isDuplicate: false,
     };
     registry.set(session);
   } else if (session.clone) {
@@ -70,19 +72,26 @@ export const startDragFromElement = (
     registry.setClone(session, null);
   }
 
-  // Clone lives on document.body so it's above all stacking contexts
-  const { clone, rect } = cloneElement(target, cloneZIndex);
+  // Clone lives on document.body so it's above all stacking contexts.
+  // cloneClean handles saving/restoring transform, display, and visibility
+  // so we get base dimensions and clean computed styles.
+  const { clone } = cloneClean(target, cloneZIndex);
+
   // Set transform-origin for consistent scale behavior during resize
   clone.style.transformOrigin = '0 0';
   document.body.appendChild(clone);
 
-  // Hide original but preserve layout space; block pointer events
-  // so it doesn't trigger hover or hit-testing.
-  target.style.visibility = 'hidden';
-  target.style.pointerEvents = 'none';
-
-  // Keep the original rect stable across re-grabs for snap calculations
-  session.originalRect = rect;
+  // Hide original so it doesn't trigger hover or hit-testing.
+  // Duplicates use display:none because their children may have
+  // visibility:visible baked in (from copyInheritedStylesDeep), which
+  // overrides the parent's visibility:hidden in CSS.
+  // Regular elements use visibility:hidden to preserve layout space.
+  if (session.isDuplicate) {
+    target.style.display = 'none';
+  } else {
+    target.style.visibility = 'hidden';
+    target.style.pointerEvents = 'none';
+  }
 
   return {
     type: 'drag',
@@ -92,7 +101,7 @@ export const startDragFromElement = (
     startY: clientY,
     baseOffsetX: session.dx,
     baseOffsetY: session.dy,
-    originalRect: rect,
+    originalRect: session.originalRect,
   };
 };
 

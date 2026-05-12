@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { css as emotionCss } from '@emotion/css';
+import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import {
   ALL_HANDLES,
@@ -23,15 +23,16 @@ import { OutlineControls } from './controls';
 interface Props {
   target: HTMLElement;
   onDelete: () => void;
+  onDuplicate: () => void;
 }
 
-export const EditOutline = ({ target, onDelete }: Props) => {
+export const EditOutline = ({ target, onDelete, onDuplicate }: Props) => {
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
 
   const outlineCss = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
-    return emotionCss({
+    return css({
       position: 'fixed',
       pointerEvents: 'none',
       zIndex: zIndex.highlight,
@@ -42,7 +43,7 @@ export const EditOutline = ({ target, onDelete }: Props) => {
 
   const handleCss = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
-    return emotionCss({
+    return css({
       position: 'absolute',
       width: RESIZE_HANDLE_SIZE,
       height: RESIZE_HANDLE_SIZE,
@@ -88,7 +89,7 @@ export const EditOutline = ({ target, onDelete }: Props) => {
           data-test-subj={`editOverlayResizeHandle-${h}`}
         />
       ))}
-      <OutlineControls onDelete={onDelete} />
+      <OutlineControls onDelete={onDelete} onDuplicate={onDuplicate} />
     </div>
   );
 };

@@ -35,6 +35,7 @@ const makeSession = (overrides: Partial<ElementSession> = {}): ElementSession =>
   dh: 0,
   originalTransform: '',
   originalRect: makeRect(),
+  isDuplicate: false,
   ...overrides,
 });
 

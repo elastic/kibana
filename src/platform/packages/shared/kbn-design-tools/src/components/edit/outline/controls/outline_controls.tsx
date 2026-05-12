@@ -8,21 +8,23 @@
  */
 
 import React, { useMemo } from 'react';
-import { css as emotionCss } from '@emotion/css';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
+import { useEuiTheme } from '@elastic/eui';
 import { DEVTOOL_IGNORE_ATTR } from '../../../../lib/constants';
+import { DeleteButton } from './delete_button';
+import { DuplicateButton } from './duplicate_button';
 
 interface Props {
   onDelete: () => void;
+  onDuplicate: () => void;
 }
 
-export const OutlineControls = ({ onDelete }: Props) => {
+export const OutlineControls = ({ onDelete, onDuplicate }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const panelCss = useMemo(
     () =>
-      emotionCss({
+      css({
         position: 'absolute',
         bottom: 0,
         left: '50%',
@@ -41,16 +43,8 @@ export const OutlineControls = ({ onDelete }: Props) => {
 
   return (
     <div className={panelCss} {...{ [DEVTOOL_IGNORE_ATTR]: '' }}>
-      <EuiButtonIcon
-        iconType="trash"
-        color="danger"
-        size="xs"
-        aria-label={i18n.translate('kbnDesignTools.editOutline.deleteElement', {
-          defaultMessage: 'Delete element',
-        })}
-        onClick={onDelete}
-        data-test-subj="editOutlineDeleteButton"
-      />
+      <DuplicateButton onClick={onDuplicate} />
+      <DeleteButton onClick={onDelete} />
     </div>
   );
 };

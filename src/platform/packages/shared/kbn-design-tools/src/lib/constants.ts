@@ -34,6 +34,9 @@ export const LABEL_PADDING = 4;
 /** Marks an element as a clone managed by the edit overlay. */
 export const DEVTOOL_CLONE_ATTR = 'data-devtool-clone';
 
+/** Marks an element as a duplicate managed by the edit overlay. */
+export const DEVTOOL_DUPLICATE_ATTR = 'data-devtool-duplicate';
+
 /** Marks an element that should be excluded from measurement/selection. */
 export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';
 
@@ -78,3 +81,6 @@ export const CONTROLS_HEIGHT = 40;
 
 /** Padding around the hover-lock bounds. */
 export const LOCK_PADDING = 12;
+
+/** Pixel offset applied to duplicated elements so they don't overlap the source. */
+export const DUPLICATE_OFFSET = 20;

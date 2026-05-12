@@ -240,3 +240,58 @@ export const cloneElement = (
 
   return { clone, rect };
 };
+
+/**
+ * Fix visibility/pointerEvents that may have been baked into the clone tree
+ * by copyInheritedStylesDeep when the source element was hidden.
+ */
+const fixCloneVisibility = (el: HTMLElement): void => {
+  if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
+  if (el.style.pointerEvents === 'none') el.style.pointerEvents = '';
+  for (let i = 0; i < el.children.length; i++) {
+    const child = el.children[i];
+    if (child instanceof HTMLElement) fixCloneVisibility(child);
+  }
+};
+
+/**
+ * Clone an element in a "clean" visual state — temporarily restoring any
+ * styles that were modified by the editing system (transform, display,
+ * visibility, pointerEvents) so cloneElement reads correct computed styles
+ * and bounding rects.
+ *
+ * This is the single place that handles the save → clone → restore cycle.
+ * Both drag and duplicate flows should use this instead of calling
+ * cloneElement directly on potentially-hidden elements.
+ */
+export const cloneClean = (
+  target: HTMLElement,
+  zIndex: number
+): { clone: HTMLElement; rect: DOMRect } => {
+  // Save styles the editing system may have mutated
+  const saved = {
+    transform: target.style.transform,
+    display: target.style.display,
+    visibility: target.style.visibility,
+    pointerEvents: target.style.pointerEvents,
+  };
+
+  // Restore to clean state for accurate measurement
+  target.style.transform = 'none';
+  if (saved.display === 'none') target.style.display = '';
+  if (saved.visibility === 'hidden') target.style.visibility = 'visible';
+  if (saved.pointerEvents === 'none') target.style.pointerEvents = '';
+
+  const result = cloneElement(target, zIndex);
+
+  // Restore original styles immediately
+  target.style.transform = saved.transform;
+  target.style.display = saved.display;
+  target.style.visibility = saved.visibility;
+  target.style.pointerEvents = saved.pointerEvents;
+
+  // Fix leaked hidden styles in the clone's subtree
+  fixCloneVisibility(result.clone);
+
+  return result;
+};

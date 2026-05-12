@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_CLONE_ATTR } from '../constants';
+import { DEVTOOL_CLONE_ATTR, DEVTOOL_DUPLICATE_ATTR } from '../constants';
+
+const ATOMIC_SELECTOR = `[${DEVTOOL_CLONE_ATTR}], [${DEVTOOL_DUPLICATE_ATTR}]`;
 import { isIgnoredElement } from './is_ignored_element';
 
 /**
@@ -52,19 +54,19 @@ export const getElementUnder = (
   const elements = document.elementsFromPoint(x, y);
   for (const el of elements) {
     if (!(el instanceof HTMLElement)) continue;
-    // Skip ignored elements (spacers, toolbar, overlays) everywhere including inside clones
+    // Skip ignored elements (spacers, toolbar, overlays) everywhere including inside clones/duplicates
     if (isIgnoredElement(el)) {
       // Tool UI elements (toolbar, overlay) block interaction — return null
-      const isInsideClone = el.closest(`[${DEVTOOL_CLONE_ATTR}]`);
-      if (!isInsideClone) return null;
-      // Inside a clone, just skip this element and try the next one
+      const isInsideAtomic = el.closest(ATOMIC_SELECTOR);
+      if (!isInsideAtomic) return null;
+      // Inside a clone/duplicate, just skip this element and try the next one
       continue;
     }
-    // Elements inside clones are valid targets — return the clone root so callers
-    // can match it against registry entries.
-    if (el.hasAttribute(DEVTOOL_CLONE_ATTR)) return el;
-    const cloneAncestor = el.closest(`[${DEVTOOL_CLONE_ATTR}]`) as HTMLElement | null;
-    if (cloneAncestor) return cloneAncestor;
+    // Clones and duplicates are atomic — return the root so callers
+    // can match it against registry entries (children are not individually targetable).
+    if (el.hasAttribute(DEVTOOL_CLONE_ATTR) || el.hasAttribute(DEVTOOL_DUPLICATE_ATTR)) return el;
+    const atomicAncestor = el.closest(ATOMIC_SELECTOR) as HTMLElement | null;
+    if (atomicAncestor) return atomicAncestor;
     if (el instanceof HTMLElement) {
       // Skip hidden elements (e.g. originals that have a visible clone)
       if (el.style.visibility === 'hidden') continue;

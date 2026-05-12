@@ -29,10 +29,28 @@ import {
   startDragFromElement,
   applyDragMove,
 } from './drag_helpers';
+import { createDuplicate } from './duplicate_helpers';
 import { findNearHandle, startResize, applyResizeMove } from './resize_helpers';
 import type { InteractionState } from './interaction_state';
 import { IDLE } from './interaction_state';
 import { EditOutline } from './outline';
+
+/**
+ * Derive the CSS cursor from the current interaction state and hover target.
+ * Single source of truth — avoids scattered setCursor calls.
+ */
+const deriveCursor = (state: InteractionState, target: HTMLElement | null): string => {
+  switch (state.type) {
+    case 'drag':
+      return 'grabbing';
+    case 'resize':
+      return HANDLE_CURSORS[state.handle];
+    case 'hover':
+      return state.handle ? HANDLE_CURSORS[state.handle] : 'grab';
+    default:
+      return target ? 'grab' : '';
+  }
+};
 
 export interface EditOverlayHandle {
   resetAll: () => void;
@@ -77,27 +95,31 @@ export const EditOverlay = ({
 
   const { deleteElement: rawDeleteElement, restoreAll, deletedCount } = useDeleteElement();
 
+  const notifyCount = useCallback(
+    () => onChangeCount?.(registry.current.size + deletedCount()),
+    [onChangeCount, deletedCount]
+  );
+
   const deleteElement = useCallback(
     (el: HTMLElement) => {
-      // If the target is a clone, resolve to the original element,
-      // remove the clone from DOM, and clean up the registry entry.
-      const session = registry.current.getByClone(el);
-      const target = session ? session.el : el;
+      const session = registry.current.getByClone(el) ?? registry.current.get(el);
 
       if (session) {
-        session.clone?.remove();
-        registry.current.delete(session);
-        target.style.pointerEvents = '';
-        target.style.transform = session.originalTransform;
+        const target = registry.current.removeSession(session);
+
+        if (!session.isDuplicate) {
+          rawDeleteElement(target);
+        }
+      } else {
+        rawDeleteElement(el);
       }
 
-      rawDeleteElement(target);
       setHoverTarget(null);
       clearLock();
       setCursor('');
-      onChangeCount?.(registry.current.size + deletedCount() + 1);
+      notifyCount();
     },
-    [rawDeleteElement, clearLock, onChangeCount, deletedCount]
+    [rawDeleteElement, clearLock, notifyCount]
   );
 
   const resetAll = useCallback(() => {
@@ -126,7 +148,7 @@ export const EditOverlay = ({
         switch (state.type) {
           case 'resize': {
             applyResizeMove(state, event.clientX, event.clientY, registry.current);
-            onChangeCount?.(registry.current.size);
+            notifyCount();
             break;
           }
 
@@ -136,7 +158,7 @@ export const EditOverlay = ({
               layoutConfig,
               toolbarHeight,
             });
-            onChangeCount?.(registry.current.size);
+            notifyCount();
             break;
           }
 
@@ -180,7 +202,7 @@ export const EditOverlay = ({
       layoutConfig,
       isLayoutVisible,
       toolbarHeight,
-      onChangeCount,
+      notifyCount,
       hoverTarget,
       isInsideHoverLock,
       updateCursor,
@@ -214,8 +236,8 @@ export const EditOverlay = ({
 
         interaction.current = startResize(session, corner, event.clientX, event.clientY);
         setHoverTarget(null);
-        setCursor(HANDLE_CURSORS[corner]);
-        onChangeCount?.(registry.current.size);
+        updateCursor(deriveCursor(interaction.current, null));
+        notifyCount();
         return;
       }
 
@@ -240,10 +262,10 @@ export const EditOverlay = ({
       }
 
       setHoverTarget(null);
-      setCursor('grabbing');
-      onChangeCount?.(registry.current.size);
+      updateCursor(deriveCursor(interaction.current, null));
+      notifyCount();
     },
-    [findElement, zIndex.clone, onChangeCount]
+    [findElement, zIndex.clone, notifyCount, updateCursor]
   );
 
   const parkInteraction = useCallback(() => {
@@ -334,12 +356,21 @@ export const EditOverlay = ({
     deleteElement(hoverTarget);
   }, [hoverTarget, deleteElement]);
 
+  const handleDuplicate = useCallback(() => {
+    if (!hoverTarget) return;
+
+    const duplicate = createDuplicate(hoverTarget, registry.current, zIndex.clone);
+    setHoverTarget(duplicate);
+    clearLock();
+    notifyCount();
+  }, [hoverTarget, zIndex.clone, clearLock, notifyCount]);
+
   return (
     <>
       {cursor && <GlobalCursorOverride cursor={cursor} allowButtons />}
       {showOutline ? (
         <EuiPortal>
-          <EditOutline target={hoverTarget} onDelete={handleDelete} />
+          <EditOutline target={hoverTarget} onDelete={handleDelete} onDuplicate={handleDuplicate} />
         </EuiPortal>
       ) : null}
     </>
