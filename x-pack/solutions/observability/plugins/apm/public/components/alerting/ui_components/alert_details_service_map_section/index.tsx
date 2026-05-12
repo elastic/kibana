@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -61,27 +61,16 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   const kuery = useMemo(() => buildKueryFromAlert(alert), [alert]);
   const filters = useMemo(() => buildFiltersFromAlert(alert), [alert]);
 
-  // Tri-state: `undefined` while we don't yet know (initial render / fetching), then
-  // settled to `false` (render the panel) or `true` (hide it). We reset to undefined
-  // whenever the alert identity changes so a remount/refetch can re-evaluate the
-  // new context — otherwise switching alerts would inherit the previous alert's
-  // "empty" decision and the panel would stay hidden for an alert that *does* have
-  // data. Once `true`, the panel returns null, the embeddable unmounts, and any
-  // further evaluation only happens on the next alert/timerange change (which is
-  // the only way this section's inputs can change in alert details).
-  const [embeddableIsEmpty, setEmbeddableIsEmpty] = useState<boolean | undefined>(undefined);
-  useEffect(() => {
-    setEmbeddableIsEmpty(undefined);
-  }, [alert]);
+  // Hide the whole panel once the embeddable reports `services === 0` (after the
+  // backend's rollup→raw fallback in getServiceStats). State stays local to this
+  // mount: the alert-details route renders a fresh section per alert, so we don't
+  // need to reset when the alert changes — that's a fresh component instance.
+  const [hasNoServices, setHasNoServices] = useState(false);
 
-  const handleEmptyStateChange = useCallback((isEmpty: boolean) => {
-    setEmbeddableIsEmpty(isEmpty);
-  }, []);
-
-  // Hide the panel entirely if we can't build a meaningful preview (e.g. alert is missing
-  // a service or a start timestamp, or we don't have the APM embeddable deps in context),
-  // or if the embeddable came back with zero services even after the rollup→raw fallback.
-  if (!embeddableDeps || !serviceName || !timeRanges || embeddableIsEmpty === true) {
+  // Hide the panel entirely if we can't build a meaningful preview (alert missing a
+  // service or start timestamp, no APM embeddable deps in context), or once we know
+  // there are zero services to draw.
+  if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
     return null;
   }
 
@@ -174,7 +163,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 // rollup before declaring empty (see getServiceStats), so a `true`
                 // here means *neither* data source had services for this alert and
                 // there's nothing useful to draw.
-                onEmptyStateChange={handleEmptyStateChange}
+                onEmptyStateChange={setHasNoServices}
               />
             </ApmEmbeddableContext>
           </EuiPanel>
