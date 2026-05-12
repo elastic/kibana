@@ -21,5 +21,11 @@ set +e
 
 TARGET_SCRIPT=$1 node ./scripts/mki_start_api_ftr_execution
 cmd_status=$?
+
+if [[ -n "${PARENT_TRIGGER_JOB_ID:-}" ]] && [[ "$cmd_status" -eq 101 ]]; then
+  buildkite-agent meta-data set "mki_project_init_timeout_occurred" "true" \
+    --job "$PARENT_TRIGGER_JOB_ID" || true
+fi
+
 echo "Exit code with status: $cmd_status"
-exit $cmd_status
+exit "$cmd_status"
