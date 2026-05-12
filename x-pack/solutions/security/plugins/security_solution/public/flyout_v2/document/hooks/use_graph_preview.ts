@@ -29,12 +29,39 @@ export interface UseGraphPreviewParams {
   hit: DataTableRecord;
 }
 
+/**
+ * Interface for the result of the useGraphPreview hook
+ */
 export interface UseGraphPreviewResult {
+  /**
+   * The timestamp of the event
+   */
   timestamp: string | null;
+
+  /**
+   * Array of event IDs associated with the alert
+   */
   eventIds: string[];
+
+  /**
+   * Action associated with the event
+   */
   action?: string[];
+
+  /**
+   * Boolean indicating if graph visualization is fully available
+   * Combines: data availability + valid license + entity store running
+   */
   shouldShowGraph: boolean;
+
+  /**
+   * Boolean indicating if the event has all required data fields for graph visualization
+   */
   hasGraphData: boolean;
+
+  /**
+   * Boolean indicating if the event is an alert or not
+   */
   isAlert: boolean;
 }
 
