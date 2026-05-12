@@ -490,6 +490,36 @@ describe('GraphInvestigation Component', () => {
       expect(mouseupSpy).toHaveBeenCalled();
       expect(mouseupSpy.mock.calls[0][0].target).toBe(root);
     });
+
+    it('does not dispatch synthetic mouse events when only a graph-internal popover is open', async () => {
+      // Graph-internal popovers (node expand, label expand, etc.) have their
+      // own dismissal flow inside `useGraphPopovers`, so pane click should
+      // not synthesize an outside-click to close them. The gate subtracts
+      // the count of open graph popovers from the total number of
+      // `.euiPopover__panel` elements; if the difference is zero, the only
+      // overlays in the DOM are graph-owned and the handler is a no-op.
+      const { container } = renderStory({ showToggleSearch: true });
+      await expandNode(container, 'admin@example.com');
+      // Marker that the node expand popover is open.
+      await waitFor(() => {
+        expect(screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toBeInTheDocument();
+      });
+
+      const pane = container.querySelector('.react-flow__pane') as HTMLElement;
+      const root = container.querySelector(
+        `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
+      ) as HTMLElement;
+
+      const mouseupSpy = jest.fn();
+      root.addEventListener('mouseup', mouseupSpy);
+      try {
+        fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
+      } finally {
+        root.removeEventListener('mouseup', mouseupSpy);
+      }
+
+      expect(mouseupSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('investigateInTimeline', () => {

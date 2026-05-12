@@ -351,13 +351,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [
+    const openGraphPopoverCount = [
       nodeExpandPopover,
       labelExpandPopover,
       ipPopover,
       countryFlagsPopover,
       eventPopover,
-    ].some(({ state: { isOpen } }) => isOpen);
+    ].filter(({ state: { isOpen } }) => isOpen).length;
+    const isPopoverOpen = openGraphPopoverCount > 0;
 
     // Pane click on the ReactFlow canvas doesn't dismiss overlays because
     // d3-zoom (used by ReactFlow for pan/zoom) calls
@@ -375,20 +376,24 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     // so the parent EuiFlyout's outside-click handling treats them as
     // inside.
     //
-    // The gate is a cheap heuristic to avoid synthesizing on every pan/zoom
-    // start when nothing is open. `#kbnTypeahead__items` covers the
-    // autocomplete; `.euiPopover__panel` covers every EuiPopover variant
-    // (filter chips, date pickers, graph node popovers).
-    const isAnyOverlayOpen = useCallback(
+    // Scope the gate to overlays that live *outside* the graph (search-bar
+    // filter chips, date pickers, KQL autocomplete). Graph-internal popovers
+    // (node expand, label expand, ips, country flags, event details) are
+    // owned by `useGraphPopovers` and have their own dismissal flow, so we
+    // shouldn't kick pane-click into closing them. We detect external
+    // popovers by counting `.euiPopover__panel` elements and subtracting the
+    // graph-owned popovers we know are open; `#kbnTypeahead__items` (not an
+    // EuiPopover) covers the KQL autocomplete separately.
+    const isExternalOverlayOpen = useCallback(
       () =>
-        document.querySelector('.euiPopover__panel') !== null ||
+        document.querySelectorAll('.euiPopover__panel').length > openGraphPopoverCount ||
         document.querySelector('#kbnTypeahead__items') !== null,
-      []
+      [openGraphPopoverCount]
     );
 
     const handlePointerDownCapture = useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
-        if (!isAnyOverlayOpen()) return;
+        if (!isExternalOverlayOpen()) return;
         const eventTarget = event.target as HTMLElement | null;
         if (!eventTarget?.closest?.('.react-flow__pane')) return;
 
@@ -396,7 +401,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         event.currentTarget.dispatchEvent(new MouseEvent('mousedown', opts));
         event.currentTarget.dispatchEvent(new MouseEvent('mouseup', opts));
       },
-      [isAnyOverlayOpen]
+      [isExternalOverlayOpen]
     );
 
     const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
