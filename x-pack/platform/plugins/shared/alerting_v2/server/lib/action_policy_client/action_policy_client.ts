@@ -432,7 +432,7 @@ export class ActionPolicyClient {
 
   private async assertRuleExists(ruleId: string): Promise<void> {
     try {
-      await this.rulesSavedObjectService.get(ruleId, this.namespace);
+      await this.rulesSavedObjectService.get(ruleId);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.badRequest(
