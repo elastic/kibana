@@ -29,3 +29,4 @@ export * from './get_composite_slo';
 export * from './composite_slo_summary_index';
 export * from './composite_slo_repository';
 export * from './composite_historical_summary_client';
+export * from './create_composite_slo';

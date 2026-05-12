@@ -5,38 +5,12 @@
  * 2.0.
  */
 
-import type { CompositeSLOMember } from '@kbn/slo-schema';
 import { createCompositeSLOParamsSchema } from '@kbn/slo-schema';
-import { v4 as uuidv4 } from 'uuid';
-import { IllegalArgumentError } from '../../../errors';
 import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
-import { persistCompositeSummaryDoc } from '../../../services/composite_summary_writer';
+import { createCompositeSlo } from '../../../services/create_composite_slo';
 import { DefaultSummaryClient } from '../../../services/summary_client';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
-
-const MIN_MEMBERS = 2;
-const MAX_MEMBERS = 25;
-
-export const validateCompositeSloMembers = (members: CompositeSLOMember[]): void => {
-  if (members.length < MIN_MEMBERS) {
-    throw new IllegalArgumentError(
-      `A composite SLO requires at least ${MIN_MEMBERS} members, got ${members.length}`
-    );
-  }
-  if (members.length > MAX_MEMBERS) {
-    throw new IllegalArgumentError(
-      `A composite SLO supports at most ${MAX_MEMBERS} members, got ${members.length}`
-    );
-  }
-  for (const member of members) {
-    if (!Number.isInteger(member.weight) || member.weight <= 0) {
-      throw new IllegalArgumentError(
-        `Member weight must be a positive integer, got ${member.weight} for SLO [${member.sloId}]`
-      );
-    }
-  }
-};
 
 export const createCompositeSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slo_composites 2023-10-31',
@@ -50,8 +24,6 @@ export const createCompositeSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    validateCompositeSloMembers(params.body.members);
-
     const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
       await getScopedClients({
         request,
@@ -60,36 +32,21 @@ export const createCompositeSLORoute = createSloServerRoute({
 
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username ?? 'unknown';
-    const now = new Date().toISOString();
-
-    const compositeSlo = {
-      ...params.body,
-      id: params.body.id ?? uuidv4(),
-      tags: params.body.tags ?? [],
-      enabled: params.body.enabled ?? true,
-      version: 1,
-      createdAt: now,
-      updatedAt: now,
-      createdBy: userId,
-      updatedBy: userId,
-    };
-
-    const created = await compositeSloRepository.create(compositeSlo);
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
       scopedClusterClient.asCurrentUser,
       burnRatesClient
     );
-    await persistCompositeSummaryDoc({
+
+    return await createCompositeSlo(params.body, {
       esClient: scopedClusterClient.asCurrentUser,
-      summaryClient,
+      compositeSloRepository,
       sloDefinitionRepository: repository,
+      summaryClient,
       logger,
       spaceId,
-      compositeSlo: created,
+      userId,
     });
-
-    return created;
   },
 });

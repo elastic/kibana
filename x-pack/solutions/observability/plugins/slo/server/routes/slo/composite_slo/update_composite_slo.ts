@@ -11,7 +11,6 @@ import { persistCompositeSummaryDoc } from '../../../services/composite_summary_
 import { DefaultSummaryClient } from '../../../services/summary_client';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
-import { validateCompositeSloMembers } from './create_composite_slo';
 
 export const updateCompositeSLORoute = createSloServerRoute({
   endpoint: 'PUT /api/observability/slo_composites/{id} 2023-10-31',
@@ -42,8 +41,6 @@ export const updateCompositeSLORoute = createSloServerRoute({
       updatedAt: new Date().toISOString(),
       updatedBy: userId ?? existing.updatedBy,
     };
-
-    validateCompositeSloMembers(updated.members);
 
     const result = await compositeSloRepository.update(updated);
 
