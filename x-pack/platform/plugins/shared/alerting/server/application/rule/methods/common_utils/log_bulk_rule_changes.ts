@@ -84,7 +84,11 @@ export async function logBulkRuleChanges({
   }
 
   try {
-    const metadata = { ...extraMetadata, bulkCount: extraMetadata?.bulkCount ?? ruleSOs.length };
+    const bulkCountMetadata = extraMetadata?.bulkCount ?? ruleSOs.length;
+    const metadata = {
+      ...extraMetadata,
+      ...(bulkCountMetadata > 1 ? { bulkCount: bulkCountMetadata } : {}),
+    };
     const hasMetadata = Boolean(Object.keys(metadata).length);
 
     await changeTrackingService.logBulk(changes, {
