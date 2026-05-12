@@ -40,7 +40,6 @@ export async function getEsqlColumnSchema({
   const response = (await esClient.esql.query({
     query: esql.from(indices).limit(0).print('basic'),
     ...(filter ? { filter } : {}),
-    drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
 
   return parseColumns(response);

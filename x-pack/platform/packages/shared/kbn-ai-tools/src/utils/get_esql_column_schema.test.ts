@@ -21,7 +21,7 @@ describe('getEsqlColumnSchema', () => {
     jest.clearAllMocks();
   });
 
-  it('queries a single index with LIMIT 0 and drop_null_columns', async () => {
+  it('queries a single index with LIMIT 0', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce({ columns: [], values: [] });
 
@@ -29,8 +29,16 @@ describe('getEsqlColumnSchema', () => {
 
     expect(query).toHaveBeenCalledWith({
       query: 'FROM logs-* | LIMIT 0',
-      drop_null_columns: true,
     });
+  });
+
+  it('never passes drop_null_columns: true (regression: ES prunes every column when LIMIT 0)', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce({ columns: [], values: [] });
+
+    await getEsqlColumnSchema({ esClient, index: 'logs-*', start: 100, end: 200 });
+
+    expect(query.mock.calls[0][0]).not.toHaveProperty('drop_null_columns');
   });
 
   it('queries multiple indices', async () => {
@@ -65,7 +73,6 @@ describe('getEsqlColumnSchema', () => {
           ],
         },
       },
-      drop_null_columns: true,
     });
   });
 
