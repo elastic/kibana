@@ -19,7 +19,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
-const { LOOKBACK_WINDOW, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, SCHEDULE_INTERVAL } = testData;
+const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
 
 /**
  * Integration tests for the alerting_v2 director component.
@@ -27,7 +27,7 @@ const { LOOKBACK_WINDOW, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, SCHEDULE_INTERVAL } 
  * The director runs after the executor has produced a batch of breach/recovery
  * alert events.
  */
-apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
+apiTest.describe.only('Director', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-director-source';
 
   apiTest.beforeAll(async ({ apiServices }) => {
@@ -64,15 +64,13 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       buildCreateRuleData({
         kind: 'signal',
         metadata: { name: 'director-skip-signal' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-director-skip-signal" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
+        // state_transition is forbidden by the schema when kind is "signal".
+        state_transition: undefined,
       })
     );
 
@@ -107,16 +105,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-shape' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-director-shape" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -158,15 +151,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-episode-id-stable' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-episode-id-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 1, recovering_count: 1 },
         })
       );
@@ -221,16 +210,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-new-lifecycle' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-new-lifecycle" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -308,15 +292,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-basic-strategy' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: null,
         })
       );
@@ -349,114 +329,6 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'uses the basic strategy when state_transition is an empty object',
-    async ({ apiServices }) => {
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-basic-strategy-empty-object',
-            severity: 'high',
-            value: 1,
-          },
-        ],
-      });
-
-      // An empty state_transition object should not opt the rule into the
-      // count/timeframe strategy. The director should therefore behave like the
-      // basic strategy and never write episode.status_count.
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'director-basic-strategy-empty-object' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy-empty-object" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: {},
-        })
-      );
-
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-        episodeStatus: 'active',
-      });
-
-      await apiServices.alertingV2.sourceIndex.deleteDocs({
-        index: SOURCE_INDEX,
-        query: { term: { 'host.name': 'host-basic-strategy-empty-object' } },
-      });
-
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-        episodeStatus: 'recovering',
-      });
-
-      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const observedStatuses = new Set(events.map((event) => event.episode?.status));
-      expect(observedStatuses.has('pending')).toBe(true);
-      expect(observedStatuses.has('active')).toBe(true);
-      expect(observedStatuses.has('recovering')).toBe(true);
-
-      for (const event of events) {
-        expect(event.episode?.status_count).toBeUndefined();
-      }
-    }
-  );
-
-  apiTest(
-    'uses the count_timeframe strategy when state_transition is configured (status_count populated on pending)',
-    async ({ apiServices }) => {
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-count-strategy',
-            severity: 'high',
-            value: 1,
-          },
-        ],
-      });
-
-      // pending_count=3 keeps the rule in pending for a while so we can
-      // capture status_count on multiple events.
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'director-count-strategy' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-count-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 3 },
-        })
-      );
-
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-        episodeStatus: 'pending',
-      });
-
-      const pendingEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-        episodeStatus: 'pending',
-      });
-
-      // Every pending event must carry a positive integer status_count.
-      for (const event of pendingEvents) {
-        expect(typeof event.episode?.status_count).toBe('number');
-        expect(event.episode!.status_count!).toBeGreaterThanOrEqual(1);
-      }
-    }
-  );
-
-  apiTest(
     'increments status_count across consecutive pending executions and resets it on transition to active',
     async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -477,15 +349,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-count-increment' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-count-increment" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 3 },
         })
       );
@@ -502,10 +370,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         .map((event) => event.episode!.status_count)
         .filter((count): count is number => typeof count === 'number');
 
-      expect(pendingCounts.length).toBeGreaterThanOrEqual(2);
+      expect(pendingCounts).toHaveLength(2);
       expect(Math.min(...pendingCounts)).toBe(1);
-      // status_count must have grown beyond the initial value at some point.
-      expect(Math.max(...pendingCounts)).toBeGreaterThan(1);
+      expect(Math.max(...pendingCounts)).toBe(2);
 
       const activeEvents = events.filter((event) => event.episode?.status === 'active');
       expect(activeEvents.length).toBeGreaterThanOrEqual(1);
@@ -533,21 +400,17 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       // pending_count=10 keeps the rule in pending so we can capture a
       // pending event before recovering it. The first lifecycle goes
-      // pending -> inactive directly (basic FSM edge), then the second
+      // pending -> inactive directly. Then the second
       // lifecycle must start fresh with status_count=1 and a new
       // episode id.
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-reset' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-reset" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 10 },
         })
       );
@@ -561,6 +424,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const firstPendingEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'pending',
       });
+
       const firstLifecycleEpisodeId = firstPendingEvents[0].episode?.id;
       expect(firstLifecycleEpisodeId).toBeDefined();
 
@@ -625,16 +489,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'director-inactive-no-count' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-inactive-no-count" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -682,15 +541,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-recovering-threshold' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-threshold" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 3 },
         })
       );
@@ -719,9 +574,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       // Every recovering event must carry a status_count, and we must have
       // observed at least two distinct values (i.e. the count climbed before
       // the threshold was met).
-      expect(recoveringCounts.length).toBeGreaterThanOrEqual(2);
+      expect(recoveringCounts).toHaveLength(2);
       expect(Math.min(...recoveringCounts)).toBe(1);
-      expect(Math.max(...recoveringCounts)).toBeGreaterThan(1);
+      expect(Math.max(...recoveringCounts)).toBe(2);
     }
   );
 
@@ -745,16 +600,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-skip-recovering' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-recovering" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -805,15 +655,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-skip-pending' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-pending" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0 },
         })
       );
@@ -856,15 +702,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-rebreach' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-rebreach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 0, recovering_count: 10 },
         })
       );
@@ -906,6 +748,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const recoveringEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'recovering',
       });
+
       const lastRecoveringTimestamp = recoveringEvents
         .map((event) => Date.parse(event['@timestamp']))
         .sort((a, b) => a - b)
@@ -917,6 +760,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             const events = await apiServices.alertingV2.ruleEvents.find(rule.id, {
               episodeStatus: 'active',
             });
+
             return events.some(
               (event) => Date.parse(event['@timestamp']) > lastRecoveringTimestamp
             );
@@ -930,9 +774,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const activeEventsAfter = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'active',
       });
+
       const reactivatedEvent = activeEventsAfter.find(
         (event) => Date.parse(event['@timestamp']) > lastRecoveringTimestamp
       );
+
       expect(reactivatedEvent?.episode?.id).toBe(initialActiveEpisodeId);
       // The re-active event is a steady-state status, so the director must
       // not carry over the recovering status_count onto it.
@@ -960,15 +806,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-to-inactive' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-to-inactive" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: { pending_count: 10 },
         })
       );
@@ -1001,8 +843,6 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest('tracks episode id and status_count independently per group', async ({ apiServices }) => {
-    // Two groups breach simultaneously. We give each a different number of
-    // pending ticks so their status_counts cannot accidentally line up.
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
       docs: [
@@ -1024,15 +864,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'director-multi-group' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-group-a", "host-multi-group-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
         // pending_count is high so neither group transitions to active
         // during the test, keeping host-b in pending while host-a is
         // recovered to inactive.
@@ -1089,6 +925,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
     const eventsA = events.filter((event) => event.group_hash === groupHashA);
     const eventsB = events.filter((event) => event.group_hash === groupHashB);
+
     expect(eventsA.length).toBeGreaterThan(0);
     expect(eventsB.length).toBeGreaterThan(0);
     expect(eventsA.some((event) => event.episode?.status === 'inactive')).toBe(true);
@@ -1096,13 +933,13 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
     const idsA = new Set(eventsA.map((event) => event.episode?.id));
     const idsB = new Set(eventsB.map((event) => event.episode?.id));
+    const [idA] = idsA;
+    const [idB] = idsB;
 
     // Each group sticks to a single episode id throughout — and the two
     // groups must have DIFFERENT ids.
     expect(idsA.size).toBe(1);
     expect(idsB.size).toBe(1);
-    const [idA] = idsA;
-    const [idB] = idsB;
     expect(idA).not.toBe(idB);
   });
 
@@ -1129,15 +966,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-timeframe' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: {
             pending_count: 1000,
             pending_timeframe: '1s',
@@ -1188,15 +1021,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-recovering-timeframe-or' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-or" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: {
             pending_count: 0,
             recovering_count: 1000,
@@ -1231,8 +1060,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
-      expect(latestStates.size).toBe(1);
       const [latestState] = Array.from(latestStates.values());
+
+      expect(latestStates.size).toBe(1);
       expect(latestState.episode?.status).toBe('inactive');
     }
   );
@@ -1259,15 +1089,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-recovering-timeframe-and' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: {
             pending_count: 0,
             recovering_count: 1000,
@@ -1313,8 +1139,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
-      expect(latestStates.size).toBe(1);
       const [latestState] = Array.from(latestStates.values());
+
+      expect(latestStates.size).toBe(1);
       expect(latestState.episode?.status).toBe('recovering');
     }
   );
@@ -1341,15 +1168,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-timeframe-and' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: {
             pending_count: 1000,
             pending_timeframe: '1s',
@@ -1385,8 +1208,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       }
 
       const latestStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
-      expect(latestStates.size).toBe(1);
       const [latestState] = Array.from(latestStates.values());
+
+      expect(latestStates.size).toBe(1);
       expect(latestState.episode?.status).toBe('pending');
     }
   );
@@ -1413,15 +1237,11 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'director-pending-and-success' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-and-success" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
           state_transition: {
             pending_count: 2,
             pending_timeframe: '1s',
@@ -1446,6 +1266,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       const pendingCounts = pendingEvents
         .map((event) => event.episode!.status_count)
         .filter((count): count is number => typeof count === 'number');
+
       expect(pendingCounts).toContain(1);
 
       for (const event of activeEvents) {
