@@ -49,10 +49,10 @@ const previewButtonLabel = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.skillDraft.previewButtonLabel',
   { defaultMessage: 'Preview' }
 );
-const createdLabel = i18n.translate(
-  'xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel',
+const editInManagementLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skillDraft.editInManagementButtonLabel',
   {
-    defaultMessage: 'Created',
+    defaultMessage: 'Edit in Management',
   }
 );
 const createSkillLabel = i18n.translate(
@@ -405,17 +405,34 @@ export const createSkillDraftAttachmentDefinition = ({
       }
 
       if (isLatest({ version, versionCount })) {
-        // Only show create button for the latest draft
-        const createButton: ActionButton = {
-          label: isCreated ? createdLabel : createSkillLabel,
-          icon: isCreated ? 'check' : 'plus',
-          type: ActionButtonType.PRIMARY,
-          disabled: isCreated || !canCreate,
-          disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
-          handler: createSkill,
-        };
+        // Once the draft has been persisted, swap the create button for one that
+        // navigates the user to the skill management page for the created skill.
+        if (isCreated && attachment.origin) {
+          const skillId = attachment.origin;
+          const editInManagementButton: ActionButton = {
+            label: editInManagementLabel,
+            icon: 'pencil',
+            type: ActionButtonType.PRIMARY,
+            handler: () => {
+              application.navigateToApp('agentBuilder', {
+                path: `/manage/skills/${skillId}`,
+              });
+            },
+          };
+          actionButtons.push(editInManagementButton);
+        } else {
+          // Only show create button for the latest draft
+          const createButton: ActionButton = {
+            label: createSkillLabel,
+            icon: 'plus',
+            type: ActionButtonType.PRIMARY,
+            disabled: !canCreate,
+            disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+            handler: createSkill,
+          };
 
-        actionButtons.push(createButton);
+          actionButtons.push(createButton);
+        }
       }
 
       return actionButtons;
