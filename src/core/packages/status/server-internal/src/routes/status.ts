@@ -88,8 +88,9 @@ const resolveStatusDecision = async ({
       });
     return hasAllRequested ? 'full' : 'no-monitor';
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     logger.warn(
-      `Failed to check 'monitor' cluster privilege for /api/status, returning redacted response: ${error.message}`
+      `Failed to check 'monitor' cluster privilege for /api/status, returning redacted response: ${message}`
     );
     return 'unauthenticated';
   }
@@ -185,14 +186,17 @@ export const registerStatusRoute = ({
       },
     },
     async (context, req, res) => {
-      const decision = await resolveStatusDecision({
-        authRequired: !config.allowAnonymous,
-        isAuthenticated: req.auth.isAuthenticated,
-        coreContext: await context.core,
-        logger,
-      });
-
-      const [overall, coreOverall, core, plugins] = await firstValueFrom(combinedStatus$);
+      const [decision, [overall, coreOverall, core, plugins]] = await Promise.all([
+        context.core.then((coreContext) =>
+          resolveStatusDecision({
+            authRequired: !config.allowAnonymous,
+            isAuthenticated: req.auth.isAuthenticated,
+            coreContext,
+            logger,
+          })
+        ),
+        firstValueFrom(combinedStatus$),
+      ]);
 
       let responseBody;
       switch (decision) {

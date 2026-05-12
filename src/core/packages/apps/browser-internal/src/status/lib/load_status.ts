@@ -213,7 +213,7 @@ export type ProcessedServerResponse =
     };
 
 const isRedactedResponse = (response: StatusApiResponse): boolean =>
-  response.status.core === undefined && response.status.plugins === undefined;
+  response.status.core === undefined || response.status.plugins === undefined;
 
 const buildServerState = (level: ServiceStatusLevelId, summary?: string): StatusState => {
   const { title, uiColor } = STATUS_LEVEL_UI_ATTRS[level];

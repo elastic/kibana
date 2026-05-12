@@ -115,12 +115,11 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
   render() {
     const { loading, fetchError, data } = this.state;
 
-    // If we're still loading, return early with a spinner
     if (loading) {
       return <EuiLoadingSpinner size="l" />;
     }
 
-    if (fetchError) {
+    if (fetchError || !data) {
       return (
         <EuiText color="danger">
           <FormattedMessage
@@ -131,15 +130,15 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
       );
     }
 
-    if (data!.redacted) {
+    if (data.redacted) {
       return (
         <EuiPage className="stsPage" data-test-subj="statusPageRoot">
-          <EuiPageBody restrictWidth>{this.renderRedactedView(data!.serverState)}</EuiPageBody>
+          <EuiPageBody restrictWidth>{this.renderRedactedView(data.serverState)}</EuiPageBody>
         </EuiPage>
       );
     }
 
-    const { metrics, coreStatus, pluginStatus, serverState, name, version } = data!;
+    const { metrics, coreStatus, pluginStatus, serverState, name, version } = data;
 
     return (
       <EuiPage className="stsPage" data-test-subj="statusPageRoot">
