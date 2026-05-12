@@ -132,9 +132,9 @@ entries:
   - https://github.com/elastic/kibana/issues/251402
 - file:
     name: 266021.yaml
-    checksum: 621bc3b7d7ece94b963e554657d9b90354162f24
+    checksum: e6169999b4f6520f411a3533c276212fb4f78ebf
   type: enhancement
-  title: APM service map context highlight for embeddable and focused map
+  title: Add context highlights for embeddable and focused APM service maps
   products:
   - product: cloud-serverless
     target: 2026-05-06
