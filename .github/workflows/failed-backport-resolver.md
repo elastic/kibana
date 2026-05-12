@@ -43,13 +43,16 @@ env:
   PR_NUMBER: &pr_number ${{ github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.issue.number || github.event.inputs.pr_number }}
 
+checkout:
+  - fetch-depth: 0
+
 runs-on: kibana
 timeout-minutes: 120
 
 engine:
   id: claude
   version: "2.1.111"
-  model: opus[1m]
+  model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
