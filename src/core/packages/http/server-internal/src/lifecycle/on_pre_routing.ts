@@ -71,6 +71,8 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
         const app = request.app as KibanaRequestState;
         app.rewrittenUrl = app.rewrittenUrl ?? request.url;
         request.setUrl(result.url);
+        // Also update the raw request URL so legacy-platform proxying sees the rewritten URL.
+        request.raw.req.url = result.url;
         return responseToolkit.continue;
       }
       throw new Error(

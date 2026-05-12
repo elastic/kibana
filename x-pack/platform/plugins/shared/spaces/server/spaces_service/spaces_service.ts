@@ -86,7 +86,7 @@ interface SpacesServiceStartDeps {
 export class SpacesService {
   public setup(): SpacesServiceSetup {
     return {
-      getSpaceId: (request: KibanaRequest) => request.spaceId,
+      getSpaceId: (request: KibanaRequest) => request.spaceId ?? DEFAULT_SPACE_ID,
       spaceIdToNamespace,
       namespaceToSpaceId,
     };
@@ -94,12 +94,13 @@ export class SpacesService {
 
   public start({ spacesClientService }: SpacesServiceStartDeps): SpacesServiceStart {
     return {
-      getSpaceId: (request: KibanaRequest) => request.spaceId,
+      getSpaceId: (request: KibanaRequest) => request.spaceId ?? DEFAULT_SPACE_ID,
 
       getActiveSpace: (request: KibanaRequest) =>
-        spacesClientService.createSpacesClient(request).get(request.spaceId),
+        spacesClientService.createSpacesClient(request).get(request.spaceId ?? DEFAULT_SPACE_ID),
 
-      isInDefaultSpace: (request: KibanaRequest) => request.spaceId === DEFAULT_SPACE_ID,
+      isInDefaultSpace: (request: KibanaRequest) =>
+        (request.spaceId ?? DEFAULT_SPACE_ID) === DEFAULT_SPACE_ID,
 
       createSpacesClient: (request: KibanaRequest) =>
         spacesClientService.createSpacesClient(request),
