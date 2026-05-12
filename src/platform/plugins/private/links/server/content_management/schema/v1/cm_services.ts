@@ -33,10 +33,10 @@ const baseLinkSchema = {
 
 export const dashboardLinkSchema = schema.object({
   ...baseLinkSchema,
+  type: schema.literal(DASHBOARD_LINK_TYPE),
   destination: schema.string({
     meta: { description: 'Linked dashboard saved object id' },
   }),
-  type: schema.literal(DASHBOARD_LINK_TYPE),
   options: dashboardNavigationOptionsSchema,
 });
 
@@ -66,10 +66,10 @@ export const externalLinkSchema = schema.object({
 });
 
 export const linksArraySchema = schema.arrayOf(
-  schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
+  schema.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]),
   {
     meta: { description: 'The list of links to display' },
-    maxSize: 9999, // For DoS prevention, no actual user will insert this many links
+    maxSize: 100,
   }
 );
 
