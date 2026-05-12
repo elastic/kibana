@@ -739,15 +739,23 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
     expect(shouldClauses).toBeDefined();
 
-    const hasIdClause = shouldClauses!.some((c) => c?.term?._id != null);
-    const hasMultiMatch = shouldClauses!.some((c) => c?.multi_match != null);
-    const hasNested = shouldClauses!.some((c) => c?.nested != null);
-    const hasRuntime = shouldClauses!.some((c) => c?.term?.[EF_ALL_VALUES_FIELD] != null);
-
-    expect(hasIdClause).toBe(true);
-    expect(hasMultiMatch).toBe(true);
-    expect(hasNested).toBe(true);
-    expect(hasRuntime).toBe(true);
+    expect(shouldClauses).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ term: expect.objectContaining({ _id: expect.any(String) }) }),
+        expect.objectContaining({
+          multi_match: expect.objectContaining({
+            query: 'test',
+            fields: DEFAULT_CASE_SEARCH_FIELDS,
+          }),
+        }),
+        expect.objectContaining({ nested: expect.anything() }),
+        expect.objectContaining({
+          term: expect.objectContaining({
+            [EF_ALL_VALUES_FIELD]: { value: 'test', case_insensitive: true },
+          }),
+        }),
+      ])
+    );
   });
 
   it('does not add runtime field clause when search is empty', () => {
