@@ -653,7 +653,7 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(({ targetDomElement }): void => {
+    MockNotificationsService.start.mockImplementation(async ({ targetDomElement }) => {
       targetDomElementInStart = targetDomElement;
     });
 
