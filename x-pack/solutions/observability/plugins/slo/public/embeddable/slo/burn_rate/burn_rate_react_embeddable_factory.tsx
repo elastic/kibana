@@ -24,6 +24,7 @@ import { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn
 import type { BurnRateApi, BurnRateCustomState, BurnRateEmbeddableState } from './types';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
+import { ensureLicense } from '../ensure_license';
 
 const getTitle = () =>
   i18n.translate('xpack.slo.burnRateEmbeddable.title', {
@@ -48,6 +49,7 @@ export const getBurnRateEmbeddableFactory = ({
       parentApi,
       initializeDrilldownsManager,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
       const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getTitle());
