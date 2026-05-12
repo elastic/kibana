@@ -252,20 +252,15 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({ state,
     );
   }
 
-  const stepTitles = getStepTitles();
-  const currentStepName = stepTitles[state.step] ?? '';
-
-  if (currentStepName === 'Alert Condition') {
-    return <AlertConditionStep state={state} dispatch={dispatch} services={services} />;
+  // Route by step index, not by string title — avoids silent breakage if step titles change
+  switch (state.step) {
+    case 0:
+      return <AlertConditionStep state={state} dispatch={dispatch} services={services} />;
+    case 1:
+      return <DetailsAndArtifactsStep state={state} dispatch={dispatch} />;
+    case 2:
+      return <NotificationsStep state={state} dispatch={dispatch} />;
+    default:
+      return null;
   }
-
-  if (currentStepName === 'Details & Artifacts') {
-    return <DetailsAndArtifactsStep state={state} dispatch={dispatch} />;
-  }
-
-  if (currentStepName === 'Notifications') {
-    return <NotificationsStep state={state} dispatch={dispatch} />;
-  }
-
-  return null;
 };
