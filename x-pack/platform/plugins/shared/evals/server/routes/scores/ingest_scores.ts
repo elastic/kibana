@@ -81,11 +81,8 @@ export const registerIngestScoresRoute = ({ router, logger }: RouteDependencies)
       },
       async (context, request, response) => {
         try {
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-          const result = await evalsContext.evaluationScoreService.write(esClient, request.body);
+          const result = await evalsContext.evaluationScoreService.write(request.body);
 
           const statusCode = getResponseStatusCode(result);
 

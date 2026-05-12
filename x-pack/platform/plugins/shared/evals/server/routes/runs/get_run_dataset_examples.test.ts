@@ -9,12 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import {
-  EVALS_RUN_DATASET_EXAMPLES_URL,
-  API_VERSIONS,
-  EVALUATIONS_INDEX_PATTERN,
-  SCORES_SORT_ORDER,
-} from '@kbn/evals-common';
+import { EVALS_RUN_DATASET_EXAMPLES_URL, API_VERSIONS, SCORES_SORT_ORDER } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerGetRunDatasetExamplesRoute } from './get_run_dataset_examples';
@@ -36,11 +31,16 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
       API_VERSIONS.internal.v1
     ];
 
-    const mockCoreContext = coreMock.createRequestHandlerContext();
-    const context = coreMock.createCustomRequestHandlerContext({ core: mockCoreContext });
-    const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
+    const evaluationScoreService = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    };
+    const context = coreMock.createCustomRequestHandlerContext({
+      evals: {
+        evaluationScoreService,
+      } as any,
+    });
 
-    return { handler, context, esClient, logger };
+    return { handler, context, evaluationScoreService, logger };
   };
 
   const makeRequest = (runId = 'run-123', datasetId = 'dataset-123') =>
@@ -54,15 +54,14 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
       query: {},
     });
 
-  it('uses the correct ES query parameters', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+  it('uses the correct query parameters', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
     await handler(context, makeRequest(), kibanaResponseFactory);
 
-    expect(esClient.search).toHaveBeenCalledWith(
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: EVALUATIONS_INDEX_PATTERN,
         sort: SCORES_SORT_ORDER,
         size: 10000,
         query: {
@@ -78,8 +77,8 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
   });
 
   it('groups scores by example id and sorts by example index', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({
       hits: {
         hits: [
           { _source: { example: { id: 'example-b', index: 2 }, evaluator: { name: 'eval-1' } } },
@@ -112,8 +111,8 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
   });
 
   it('returns 500 when ES throws', async () => {
-    const { handler, context, esClient, logger } = setup();
-    esClient.search.mockRejectedValueOnce(new Error('ES error'));
+    const { handler, context, evaluationScoreService, logger } = setup();
+    evaluationScoreService.search.mockRejectedValueOnce(new Error('ES error'));
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 

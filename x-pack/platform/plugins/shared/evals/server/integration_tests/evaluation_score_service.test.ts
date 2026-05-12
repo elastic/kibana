@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { clearTimeout as nodeClearTimeout, setTimeout as nodeSetTimeout } from 'node:timers';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
@@ -81,6 +82,7 @@ describe('EvaluationScoreService integration', () => {
 
   let manageES: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
+  let coreDataStreams: DataStreamsStart;
   let root: ReturnType<typeof createRootWithCorePlugins>;
   let initializeDataStreamClient: () => Promise<unknown>;
   let originalSetTimeout: typeof global.setTimeout;
@@ -101,8 +103,9 @@ describe('EvaluationScoreService integration', () => {
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
     const coreStart = await root.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
+    coreDataStreams = coreStart.dataStreams;
     initializeDataStreamClient = () =>
-      coreStart.dataStreams.initializeClient(EVALUATIONS_DATA_STREAM_NAME);
+      coreDataStreams.initializeClient(EVALUATIONS_DATA_STREAM_NAME);
   });
 
   afterAll(async () => {
@@ -127,7 +130,7 @@ describe('EvaluationScoreService integration', () => {
   });
 
   it('ingests scores with deterministic conflicts on rewrite', async () => {
-    const service = new EvaluationScoreService(loggingSystemMock.createLogger());
+    const service = new EvaluationScoreService(loggingSystemMock.createLogger(), coreDataStreams);
     const runId = `service-integration-run-${Date.now()}`;
     const payload = getPayload(runId);
 
@@ -142,11 +145,10 @@ describe('EvaluationScoreService integration', () => {
     });
     expect(dataStream.data_streams.map(({ name }) => name)).toContain(EVALUATIONS_DATA_STREAM_NAME);
 
-    const firstWrite = await service.write(esClient, payload);
+    const firstWrite = await service.write(payload);
     expect(firstWrite).toEqual({ ingested: payload.scores.length, conflicted: 0, failed: [] });
 
-    const searchResult = await esClient.search({
-      index: EVALUATIONS_DATA_STREAM_NAME,
+    const searchResult = await service.search({
       query: {
         term: {
           run_id: runId,
@@ -155,7 +157,7 @@ describe('EvaluationScoreService integration', () => {
     });
     expect(searchResult.hits.hits).toHaveLength(payload.scores.length);
 
-    const secondWrite = await service.write(esClient, payload);
+    const secondWrite = await service.write(payload);
     expect(secondWrite).toEqual({ ingested: 0, conflicted: payload.scores.length, failed: [] });
   });
 });

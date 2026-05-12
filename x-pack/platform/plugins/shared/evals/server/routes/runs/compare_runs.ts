@@ -9,7 +9,7 @@ import {
   EVALS_RUNS_COMPARE_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
+  buildRouteValidationWithZod,
   buildRunFilterQuery,
   SCORES_SORT_ORDER,
   CompareRunsRequestQuery,
@@ -17,8 +17,7 @@ import {
   computePairedTTestResults,
 } from '@kbn/evals-common';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { EVALS_API_PRIVILEGES } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 const MAX_SCORES_PER_RUN = 10_000;
@@ -38,7 +37,7 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
       path: EVALS_RUNS_COMPARE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
+        authz: { requiredPrivileges: [PLUGIN_ID] },
       },
       summary: 'Compare two evaluation runs',
     })
@@ -54,20 +53,17 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
       async (context, request, response) => {
         try {
           const { run_id_a: runIdA, run_id_b: runIdB } = request.query;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
           const [responseA, responseB] = await Promise.all([
-            esClient.search<EvaluationScoreDocument>({
-              index: EVALUATIONS_INDEX_PATTERN,
+            evalsContext.evaluationScoreService.search({
               query: buildRunFilterQuery(runIdA),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_RUN,
               _source: COMPARE_SOURCE_FIELDS,
               track_total_hits: true,
             }),
-            esClient.search<EvaluationScoreDocument>({
-              index: EVALUATIONS_INDEX_PATTERN,
+            evalsContext.evaluationScoreService.search({
               query: buildRunFilterQuery(runIdB),
               sort: SCORES_SORT_ORDER,
               size: MAX_SCORES_PER_RUN,
@@ -95,11 +91,11 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
           }
 
           const scoresA = (responseA.hits?.hits ?? [])
-            .map((hit) => hit._source)
+            .map((hit) => hit._source as EvaluationScoreDocument | undefined)
             .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
           const scoresB = (responseB.hits?.hits ?? [])
-            .map((hit) => hit._source)
+            .map((hit) => hit._source as EvaluationScoreDocument | undefined)
             .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
           if (scoresA.length === 0) {

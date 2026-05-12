@@ -9,7 +9,7 @@ import {
   EVALS_RUN_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
+  buildRouteValidationWithZod,
   buildRunFilterQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
@@ -17,8 +17,7 @@ import {
   GetEvaluationRunRequestParams,
   GetEvaluationRunRequestQuery,
 } from '@kbn/evals-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { EVALS_API_PRIVILEGES } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 interface EvalDocSource {
@@ -49,7 +48,7 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
       path: EVALS_RUN_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
+        authz: { requiredPrivileges: [PLUGIN_ID] },
       },
       summary: 'Get evaluation run detail',
     })
@@ -67,25 +66,22 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
         try {
           const { runId } = request.params;
           const { suite_id: suiteId, model_id: modelId } = request.query;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
           const query = buildRunFilterQuery(runId, { suiteId, modelId });
 
-          const metadataResponse = await esClient.search<EvalDocSource>({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const metadataResponse = await evalsContext.evaluationScoreService.search({
             query,
             size: 1,
           });
 
           const firstHit = metadataResponse.hits?.hits[0];
-          const firstDoc = firstHit?._source;
+          const firstDoc = firstHit?._source as EvalDocSource | undefined;
           if (!firstDoc) {
             return response.notFound({ body: { message: `Run not found: ${runId}` } });
           }
 
-          const aggResponse = await esClient.search({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
             query,
             aggs: buildStatsAggregation(),

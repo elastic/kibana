@@ -31,11 +31,16 @@ describe('GET /internal/evals/runs/{runId}', () => {
       API_VERSIONS.internal.v1
     ];
 
-    const mockCoreContext = coreMock.createRequestHandlerContext();
-    const context = coreMock.createCustomRequestHandlerContext({ core: mockCoreContext });
-    const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
+    const evaluationScoreService = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+    };
+    const context = coreMock.createCustomRequestHandlerContext({
+      evals: {
+        evaluationScoreService,
+      } as any,
+    });
 
-    return { handler, context, esClient, logger };
+    return { handler, context, evaluationScoreService, logger };
   };
 
   const makeRequest = (runId = 'run-abc') =>
@@ -47,8 +52,8 @@ describe('GET /internal/evals/runs/{runId}', () => {
     });
 
   it('returns 404 when no documents match the run', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -57,10 +62,10 @@ describe('GET /internal/evals/runs/{runId}', () => {
   });
 
   it('returns run detail with stats on success', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, evaluationScoreService } = setup();
 
     // First search: metadata doc
-    esClient.search.mockResolvedValueOnce({
+    evaluationScoreService.search.mockResolvedValueOnce({
       hits: {
         hits: [
           {
@@ -75,7 +80,7 @@ describe('GET /internal/evals/runs/{runId}', () => {
     } as any);
 
     // Second search: aggregations
-    esClient.search.mockResolvedValueOnce({
+    evaluationScoreService.search.mockResolvedValueOnce({
       aggregations: {
         by_dataset: {
           buckets: [
@@ -121,8 +126,8 @@ describe('GET /internal/evals/runs/{runId}', () => {
   });
 
   it('returns 500 when ES throws', async () => {
-    const { handler, context, esClient, logger } = setup();
-    esClient.search.mockRejectedValueOnce(new Error('ES error'));
+    const { handler, context, evaluationScoreService, logger } = setup();
+    evaluationScoreService.search.mockRejectedValueOnce(new Error('ES error'));
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 

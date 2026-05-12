@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
 import { EVALUATIONS_DATA_STREAM_NAME } from './scores_index_template';
-
-interface BulkDroppedDocument {
-  document: {
-    index: number;
-    payload: EvaluationScoreDocument;
-  };
-  status: number;
-  error?: {
-    type?: string;
-    reason?: string;
-  };
-}
 
 export interface IngestFailure {
   index: number;
@@ -34,6 +24,7 @@ export interface WriteResult {
 }
 
 const DEFAULT_SUITE_ID = 'unknown-suite';
+type DataStreamSearchResponse = Awaited<ReturnType<AnyIDataStreamClient['search']>>;
 
 export const computeScoreDocumentId = (document: EvaluationScoreDocument): string => {
   const suiteId = document.suite?.id ?? DEFAULT_SUITE_ID;
@@ -51,10 +42,9 @@ export const computeScoreDocumentId = (document: EvaluationScoreDocument): strin
 const toEvaluationScoreDocuments = (
   request: IngestScoresRequestBody,
   timestamp: string
-): Array<{ index: number; payload: EvaluationScoreDocument }> => {
-  return request.scores.map((score, index) => ({
-    index,
-    payload: {
+): Array<{ _id: string } & EvaluationScoreDocument> => {
+  return request.scores.map((score) => {
+    const payload: EvaluationScoreDocument = {
       '@timestamp': timestamp,
       run_id: request.run_id,
       experiment_id: request.experiment_id,
@@ -89,59 +79,73 @@ const toEvaluationScoreDocuments = (
       environment: {
         hostname: request.environment.hostname,
       },
-    },
-  }));
+    };
+
+    return {
+      _id: computeScoreDocumentId(payload),
+      ...payload,
+    };
+  });
 };
 
 export class EvaluationScoreService {
-  constructor(logger: Logger) {
+  constructor(logger: Logger, private readonly coreDataStreams: DataStreamsStart) {
     void logger;
   }
 
-  async write(
-    esClient: ElasticsearchClient,
-    request: IngestScoresRequestBody
-  ): Promise<WriteResult> {
+  private async getClient(): Promise<AnyIDataStreamClient> {
+    return this.coreDataStreams.initializeClient(EVALUATIONS_DATA_STREAM_NAME);
+  }
+
+  public async search(request: ClientSearchRequest): Promise<DataStreamSearchResponse> {
+    const client = await this.getClient();
+    return client.search(request);
+  }
+
+  async write(request: IngestScoresRequestBody): Promise<WriteResult> {
     if (request.scores.length === 0) {
       return { ingested: 0, conflicted: 0, failed: [] };
     }
 
     const timestamp = new Date().toISOString();
     const documents = toEvaluationScoreDocuments(request, timestamp);
-    const droppedDocuments: BulkDroppedDocument[] = [];
-
-    const bulkStats = await esClient.helpers.bulk({
-      datasource: documents,
-      onDocument: ({ payload }) => [
-        {
-          create: {
-            _index: EVALUATIONS_DATA_STREAM_NAME,
-            _id: computeScoreDocumentId(payload),
-          },
-        },
-        payload,
-      ],
-      onDrop: (document) => {
-        droppedDocuments.push(document as BulkDroppedDocument);
-      },
+    const client = await this.getClient();
+    const response = await client.create({
+      documents,
       refresh: 'wait_for',
     });
 
-    if (bulkStats.failed === 0) {
-      return { ingested: bulkStats.successful, conflicted: 0, failed: [] };
-    }
+    let conflicted = 0;
+    const failed: IngestFailure[] = [];
 
-    const conflicted = droppedDocuments.filter(({ status }) => status === 409).length;
-    const failed = droppedDocuments
-      .filter(({ status }) => status !== 409)
-      .map(({ document, status, error }) => ({
-        index: document.index,
-        status,
-        reason: error?.reason ?? error?.type ?? 'unknown failure reason',
-      }));
+    response.items.forEach((item, index) => {
+      const createItem = item.create;
+      const status = createItem?.status;
+      if (!status) {
+        failed.push({
+          index,
+          status: 500,
+          reason: 'unknown failure reason',
+        });
+        return;
+      }
+
+      if (status === 409) {
+        conflicted += 1;
+        return;
+      }
+
+      if (status < 200 || status >= 300) {
+        failed.push({
+          index,
+          status,
+          reason: createItem.error?.reason ?? createItem.error?.type ?? 'unknown failure reason',
+        });
+      }
+    });
 
     return {
-      ingested: bulkStats.successful,
+      ingested: documents.length - conflicted - failed.length,
       conflicted,
       failed,
     };

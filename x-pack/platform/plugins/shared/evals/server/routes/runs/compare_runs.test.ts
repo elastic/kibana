@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_RUNS_COMPARE_URL, API_VERSIONS, EVALUATIONS_INDEX_PATTERN } from '@kbn/evals-common';
+import { EVALS_RUNS_COMPARE_URL, API_VERSIONS } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerCompareRunsRoute } from './compare_runs';
@@ -78,11 +78,18 @@ describe('GET /internal/evals/runs/compare', () => {
       API_VERSIONS.internal.v1
     ];
 
-    const mockCoreContext = coreMock.createRequestHandlerContext();
-    const context = coreMock.createCustomRequestHandlerContext({ core: mockCoreContext });
-    const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
+    const evaluationScoreService = {
+      search: jest.fn().mockResolvedValue({
+        hits: { hits: [], total: { value: 0, relation: 'eq' } },
+      }),
+    };
+    const context = coreMock.createCustomRequestHandlerContext({
+      evals: {
+        evaluationScoreService,
+      } as any,
+    });
 
-    return { handler, context, esClient, logger };
+    return { handler, context, evaluationScoreService, logger };
   };
 
   const makeRequest = (runIdA = 'run-a', runIdB = 'run-b') =>
@@ -92,23 +99,20 @@ describe('GET /internal/evals/runs/compare', () => {
       query: { run_id_a: runIdA, run_id_b: runIdB },
     });
 
-  it('queries the correct index for both runs', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValue({
+  it('queries both runs through evaluationScoreService.search', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
     } as any);
 
     await handler(context, makeRequest(), kibanaResponseFactory);
 
-    expect(esClient.search).toHaveBeenCalledTimes(2);
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: EVALUATIONS_INDEX_PATTERN })
-    );
+    expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
   });
 
   it('returns 404 when no scores exist for the first run', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search
       .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0, relation: 'eq' } } } as any)
       .mockResolvedValueOnce({
         hits: {
@@ -124,8 +128,8 @@ describe('GET /internal/evals/runs/compare', () => {
   });
 
   it('returns 404 when no scores exist for the second run', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search
       .mockResolvedValueOnce({
         hits: {
           hits: [{ _source: makeScoreDoc({ runId: 'run-a' }) }],
@@ -141,8 +145,8 @@ describe('GET /internal/evals/runs/compare', () => {
   });
 
   it('returns empty results when datasets do not overlap', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search
       .mockResolvedValueOnce({
         hits: {
           hits: [{ _source: makeScoreDoc({ datasetId: 'ds-only-a' }) }],
@@ -166,9 +170,9 @@ describe('GET /internal/evals/runs/compare', () => {
   });
 
   it('returns comparison results with pairing stats for overlapping datasets', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, evaluationScoreService } = setup();
     const sharedDataset = { datasetId: 'ds-shared', datasetName: 'Shared' };
-    esClient.search
+    evaluationScoreService.search
       .mockResolvedValueOnce({
         hits: {
           hits: [
@@ -203,9 +207,9 @@ describe('GET /internal/evals/runs/compare', () => {
   });
 
   it('filters out hits with no _source', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, evaluationScoreService } = setup();
     const sharedDataset = { datasetId: 'ds-1', datasetName: 'DS' };
-    esClient.search
+    evaluationScoreService.search
       .mockResolvedValueOnce({
         hits: {
           hits: [
@@ -230,9 +234,9 @@ describe('GET /internal/evals/runs/compare', () => {
   });
 
   it('reports truncation when total hits exceed the fetch limit', async () => {
-    const { handler, context, esClient } = setup();
+    const { handler, context, evaluationScoreService } = setup();
     const sharedDataset = { datasetId: 'ds-1', datasetName: 'DS' };
-    esClient.search
+    evaluationScoreService.search
       .mockResolvedValueOnce({
         hits: {
           hits: [{ _source: makeScoreDoc({ ...sharedDataset, score: 0.8 }) }],
@@ -254,8 +258,8 @@ describe('GET /internal/evals/runs/compare', () => {
   });
 
   it('returns 500 when ES throws', async () => {
-    const { handler, context, esClient, logger } = setup();
-    esClient.search.mockRejectedValueOnce(new Error('ES error'));
+    const { handler, context, evaluationScoreService, logger } = setup();
+    evaluationScoreService.search.mockRejectedValueOnce(new Error('ES error'));
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 

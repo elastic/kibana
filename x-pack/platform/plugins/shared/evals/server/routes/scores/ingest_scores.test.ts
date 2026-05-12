@@ -88,20 +88,16 @@ describe('POST /internal/evals/scores', () => {
     ];
     const { handler } = route;
 
-    const mockCoreContext = coreMock.createRequestHandlerContext();
     const evaluationScoreService = {
       write: jest.fn().mockResolvedValue({ ingested: 1, conflicted: 0, failed: [] }),
     };
     const context = coreMock.createCustomRequestHandlerContext({
-      core: mockCoreContext,
       evals: {
         evaluationScoreService,
       } as any,
     });
 
-    const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
-
-    return { handler, context, esClient, evaluationScoreService, route };
+    return { handler, context, evaluationScoreService, route };
   };
 
   const makeRequest = (body: IngestScoresRequestBodyInput) =>
@@ -119,13 +115,13 @@ describe('POST /internal/evals/scores', () => {
   };
 
   it('returns 200 with ingest counts on successful ingest', async () => {
-    const { handler, context, esClient, evaluationScoreService } = setup();
+    const { handler, context, evaluationScoreService } = setup();
     const payload = getBasePayload();
     mockWriteResult(evaluationScoreService, { ingested: 1, conflicted: 0, failed: [] });
 
     const response = await handler(context as any, makeRequest(payload), kibanaResponseFactory);
 
-    expect(evaluationScoreService.write).toHaveBeenCalledWith(esClient, payload);
+    expect(evaluationScoreService.write).toHaveBeenCalledWith(payload);
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({ ingested: 1, conflicted: 0, failed: [] });
   });

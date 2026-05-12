@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { AnyIDataStreamClient, ClientSearchRequest } from '@kbn/data-streams';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
 import {
   EvaluationScoreService,
   computeScoreDocumentId,
   type WriteResult,
 } from './evaluation_score_service';
+import { EVALUATIONS_DATA_STREAM_NAME } from './scores_index_template';
 
 const getBaseRequest = (): IngestScoresRequestBody => ({
   run_id: 'run-1',
@@ -70,35 +72,22 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
   ],
 });
 
-interface BulkOptions {
-  datasource: Array<{ index: number; payload: EvaluationScoreDocument }>;
-  onDocument: (document: { index: number; payload: EvaluationScoreDocument }) => unknown;
-  onDrop: (document: unknown) => void;
-}
-
-const createEsClientMock = (
-  bulkImplementation?: (
-    options: BulkOptions
-  ) => Promise<{ failed: number; successful: number; total: number }>
-) => {
-  const bulk = jest.fn(
-    bulkImplementation ??
-      (async ({ datasource }: BulkOptions) => ({
-        failed: 0,
-        successful: datasource.length,
-        total: datasource.length,
-      }))
-  );
-
-  const esClient = {
-    helpers: {
-      bulk,
-    },
-  } as unknown as ElasticsearchClient;
+const createDataStreamsMock = () => {
+  const create = jest.fn();
+  const search = jest.fn();
+  const dataStreamClient = {
+    create,
+    search,
+  } as unknown as AnyIDataStreamClient;
+  const coreDataStreams = {
+    initializeClient: jest.fn().mockResolvedValue(dataStreamClient),
+  } as unknown as DataStreamsStart;
 
   return {
-    esClient,
-    bulk,
+    coreDataStreams,
+    initializeClient: coreDataStreams.initializeClient as jest.Mock,
+    create,
+    search,
   };
 };
 
@@ -106,37 +95,39 @@ describe('EvaluationScoreService', () => {
   it('write maps request fields and preserves deterministic ids', async () => {
     const logger = loggingSystemMock.createLogger();
     const request = getBaseRequest();
-    const capturedDocuments: EvaluationScoreDocument[] = [];
-    const capturedCreateIds: string[] = [];
+    const capturedDocuments: Array<{ _id: string } & EvaluationScoreDocument> = [];
+    const { coreDataStreams, initializeClient, create } = createDataStreamsMock();
 
-    const { esClient } = createEsClientMock(async ({ datasource, onDocument }: BulkOptions) => {
-      for (const document of datasource) {
-        capturedDocuments.push(document.payload);
-        const operation = onDocument(document) as [
-          { create: { _id: string } },
-          EvaluationScoreDocument
-        ];
-        capturedCreateIds.push(operation[0].create._id);
-      }
-
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      capturedDocuments.push(...(documents as Array<{ _id: string } & EvaluationScoreDocument>));
       return {
-        failed: 0,
-        successful: datasource.length,
-        total: datasource.length,
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
       };
     });
 
-    const service = new EvaluationScoreService(logger);
-    const result = await service.write(esClient, request);
+    const service = new EvaluationScoreService(logger, coreDataStreams);
+    const result = await service.write(request);
 
     expect(result).toEqual<WriteResult>({ ingested: 1, conflicted: 0, failed: [] });
-    expect(capturedCreateIds).toEqual([
+    expect(initializeClient).toHaveBeenCalledWith(EVALUATIONS_DATA_STREAM_NAME);
+    expect(create).toHaveBeenCalledWith({
+      documents: expect.any(Array),
+      refresh: 'wait_for',
+    });
+    expect(capturedDocuments.map(({ _id }) => _id)).toEqual([
       'run-1-suite-1-task-model-dataset-1-example-1-correctness-0',
     ]);
 
     const firstDocument = capturedDocuments[0];
-    expect(firstDocument).toMatchSnapshot({
+    expect(firstDocument).toMatchObject({
       '@timestamp': expect.any(String),
+      _id: expect.any(String),
+      run_id: request.run_id,
+      experiment_id: request.experiment_id,
+      suite: { id: request.suite_id },
+      task: { model: request.task_model, repetition_index: 0 },
+      evaluator: { model: request.evaluator_model, name: 'correctness' },
     });
     expect(computeScoreDocumentId(capturedDocuments[0])).toBe(
       'run-1-suite-1-task-model-dataset-1-example-1-correctness-0'
@@ -146,64 +137,94 @@ describe('EvaluationScoreService', () => {
   it('treats 409 bulk drops as idempotent conflicts', async () => {
     const logger = loggingSystemMock.createLogger();
     const request = getBaseRequest();
-    const { esClient } = createEsClientMock(async ({ datasource, onDrop }) => {
-      for (const _document of datasource) {
-        onDrop({
-          status: 409,
-          error: {
-            type: 'version_conflict_engine_exception',
-            reason: 'document already exists',
-          },
-        });
-      }
+    const { coreDataStreams, create } = createDataStreamsMock();
 
-      return {
-        failed: datasource.length,
-        successful: 0,
-        total: datasource.length,
-      };
+    create.mockResolvedValue({
+      errors: true,
+      items: [{ create: { _id: 'doc-1', status: 409 } }],
     });
 
-    const service = new EvaluationScoreService(logger);
-    const result = await service.write(esClient, request);
+    const service = new EvaluationScoreService(logger, coreDataStreams);
+    const result = await service.write(request);
 
     expect(result).toEqual({ ingested: 0, conflicted: 1, failed: [] });
   });
 
   it('returns per-document failures when non-409 bulk drops occur', async () => {
     const logger = loggingSystemMock.createLogger();
-    const request = getBaseRequest();
-    const { esClient } = createEsClientMock(async ({ datasource, onDrop }) => {
-      onDrop({
-        document: datasource[0],
-        status: 409,
-        error: {
-          type: 'version_conflict_engine_exception',
-          reason: 'already exists',
+    const request = {
+      ...getBaseRequest(),
+      scores: [
+        ...getBaseRequest().scores,
+        {
+          ...getBaseRequest().scores[0],
+          evaluator: {
+            ...getBaseRequest().scores[0].evaluator,
+            name: 'fluency',
+          },
         },
-      });
-      onDrop({
-        document: datasource[0],
-        status: 500,
-        error: {
-          type: 'mapper_parsing_exception',
-          reason: 'bad field',
-        },
-      });
+      ],
+    };
+    const { coreDataStreams, create } = createDataStreamsMock();
 
-      return {
-        failed: 2,
-        successful: 0,
-        total: datasource.length,
-      };
+    create.mockResolvedValue({
+      errors: true,
+      items: [
+        { create: { _id: 'doc-1', status: 409 } },
+        {
+          create: {
+            _id: 'doc-2',
+            status: 400,
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'bad field',
+            },
+          },
+        },
+      ],
     });
 
-    const service = new EvaluationScoreService(logger);
+    const service = new EvaluationScoreService(logger, coreDataStreams);
 
-    await expect(service.write(esClient, request)).resolves.toEqual({
+    await expect(service.write(request)).resolves.toEqual({
       ingested: 0,
       conflicted: 1,
-      failed: [{ index: 0, status: 500, reason: 'bad field' }],
+      failed: [{ index: 1, status: 400, reason: 'bad field' }],
     });
+  });
+
+  it('search delegates to data stream client search', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, initializeClient, search } = createDataStreamsMock();
+    const request: ClientSearchRequest = {
+      query: {
+        match_all: {},
+      },
+      size: 10,
+    };
+    const response = {
+      took: 1,
+      timed_out: false,
+      _shards: {
+        total: 1,
+        successful: 1,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: 0,
+          relation: 'eq',
+        },
+        max_score: null,
+        hits: [],
+      },
+    } as Awaited<ReturnType<AnyIDataStreamClient['search']>>;
+    search.mockResolvedValue(response);
+
+    const service = new EvaluationScoreService(logger, coreDataStreams);
+    await expect(service.search(request)).resolves.toBe(response);
+    expect(initializeClient).toHaveBeenCalledWith(EVALUATIONS_DATA_STREAM_NAME);
+    expect(search).toHaveBeenCalledWith(request);
   });
 });

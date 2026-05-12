@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_RUNS_URL, API_VERSIONS, EVALUATIONS_INDEX_PATTERN } from '@kbn/evals-common';
+import { EVALS_RUNS_URL, API_VERSIONS } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerGetRunsRoute } from './get_runs';
@@ -31,16 +31,23 @@ describe('GET /internal/evals/runs', () => {
       API_VERSIONS.internal.v1
     ];
 
-    const mockCoreContext = coreMock.createRequestHandlerContext();
-    const context = coreMock.createCustomRequestHandlerContext({ core: mockCoreContext });
-    const esClient = mockCoreContext.elasticsearch.client.asCurrentUser;
+    const evaluationScoreService = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { total_runs: { value: 0 }, runs: { buckets: [] } },
+      }),
+    };
+    const context = coreMock.createCustomRequestHandlerContext({
+      evals: {
+        evaluationScoreService,
+      } as any,
+    });
 
-    return { handler, context, esClient, logger };
+    return { handler, context, evaluationScoreService, logger };
   };
 
-  it('calls esClient.search with correct index and size 0', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({
+  it('calls evaluationScoreService.search with size 0', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({
       aggregations: { total_runs: { value: 0 }, runs: { buckets: [] } },
     } as any);
 
@@ -52,17 +59,16 @@ describe('GET /internal/evals/runs', () => {
 
     await handler(context, request, kibanaResponseFactory);
 
-    expect(esClient.search).toHaveBeenCalledWith(
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: EVALUATIONS_INDEX_PATTERN,
         size: 0,
       })
     );
   });
 
   it('applies dataset_id filter when provided', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({
       aggregations: { total_runs: { value: 0 }, runs: { buckets: [] } },
     } as any);
 
@@ -74,7 +80,7 @@ describe('GET /internal/evals/runs', () => {
 
     await handler(context, request, kibanaResponseFactory);
 
-    expect(esClient.search).toHaveBeenCalledWith(
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
       expect.objectContaining({
         query: {
           bool: {
@@ -87,8 +93,8 @@ describe('GET /internal/evals/runs', () => {
   });
 
   it('returns parsed runs listing on success', async () => {
-    const { handler, context, esClient } = setup();
-    esClient.search.mockResolvedValueOnce({
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({
       aggregations: {
         total_runs: { value: 1 },
         runs: {
@@ -129,9 +135,9 @@ describe('GET /internal/evals/runs', () => {
     expect(response.payload.runs[0].task_model.id).toBe('gpt-4');
   });
 
-  it('returns 500 when esClient.search throws', async () => {
-    const { handler, context, esClient, logger } = setup();
-    esClient.search.mockRejectedValueOnce(new Error('ES connection failed'));
+  it('returns 500 when evaluationScoreService.search throws', async () => {
+    const { handler, context, evaluationScoreService, logger } = setup();
+    evaluationScoreService.search.mockRejectedValueOnce(new Error('ES connection failed'));
 
     const request = httpServerMock.createKibanaRequest({
       method: 'get',

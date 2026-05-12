@@ -17,6 +17,8 @@
     "@kbn/es-errors",
     "@kbn/evals-common",
     "@kbn/zod-helpers",
+    "@kbn/data-streams",
+    "@kbn/core-data-streams-server",
     "@kbn/i18n",
     "@kbn/react-query",
     "@kbn/shared-ux-router",

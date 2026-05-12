@@ -9,14 +9,13 @@ import {
   EVALS_RUN_SCORES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
+  buildRouteValidationWithZod,
   buildRunFilterQuery,
   SCORES_SORT_ORDER,
   GetEvaluationRunScoresRequestParams,
   GetEvaluationRunScoresRequestQuery,
 } from '@kbn/evals-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { EVALS_API_PRIVILEGES } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies) => {
@@ -25,7 +24,7 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
       path: EVALS_RUN_SCORES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
+        authz: { requiredPrivileges: [PLUGIN_ID] },
       },
       summary: 'Get evaluation run scores',
     })
@@ -43,13 +42,11 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
         try {
           const { runId } = request.params;
           const { suite_id: suiteId, model_id: modelId } = request.query;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
           const query = buildRunFilterQuery(runId, { suiteId, modelId });
 
-          const searchResponse = await esClient.search({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const searchResponse = await evalsContext.evaluationScoreService.search({
             query,
             sort: SCORES_SORT_ORDER,
             size: 10000,

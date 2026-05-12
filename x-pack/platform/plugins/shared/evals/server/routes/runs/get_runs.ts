@@ -9,14 +9,13 @@ import {
   EVALS_RUNS_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
+  buildRouteValidationWithZod,
   GetEvaluationRunsRequestQuery,
   buildRunsListingFilterQuery,
   buildRunsListingAggregation,
   parseRunsListingResponse,
 } from '@kbn/evals-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { EVALS_API_PRIVILEGES } from '../../../common';
+import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
@@ -25,7 +24,7 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
       path: EVALS_RUNS_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
+        authz: { requiredPrivileges: [PLUGIN_ID] },
       },
       summary: 'List evaluation runs',
     })
@@ -48,12 +47,10 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
             page,
             per_page: perPage,
           } = request.query;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
           const pagination = { page, perPage };
-          const aggResponse = await esClient.search({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
             query: buildRunsListingFilterQuery({ suiteId, modelId, branch, datasetId }),
             aggs: buildRunsListingAggregation(pagination),

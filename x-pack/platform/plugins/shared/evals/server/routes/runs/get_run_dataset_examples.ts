@@ -9,7 +9,6 @@ import {
   EVALS_RUN_DATASET_EXAMPLES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  EVALUATIONS_INDEX_PATTERN,
   MAX_SCORES_PER_QUERY,
   buildDatasetExampleScoresQuery,
   SCORES_SORT_ORDER,
@@ -59,11 +58,9 @@ export const registerGetRunDatasetExamplesRoute = ({ router, logger }: RouteDepe
       async (context, request, response) => {
         try {
           const { runId, datasetId } = request.params;
-          const coreContext = await context.core;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const evalsContext = await context.evals;
 
-          const searchResponse = await esClient.search({
-            index: EVALUATIONS_INDEX_PATTERN,
+          const searchResponse = await evalsContext.evaluationScoreService.search({
             query: buildDatasetExampleScoresQuery(datasetId, runId),
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
