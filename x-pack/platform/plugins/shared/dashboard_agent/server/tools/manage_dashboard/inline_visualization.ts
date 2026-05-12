@@ -31,7 +31,7 @@ export type VisualizationAttempt =
 
 export type InlineVisualizationOperationType =
   | 'add_section'
-  | 'create_visualization_panels'
+  | 'add_panels'
   | 'edit_visualization_panels';
 
 interface ResolveVisualizationConfigParams {

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { z } from '@kbn/zod/v4';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import {
   isCommentRequestTypeExternalReference,
@@ -21,6 +22,22 @@ import type { AttachmentRequest, AttachmentRequestV2 } from '../../../common/typ
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
+
+/** Throws `Boom.badRequest` with a `path: message` summary of every zod issue. */
+export const parseUnifiedAttachmentWithSchema = (
+  schema: z.ZodType,
+  payload: UnifiedAttachmentPayload,
+  type: string
+): void => {
+  const result = schema.safeParse(payload);
+  if (result.success) {
+    return;
+  }
+  const summary = result.error.issues
+    .map(({ path, message }) => `${path.length > 0 ? path.join('.') : '(root)'}: ${message}`)
+    .join('; ');
+  throw Boom.badRequest(`Invalid attachment payload for type '${type}': ${summary}`);
+};
 
 export const validateLegacyRegisteredAttachments = ({
   query,
@@ -77,6 +94,13 @@ export const validateUnifiedRegisteredAttachments = ({
       `Attachment type ${query.type} is not registered in unified attachment type registry.`
     );
   }
+
+  // Prefer `schema`; fall back to the slice-based `schemaValidator` below.
+  if (attachmentType.schema) {
+    parseUnifiedAttachmentWithSchema(attachmentType.schema, query, query.type);
+    return;
+  }
+
   if (!attachmentType.schemaValidator) {
     throw Boom.badRequest(`Attachment type '${query.type}' does not define a schema validator.`);
   }
