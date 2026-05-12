@@ -15,9 +15,7 @@ import type { Example } from '@kbn/evals';
  * entry to this array; tests in `dataset.test.ts` pin the example count and
  * basic shape so accidental drops are caught.
  */
-export const esqlGenerationDataset: Array<
-  Example<{ question: string }, { query: string }, { query_intent?: string; criteria?: string[] }>
-> = [
+export const esqlGenerationDataset: Array<Example<{ question: string }, { query: string }>> = [
   {
     input: {
       question: `I want to see an ES|QL query that does the following: extract the query duration from the message field in postgres-logs*, and calculate the avg`,

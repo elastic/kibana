@@ -6,8 +6,8 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { Evaluator, EvalsExecutorClient } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator, withEvaluatorSpan } from '@kbn/evals';
+import type { DefaultEvaluators, Evaluator, EvalsExecutorClient } from '@kbn/evals';
+import { createEsqlEquivalenceEvaluator, getCurrentTraceId, withEvaluatorSpan } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -52,16 +52,22 @@ function sliceDataset<T>(examples: readonly T[]): T[] {
 export type EvaluateEsqlGenerationDataset = () => Promise<void>;
 
 export function createEvaluateEsqlGenerationDataset({
+  evaluators,
   executorClient,
   inferenceClient,
   esClient,
+  traceEsClient,
   log,
 }: {
+  evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
   esClient: EsClient;
+  traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateEsqlGenerationDataset {
+  const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+    evaluators.traceBasedEvaluators;
   const baseEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
@@ -125,14 +131,27 @@ export function createEvaluateEsqlGenerationDataset({
             system: ESQL_GENERATION_SYSTEM_PROMPT,
             messages: [{ role: MessageRole.User, content: question }],
           });
-          return { esql: response.content };
+          // Capture the active task span's traceId so trace-based evaluators
+          // (latency, token usage, tool calls) can query the OTel traces
+          // captured by the EDOT collector. Mirrors the alerts-rag suite.
+          return { esql: response.content, traceId: getCurrentTraceId() };
         },
       },
       [
+        // Quality (LLM- and code-judged): functional correctness of generated ES|QL.
         esqlEquivalenceEvaluator,
         esqlValidityEvaluator,
         esqlExecutionEvaluator,
         esqlResultEquivalenceEvaluator,
+        // Observability (trace-based, zero per-example LLM cost): baseline
+        // signals derived from OTel spans for this task's trace.id. Used to
+        // track regressions in latency / token usage / tool-call counts over
+        // time without paying for additional LLM judging.
+        toolCalls,
+        latency,
+        inputTokens,
+        outputTokens,
+        cachedTokens,
       ]
     );
   };
