@@ -7,8 +7,8 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
-import { mockHostRiskScoreState, mockObservedHostData } from '../../../flyout/entity_details/mocks';
+import { TestProviders } from '../../../../common/mock';
+import { mockHostRiskScoreState, mockObservedHostData } from '../../../../flyout/entity_details/mocks';
 import { Host } from '.';
 
 const mockProps = {
@@ -17,10 +17,10 @@ const mockProps = {
   contextID: 'test-host-panel',
 };
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
 const mockedHostRiskScore = jest.fn().mockReturnValue(mockHostRiskScoreState);
-jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedHostRiskScore(),
 }));
 

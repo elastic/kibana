@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { mockObservedHostData } from '../../../../flyout/entity_details/mocks';
+import { mockObservedHostData } from '../../../../../flyout/entity_details/mocks';
 import { policyFields } from './endpoint_policy_fields';
 
-jest.mock('../../../../management/hooks/agents/use_get_agent_status');
+jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
 
 const TestWrapper = ({ el }: { el: JSX.Element | undefined }) => <>{el}</>;
 
 jest.mock(
-  '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary',
+  '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary',
   () => {
     const original = jest.requireActual(
-      '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'
+      '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'
     );
     return {
       ...original,

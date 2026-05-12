@@ -26,14 +26,14 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { Footer } from '../../../flyout_v2/entity_details/host/footer';
-import { Content } from '../../../flyout_v2/entity_details/host/content';
-import { Header } from '../../../flyout_v2/entity_details/host/header';
+import { Footer } from '../../../flyout_v2/entity/host/main/footer';
+import { Content } from '../../../flyout_v2/entity/host/main/content';
+import { Header } from '../../../flyout_v2/entity/host/main/header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { useObservedHost } from '../../../flyout_v2/entity_details/host/hooks/use_observed_host';
+import { useObservedHost } from '../../../flyout_v2/entity/host/main/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
@@ -48,7 +48,7 @@ import {
 import {
   HOST_PANEL_RISK_SCORE_QUERY_ID,
   HOST_PANEL_OBSERVED_HOST_QUERY_ID,
-} from '../../../flyout_v2/entity_details/host/constants';
+} from '../../../flyout_v2/entity/host/main/constants';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';

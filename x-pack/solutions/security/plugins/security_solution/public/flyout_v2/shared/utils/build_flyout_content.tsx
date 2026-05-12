@@ -15,7 +15,7 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { Network } from '../../network/main';
-import { Host } from '../../entity_details/host';
+import { Host } from '../../entity/host/main';
 import { RuleDetails } from '../../rule/main';
 
 /**

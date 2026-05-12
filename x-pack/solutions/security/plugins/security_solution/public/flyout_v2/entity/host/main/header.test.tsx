@@ -7,9 +7,9 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { Header } from './header';
-import { RiskSeverity } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 
 const defaultLastSeen = {
   date: '2023-02-23T20:03:17.489Z',
@@ -22,7 +22,7 @@ const mockProps = {
   lastSeen: defaultLastSeen,
 };
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('Header', () => {
   it('renders', () => {

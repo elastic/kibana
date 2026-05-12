@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import type { HostItem } from '../../../../../common/search_strategy';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { NetworkDetailsLink } from '../../../../common/components/links';
+import { getEmptyTagValue } from '../../../../../common/components/empty_value';
+import type { HostItem } from '../../../../../../common/search_strategy';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { NetworkDetailsLink } from '../../../../../common/components/links';
 import * as i18n from './translations';
-import type { ObservedEntityData } from '../../../../flyout/entity_details/shared/components/observed_entity/types';
-import type { EntityTableRows } from '../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { ObservedEntityData } from '../../../../../flyout/entity_details/shared/components/observed_entity/types';
+import type { EntityTableRows } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
 
 export const basicHostFields: EntityTableRows<ObservedEntityData<HostItem>> = [
   {

@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useObservedHostFields } from './use_observed_host_fields';
-import { mockObservedHostData } from '../../../../flyout/entity_details/mocks';
-import { TestProviders } from '../../../../common/mock';
+import { mockObservedHostData } from '../../../../../flyout/entity_details/mocks';
+import { TestProviders } from '../../../../../common/mock';
 
 describe('useObservedHostFields', () => {
   it('returns managed host items for Entra host', () => {

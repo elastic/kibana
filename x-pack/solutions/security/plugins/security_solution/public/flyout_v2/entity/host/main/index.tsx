@@ -10,43 +10,43 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import type { Refetch } from '../../../common/types';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { buildHostNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
-import { useUiSetting, useKibana } from '../../../common/lib/kibana';
+import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
+import { RISK_INPUTS_TAB_QUERY_ID } from '../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
+import type { Refetch } from '../../../../common/types';
+import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { useQueryInspector } from '../../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
 import { useObservedHost } from './hooks/use_observed_host';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
-} from '../../../flyout/entity_details/shared/entity_store_risk_utils';
+} from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import {
   useEntityFromStore,
   type EntityStoreRecord,
-} from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
+} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../../common/constants';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
-} from '../../../flyout/document_details/shared/utils';
+} from '../../../../flyout/document_details/shared/utils';
 import { HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
-} from '../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
-import { EntityPanelHeaderTabs } from '../../../flyout/entity_details/shared/components/entity_panel_tabs';
-import { EntityStoreTableTab } from '../../../flyout/entity_details/shared/components/entity_store_table_tab';
-import { EntitySummaryGrid } from '../../../flyout/entity_details/shared/components/entity_summary_grid';
+} from '../../../../flyout/entity_details/shared/hooks/use_entity_panel_tabs';
+import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
+import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
+import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
 
 export interface HostProps {
   /**

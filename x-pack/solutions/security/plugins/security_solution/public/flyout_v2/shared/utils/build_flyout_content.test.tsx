@@ -27,7 +27,7 @@ jest.mock('../../network/main', () => ({
   ),
 }));
 
-jest.mock('../../entity_details/host', () => ({
+jest.mock('../../entity/host/main', () => ({
   Host: ({ hostName }: { hostName: string }) => <div data-test-subj="mockHost">{hostName}</div>,
 }));
 

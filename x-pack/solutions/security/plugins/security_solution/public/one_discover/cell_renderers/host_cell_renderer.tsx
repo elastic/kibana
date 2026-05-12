@@ -13,7 +13,7 @@ import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
-import { Host } from '../../flyout_v2/entity_details/host';
+import { Host } from '../../flyout_v2/entity/host/main';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';

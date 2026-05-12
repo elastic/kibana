@@ -19,7 +19,7 @@ import { TruncatableText } from '../../../../../common/components/truncatable_te
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { Host } from '../../../../../flyout_v2/entity_details/host';
+import { Host } from '../../../../../flyout_v2/entity/host/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { defaultToolsFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 

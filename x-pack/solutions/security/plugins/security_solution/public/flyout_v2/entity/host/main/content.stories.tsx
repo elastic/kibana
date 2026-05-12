@@ -9,10 +9,10 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
-import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../../flyout/shared/mocks';
+import { StorybookProviders } from '../../../../common/mock/storybook_providers';
+import { mockRiskScoreState } from '../../../../flyout/shared/mocks';
 import { Content } from './content';
-import { mockObservedHostData, mockEntityRecord } from '../../../flyout/entity_details/mocks';
+import { mockObservedHostData, mockEntityRecord } from '../../../../flyout/entity_details/mocks';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
