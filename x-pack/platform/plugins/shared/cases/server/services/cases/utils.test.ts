@@ -743,7 +743,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
       expect.arrayContaining([
         expect.objectContaining({ term: expect.objectContaining({ _id: expect.any(String) }) }),
         expect.objectContaining({
-          multi_match: expect.objectContaining({
+          simple_query_string: expect.objectContaining({
             query: 'test',
             fields: DEFAULT_CASE_SEARCH_FIELDS,
           }),
