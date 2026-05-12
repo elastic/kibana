@@ -30,7 +30,7 @@
           "(data: { recovery_policy?: { type?: string | undefined; query?: { base?: string | undefined; } | undefined; } | undefined; }) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 251,
+        "lineNumber": 252,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -43,7 +43,7 @@
             "label": "data",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-            "lineNumber": 251,
+            "lineNumber": 252,
             "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
@@ -59,7 +59,7 @@
                   "{ type?: string | undefined; query?: { base?: string | undefined; } | undefined; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-                "lineNumber": 252,
+                "lineNumber": 253,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -83,7 +83,7 @@
           "(data: { kind?: string | undefined; state_transition?: unknown; }) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 246,
+        "lineNumber": 247,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -96,7 +96,7 @@
             "label": "data",
             "description": [],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-            "lineNumber": 246,
+            "lineNumber": 247,
             "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
@@ -112,7 +112,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-                "lineNumber": 247,
+                "lineNumber": 248,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -128,7 +128,7 @@
                   "unknown"
                 ],
                 "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-                "lineNumber": 248,
+                "lineNumber": 249,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -804,7 +804,7 @@
           "{ rules: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; errors: { id: string; error: { message: string; statusCode: number; }; }[]; truncated?: boolean | undefined; totalMatched?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 386,
+        "lineNumber": 408,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -940,7 +940,7 @@
           "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 267,
+        "lineNumber": 268,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1042,7 +1042,7 @@
           "{ sortField: any; sortOrder: any; page?: number | undefined; perPage?: number | undefined; filter?: string | undefined; search?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 337,
+        "lineNumber": 359,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1059,7 +1059,7 @@
           "{ items: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; total: number; page: number; perPage: number; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 349,
+        "lineNumber": 371,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1076,7 +1076,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 315,
+        "lineNumber": 337,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1095,7 +1095,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 314,
+        "lineNumber": 336,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1167,6 +1167,23 @@
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/constants.ts",
         "lineNumber": 24,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ImmutableRuleField",
+        "type": "Type",
+        "tags": [],
+        "label": "ImmutableRuleField",
+        "description": [],
+        "signature": [
+          "\"kind\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 289,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1419,6 +1436,41 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.ReadonlyArray",
+        "type": "Any",
+        "tags": [],
+        "label": "ReadonlyArray",
+        "description": [
+          "\nTop-level fields of the create-rule schema that cannot be changed after the\nrule has been created. Every other field of ",
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.createRuleDataBaseSchema",
+            "text": "createRuleDataBaseSchema"
+          },
+          "\nis implicitly mutable.\n\nConsumers that implement PUT-style upsert must reject requests that try to\nmutate one of these. Consumers that implement PATCH-style update must\npreserve them from storage regardless of the body.\n\nWhenever a top-level field is added to ",
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.createRuleDataBaseSchema",
+            "text": "createRuleDataBaseSchema"
+          },
+          ", the\nsnapshot test in `rule_data_schema.test.ts` will fail. Updating the\nsnapshot surfaces the new field in the PR diff so reviewers can confirm\nwhether it should be classified as immutable here instead of being silently\nmutable."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 285,
+        "columnNumber": 66,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
         "id": "def-common.recoveryPolicyType",
         "type": "Any",
         "tags": [],
@@ -1568,8 +1620,43 @@
           "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 311,
+        "lineNumber": 333,
         "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.satisfies",
+        "type": "Any",
+        "tags": [],
+        "label": "satisfies",
+        "description": [
+          "\nTop-level fields of the create-rule schema that cannot be changed after the\nrule has been created. Every other field of ",
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.createRuleDataBaseSchema",
+            "text": "createRuleDataBaseSchema"
+          },
+          "\nis implicitly mutable.\n\nConsumers that implement PUT-style upsert must reject requests that try to\nmutate one of these. Consumers that implement PATCH-style update must\npreserve them from storage regardless of the body.\n\nWhenever a top-level field is added to ",
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.createRuleDataBaseSchema",
+            "text": "createRuleDataBaseSchema"
+          },
+          ", the\nsnapshot test in `rule_data_schema.test.ts` will fail. Updating the\nsnapshot surfaces the new field in the PR diff so reviewers can confirm\nwhether it should be classified as immutable here instead of being silently\nmutable."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 285,
+        "columnNumber": 56,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1723,7 +1810,7 @@
           "{ metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: { every?: string | undefined; lookback?: string | undefined; } | null | undefined; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | null | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | null | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | null | undefined; artifacts?: { id: string; type: string; value: string; }[] | null | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 296,
+        "lineNumber": 318,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2385,7 +2472,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 359,
+        "lineNumber": 381,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2757,7 +2844,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 257,
+        "lineNumber": 258,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3047,7 +3134,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 318,
+        "lineNumber": 340,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3215,7 +3302,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 340,
+        "lineNumber": 362,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3264,6 +3351,41 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
         "lineNumber": 170,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-schemas",
+        "id": "def-common.IMMUTABLE_RULE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "IMMUTABLE_RULE_FIELDS",
+        "description": [
+          "\nTop-level fields of the create-rule schema that cannot be changed after the\nrule has been created. Every other field of ",
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.createRuleDataBaseSchema",
+            "text": "createRuleDataBaseSchema"
+          },
+          "\nis implicitly mutable.\n\nConsumers that implement PUT-style upsert must reject requests that try to\nmutate one of these. Consumers that implement PATCH-style update must\npreserve them from storage regardless of the body.\n\nWhenever a top-level field is added to ",
+          {
+            "pluginId": "@kbn/alerting-v2-schemas",
+            "scope": "common",
+            "docId": "kibKbnAlertingV2SchemasPluginApi",
+            "section": "def-common.createRuleDataBaseSchema",
+            "text": "createRuleDataBaseSchema"
+          },
+          ", the\nsnapshot test in `rule_data_schema.test.ts` will fail. Updating the\nsnapshot surfaces the new field in the PR diff so reviewers can confirm\nwhether it should be classified as immutable here instead of being silently\nmutable."
+        ],
+        "signature": [
+          "readonly [\"kind\"]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
+        "lineNumber": 285,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3695,7 +3817,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 302,
+        "lineNumber": 324,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3721,7 +3843,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 352,
+        "lineNumber": 374,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4220,7 +4342,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-schemas/src/rule_data_schema.ts",
-        "lineNumber": 271,
+        "lineNumber": 293,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

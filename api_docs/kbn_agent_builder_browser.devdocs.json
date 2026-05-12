@@ -1530,10 +1530,12 @@
             "parentPluginId": "@kbn/agent-builder-browser",
             "id": "def-common.EventsServiceStartContract.chat$",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "chat$",
             "description": [
-              "\n(hot) observable of all chat events."
+              "\nHot observable of chat events from every conversation, interleaved.\n"
             ],
             "signature": [
               "Observable",
@@ -1550,8 +1552,82 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
             "lineNumber": 39,
             "columnNumber": 3,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/services/events/create_public_contract.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/mocks.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/ui/hooks/use_agent_builder_integration.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/ui/hooks/use_agent_builder_integration.ts"
+              },
+              {
+                "plugin": "dashboardAgent",
+                "path": "x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/dashboard_integration/agent_live_updates_subscription.ts"
+              },
+              {
+                "plugin": "dashboardAgent",
+                "path": "x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/dashboard_integration/new_attachment_id_regeneration_subscription.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EventsServiceStartContract.getChatEvents$",
+            "type": "Function",
+            "tags": [],
+            "label": "getChatEvents$",
+            "description": [
+              "\nReturns a hot observable of chat events scoped to a single conversation. Subscribe\nat any point during the events service's lifetime; events emit live as the agent\nruns that conversation. Subscribers only see events tagged with the matching id.\n\nUse this in preference to `chat$` whenever your consumer cares about a specific\nconversation. Concurrent streams mean `chat$` is no longer single-conversation,\nand most chat event payloads do not carry a `conversation_id` field that you can\nfilter on directly.\n\nMigration patterns (these are recommendations):\n\n  // Before — assumes only one conversation streams at a time:\n  events.chat$.subscribe((event) => { ... });\n\n  // After — scope to a known conversation:\n  events.getChatEvents$(conversationId).subscribe((event) => { ... });\n\n  // After — scope to whichever conversation the UI is currently focused on:\n  events.ui.activeConversation$.pipe(\n    filter((c): c is ActiveConversation => c?.id != null),\n    switchMap((c) => events.getChatEvents$(c.id!))\n  ).subscribe((event) => { ... });"
+            ],
+            "signature": [
+              "(conversationId: string) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ChatEvent",
+                "text": "ChatEvent"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.EventsServiceStartContract.getChatEvents$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "conversationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+                "lineNumber": 74,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
@@ -1572,7 +1648,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
-            "lineNumber": 43,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

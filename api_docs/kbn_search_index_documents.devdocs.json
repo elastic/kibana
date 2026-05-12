@@ -402,7 +402,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result.tsx",
-        "lineNumber": 41,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -418,7 +418,7 @@
               "ResultProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-search-index-documents/components/result/result.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,

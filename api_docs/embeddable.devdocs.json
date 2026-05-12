@@ -3421,7 +3421,7 @@
               "label": "type",
               "description": [],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-              "lineNumber": 30,
+              "lineNumber": 32,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false
@@ -3445,7 +3445,7 @@
                 "<SerializedState, Api>>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
-              "lineNumber": 31,
+              "lineNumber": 33,
               "columnNumber": 3,
               "deprecated": false,
               "trackAdoption": false,

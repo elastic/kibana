@@ -21,6 +21,118 @@
     "functions": [
       {
         "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.buildEisPreconfiguredConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "buildEisPreconfiguredConnectors",
+        "description": [
+          "\nBuilds preconfigured connectors for EIS models.\nThese connectors reference EIS inference endpoints that will exist once CCM is enabled."
+        ],
+        "signature": [
+          "() => Record<string, unknown>"
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.enableCcm",
+        "type": "Function",
+        "tags": [],
+        "label": "enableCcm",
+        "description": [
+          "\nEnables Cloud Connected Mode (CCM) for EIS and waits for endpoints to be available.\nOnce CCM is enabled, EIS auto-provisions inference endpoints that preconfigured connectors reference."
+        ],
+        "signature": [
+          "(es: ",
+          "default",
+          ", apiKey: string, log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+        "lineNumber": 75,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.enableCcm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "es",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+            "lineNumber": 75,
+            "columnNumber": 33,
+            "deprecated": false,
+            "docsReferencedTypeName": "Client",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.enableCcm.$2",
+            "type": "string",
+            "tags": [],
+            "label": "apiKey",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+            "lineNumber": 75,
+            "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.enableCcm.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+            "lineNumber": 75,
+            "columnNumber": 61,
+            "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
         "id": "def-common.getAvailableConnectors",
         "type": "Function",
         "tags": [],
@@ -68,6 +180,33 @@
         ],
         "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
         "lineNumber": 136,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.getPreDiscoveredEisModels",
+        "type": "Function",
+        "tags": [],
+        "label": "getPreDiscoveredEisModels",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.DiscoveredModel",
+            "text": "DiscoveredModel"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -255,6 +394,64 @@
             "description": [],
             "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
             "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.DiscoveredModel",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoveredModel",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.DiscoveredModel.inferenceId",
+            "type": "string",
+            "tags": [],
+            "label": "inferenceId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.DiscoveredModel.modelId",
+            "type": "string",
+            "tags": [],
+            "label": "modelId",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.DiscoveredModel.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ heuristics?: { properties?: string[] | undefined; } | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts",
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
