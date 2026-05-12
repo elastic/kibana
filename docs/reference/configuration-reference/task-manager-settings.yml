@@ -128,7 +128,7 @@ groups:
 
       - setting: xpack.task_manager.ephemeral_tasks.enabled
         description: |
-          Set to `true` to enable ephemeral tasks, which ran actions inline without persisting them to Elasticsearch. Deprecated in 8.8 and removed in 9.0; any value is silently ignored on 9.0 and later.
+          Set to `true` to enable ephemeral tasks, which ran actions inline without persisting them to Elasticsearch.
         datatype: bool
         default: false
         applies_to:
