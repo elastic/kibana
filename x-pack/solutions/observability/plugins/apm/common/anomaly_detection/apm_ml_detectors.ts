@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export enum AnomalyDetectorType {
-  txLatency = 'txLatency',
-  txThroughput = 'txThroughput',
-  txFailureRate = 'txFailureRate',
-}
+export { AnomalyDetectorType } from '@kbn/apm-types';
+import { AnomalyDetectorType } from '@kbn/apm-types';
 
 const detectorIndices = {
   [AnomalyDetectorType.txLatency]: 0,
