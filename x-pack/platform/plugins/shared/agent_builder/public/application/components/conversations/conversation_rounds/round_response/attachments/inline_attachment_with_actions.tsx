@@ -101,6 +101,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             nextPreviewState === 'previewing' ? attachmentPreviewKey : null
           );
         },
+        version,
+        versionCount,
       }) ?? [],
     [
       uiDefinition,
@@ -111,6 +113,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
+      version,
+      versionCount,
     ]
   );
 

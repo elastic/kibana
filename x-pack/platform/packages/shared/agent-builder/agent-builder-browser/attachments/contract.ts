@@ -85,6 +85,10 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
    * Use to mark an attachment as currently previewed outside canvas.
    */
   setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
+  /** The version number being rendered. Undefined when version metadata is unavailable. */
+  version?: number;
+  /** Total number of versions for this attachment in the conversation. Undefined when version metadata is unavailable. */
+  versionCount?: number;
 }
 
 /**

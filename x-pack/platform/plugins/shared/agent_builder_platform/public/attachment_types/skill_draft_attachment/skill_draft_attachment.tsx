@@ -48,6 +48,29 @@ const SKILLS_CREATE_API_PATH = '/api/agent_builder/skills';
 const PREVIEW_MAX_LINES = 30;
 const PREVIEW_MAX_HEIGHT_PX = 240;
 
+const viewFullSkillLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skillDraft.viewFullSkillButtonLabel',
+  { defaultMessage: 'View full skill' }
+);
+const createdLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel',
+  {
+    defaultMessage: 'Created',
+  }
+);
+const createSkillLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skillDraft.createButtonLabel',
+  {
+    defaultMessage: 'Create skill',
+  }
+);
+const lackManageSkillsPermissionDescription = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skillDraft.createDisabledReason',
+  {
+    defaultMessage: 'You do not have permission to manage skills in this space.',
+  }
+);
+
 /**
  * Trim a multi-line markdown body to a preview suitable for the inline card.
  * The agent's `content` can be hundreds of lines; we show the first chunk
@@ -376,17 +399,47 @@ export const createSkillDraftAttachmentDefinition = ({
     getIcon: () => 'bullseye',
     renderInlineContent: (props) => <SkillDraftInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillDraftCanvasContent {...props} />,
-    getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
+    getActionButtons: ({
+      attachment,
+      updateOrigin,
+      openCanvas,
+      isCanvas,
+      version,
+      versionCount,
+    }) => {
       const isCreated = Boolean(attachment.origin);
+      const isOutdatedVersion =
+        typeof version === 'number' && typeof versionCount === 'number' && version !== versionCount;
       const actionButtons: ActionButton[] = [];
+      const createSkill = async () => {
+        try {
+          const response = await http.post<{ id: string; name: string }>(SKILLS_CREATE_API_PATH, {
+            body: JSON.stringify(attachment.data satisfies SkillDraftAttachmentData),
+          });
+          await updateOrigin(response.id);
+          notifications.toasts.addSuccess({
+            title: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.skillDraft.createSuccessToast',
+              {
+                defaultMessage: 'Skill "{skillId}" created.',
+                values: { skillId: response.id },
+              }
+            ),
+          });
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.skillDraft.createErrorToast',
+              { defaultMessage: 'Could not create skill from draft' }
+            ),
+          });
+        }
+      };
 
       if (!isCanvas && openCanvas) {
         // As long as the canvas for the skill is not currently open, show the button
         const viewFullSkillButton = {
-          label: i18n.translate(
-            'xpack.agentBuilderPlatform.attachments.skillDraft.viewFullSkillButtonLabel',
-            { defaultMessage: 'View full skill' }
-          ),
+          label: viewFullSkillLabel,
           icon: 'expand',
           type: ActionButtonType.SECONDARY,
           handler: () => {
@@ -396,52 +449,19 @@ export const createSkillDraftAttachmentDefinition = ({
         actionButtons.push(viewFullSkillButton);
       }
 
-      const createButton: ActionButton = {
-        label: isCreated
-          ? i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel', {
-              defaultMessage: 'Created',
-            })
-          : i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createButtonLabel', {
-              defaultMessage: 'Create skill',
-            }),
-        icon: isCreated ? 'check' : 'save',
-        type: ActionButtonType.PRIMARY,
-        disabled: isCreated || !canCreate,
-        disabledReason: !canCreate
-          ? i18n.translate(
-              'xpack.agentBuilderPlatform.attachments.skillDraft.createDisabledReason',
-              {
-                defaultMessage: 'You do not have permission to manage skills in this space.',
-              }
-            )
-          : undefined,
-        handler: async () => {
-          try {
-            const response = await http.post<{ id: string; name: string }>(SKILLS_CREATE_API_PATH, {
-              body: JSON.stringify(attachment.data satisfies SkillDraftAttachmentData),
-            });
-            await updateOrigin(response.id);
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.skillDraft.createSuccessToast',
-                {
-                  defaultMessage: 'Skill "{skillId}" created.',
-                  values: { skillId: response.id },
-                }
-              ),
-            });
-          } catch (error) {
-            notifications.toasts.addError(error as Error, {
-              title: i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.skillDraft.createErrorToast',
-                { defaultMessage: 'Could not create skill from draft' }
-              ),
-            });
-          }
-        },
-      };
+      if (!isOutdatedVersion) {
+        // Outdated drafts can only be viewed, not created — the create action belongs to the latest draft.
+        const createButton: ActionButton = {
+          label: isCreated ? createdLabel : createSkillLabel,
+          icon: isCreated ? 'check' : 'save',
+          type: ActionButtonType.PRIMARY,
+          disabled: isCreated || !canCreate,
+          disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+          handler: createSkill,
+        };
 
-      actionButtons.push(createButton);
+        actionButtons.push(createButton);
+      }
 
       return actionButtons;
     },
