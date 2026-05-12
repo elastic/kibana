@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { Parser, isColumn } from '@elastic/esql';
+import { useQuery } from '@kbn/react-query';
+import { getEsqlColumns } from '@kbn/esql-utils';
 import {
   EuiButton,
   EuiCallOut,
@@ -51,13 +54,13 @@ function AlertConditionStep({
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
 
-  // Only fetch date fields when the query has a committed, valid index pattern
-  const queryForFields =
-    /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.sandbox.query) && state.queryCommitted
-      ? state.sandbox.query
-      : '';
+  const hasValidQuery =
+    /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.sandbox.query) && state.queryCommitted;
+  const committedQuery = hasValidQuery ? state.sandbox.query : '';
+
+  // Source index fields → date-type options for the time field selector
   const { data: fieldMap } = useDataFields({
-    query: queryForFields,
+    query: committedQuery,
     http: services.http,
     dataViews: services.dataViews,
   });
@@ -69,6 +72,41 @@ function AlertConditionStep({
     if (!dateFields.includes('@timestamp')) dateFields.unshift('@timestamp');
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
+
+  // Output columns of the full pipeline → options for the group fields selector.
+  // Uses | LIMIT 0 so no data is transferred — only the output schema is returned.
+  // Works in edit mode (query seeded on mount) without requiring the sandbox to be opened.
+  const { data: outputColumns = [] } = useQuery({
+    queryKey: ['composeDiscoverOutputColumns', committedQuery],
+    queryFn: async () => {
+      const cols = await getEsqlColumns({ esqlQuery: committedQuery, search: services.data.search.search });
+      return cols.map((c) => c.name);
+    },
+    enabled: Boolean(committedQuery),
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
+
+  // Auto-populate group fields from the STATS BY clause when a query is first committed
+  // and the user hasn't already set any group fields.
+  const autoPopulatedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!state.queryCommitted || groupFields.length > 0 || !state.sandbox.query) return;
+    if (autoPopulatedForRef.current === state.sandbox.query) return;
+    autoPopulatedForRef.current = state.sandbox.query;
+    try {
+      const { root } = Parser.parse(state.sandbox.query);
+      const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
+      type AstNode = { type: string; name: string; args?: unknown[] };
+      const byOption = (statsCmd?.args as AstNode[] | undefined)?.find(
+        (a) => a.type === 'option' && a.name === 'by'
+      );
+      const byFields = (byOption?.args ?? []).filter(isColumn).map((a) => a.name);
+      if (byFields.length > 0) setValue('grouping', { fields: byFields });
+    } catch {
+      // Non-parseable query — skip auto-populate
+    }
+  }, [state.queryCommitted, state.sandbox.query, groupFields.length, setValue]);
 
   return (
     <>
@@ -125,6 +163,7 @@ function AlertConditionStep({
       <EuiFormRow label="Group fields" fullWidth>
         <EuiComboBox
           fullWidth
+          options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
             setValue('grouping', opts.length ? { fields: opts.map((o) => o.label) } : undefined)
