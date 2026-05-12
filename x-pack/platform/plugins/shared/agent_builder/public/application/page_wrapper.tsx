@@ -7,8 +7,8 @@
 
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React from 'react';
-import { AGENT_BUILDER_UI_EBT_ELEMENT } from './agent_builder_ui_ebt';
 import { AccessBoundary } from './components/access/access_boundary';
 
 const wrapperStyles = css`
@@ -22,7 +22,7 @@ export const PageWrapper: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <div
       css={wrapperStyles}
-      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.PAGE_CONTENT}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.pageContent}
       data-test-subj="agentBuilderWrapper"
     >
       <AccessBoundary>{children}</AccessBoundary>

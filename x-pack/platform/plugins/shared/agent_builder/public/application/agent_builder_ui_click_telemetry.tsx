@@ -8,10 +8,10 @@
 import { css } from '@emotion/react';
 import {
   AGENT_BUILDER_EVENT_TYPES,
+  AGENT_BUILDER_UI_EBT,
   type ReportUiClickParams,
 } from '@kbn/agent-builder-common/telemetry';
 import React, { type ReactNode, useEffect, useRef } from 'react';
-import { AGENT_BUILDER_UI_EBT_ELEMENT } from './agent_builder_ui_ebt';
 import { resolveAgentBuilderUiClickPayload } from './agent_builder_ui_click_resolve';
 import { useKibana } from './hooks/use_kibana';
 
@@ -67,7 +67,7 @@ export const AgentBuilderUiClickTelemetry: React.FC<{ children: ReactNode }> = (
     <div
       ref={rootRef}
       css={rootStyles}
-      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.APP_ROOT}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.appRoot}
       data-test-subj="agentBuilderUiClickTelemetryRoot"
     >
       {children}
