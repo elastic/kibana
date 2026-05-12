@@ -7,13 +7,12 @@
 entries:
 - file:
     name: 266512.yaml
-    checksum: ad9bce743a5c238998ec6e1094f29ed8b19e2ee3
+    checksum: a2bf1559babe637ecae9be83069b81b7c9332741
   type: bug-fix
-  title: Replace flaky tests & improve space handling
+  title: Fix a bug that caused long runs of whitespace in KQL to be parsed slowly
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Fixed a bug that caused long runs of whitespace in KQL to be parsed slowly.
   areas:
   - Kibana platform
   - Discover and ES|QL
@@ -23,9 +22,9 @@ entries:
   - https://github.com/elastic/kibana/issues/217598
 - file:
     name: 266115.yaml
-    checksum: 728dfd5b15525939cc848e7356411fb399066a3d
+    checksum: e2846df0cd2165718243a604fb209215fe0c45c9
   type: bug-fix
-  title: 'Fix: [Security Solution] [Bug] Bulk Action allows changing to same Attach Discovery status'
+  title: Fix the "Take Action" bulk menu that allowed changing to the same Attach Discovery status
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -33,13 +32,12 @@ entries:
   - https://github.com/elastic/kibana/pull/266115
 - file:
     name: 265518.yaml
-    checksum: ad6fbeb7062482241420c350fcc34b154c9254ce
+    checksum: 8903d9d66ae567a4ec8b45313772eb62cbb61bec
   type: bug-fix
-  title: 'auto-implement: [Inference][Code Scanning] Unbounded array in schema validation'
+  title: Fix inference plugin routes to limit the size of arrays accepted in payloads
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Fixes inference plugin routes to limit the size of arrays accepted in payloads.
   areas:
   - Search and data
   prs:
@@ -85,7 +83,7 @@ entries:
   - https://github.com/elastic/kibana/pull/266513
 - file:
     name: 265145.yaml
-    checksum: b9b433378542e6a4d66ceed906691b793191d857
+    checksum: f82f4f9953d3cc0859f4b8efe87b0dd38166af1c
   type: enhancement
   title: Enable attachments for all stream types by default, removing the `observability:streamsEnableAttachments` advanced setting
   products:
@@ -109,9 +107,9 @@ entries:
   - https://github.com/elastic/kibana/issues/265694
 - file:
     name: 260835.yaml
-    checksum: 79c01303435ba32e645aaa9a62497d367499d15e
+    checksum: e31a1e0806567097c741b2ac45dd0b8a1f6e8c1d
   type: enhancement
-  title: Change Display Language from Settings
+  title: Change display language from settings
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -134,9 +132,9 @@ entries:
   - https://github.com/elastic/kibana/issues/251402
 - file:
     name: 266021.yaml
-    checksum: e4b9eb8742ded78ebab9b259a185b3093d7aa10e
+    checksum: 621bc3b7d7ece94b963e554657d9b90354162f24
   type: enhancement
-  title: 'feat: APM service map context highlight for embeddable and focused map'
+  title: APM service map context highlight for embeddable and focused map
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -170,9 +168,9 @@ entries:
   - https://github.com/elastic/kibana/pull/266522
 - file:
     name: 266105.yaml
-    checksum: e175643154d22abf4d0bec9770ee90ac60962dee
+    checksum: 1727cc79f70d65e499f05d11afebb8bc9547ab7f
   type: bug-fix
-  title: 'Fix: [Security Solution][Attacks/Alerts][Bug] "Run ad-hoc" attack discovery button text is truncated'
+  title: Fix truncated title in "Run" attack discovery button
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -180,9 +178,9 @@ entries:
   - https://github.com/elastic/kibana/pull/266105
 - file:
     name: 266001.yaml
-    checksum: 6addee7d150c54dba2fdb66c1274bafb6d6fe989
+    checksum: 83093f2ae98f792d48d95d02b2cd1970a4bc5dc8
   type: bug-fix
-  title: Fix known issues
+  title: Fix known issues in significant events
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -204,13 +202,12 @@ entries:
   - https://github.com/elastic/kibana/issues/265591
 - file:
     name: 265495.yaml
-    checksum: 59ec6a61fb3730e157fe539205ae0532fd385410
+    checksum: 51054bbf9ae888f5d35bd1d49ac03f859701db37
   type: bug-fix
-  title: 'auto-implement: [Query Rules] Fix: Unbounded array in schema validation'
+  title: Fix query rules routes to limit the size of arrays accepted in data
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Fixes query rules routes to limit the size of arrays accepted in data.
   areas:
   - Search and data
   prs:
@@ -227,9 +224,9 @@ entries:
   - https://github.com/elastic/kibana/pull/263687
 - file:
     name: 264457.yaml
-    checksum: 901db59422a6bcbc9f2a250bd7572e33e53751dc
+    checksum: 1bb893c88cdd094b0f71fdb468d7aacc6babeaac
   type: enhancement
-  title: Redesign Add to Dashboard UX
+  title: Redesign Add to Dashboard UI
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -255,13 +252,12 @@ entries:
   - '# PRIVATE: https://github.com/elastic/search-team/issues/13907'
 - file:
     name: 265529.yaml
-    checksum: 8ece5bb9662c002c0a84ca20fbdb7d307491d75d
+    checksum: a4b0c3c4103d0ab6bd2bed4adcdf8816c47590c2
   type: bug-fix
-  title: Align axis tick precision to decimal formatter in XY charts
+  title: Fix issue where the decimals setting in the number formatter was not used to generate appropriate axis ticks
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: '> Fixes issue where the decimals setting in the number formatter was not used to generate appropriate axis ticks.'
   areas:
   - Dashboards and visualizations
   prs:
@@ -280,20 +276,19 @@ entries:
   - https://github.com/elastic/kibana/pull/265926
 - file:
     name: 266824.yaml
-    checksum: 623dbf50c02ab37f50252ae7352517ffcbc66b92
+    checksum: 4a709b2bdd686ff20eedab68220e1b3cea2766da
   type: bug-fix
-  title: Fix serverless nav using Classic when chat default is Agent
+  title: Fix Security serverless navigation ignoring UI defaults when preferred chat experience or Elastic Workflows UI has no saved space value
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Fixes Security serverless navigation ignoring UI defaults when preferred chat experience or Elastic Workflows UI has no saved space value (wrong classic/disabled state vs Gen AI Settings and registered defaults).
   prs:
   - https://github.com/elastic/kibana/pull/266824
 - file:
     name: 266127.yaml
-    checksum: 8ee351b1cf0b477963491a78e74ce6be84da6e78
+    checksum: 0d6d3bc7850cdb3cbe97b2ce7353f3450e24531b
   type: bug-fix
-  title: 'Fix: [Security Solution] [Bug] The cases action is visible under the Attack Discovery tab when CASES privilege is set to NONE'
+  title: Fix the visiblity of case action under the Attack Discovery tab when the cases privilege is set to NONE
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -325,9 +320,9 @@ entries:
   - https://github.com/elastic/kibana/issues/255950
 - file:
     name: 261119.yaml
-    checksum: 684fbb7e0fc30f4edd5cc801e7553eb16cd9b3df
+    checksum: 18b5fdcad3b24bbe0f82830c766e77eea2b21ad2
   type: enhancement
-  title: 'Trained models: Customize start/update actions for rerank models'
+  title: Customize start and update actions for rerank models
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -337,15 +332,13 @@ entries:
   - https://github.com/elastic/kibana/pull/261119
 - file:
     name: 266185.yaml
-    checksum: dfda069985e3e17c0db55bfff9793df4782866a4
+    checksum: 62b69d9872bdce55fd7ca7cad0053831d1b62f4b
   type: bug-fix
-  title: Small improvements, cursor blinking
+  title: Fix the time filter component in Discover and Dashboards
   products:
   - product: cloud-serverless
     target: 2026-05-06
   description: >-
-    Improves the time filter component in Discover and Dashboards:
-
     - The input now shows a blinking cursor on focus, instead of selected text.
 
     - The input placeholder is prefixed with "Type" to make its purpose clearer.
@@ -357,9 +350,9 @@ entries:
   - https://github.com/elastic/kibana/pull/266185
 - file:
     name: 266783.yaml
-    checksum: 513a90e7fc665b6443918fc9dd1f500c007ccbcf
+    checksum: 1b227eec6fb99d7fe42b85f651501a6f06fbeff4
   type: bug-fix
-  title: Quote phrase values in alert details preview KQL
+  title: Fix a bug in the alert details preview chart for log threshold rules
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -396,13 +389,12 @@ entries:
   - https://github.com/elastic/kibana/issues/251672
 - file:
     name: 266242.yaml
-    checksum: f3376cf042334c83b2b04fc3a4f931a22c9203fa
+    checksum: bc22c2aedfd33a74fd3b54e016787ab2576900fe
   type: bug-fix
-  title: Fix keybindings not using the latest version of action callbacks
+  title: Fix a bug where ES|QL Editors might exhibit different behavior when submitting a query by clicking the Search button versus pressing Command-Enter or Control-Enter.
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Fixes a bug where ES|QL Editors might exhibit different behavior when submitting a query by clicking the Search button versus pressing Command-Enter or Control-Enter.
   areas:
   - Discover and ES|QL
   prs:
@@ -423,9 +415,9 @@ entries:
   - https://github.com/elastic/kibana/issues/257233
 - file:
     name: 266117.yaml
-    checksum: 100c55d6060b9065e5fe1d20e3026d930e8b5a85
+    checksum: 1937886e57d8317d57bbed36caf049294dcb7ae5
   type: bug-fix
-  title: 'Fix: [Security Solution] Integration Icons Blinking During Input in Attack discovery schedule'
+  title: Fix blinking integration icons in Attack Discovery schedules
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -433,13 +425,12 @@ entries:
   - https://github.com/elastic/kibana/pull/266117
 - file:
     name: 265916.yaml
-    checksum: 5345aee28635e5b2fbbf30ba2cbf71b46f43a8eb
+    checksum: ef1adc65ec2881c876bde5b2daa4a86fbfc4ab64
   type: feature
-  title: Enrollment tokens bulk management UI
+  title: Add bulk revoke and delete actions, filtering, and search to the Fleet enrollment tokens page
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Add bulk revoke and delete actions, filtering, and search to the Fleet enrollment tokens page.
   areas:
   - Search and data
   prs:
@@ -448,9 +439,9 @@ entries:
   - https://github.com/elastic/kibana/issues/258057
 - file:
     name: 265015.yaml
-    checksum: aadf04b3f708326f23e32818869dd3a0fcdce31b
+    checksum: 1a86caa38c7f681e8173ef473c9a87ca0f927b37
   type: enhancement
-  title: Removes custom feedback button and use One Feedback with custom questions for anomaly detection and data frame analytics results
+  title: Remove custom feedback button and use One Feedback with custom questions for anomaly detection and data frame analytics results
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -460,26 +451,24 @@ entries:
   - https://github.com/elastic/kibana/pull/265015
 - file:
     name: 266225.yaml
-    checksum: f995effbff9f857f334d3dba875cee38bacf461e
+    checksum: 920bae24cb2ca858be1d41e660842e00adbcc465
   type: bug-fix
-  title: limit analytics collection name size in route
+  title: Fix behavioral analytics to limit the size of name to 1024 characters.
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Fixes behavioral analytics to limit the size of name to 1024 characters.
   areas:
   - Search and data
   prs:
   - https://github.com/elastic/kibana/pull/266225
 - file:
     name: 266823.yaml
-    checksum: dcb73e36aadb42888d70e4ce95938f2a449fc35b
+    checksum: 148f9a86c737f0e2b36e696acc9934aa11c388d7
   type: bug-fix
-  title: Use password field for multi text secrets
+  title: Use password field for multi-value secret variables in integration policy forms
   products:
   - product: cloud-serverless
     target: 2026-05-06
-  description: Use password field for multi-value secret variables in integration policy forms.
   areas:
   - Search and data
   prs:
@@ -514,9 +503,9 @@ entries:
   - https://github.com/elastic/kibana/issues/261988
 - file:
     name: 265995.yaml
-    checksum: 85108cf12a6d47773fa7e99311b0674045c0957a
+    checksum: 8853f8165918be6732d66840e9e89a18b4e9a9b1
   type: feature
-  title: 'Export results split: phase 1+2 (foundation + stream core)'
+  title: Add backend foundation for OsQuery results export
   products:
   - product: cloud-serverless
     target: 2026-05-06
@@ -536,9 +525,9 @@ entries:
   - https://github.com/elastic/kibana/issues/266192
 - file:
     name: 267290.yaml
-    checksum: 993d3820aa6e6ddf1678cc21449a3d57879039c9
+    checksum: 87b7eb3fdc0ad577dee358b51e1b79943ff0f19a
   type: bug-fix
-  title: Fix registered step summary/description swap
+  title: Fix workflow steps where summary and description were swapped
   products:
   - product: cloud-serverless
     target: 2026-05-06
