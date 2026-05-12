@@ -171,6 +171,7 @@ export function SloItemActions({
     <EuiIcon
       type="external"
       size="s"
+      aria-hidden={true}
       css={{
         marginLeft: '10px',
       }}

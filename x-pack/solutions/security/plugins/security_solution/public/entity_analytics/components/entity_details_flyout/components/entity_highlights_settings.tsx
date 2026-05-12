@@ -21,19 +21,11 @@ import {
 import React, { useMemo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { noop } from 'lodash';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { isEmpty } from 'lodash/fp';
 import { AnonymizationSettingsManagement } from '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management';
 import { css } from '@emotion/react';
-import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
-import { ENTITY_PROMPT } from '../../../../agent_builder/components/prompts';
-import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
-import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { useAskAiAssistant } from '../tabs/risk_inputs/use_ask_ai_assistant';
-import { getAnonymizedEntityIdentifier } from '../utils/helpers';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
 
 interface EntityHighlightsSettingsProps {
   showAnonymizedValues: boolean;
@@ -41,8 +33,6 @@ interface EntityHighlightsSettingsProps {
   setConnectorId: (id: string) => void;
   connectorId: string;
   connectorName: string;
-  entityType: string;
-  entityIdentifier: string;
   assistantResult: {
     replacements?: Record<string, string>;
     summaryAsText?: string;
@@ -50,7 +40,6 @@ interface EntityHighlightsSettingsProps {
   } | null;
   closePopover: () => void;
   openPopover: () => void;
-  isAssistantVisible: boolean;
   isLoading: boolean;
   isPopoverOpen: boolean;
 }
@@ -65,9 +54,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
   openPopover,
   isLoading,
   isPopoverOpen,
-  entityType,
-  entityIdentifier,
-  isAssistantVisible,
   assistantResult,
 }) => {
   const selectedConversationHasAnonymizedValues = useMemo(
@@ -75,53 +61,9 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
     [assistantResult?.replacements]
   );
 
-  const anonymizedEntityIdentifier = useMemo(
-    () =>
-      assistantResult?.replacements
-        ? getAnonymizedEntityIdentifier(entityIdentifier, assistantResult.replacements)
-        : entityIdentifier,
-    [entityIdentifier, assistantResult?.replacements]
-  );
-
   const [isAnonymizationModalVisible, setIsAnonymizationModalVisible] = useState(false);
   const closeAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(false), []);
   const showAnonymizationModal = useCallback(() => setIsAnonymizationModalVisible(true), []);
-
-  const getPromptContext = useCallback(
-    async () =>
-      `### The following entity is under investigation:\nType: ${entityType}\nIdentifier: ${`\`${anonymizedEntityIdentifier}\``}\n#### Context:\n\`\`\`json\n${
-        assistantResult?.summaryAsText
-      }`,
-    [anonymizedEntityIdentifier, assistantResult?.summaryAsText, entityType]
-  );
-
-  const { showAssistantOverlay } = useAskAiAssistant({
-    title: `Investigating ${entityType} '${entityIdentifier}'`,
-    description: `Entity: ${entityIdentifier}`,
-    suggestedPrompt: `Investigate the entity and suggest next steps.`,
-    getPromptContext,
-    replacements: assistantResult?.replacements,
-  });
-
-  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
-
-  const entityAttachment = useMemo(
-    () => ({
-      attachmentType: SecurityAgentBuilderAttachments.entity,
-      attachmentData: {
-        identifierType: entityType,
-        identifier: entityIdentifier,
-        attachmentLabel: `${entityType}: ${entityIdentifier}`,
-      },
-      attachmentPrompt: ENTITY_PROMPT,
-    }),
-    [entityIdentifier, entityType]
-  );
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(entityAttachment);
-  const onAgentBuildAttachmentClick = useCallback(() => {
-    openAgentBuilderFlyout();
-    closePopover();
-  }, [closePopover, openAgentBuilderFlyout]);
 
   const panels = useMemo(
     () => [
@@ -230,57 +172,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
               </EuiContextMenuItem>
             ),
           },
-          {
-            key: 'ask-ai-assistant',
-            renderItem: () => {
-              if (isAgentBuilderEnabled) {
-                return (
-                  <EuiContextMenuItem
-                    aria-label={i18n.translate(
-                      'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-                      {
-                        defaultMessage: 'Ask AI Assistant',
-                      }
-                    )}
-                  >
-                    <NewAgentBuilderAttachment
-                      onClick={onAgentBuildAttachmentClick}
-                      size="s"
-                      disabled={isLoading || !assistantResult}
-                      telemetry={{
-                        pathway: 'entity_highlights',
-                        attachments: ['entity'],
-                      }}
-                    />
-                  </EuiContextMenuItem>
-                );
-              }
-
-              if (!isAssistantVisible) return null;
-
-              return (
-                <EuiContextMenuItem
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistantAriaLabel',
-                    {
-                      defaultMessage: 'Ask AI Assistant',
-                    }
-                  )}
-                  onClick={() => {
-                    showAssistantOverlay();
-                    closePopover();
-                  }}
-                  icon={<AssistantIcon />}
-                  disabled={isLoading || !assistantResult}
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.highlights.askAiAssistant"
-                    defaultMessage="Ask AI Assistant"
-                  />
-                </EuiContextMenuItem>
-              );
-            },
-          },
         ],
       },
       {
@@ -321,15 +212,8 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
       showAnonymizedValues,
       onChangeShowAnonymizedValues,
       selectedConversationHasAnonymizedValues,
-      onAgentBuildAttachmentClick,
-      isAssistantVisible,
       setConnectorId,
       connectorId,
-      showAssistantOverlay,
-      closePopover,
-      isAgentBuilderEnabled,
-      isLoading,
-      assistantResult,
       showAnonymizationModal,
     ]
   );

@@ -323,7 +323,9 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
               </EuiPanel>
             </EuiContextMenuPanel>
             <EuiHorizontalRule margin="none" />
-            <EuiContextMenuItem icon={<EuiIcon type="question" color="primary" />}>
+            <EuiContextMenuItem
+              icon={<EuiIcon type="question" color="primary" aria-hidden={true} />}
+            >
               <EuiLink
                 href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
                 target="_blank"
