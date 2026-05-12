@@ -21,6 +21,7 @@ import {
   EuiFormRow,
   EuiButtonIcon,
   EuiIconTip,
+  EuiToolTip,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
@@ -538,25 +539,35 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             )}
             {splom ? (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  role="link"
-                  iconType="code"
-                  iconSize="l"
-                  aria-label={i18n.translate(
-                    'xpack.ml.splom.exploreInCustomVisualizationAriaLabel',
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.splom.exploreInCustomVisualizationLabel',
                     {
-                      defaultMessage: 'Explore scatterplot charts',
+                      defaultMessage:
+                        'Explore scatterplot charts in Vega based custom visualization',
                     }
                   )}
-                  onClick={async () => {
-                    const customVisLink = getCustomVisualizationLink();
-                    await application.navigateToApp('visualize#', {
-                      path: customVisLink.path,
-                      openInNewTab: false,
-                    });
-                  }}
-                  data-test-subj="mlSplomExploreInCustomVisualizationLink"
-                />
+                >
+                  <EuiButtonIcon
+                    role="link"
+                    iconType="code"
+                    iconSize="l"
+                    aria-label={i18n.translate(
+                      'xpack.ml.splom.exploreInCustomVisualizationAriaLabel',
+                      {
+                        defaultMessage: 'Explore scatterplot charts',
+                      }
+                    )}
+                    onClick={async () => {
+                      const customVisLink = getCustomVisualizationLink();
+                      await application.navigateToApp('visualize#', {
+                        path: customVisLink.path,
+                        openInNewTab: false,
+                      });
+                    }}
+                    data-test-subj="mlSplomExploreInCustomVisualizationLink"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
