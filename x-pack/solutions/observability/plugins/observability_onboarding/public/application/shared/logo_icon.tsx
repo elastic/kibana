@@ -135,7 +135,7 @@ export function LogoIcon({
     );
   }
   if (resolvedIconType) {
-    return <EuiIcon type={resolvedIconType} size={size} className={className} />;
+    return <EuiIcon type={resolvedIconType} size={size} className={className} aria-hidden={true} />;
   }
   return null;
 }
