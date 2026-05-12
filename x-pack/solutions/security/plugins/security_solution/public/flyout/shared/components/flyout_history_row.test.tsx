@@ -21,7 +21,7 @@ import {
   useExpandableFlyoutApi,
 } from '@kbn/expandable-flyout';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useRuleDetails } from '../../../flyout_v2/rule/hooks/use_rule_details';
+import { useRuleDetails } from '../../../flyout_v2/rule/main/hooks/use_rule_details';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { useEventDetails } from '../../document_details/shared/hooks/use_event_details';
 import { DocumentDetailsRightPanelKey } from '../../document_details/shared/constants/panel_keys';
@@ -57,7 +57,7 @@ jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => (
 }));
 jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
-jest.mock('../../../flyout_v2/rule/hooks/use_rule_details');
+jest.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');
 jest.mock('../../document_details/shared/hooks/use_event_details');
 
 const flyoutContextValue = {

@@ -1,0 +1,23 @@
+# Inbox demo workflow — single-select enum
+name: inbox-demo-enum
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_disposition
+    type: waitForInput
+    with:
+      message: "Set the alert disposition."
+      schema:
+        type: object
+        properties:
+          disposition:
+            type: string
+            title: Disposition
+            enum: ["true_positive", "false_positive", "needs_review"]
+        required:
+          - disposition
+  - name: log_disposition
+    type: console
+    with:
+      message: "Disposition = {{ steps.ask_disposition.output.disposition }}"
