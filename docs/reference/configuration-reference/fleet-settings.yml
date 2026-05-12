@@ -544,7 +544,7 @@ groups:
         default: "1m"
         applies_to:
           stack: ga 9.4
-          ech: unavailable
+          ech: ga
           self: ga
 
       - setting: xpack.fleet.integrationRollbackTTL
