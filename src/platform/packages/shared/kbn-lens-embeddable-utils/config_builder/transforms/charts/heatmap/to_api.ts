@@ -66,7 +66,7 @@ function getGridConfigProps(
         }),
       },
       title: {
-        text: gridConfig.xTitle,
+        ...(gridConfig.xTitle !== undefined ? { text: gridConfig.xTitle } : {}),
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
@@ -77,7 +77,7 @@ function getGridConfigProps(
           y: {
             labels: { visible: gridConfig.isYAxisLabelVisible },
             title: {
-              text: gridConfig.yTitle,
+              ...(gridConfig.yTitle !== undefined ? { text: gridConfig.yTitle } : {}),
               visible: gridConfig.isYAxisTitleVisible,
             },
             ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
