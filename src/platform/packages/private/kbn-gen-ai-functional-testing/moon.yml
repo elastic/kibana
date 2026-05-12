@@ -19,6 +19,9 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/repo-info'
+  - '@kbn/tooling-log'
+  - '@kbn/dev-cli-runner'
+  - '@kbn/test'
 tags:
   - shared-common
   - package
