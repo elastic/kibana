@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-
-export const logEcsReformattingRt = t.union([
-  t.literal('off'),
-  t.literal('shade'),
-  t.literal('replace'),
-  t.literal('override'),
-]);
+export { logEcsReformattingRt } from '@kbn/apm-common';
