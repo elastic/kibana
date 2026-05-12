@@ -630,10 +630,9 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/rules/create'
-    );
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/create');
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
