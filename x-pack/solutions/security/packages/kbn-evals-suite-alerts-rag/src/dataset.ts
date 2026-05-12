@@ -31,7 +31,27 @@ export type AlertsRagCategory =
  */
 export interface AlertsRagExample {
   input: string;
-  expected: { reference: string };
+  expected: {
+    reference: string;
+    /**
+     * Minimum sufficient agent-builder tool sequence to answer this question,
+     * EXCLUDING `filestore.read` (which is already covered by the
+     * skill-invocation evaluator and would otherwise show up as noisy "extra
+     * tools" in the trajectory report).
+     *
+     * Used by the trajectory evaluator (`@kbn/evals`'s
+     * `createTrajectoryEvaluator`): scored via LCS for order + set
+     * intersection for coverage. Examples without a `tool_sequence` skip
+     * trajectory scoring and report N/A so partial annotation does not
+     * misleadingly penalise unannotated examples.
+     *
+     * Tool IDs must match registered agent-builder tool ids, e.g.
+     * `security.alerts`, `security.security_labs_search`,
+     * `security.entity_risk_score`,
+     * `security.alert-analysis.get-related-alerts`.
+     */
+    tool_sequence?: string[];
+  };
   metadata: {
     category: AlertsRagCategory;
     dataset_split: string[];

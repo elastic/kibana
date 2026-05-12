@@ -24,12 +24,13 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
         createEvaluateAlertsRagDataset({
           chatClient,
           evaluators,
           executorClient,
+          traceEsClient,
           log,
         })
       );
