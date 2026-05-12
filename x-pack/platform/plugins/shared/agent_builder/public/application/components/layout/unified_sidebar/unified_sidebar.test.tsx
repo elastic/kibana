@@ -56,7 +56,7 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
 }));
 
 jest.mock('../../../context/streaming/streaming_context', () => ({
-  useSendMessageContext: () => ({ removeAllErrors: jest.fn() }),
+  useStreamingContext: () => ({ removeAllErrors: jest.fn() }),
 }));
 
 import { UnifiedSidebar } from './unified_sidebar';

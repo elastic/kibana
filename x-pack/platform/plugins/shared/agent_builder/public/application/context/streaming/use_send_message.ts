@@ -11,14 +11,14 @@ import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConnectorSelection } from '../../hooks/chat/use_connector_selection';
-import { useSendMessageContext, useStreamRecord } from './streaming_context';
+import { useStreamingContext, useStreamRecord } from './streaming_context';
 
 /**
  * Per-conversation scoped hook. Use INSIDE a conversation tree — it reads `conversationId`
  * and `agentId` from context. Components asking "am I streaming?" get an answer about
  * their own conversation, not the global app.
  *
- * Outside a conversation tree (e.g. the global sidebar), use `useSendMessageContext()`
+ * Outside a conversation tree (e.g. the global sidebar), use `useStreamingContext()`
  * directly.
  */
 export const useSendMessage = () => {
@@ -34,7 +34,7 @@ export const useSendMessage = () => {
     mutateResumeRound,
     cancelStream,
     removeError: removeErrorCtx,
-  } = useSendMessageContext();
+  } = useStreamingContext();
 
   const record = useStreamRecord(conversationId);
 

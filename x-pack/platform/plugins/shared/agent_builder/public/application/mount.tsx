@@ -21,7 +21,7 @@ import { AgentBuilderServicesContext } from './context/agent_builder_services_co
 import { ActiveSpaceProvider } from './context/active_space_context';
 import { PageWrapper } from './page_wrapper';
 import { AppLeaveContext, type OnAppLeave } from './context/app_leave_context';
-import { SendMessageProvider } from './context/streaming/streaming_context';
+import { StreamingProvider } from './context/streaming/streaming_context';
 
 export const mountApp = async ({
   core,
@@ -57,9 +57,9 @@ export const mountApp = async ({
                     <RedirectAppLinks coreStart={core}>
                       <PageWrapper>
                         <Router history={history}>
-                          <SendMessageProvider>
+                          <StreamingProvider>
                             <AgentBuilderRoutes />
-                          </SendMessageProvider>
+                          </StreamingProvider>
                         </Router>
                       </PageWrapper>
                     </RedirectAppLinks>

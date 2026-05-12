@@ -25,10 +25,7 @@ import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
-import {
-  useSendMessage,
-  useSendMessageContext,
-} from '../../context/streaming/streaming_context';
+import { useSendMessage, useStreamingContext } from '../../context/streaming/streaming_context';
 import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
@@ -58,7 +55,7 @@ export const Conversation: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
   const isAnyStreaming = useIsAnyConversationStreaming();
-  const { cancelAllStreams } = useSendMessageContext();
+  const { cancelAllStreams } = useStreamingContext();
   const conversationRounds = useConversationRounds();
   const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
