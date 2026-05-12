@@ -1517,6 +1517,64 @@ describe('runExtractFieldsFlow', () => {
       }
     });
 
+    it('preserves the relative order of multiple existing harmless steps end-to-end', async () => {
+      const setEnvironment = {
+        action: 'set',
+        to: 'attributes.environment',
+        value: 'prod',
+        ignore_failure: true,
+      } as unknown as StreamlangStep;
+      const setRegion = {
+        action: 'set',
+        to: 'attributes.region',
+        value: 'eu-west-1',
+        ignore_failure: true,
+      } as unknown as StreamlangStep;
+
+      const deps = buildDeps();
+      arrangeStreamWithSamples(deps, [setEnvironment, setRegion]);
+
+      mockProcessGrokPatterns.mockResolvedValue({
+        type: 'grok',
+        processor: grokCandidateProcessor,
+        parsedRate: 0.95,
+      });
+      mockProcessDissectPattern.mockResolvedValue(null);
+      mockExtractParsedSampleDocuments.mockResolvedValue({
+        parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+        definitionError: false,
+      });
+      mockSuggestProcessingPipeline.mockResolvedValue({
+        pipeline: { steps: [] },
+        metadata: { stepsUsed: 1, maxSteps: 6 },
+      });
+      mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+      const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+      expect(outcome.kind).toBe('success');
+      if (outcome.kind !== 'success') return;
+
+      const indexOfTo = (target: string) =>
+        outcome.result.steps.findIndex(
+          (step) => (step as { action?: string; to?: string }).to === target
+        );
+      const envIdx = indexOfTo('attributes.environment');
+      const regionIdx = indexOfTo('attributes.region');
+
+      expect(envIdx).toBeGreaterThanOrEqual(0);
+      expect(regionIdx).toBeGreaterThanOrEqual(0);
+      // Relative ordering between the two existing steps must match the
+      // input order — environment (passed first) precedes region.
+      expect(envIdx).toBeLessThan(regionIdx);
+      // existing_steps mirrors the input pipeline 1:1 in the same order.
+      expect(outcome.result.existing_steps).toHaveLength(2);
+      expect((outcome.result.existing_steps[0] as { to?: string }).to).toBe(
+        'attributes.environment'
+      );
+      expect((outcome.result.existing_steps[1] as { to?: string }).to).toBe('attributes.region');
+    });
+
     it('preserves an existing step with `ignore_failure: false` end-to-end without flipping it to true', async () => {
       const userConfiguredFailLoudly = {
         action: 'set',
