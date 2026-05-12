@@ -11,7 +11,7 @@ import * as t from 'io-ts';
 import { sortBy } from 'lodash';
 import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import type { AgentName } from '@kbn/apm-types';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { isEDOTAgentName, isOTELAgentName, isRumOrMobileAgentName } from '@kbn/elastic-agent-utils';
 import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
