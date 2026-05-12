@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { isEDOTAgentName, type AgentName } from '@kbn/elastic-agent-utils';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import type {
@@ -38,6 +37,8 @@ import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
 import { AdvancedConfiguration } from './advanced_configuration';
+import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import { isEDOTAgentName, isOTELAgentName } from '../../../../../../../common/agent_name';
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(
@@ -74,8 +75,12 @@ export function SettingsPage({
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const status = initialConfig?.status;
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isOtelCentralConfigAgent = Boolean(
+    newConfig.agent_name && isOTELAgentName(newConfig.agent_name as AgentName)
+  );
   const isAdvancedConfigSupported =
-    newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
+    newConfig.agent_name &&
+    (isEDOTAgentName(newConfig.agent_name as AgentName) || isOtelCentralConfigAgent);
   const hasActiveValidationErrors = [...validationErrors.values()].includes(true);
   const hasInactiveValidationErrors = [...validationErrors.values()].includes(false);
   const [revalidate, setRevalidate] = useState(false);
@@ -292,6 +297,31 @@ export function SettingsPage({
             </div>
           ) : (
             <>
+              {!isEditMode && isOtelCentralConfigAgent && (
+                <>
+                  <EuiCallOut
+                    iconType="iInCircle"
+                    title={i18n.translate(
+                      'xpack.apm.agentConfig.settingsPage.otelCentralConfigDocumentation.title',
+                      {
+                        defaultMessage: 'OpenTelemetry central configuration documentation',
+                      }
+                    )}
+                    data-test-subj="apmOtelCentralConfigDocumentationCallout"
+                  >
+                    <p>
+                      {i18n.translate(
+                        'xpack.apm.agentConfig.settingsPage.otelCentralConfigDocumentation.description',
+                        {
+                          defaultMessage:
+                            'This OpenTelemetry Java agent uses central configuration options that are equivalent to EDOT. Review the OpenTelemetry Java instrumentation documentation to verify compatibility.',
+                        }
+                      )}
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer />
+                </>
+              )}
               {renderSettings({
                 unsavedChanges,
                 newConfig,

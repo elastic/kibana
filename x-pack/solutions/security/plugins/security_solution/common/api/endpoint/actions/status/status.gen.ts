@@ -71,12 +71,15 @@ export type PendingActionsSchema = z.infer<typeof PendingActionsSchema>;
 
 export const ActionStatusSuccessResponse = lazySchema(() =>
   z.object({
-    body: z.object({
-      data: z.object({
+    /**
+     * One pending-actions summary entry per requested agent.
+     */
+    data: z.array(
+      z.object({
         agent_id: AgentId,
         pending_actions: PendingActionsSchema,
-      }),
-    }),
+      })
+    ),
   })
 );
 export type ActionStatusSuccessResponse = z.infer<typeof ActionStatusSuccessResponse>;
