@@ -243,7 +243,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
             aria-label={i18n.translate(
-              'xpack.ml.datePicker.fullTimeRangeSelector.timeRangeOptionsAriaLabel',
+              'xpack.ml.datePicker.fullTimeRangeSelector.frozenDataTierOptionsAriaLabel',
               {
                 defaultMessage: 'Frozen data tier options',
               }
