@@ -186,6 +186,52 @@ For convenience, `start` and `run` support shorter aliases:
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
 ```
 
+### Local model quick start (Ollama)
+
+Run evals entirely offline using a local LLM served by [Ollama](https://ollama.com). No cloud credentials required.
+
+#### 1. Install and pull a model
+
+```bash
+brew install ollama && ollama pull <model>
+```
+
+Pick a model based on your available RAM:
+
+| RAM    | Recommended model | Notes                               |
+| ------ | ----------------- | ----------------------------------- |
+| 16 GB  | `qwen3:8b`        | Fast; good for smoke-testing suites |
+| 32 GB  | `qwen3:14b`       | Balanced quality / speed            |
+| 48 GB  | `qwen3:32b`       | Production-grade reasoning          |
+| 64 GB+ | `llama3.3:70b`    | Highest quality for complex tasks   |
+
+#### 2. Set the required timeout env var
+
+Local models are slower than cloud connectors. Raise the task timeout so evaluations do not time out mid-run:
+
+```bash
+export EVAL_TASK_TIMEOUT_MS=600000
+```
+
+#### 3. Run a suite
+
+```bash
+node scripts/evals run --suite <suite-id> --local
+```
+
+`--local` detects the running Ollama instance, auto-wires a connector pointing at it, and runs the full suite against that model.
+
+#### `--local` vs `--dry-run`
+
+| Flag        | Purpose                                                                                                                                                         |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--local`   | Full eval run against a local Ollama runtime — all examples, all repetitions.                                                                                   |
+| `--dry-run` | Smoke-test suite wiring without committing to a full run: samples **one example per dataset** and sets `EVALUATION_REPETITIONS=1`. Use this to verify datasets, connectors, and Playwright config before a long run. Works with any connector, not just `--local`. |
+
+#### Automated orchestration
+
+For model benchmarking, automated model selection, and multi-suite orchestration on a local runtime, use the `local-evals` skill in [`elastic-agent-builder-skill-dev`](https://github.com/elastic/elastic-agent-builder-skill-dev). That skill provides the full provisioning + benchmark + recommendation workflow that was intentionally kept out of `@kbn/evals` core.
+
 ### Evals CLI commands
 
 ```bash
