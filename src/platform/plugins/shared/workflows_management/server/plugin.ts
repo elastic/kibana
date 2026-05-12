@@ -79,11 +79,11 @@ export class WorkflowsPlugin
       }
     }
 
-    plugins.workflowsExtensions.registerWorkflowsClientProvider(
-      createWorkflowsClientProvider(workflowsService, this.config, this.logger)
-    );
-
     const spaces = plugins.spaces.spacesService;
+
+    plugins.workflowsExtensions.registerWorkflowsClientProvider(
+      createWorkflowsClientProvider(workflowsService, this.config, this.logger, spaces)
+    );
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
     defineRoutes(router, api, this.logger, spaces, workflowsService);

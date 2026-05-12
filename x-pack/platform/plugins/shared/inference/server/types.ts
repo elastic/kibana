@@ -59,7 +59,9 @@ export interface InferenceSetupDependencies {
 export interface InferenceStartDependencies {
   actions: ActionsPluginStart;
   anonymization?: AnonymizationPluginStart;
-  workflowsExtensions?: { invokeHook: InvokeHookFn };
+  workflowsExtensions?: {
+    getClient: (request: KibanaRequest) => Promise<{ invokeHook: InvokeHookFn }>;
+  };
 }
 
 /**
