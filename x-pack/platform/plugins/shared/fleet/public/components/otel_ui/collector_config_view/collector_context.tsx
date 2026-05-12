@@ -7,20 +7,18 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 
-interface CollectorMetricsContextValue {
+interface CollectorContextValue {
   serviceInstanceId?: string;
 }
 
-const CollectorMetricsContext = createContext<CollectorMetricsContextValue>({});
+const CollectorContext = createContext<CollectorContextValue>({});
 
-export const CollectorMetricsProvider: React.FC<{
+export const CollectorContextProvider: React.FC<{
   serviceInstanceId?: string;
   children: React.ReactNode;
 }> = ({ serviceInstanceId, children }) => {
   const value = useMemo(() => ({ serviceInstanceId }), [serviceInstanceId]);
-  return (
-    <CollectorMetricsContext.Provider value={value}>{children}</CollectorMetricsContext.Provider>
-  );
+  return <CollectorContext.Provider value={value}>{children}</CollectorContext.Provider>;
 };
 
-export const useCollectorMetrics = () => useContext(CollectorMetricsContext);
+export const useCollectorContext = () => useContext(CollectorContext);
