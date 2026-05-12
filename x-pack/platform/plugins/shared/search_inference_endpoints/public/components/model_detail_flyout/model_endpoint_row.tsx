@@ -11,9 +11,11 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiScreenReaderOnly,
   EuiSplitPanel,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -34,6 +36,19 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
   onDelete,
 }) => {
   const preconfigured = isEndpointPreconfigured(endpoint.inference_id);
+  const preconfiguredEndpointAriaLabel = i18n.translate(
+    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredAriaLabel',
+    { defaultMessage: 'Preconfigured endpoint' }
+  );
+  const preconfiguredTooltipContent = i18n.translate(
+    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredTooltip',
+    {
+      defaultMessage: 'Preconfigured endpoints are system generated and can not be edited',
+    }
+  );
+  const preconfiguredTooltipDescriptionId = useGeneratedHtmlId({
+    prefix: 'searchInferenceEndpointsPreconfiguredTooltip',
+  });
 
   return (
     <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpoint.inference_id}`}>
@@ -92,28 +107,27 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ minWidth: 24 }}>
               {preconfigured ? (
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredTooltip',
-                    {
-                      defaultMessage:
-                        'Preconfigured endpoints are system generated and can not be edited',
-                    }
-                  )}
-                >
-                  <span tabIndex={0}>
-                    <EuiButtonIcon
-                      data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
-                      iconType="lock"
-                      size="xs"
-                      isDisabled
-                      aria-label={i18n.translate(
-                        'xpack.searchInferenceEndpoints.modelDetailFlyout.preconfiguredAriaLabel',
-                        { defaultMessage: 'Preconfigured endpoint' }
-                      )}
-                    />
-                  </span>
-                </EuiToolTip>
+                <>
+                  <EuiScreenReaderOnly>
+                    <span id={preconfiguredTooltipDescriptionId}>
+                      {preconfiguredTooltipContent}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <EuiToolTip content={preconfiguredTooltipContent}>
+                    <span
+                      tabIndex={0}
+                      aria-label={preconfiguredEndpointAriaLabel}
+                      aria-describedby={preconfiguredTooltipDescriptionId}
+                    >
+                      <EuiButtonIcon
+                        data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
+                        iconType="lock"
+                        size="xs"
+                        isDisabled
+                      />
+                    </span>
+                  </EuiToolTip>
+                </>
               ) : onDelete ? (
                 <EuiToolTip
                   content={i18n.translate(

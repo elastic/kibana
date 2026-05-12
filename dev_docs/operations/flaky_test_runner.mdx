@@ -19,3 +19,19 @@ If you did want to prove that your test wasn't flaky anymore, the number of runs
 Ultimately, running the flaky test runner enough times to validate that a test isn't flaky just isn't an economically responsible way to fix flakiness so should be a last resort strategy.
 
 If there is reason to believe that a test which was previously flaky is no longer flaky, then the test can just be unskipped. If the test is still flaky then that will be proven shortly enough in CI and Operations will skip the test again.
+
+## Scout: per (arch, domain) execution
+
+When you select a Scout Playwright config in the trigger form, the Flaky Test Runner expands that single request into **one Buildkite step per `(arch, domain)` mode** the config supports (e.g. `--arch stateful --domain classic`, `--arch serverless --domain search`, `--arch serverless --domain security_complete`). Each mode then runs in its own worker with `parallelism` set to the requested run count, so:
+
+- Modes execute in parallel rather than sequentially within a single job, reducing wall-clock time for multi-mode configs.
+- Pass/fail rates are reported per `(arch, domain)` step in the Buildkite UI, making it easy to see which mode is actually flaky.
+- A failure in one mode no longer ties up the worker for the remaining modes.
+
+A single `Discover and plan Scout flaky steps` step bootstraps Kibana, runs Playwright config discovery, and dynamically uploads the per-mode steps. It runs in parallel with `Build Kibana Distribution`, and the per-mode steps it uploads wait for the build to finish before executing.
+
+### Limit per Scout config: 50 runs
+
+Because a single Scout request fans out into multiple Buildkite jobs, the Flaky Test Runner caps the **per-config** run count at **50**. Submitting a higher `count` for a `scoutConfig` entry will fail at pipeline upload with a clear error message.
+
+If you need more repetitions for a specific failure mode, run the Flaky Test Runner multiple times. The Buildkite platform also caps total jobs per build at 500; the planner enforces this limit precisely after fan-out, accounting for FTR/Cypress jobs already in the build, and refuses to upload more steps if the cap would be exceeded.

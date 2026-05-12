@@ -4962,7 +4962,7 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}: Args) => ",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n  ignoreGlobalFilters,\n}: Args) => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -4972,7 +4972,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/query/text_based_query_state_to_ast.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4982,13 +4982,13 @@
             "id": "def-common.textBasedQueryStateToExpressionAst.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n}",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n  titleForInspector,\n  descriptionForInspector,\n  ignoreGlobalFilters,\n}",
             "description": [],
             "signature": [
               "Args"
             ],
             "path": "src/platform/plugins/shared/data/common/query/text_based_query_state_to_ast.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 52,
             "deprecated": false,
             "docsReferencedTypeName": "Args",

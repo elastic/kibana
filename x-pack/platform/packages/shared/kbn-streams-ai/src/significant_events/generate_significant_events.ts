@@ -229,10 +229,13 @@ export async function generateSignificantEvents({
 
                 const hints = getStatsQueryHints(rewritten);
 
-                await esClient.esql.query({
-                  query: `${rewritten}\n| LIMIT 0`,
-                  format: 'json',
-                });
+                await esClient.esql.query(
+                  {
+                    query: `${rewritten}\n| LIMIT 0`,
+                    format: 'json',
+                  },
+                  { signal, requestTimeout: '10s' }
+                );
 
                 const allHints = [...warnings, ...hints];
                 return {

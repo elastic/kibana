@@ -20,6 +20,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 
@@ -65,6 +66,10 @@ describe('GenAiSettingsApp', () => {
       type: 'select',
       options: ['default'],
     },
+    [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
+      value: false,
+      type: 'boolean',
+    },
     ...overrides,
   });
 
@@ -92,6 +97,7 @@ describe('GenAiSettingsApp', () => {
       securitySolutionAssistant: { 'ai-assistant': true },
       agentBuilder: { show: true },
       anonymization: { show: true, manage: true },
+      advancedSettings: { show: true, save: true },
     };
 
     // Mock feature flags to enable AI Agents by default
@@ -497,6 +503,96 @@ describe('GenAiSettingsApp', () => {
     await waitFor(() => {
       expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
         source: 'stack_management',
+      });
+    });
+  });
+
+  describe('Token usage tracking', () => {
+    it('installs the token usage dashboard when the user turns the setting on', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+
+      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: true });
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const tokenUsageSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING}`
+      );
+      fireEvent.click(tokenUsageSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(genAiSettingsApi).toHaveBeenCalledWith(
+          'POST /internal/gen_ai_settings/install_token_usage_dashboard',
+          { signal: null }
+        );
+      });
+    });
+
+    it('does not install the dashboard when token usage tracking is not changed', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(
+        createSettingsMock({
+          [AI_CHAT_EXPERIENCE_TYPE]: {
+            value: AIChatExperience.Classic,
+            userValue: AIChatExperience.Agent,
+            type: 'select',
+            options: [AIChatExperience.Classic, AIChatExperience.Agent],
+          },
+        }) as any
+      );
+
+      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: false });
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const chatExperienceSelect = await screen.findByTestId(
+        `management-settings-editField-${AI_CHAT_EXPERIENCE_TYPE}`
+      );
+      fireEvent.change(chatExperienceSelect, { target: { value: AIChatExperience.Classic } });
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(saveButton).toBeInTheDocument();
+      });
+
+      expect(genAiSettingsApi).not.toHaveBeenCalled();
+    });
+
+    it('shows a danger toast when the install request fails', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+
+      const genAiSettingsApi = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('boom'), { body: { message: 'boom' } }));
+      const addDanger = jest.spyOn(coreStart.notifications.toasts, 'addDanger');
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const tokenUsageSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING}`
+      );
+      fireEvent.click(tokenUsageSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(addDanger).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: 'Failed to install token usage dashboard',
+            text: 'boom',
+          })
+        );
       });
     });
   });

@@ -29,10 +29,15 @@ paths:
                 $ref: '../model/set_alert_assignees_body.schema.yaml#/components/examples/SetAlertAssigneesBodyRemove'
       responses:
         200:
-          description: Indicates a successful call.
+          description: |
+            Indicates a successful call. The body matches an Elasticsearch update-by-query response
+            (for example `took`, `updated`, `failures`).
           content:
             application/json:
-              description: Elasticsearch update by query or update by IDs response
+              schema:
+                type: object
+                additionalProperties: true
+                description: Elasticsearch update by query response
               examples:
                 add:
                   value:

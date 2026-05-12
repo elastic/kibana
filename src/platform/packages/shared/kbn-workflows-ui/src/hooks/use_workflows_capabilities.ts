@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { useMemo } from 'react';
+import type { Capabilities } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOWS_MANAGEMENT_FEATURE_ID } from '@kbn/workflows';
@@ -29,7 +31,17 @@ export const useWorkflowsCapabilities = (): WorkflowsManagementCapabilities => {
   const {
     services: { application },
   } = useKibana<{ application: ApplicationStart }>();
-  const workflowsCapabilities = application?.capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
+
+  return useMemo(
+    () => getWorkflowsCapabilities(application?.capabilities ?? {}),
+    [application?.capabilities]
+  );
+};
+
+export const getWorkflowsCapabilities = (
+  capabilities: Capabilities
+): WorkflowsManagementCapabilities => {
+  const workflowsCapabilities = capabilities?.[WORKFLOWS_MANAGEMENT_FEATURE_ID] ?? {};
 
   return Object.fromEntries(
     Object.entries(CapabilitiesMap).map(([key, value]) => [

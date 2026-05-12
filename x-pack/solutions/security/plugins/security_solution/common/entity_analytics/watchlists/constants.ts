@@ -19,6 +19,7 @@ export const WATCHLISTS_DATA_SOURCE_LIST_URL = `${WATCHLISTS_DATA_SOURCE_URL}/li
 export const WATCHLISTS_SYNC_URL = `${WATCHLISTS_URL}/{watchlist_id}/sync` as const;
 export const WATCHLISTS_INDICES_URL = `${WATCHLISTS_URL}/indices` as const;
 export const WATCHLISTS_CSV_UPLOAD_URL = `${WATCHLISTS_URL}/{watchlist_id}/csv_upload` as const;
+export const WATCHLISTS_PRIVILEGES_URL = `${WATCHLISTS_URL}/privileges` as const;
 export const WATCHLISTS_ENTITIES_ASSIGN_URL =
   `${WATCHLISTS_URL}/{watchlist_id}/entities/assign` as const;
 export const WATCHLISTS_ENTITIES_UNASSIGN_URL =

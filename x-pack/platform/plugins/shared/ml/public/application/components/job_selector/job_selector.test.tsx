@@ -29,10 +29,6 @@ jest.mock('../anomaly_results_view_selector', () => ({
   ),
 }));
 
-jest.mock('../feedback_button', () => ({
-  FeedBackButton: () => <div data-test-subj="mockFeedbackButton" />,
-}));
-
 jest.mock('../../capabilities/check_capabilities', () => ({
   usePermissionCheck: () => [true, true],
 }));
