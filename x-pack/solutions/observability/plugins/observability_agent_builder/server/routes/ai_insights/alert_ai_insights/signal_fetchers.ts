@@ -28,8 +28,8 @@ export interface SignalFetcherDeps {
   esClient: IScopedClusterClient;
   request: KibanaRequest;
   logger: Logger;
-  serviceName: string;
-  serviceEnvironment: string;
+  serviceName?: string;
+  serviceEnvironment?: string;
   transactionType?: string;
   transactionName?: string;
   hostName: string;
@@ -60,7 +60,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       start,
       end
     ) {
-      if (!serviceName) return null;
+      if (!serviceName || !serviceEnvironment) return null;
       const data = await dataRegistry.getData('apmServiceSummary', {
         request,
         serviceName,
@@ -90,7 +90,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       start,
       end
     ) {
-      if (!serviceName) return null;
+      if (!serviceName || !serviceEnvironment) return null;
       let kqlFilter = `service.name: "${serviceName}" AND service.environment: "${serviceEnvironment}"`;
       if (transactionType) {
         kqlFilter += ` AND transaction.type: "${transactionType}"`;
@@ -128,7 +128,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
       'sudden shifts in throughput/latency/failure rate of downstream dependencies — shows when problems started',
     startOffsetMinutes: 6 * 60,
     async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
-      if (!serviceName) return null;
+      if (!serviceName || !serviceEnvironment) return null;
 
       const buckets = await getTraceChangePoints({
         core,
@@ -211,7 +211,7 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     description: 'CPU, memory, GC duration, thread count — indicates internal resource pressure',
     startOffsetMinutes: 15,
     async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
-      if (!serviceName) return null;
+      if (!serviceName || !serviceEnvironment) return null;
       const result = await getRuntimeMetrics({
         core,
         plugins,
