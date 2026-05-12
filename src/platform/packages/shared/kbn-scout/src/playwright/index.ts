@@ -67,3 +67,11 @@ export * from './eui_components';
 
 // Test helpers for Kibana components
 export * from './ui_components';
+
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './page_objects';
+export type { ContentListUrlState } from './page_objects';
