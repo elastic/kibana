@@ -305,7 +305,7 @@
           "(query: string) => string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/sources.ts",
-        "lineNumber": 389,
+        "lineNumber": 414,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -321,7 +321,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/utils/sources.ts",
-            "lineNumber": 389,
+            "lineNumber": 414,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -1672,7 +1672,7 @@
         "label": "ESQLCommandSummary",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-        "lineNumber": 148,
+        "lineNumber": 149,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1690,7 +1690,7 @@
               "Set<string>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 149,
+            "lineNumber": 150,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1708,7 +1708,7 @@
               "Set<string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 154,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1720,13 +1720,13 @@
             "tags": [],
             "label": "renamedColumnsPairs",
             "description": [
-              "\nA set of renamed columns pairs [oldName, newName]"
+              "\nA set of renamed columns pairs [newName, oldName]"
             ],
             "signature": [
               "Set<[string, string]> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 159,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1746,7 +1746,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 164,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1766,7 +1766,7 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/types.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3898,7 +3898,7 @@
         "label": "ValidationOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3918,7 +3918,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-language/src/language/validation/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
