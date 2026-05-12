@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
@@ -35,38 +35,42 @@ export class EntraAuthError extends Error {
   }
 }
 
-const authSchema = z
-  .object({
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
-    clientId: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
-    certificate: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CERT_CERTIFICATE_REQUIRED_MESSAGE })
-      .refine((v) => CERTIFICATE_MARKER.test(v), {
-        message: i18n.OAUTH_CERT_CERTIFICATE_INVALID_PEM_MESSAGE,
-      })
-      .meta({ label: i18n.OAUTH_CERT_CERTIFICATE_LABEL, widget: 'textarea' }),
-    privateKey: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CERT_PRIVATE_KEY_REQUIRED_MESSAGE })
-      .refine((v) => PRIVATE_KEY_MARKER.test(v), {
-        message: i18n.OAUTH_CERT_PRIVATE_KEY_INVALID_PEM_MESSAGE,
-      })
-      .meta({
-        label: i18n.OAUTH_CERT_PRIVATE_KEY_LABEL,
-        sensitive: true,
-        widget: 'secretTextarea',
-      }),
-    passphrase: z
-      .string()
-      .meta({ label: i18n.OAUTH_CERT_PASSPHRASE_LABEL, sensitive: true })
-      .optional(),
-  })
-  .meta({ label: i18n.OAUTH_CERT_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      tokenUrl: z
+        .url()
+        .meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
+      clientId: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+      scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+      certificate: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CERT_CERTIFICATE_REQUIRED_MESSAGE })
+        .refine((v) => CERTIFICATE_MARKER.test(v), {
+          message: i18n.OAUTH_CERT_CERTIFICATE_INVALID_PEM_MESSAGE,
+        })
+        .meta({ label: i18n.OAUTH_CERT_CERTIFICATE_LABEL, widget: 'textarea' }),
+      privateKey: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CERT_PRIVATE_KEY_REQUIRED_MESSAGE })
+        .refine((v) => PRIVATE_KEY_MARKER.test(v), {
+          message: i18n.OAUTH_CERT_PRIVATE_KEY_INVALID_PEM_MESSAGE,
+        })
+        .meta({
+          label: i18n.OAUTH_CERT_PRIVATE_KEY_LABEL,
+          sensitive: true,
+          widget: 'secretTextarea',
+        }),
+      passphrase: z
+        .string()
+        .meta({ label: i18n.OAUTH_CERT_PASSPHRASE_LABEL, sensitive: true })
+        .optional(),
+    })
+    .meta({ label: i18n.OAUTH_CERT_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
