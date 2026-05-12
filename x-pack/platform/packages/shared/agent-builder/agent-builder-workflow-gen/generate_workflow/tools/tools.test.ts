@@ -5,7 +5,20 @@
  * 2.0.
  */
 
+import { lookupStepDefinitions, lookupTriggerDefinitions } from './lookup';
 import { dispatchToolCall } from './tools';
+
+jest.mock('./lookup', () => ({
+  lookupStepDefinitions: jest.fn(),
+  lookupTriggerDefinitions: jest.fn(),
+}));
+
+const mockLookupStepDefinitions = lookupStepDefinitions as jest.MockedFunction<
+  typeof lookupStepDefinitions
+>;
+const mockLookupTriggerDefinitions = lookupTriggerDefinitions as jest.MockedFunction<
+  typeof lookupTriggerDefinitions
+>;
 
 describe('dispatchToolCall', () => {
   const baseDeps = {
@@ -13,6 +26,13 @@ describe('dispatchToolCall', () => {
     spaceId: 'default',
     request: {} as any,
   };
+
+  const twoStepYaml = `name: demo\nversion: "1"\ntriggers:\n  - type: manual\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n  - name: b\n    type: console\n    with:\n      message: bye\n`;
+
+  beforeEach(() => {
+    mockLookupStepDefinitions.mockReset();
+    mockLookupTriggerDefinitions.mockReset();
+  });
 
   it('replaces YAML on set_yaml', async () => {
     const result = await dispatchToolCall(
@@ -56,6 +76,124 @@ describe('dispatchToolCall', () => {
     expect(result.message.success).toBe(true);
     expect(result.yaml).toContain('name: b');
     expect(result.yaml).toContain('name: a');
+  });
+
+  it('replaces a step by name on modify_step', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_step',
+        args: {
+          stepName: 'a',
+          updatedStep: { name: 'a', type: 'http', with: { url: 'https://example.com' } },
+        },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(result.yaml).toContain('type: http');
+    expect(result.yaml).toContain('url: https://example.com');
+    // step b is preserved
+    expect(result.yaml).toContain('name: b');
+  });
+
+  it('returns an error from modify_step when the step name does not exist', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_step',
+        args: {
+          stepName: 'does_not_exist',
+          updatedStep: { name: 'does_not_exist', type: 'console', with: { message: '!' } },
+        },
+      },
+      baseDeps
+    );
+
+    expect(result.yaml).toBeUndefined();
+    expect(result.message.success).toBe(false);
+  });
+
+  it('updates a single property on modify_step_property', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      {
+        toolCallId: 't1',
+        toolName: 'modify_step_property',
+        args: { stepName: 'a', property: 'with.message', value: 'updated' },
+      },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(result.yaml).toContain('message: updated');
+    // step a's type is untouched, step b unchanged
+    expect(result.yaml).toContain('name: a');
+    expect(result.yaml).toContain('name: b');
+  });
+
+  it('removes a step by name on delete_step', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      { toolCallId: 't1', toolName: 'delete_step', args: { stepName: 'a' } },
+      baseDeps
+    );
+
+    expect(result.message.success).toBe(true);
+    expect(result.yaml).not.toContain('name: a');
+    expect(result.yaml).toContain('name: b');
+  });
+
+  it('returns an error from delete_step when the step name does not exist', async () => {
+    const result = await dispatchToolCall(
+      { yaml: twoStepYaml },
+      { toolCallId: 't1', toolName: 'delete_step', args: { stepName: 'nope' } },
+      baseDeps
+    );
+
+    expect(result.yaml).toBeUndefined();
+    expect(result.message.success).toBe(false);
+  });
+
+  it('delegates get_step_definitions to lookupStepDefinitions and surfaces its result', async () => {
+    mockLookupStepDefinitions.mockResolvedValueOnce({ count: 0, stepTypes: [] });
+
+    const result = await dispatchToolCall(
+      { yaml: '' },
+      {
+        toolCallId: 't1',
+        toolName: 'get_step_definitions',
+        args: { search: 'slack' },
+      },
+      baseDeps
+    );
+
+    expect(mockLookupStepDefinitions).toHaveBeenCalledWith({ search: 'slack' }, baseDeps);
+    expect(result.yaml).toBeUndefined();
+    expect(result.message.success).toBe(true);
+    expect(result.message.data).toEqual({ count: 0, stepTypes: [] });
+  });
+
+  it('delegates get_trigger_definitions to lookupTriggerDefinitions and surfaces its result', async () => {
+    mockLookupTriggerDefinitions.mockResolvedValueOnce({ count: 1, triggerTypes: ['alert'] });
+
+    const result = await dispatchToolCall(
+      { yaml: '' },
+      {
+        toolCallId: 't1',
+        toolName: 'get_trigger_definitions',
+        args: { triggerType: 'alert' },
+      },
+      baseDeps
+    );
+
+    expect(mockLookupTriggerDefinitions).toHaveBeenCalledWith({ triggerType: 'alert' });
+    expect(result.yaml).toBeUndefined();
+    expect(result.message.success).toBe(true);
+    expect(result.message.data).toEqual({ count: 1, triggerTypes: ['alert'] });
   });
 
   it('rejects unknown tool names', async () => {
