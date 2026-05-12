@@ -196,20 +196,18 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* ── 1. Search / date picker / time field row — one line ──────── */}
+        {/* ── 1. Time field / date picker / Search row — one line ──────── */}
         <div style={{ padding: '8px 16px' }}>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
-                <EuiButton
-                  size="s"
-                  onClick={run}
-                  isLoading={isLoading}
-                  data-test-subj="composeDiscoverRunQuery"
-                >
-                  Search
-                </EuiButton>
-              </EuiToolTip>
+            <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
+              <EuiSelect
+                options={timeFieldOptions}
+                value={timeField}
+                onChange={(e) => setFormValue('timeField', e.target.value)}
+                compressed
+                prepend="Time field"
+                data-test-subj="composeDiscoverTimeField"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow>
               <EuiSuperDatePicker
@@ -223,15 +221,17 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
                 width="full"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
-              <EuiSelect
-                options={timeFieldOptions}
-                value={timeField}
-                onChange={(e) => setFormValue('timeField', e.target.value)}
-                compressed
-                prepend="Time field"
-                data-test-subj="composeDiscoverTimeField"
-              />
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
+                <EuiButton
+                  size="s"
+                  onClick={run}
+                  isLoading={isLoading}
+                  data-test-subj="composeDiscoverRunQuery"
+                >
+                  Search
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
