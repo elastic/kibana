@@ -38,6 +38,8 @@ import {
   removeVersionSuffixFromPolicyId,
 } from '../../../../../../../common/services/version_specific_policies_utils';
 
+import { isAgentSelectable as isAgentSelectableService } from '../../services/is_agent_selectable';
+
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
@@ -110,15 +112,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   const latestAgentVersion = useAgentVersion();
 
   const isAgentSelectable = useCallback(
-    (agent: Agent) => {
-      if (!agent.active) return false;
-      if (!agent.policy_id) return true;
-
-      const basePolicyId = removeVersionSuffixFromPolicyId(agent.policy_id);
-      const agentPolicy = agentPoliciesIndexedById[basePolicyId];
-      const isHosted = agentPolicy?.is_managed === true;
-      return !isHosted;
-    },
+    (agent: Agent) => isAgentSelectableService(agent, agentPoliciesIndexedById),
     [agentPoliciesIndexedById]
   );
 
@@ -236,7 +230,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
-            <EuiIcon type="info" />
+            <EuiIcon type="info" aria-hidden={true} />
           </span>
         </EuiToolTip>
       ),
@@ -264,7 +258,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
-            <EuiIcon type="info" />
+            <EuiIcon type="info" aria-hidden={true} />
           </span>
         </EuiToolTip>
       ),
@@ -387,7 +381,11 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           if (!agent.active) {
             return 'This agent is not active';
           }
-          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+          if (
+            agent.policy_id &&
+            agentPoliciesIndexedById[agent.policy_id].is_managed &&
+            agent.type !== 'OPAMP'
+          ) {
             return 'This action is not available for agents enrolled in an externally managed agent policy';
           }
           return '';

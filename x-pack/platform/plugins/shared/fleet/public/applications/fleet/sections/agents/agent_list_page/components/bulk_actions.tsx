@@ -190,6 +190,15 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     const hasOpAMPAgents = Array.isArray(agents)
       ? agents.some((agent) => agent.type === 'OPAMP')
       : false;
+    const hasNonOpAMPAgents = Array.isArray(agents)
+      ? agents.some((agent) => agent.type !== 'OPAMP')
+      : false;
+
+    // Mixed selection (OpAMP + Elastic Agents): only show actions applicable to both.
+    // Export is the only universal action.
+    if (hasOpAMPAgents && hasNonOpAMPAgents) {
+      return [exportMenuItem];
+    }
 
     if (hasOpAMPAgents) {
       const items: MenuItem[] = [exportMenuItem];

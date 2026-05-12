@@ -36,6 +36,7 @@ import {
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
+import { isAgentSelectable as isAgentSelectableService } from '../services/is_agent_selectable';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
@@ -242,13 +243,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isAgentSelectable = useCallback(
-    (agent: Agent) => {
-      if (!agent.active) return false;
-      if (!agent.policy_id) return true;
-      const agentPolicy = agentPoliciesIndexedById[agent.policy_id];
-      const isHosted = agentPolicy?.is_managed === true;
-      return !isHosted;
-    },
+    (agent: Agent) => isAgentSelectableService(agent, agentPoliciesIndexedById),
     [agentPoliciesIndexedById]
   );
 
