@@ -523,7 +523,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
             aria-label={i18n.translate('xpack.aiops.changePointDetection.toggleConfigLabel', {
-              defaultMessage: 'Toggle configuration',
+              defaultMessage: 'Toggle change points table',
             })}
             aria-expanded={isExpanded}
             size="s"
