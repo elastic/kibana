@@ -86,17 +86,14 @@ export const ActionPolicyDetailsFlyout = ({
   };
 
   const handleClone = (p: ActionPolicyResponse) => {
-    onClose();
     onClone(p);
   };
 
   const handleDelete = (p: ActionPolicyResponse) => {
-    onClose();
     onDelete(p);
   };
 
   const handleUpdateApiKey = (id: string) => {
-    onClose();
     onUpdateApiKey(id);
   };
 
