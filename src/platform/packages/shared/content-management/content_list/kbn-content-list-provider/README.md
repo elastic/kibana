@@ -127,8 +127,29 @@ item={{
 | Prop | Type | Description |
 |------|------|-------------|
 | `isReadOnly` | `boolean` | When `true`, disables selection and editing actions. |
-| `features` | `ContentListFeatures` | Opt-in feature configuration. Supports `sorting` (field list + initial sort), `pagination` (initial page size), `tags` (tag facet provider), `starred` (favorites service required), and `userProfiles` (user profile facet provider). |
+| `features` | `ContentListFeatures` | Opt-in feature configuration. Supports `urlSync` (enabled by default; pass `false` to opt out), `sorting` (field list + initial sort), `pagination` (initial page size), `tags` (tag facet provider), `starred` (favorites service required), and `userProfiles` (user profile facet provider). |
 | `services` | `ContentListServices` | External service integrations. Supports `favorites` (for starred toggling), `tags` (for tag filter popovers), and `userProfiles` (for `createdBy` avatars and filter popovers). |
+
+### URL Persistence
+
+When `ContentListProvider` is rendered inside a React Router context, `queryText` and `sort` are synchronized with the current URL by default.
+
+| State | Param | Shape | Example |
+|-------|-------|-------|---------|
+| `queryText` | `q` | full query string | `?q=createdBy:jane%20is:starred%20dashboard` |
+| `sort` | `sort` | `field:direction` | `?sort=updatedAt:desc` |
+
+Empty query text removes `q`. The resolved initial sort removes `sort`, keeping default URLs compact. Unrelated host-app query params are preserved verbatim — values are written using an RFC 3986–friendly encoder, so Rison-style params (e.g. `_g`, `_a`) keep their readable form (parens, colons, commas, `!`, etc.) instead of being percent-encoded on every rewrite.
+
+Every URL write uses `history.replace`, so listing-page interactions (typing, filter toggles, sort changes) refine the current entry instead of adding to the back stack. Browser Back/Forward leaves the listing page.
+
+Legacy TableListView URLs using `s`, `title`, `sort`, `sortdir`, `created_by`, and `favorites` are decoded on first load and rewritten to the new `q` / `sort` shape. New-shape params win when both old and new params are present.
+
+Use `features={{ urlSync: false }}` for embedded lists, modals, sidebars, or secondary lists that share a route with another URL-synced list. Only one list per route should leave URL sync enabled unless the lists intentionally share the same URL state.
+
+#### Implementation note: one source of truth
+
+`queryText` from state flows directly to `EuiSearchBar`'s `query` prop. There is no `displayText` mirror, no typing ref, and no internal sync hack — the search bar is fully controlled. Both search-box typing and committed filter changes dispatch `SET_QUERY` through the same path; `ContentListUrlSync` writes the resulting URL with `history.replace`.
 
 ## Architecture
 
@@ -190,4 +211,3 @@ Manages runtime data using a reducer pattern with React Query for data fetching.
 | `useProfileCache()` | `ProfileCache \| undefined` | Access the shared profile cache instance. Returns `undefined` when user profiles are not configured. |
 | `useProfileCacheVersion()` | `number` | Subscribe to cache version changes. Re-renders only when profiles are loaded. |
 | `useProfile(uid)` | `UserProfileEntry \| undefined` | Resolve a single profile by UID. Self-loading via batched requests. |
-
