@@ -8,7 +8,10 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { mockHostRiskScoreState, mockObservedHostData } from '../../../../flyout/entity_details/mocks';
+import {
+  mockHostRiskScoreState,
+  mockObservedHostData,
+} from '../../../../flyout/entity_details/mocks';
 import { Host } from '.';
 
 const mockProps = {
