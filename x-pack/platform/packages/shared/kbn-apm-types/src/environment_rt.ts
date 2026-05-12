@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { nonEmptyStringRt } from '@kbn/io-ts-utils';
-import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from './environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '@kbn/apm-common';
 
 export const environmentStringRt = t.union([
   t.literal(ENVIRONMENT_NOT_DEFINED.value),

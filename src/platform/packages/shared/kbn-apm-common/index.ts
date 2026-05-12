@@ -65,3 +65,4 @@ export type {
   RawSettingDefinition,
   SettingDefinition,
 } from './src/agent_configuration/setting_definitions/types';
+export * from './src/environment/environment_filter_values';
