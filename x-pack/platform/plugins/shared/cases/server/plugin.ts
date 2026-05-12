@@ -133,7 +133,7 @@ export class CasePlugin
       logger: this.logger,
       enabled: this.caseConfig.analyticsV2.enabled,
     });
-    this.casesAnalyticsV2Service.setup({ taskManager: plugins.taskManager });
+    this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;

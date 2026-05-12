@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -14,6 +19,7 @@ import type {
 import { CasesAnalyticsV2DataViewService } from './data_view/service';
 import { ensureCaseIndex } from './ensure_indices/case';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
+import { registerCasesAnalyticsV2Routes } from './routes';
 import {
   CasesAnalyticsV2Writer,
   V2_NOOP_WRITER,
@@ -32,6 +38,8 @@ interface CasesAnalyticsV2ServiceDeps {
  * here (Task Manager setup, logger, etc.).
  */
 interface CasesAnalyticsV2SetupDeps {
+  /** Core setup contract — needed by the operator-route registration. */
+  core: CoreSetup;
   taskManager: TaskManagerSetupContract;
 }
 
@@ -103,6 +111,13 @@ export class CasesAnalyticsV2Service {
    * runtime field map.
    */
   private dataViewService: CasesAnalyticsV2DataViewService | undefined;
+  /**
+   * Task Manager start contract captured at start. Operator routes
+   * registered in `setup()` close over a `getTaskManager()` callback that
+   * reads this — the routes need a TM start contract, but they're
+   * registered in setup where only the setup contract is available.
+   */
+  private taskManager: TaskManagerStartContract | undefined;
 
   constructor(deps: CasesAnalyticsV2ServiceDeps) {
     this.logger = deps.logger.get('cases.analyticsV2');
@@ -123,6 +138,11 @@ export class CasesAnalyticsV2Service {
       this.logger.debug(
         'cases-analytics v2 disabled (xpack.cases.analyticsV2.enabled=false); skipping setup'
       );
+      // Note: operator routes are NOT registered when the flag is off. Health
+      // tooling that queries `/state` against a disabled instance gets a 404
+      // — equivalent to "the feature isn't present here." If we want a
+      // discoverable health endpoint regardless of the flag, we can register
+      // a thin always-on route here later. Not in this PR.
       return;
     }
     registerReconciliationTask({
@@ -141,6 +161,16 @@ export class CasesAnalyticsV2Service {
           writer: this.writerProxy,
         };
       },
+    });
+
+    // Register operator routes. The Task Manager start contract isn't
+    // available yet — routes close over a `getTaskManager()` callback that
+    // returns `this.taskManager` once `start()` runs.
+    registerCasesAnalyticsV2Routes({
+      core: deps.core,
+      logger: this.logger,
+      getTaskManager: () => this.taskManager ?? null,
+      enabled: this.enabled,
     });
   }
 
@@ -180,6 +210,9 @@ export class CasesAnalyticsV2Service {
     // Capture the SO client for the reconciliation task — the runner uses it
     // to walk cases since the last cursor.
     this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
+    // Capture the Task Manager start contract so the operator routes (which
+    // were registered in setup() but need the start contract) can resolve it.
+    this.taskManager = deps.taskManager;
 
     // Bootstrap the managed Cases data view + apply runtime fields from every
     // template's declared extended fields. Idempotent; safe under concurrent

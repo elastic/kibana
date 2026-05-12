@@ -20,3 +20,14 @@
  * without a translation table.
  */
 export const CASE_INDEX_NAME = '.cases';
+
+/**
+ * Operator route URLs. All under `/internal/cases/_analyticsV2/*` — internal
+ * access only, superuser-gated. These are not customer-facing; they exist for
+ * on-call to introspect state and recover from inconsistencies without
+ * having to query system indices by hand.
+ */
+export const CASES_ANALYTICS_V2_STATE_URL = '/internal/cases/_analyticsV2/state';
+export const CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL =
+  '/internal/cases/_analyticsV2/reconcile/run_soon';
+export const CASES_ANALYTICS_V2_RESET_URL = '/internal/cases/_analyticsV2/reset';
