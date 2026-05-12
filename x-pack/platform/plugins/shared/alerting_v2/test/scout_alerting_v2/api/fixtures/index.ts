@@ -7,21 +7,29 @@
 
 import { apiTest as baseApiTest } from '@kbn/scout';
 import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/scout';
-import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '../../common/constants';
+import { ALERT_ACTIONS_DATA_STREAM } from '../../common/constants';
 import {
   getDataStreamApiService,
   getInsightsApiService,
   getRulesApiService,
+  getTaskExecutionsApiService,
   type DataStreamApiService,
   type InsightsApiService,
   type RulesApiService,
-} from '../services';
+  type RuleEventsApiService,
+  type TaskExecutionsApiService,
+} from '../../common/services';
+import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
+import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
+import { getSourceIndexApiService } from '../../common/services/source_index_api_service';
 
 export interface AlertingApiServices {
   rules: RulesApiService;
-  ruleEvents: DataStreamApiService;
+  ruleEvents: RuleEventsApiService;
   alertActions: DataStreamApiService;
   insights: InsightsApiService;
+  sourceIndex: SourceIndexApiService;
+  taskExecutions: TaskExecutionsApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -43,17 +51,15 @@ export const buildAlertingApiServices = ({
   log: ScoutLogger;
 }): AlertingApiServices => ({
   rules: getRulesApiService({ kbnClient, log }),
-  ruleEvents: getDataStreamApiService({
-    esClient,
-    log,
-    dataStreamName: ALERT_EVENTS_DATA_STREAM,
-  }),
+  ruleEvents: getRuleEventsApiService({ esClient, log }),
   alertActions: getDataStreamApiService({
     esClient,
     log,
     dataStreamName: ALERT_ACTIONS_DATA_STREAM,
   }),
   insights: getInsightsApiService({ esClient, log }),
+  sourceIndex: getSourceIndexApiService({ esClient, log }),
+  taskExecutions: getTaskExecutionsApiService({ esClient, log }),
 });
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({

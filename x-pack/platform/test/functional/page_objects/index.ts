@@ -27,7 +27,6 @@ import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { BannersPageObject } from './banners_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
-import { AgentBuilderPageObject } from './agent_builder_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { LicenseManagementPageProvider } from './license_management_page';
@@ -36,7 +35,6 @@ import { IndexManagementPageProvider } from './index_management_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
 import { StatusPageObject } from './status_page';
 import { GeoFileUploadPageObject } from './geo_file_upload';
-import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { LogstashPageObject } from './logstash_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { RollupPageObject } from './rollup_page';
@@ -67,7 +65,6 @@ export const pageObjects = {
   banners: BannersPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   tagManagement: TagManagementPageObject,
-  agentBuilder: AgentBuilderPageObject,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   grokDebugger: GrokDebuggerPageObject,
   licenseManagement: LicenseManagementPageProvider,
@@ -76,7 +73,6 @@ export const pageObjects = {
   shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   statusPage: StatusPageObject,
   geoFileUpload: GeoFileUploadPageObject,
-  ingestPipelines: IngestPipelinesPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
   logstash: LogstashPageObject,
   rollup: RollupPageObject,

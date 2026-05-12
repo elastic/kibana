@@ -42,7 +42,7 @@ export function Requirements(props: RequirementsProps) {
     <Fragment>
       <FlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={'logoElasticStack'} />
+          <EuiIcon type={'logoElasticStack'} aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle>
