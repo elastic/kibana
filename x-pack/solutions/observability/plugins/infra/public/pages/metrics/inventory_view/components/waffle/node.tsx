@@ -65,7 +65,6 @@ export const Node = ({
 
   const nodeSquare = (
     <EuiToolTip
-      delay="regular"
       position="right"
       content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
     >
