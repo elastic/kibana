@@ -33,6 +33,7 @@
       "licensing"
     ],
     "optionalPlugins": ["alerting", "serverless", "cloud"],
-    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer"]
+    "runtimePluginDependencies": ["agentBuilder"],
+    "extraPublicDirs": ["common"]
   }
 }
