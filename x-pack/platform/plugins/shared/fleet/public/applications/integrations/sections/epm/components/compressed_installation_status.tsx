@@ -39,6 +39,7 @@ export const CompressedInstallationStatus: React.FC<{
           data-test-subj="compressed-active-icon"
           type="checkCircleFill"
           className={styles.compressedActiveStatusIcon}
+          aria-hidden={true}
         />
       ) : (
         <EuiIconTip

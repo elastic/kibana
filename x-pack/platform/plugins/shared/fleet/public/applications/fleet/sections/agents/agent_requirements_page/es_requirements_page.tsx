@@ -38,9 +38,9 @@ export const RequirementItem: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         <EuiText>
           {isMissing ? (
-            <EuiIcon type="error" color="danger" />
+            <EuiIcon type="error" color="danger" aria-hidden={true} />
           ) : (
-            <EuiIcon type="checkCircleFill" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           )}
         </EuiText>
       </EuiFlexItem>

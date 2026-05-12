@@ -284,6 +284,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                   ) : (
                     <EuiIcon
                       size="m"
+                      aria-hidden={true}
                       color={
                         customAsset.sync_status === SyncStatus.FAILED
                           ? 'danger'
