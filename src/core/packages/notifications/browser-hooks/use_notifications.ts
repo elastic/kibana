@@ -14,9 +14,24 @@ import { useNotificationEventsService } from './notification_events_provider';
 
 const EMPTY: NotificationEvent[] = [];
 
-/** All notification events, ordered by insertion. */
+/**
+ * All notification events, sorted pinned-first then by descending timestamp.
+ *
+ * Sort lives in this hook (rather than EventsService) so consumers that
+ * want a different order can build their own selector on top of the raw
+ * `events.get$()` observable.
+ */
 export function useNotifications(): NotificationEvent[] {
   const events = useNotificationEventsService();
   const events$ = useMemo(() => events.get$(), [events]);
-  return useObservable(events$, EMPTY);
+  const raw = useObservable(events$, EMPTY);
+  return useMemo(() => {
+    if (raw.length === 0) return raw;
+    return [...raw].sort((a, b) => {
+      const aPinned = a.isPinned ? 1 : 0;
+      const bPinned = b.isPinned ? 1 : 0;
+      if (aPinned !== bPinned) return bPinned - aPinned; // pinned first
+      return b.timestamp - a.timestamp; // newest first
+    });
+  }, [raw]);
 }

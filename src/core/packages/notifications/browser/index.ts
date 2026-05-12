@@ -30,6 +30,16 @@ export type {
   INotificationEvents,
   NotificationEvent,
   NotificationEventTypeData,
+  NotificationTypeId,
   RegisteredNotificationEventType,
   TypedNotificationEvent,
 } from './src/events_types';
+export {
+  EXAMPLE_NOTIFICATION_TYPE_ID_PREFIX,
+  VALID_NOTIFICATION_TYPE_IDS,
+  isValidNotificationTypeId,
+} from './src/events_types';
+export type {
+  NotificationStateScope,
+  NotificationStateStore,
+} from './src/notification_state_store_types';

@@ -17,7 +17,14 @@ import type {
   EuiContextMenuItem,
   EuiContextMenuItemProps,
 } from '@elastic/eui';
-import { EuiButtonEmpty, EuiLink, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiLink,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 // @ts-expect-error - reaching into EUI internals for the shared title typography
 import { euiTitleStyles } from '@elastic/eui/es/components/title/title.styles';
@@ -79,6 +86,15 @@ export type NotificationEventProps = Omit<
      */
     onRead?: (id: string, isRead: boolean) => void;
     /**
+     * Whether the user has pinned this event. When set, a pin button appears next to the
+     * read indicator. Leave undefined to hide the pin button entirely.
+     */
+    isPinned?: boolean;
+    /**
+     * Returns the `id` and the current `isPinned` value. Required to render the pin button.
+     */
+    onPin?: (id: string, isPinned: boolean) => void;
+    /**
      * Provided the `id` of the event must return an array of #EuiContextMenuItem elements.
      */
     onOpenContextMenu?: (
@@ -96,6 +112,8 @@ export const NotificationEvent: FunctionComponent<NotificationEventProps> = ({
   time,
   title,
   isRead,
+  isPinned,
+  onPin,
   primaryAction,
   primaryActionProps,
   messages,
@@ -107,6 +125,18 @@ export const NotificationEvent: FunctionComponent<NotificationEventProps> = ({
   className,
   ...rest
 }) => {
+  const pinLabel = isPinned
+    ? i18n.translate('core.notifications.eventPinButton.unpin', { defaultMessage: 'Unpin' })
+    : i18n.translate('core.notifications.eventPinButton.pin', { defaultMessage: 'Pin' });
+  const pinAria = isPinned
+    ? i18n.translate('core.notifications.eventPinButton.unpinAria', {
+        defaultMessage: 'Unpin {eventName}',
+        values: { eventName: title },
+      })
+    : i18n.translate('core.notifications.eventPinButton.pinAria', {
+        defaultMessage: 'Pin {eventName}',
+        values: { eventName: title },
+      });
   const randomHeadingId = useGeneratedHtmlId();
   const theme = useEuiTheme();
   const {
@@ -163,6 +193,16 @@ export const NotificationEvent: FunctionComponent<NotificationEventProps> = ({
             />
           ) : (
             <NotificationEventReadIcon id={id} isRead={isRead} eventName={title} />
+          )}
+          {typeof isPinned === 'boolean' && onPin && (
+            <EuiButtonIcon
+              iconType={isPinned ? 'pinFilled' : 'pin'}
+              color={isPinned ? 'primary' : 'text'}
+              aria-label={pinAria}
+              title={pinLabel}
+              onClick={() => onPin(id, isPinned)}
+              data-test-subj={`${id}-notificationEventPinButton`}
+            />
           )}
         </div>
       )}

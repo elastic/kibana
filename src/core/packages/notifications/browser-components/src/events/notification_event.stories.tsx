@@ -21,32 +21,48 @@ const meta: Meta<NotificationEventProps> = {
       options: ['info', 'warning', 'error'],
       control: { type: 'select' },
     },
-    isRead: {
-      control: { type: 'boolean' },
-      defaultValue: false,
-    },
+    isRead: { control: { type: 'boolean' } },
+    isPinned: { control: { type: 'boolean' } },
   },
 };
 
 export default meta;
 
-export const Event: StoryFn<NotificationEventProps> = (args) => (
+const baseArgs = {
+  id: '1234',
+  type: 'Report',
+  iconType: 'logoKibana',
+  iconAriaLabel: 'Kibana',
+  time: '1 min ago',
+  title: '[Error Monitoring Report] is generated',
+  primaryAction: 'Download',
+  primaryActionProps: { iconType: 'download' as const },
+  onClickPrimaryAction: () => {},
+  messages: ['The reported was generated at 17:12:16 GMT+4'],
+  onClickTitle: () => {},
+};
+
+const Template: StoryFn<NotificationEventProps> = (args) => (
   <EuiPanel paddingSize="none" hasShadow={true} style={{ maxWidth: '540px' }}>
-    <NotificationEvent
-      {...args}
-      id={'1234'}
-      type="Report"
-      iconType="logoKibana"
-      iconAriaLabel="Kibana"
-      time="1 min ago"
-      title="[Error Monitoring Report] is generated"
-      primaryAction="Download"
-      primaryActionProps={{
-        iconType: 'download',
-      }}
-      onClickPrimaryAction={() => {}}
-      messages={['The reported was generated at 17:12:16 GMT+4']}
-      onClickTitle={() => {}}
-    />
+    <NotificationEvent {...baseArgs} {...args} />
   </EuiPanel>
 );
+
+export const Event: StoryFn<NotificationEventProps> = Template.bind({});
+Event.args = { isRead: false };
+
+export const Pinned: StoryFn<NotificationEventProps> = Template.bind({});
+Pinned.args = {
+  isRead: false,
+  isPinned: true,
+  onRead: () => {},
+  onPin: () => {},
+};
+
+export const PinnedAndRead: StoryFn<NotificationEventProps> = Template.bind({});
+PinnedAndRead.args = {
+  isRead: true,
+  isPinned: true,
+  onRead: () => {},
+  onPin: () => {},
+};
