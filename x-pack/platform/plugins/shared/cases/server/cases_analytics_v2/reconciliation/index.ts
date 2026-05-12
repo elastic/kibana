@@ -138,3 +138,41 @@ export async function scheduleReconciliationTask({
     );
   }
 }
+
+/**
+ * Clears the reconciliation task's persisted state by removing and
+ * re-scheduling the task SO. The fresh task starts with `state: {}`, so the
+ * runner sees `last_run_at === undefined` and walks every case — exactly what
+ * the `/reset` endpoint needs after dropping and recreating the index.
+ *
+ * **Why remove + re-schedule** instead of mutating state in place? Task
+ * Manager's state-mutation APIs (`bulkUpdateState`, etc.) update the task
+ * SO atomically, but they fail if the SO is locked by an in-flight tick or
+ * doesn't exist yet. Remove + re-schedule is robust to both cases: missing
+ * task → recreated cleanly; in-flight tick → the running tick completes
+ * against the old state, the new task starts with empty state on its next
+ * tick. Idempotent: a missing task on remove is a no-op.
+ */
+export async function resetReconciliationTask({
+  taskManager,
+  logger,
+}: ScheduleReconciliationTaskArgs): Promise<void> {
+  try {
+    await taskManager.remove(RECONCILIATION_TASK_ID);
+  } catch (err) {
+    // 404 = task wasn't scheduled (first-ever reset, or task was manually
+    // deleted). Either way, our post-state ("no task with stale state") is
+    // already met — log at debug and proceed to re-schedule.
+    const status =
+      (err as { statusCode?: number })?.statusCode ??
+      (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    if (status !== 404) {
+      logger.warn(
+        `cases-analyticsV2: failed to remove reconciliation task during reset: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  }
+  await scheduleReconciliationTask({ taskManager, logger });
+}

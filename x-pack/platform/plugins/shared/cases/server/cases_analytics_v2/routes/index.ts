@@ -13,7 +13,11 @@ import {
   CASES_ANALYTICS_V2_STATE_URL,
   CASE_INDEX_NAME,
 } from '../constants';
-import { RECONCILIATION_TASK_ID, RECONCILIATION_TASK_TYPE } from '../reconciliation';
+import {
+  RECONCILIATION_TASK_ID,
+  RECONCILIATION_TASK_TYPE,
+  resetReconciliationTask,
+} from '../reconciliation';
 import { ensureCaseIndex } from '../ensure_indices/case';
 
 interface RegisterArgs {
@@ -190,15 +194,23 @@ export const registerCasesAnalyticsV2Routes = ({
         // Recreate via the same bootstrap used at plugin start.
         await ensureCaseIndex({ esClient, logger: log });
 
-        // Kick off an immediate reconciliation to populate the fresh index
-        // from the SO source of truth. If Task Manager isn't available
-        // (analyticsV2 disabled), we still report the reset succeeded — the
-        // index exists, ready for writes once the flag flips on.
+        // Kick off a follow-up reconciliation to repopulate the freshly
+        // emptied index from the SO source of truth.
+        //
+        // **Critical**: we must clear the task's persisted state first.
+        // Without this step, the next tick uses the existing `last_run_at`
+        // cursor and only walks cases updated since that timestamp — every
+        // case older than the cursor stays missing from the new index. The
+        // reset helper removes the task SO and re-schedules a fresh one with
+        // empty state, so the next tick sees no cursor and walks every case.
+        //
+        // If Task Manager isn't available (analyticsV2 disabled), we still
+        // report the reset succeeded — the index exists, ready for writes
+        // once the flag flips on.
         let reconcileResult: string | null = null;
         if (taskManager != null) {
           try {
-            // Pass the task **instance** id (not the type) — same as
-            // /reconcile/run_soon.
+            await resetReconciliationTask({ taskManager, logger: log });
             const result = await taskManager.runSoon(RECONCILIATION_TASK_ID);
             reconcileResult = result.id;
           } catch (err) {
