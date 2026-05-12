@@ -34,7 +34,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { ESQL_LANG_ID } from '@kbn/monaco';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import type { ComposeDiscoverState, ComposeDiscoverAction, SandboxTabConfig } from './types';
+import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
 import { useQueryExecution } from './use_query_execution';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { ComposeDiscoverChart } from './compose_discover_chart';
@@ -43,8 +43,6 @@ interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  /** Always `{ type: 'single' }` for now. */
-  tabConfig: SandboxTabConfig;
   onClose: () => void;
 }
 

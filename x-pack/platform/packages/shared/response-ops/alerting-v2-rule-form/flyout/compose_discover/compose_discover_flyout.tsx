@@ -28,7 +28,7 @@ import {
   mapFormValuesToUpdateRequest,
 } from '../../form/utils/rule_request_mappers';
 import type { ComposeDiscoverMode } from './types';
-import { useComposeDiscoverState, getStepTitles, getSandboxTabConfig } from './use_compose_discover_state';
+import { useComposeDiscoverState, getStepTitles } from './use_compose_discover_state';
 import { ComposeDiscoverForm } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 
@@ -116,7 +116,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const stepTitles = getStepTitles();
   const isLastStep = uiState.step === stepTitles.length - 1;
-  const tabConfig = getSandboxTabConfig(uiState);
 
   // Sync reducer-owned query fields into RHF whenever the user commits a query
   // from the Discover Sandbox. This bridges the gap between the two state systems
@@ -221,7 +220,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               state={uiState}
               dispatch={dispatch}
               services={services}
-              tabConfig={tabConfig}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
             />
           )}
