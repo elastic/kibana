@@ -361,7 +361,7 @@ describe('MarkdownEmbeddable', () => {
             const { title } = embeddableApi.serializeState();
             expect(title).toBe('cute puppies');
           } catch (error) {
-            // start_percentage_of_time_range assertion fails when
+            // title assertion fails when
             // anyStateChange$ emits on subscribe
             done(error);
             return;
