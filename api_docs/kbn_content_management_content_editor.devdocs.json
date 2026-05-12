@@ -10,7 +10,23 @@
         "tags": [],
         "label": "ContentEditorKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps to known dependency types."
+          "\nKibana-specific Provider that maps to known dependency types.\n\nSelf-provides every external context the editor needs so consumers can drop\nit into any provider tree without thinking about ancestry:\n\n- ",
+          {
+            "pluginId": "@kbn/content-management-content-editor",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-public.QueryClientProvider",
+            "text": "QueryClientProvider"
+          },
+          " — the inner body uses `useQueryClient()` to\n  forward the client into the system flyout it opens, so user-profile\n  queries inside the flyout work without an outer `QueryClientProvider`.\n- ",
+          {
+            "pluginId": "@kbn/content-management-content-editor",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentEditorPluginApi",
+            "section": "def-public.UserProfilesKibanaProvider",
+            "text": "UserProfilesKibanaProvider"
+          },
+          " — the inner body reads profile services\n  via `useUserProfilesServices()` for the same forwarding reason.\n\nWhen this provider is itself rendered under another `QueryClientProvider`\nor `UserProfilesProvider` (e.g. legacy `TableListViewKibanaProvider`), the\ninner providers shadow the outer with semantically equivalent values derived\nfrom the same `core` services, so nesting is harmless."
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
@@ -18,7 +34,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-        "lineNumber": 128,
+        "lineNumber": 159,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -36,7 +52,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-            "lineNumber": 130,
+            "lineNumber": 161,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -61,7 +77,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-        "lineNumber": 59,
+        "lineNumber": 76,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -79,7 +95,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-            "lineNumber": 59,
+            "lineNumber": 76,
             "columnNumber": 72,
             "deprecated": false,
             "trackAdoption": false,
@@ -280,7 +296,7 @@
         "label": "SavedObjectsReference",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-        "lineNumber": 34,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -293,7 +309,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-            "lineNumber": 35,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -306,7 +322,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-            "lineNumber": 36,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -319,7 +335,7 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx",
-            "lineNumber": 37,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

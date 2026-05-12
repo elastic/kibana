@@ -21,6 +21,7 @@
       "security",
       "encryptedSavedObjects",
       "workflowsManagement",
+      "workflowsExtensions",
       "expressions",
       "uiActions",
       "fieldFormats",
@@ -28,8 +29,9 @@
       "management",
       "kibanaUtils",
       "share",
-      "eventLog",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "maintenanceWindows",
+      "eventLog"
     ],
     "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
     "requiredBundles": ["alerting", "kibanaReact"],

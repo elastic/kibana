@@ -46,7 +46,7 @@ spec:
       #      - -c
       #      - >-
       #        mkdir -p /etc/elastic-agent/inputs.d &&
-      #        curl -sL https://github.com/elastic/elastic-agent/archive/9.5.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-9.5/deploy/kubernetes/elastic-agent-standalone/templates.d"
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/refs/tags/vVERSION.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-VERSION/deploy/kubernetes/elastic-agent-standalone/templates.d"
       #    volumeMounts:
       #      - name: external-inputs
       #        mountPath: /etc/elastic-agent/inputs.d

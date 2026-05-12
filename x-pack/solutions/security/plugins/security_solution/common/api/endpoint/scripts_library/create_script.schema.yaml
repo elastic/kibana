@@ -9,9 +9,7 @@ paths:
       operationId: EndpointScriptLibraryCreateScript
       description: Create a new script entry by uploading a script file
       x-codegen-enabled: false
-      x-labels: []
-#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-#      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
@@ -51,6 +49,18 @@ paths:
             application/json:
               schema:
                 $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+              examples:
+                CreateScriptEntrySuccess:
+                  summary: Create a script entry
+                  value:
+                    data:
+                      id: 1234567890
+                      name: Collect host data
+                      platform: [ linux, macos ]
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      description: Collects host data for investigation
+                      instructions: No arguments required
 
 components:
   x-codegen-enabled: false
