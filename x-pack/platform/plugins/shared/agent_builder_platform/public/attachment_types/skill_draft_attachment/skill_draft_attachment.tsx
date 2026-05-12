@@ -41,6 +41,8 @@ import {
  * just for one string).
  */
 const SKILLS_CREATE_API_PATH = '/api/agent_builder/skills';
+const AGENT_BUILDER_APP_ID = 'agent_builder';
+const SKILLS_MANAGE_PATH = '/manage/skills';
 
 const PREVIEW_MAX_LINES = 30;
 const PREVIEW_MAX_HEIGHT_PX = 240;
@@ -413,11 +415,10 @@ export const createSkillDraftAttachmentDefinition = ({
             label: editInManagementLabel,
             icon: 'pencil',
             type: ActionButtonType.PRIMARY,
-            handler: () => {
-              application.navigateToApp('agentBuilder', {
-                path: `/manage/skills/${skillId}`,
-              });
-            },
+            href: application.getUrlForApp(AGENT_BUILDER_APP_ID, {
+              path: `${SKILLS_MANAGE_PATH}/${skillId}`,
+            }),
+            target: '_blank',
           };
           actionButtons.push(editInManagementButton);
         } else {

@@ -105,8 +105,23 @@ export interface ActionButton {
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
   disabledReason?: string;
-  /** Handler function called when the button is clicked */
-  handler: () => void | Promise<void>;
+  /**
+   * Optional URL. When provided, the button renders as an anchor (`<a href>`)
+   * so it honors native browser behaviors like middle-click and cmd-click /
+   * "Open in new tab" from the context menu.
+   */
+  href?: string;
+  /**
+   * Optional anchor target. Use `'_blank'` to open in a new tab. Only applies
+   * when `href` is set; `rel="noopener noreferrer"` is added automatically for
+   * `_blank` targets.
+   */
+  target?: '_self' | '_blank' | '_parent' | '_top';
+  /**
+   * Handler function called when the button is clicked. Optional when `href`
+   * is set (browser navigation handles the action), required otherwise.
+   */
+  handler?: () => void | Promise<void>;
 }
 
 /**

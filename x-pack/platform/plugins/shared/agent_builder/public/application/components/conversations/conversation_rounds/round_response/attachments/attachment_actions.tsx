@@ -50,6 +50,17 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
     );
   }, []);
 
+  // Derive the navigation/click props for an EUI button. When `href` is set we
+  // render an anchor (so middle-click / cmd-click / "Open in new tab" all work
+  // natively); `rel="noopener noreferrer"` is added automatically for `_blank`
+  // targets.
+  const getNavProps = (button: ActionButton) => ({
+    href: button.href,
+    target: button.href ? button.target : undefined,
+    rel: button.href && button.target === '_blank' ? 'noopener noreferrer' : undefined,
+    onClick: button.handler,
+  });
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       {secondaryButtons.map((button) => (
@@ -60,8 +71,8 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
               color="text"
               size="s"
               iconType={button.icon}
-              onClick={button.handler}
               isDisabled={button.disabled}
+              {...getNavProps(button)}
             >
               {button.label}
             </EuiButtonEmpty>
@@ -76,8 +87,8 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
               color="text"
               size="s"
               iconType={button.icon}
-              onClick={button.handler}
               isDisabled={button.disabled}
+              {...getNavProps(button)}
             >
               {button.label}
             </EuiButton>
@@ -116,9 +127,13 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
                     icon: button.icon,
                     disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
+                    href: button.href,
+                    target: button.href ? button.target : undefined,
+                    rel:
+                      button.href && button.target === '_blank' ? 'noopener noreferrer' : undefined,
                     onClick: () => {
                       closePopover();
-                      button.handler();
+                      button.handler?.();
                     },
                   })),
                 },
