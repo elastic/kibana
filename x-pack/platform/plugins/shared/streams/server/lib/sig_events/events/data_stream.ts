@@ -20,6 +20,8 @@ export const eventsMappings = {
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
+    grouped_into: mappings.keyword(),
+    last_reviewed_at: mappings.date({ format: 'strict_date_optional_time' }),
     rule_names: mappings.keyword(),
     stream_names: mappings.keyword(),
     verdict_id: mappings.keyword(),
@@ -40,7 +42,7 @@ export type { SigEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     priority: 500,

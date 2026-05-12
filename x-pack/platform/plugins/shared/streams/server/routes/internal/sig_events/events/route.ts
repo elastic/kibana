@@ -6,10 +6,39 @@
  */
 
 import { sigEventSchema, type SigEvent } from '@kbn/streams-schema';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+
+const stringArrayFromQuery = z
+  .union([z.string().transform((value) => [value]), z.array(z.string())])
+  .optional();
+
+const eventSortEnum = z.enum([
+  '@timestamp:asc',
+  '@timestamp:desc',
+  'last_reviewed_at:asc',
+  'last_reviewed_at:desc',
+]);
+const eventSortFromQuery = z
+  .union([eventSortEnum.transform((value) => [value]), z.array(eventSortEnum)])
+  .optional();
+
+const eventsSearchQuery = z.object({
+  from: z.iso.datetime().optional(),
+  to: z.iso.datetime().optional(),
+  verdict: stringArrayFromQuery,
+  slug: stringArrayFromQuery,
+  exclude_slug: stringArrayFromQuery,
+  discovery_id: stringArrayFromQuery,
+  exclude_grouped: BooleanFromString.optional(),
+  last_reviewed_before: z.iso.datetime().optional(),
+  or_last_reviewed_lte: z.iso.datetime().optional(),
+  size: z.coerce.number().int().positive().optional(),
+  sort: eventSortFromQuery,
+});
 
 const eventsSearchRoute = createServerRoute({
   endpoint: 'GET /internal/sig_events/events',
@@ -24,10 +53,7 @@ const eventsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
-    }),
+    query: eventsSearchQuery,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: SigEvent[] }> => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });

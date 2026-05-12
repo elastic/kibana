@@ -12,6 +12,33 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
+const stringArrayFromQuery = z
+  .union([z.string().transform((value) => [value]), z.array(z.string())])
+  .optional();
+
+const detectionSortEnum = z.enum(['@timestamp:asc', '@timestamp:desc']);
+const detectionSortFromQuery = z
+  .union([detectionSortEnum.transform((value) => [value]), z.array(detectionSortEnum)])
+  .optional();
+
+const detectionsSearchQuery = z.object({
+  from: z.iso.datetime().optional(),
+  to: z.iso.datetime().optional(),
+  rule_uuid: stringArrayFromQuery,
+  rule_name: z.string().optional(),
+  stream_name: z.string().optional(),
+  silent: BooleanFromString.optional(),
+  superseded: BooleanFromString.optional(),
+  superseded_at: z
+    .object({
+      from: z.iso.datetime().optional(),
+      to: z.iso.datetime().optional(),
+    })
+    .optional(),
+  size: z.coerce.number().int().positive().optional(),
+  sort: detectionSortFromQuery,
+});
+
 const detectionsSearchRoute = createServerRoute({
   endpoint: 'GET /internal/sig_events/detections',
   options: {
@@ -25,23 +52,7 @@ const detectionsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
-      rule_uuid: z
-        .union([z.string().transform((value) => [value]), z.array(z.string())])
-        .optional(),
-      rule_name: z.string().optional(),
-      stream_name: z.string().optional(),
-      silent: BooleanFromString.optional(),
-      superseded: BooleanFromString.optional(),
-      superseded_at: z
-        .object({
-          from: z.iso.datetime().optional(),
-          to: z.iso.datetime().optional(),
-        })
-        .optional(),
-    }),
+    query: detectionsSearchQuery,
   }),
   handler: async ({
     params,
@@ -54,6 +65,36 @@ const detectionsSearchRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     return getDetectionClient().findLatest(params.query);
+  },
+});
+
+const detectionsLatestPerRuleRoute = createServerRoute({
+  endpoint: 'GET /internal/sig_events/detections/_latest_per_rule',
+  options: {
+    access: 'internal',
+    summary: 'Get latest detection per rule_uuid',
+    description:
+      'Search detection entities returning the latest derived state per rule_uuid (instead of per detection_id).',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: detectionsSearchQuery,
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ hits: Detection[] }> => {
+    const { getDetectionClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getDetectionClient().findLatestPerRule(params.query);
   },
 });
 
@@ -83,5 +124,6 @@ const detectionsBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsDetectionsRoutes = {
   ...detectionsSearchRoute,
+  ...detectionsLatestPerRuleRoute,
   ...detectionsBulkCreateRoute,
 };

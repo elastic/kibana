@@ -11,6 +11,24 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
+const stringArrayFromQuery = z
+  .union([z.string().transform((value) => [value]), z.array(z.string())])
+  .optional();
+
+const verdictSortEnum = z.enum(['@timestamp:asc', '@timestamp:desc']);
+const verdictSortFromQuery = z
+  .union([verdictSortEnum.transform((value) => [value]), z.array(verdictSortEnum)])
+  .optional();
+
+const verdictsSearchQuery = z.object({
+  from: z.iso.datetime().optional(),
+  to: z.iso.datetime().optional(),
+  verdict: stringArrayFromQuery,
+  prioritize_slug: stringArrayFromQuery,
+  size: z.coerce.number().int().positive().optional(),
+  sort: verdictSortFromQuery,
+});
+
 const verdictsSearchRoute = createServerRoute({
   endpoint: 'GET /internal/sig_events/verdicts',
   options: {
@@ -24,10 +42,7 @@ const verdictsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: z.object({
-      from: z.iso.datetime().optional(),
-      to: z.iso.datetime().optional(),
-    }),
+    query: verdictsSearchQuery,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: Verdict[] }> => {
     const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
@@ -35,6 +50,64 @@ const verdictsSearchRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     return getVerdictClient().findLatest(params.query);
+  },
+});
+
+const verdictsLatestPerSlugRoute = createServerRoute({
+  endpoint: 'GET /internal/sig_events/verdicts/_latest_per_slug',
+  options: {
+    access: 'internal',
+    summary: 'Get latest verdict per slug',
+    description:
+      'Search verdict entities returning the latest derived state per discovery_slug (instead of per verdict_id).',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: verdictsSearchQuery,
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: Verdict[] }> => {
+    const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getVerdictClient().findLatestPerSlug(params.query);
+  },
+});
+
+const verdictsReviewedSummaryRoute = createServerRoute({
+  endpoint: 'GET /internal/sig_events/verdicts/_reviewed_summary',
+  options: {
+    access: 'internal',
+    summary: 'Get reviewed discovery summary',
+    description:
+      'Return the distinct discovery_ids and discovery_slugs that have at least one verdict in the time window.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z.object({
+      from: z.iso.datetime().optional(),
+      to: z.iso.datetime().optional(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ reviewed_discovery_ids: string[]; reviewed_slugs: string[] }> => {
+    const { getVerdictClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return getVerdictClient().getReviewedSummary(params.query);
   },
 });
 
@@ -64,5 +137,7 @@ const verdictsBulkCreateRoute = createServerRoute({
 
 export const internalSigEventsVerdictsRoutes = {
   ...verdictsSearchRoute,
+  ...verdictsLatestPerSlugRoute,
+  ...verdictsReviewedSummaryRoute,
   ...verdictsBulkCreateRoute,
 };

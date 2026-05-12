@@ -12,6 +12,8 @@ export const discoverySchema = z.object({
   status: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  criticality: z.number().int().optional(),
+  grouped_into: z.string().optional(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
   grouped_discovery_ids: z.array(z.string()),

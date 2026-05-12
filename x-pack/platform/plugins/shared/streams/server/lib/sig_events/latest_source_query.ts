@@ -12,6 +12,12 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { type CommonSearchOptions } from './query_utils';
 
 export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+export type LatestSourceExpression = LatestSourceWhereCondition;
+
+export interface LatestSourceEvalColumn {
+  name: string;
+  expression: LatestSourceExpression;
+}
 
 interface RunLatestSourceEsqlQueryArgs {
   esClient: ElasticsearchClient;
@@ -19,7 +25,9 @@ interface RunLatestSourceEsqlQueryArgs {
   options: CommonSearchOptions;
   index: string;
   where?: LatestSourceWhereCondition;
+  evalColumns?: LatestSourceEvalColumn[];
   sort?: ComposerSortShorthand[];
+  limit?: number;
   groupBy: string;
 }
 
@@ -29,7 +37,9 @@ export const runLatestSourceEsqlQuery = async <T>({
   options,
   index,
   where,
+  evalColumns,
   sort,
+  limit,
   groupBy,
 }: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
   let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
@@ -46,6 +56,12 @@ export const runLatestSourceEsqlQuery = async <T>({
     query = query.where`${where}`;
   }
 
+  if (evalColumns?.length) {
+    for (const { name, expression } of evalColumns) {
+      query = query.pipe`EVAL ${esql.col(name)} = ${expression}`;
+    }
+  }
+
   // pick the latest events by group
   query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
     .where`@timestamp == latest_ts`;
@@ -59,6 +75,10 @@ export const runLatestSourceEsqlQuery = async <T>({
   }
 
   query = query.keep('_source');
+
+  if (limit !== undefined) {
+    query = query.limit(limit);
+  }
 
   const response = (await esClient.esql.query({
     query: query.print(),
