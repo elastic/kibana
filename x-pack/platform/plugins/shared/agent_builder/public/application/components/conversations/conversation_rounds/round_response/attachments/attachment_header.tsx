@@ -130,7 +130,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
           >
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
-                gutterSize="s"
+                gutterSize="xs"
                 alignItems="center"
                 responsive={false}
                 wrap
