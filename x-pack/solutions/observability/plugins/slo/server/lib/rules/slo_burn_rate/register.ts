@@ -87,6 +87,10 @@ export function sloBurnRateRuleType(
           description: sloErrorBudgetConsumedActionVariableDescription,
         },
         {
+          name: 'estimatedBudgetDepletion',
+          description: estimatedBudgetDepletionActionVariableDescription,
+        },
+        {
           name: 'grouping',
           description: groupingObjectActionVariableDescription,
         },
@@ -213,6 +217,14 @@ export const sloErrorBudgetConsumedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloErrorBudgetConsumedDescription',
   {
     defaultMessage: 'The consumed error budget at the time of firing the alert.',
+  }
+);
+
+export const estimatedBudgetDepletionActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.estimatedBudgetDepletionDescription',
+  {
+    defaultMessage:
+      'The estimated time until the error budget is fully depleted at the current burn rate.',
   }
 );
 

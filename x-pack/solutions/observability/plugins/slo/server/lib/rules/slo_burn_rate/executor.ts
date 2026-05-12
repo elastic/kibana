@@ -215,6 +215,11 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             sloStatus: sloSummary?.status ?? 'NO_DATA',
             sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
             sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
+            estimatedBudgetDepletion: computeEstimatedBudgetDepletion(
+              slo,
+              sloSummary?.errorBudgetRemaining ?? 1,
+              longWindowBurnRate
+            ),
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
             grouping: groupings,
           };
@@ -315,6 +320,49 @@ function buildReason(
       instanceId,
     },
   });
+}
+
+export function computeEstimatedBudgetDepletion(
+  slo: SLODefinition,
+  errorBudgetRemaining: number,
+  burnRate: number
+): string {
+  if (errorBudgetRemaining <= 0) {
+    return '0m';
+  }
+
+  if (burnRate <= 0 || !Number.isFinite(burnRate)) {
+    return '';
+  }
+
+  const timeWindowDurationMinutes = slo.timeWindow.duration.asMinutes();
+  const remainingMinutes = (errorBudgetRemaining * timeWindowDurationMinutes) / burnRate;
+
+  return formatDepletionTime(remainingMinutes);
+}
+
+export function formatDepletionTime(minutes: number): string {
+  if (minutes <= 0 || !Number.isFinite(minutes)) {
+    return '0m';
+  }
+
+  const roundedMinutes = Math.max(1, Math.ceil(minutes));
+  const days = Math.floor(roundedMinutes / (60 * 24));
+  const hours = Math.floor((roundedMinutes % (60 * 24)) / 60);
+  const remainingMinutes = roundedMinutes % 60;
+  const parts: string[] = [];
+
+  if (days > 0) {
+    parts.push(`${days}d`);
+  }
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (remainingMinutes > 0 || parts.length === 0) {
+    parts.push(`${remainingMinutes}m`);
+  }
+
+  return parts.join(' ');
 }
 
 function extractApmFieldsFromSLOSummary(

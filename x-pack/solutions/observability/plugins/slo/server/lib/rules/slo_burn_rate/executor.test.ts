@@ -57,7 +57,7 @@ import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
 import type { BurnRateAlert } from './executor';
-import { getRuleExecutor } from './executor';
+import { computeEstimatedBudgetDepletion, formatDepletionTime, getRuleExecutor } from './executor';
 import {
   generateAboveThresholdKey,
   generateBurnRateKey,
@@ -483,6 +483,7 @@ describe('BurnRateRuleExecutor', () => {
         context: expect.objectContaining({
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
+          estimatedBudgetDepletion: expect.any(String),
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo,asia. Alert when above 2 for both windows',
@@ -495,6 +496,7 @@ describe('BurnRateRuleExecutor', () => {
         context: expect.objectContaining({
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
+          estimatedBudgetDepletion: expect.any(String),
           burnRateThreshold: 2,
           reason:
             'CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar,asia. Alert when above 2 for both windows',
@@ -637,6 +639,7 @@ describe('BurnRateRuleExecutor', () => {
         context: expect.objectContaining({
           longWindow: { burnRate: 2.3, duration: '1h' },
           shortWindow: { burnRate: 2.1, duration: '5m' },
+          estimatedBudgetDepletion: expect.any(String),
           burnRateThreshold: 2,
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.3 and for the past 5m is 2.1 for foo. Alert when above 2 for both windows',
@@ -651,6 +654,7 @@ describe('BurnRateRuleExecutor', () => {
         context: expect.objectContaining({
           longWindow: { burnRate: 2.5, duration: '1h' },
           shortWindow: { burnRate: 2.2, duration: '5m' },
+          estimatedBudgetDepletion: expect.any(String),
           burnRateThreshold: 2,
           reason:
             'SUPPRESSED - CRITICAL: The burn rate for the past 1h is 2.5 and for the past 5m is 2.2 for bar. Alert when above 2 for both windows',
@@ -777,6 +781,7 @@ describe('BurnRateRuleExecutor', () => {
         context: expect.objectContaining({
           longWindow: { burnRate: 1.2, duration: '6h' },
           shortWindow: { burnRate: 1.9, duration: '30m' },
+          estimatedBudgetDepletion: '2d 8h',
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.2 and for the past 30m is 1.9 for foo. Alert when above 1 for both windows',
@@ -795,6 +800,7 @@ describe('BurnRateRuleExecutor', () => {
         context: expect.objectContaining({
           longWindow: { burnRate: 1.1, duration: '6h' },
           shortWindow: { burnRate: 1.5, duration: '30m' },
+          estimatedBudgetDepletion: '2d 13h 6m',
           burnRateThreshold: 1,
           reason:
             'HIGH: The burn rate for the past 6h is 1.1 and for the past 30m is 1.5 for bar. Alert when above 1 for both windows',
@@ -872,6 +878,34 @@ describe('BurnRateRuleExecutor', () => {
         }),
       });
     });
+  });
+});
+
+describe('estimated budget depletion formatting', () => {
+  it('formats depletion time in a friendly compact format', () => {
+    expect(formatDepletionTime(5)).toBe('5m');
+    expect(formatDepletionTime(242)).toBe('4h 2m');
+    expect(formatDepletionTime(3000)).toBe('2d 2h');
+  });
+
+  it('returns edge-case values for invalid depletion inputs', () => {
+    expect(formatDepletionTime(0)).toBe('0m');
+    expect(formatDepletionTime(Number.NaN)).toBe('0m');
+  });
+
+  it('computes estimated budget depletion from remaining budget and burn rate', () => {
+    const slo = createSLO();
+    expect(computeEstimatedBudgetDepletion(slo, 0.5, 5)).toBe('16h 48m');
+  });
+
+  it('returns safe fallback for non-positive burn rate', () => {
+    const slo = createSLO();
+    expect(computeEstimatedBudgetDepletion(slo, 0.5, 0)).toBe('');
+  });
+
+  it('returns already depleted when no error budget is left', () => {
+    const slo = createSLO();
+    expect(computeEstimatedBudgetDepletion(slo, 0, 2)).toBe('0m');
   });
 });
 
