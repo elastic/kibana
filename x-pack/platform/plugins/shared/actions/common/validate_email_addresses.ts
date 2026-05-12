@@ -93,11 +93,12 @@ function hasValidDomainLabels(domain: string): boolean {
   );
 }
 
-function hasValidLocalPart(local: string, rawAddress: string): boolean {
+function hasValidLocalPart(local: string, tokens: string): boolean {
   if (local.length === 0) return false;
   // The parser strips quotes, so "-foo"@example.com yields local="-foo".
-  // Skip hyphen checks for quoted local parts — they're RFC 5322 valid.
-  if (rawAddress.includes(`"${local}"@`)) return true;
+  // Check the per-mailbox tokens (not the full input) to avoid a quoted
+  // member in a group falsely bypassing the check for an unquoted member.
+  if (tokens.includes(`"${local}"@`)) return true;
   return !local.startsWith('-') && !local.endsWith('-');
 }
 
@@ -114,16 +115,18 @@ function validateEmailAddress_(
 
   for (const emailAddress of emailAddresses) {
     if (emailAddress.type === 'mailbox') {
+      const tokens = emailAddress.parts.address.tokens;
       if (
-        !hasValidLocalPart(emailAddress.local, address) ||
+        !hasValidLocalPart(emailAddress.local, tokens) ||
         !hasValidDomainLabels(emailAddress.domain)
       ) {
         return { address, valid: false, reason: InvalidEmailReason.invalid };
       }
     } else if (emailAddress.type === 'group') {
       for (const groupAddress of emailAddress.addresses) {
+        const tokens = groupAddress.parts.address.tokens;
         if (
-          !hasValidLocalPart(groupAddress.local, address) ||
+          !hasValidLocalPart(groupAddress.local, tokens) ||
           !hasValidDomainLabels(groupAddress.domain)
         ) {
           return { address, valid: false, reason: InvalidEmailReason.invalid };

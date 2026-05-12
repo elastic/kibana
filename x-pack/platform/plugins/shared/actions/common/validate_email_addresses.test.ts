@@ -533,6 +533,19 @@ describe('validate_email_address', () => {
         { address: 'Team: alice@example.com, bob@example.com;', valid: true },
       ]);
     });
+
+    test('rejects group with unquoted leading-hyphen member even if another member is quoted', () => {
+      const result = validateEmailAddresses(null, [
+        'Team: -alice@example.com, "-alice"@example.com;',
+      ]);
+      expect(result).toEqual([
+        {
+          address: 'Team: -alice@example.com, "-alice"@example.com;',
+          valid: false,
+          reason: InvalidEmailReason.invalid,
+        },
+      ]);
+    });
   });
 
   test('isAddressMatchingSomePattern', () => {
