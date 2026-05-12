@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -63,8 +63,8 @@ export const getAlertsTableEmbeddableFactory = (
       anyStateChange$: merge(
         timeRangeManager.anyStateChange$,
         titleManager.anyStateChange$,
-        tableConfig$
-      ).pipe(map(() => undefined)),
+        tableConfig$.pipe(skip(1), map(() => undefined))
+      ),
       serializeState,
       getComparators: () => ({
         ...titleComparators,

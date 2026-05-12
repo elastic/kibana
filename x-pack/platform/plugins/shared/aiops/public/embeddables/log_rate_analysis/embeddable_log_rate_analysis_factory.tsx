@@ -27,7 +27,7 @@ import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
 import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
@@ -79,8 +79,8 @@ export const getLogRateAnalysisEmbeddableFactory = (
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          logRateAnalysisControlsApi.dataViewId
-        ).pipe(map(() => undefined)),
+          logRateAnalysisControlsApi.dataViewId.pipe(skip(1), map(() => undefined))
+        ),
         getComparators: () => ({
           dataViewId: 'referenceEquality',
           ...timeRangeComparators,

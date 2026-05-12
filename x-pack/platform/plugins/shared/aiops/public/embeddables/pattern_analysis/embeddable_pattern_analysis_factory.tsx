@@ -24,7 +24,7 @@ import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
@@ -78,12 +78,12 @@ export const getPatternAnalysisEmbeddableFactory = (
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          patternAnalysisControlsApi.dataViewId,
-          patternAnalysisControlsApi.fieldName,
-          patternAnalysisControlsApi.minimumTimeRangeOption,
-          patternAnalysisControlsApi.randomSamplerMode,
-          patternAnalysisControlsApi.randomSamplerProbability
-        ).pipe(map(() => undefined)),
+          patternAnalysisControlsApi.dataViewId.pipe(skip(1), map(() => undefined)),
+          patternAnalysisControlsApi.fieldName.pipe(skip(1), map(() => undefined)),
+          patternAnalysisControlsApi.minimumTimeRangeOption.pipe(skip(1), map(() => undefined)),
+          patternAnalysisControlsApi.randomSamplerMode.pipe(skip(1), map(() => undefined)),
+          patternAnalysisControlsApi.randomSamplerProbability.pipe(skip(1), map(() => undefined))
+        ),
         getComparators: () => ({
           ...timeRangeComparators,
           ...titleComparators,
