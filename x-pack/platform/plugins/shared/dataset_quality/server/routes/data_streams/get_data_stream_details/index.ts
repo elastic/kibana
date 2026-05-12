@@ -145,10 +145,13 @@ async function getDataStreamSummaryStats(
 }> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const fieldCapsResponse = await esClient.fieldCaps({
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
     index: dataStream,
     fields: ['*'],
     include_unmapped: false,
+    index_filter: {
+      ...rangeQuery(start, end)[0],
+    },
   });
 
   const aggregatableHostFields = entityFields.filter((field) =>

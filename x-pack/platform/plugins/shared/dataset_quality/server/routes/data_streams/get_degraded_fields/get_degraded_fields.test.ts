@@ -25,12 +25,14 @@ describe('getDegradedFields', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
     search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
       search: jest.fn(),
+      fieldCaps: jest.fn(),
     };
     mockCreateDatasetQualityESClient.mockReturnValue(
       mockDatasetQualityESClient as unknown as ReturnType<typeof createDatasetQualityESClient>
@@ -42,13 +44,13 @@ describe('getDegradedFields', () => {
   });
 
   it('issues the search and maps degraded field buckets when _ignored is aggregatable', async () => {
-    esClient.fieldCaps.mockResolvedValue({
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
       fields: {
         _ignored: {
           _ignored: { type: '_ignored', aggregatable: true },
         },
       },
-    } as unknown as Awaited<ReturnType<typeof esClient.fieldCaps>>);
+    } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
 
     mockDatasetQualityESClient.search.mockResolvedValue({
       aggregations: {
@@ -78,10 +80,19 @@ describe('getDegradedFields', () => {
       dataStream: 'logs-foo-default',
     });
 
-    expect(esClient.fieldCaps).toHaveBeenCalledWith({
+    expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
       index: 'logs-foo-default',
       fields: ['_ignored'],
       include_unmapped: false,
+      index_filter: {
+        range: {
+          '@timestamp': {
+            gte: 1700000000000,
+            lte: 1700000120000,
+            format: 'epoch_millis',
+          },
+        },
+      },
     });
     expect(mockDatasetQualityESClient.search).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
@@ -101,13 +112,13 @@ describe('getDegradedFields', () => {
   });
 
   it('returns empty degradedFields and skips the search when _ignored is not aggregatable', async () => {
-    esClient.fieldCaps.mockResolvedValue({
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
       fields: {
         _ignored: {
           _ignored: { type: '_ignored', aggregatable: false },
         },
       },
-    } as unknown as Awaited<ReturnType<typeof esClient.fieldCaps>>);
+    } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
 
     const result = await getDegradedFields({
       esClient,
@@ -121,9 +132,9 @@ describe('getDegradedFields', () => {
   });
 
   it('returns empty degradedFields and skips the search when _ignored is unmapped', async () => {
-    esClient.fieldCaps.mockResolvedValue({
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
       fields: {},
-    } as unknown as Awaited<ReturnType<typeof esClient.fieldCaps>>);
+    } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
 
     const result = await getDegradedFields({
       esClient,

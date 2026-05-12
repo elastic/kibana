@@ -28,10 +28,13 @@ export async function getDegradedFields({
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   // _ignored is not always aggregatable, skip the search to avoid fielddata errors.
-  const fieldCapsResponse = await esClient.fieldCaps({
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
     index: dataStream,
     fields: [_IGNORED],
     include_unmapped: false,
+    index_filter: {
+      ...rangeQuery(start, end)[0],
+    },
   });
 
   if (!isFieldAggregatable(fieldCapsResponse, _IGNORED)) {

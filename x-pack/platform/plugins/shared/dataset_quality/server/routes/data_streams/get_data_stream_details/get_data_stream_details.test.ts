@@ -63,6 +63,7 @@ describe('getDataStreamDetails', () => {
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
     search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
@@ -70,6 +71,7 @@ describe('getDataStreamDetails', () => {
     mockESClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
       search: jest.fn(),
+      fieldCaps: jest.fn(),
     };
     esClient.asCurrentUser = mockESClient;
 
@@ -127,7 +129,7 @@ describe('getDataStreamDetails', () => {
       },
     } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
 
-    mockESClient.fieldCaps.mockResolvedValue({
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
       fields: {
         'host.name': {
           keyword: { type: 'keyword', aggregatable: true },
@@ -136,7 +138,7 @@ describe('getDataStreamDetails', () => {
           keyword: { type: 'keyword', aggregatable: true },
         },
       },
-    } as unknown as Awaited<ReturnType<typeof mockESClient.fieldCaps>>);
+    } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
   });
 
   afterEach(() => {
@@ -189,6 +191,21 @@ describe('getDataStreamDetails', () => {
           ['monitor', 'read_failure_store', 'manage_failure_store'],
           true
         );
+
+        expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
+          index: 'logs-test-default',
+          fields: ['*'],
+          include_unmapped: false,
+          index_filter: {
+            range: {
+              '@timestamp': {
+                gte: 1234567890,
+                lte: 1234567900,
+                format: 'epoch_millis',
+              },
+            },
+          },
+        });
       });
 
       it('throws when user lacks privileges', async () => {
@@ -249,7 +266,7 @@ describe('getDataStreamDetails', () => {
       });
 
       it('omits service.name agg when the field is not aggregatable (e.g. text without keyword)', async () => {
-        mockESClient.fieldCaps.mockResolvedValue({
+        mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
           fields: {
             'host.name': {
               keyword: { type: 'keyword', aggregatable: true },
@@ -258,7 +275,7 @@ describe('getDataStreamDetails', () => {
               text: { type: 'text', aggregatable: false },
             },
           },
-        } as unknown as Awaited<ReturnType<typeof mockESClient.fieldCaps>>);
+        } as unknown as Awaited<ReturnType<typeof mockDatasetQualityESClient.fieldCaps>>);
 
         mockDatasetQualityESClient.search.mockResolvedValue({
           aggregations: {
