@@ -40,6 +40,21 @@ describe('computeOldValues', () => {
     expect(patch).toEqual({ tags: ['x', 'y'] });
   });
 
+  it('emits the entire previous array when items order does not match', () => {
+    const current = [{ foo: 'bar' }, 20];
+    const prev = [20, { foo: 'bar' }];
+
+    const patch = computeOldValues(
+      asRule({
+        threat: current,
+      }),
+      asRule({
+        threat: prev,
+      })
+    );
+    expect(patch).toEqual({ threat: prev });
+  });
+
   it('emits `null` for keys present in current but missing in previous (addition)', () => {
     const patch = computeOldValues(asRule({ name: 'a', interval: '5m' }), asRule({ name: 'a' }));
     expect(patch).toEqual({ interval: null });
