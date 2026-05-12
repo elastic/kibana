@@ -8,11 +8,21 @@
  */
 
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import {
+  AI_CLASSIFY_FEATURE_ID,
+  AI_PROMPT_FEATURE_ID,
+  AI_SUMMARIZE_FEATURE_ID,
+  WORKFLOWS_AI_PARENT_FEATURE_ID,
+  WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
+} from './ai_feature_ids';
 
-export const WORKFLOWS_AI_PARENT_FEATURE_ID = 'workflows_ai';
-export const AI_PROMPT_FEATURE_ID = 'ai.prompt';
-export const AI_SUMMARIZE_FEATURE_ID = 'ai.summarize';
-export const AI_CLASSIFY_FEATURE_ID = 'ai.classify';
+export {
+  AI_CLASSIFY_FEATURE_ID,
+  AI_PROMPT_FEATURE_ID,
+  AI_SUMMARIZE_FEATURE_ID,
+  WORKFLOWS_AI_PARENT_FEATURE_ID,
+  WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
+} from './ai_feature_ids';
 
 export const registerInferenceFeatures = (
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup
@@ -22,7 +32,7 @@ export const registerInferenceFeatures = (
     featureName: 'Workflows AI',
     featureDescription: 'AI models used for Workflows AI steps',
     taskType: 'chat_completion',
-    recommendedEndpoints: [],
+    recommendedEndpoints: WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
   });
 
   searchInferenceEndpoints.features.register({
@@ -31,7 +41,7 @@ export const registerInferenceFeatures = (
     featureName: 'AI Prompt step',
     featureDescription: 'AI model used for the ai.prompt workflow step',
     taskType: 'chat_completion',
-    recommendedEndpoints: [],
+    recommendedEndpoints: WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
   });
 
   searchInferenceEndpoints.features.register({
@@ -40,7 +50,7 @@ export const registerInferenceFeatures = (
     featureName: 'AI Summarize step',
     featureDescription: 'AI model used for the ai.summarize workflow step',
     taskType: 'chat_completion',
-    recommendedEndpoints: [],
+    recommendedEndpoints: WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
   });
 
   searchInferenceEndpoints.features.register({
@@ -49,6 +59,6 @@ export const registerInferenceFeatures = (
     featureName: 'AI Classify step',
     featureDescription: 'AI model used for the ai.classify workflow step',
     taskType: 'chat_completion',
-    recommendedEndpoints: [],
+    recommendedEndpoints: WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
   });
 };

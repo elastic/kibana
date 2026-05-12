@@ -18,6 +18,7 @@ import {
 import { AiSummarizeStepCommonDefinition } from '../../../../common/steps/ai';
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+import { AI_SUMMARIZE_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiSummarizeStepDefinition = (
@@ -32,7 +33,7 @@ export const aiSummarizeStepDefinition = (
         context.config['connector-id'],
         inference,
         context.contextManager.getFakeRequest(),
-        { featureId: 'ai.summarize', searchInferenceEndpoints }
+        { featureId: AI_SUMMARIZE_FEATURE_ID, searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({

@@ -22,6 +22,7 @@ import {
 } from '../../../../common/steps/ai';
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+import { AI_CLASSIFY_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiClassifyStepDefinition = (
@@ -36,7 +37,7 @@ export const aiClassifyStepDefinition = (
         context.config['connector-id'],
         inference,
         context.contextManager.getFakeRequest(),
-        { featureId: 'ai.classify', searchInferenceEndpoints }
+        { featureId: AI_CLASSIFY_FEATURE_ID, searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({

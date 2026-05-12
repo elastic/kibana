@@ -11,6 +11,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import { createServerStepDefinition } from '../../../step_registry/types';
 import type { WorkflowsExtensionsServerPluginStartDeps } from '../../../types';
+import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
 import { resolveConnectorId } from '../utils/resolve_connector_id';
 
 export const aiPromptStepDefinition = (
@@ -25,7 +26,7 @@ export const aiPromptStepDefinition = (
         context.config['connector-id'],
         inference,
         context.contextManager.getFakeRequest(),
-        { featureId: 'ai.prompt', searchInferenceEndpoints }
+        { featureId: AI_PROMPT_FEATURE_ID, searchInferenceEndpoints }
       );
 
       const chatModel = await inference.getChatModel({
