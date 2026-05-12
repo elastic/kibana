@@ -471,7 +471,7 @@ export const alertDelaySchema = schema.object(
   },
   {
     meta: {
-      id: 'alert_delay',
+      id: 'rule_alert_delay',
       description:
         'Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.',
     },
