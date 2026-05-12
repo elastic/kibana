@@ -14,7 +14,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import type { Status } from '../../../../../common/api/detection_engine';
-import { AddExceptionFlyoutContent } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import {
   ADD_ENDPOINT_EXCEPTION,
   CREATE_RULE_EXCEPTION,
@@ -23,7 +23,7 @@ import type { AlertData } from '../../../../detection_engine/rule_exceptions/uti
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { EndpointExceptionContent } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exception_content';
+import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
 import { ADD_RULE_EXCEPTION_LOADING_TEST_ID } from './test_ids';
 
@@ -56,7 +56,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
 
     const ruleId = useMemo(() => {
       const value = getFieldValue(hit, ALERT_RULE_UUID);
-      return (Array.isArray(value) ? value[0] : value) as string | undefined;
+      return (Array.isArray(value) ? value[0] : value) as string;
     }, [hit]);
     const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
     const rules = useMemo<Rule[] | null>(() => (maybeRule ? [maybeRule] : null), [maybeRule]);
@@ -102,7 +102,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
             <EuiSkeletonText lines={4} />
           </EuiFlyoutBody>
         ) : renderEndpointExceptionContent ? (
-          <EndpointExceptionContent
+          <EndpointExceptionsFlyout
             rules={rules}
             alertData={alertData}
             isAlertDataLoading={false}
@@ -111,7 +111,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
             onConfirm={onConfirm}
           />
         ) : (
-          <AddExceptionFlyoutContent
+          <AddExceptionFlyout
             rules={rules}
             isEndpointItem={isEndpointItem}
             alertData={alertData}
