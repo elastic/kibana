@@ -62,7 +62,7 @@ const samplesSchema = z
     }),
     z.object({
       source: z.literal('inline'),
-      documents: z.array(z.record(z.string(), z.unknown())),
+      documents: z.array(z.record(z.string(), z.unknown())).max(500),
       status: z.enum(['processed', 'unprocessed']),
     }),
   ])

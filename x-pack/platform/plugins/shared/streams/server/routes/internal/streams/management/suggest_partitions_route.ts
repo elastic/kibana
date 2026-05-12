@@ -38,17 +38,40 @@ export interface SuggestPartitionsParams {
   };
 }
 
+/**
+ * Outer cap on the [start, end] window the caller can request. The inner
+ * `partitionStream` workflow does its own 7-day clamp on the *effective*
+ * clustering window (anchored at the latest unrouted document), but it
+ * still issues 1-2 ES aggregation queries against the user-supplied range
+ * to discover that anchor. Without an outer cap, an adversarial caller
+ * (this is an internal route under the broad `read` privilege) could pin
+ * `end - start` to e.g. epoch-since-1970, forcing those discovery queries
+ * over arbitrary spans. One year is far wider than any legitimate UI
+ * picker would produce and still leaves comfortable headroom for backfill
+ * scenarios.
+ */
+const MAX_WINDOW_MS = 365 * 24 * 60 * 60 * 1000;
+
 export const suggestPartitionsSchema = z.object({
   path: z.object({ name: z.string() }),
-  body: z.object({
-    connector_id: z.string(),
-    start: z.number(),
-    end: z.number(),
-    user_prompt: z.string().max(2000).optional(),
-    previous_suggestions: z
-      .array(z.object({ name: z.string(), condition: conditionSchema }))
-      .optional(),
-  }),
+  body: z
+    .object({
+      connector_id: z.string(),
+      start: z.number().int().nonnegative(),
+      end: z.number().int().nonnegative(),
+      user_prompt: z.string().max(2000).optional(),
+      previous_suggestions: z
+        .array(z.object({ name: z.string(), condition: conditionSchema }))
+        .optional(),
+    })
+    .refine(({ start, end }) => start < end, {
+      message: '`start` must be strictly less than `end`',
+      path: ['end'],
+    })
+    .refine(({ start, end }) => end - start <= MAX_WINDOW_MS, {
+      message: `time window (\`end - start\`) must not exceed ${MAX_WINDOW_MS}ms (~365 days)`,
+      path: ['end'],
+    }),
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
 type SuggestPartitionsResponse = Observable<
