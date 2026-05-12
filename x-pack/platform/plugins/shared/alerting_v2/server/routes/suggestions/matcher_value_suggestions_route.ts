@@ -19,9 +19,7 @@ import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestion
 
 const suggestionsBodySchema = z.object({
   field: z.string().min(1).max(256).describe('The field to suggest values for.'),
-  query: z.string().max(256).describe('Optional search query for filtering suggestions.'),
-  filters: z.array(z.any()).optional().describe('Optional filter clauses to scope suggestions'),
-  field_meta: z.any().optional().describe('Optional field metadata for suggestion behavior'),
+  query: z.string().max(1024).describe('Optional search query for filtering suggestions.'),
 });
 
 type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
