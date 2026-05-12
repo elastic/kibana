@@ -70,7 +70,8 @@
     "@kbn/apm-utils",
     "@kbn/std",
     "@kbn/core-elasticsearch-server",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }
