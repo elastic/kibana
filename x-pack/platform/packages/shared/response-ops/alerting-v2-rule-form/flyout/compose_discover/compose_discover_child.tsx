@@ -254,7 +254,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         {hasRun && !isLoading && !isError && (
           <div style={{ padding: '4px 16px' }}>
             <EuiText size="xs" color="subdued">
-              {totalRowCount.toLocaleString()} row{totalRowCount !== 1 ? 's' : ''} returned
+              {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
             </EuiText>
           </div>
         )}
@@ -314,7 +314,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {totalRowCount} {totalRowCount === 1 ? 'row' : 'rows'}
+                  {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
