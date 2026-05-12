@@ -93,10 +93,7 @@ export abstract class FieldFormat {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
-    // format a single item as text fallback
-    const formatted = this.textConvert
-      ? this.textConvert(val, options)
-      : asPrettyString(val, options);
+    const formatted = this.convertToText(val, options);
     const fieldName = options?.field?.name;
     const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
     // getHighlightReact expects a string; guard against edge cases where convert() returns non-string

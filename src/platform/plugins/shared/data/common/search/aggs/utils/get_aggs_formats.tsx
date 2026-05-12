@@ -166,7 +166,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return this.getCachedFormat(this._params as SerializedFieldFormat<{}, SerializableRecord>);
       }
 
-      convertToText = (val: unknown) => {
+      textConvert = (val: unknown) => {
         return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convertToText(val);
       };
 
@@ -198,7 +198,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return String(this._params.separator ?? ' › ');
       }
 
-      convertToText = (val: unknown) => {
+      textConvert = (val: unknown) => {
         const otherLabel = this.getSpecialBucketLabel(val);
         if (otherLabel) return otherLabel;
 

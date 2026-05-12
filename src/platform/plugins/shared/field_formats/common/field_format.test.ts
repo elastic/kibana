@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable max-classes-per-file -- needs TestFormat (generic test double) + ConvertOverrideFormat (tests convertToText/textConvert override path, as used by AggsTermsFieldFormat) */
+/* eslint-disable max-classes-per-file -- needs TestFormat (generic test double) + ConvertOverrideFormat (tests textConvert override path, as used by AggsTermsFieldFormat) */
 
 import React from 'react';
 import ReactDOM from 'react-dom/server';
@@ -193,11 +193,11 @@ describe('FieldFormat class', () => {
         ).toBe('lorem ipsum');
       });
 
-      describe('for formatters that override convertToText (mimics AggsTermsFieldFormat)', () => {
+      describe('for formatters that override textConvert (mimics AggsTermsFieldFormat)', () => {
         class ConvertOverrideFormat extends FieldFormat {
           static id = 'convert-override-format';
           static title = 'Convert Override Format';
-          convertToText = (val: unknown) => `formatted:${val}`;
+          textConvert = (val: unknown) => `formatted:${val}`;
         }
 
         test('wraps matched text in <mark> via convertToReact when highlights are present', () => {
