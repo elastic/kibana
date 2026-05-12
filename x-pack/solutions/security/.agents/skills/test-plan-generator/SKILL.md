@@ -28,7 +28,7 @@ If the user is not available and the information cannot be found in any source, 
 
 ## Execution constraints
 
-**Sequential only — no parallel calls.** Execute every tool call one at a time. Wait for each to complete before making the next. This applies throughout the entire skill: `gh` CLI, GitHub MCP, Figma MCP, Google Drive MCP, filesystem reads.
+**MCP calls run sequentially — other tools may run in parallel.** Never issue parallel calls to MCP tools (GitHub MCP, Figma MCP, Google Drive MCP): Cursor's MCP layer has a known race condition where concurrent MCP invocations cause the session to hang. Wait for each MCP response before issuing the next, even across different MCP servers. All other tools — `gh` CLI, filesystem reads, shell, image fetches — may run in parallel where the workflow benefits from it (e.g. fetching multiple sub-issues with `gh` at once).
 
 **Read reference files only when explicitly instructed.** Each file in `references/` is read at the exact point in the workflow where it is needed — never speculatively at the start of a session.
 
