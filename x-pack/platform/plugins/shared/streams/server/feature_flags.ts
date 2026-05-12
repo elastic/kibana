@@ -12,7 +12,6 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
@@ -39,7 +38,7 @@ const sigEventsTuningConfigSchema = schema.object(
     diverse_ratio: schema.number({ min: 0, max: 1 }),
     max_excluded_features_in_prompt: schema.number({ min: 0, max: 50 }),
     max_entity_filters: schema.number({ min: 1, max: 50 }),
-    semantic_min_score: schema.number({ min: 0, max: 100 }),
+    semantic_min_score: schema.number({ min: 0, max: 1 }),
     rrf_rank_constant: schema.number({ min: 1, max: 100 }),
   },
   {
@@ -235,21 +234,6 @@ export function registerFeatureFlags(
       value: false,
       description: i18n.translate('xpack.streams.streamsContentPacksSettingsDescription', {
         defaultMessage: 'Enable Streams content packs.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-    },
-    [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.streamsAttachmentsSettingsName', {
-        defaultMessage: 'Streams attachments',
-      }),
-      value: false,
-      description: i18n.translate('xpack.streams.streamsAttachmentsSettingsDescription', {
-        defaultMessage: 'Enable Streams attachments tab.',
       }),
       type: 'boolean',
       schema: schema.boolean(),

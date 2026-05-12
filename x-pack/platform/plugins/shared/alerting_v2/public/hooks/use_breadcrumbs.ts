@@ -92,6 +92,9 @@ export function useBreadcrumbs(
           }),
         ];
         break;
+      case 'rule_doctor':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rule_doctor') }];
+        break;
       default:
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
     }

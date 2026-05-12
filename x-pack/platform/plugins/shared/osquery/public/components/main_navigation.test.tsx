@@ -32,9 +32,6 @@ jest.mock('../common/lib/kibana', () => ({
           },
         },
       },
-      notifications: {
-        feedback: { isEnabled: () => false },
-      },
     },
   }),
   useRouterNavigate: (path: string) => ({ onClick: jest.fn(), href: path }),

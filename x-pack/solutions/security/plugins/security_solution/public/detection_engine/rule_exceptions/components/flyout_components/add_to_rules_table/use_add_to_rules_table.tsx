@@ -29,13 +29,9 @@ export const useAddToRulesTable = ({
   onRuleSelectionChange,
 }: ExceptionsAddToRulesComponentProps) => {
   const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
-    filterOptions: {
-      filter: '',
-      showCustomRules: false,
-      showElasticRules: false,
-      tags: [],
-    },
-    sortingOptions: undefined,
+    filter: '',
+    sort_field: 'enabled',
+    sort_order: 'desc',
     pagination: {
       page: 1,
       perPage: 10000,

@@ -35,6 +35,14 @@ export * from './src/playwright/eui_components';
 // Kibana-wide components
 export * from './src/playwright/ui_components';
 
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+} from './src/playwright/page_objects';
+export type { ContentListUrlState } from './src/playwright/page_objects';
+
 // Scout core types
 export type {
   ScoutPlaywrightOptions,
@@ -50,6 +58,9 @@ export type {
 // Fixture types
 export type {
   ApiServicesFixture,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
@@ -64,6 +75,7 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';

@@ -52,6 +52,7 @@ import {
   FieldPassword,
   Checkbox,
   ComboBox,
+  LocationsComboBox,
   Select,
   Switch,
   Source,
@@ -428,7 +429,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: ComboBox,
+    component: LocationsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),

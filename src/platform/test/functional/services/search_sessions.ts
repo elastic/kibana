@@ -58,6 +58,11 @@ export class SearchSessionsService extends FtrService {
   }: { searchSessionName?: string; isSubmitButton?: boolean; withRefresh?: boolean } = {}) {
     this.log.debug('save the search session');
     if (withRefresh) {
+      // The button might be in the cancel or loading state, in those cases we won't be able to find the test subject, so we wait for it to be present.
+      await this.retry.waitFor('refresh button to be present', async () => {
+        return await this.testSubjects.exists('querySubmitButton');
+      });
+
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('querySubmitButton');
     }
 
@@ -92,6 +97,11 @@ export class SearchSessionsService extends FtrService {
     if (!successToast) return;
     const closeBtn = await successToast.findByTestSubject('toastCloseButton');
     await closeBtn.click();
+
+    await this.retry.waitFor('success toast to be dismissed', async () => {
+      const _successToast = await this.getSuccessToast();
+      return !_successToast;
+    });
   }
 
   private async getSuccessToast() {
@@ -135,6 +145,33 @@ export class SearchSessionsService extends FtrService {
 
   public async expectManagementTable() {
     await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
+  }
+
+  public async expectNoErrorsOrWarnings() {
+    expect(await this.hasErrorsOrWarnings()).to.be(false);
+  }
+
+  public async hasErrorsOrWarnings() {
+    const messages = [
+      // Warnings
+      'Your background search is still running',
+      // Errors
+      'Timed out',
+      'Search Error',
+      'Cannot retrieve search results',
+      'Unable to connect to the Kibana server',
+      'Failed to edit name of the background search',
+      'Failed to fetch background search info',
+    ];
+
+    const toasts = await this.toasts.getAll();
+    for (const toast of toasts) {
+      const text = await toast.getVisibleText();
+      if (messages.some((message) => text.includes(message))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /*

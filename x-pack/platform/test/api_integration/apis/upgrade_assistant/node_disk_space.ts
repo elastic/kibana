@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   describe.skip('Node disk space', function () {
     describe('GET /api/upgrade_assistant/node_disk_space', () => {
       it('returns an array of nodes', async () => {

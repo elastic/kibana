@@ -328,7 +328,7 @@
         "signature": [
           "({\n  adjustTimeout,\n  kibana = {},\n  enableCPS = false,\n  esArgs = [],\n  projectType = DEFAULT_PROJECT_TYPE,\n  kibanaUrl = DEFAULT_KIBANA_URL,\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
           "CliArgs",
-          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; enableCPS?: boolean | undefined; esArgs?: string[] | undefined; projectType?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; kibanaUrl?: string | undefined; }) => ",
+          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; enableCPS?: boolean | undefined; esArgs?: string[] | undefined; projectType?: \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | undefined; kibanaUrl?: string | undefined; }) => ",
           "TestServerlessUtils"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
@@ -454,7 +454,7 @@
                   "\nThe serverless project type to run (`yarn es serverless --projectType`).\n\nDefaults to `es` for existing tests."
                 ],
                 "signature": [
-                  "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
+                  "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
                 "lineNumber": 81,

@@ -11,13 +11,13 @@ import {
   INTERNAL_API_ACCESS,
   EVALUATIONS_INDEX_PATTERN,
   MAX_SCORES_PER_QUERY,
-  buildRouteValidationWithZod,
   buildDatasetExampleScoresQuery,
   SCORES_SORT_ORDER,
   GetEvaluationRunDatasetExamplesRequestParams,
   type EvaluationScoreDocument,
   type GetEvaluationRunDatasetExamplesResponse,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 

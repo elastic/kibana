@@ -21,8 +21,7 @@ const WIRED_STREAM = 'logs.otel';
  * The StreamDescription and StreamDiscoveryConfiguration components should not
  * render when the license doesn't support significant events features.
  */
-// Failing: See https://github.com/elastic/kibana/issues/263153
-test.describe.skip('Advanced tab with basic license', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Advanced tab with basic license', { tag: [...tags.stateful.classic] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient, apiServices }) => {
     // Generate logs to create a classic stream
     await generateLogsData(logsSynthtraceEsClient)({ index: CLASSIC_STREAM });
