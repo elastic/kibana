@@ -10,6 +10,7 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
+  StoreStatus,
 } from '../../../constants/entity_analytics';
 
 const ENTITY_STORE_ENGINES_URL = '/api/entity_store/engines';
@@ -35,7 +36,7 @@ export interface EntityAnalyticsApiService {
   getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
   getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatus: (
-    expectedStatus: 'running',
+    expectedStatus: StoreStatus,
     timeoutMs?: number
   ) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
@@ -158,7 +159,7 @@ export const getEntityAnalyticsApiService = ({
       );
     },
 
-    waitForEntityStoreStatus: async (expectedStatus: 'running', timeoutMs: number = 60000) => {
+    waitForEntityStoreStatus: async (expectedStatus: StoreStatus, timeoutMs: number = 60000) => {
       return measurePerformanceAsync(
         log,
         `security.entityAnalytics.waitForEntityStoreStatus [${expectedStatus}]`,

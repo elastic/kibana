@@ -49,7 +49,7 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock('../../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
