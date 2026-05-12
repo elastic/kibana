@@ -9,7 +9,7 @@
 
 import { pick } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
@@ -70,7 +70,7 @@ export const getESQLControlFactory = <
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: selections.anyStateChange$,
+        anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
             ...getSelectionComparators(state.control_type),
