@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextBlockTruncate,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +26,7 @@ import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachmen
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   CASE_ATTACHMENT_TYPE,
-  type CaseAttachmentData,
+  CaseAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
 import { SeverityBadge } from './severity_badge';
 import { CaseMetaRow } from './case_meta_row';
@@ -93,6 +94,7 @@ const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label,
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+DetailRow.displayName = 'DetailRow';
 
 export type CaseAttachment = Attachment<typeof CASE_ATTACHMENT_TYPE, CaseAttachmentData>;
 
@@ -136,7 +138,7 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
     <EuiPanel hasBorder paddingSize="m" data-test-subj="case-attachment-inline">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="casesApp" />
+          <EuiIcon type="casesApp" aria-hidden />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
@@ -195,59 +197,23 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
       {data.description && !expanded && (
         <>
           <EuiSpacer size="s" />
-          <EuiText
-            size="s"
-            color="subdued"
-            css={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {data.description}
-          </EuiText>
+          <EuiTextBlockTruncate lines={2}>
+            <EuiText size="s" color="subdued">
+              {data.description}
+            </EuiText>
+          </EuiTextBlockTruncate>
         </>
       )}
 
       {expanded && (
         <>
           <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {data.description && (
-              <EuiFlexItem>
-                <DetailRow
-                  label={i18nStrings.description}
-                  value={<span style={{ whiteSpace: 'pre-wrap' }}>{data.description}</span>}
-                />
-              </EuiFlexItem>
-            )}
-            {data.category && (
-              <EuiFlexItem>
-                <DetailRow label={i18nStrings.category} value={data.category} />
-              </EuiFlexItem>
-            )}
-            {createdAt && (
-              <EuiFlexItem>
-                <DetailRow label={i18nStrings.created} value={createdAt} />
-              </EuiFlexItem>
-            )}
-            {updatedAt && (
-              <EuiFlexItem>
-                <DetailRow label={i18nStrings.updated} value={updatedAt} />
-              </EuiFlexItem>
-            )}
-            {hasObservablesCount && (
-              <EuiFlexItem>
-                <DetailRow label={i18nStrings.observables} value={String(data.total_observables)} />
-              </EuiFlexItem>
-            )}
-            {data.connector_name && (
-              <EuiFlexItem>
-                <DetailRow label={i18nStrings.connector} value={data.connector_name} />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <CaseInlineExpandedContent
+            attachment={attachment}
+            createdAt={createdAt}
+            updatedAt={updatedAt}
+            hasObservablesCount={hasObservablesCount}
+          />
         </>
       )}
 
@@ -268,6 +234,55 @@ const CaseInlineContent: React.FC<InlineContentProps> = ({ attachment, applicati
     </EuiPanel>
   );
 };
+CaseInlineContent.displayName = 'CaseInlineContent';
+
+const CaseInlineExpandedContent: React.FC<
+  Pick<InlineContentProps, 'attachment'> & {
+    createdAt: string | null;
+    updatedAt: string | null;
+    hasObservablesCount: boolean;
+  }
+> = ({ attachment, createdAt, updatedAt, hasObservablesCount }) => {
+  const data = attachment.data;
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {data.description && (
+        <EuiFlexItem>
+          <DetailRow
+            label={i18nStrings.description}
+            value={<span style={{ whiteSpace: 'pre-wrap' }}>{data.description}</span>}
+          />
+        </EuiFlexItem>
+      )}
+      {data.category && (
+        <EuiFlexItem>
+          <DetailRow label={i18nStrings.category} value={data.category} />
+        </EuiFlexItem>
+      )}
+      {createdAt && (
+        <EuiFlexItem>
+          <DetailRow label={i18nStrings.created} value={createdAt} />
+        </EuiFlexItem>
+      )}
+      {updatedAt && (
+        <EuiFlexItem>
+          <DetailRow label={i18nStrings.updated} value={updatedAt} />
+        </EuiFlexItem>
+      )}
+      {hasObservablesCount && (
+        <EuiFlexItem>
+          <DetailRow label={i18nStrings.observables} value={String(data.total_observables)} />
+        </EuiFlexItem>
+      )}
+      {data.connector_name && (
+        <EuiFlexItem>
+          <DetailRow label={i18nStrings.connector} value={data.connector_name} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};
+CaseInlineExpandedContent.displayName = 'CaseInlineExpandedContent';
 
 export const createCaseInlineContent = ({ application }: Services) => {
   const Wrapped: React.FC<AttachmentRenderProps<CaseAttachment>> = (props) => (
