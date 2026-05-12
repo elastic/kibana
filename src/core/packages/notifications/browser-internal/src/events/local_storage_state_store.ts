@@ -9,6 +9,7 @@
 
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type {
+  NotificationEvent,
   NotificationStateScope,
   NotificationStateStore,
 } from '@kbn/core-notifications-browser';
@@ -18,24 +19,25 @@ import type {
  *
  * This is a stopgap until `core.userStorage` browser-side hooks ship (see RFC:
  * `core.userStorage` / Per-User Storage in Kibana). When that lands, this file
- * is deleted and replaced by a `UserStorageNotificationStateStore` adapter; the
- * only other change is one line in `NotificationsService.start()` to swap the
- * constructor.
+ * is deleted and replaced by a `UserStorageNotificationStateStore` adapter;
+ * the only other change is one line in `NotificationsService.start()` to swap
+ * the constructor.
  *
  * The interface is intentionally shape-aligned with `core.userStorage` (sync
- * `get`, observable `get$`, async `set`, `preload` for backend pre-fetch).
+ * getters, async writes).
  */
 
 const KEY_PREFIX = 'core.notifications.events';
+const EVENTS_KEY = `${KEY_PREFIX}.events`;
 
 /**
- * Defensive validation for spaceIds. We never trust caller input to be safe in
- * a localStorage key (and the future userStorage backend has its own
+ * Defensive validation for spaceIds. We never trust caller input to be safe
+ * in a localStorage key (and the future userStorage backend has its own
  * registration-time validation). Only allow alphanumerics, `_`, and `-`.
  */
 const SPACE_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
-function buildKey(scope: NotificationStateScope, kind: 'readIds' | 'pinnedIds'): string {
+function buildIdSetKey(scope: NotificationStateScope, kind: 'readIds' | 'pinnedIds'): string {
   if (scope === undefined) {
     return `${KEY_PREFIX}.${kind}`;
   }
@@ -55,7 +57,6 @@ function readSetFromLocalStorage(key: string): Set<string> {
     if (!Array.isArray(parsed)) return new Set();
     return new Set(parsed.filter((item): item is string => typeof item === 'string'));
   } catch {
-    // Corrupt JSON or disabled storage — fall back to an empty set.
     return new Set();
   }
 }
@@ -65,8 +66,35 @@ function writeSetToLocalStorage(key: string, set: ReadonlySet<string>): void {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(key, JSON.stringify(Array.from(set)));
   } catch {
-    // Quota exceeded, disabled storage, etc. — silently swallow. The
-    // in-memory mirror still reflects the change for this session.
+    // Quota exceeded, disabled storage, etc. — silently swallow.
+  }
+}
+
+function readEventsFromLocalStorage(): NotificationEvent[] {
+  try {
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(EVENTS_KEY) : null;
+    if (raw === null) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Light validation — drop anything that doesn't look like a notification event.
+    return parsed.filter(
+      (item): item is NotificationEvent =>
+        item &&
+        typeof item === 'object' &&
+        typeof item.id === 'string' &&
+        typeof item.timestamp === 'number'
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeEventsToLocalStorage(events: readonly NotificationEvent[]): void {
+  try {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(EVENTS_KEY, JSON.stringify(events));
+  } catch {
+    // Quota exceeded, disabled storage, etc. — silently swallow.
   }
 }
 
@@ -74,14 +102,41 @@ export class LocalStorageNotificationStateStore implements NotificationStateStor
   private readonly readBuckets = new Map<string, BehaviorSubject<Set<string>>>();
   private readonly pinnedBuckets = new Map<string, BehaviorSubject<Set<string>>>();
 
+  /** Loaded events as they exist in localStorage. Hydrated by `preload()`. */
+  private storedEvents: NotificationEvent[] = [];
+
   /**
-   * No-op for the localStorage impl. Reads are lazy: the first sync getter
-   * for a (scope, kind) tuple loads from localStorage synchronously and
-   * caches a BehaviorSubject. The future UserStorage impl uses this to await
-   * page-metadata injection.
+   * Reads the persisted events list into the in-memory snapshot. Id sets
+   * (`readIds`, `pinnedIds`) remain lazy — they hydrate from localStorage on
+   * first access, which is synchronous since `localStorage.getItem` is too.
    */
   public async preload(): Promise<void> {
-    // intentionally empty
+    this.storedEvents = readEventsFromLocalStorage();
+  }
+
+  public getStoredEvents(): readonly NotificationEvent[] {
+    return this.storedEvents;
+  }
+
+  public saveEvent(event: NotificationEvent): Promise<void> {
+    const idx = this.storedEvents.findIndex((e) => e.id === event.id);
+    if (idx === -1) {
+      this.storedEvents = [...this.storedEvents, event];
+    } else {
+      const next = this.storedEvents.slice();
+      next[idx] = event;
+      this.storedEvents = next;
+    }
+    writeEventsToLocalStorage(this.storedEvents);
+    return Promise.resolve();
+  }
+
+  public removeEvent(id: string): Promise<void> {
+    const next = this.storedEvents.filter((e) => e.id !== id);
+    if (next.length === this.storedEvents.length) return Promise.resolve();
+    this.storedEvents = next;
+    writeEventsToLocalStorage(this.storedEvents);
+    return Promise.resolve();
   }
 
   public readIds$(scope: NotificationStateScope): Observable<ReadonlySet<string>> {
@@ -101,35 +156,35 @@ export class LocalStorageNotificationStateStore implements NotificationStateStor
   }
 
   public markRead(eventId: string, scope: NotificationStateScope): Promise<void> {
-    return this.mutate(this.readBucket(scope), buildKey(scope, 'readIds'), (set) => {
+    return this.mutate(this.readBucket(scope), buildIdSetKey(scope, 'readIds'), (set) => {
       set.add(eventId);
     });
   }
 
   public markUnread(eventId: string, scope: NotificationStateScope): Promise<void> {
-    return this.mutate(this.readBucket(scope), buildKey(scope, 'readIds'), (set) => {
+    return this.mutate(this.readBucket(scope), buildIdSetKey(scope, 'readIds'), (set) => {
       set.delete(eventId);
     });
   }
 
   public pin(eventId: string, scope: NotificationStateScope): Promise<void> {
-    return this.mutate(this.pinnedBucket(scope), buildKey(scope, 'pinnedIds'), (set) => {
+    return this.mutate(this.pinnedBucket(scope), buildIdSetKey(scope, 'pinnedIds'), (set) => {
       set.add(eventId);
     });
   }
 
   public unpin(eventId: string, scope: NotificationStateScope): Promise<void> {
-    return this.mutate(this.pinnedBucket(scope), buildKey(scope, 'pinnedIds'), (set) => {
+    return this.mutate(this.pinnedBucket(scope), buildIdSetKey(scope, 'pinnedIds'), (set) => {
       set.delete(eventId);
     });
   }
 
   private readBucket(scope: NotificationStateScope): BehaviorSubject<Set<string>> {
-    return this.getOrCreateBucket(this.readBuckets, buildKey(scope, 'readIds'));
+    return this.getOrCreateBucket(this.readBuckets, buildIdSetKey(scope, 'readIds'));
   }
 
   private pinnedBucket(scope: NotificationStateScope): BehaviorSubject<Set<string>> {
-    return this.getOrCreateBucket(this.pinnedBuckets, buildKey(scope, 'pinnedIds'));
+    return this.getOrCreateBucket(this.pinnedBuckets, buildIdSetKey(scope, 'pinnedIds'));
   }
 
   private getOrCreateBucket(

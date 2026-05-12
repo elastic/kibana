@@ -28,20 +28,24 @@ export class EventsService implements INotificationEvents {
   /**
    * Reactive unread count maintained alongside `events$`. Subscribers (e.g.
    * the global-header badge) get O(1) re-renders that only fire when the
-   * count actually changes — no need to iterate the full events list on every
-   * render.
+   * count actually changes — no need to iterate the full events list on
+   * every render.
    */
   private readonly unreadCount$ = new BehaviorSubject<number>(0);
 
   constructor(private readonly store: NotificationStateStore) {}
 
   /**
-   * Awaits {@link NotificationStateStore.preload} before returning the public
-   * interface. After this resolves, `notify()` can hydrate `isRead` / `isPinned`
-   * from the store using synchronous getters.
+   * Awaits {@link NotificationStateStore.preload}, then seeds `events$` and
+   * `unreadCount$` from whatever the store persisted on previous page loads.
+   * After this resolves, `notify()` can hydrate `isRead` / `isPinned` from
+   * the store using synchronous getters.
    */
   public async start(): Promise<INotificationEvents> {
     await this.store.preload();
+    const persisted = this.store.getStoredEvents().slice();
+    this.events$.next(persisted);
+    this.unreadCount$.next(persisted.filter((e) => !e.isRead).length);
     return this;
   }
 
@@ -91,6 +95,11 @@ export class EventsService implements INotificationEvents {
     if (unreadDelta !== 0) {
       this.unreadCount$.next(this.unreadCount$.getValue() + unreadDelta);
     }
+
+    // Fire-and-forget persistence. notify() stays synchronous; failures inside
+    // the store are silently swallowed (the in-memory state is the source of
+    // truth for this session).
+    void this.store.saveEvent(hydrated);
   }
 
   public async markAsRead(eventId: string, isRead: boolean): Promise<void> {
@@ -100,17 +109,17 @@ export class EventsService implements INotificationEvents {
     const previous = events[index];
     if (previous.isRead === isRead) return; // no-op
 
+    const updated: NotificationEvent = { ...previous, isRead };
     const next = events.slice();
-    next[index] = { ...previous, isRead };
+    next[index] = updated;
     this.events$.next(next);
     this.unreadCount$.next(this.unreadCount$.getValue() + (isRead ? -1 : 1));
 
     const scope = previous.spaceId;
-    if (isRead) {
-      await this.store.markRead(eventId, scope);
-    } else {
-      await this.store.markUnread(eventId, scope);
-    }
+    await Promise.all([
+      isRead ? this.store.markRead(eventId, scope) : this.store.markUnread(eventId, scope),
+      this.store.saveEvent(updated),
+    ]);
   }
 
   public async pin(eventId: string): Promise<void> {
@@ -128,16 +137,16 @@ export class EventsService implements INotificationEvents {
     const previous = events[index];
     if ((previous.isPinned ?? false) === isPinned) return; // no-op
 
+    const updated: NotificationEvent = { ...previous, isPinned };
     const next = events.slice();
-    next[index] = { ...previous, isPinned };
+    next[index] = updated;
     this.events$.next(next);
 
     const scope = previous.spaceId;
-    if (isPinned) {
-      await this.store.pin(eventId, scope);
-    } else {
-      await this.store.unpin(eventId, scope);
-    }
+    await Promise.all([
+      isPinned ? this.store.pin(eventId, scope) : this.store.unpin(eventId, scope),
+      this.store.saveEvent(updated),
+    ]);
   }
 
   public registerType<T>(
@@ -155,8 +164,10 @@ export class EventsService implements INotificationEvents {
       const i = events.findIndex((e) => e.id === event.id);
       if (i !== -1) {
         const next = events.slice();
-        next[i] = { ...next[i], ...event };
+        const merged = { ...next[i], ...event };
+        next[i] = merged;
         this.events$.next(next);
+        void this.store.saveEvent(merged);
       }
 
       if (actionCallback) {
