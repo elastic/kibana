@@ -51,7 +51,7 @@ import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
-import type { ConcreteTaskInstance, TaskEventLogger } from './task';
+import { TaskPriority, type ConcreteTaskInstance, type TaskEventLogger } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -126,6 +126,8 @@ export interface TaskManagerPluginsSetup {
 }
 
 const LogHealthForBackgroundTasksOnlyMinutes = 60;
+const TaskManagerLatencyProbeTaskType = 'task_manager:latency_probe';
+const TaskManagerLatencyProbeIntervalMs = 10_000;
 
 export class TaskManagerPlugin
   implements
@@ -163,6 +165,7 @@ export class TaskManagerPlugin
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
   private claimNudgeService?: TaskManagerClaimNudgeService;
+  private probeScheduleIntervalId?: NodeJS.Timeout;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -305,6 +308,36 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
+    this.definitions.registerTaskDefinitions({
+      [TaskManagerLatencyProbeTaskType]: {
+        title: 'Task Manager latency probe',
+        timeout: '5m',
+        priority: TaskPriority.High,
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => {
+            const startedAtMs = Date.now();
+            const params = (taskInstance.params ?? {}) as { scheduleRequestedAtMs?: number };
+            const scheduleRequestedAtMs = params.scheduleRequestedAtMs ?? 0;
+            const scheduledAtMs = taskInstance.scheduledAt.valueOf();
+
+            this.logger.info(
+              `[tm_latency_probe] run_started_at=${new Date(
+                startedAtMs
+              ).toISOString()} schedule_requested_at=${new Date(
+                scheduleRequestedAtMs
+              ).toISOString()} task_scheduled_at=${taskInstance.scheduledAt.toISOString()} delta_from_requested_ms=${
+                startedAtMs - scheduleRequestedAtMs
+              } delta_from_scheduled_ms=${startedAtMs - scheduledAtMs}`
+            );
+
+            return {
+              state: {},
+              shouldDeleteTask: true,
+            };
+          },
+        }),
+      },
+    });
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
@@ -486,6 +519,50 @@ export class TaskManagerPlugin
 
     if (this.shouldRunBackgroundTasks) {
       this.claimNudgeService.start();
+
+      const scheduleProbeTask = () => {
+        const scheduleRequestedAtMs = Date.now();
+        const probeTaskId = `tm-latency-probe-${this.taskManagerId}-${scheduleRequestedAtMs}`;
+        this.logger.info(
+          `[tm_latency_probe] scheduling_one_time_task id=${probeTaskId} schedule_requested_at=${new Date(
+            scheduleRequestedAtMs
+          ).toISOString()}`
+        );
+
+        taskScheduling
+          .schedule(
+            {
+              id: probeTaskId,
+              taskType: TaskManagerLatencyProbeTaskType,
+              params: { scheduleRequestedAtMs },
+              state: {},
+              enabled: true,
+              priority: TaskPriority.High,
+            },
+            { requestImmediateClaim: true }
+          )
+          .then(() => {
+            const persistedAtMs = Date.now();
+            this.logger.info(
+              `[tm_latency_probe] task_scheduled id=${probeTaskId} persisted_at=${new Date(
+                persistedAtMs
+              ).toISOString()} persistence_delta_ms=${persistedAtMs - scheduleRequestedAtMs}`
+            );
+          })
+          .catch((error) => {
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.warn(`[tm_latency_probe] failed_scheduling id=${probeTaskId}: ${message}`);
+          });
+      };
+
+      scheduleProbeTask();
+      this.logger.info(
+        `[tm_latency_probe] using setInterval(${TaskManagerLatencyProbeIntervalMs}ms) to schedule one-time probe tasks`
+      );
+      this.probeScheduleIntervalId = setInterval(
+        scheduleProbeTask,
+        TaskManagerLatencyProbeIntervalMs
+      );
     }
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
@@ -546,5 +623,10 @@ export class TaskManagerPlugin
     }
 
     this.claimNudgeService?.stop();
+
+    if (this.probeScheduleIntervalId) {
+      clearInterval(this.probeScheduleIntervalId);
+      this.probeScheduleIntervalId = undefined;
+    }
   }
 }
