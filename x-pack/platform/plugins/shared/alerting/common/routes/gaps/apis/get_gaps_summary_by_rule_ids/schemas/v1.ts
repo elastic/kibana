@@ -34,14 +34,17 @@ export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   }
 );
 
-export const getGapsSummaryByRuleIdsResponseSchema = schema.object({
-  data: schema.arrayOf(
-    schema.object({
-      rule_id: schema.string(),
-      total_unfilled_duration_ms: schema.number(),
-      total_in_progress_duration_ms: schema.number(),
-      total_filled_duration_ms: schema.number(),
-      gap_fill_status: schema.maybe(schema.string()),
-    })
-  ),
-}, { meta: { id: 'get_gaps_summary_by_rule_ids_response' } });
+export const getGapsSummaryByRuleIdsResponseSchema = schema.object(
+  {
+    data: schema.arrayOf(
+      schema.object({
+        rule_id: schema.string(),
+        total_unfilled_duration_ms: schema.number(),
+        total_in_progress_duration_ms: schema.number(),
+        total_filled_duration_ms: schema.number(),
+        gap_fill_status: schema.maybe(schema.string()),
+      })
+    ),
+  },
+  { meta: { id: 'get_gaps_summary_by_rule_ids_response' } }
+);

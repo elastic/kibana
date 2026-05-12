@@ -7,8 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const bulkDisableRulesRequestBodySchema = schema.object({
-  filter: schema.maybe(schema.string()),
-  ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
-  untrack: schema.maybe(schema.boolean({ defaultValue: false })),
-}, { meta: { id: 'bulk_disable_rules_request' } });
+export const bulkDisableRulesRequestBodySchema = schema.object(
+  {
+    filter: schema.maybe(schema.string()),
+    ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
+    untrack: schema.maybe(schema.boolean({ defaultValue: false })),
+  },
+  { meta: { id: 'bulk_disable_rules_request' } }
+);

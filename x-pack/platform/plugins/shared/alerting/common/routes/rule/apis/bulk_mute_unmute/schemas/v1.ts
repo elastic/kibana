@@ -9,12 +9,15 @@ import { schema } from '@kbn/config-schema';
 
 const MAX_MUTE_UNMUTE_INSTANCES = 100;
 
-export const bulkMuteUnmuteAlertsBodySchema = schema.object({
-  rules: schema.arrayOf(
-    schema.object({
-      rule_id: schema.string(),
-      alert_instance_ids: schema.arrayOf(schema.string(), { maxSize: MAX_MUTE_UNMUTE_INSTANCES }),
-    }),
-    { maxSize: MAX_MUTE_UNMUTE_INSTANCES }
-  ),
-}, { meta: { id: 'bulk_mute_unmute_alerts_request' } });
+export const bulkMuteUnmuteAlertsBodySchema = schema.object(
+  {
+    rules: schema.arrayOf(
+      schema.object({
+        rule_id: schema.string(),
+        alert_instance_ids: schema.arrayOf(schema.string(), { maxSize: MAX_MUTE_UNMUTE_INSTANCES }),
+      }),
+      { maxSize: MAX_MUTE_UNMUTE_INSTANCES }
+    ),
+  },
+  { meta: { id: 'bulk_mute_unmute_alerts_request' } }
+);

@@ -14,9 +14,12 @@ export const ruleTagsRequestQuerySchema = schema.object({
   rule_type_ids: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
 });
 
-export const ruleTagsFormattedResponseSchema = schema.object({
-  total: schema.number(),
-  page: schema.number(),
-  perPage: schema.number(),
-  data: schema.arrayOf(schema.string()),
-}, { meta: { id: 'rule_tags_response' } });
+export const ruleTagsFormattedResponseSchema = schema.object(
+  {
+    total: schema.number(),
+    page: schema.number(),
+    perPage: schema.number(),
+    data: schema.arrayOf(schema.string()),
+  },
+  { meta: { id: 'rule_tags_response' } }
+);

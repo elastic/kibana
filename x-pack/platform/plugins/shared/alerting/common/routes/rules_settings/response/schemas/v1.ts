@@ -7,13 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const queryDelaySettingsResponseBodySchema = schema.object({
-  delay: schema.number(),
-  created_by: schema.nullable(schema.string()),
-  updated_by: schema.nullable(schema.string()),
-  created_at: schema.string(),
-  updated_at: schema.string(),
-}, { meta: { id: 'query_delay_settings_response' } });
+export const queryDelaySettingsResponseBodySchema = schema.object(
+  {
+    delay: schema.number(),
+    created_by: schema.nullable(schema.string()),
+    updated_by: schema.nullable(schema.string()),
+    created_at: schema.string(),
+    updated_at: schema.string(),
+  },
+  { meta: { id: 'query_delay_settings_response' } }
+);
 
 export const queryDelaySettingsResponseSchema = schema.object({
   body: queryDelaySettingsResponseBodySchema,

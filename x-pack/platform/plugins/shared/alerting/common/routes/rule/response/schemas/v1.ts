@@ -45,23 +45,31 @@ export const notifyWhenSchema = schema.oneOf(
   }
 );
 
-const intervalScheduleSchema = schema.object({
-  interval: schema.string({
-    meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
-  }),
-}, { meta: { id: 'rule_interval_schedule' } });
+const intervalScheduleSchema = schema.object(
+  {
+    interval: schema.string({
+      meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
+    }),
+  },
+  { meta: { id: 'rule_interval_schedule' } }
+);
 
-const actionFrequencySchema = schema.object({
-  summary: schema.boolean({ meta: { description: 'Indicates whether the action is a summary.' } }),
-  notify_when: notifyWhenSchema,
-  throttle: schema.nullable(
-    schema.string({
-      meta: {
-        description: `The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.`,
-      },
-    })
-  ),
-}, { meta: { id: 'rule_action_frequency' } });
+const actionFrequencySchema = schema.object(
+  {
+    summary: schema.boolean({
+      meta: { description: 'Indicates whether the action is a summary.' },
+    }),
+    notify_when: notifyWhenSchema,
+    throttle: schema.nullable(
+      schema.string({
+        meta: {
+          description: `The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.`,
+        },
+      })
+    ),
+  },
+  { meta: { id: 'rule_action_frequency' } }
+);
 
 const actionAlertsFilterSchema = schema.object(
   {
@@ -114,116 +122,122 @@ const actionAlertsFilterSchema = schema.object(
   }
 );
 
-const actionSchema = schema.object({
-  uuid: schema.maybe(
-    schema.string({
-      meta: { description: 'A universally unique identifier (UUID) for the action.' },
-    })
-  ),
-  group: schema.maybe(
-    schema.string({
+const actionSchema = schema.object(
+  {
+    uuid: schema.maybe(
+      schema.string({
+        meta: { description: 'A universally unique identifier (UUID) for the action.' },
+      })
+    ),
+    group: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.",
+        },
+      })
+    ),
+    id: schema.string({
+      meta: { description: 'The identifier for the connector saved object.' },
+    }),
+    connector_type_id: schema.string({
       meta: {
         description:
-          "The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.",
+          'The type of connector. This property appears in responses but cannot be set in requests.',
       },
-    })
-  ),
-  id: schema.string({
-    meta: { description: 'The identifier for the connector saved object.' },
-  }),
-  connector_type_id: schema.string({
-    meta: {
-      description:
-        'The type of connector. This property appears in responses but cannot be set in requests.',
-    },
-  }),
-  params: actionParamsSchema,
-  frequency: schema.maybe(actionFrequencySchema),
-  alerts_filter: schema.maybe(actionAlertsFilterSchema),
-  use_alert_data_for_template: schema.maybe(
-    schema.boolean({
-      meta: { description: 'Indicates whether to use alert data as a template.' },
-    })
-  ),
-}, { meta: { id: 'rule_action' } });
+    }),
+    params: actionParamsSchema,
+    frequency: schema.maybe(actionFrequencySchema),
+    alerts_filter: schema.maybe(actionAlertsFilterSchema),
+    use_alert_data_for_template: schema.maybe(
+      schema.boolean({
+        meta: { description: 'Indicates whether to use alert data as a template.' },
+      })
+    ),
+  },
+  { meta: { id: 'rule_action' } }
+);
 
-export const ruleExecutionStatusSchema = schema.object({
-  status: schema.oneOf(
-    [
-      schema.literal(ruleExecutionStatusValuesV1.OK),
-      schema.literal(ruleExecutionStatusValuesV1.ACTIVE),
-      schema.literal(ruleExecutionStatusValuesV1.ERROR),
-      schema.literal(ruleExecutionStatusValuesV1.WARNING),
-      schema.literal(ruleExecutionStatusValuesV1.PENDING),
-      schema.literal(ruleExecutionStatusValuesV1.UNKNOWN),
-    ],
-    {
-      meta: {
-        description: 'Status of rule execution.',
-      },
-    }
-  ),
-  last_execution_date: schema.string({
-    meta: {
-      description: 'The date and time when rule was executed last.',
-    },
-  }),
-  last_duration: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'Duration of last execution of the rule.',
-      },
-    })
-  ),
-  error: schema.maybe(
-    schema.object({
-      reason: schema.oneOf(
-        [
-          schema.literal(ruleExecutionStatusErrorReasonV1.READ),
-          schema.literal(ruleExecutionStatusErrorReasonV1.DECRYPT),
-          schema.literal(ruleExecutionStatusErrorReasonV1.EXECUTE),
-          schema.literal(ruleExecutionStatusErrorReasonV1.UNKNOWN),
-          schema.literal(ruleExecutionStatusErrorReasonV1.LICENSE),
-          schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
-          schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
-          schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
-        ],
-        {
-          meta: {
-            description: 'Reason for error.',
-          },
-        }
-      ),
-      message: schema.string({
+export const ruleExecutionStatusSchema = schema.object(
+  {
+    status: schema.oneOf(
+      [
+        schema.literal(ruleExecutionStatusValuesV1.OK),
+        schema.literal(ruleExecutionStatusValuesV1.ACTIVE),
+        schema.literal(ruleExecutionStatusValuesV1.ERROR),
+        schema.literal(ruleExecutionStatusValuesV1.WARNING),
+        schema.literal(ruleExecutionStatusValuesV1.PENDING),
+        schema.literal(ruleExecutionStatusValuesV1.UNKNOWN),
+      ],
+      {
         meta: {
-          description: 'Error message.',
+          description: 'Status of rule execution.',
         },
-      }),
-    })
-  ),
-  warning: schema.maybe(
-    schema.object({
-      reason: schema.oneOf(
-        [
-          schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
-          schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
-          schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
-          schema.literal(ruleExecutionStatusWarningReasonV1.EXECUTION),
-        ],
-        {
-          meta: {
-            description: 'Reason for warning.',
-          },
-        }
-      ),
-      message: schema.string({
+      }
+    ),
+    last_execution_date: schema.string({
+      meta: {
+        description: 'The date and time when rule was executed last.',
+      },
+    }),
+    last_duration: schema.maybe(
+      schema.number({
         meta: {
-          description: 'Warning message.',
+          description: 'Duration of last execution of the rule.',
         },
-      }),
-    })
-  ),
-}, { meta: { id: 'rule_execution_status' } });
+      })
+    ),
+    error: schema.maybe(
+      schema.object({
+        reason: schema.oneOf(
+          [
+            schema.literal(ruleExecutionStatusErrorReasonV1.READ),
+            schema.literal(ruleExecutionStatusErrorReasonV1.DECRYPT),
+            schema.literal(ruleExecutionStatusErrorReasonV1.EXECUTE),
+            schema.literal(ruleExecutionStatusErrorReasonV1.UNKNOWN),
+            schema.literal(ruleExecutionStatusErrorReasonV1.LICENSE),
+            schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
+            schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
+            schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
+          ],
+          {
+            meta: {
+              description: 'Reason for error.',
+            },
+          }
+        ),
+        message: schema.string({
+          meta: {
+            description: 'Error message.',
+          },
+        }),
+      })
+    ),
+    warning: schema.maybe(
+      schema.object({
+        reason: schema.oneOf(
+          [
+            schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
+            schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
+            schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
+            schema.literal(ruleExecutionStatusWarningReasonV1.EXECUTION),
+          ],
+          {
+            meta: {
+              description: 'Reason for warning.',
+            },
+          }
+        ),
+        message: schema.string({
+          meta: {
+            description: 'Warning message.',
+          },
+        }),
+      })
+    ),
+  },
+  { meta: { id: 'rule_execution_status' } }
+);
 
 export const outcome = schema.oneOf(
   [
@@ -238,90 +252,93 @@ export const outcome = schema.oneOf(
   }
 );
 
-export const ruleLastRunSchema = schema.object({
-  outcome,
-  outcome_order: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'Order of the outcome.',
-      },
-    })
-  ),
-  warning: schema.maybe(
-    schema.nullable(
-      schema.oneOf(
-        [
-          schema.literal(ruleExecutionStatusErrorReasonV1.READ),
-          schema.literal(ruleExecutionStatusErrorReasonV1.DECRYPT),
-          schema.literal(ruleExecutionStatusErrorReasonV1.EXECUTE),
-          schema.literal(ruleExecutionStatusErrorReasonV1.UNKNOWN),
-          schema.literal(ruleExecutionStatusErrorReasonV1.LICENSE),
-          schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
-          schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
-          schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
-          schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
-          schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
-          schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
-          schema.literal(ruleExecutionStatusWarningReasonV1.EXECUTION),
-        ],
-        {
-          meta: {
-            description: 'Warning of last rule execution.',
-          },
-        }
-      )
-    )
-  ),
-  outcome_msg: schema.maybe(
-    schema.nullable(
-      schema.arrayOf(
-        schema.string({
-          meta: {
-            description: 'Outcome message generated during last rule run.',
-          },
-        })
-      )
-    )
-  ),
-  alerts_count: schema.object({
-    active: schema.maybe(
+export const ruleLastRunSchema = schema.object(
+  {
+    outcome,
+    outcome_order: schema.maybe(
+      schema.number({
+        meta: {
+          description: 'Order of the outcome.',
+        },
+      })
+    ),
+    warning: schema.maybe(
       schema.nullable(
-        schema.number({
-          meta: {
-            description: 'Number of active alerts during last run.',
-          },
-        })
+        schema.oneOf(
+          [
+            schema.literal(ruleExecutionStatusErrorReasonV1.READ),
+            schema.literal(ruleExecutionStatusErrorReasonV1.DECRYPT),
+            schema.literal(ruleExecutionStatusErrorReasonV1.EXECUTE),
+            schema.literal(ruleExecutionStatusErrorReasonV1.UNKNOWN),
+            schema.literal(ruleExecutionStatusErrorReasonV1.LICENSE),
+            schema.literal(ruleExecutionStatusErrorReasonV1.TIMEOUT),
+            schema.literal(ruleExecutionStatusErrorReasonV1.DISABLED),
+            schema.literal(ruleExecutionStatusErrorReasonV1.VALIDATE),
+            schema.literal(ruleExecutionStatusWarningReasonV1.MAX_EXECUTABLE_ACTIONS),
+            schema.literal(ruleExecutionStatusWarningReasonV1.MAX_ALERTS),
+            schema.literal(ruleExecutionStatusWarningReasonV1.MAX_QUEUED_ACTIONS),
+            schema.literal(ruleExecutionStatusWarningReasonV1.EXECUTION),
+          ],
+          {
+            meta: {
+              description: 'Warning of last rule execution.',
+            },
+          }
+        )
       )
     ),
-    new: schema.maybe(
+    outcome_msg: schema.maybe(
       schema.nullable(
-        schema.number({
-          meta: {
-            description: 'Number of new alerts during last run.',
-          },
-        })
+        schema.arrayOf(
+          schema.string({
+            meta: {
+              description: 'Outcome message generated during last rule run.',
+            },
+          })
+        )
       )
     ),
-    recovered: schema.maybe(
-      schema.nullable(
-        schema.number({
-          meta: {
-            description: 'Number of recovered alerts during last run.',
-          },
-        })
-      )
-    ),
-    ignored: schema.maybe(
-      schema.nullable(
-        schema.number({
-          meta: {
-            description: 'Number of ignored alerts during last run.',
-          },
-        })
-      )
-    ),
-  }),
-}, { meta: { id: 'rule_last_run' } });
+    alerts_count: schema.object({
+      active: schema.maybe(
+        schema.nullable(
+          schema.number({
+            meta: {
+              description: 'Number of active alerts during last run.',
+            },
+          })
+        )
+      ),
+      new: schema.maybe(
+        schema.nullable(
+          schema.number({
+            meta: {
+              description: 'Number of new alerts during last run.',
+            },
+          })
+        )
+      ),
+      recovered: schema.maybe(
+        schema.nullable(
+          schema.number({
+            meta: {
+              description: 'Number of recovered alerts during last run.',
+            },
+          })
+        )
+      ),
+      ignored: schema.maybe(
+        schema.nullable(
+          schema.number({
+            meta: {
+              description: 'Number of ignored alerts during last run.',
+            },
+          })
+        )
+      ),
+    }),
+  },
+  { meta: { id: 'rule_last_run' } }
+);
 
 export const monitoringSchema = schema.object(
   {
@@ -438,30 +455,33 @@ export const monitoringSchema = schema.object(
   }
 );
 
-export const ruleSnoozeScheduleSchema = schema.object({
-  id: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Identifier of the rule snooze schedule.',
-      },
-    })
-  ),
-  duration: schema.number({
-    meta: {
-      description: 'Duration of the rule snooze schedule.',
-    },
-  }),
-  rRule: rRuleResponseSchemaV1,
-  skipRecurrences: schema.maybe(
-    schema.arrayOf(
+export const ruleSnoozeScheduleSchema = schema.object(
+  {
+    id: schema.maybe(
       schema.string({
         meta: {
-          description: 'Skips recurrence of rule on this date.',
+          description: 'Identifier of the rule snooze schedule.',
         },
       })
-    )
-  ),
-}, { meta: { id: 'rule_snooze_schedule' } });
+    ),
+    duration: schema.number({
+      meta: {
+        description: 'Duration of the rule snooze schedule.',
+      },
+    }),
+    rRule: rRuleResponseSchemaV1,
+    skipRecurrences: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          meta: {
+            description: 'Skips recurrence of rule on this date.',
+          },
+        })
+      )
+    ),
+  },
+  { meta: { id: 'rule_snooze_schedule' } }
+);
 
 export const alertDelaySchema = schema.object(
   {
@@ -488,176 +508,182 @@ export const investigationGuideSchema = schema.object({
   }),
 });
 
-export const artifactsSchema = schema.object({
-  dashboards: schema.maybe(dashboardsSchema),
-  investigation_guide: schema.maybe(investigationGuideSchema),
-}, { meta: { id: 'rule_artifacts' } });
+export const artifactsSchema = schema.object(
+  {
+    dashboards: schema.maybe(dashboardsSchema),
+    investigation_guide: schema.maybe(investigationGuideSchema),
+  },
+  { meta: { id: 'rule_artifacts' } }
+);
 
-export const ruleResponseSchema = schema.object({
-  id: schema.string({
-    meta: {
-      description: 'The identifier for the rule.',
-    },
-  }),
-  enabled: schema.boolean({
-    meta: {
-      description:
-        'Indicates whether you want to run the rule on an interval basis after it is created.',
-    },
-  }),
-  name: schema.string({
-    meta: {
-      description: ' The name of the rule.',
-    },
-  }),
-  tags: schema.arrayOf(
-    schema.string({
-      meta: { description: 'The tags for the rule.' },
-    })
-  ),
-  rule_type_id: schema.string({
-    meta: { description: 'The rule type identifier.' },
-  }),
-  consumer: schema.string({
-    meta: {
-      description:
-        'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
-    },
-  }),
-  schedule: intervalScheduleSchema,
-  actions: schema.arrayOf(actionSchema),
-  params: ruleParamsSchemaV1,
-  mapped_params: schema.maybe(mappedParamsSchema),
-  scheduled_task_id: schema.maybe(
-    schema.string({
+export const ruleResponseSchema = schema.object(
+  {
+    id: schema.string({
       meta: {
-        description: 'Identifier of the scheduled task.',
+        description: 'The identifier for the rule.',
       },
-    })
-  ),
-  created_by: schema.nullable(
-    schema.string({
-      meta: {
-        description: 'The identifier for the user that created the rule.',
-      },
-    })
-  ),
-  updated_by: schema.nullable(
-    schema.string({
-      meta: {
-        description: 'The identifier for the user that updated this rule most recently.',
-      },
-    })
-  ),
-  created_at: schema.string({
-    meta: {
-      description: 'The date and time that the rule was created.',
-    },
-  }),
-  updated_at: schema.string({
-    meta: {
-      description: 'The date and time that the rule was updated most recently.',
-    },
-  }),
-  api_key_owner: schema.nullable(
-    schema.string({
+    }),
+    enabled: schema.boolean({
       meta: {
         description:
-          'The owner of the API key that is associated with the rule and used to run background tasks.',
+          'Indicates whether you want to run the rule on an interval basis after it is created.',
       },
-    })
-  ),
-  api_key_created_by_user: schema.maybe(
-    schema.nullable(
-      schema.boolean({
-        meta: {
-          description:
-            'Indicates whether the API key that is associated with the rule was created by the user.',
-        },
-      })
-    )
-  ),
-  throttle: schema.maybe(
-    schema.nullable(
-      schema.string({
-        meta: {
-          description:
-            'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
-          deprecated: true,
-        },
-      })
-    )
-  ),
-  mute_all: schema.boolean({
-    meta: {
-      description: 'Indicates whether all alerts are muted.',
-    },
-  }),
-  notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
-  muted_alert_ids: schema.arrayOf(
-    schema.string({
+    }),
+    name: schema.string({
       meta: {
-        description: 'List of identifiers of muted alerts. ',
+        description: ' The name of the rule.',
       },
-    })
-  ),
-  execution_status: ruleExecutionStatusSchema,
-  monitoring: schema.maybe(monitoringSchema),
-  snooze_schedule: schema.maybe(schema.arrayOf(ruleSnoozeScheduleSchema)),
-  active_snoozes: schema.maybe(
-    schema.arrayOf(
+    }),
+    tags: schema.arrayOf(
+      schema.string({
+        meta: { description: 'The tags for the rule.' },
+      })
+    ),
+    rule_type_id: schema.string({
+      meta: { description: 'The rule type identifier.' },
+    }),
+    consumer: schema.string({
+      meta: {
+        description:
+          'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.',
+      },
+    }),
+    schedule: intervalScheduleSchema,
+    actions: schema.arrayOf(actionSchema),
+    params: ruleParamsSchemaV1,
+    mapped_params: schema.maybe(mappedParamsSchema),
+    scheduled_task_id: schema.maybe(
       schema.string({
         meta: {
-          description: `List of active snoozes for the rule.`,
+          description: 'Identifier of the scheduled task.',
         },
       })
-    )
-  ),
-  is_snoozed_until: schema.maybe(
-    schema.nullable(
+    ),
+    created_by: schema.nullable(
       schema.string({
         meta: {
-          description: 'The date when the rule will no longer be snoozed.',
+          description: 'The identifier for the user that created the rule.',
         },
       })
-    )
-  ),
-  last_run: schema.maybe(schema.nullable(ruleLastRunSchema)),
-  next_run: schema.maybe(
-    schema.nullable(
+    ),
+    updated_by: schema.nullable(
       schema.string({
         meta: {
-          description: 'Date and time of the next run of the rule.',
+          description: 'The identifier for the user that updated this rule most recently.',
         },
       })
-    )
-  ),
-  revision: schema.number({
-    meta: {
-      description: 'The rule revision number.',
-    },
-  }),
-  running: schema.maybe(
-    schema.nullable(
-      schema.boolean({
-        meta: {
-          description: 'Indicates whether the rule is running.',
-        },
-      })
-    )
-  ),
-  view_in_app_relative_url: schema.maybe(
-    schema.nullable(
+    ),
+    created_at: schema.string({
+      meta: {
+        description: 'The date and time that the rule was created.',
+      },
+    }),
+    updated_at: schema.string({
+      meta: {
+        description: 'The date and time that the rule was updated most recently.',
+      },
+    }),
+    api_key_owner: schema.nullable(
       schema.string({
         meta: {
-          description: 'Relative URL to view rule in the app.',
+          description:
+            'The owner of the API key that is associated with the rule and used to run background tasks.',
         },
       })
-    )
-  ),
-  alert_delay: schema.maybe(alertDelaySchema),
-  flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
-  artifacts: schema.maybe(artifactsSchema),
-}, { meta: { id: 'rule_response' } });
+    ),
+    api_key_created_by_user: schema.maybe(
+      schema.nullable(
+        schema.boolean({
+          meta: {
+            description:
+              'Indicates whether the API key that is associated with the rule was created by the user.',
+          },
+        })
+      )
+    ),
+    throttle: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+            deprecated: true,
+          },
+        })
+      )
+    ),
+    mute_all: schema.boolean({
+      meta: {
+        description: 'Indicates whether all alerts are muted.',
+      },
+    }),
+    notify_when: schema.maybe(schema.nullable(notifyWhenSchema)),
+    muted_alert_ids: schema.arrayOf(
+      schema.string({
+        meta: {
+          description: 'List of identifiers of muted alerts. ',
+        },
+      })
+    ),
+    execution_status: ruleExecutionStatusSchema,
+    monitoring: schema.maybe(monitoringSchema),
+    snooze_schedule: schema.maybe(schema.arrayOf(ruleSnoozeScheduleSchema)),
+    active_snoozes: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          meta: {
+            description: `List of active snoozes for the rule.`,
+          },
+        })
+      )
+    ),
+    is_snoozed_until: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description: 'The date when the rule will no longer be snoozed.',
+          },
+        })
+      )
+    ),
+    last_run: schema.maybe(schema.nullable(ruleLastRunSchema)),
+    next_run: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description: 'Date and time of the next run of the rule.',
+          },
+        })
+      )
+    ),
+    revision: schema.number({
+      meta: {
+        description: 'The rule revision number.',
+      },
+    }),
+    running: schema.maybe(
+      schema.nullable(
+        schema.boolean({
+          meta: {
+            description: 'Indicates whether the rule is running.',
+          },
+        })
+      )
+    ),
+    view_in_app_relative_url: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description: 'Relative URL to view rule in the app.',
+          },
+        })
+      )
+    ),
+    alert_delay: schema.maybe(alertDelaySchema),
+    flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
+    artifacts: schema.maybe(artifactsSchema),
+  },
+  { meta: { id: 'rule_response' } }
+);
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

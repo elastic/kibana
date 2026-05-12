@@ -55,9 +55,12 @@ export const findGapsBodySchema = schema.object(
   }
 );
 
-export const findGapsResponseSchema = schema.object({
-  page: schema.number(),
-  per_page: schema.number(),
-  total: schema.number(),
-  data: schema.arrayOf(gapsResponseSchemaV1),
-}, { meta: { id: 'find_gaps_response' } });
+export const findGapsResponseSchema = schema.object(
+  {
+    page: schema.number(),
+    per_page: schema.number(),
+    total: schema.number(),
+    data: schema.arrayOf(gapsResponseSchemaV1),
+  },
+  { meta: { id: 'find_gaps_response' } }
+);

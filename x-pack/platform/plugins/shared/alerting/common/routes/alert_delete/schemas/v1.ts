@@ -57,22 +57,31 @@ const alertDeleteSettingsSchema = {
 
 export const alertDeletePreviewQuerySchema = schema.object(alertDeleteSettingsSchema);
 
-export const alertDeletePreviewResponseSchema = schema.object({
-  affected_alert_count: schema.number(),
-}, { meta: { id: 'alert_delete_preview_response' } });
+export const alertDeletePreviewResponseSchema = schema.object(
+  {
+    affected_alert_count: schema.number(),
+  },
+  { meta: { id: 'alert_delete_preview_response' } }
+);
 
-export const alertDeleteScheduleQuerySchema = schema.object({
-  ...alertDeleteSettingsSchema,
-  space_ids: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      minSize: 1,
-      meta: {
-        description: 'Kibana space IDs to delete alerts from',
-      },
-    })
-  ),
-}, { meta: { id: 'alert_delete_schedule_request' } });
+export const alertDeleteScheduleQuerySchema = schema.object(
+  {
+    ...alertDeleteSettingsSchema,
+    space_ids: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        minSize: 1,
+        meta: {
+          description: 'Kibana space IDs to delete alerts from',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'alert_delete_schedule_request' } }
+);
 
-export const alertDeleteLastRunResponseSchema = schema.object({
-  last_run: schema.maybe(schema.string()),
-}, { meta: { id: 'alert_delete_last_run_response' } });
+export const alertDeleteLastRunResponseSchema = schema.object(
+  {
+    last_run: schema.maybe(schema.string()),
+  },
+  { meta: { id: 'alert_delete_last_run_response' } }
+);

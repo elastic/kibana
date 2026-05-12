@@ -78,9 +78,12 @@ export const findQuerySchema = schema.object(
   }
 );
 
-export const findResponseSchema = schema.object({
-  page: schema.number(),
-  per_page: schema.number(),
-  total: schema.number(),
-  data: schema.arrayOf(backfillResponseSchemaV1),
-}, { meta: { id: 'find_backfill_response' } });
+export const findResponseSchema = schema.object(
+  {
+    page: schema.number(),
+    per_page: schema.number(),
+    total: schema.number(),
+    data: schema.arrayOf(backfillResponseSchemaV1),
+  },
+  { meta: { id: 'find_backfill_response' } }
+);

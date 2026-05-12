@@ -15,40 +15,49 @@ export const gapStatusSchema = schema.oneOf([
   schema.literal(gapStatus.PARTIALLY_FILLED),
 ]);
 
-export const rangeSchema = schema.object({
-  lte: schema.string(),
-  gte: schema.string(),
-}, { meta: { id: 'gap_range' } });
+export const rangeSchema = schema.object(
+  {
+    lte: schema.string(),
+    gte: schema.string(),
+  },
+  { meta: { id: 'gap_range' } }
+);
 
 export const rangeListSchema = schema.arrayOf(rangeSchema);
 
-export const gapsResponseSchema = schema.object({
-  '@timestamp': schema.string(),
-  _id: schema.string(),
-  status: gapStatusSchema,
-  range: rangeSchema,
-  in_progress_intervals: rangeListSchema,
-  filled_intervals: rangeListSchema,
-  unfilled_intervals: rangeListSchema,
-  total_gap_duration_ms: schema.number(),
-  filled_duration_ms: schema.number(),
-  unfilled_duration_ms: schema.number(),
-  in_progress_duration_ms: schema.number(),
-  updated_at: schema.maybe(schema.string()),
-  failed_auto_fill_attempts: schema.maybe(schema.number()),
-  reason: schema.maybe(
-    schema.object({
-      type: schema.oneOf([
-        schema.literal(gapReasonType.RULE_DISABLED),
-        schema.literal(gapReasonType.RULE_DID_NOT_RUN),
-      ]),
-    })
-  ),
-}, { meta: { id: 'gap_response' } });
+export const gapsResponseSchema = schema.object(
+  {
+    '@timestamp': schema.string(),
+    _id: schema.string(),
+    status: gapStatusSchema,
+    range: rangeSchema,
+    in_progress_intervals: rangeListSchema,
+    filled_intervals: rangeListSchema,
+    unfilled_intervals: rangeListSchema,
+    total_gap_duration_ms: schema.number(),
+    filled_duration_ms: schema.number(),
+    unfilled_duration_ms: schema.number(),
+    in_progress_duration_ms: schema.number(),
+    updated_at: schema.maybe(schema.string()),
+    failed_auto_fill_attempts: schema.maybe(schema.number()),
+    reason: schema.maybe(
+      schema.object({
+        type: schema.oneOf([
+          schema.literal(gapReasonType.RULE_DISABLED),
+          schema.literal(gapReasonType.RULE_DID_NOT_RUN),
+        ]),
+      })
+    ),
+  },
+  { meta: { id: 'gap_response' } }
+);
 
-export const errorResponseSchema = schema.object({
-  error: schema.object({
-    message: schema.string(),
-    status: schema.maybe(schema.number()),
-  }),
-}, { meta: { id: 'gap_error_response' } });
+export const errorResponseSchema = schema.object(
+  {
+    error: schema.object({
+      message: schema.string(),
+      status: schema.maybe(schema.number()),
+    }),
+  },
+  { meta: { id: 'gap_error_response' } }
+);
