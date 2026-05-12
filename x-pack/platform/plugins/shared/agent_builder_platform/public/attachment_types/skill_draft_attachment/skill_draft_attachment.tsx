@@ -14,13 +14,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiNotificationBadge,
-  useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { HeaderBadge } from '@kbn/agent-builder-browser/attachments';
@@ -89,109 +85,61 @@ const previewContent = (content: string): { preview: string; truncated: boolean 
   };
 };
 
-const SkillDraftBadges = ({
-  hasMultipleVersions,
-  isLatestVersion,
-  isCreated,
-  skillId,
-}: {
-  hasMultipleVersions: boolean;
-  isLatestVersion: boolean;
-  isCreated: boolean;
-  skillId: string;
-}) => {
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{skillId}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color={isCreated ? 'success' : 'primary'}>
-          {isCreated ? (
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skillDraft.createdBadge"
-              defaultMessage="Created"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge"
-              defaultMessage="Draft"
-            />
-          )}
-        </EuiBadge>
-      </EuiFlexItem>
-      {hasMultipleVersions && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={isLatestVersion ? 'accent' : 'warning'}>
-            {isLatestVersion ? (
-              <FormattedMessage
-                id="xpack.agentBuilderPlatform.attachments.skillDraft.latestVersionBadge"
-                defaultMessage="Latest"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.agentBuilderPlatform.attachments.skillDraft.outdatedVersionBadge"
-                defaultMessage="Outdated"
-              />
-            )}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
+const renderBoldChunks = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
-const SkillDraftToolsAndReferencedFiles = ({
+const SkillDraftReferences = ({
   toolIds,
   referencedContent,
 }: {
   toolIds: string[];
   referencedContent: SkillReferencedContent[] | undefined;
 }) => {
+  const hasTools = toolIds.length > 0;
+  const hasFiles = (referencedContent?.length ?? 0) > 0;
+  if (!hasTools && !hasFiles) {
+    return null;
+  }
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.agentBuilderPlatform.attachments.skillDraft.toolsLabel"
-                  defaultMessage="Tools"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="subdued">{toolIds.length}</EuiNotificationBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                <FormattedMessage
-                  id="xpack.agentBuilderPlatform.attachments.skillDraft.filesLabel"
-                  defaultMessage="Referenced files"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="subdued">
-                {referencedContent?.length ?? 0}
-              </EuiNotificationBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {toolIds.length > 0 && (
+      <EuiText size="xs" color="subdued">
+        <strong>
+          <FormattedMessage
+            id="xpack.agentBuilderPlatform.attachments.skillDraft.referencesLabel"
+            defaultMessage="References"
+          />
+        </strong>
+      </EuiText>
+      {hasTools && (
         <>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
             {toolIds.map((toolId) => (
               <EuiFlexItem grow={false} key={toolId}>
-                <EuiBadge color="hollow">{toolId}</EuiBadge>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.agentBuilderPlatform.attachments.skillDraft.toolBadge"
+                    defaultMessage="<bold>tool:</bold> {toolName}"
+                    values={{ toolName: toolId, bold: renderBoldChunks }}
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
+      {hasFiles && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            {referencedContent!.map((file) => (
+              <EuiFlexItem grow={false} key={file.relativePath}>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.agentBuilderPlatform.attachments.skillDraft.fileBadge"
+                    defaultMessage="<bold>file:</bold> {fileName}"
+                    values={{ fileName: file.name, bold: renderBoldChunks }}
+                  />
+                </EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -268,7 +216,6 @@ const SkillDraftInstructions = ({
 };
 
 interface SkillDraftCardProps extends AttachmentRenderProps<SkillDraftAttachment> {
-  isCreated: boolean;
   isCanvas?: boolean;
 }
 
@@ -278,25 +225,14 @@ const fullContentPanelStyles = css`
   height: 100%;
 `;
 
-const SkillDraftCard: React.FC<SkillDraftCardProps> = ({
-  attachment,
-  isCreated,
-  isCanvas,
-  version,
-  versionCount,
-}) => {
-  const { euiTheme } = useEuiTheme();
+const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCanvas }) => {
   const {
     content,
     description,
-    id: skillId,
-    name: skillName,
     tool_ids: toolIds,
     referenced_content: referencedContent,
   } = attachment.data;
   const showFullContent = isCanvas === true;
-  const hasMultipleVersions = (versionCount ?? 0) > 1;
-  const isLatestVersion = version !== undefined && version === versionCount;
 
   return (
     <EuiPanel
@@ -305,61 +241,37 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({
       paddingSize="m"
       css={showFullContent && fullContentPanelStyles}
     >
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="bullseye" size="l" color={euiTheme.colors.primary} aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{skillName}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SkillDraftBadges
-                skillId={skillId}
-                isCreated={isCreated}
-                hasMultipleVersions={hasMultipleVersions}
-                isLatestVersion={isLatestVersion}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        <strong>
+          <FormattedMessage
+            id="xpack.agentBuilderPlatform.attachments.skillDraft.descriptionLabel"
+            defaultMessage="Description"
+          />
+        </strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
       <EuiText size="s" color="subdued">
         <p>{description}</p>
       </EuiText>
 
       <EuiHorizontalRule margin="m" />
 
-      <SkillDraftToolsAndReferencedFiles toolIds={toolIds} referencedContent={referencedContent} />
-
-      <EuiSpacer size="m" />
-
       <SkillDraftInstructions showFullContent={showFullContent} content={content} />
+
+      <EuiHorizontalRule margin="m" />
+
+      <SkillDraftReferences toolIds={toolIds} referencedContent={referencedContent} />
     </EuiPanel>
   );
 };
 
-/**
- * Provider container that gives the inline content access to the live
- * `origin` field on the attachment so the badge updates after Create
- * without remounting the renderer. We pass `isCreated` through the
- * standard render props pipeline (the attachment object itself updates
- * when `updateOrigin` invalidates the conversation).
- */
-const SkillDraftInlineContent: React.FC<AttachmentRenderProps<SkillDraftAttachment>> = (props) => {
-  const isCreated = Boolean(props.attachment.origin);
-  return <SkillDraftCard {...props} isCreated={isCreated} />;
-};
+const SkillDraftInlineContent: React.FC<AttachmentRenderProps<SkillDraftAttachment>> = (props) => (
+  <SkillDraftCard {...props} />
+);
 
-const SkillDraftCanvasContent: React.FC<AttachmentRenderProps<SkillDraftAttachment>> = (props) => {
-  const isCreated = Boolean(props.attachment.origin);
-  return <SkillDraftCard {...props} isCreated={isCreated} isCanvas />;
-};
+const SkillDraftCanvasContent: React.FC<AttachmentRenderProps<SkillDraftAttachment>> = (props) => (
+  <SkillDraftCard {...props} isCanvas />
+);
 
 interface CreateSkillDraftDeps {
   http: HttpStart;
