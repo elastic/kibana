@@ -45,6 +45,7 @@ env:
 
 checkout:
   - fetch-depth: 0
+    fetch: ["*"]
 
 runs-on: kibana
 timeout-minutes: 120
@@ -170,9 +171,9 @@ The parent task will provide:
 - workflow run URL
 - repository, always `elastic/kibana`
 
-Create exactly one isolated git worktree for the target branch. Use a branch/worktree name that starts with `backport/` and includes the source PR number and target branch. Fetch the target branch before creating the worktree.
+Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. Use a branch/worktree name that starts with `backport/` and includes the source PR number and target branch.
 
-Cherry-pick the source merge commit into the target branch worktree with `git cherry-pick -x <source merge commit SHA>`. The `-x` flag preserves the original commit attribution in the backport commit message, which is useful for public release branches.
+Cherry-pick the source merge commit into the target branch worktree with `git cherry-pick -x <source merge commit SHA>`.
 
 If git fetch, worktree creation, cherry-pick, bootstrap, or safe-output tooling exits with an error unrelated to a merge conflict, return `failed` with the exact command or tool error. Do not retry blindly or invent workarounds.
 
