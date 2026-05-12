@@ -6,10 +6,14 @@
  */
 
 import { Context, CoreStart } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { Decorator } from '@storybook/react';
 import { Container } from 'inversify';
 import { action } from '@storybook/addon-actions';
 import React, { useMemo } from 'react';
+import { ActionPoliciesApi } from '../public/services/action_policies_api';
+import { RulesApi } from '../public/services/rules_api';
 
 const buildContainer = () => {
   const container = new Container({ defaultScope: 'Singleton' });
@@ -39,15 +43,51 @@ const buildContainer = () => {
   container.bind(CoreStart('http')).toConstantValue({
     get: async () => [],
     post: async () => ({}),
+    patch: async () => ({}),
+    delete: async () => ({}),
     basePath: { prepend: (p: string) => p, get: () => '' },
+  });
+
+  container.bind(ActionPoliciesApi).toSelf();
+  container.bind(RulesApi).toSelf();
+
+  container.bind(PluginStart('kql')).toConstantValue({
+    QueryStringInput: ({
+      query,
+      onChange,
+      placeholder,
+      dataTestSubj,
+    }: {
+      query: { query: string; language: string };
+      onChange: (q: { query: string; language: string }) => void;
+      placeholder?: string;
+      dataTestSubj?: string;
+      [key: string]: unknown;
+    }) => (
+      <input
+        type="text"
+        placeholder={placeholder}
+        data-test-subj={dataTestSubj}
+        value={query.query}
+        onChange={(e) => onChange({ query: e.target.value, language: 'kuery' })}
+      />
+    ),
   });
 
   return container;
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
 const DiDecorator: Decorator = (storyFn) => {
   const container = useMemo(buildContainer, []);
-  return <Context.Provider value={container}>{storyFn()}</Context.Provider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Context.Provider value={container}>{storyFn()}</Context.Provider>
+    </QueryClientProvider>
+  );
 };
 
 export const decorators = [DiDecorator];
