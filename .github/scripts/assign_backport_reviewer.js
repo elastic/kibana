@@ -16,86 +16,72 @@ const getOriginalPrNumber = ({ title, body }) => {
   return Number(originalPrNumberFromMetadata ?? originalPrNumberFromTitle);
 };
 
-const getReviews = async ({ github, owner, repo, originalPrNumber }) => {
-  const reviewHistory = await github.graphql(
-    `query($owner: String!, $repo: String!, $number: Int!) {
-      repository(owner: $owner, name: $repo) {
-        pullRequest(number: $number) {
-          reviews(first: 100) {
-            nodes {
-              state
-              submittedAt
-              author {
-                login
-              }
-            }
-          }
+const isInsufficientScopes = (error) =>
+  Array.isArray(error?.errors) &&
+  error.errors.some((entry) => entry?.type === 'INSUFFICIENT_SCOPES');
+
+const REVIEW_TEAM_FIELDS = `onBehalfOf(first: 10) {
+  nodes {
+    slug
+    organization { login }
+  }
+}`;
+
+const buildReviewHistoryQuery = ({ withTeams }) => `query($owner: String!, $repo: String!, $number: Int!) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $number) {
+      reviews(first: 100) {
+        nodes {
+          state
+          submittedAt
+          author { login }
+          ${withTeams ? REVIEW_TEAM_FIELDS : ''}
         }
       }
-    }`,
-    {
-      owner,
-      repo,
-      number: originalPrNumber,
     }
-  );
+  }
+}`;
 
-  return (reviewHistory.repository.pullRequest?.reviews?.nodes ?? [])
+// `onBehalfOf` returns team `slug` and `organization.login`, both of which
+// require the `read:org` scope. GitHub rejects the entire query with
+// INSUFFICIENT_SCOPES when the configured token cannot read org/team data, so
+// retry once without those fields and skip team matching for that run.
+const getReviewHistory = async ({ github, core, owner, repo, originalPrNumber }) => {
+  const variables = { owner, repo, number: originalPrNumber };
+
+  let data;
+  try {
+    data = await github.graphql(buildReviewHistoryQuery({ withTeams: true }), variables);
+  } catch (error) {
+    if (!isInsufficientScopes(error)) throw error;
+    core.warning(
+      `Skipping team review matching, token cannot read org/team data: ${error.message}`
+    );
+    data = await github.graphql(buildReviewHistoryQuery({ withTeams: false }), variables);
+  }
+
+  const nodes = data.repository.pullRequest?.reviews?.nodes ?? [];
+
+  const reviews = nodes
     .filter((review) => Boolean(review.submittedAt))
     .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
-};
 
-// Fetched in a separate query because `onBehalfOf` returns team `slug` and
-// `organization.login`, which require the `read:org` scope. Wrapping the call
-// in try/catch lets the workflow fall back to the last-approver reviewer when
-// the configured token cannot read org/team data.
-const getReviewedTeams = async ({ github, core, owner, repo, originalPrNumber }) => {
-  try {
-    const reviewHistory = await github.graphql(
-      `query($owner: String!, $repo: String!, $number: Int!) {
-        repository(owner: $owner, name: $repo) {
-          pullRequest(number: $number) {
-            reviews(first: 100) {
-              nodes {
-                onBehalfOf(first: 10) {
-                  nodes {
-                    slug
-                    organization {
-                      login
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }`,
-      {
-        owner,
-        repo,
-        number: originalPrNumber,
-      }
-    );
-
-    const reviewedTeams = [];
-
-    for (const review of reviewHistory.repository.pullRequest?.reviews?.nodes ?? []) {
-      for (const team of review.onBehalfOf?.nodes ?? []) {
-        const combinedSlug = `${team.organization.login}/${team.slug}`;
-        if (!reviewedTeams.includes(combinedSlug)) {
-          reviewedTeams.push(combinedSlug);
-        }
+  const reviewedTeams = [];
+  for (const review of nodes) {
+    for (const team of review.onBehalfOf?.nodes ?? []) {
+      const combinedSlug = `${team.organization.login}/${team.slug}`;
+      if (!reviewedTeams.includes(combinedSlug)) {
+        reviewedTeams.push(combinedSlug);
       }
     }
-
-    return reviewedTeams;
-  } catch (error) {
-    core.warning(`Failed to query reviewed teams: ${error.message}`);
-    return [];
   }
+
+  return { reviews, reviewedTeams };
 };
 
 const getMatchedTeams = async ({ github, core, prAuthor, reviewedTeams }) => {
+  if (reviewedTeams.length === 0) return [];
+
   try {
     const result = await github.graphql(
       `query($login: String!) {
@@ -172,8 +158,7 @@ module.exports = async ({ github, context, core }) => {
     return;
   }
 
-  const reviews = await getReviews({ github, owner, repo, originalPrNumber });
-  const reviewedTeams = await getReviewedTeams({
+  const { reviews, reviewedTeams } = await getReviewHistory({
     github,
     core,
     owner,
