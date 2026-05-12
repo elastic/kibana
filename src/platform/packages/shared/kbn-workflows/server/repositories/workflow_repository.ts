@@ -96,8 +96,6 @@ export class WorkflowRepository {
       const originSystemWorkflowId =
         typeof source.originSystemWorkflowId === 'string'
           ? source.originSystemWorkflowId
-          : source.originSystemWorkflowId === null
-          ? null
           : undefined;
       return {
         id: workflowId,
