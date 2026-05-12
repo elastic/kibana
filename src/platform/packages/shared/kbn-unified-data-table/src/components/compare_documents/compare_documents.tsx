@@ -18,7 +18,7 @@ import type {
 } from '@elastic/eui';
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
@@ -38,6 +38,7 @@ export interface CompareDocumentsProps {
   ariaDescribedBy: string;
   ariaLabelledBy: string;
   dataView: DataView;
+  columnsMeta?: DataTableColumnsMeta;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
   selectedDocIds: string[];
@@ -67,6 +68,7 @@ const CompareDocuments = ({
   ariaDescribedBy,
   ariaLabelledBy,
   dataView,
+  columnsMeta,
   isPlainRecord,
   selectedFieldNames,
   selectedDocIds,
@@ -189,6 +191,7 @@ const CompareDocuments = ({
   );
   const renderCellValue = useComparisonCellValue({
     dataView,
+    columnsMeta,
     comparisonFields,
     fieldColumnId,
     selectedDocIds,

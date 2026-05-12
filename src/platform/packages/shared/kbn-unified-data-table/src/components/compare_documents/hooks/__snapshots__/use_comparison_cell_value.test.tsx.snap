@@ -452,3 +452,38 @@ exports[`useComparisonCellValue should render field cells 3`] = `
   </div>
 </div>
 `;
+
+exports[`useComparisonCellValue should render icons from fields defined in columnsMeta (ES|QL computed columns) 1`] = `
+<div
+  data-test-subj="fieldColumnId_0_0"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+      >
+        <span
+          data-euiicon-type="tokenNumber"
+          title="number"
+        >
+          number
+        </span>
+      </span>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+    >
+      <div
+        class="euiText unifiedDataTable__comparisonFieldName emotion-euiText-relative"
+        data-test-subj="unifiedDataTableComparisonFieldName"
+      >
+        custom_esql_field
+      </div>
+    </div>
+  </div>
+</div>
+`;
