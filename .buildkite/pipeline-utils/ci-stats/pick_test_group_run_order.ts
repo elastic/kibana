@@ -135,7 +135,7 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
   if (LIMIT_SOLUTIONS) {
-    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
     const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
     if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }

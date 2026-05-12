@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inbox-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-pds-deployment'
+  defaultOwner: '@elastic/security-generative-ai'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/inbox-plugin'
   description: Moon project for @kbn/inbox-plugin
   channel: ''
-  owner: '@elastic/security-pds-deployment'
+  owner: '@elastic/security-generative-ai'
   sourceRoot: x-pack/platform/plugins/shared/inbox
 dependsOn:
   - '@kbn/core'
@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
+  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
@@ -42,6 +43,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

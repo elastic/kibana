@@ -27,9 +27,9 @@ export interface ResumeRoundVars {
 }
 
 export interface ResumeRoundMutationBindings {
-  updateActiveReasoning: (reasoning: string) => void;
+  updateActiveReasoning: (conversationId: string, reasoning: string) => void;
   setError: (conversationId: string, error: unknown, errorSteps: ConversationRoundStep[]) => void;
-  clearActiveStream: () => void;
+  clearActiveStream: (conversationId: string) => void;
 }
 
 type UseResumeRoundMutationProps = ResumeRoundMutationBindings;
@@ -46,7 +46,9 @@ export const useResumeRoundMutation = ({
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
   const queryClient = useQueryClient();
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // One controller per in-flight conversation. Concurrent streams need independent cancel.
+  // `useResumeRoundMutation` is called exactly once — by the `SendMessageProvider`.
+  const controllersRef = useRef<Map<string, AbortController>>(new Map());
 
   const browserToolExecutor = useMemo(() => {
     return new BrowserToolExecutor(services.notifications?.toasts);
@@ -61,8 +63,9 @@ export const useResumeRoundMutation = ({
         conversationsService,
       });
 
+      controllersRef.current.get(vars.conversationId)?.abort();
       const controller = new AbortController();
-      abortControllerRef.current = controller;
+      controllersRef.current.set(vars.conversationId, controller);
 
       // Drop pending prompts from the round — the user has answered, the round is back in progress.
       streamActions.clearPendingPrompts();
@@ -86,7 +89,7 @@ export const useResumeRoundMutation = ({
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => controller.signal.aborted,
-          setAgentReasoning: updateActiveReasoning,
+          setAgentReasoning: (reasoning) => updateActiveReasoning(vars.conversationId, reasoning),
         });
         succeeded = true;
       } catch (err) {
@@ -97,21 +100,28 @@ export const useResumeRoundMutation = ({
         if (succeeded) {
           streamActions.invalidateConversation();
         }
-        clearActiveStream();
-        if (abortControllerRef.current === controller) {
-          abortControllerRef.current = null;
+        clearActiveStream(vars.conversationId);
+        if (controllersRef.current.get(vars.conversationId) === controller) {
+          controllersRef.current.delete(vars.conversationId);
         }
       }
     },
   });
 
-  const cancel = useCallback(() => {
-    abortControllerRef.current?.abort();
+  const cancel = useCallback((conversationId: string) => {
+    controllersRef.current.get(conversationId)?.abort();
+  }, []);
+
+  const cancelAll = useCallback(() => {
+    for (const controller of controllersRef.current.values()) {
+      controller.abort();
+    }
   }, []);
 
   return {
     mutate,
     isLoading,
     cancel,
+    cancelAll,
   };
 };
