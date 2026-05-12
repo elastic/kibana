@@ -12,11 +12,16 @@ import type { INotificationEvents, NotificationEvent } from '@kbn/core-notificat
 
 const createStartContract = (): jest.Mocked<INotificationEvents> => {
   const events$ = new BehaviorSubject<NotificationEvent[]>([]);
+  const unreadCount$ = new BehaviorSubject<number>(0);
   return {
     get$: jest.fn(() => events$.asObservable()),
     registerType: jest.fn().mockReturnValue(jest.fn()),
     notify: jest.fn(),
-    markAsRead: jest.fn(),
+    markAsRead: jest.fn().mockResolvedValue(undefined),
+    pin: jest.fn().mockResolvedValue(undefined),
+    unpin: jest.fn().mockResolvedValue(undefined),
+    getUnreadCount$: jest.fn(() => unreadCount$.asObservable()),
+    getUnreadCount: jest.fn(() => unreadCount$.getValue()),
   };
 };
 

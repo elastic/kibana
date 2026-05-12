@@ -13,9 +13,10 @@ import type {
   TypedNotificationEvent,
 } from '@kbn/core-notifications-browser';
 
-export const reportTypeId = 'notification-center-example.report';
-export const alertTypeId = 'notification-center-example.alert';
-export const cloudTypeId = 'notification-center-example.cloud';
+// Allowlist-conforming typeIds (NotificationTypeId prefix carve-out for examples).
+export const reportTypeId = 'notificationExampleReport' as const;
+export const alertTypeId = 'notificationExampleAlert' as const;
+export const cloudTypeId = 'notificationExampleCloud' as const;
 
 export interface ReportMetadata {
   format: 'pdf' | 'csv';

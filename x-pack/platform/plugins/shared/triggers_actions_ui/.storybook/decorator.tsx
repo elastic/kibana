@@ -60,7 +60,11 @@ const notifications: NotificationsStart = {
     get$: () => of([]),
     registerType: () => () => {},
     notify: () => {},
-    markAsRead: () => {},
+    markAsRead: () => Promise.resolve(),
+    pin: () => Promise.resolve(),
+    unpin: () => Promise.resolve(),
+    getUnreadCount$: () => of(0),
+    getUnreadCount: () => 0,
   },
 };
 

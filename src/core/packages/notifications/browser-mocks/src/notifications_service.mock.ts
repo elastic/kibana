@@ -43,7 +43,7 @@ const createStartContractMock = () => {
  */
 export interface NotificationsServiceContract {
   setup: typeof createSetupContractMock;
-  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => void;
+  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => Promise<void>;
   stop: () => void;
 }
 

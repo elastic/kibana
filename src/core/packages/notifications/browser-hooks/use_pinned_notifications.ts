@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  NotificationEventsProvider,
-  useNotificationEventsService,
-} from './notification_events_provider';
-export { useNotifications } from './use_notifications';
-export { useUnreadNotifications } from './use_unread_notifications';
-export { useReadNotifications } from './use_read_notifications';
-export { usePinnedNotifications } from './use_pinned_notifications';
-export { useUnreadNotificationCount } from './use_unread_notification_count';
+import { useMemo } from 'react';
+import type { NotificationEvent } from '@kbn/core-notifications-browser';
+import { useNotifications } from './use_notifications';
+
+/** Notification events the user has pinned. */
+export function usePinnedNotifications(): NotificationEvent[] {
+  const all = useNotifications();
+  return useMemo(() => all.filter((e) => e.isPinned), [all]);
+}

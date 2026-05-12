@@ -1,0 +1,178 @@
+---
+id: kibDevDocsCoreNotificationsBrowser
+slug: /kibana-dev-docs/core/notifications-browser
+title: Core Notifications Browser
+description: Public types and runtime contract for core.notifications.events, the persistent browser-side notification events surface.
+tags: ['kibana', 'core', 'notifications', 'notification-center', 'shared-ux']
+date: 2026-05-12
+---
+
+# @kbn/core-notifications-browser
+
+Public types and runtime contract for **`core.notifications.events`** —
+the persistent notification events surface available on `NotificationsStart`.
+
+`core.notifications.events` is different from `core.notifications.toasts`.
+Toasts are ephemeral UI prompts that disappear after the user dismisses
+them or a timer expires. Events are entries in the notification center: they
+have read/unread state, can be pinned, and (today) live for the page
+session. Read and pinned flags are persisted across reloads so the user's
+acknowledgements survive.
+
+## Surface map
+
+- **This package (`@kbn/core-notifications-browser`)** — public types and
+  the `NotificationStateStore` interface. Read this README.
+- **`@kbn/core-notifications-browser-hooks`** — React hooks
+  (`useNotifications`, `usePinnedNotifications`, `useUnreadNotificationCount`,
+  …) and the `NotificationEventsProvider`. Use this to read state from a
+  React component.
+- **`@kbn/core-notifications-browser-components`** — the `NotificationEvent`
+  React component and its Storybook story. Use this to render an event.
+- **`@kbn/core-notifications-browser-internal`** — implementation details
+  (`EventsService`, the localStorage-backed state store). Maintainer-only.
+
+## Publishing an event
+
+```ts
+core.notifications.events.notify({
+  id: 'reporting:job-abc',            // see "Namespaced ids" below
+  typeId: 'reporting',                 // see "Registering a notification type"
+  timestamp: Date.now(),
+  title: '[Error Monitoring Report] is generated',
+  message: 'The report was generated and is ready to download.',
+  isRead: false,                       // default; persisted flag may override at notify time
+  severity: 'info',
+  iconType: 'reportingApp',
+  badgeColor: 'primary',
+  eventName: 'reporting-job-done',
+});
+```
+
+`notify()` upserts by `id`: a second `notify()` with the same id replaces
+the first entry in place. This is the mechanism that lets persisted read /
+pinned state hydrate on reload — re-publishing an event with the same id
+brings back the flags from the persisted set.
+
+### Namespaced ids
+
+Publishers should namespace `id` by their `typeId` (e.g.,
+`'reporting:job-abc'`, never just `'job-abc'`). Two unrelated publishers
+that pick the same id will silently overwrite each other's events.
+
+## Registering a notification type
+
+```ts
+const updateReport = core.notifications.events.registerType<ReportMetadata>(
+  'reporting',
+  {
+    severity: 'info',
+    iconType: 'reportingApp',
+    badgeColor: 'primary',
+    eventName: 'reporting',
+  }
+);
+```
+
+`registerType()` returns an update callback. Calling it with an event whose
+`id` already exists in the events stream merges new fields into the
+existing entry (useful for "report is generating → 30% → 60% → ready").
+
+### The typeId allowlist
+
+`typeId` is type-constrained by `NotificationTypeId`:
+
+```ts
+export const VALID_NOTIFICATION_TYPE_IDS = [] as const;
+export const EXAMPLE_NOTIFICATION_TYPE_ID_PREFIX = 'notificationExample';
+
+export type NotificationTypeId =
+  | (typeof VALID_NOTIFICATION_TYPE_IDS)[number]
+  | `${typeof EXAMPLE_NOTIFICATION_TYPE_ID_PREFIX}${string}`;
+```
+
+This mirrors the `SidebarAppId` pattern in `@kbn/core-chrome-sidebar`. To
+add a production notification type, **submit a PR adding your typeId to
+`VALID_NOTIFICATION_TYPE_IDS`** in
+`src/core/packages/notifications/browser/src/events_types.ts`. The Shared
+UX team reviews the addition. Example / test code uses the
+`notificationExample*` prefix without needing a PR.
+
+The same allowlist will gate the upcoming "Mute notifications of this
+type" UX, so picking a stable typeId now matters.
+
+## Space scoping
+
+`notify()` accepts an optional `spaceId`. When set, the event's read and
+pinned flags are persisted under that space's namespace. When omitted, the
+event is **global** — its flags persist under the global namespace and are
+visible from every space.
+
+```ts
+events.notify({ id: '…', spaceId: 'default', /* … */ });
+```
+
+Core notifications does **not** validate that `spaceId` corresponds to a
+real Kibana space — the spaces plugin lives above core and core stays
+unaware of it. Upper-layer callers that need real validation should wrap
+`notify()` themselves.
+
+## Memory lifecycle
+
+- **The events list** lives in an in-memory `BehaviorSubject` on
+  `EventsService` for the duration of the page session. Closing the
+  notification center sidebar does **not** clear it — the user can reopen
+  and see the same list. A hard reload clears it; on next load, events
+  arrive again from publisher calls (or, in the future, from a server-fed
+  source).
+- **Persisted state (read / pinned)** lives in
+  `NotificationStateStore` (today: `localStorage`, future: `core.userStorage`).
+  Survives reloads, tab closes, and browser restarts.
+- **Unread count** is maintained as a dedicated observable
+  (`getUnreadCount$()`) inside `EventsService`. It updates O(1) per state
+  transition and is the right hook for the global-header badge.
+
+## `NotificationStateStore` — the persistence abstraction
+
+```ts
+export interface NotificationStateStore {
+  readIds$(scope: NotificationStateScope): Observable<ReadonlySet<string>>;
+  pinnedIds$(scope: NotificationStateScope): Observable<ReadonlySet<string>>;
+
+  getReadIds(scope: NotificationStateScope): ReadonlySet<string>;
+  getPinnedIds(scope: NotificationStateScope): ReadonlySet<string>;
+
+  markRead(eventId: string, scope: NotificationStateScope): Promise<void>;
+  markUnread(eventId: string, scope: NotificationStateScope): Promise<void>;
+  pin(eventId: string, scope: NotificationStateScope): Promise<void>;
+  unpin(eventId: string, scope: NotificationStateScope): Promise<void>;
+
+  preload(): Promise<void>;
+}
+```
+
+- **Sync reads, async writes.** Reads stay synchronous so `notify()` doesn't
+  go async (concurrent publishes would lose ordering). Mutations are
+  async because they hit the backing store.
+- **`preload()`** is the one-shot init hook the service awaits at start.
+  The current `LocalStorageNotificationStateStore` implements it as a
+  no-op (localStorage reads are lazy and synchronous). A future
+  `UserStorageNotificationStateStore` would await page-metadata injection
+  here.
+
+The implementation is intentionally narrow and one file's worth of code.
+See `@kbn/core-notifications-browser-internal` for the maintainer notes
+about today's localStorage stopgap and the swap path to
+`core.userStorage`.
+
+## Out of scope (today)
+
+- **Mute / opt-out by typeId** — landing alongside the 3-dot per-event
+  context menu in a follow-up.
+- **Archive / dismiss / delete** — not yet modeled. The events list can
+  only grow during a session today.
+- **Bulk actions** — the UI loops `markAsRead`. A real bulk API arrives
+  when the persistence backend goes async.
+- **Cross-tab sync** — second tab won't see read / pinned changes until
+  reload.
+- **Server-generated events** — `notify()` is the only event source today.

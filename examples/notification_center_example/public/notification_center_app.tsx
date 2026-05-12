@@ -109,6 +109,8 @@ export function NotificationCenterApp({ onClose }: SidebarComponentProps) {
               messages={[event.message]}
               isRead={event.isRead}
               onRead={(id, isRead) => events.markAsRead(id, !isRead)}
+              isPinned={event.isPinned ?? false}
+              onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
             />
           ))
         )}
