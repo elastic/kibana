@@ -16,8 +16,6 @@ import { useDocViewerExtensionActionsContext } from '../../../../../../../hooks/
 export { useLogFlyoutData } from './use_log_flyout_data';
 export type { UseLogFlyoutDataParams, LogFlyoutData } from './use_log_flyout_data';
 
-export const logsFlyoutId = 'logsFlyout' as const;
-
 export interface LogFlyoutContentProps {
   hit: DataTableRecord;
   logDataView: DocViewRenderProps['dataView'];

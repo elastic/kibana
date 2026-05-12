@@ -7,214 +7,209 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
-
-import { ScriptedFieldsTable } from '.';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, within } from '@testing-library/react';
+import { ScriptedFieldsTable } from '.';
 
-jest.mock('@elastic/eui', () => ({
-  EuiTitle: 'eui-title',
-  EuiText: 'eui-text',
-  EuiHorizontalRule: 'eui-horizontal-rule',
-  EuiSpacer: 'eui-spacer',
-  EuiCallOut: 'eui-call-out',
-  EuiLink: 'eui-link',
-  EuiOverlayMask: 'eui-overlay-mask',
-  EuiConfirmModal: 'eui-confirm-modal',
-  Comparators: {
-    property: () => {},
-    default: () => {},
-  },
-}));
-jest.mock('./components/header', () => ({ Header: 'header' }));
-jest.mock('./components/call_outs', () => ({ CallOuts: 'call-outs' }));
-jest.mock('./components/table', () => ({
-  // Note: this seems to fix React complaining about non lowercase attributes
-  Table: () => {
-    return 'table';
-  },
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      docLinks: {
+        links: {
+          indexPatterns: {
+            runtimeFields: '#',
+          },
+          query: {
+            queryESQL: '#',
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const helpers = {
-  redirectToRoute: () => {},
-  getRouteHref: () => '#',
+  getRouteHref: jest.fn(),
+  redirectToRoute: jest.fn(),
 };
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
+const createDataViewWithScriptedFields = (scriptedFields: FieldSpec[]) =>
+  createStubDataView({
+    spec: {
+      title: 'test-data-view',
+      fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field])),
+    },
+  });
+
+const createScriptedField = ({
+  name,
+  lang = 'painless',
+  script,
+}: {
+  name: string;
+  lang?: string;
+  script: string;
+}): FieldSpec => ({
+  aggregatable: false,
+  lang,
+  name,
+  script,
+  scripted: true,
+  searchable: false,
+  type: 'number',
+});
+
+const getDeleteButtonForField = (fieldName: string) =>
+  within(screen.getByRole('row', { name: new RegExp(fieldName) })).getAllByRole('button', {
+    name: 'Edit',
+  })[1];
 
 describe('ScriptedFieldsTable', () => {
   let indexPattern: DataView;
 
   beforeEach(() => {
-    indexPattern = getIndexPatternMock({
-      getScriptedFields: () => [
-        { isUserEditable: true, name: 'ScriptedField', lang: 'painless', script: 'x++' },
-        {
-          isUserEditable: false,
-          name: 'JustATest',
-          lang: 'painless',
-          script: 'z++',
-        },
-      ],
-    }) as DataView;
+    indexPattern = createDataViewWithScriptedFields([
+      createScriptedField({ name: 'ScriptedField', script: 'x++' }),
+      createScriptedField({ name: 'JustATest', script: 'z++' }),
+    ]);
+    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
-  test('should render normally', async () => {
-    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
-      typeof ScriptedFieldsTable
-    >(
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should render normally', () => {
+    renderWithI18n(
       <ScriptedFieldsTable
+        helpers={helpers}
         indexPattern={indexPattern}
-        helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
-        userEditPermission={false}
         scriptedFieldLanguageFilter={[]}
+        userEditPermission={false}
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Scripted fields are deprecated')).toBeVisible();
+    expect(screen.getByTestId('tableHeaderCell_displayName_0')).toBeVisible();
+    expect(screen.getByText('ScriptedField')).toBeVisible();
+    expect(screen.getByText('JustATest')).toBeVisible();
+    expect(screen.queryByText('Deprecated languages in use')).not.toBeInTheDocument();
   });
 
-  test('should filter based on the query bar', async () => {
-    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
+  it('should filter based on the query bar', () => {
+    renderWithI18n(
       <ScriptedFieldsTable
+        fieldFilter="Just"
+        helpers={helpers}
         indexPattern={indexPattern}
-        helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
-        userEditPermission={false}
         scriptedFieldLanguageFilter={[]}
+        userEditPermission={false}
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
-    component.setProps({ fieldFilter: 'Just' });
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    expect(screen.queryByText('ScriptedField')).not.toBeInTheDocument();
+    expect(screen.getByText('JustATest')).toBeVisible();
   });
 
-  test('should filter based on the lang filter', async () => {
-    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
-      typeof ScriptedFieldsTable
-    >(
+  it('should filter based on the lang filter', () => {
+    const BAD_LANG = 'somethingElse';
+    const indexPatternWithDeprecatedLang = createDataViewWithScriptedFields([
+      createScriptedField({ name: 'ScriptedField', script: 'x++' }),
+      createScriptedField({ name: 'JustATest', script: 'z++' }),
+      createScriptedField({ name: 'Bad', lang: BAD_LANG, script: 'z++' }),
+    ]);
+
+    renderWithI18n(
       <ScriptedFieldsTable
-        indexPattern={
-          getIndexPatternMock({
-            getScriptedFields: () => [
-              { isUserEditable: true, name: 'ScriptedField', lang: 'painless', script: 'x++' },
-              { isUserEditable: true, name: 'JustATest', lang: 'painless', script: 'z++' },
-              { isUserEditable: true, name: 'Bad', lang: 'somethingElse', script: 'z++' },
-            ],
-          }) as DataView
-        }
-        painlessDocLink={'painlessDoc'}
         helpers={helpers}
+        indexPattern={indexPatternWithDeprecatedLang}
+        painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
+        scriptedFieldLanguageFilter={['painless']}
         userEditPermission={false}
-        scriptedFieldLanguageFilter={[]}
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
-    component.setProps({ scriptedFieldLanguageFilter: ['painless'] });
-    component.update();
-
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('Deprecated languages in use')).toBeVisible();
+    expect(
+      screen.getByText(`The following deprecated languages are in use: ${BAD_LANG}.`, {
+        exact: false,
+      })
+    ).toBeVisible();
+    expect(screen.getByText('ScriptedField')).toBeVisible();
+    expect(screen.getByText('JustATest')).toBeVisible();
+    expect(screen.queryByText('Bad')).not.toBeInTheDocument();
   });
 
-  test('should hide the table if there are no scripted fields', async () => {
-    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow(
+  it('should show an empty table if there are no scripted fields', () => {
+    renderWithI18n(
       <ScriptedFieldsTable
-        indexPattern={
-          getIndexPatternMock({
-            getScriptedFields: () => [],
-          }) as DataView
-        }
-        painlessDocLink={'painlessDoc'}
         helpers={helpers}
+        indexPattern={createDataViewWithScriptedFields([])}
+        painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
-        userEditPermission={false}
         scriptedFieldLanguageFilter={[]}
+        userEditPermission={false}
       />
     );
 
-    // Allow the componentWillMount code to execute
-    // https://github.com/airbnb/enzyme/issues/450
-    await component.update(); // Fire `componentWillMount()`
-    await component.update(); // Force update the component post async actions
-
-    expect(component).toMatchSnapshot();
+    expect(screen.getByTestId('tableHeaderCell_displayName_0')).toBeVisible();
+    expect(screen.getByText('No items found')).toBeVisible();
+    expect(screen.queryByText('ScriptedField')).not.toBeInTheDocument();
+    expect(screen.queryByText('JustATest')).not.toBeInTheDocument();
   });
 
-  test('should show a delete modal', async () => {
-    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
-      typeof ScriptedFieldsTable
-    >(
+  it('should show a delete modal', async () => {
+    const user = userEvent.setup();
+
+    renderWithI18n(
       <ScriptedFieldsTable
+        helpers={helpers}
         indexPattern={indexPattern}
-        helpers={helpers}
         painlessDocLink={'painlessDoc'}
         saveIndexPattern={async () => {}}
-        userEditPermission={false}
         scriptedFieldLanguageFilter={[]}
+        userEditPermission={true}
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
-    // @ts-expect-error lang is not valid
-    component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
-    await component.update();
+    await user.click(getDeleteButtonForField('ScriptedField'));
 
-    // Ensure the modal is visible
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText("Delete scripted field 'ScriptedField'?")).toBeVisible();
   });
 
-  test('should delete a field', async () => {
-    const removeScriptedField = jest.fn();
-    const component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>> = shallow<
-      typeof ScriptedFieldsTable
-    >(
+  it('should delete a field', async () => {
+    const user = userEvent.setup();
+
+    const removeScriptedFieldSpy = jest.fn();
+    const saveIndexPatternSpy = jest.fn();
+    jest.spyOn(indexPattern, 'removeScriptedField').mockImplementation(removeScriptedFieldSpy);
+
+    renderWithI18n(
       <ScriptedFieldsTable
-        indexPattern={
-          {
-            ...indexPattern,
-            removeScriptedField,
-          } as unknown as DataView
-        }
         helpers={helpers}
+        indexPattern={indexPattern}
         painlessDocLink={'painlessDoc'}
-        saveIndexPattern={async () => {}}
-        userEditPermission={false}
+        saveIndexPattern={saveIndexPatternSpy}
         scriptedFieldLanguageFilter={[]}
+        userEditPermission={true}
       />
     );
 
-    await component.update(); // Fire `componentWillMount()`
-    // @ts-expect-error
-    component.instance().startDeleteField({ name: 'ScriptedField', lang: '', script: '' });
+    await user.click(getDeleteButtonForField('ScriptedField'));
+    expect(screen.getByText("Delete scripted field 'ScriptedField'?")).toBeVisible();
+    await user.click(screen.getByTestId('confirmModalConfirmButton'));
 
-    await component.update();
-    // @ts-expect-error
-    await component.instance().deleteField();
-    await component.update();
-
-    expect(removeScriptedField).toBeCalled();
+    expect(removeScriptedFieldSpy).toHaveBeenCalledWith('ScriptedField');
+    expect(saveIndexPatternSpy).toHaveBeenCalledWith(indexPattern);
   });
 });

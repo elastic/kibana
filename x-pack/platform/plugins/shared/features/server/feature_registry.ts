@@ -371,7 +371,12 @@ function applyAutomaticAllPrivilegeGrants(
 ) {
   allPrivileges.forEach((allPrivilege) => {
     if (allPrivilege) {
-      allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
+      allPrivilege.savedObject.all = uniq([
+        ...allPrivilege.savedObject.all,
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
       allPrivilege.savedObject.read = uniq([
         ...allPrivilege.savedObject.read,
         'config',
@@ -397,6 +402,8 @@ function applyAutomaticReadPrivilegeGrants(
         'url',
         'tag',
         'cloud',
+        'user-storage',
+        'user-storage-global',
       ]);
     }
   });

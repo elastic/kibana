@@ -1,5 +1,5 @@
 {
-  "sha1": "eb152f4faf1d23ef32cbf775c18490fc09fa6075",
+  "sha1": "ad6dc18a1f82065a57447d17d58eeb4f77c445be",
   "tests": [
     {
       "id": "7d659b2da63538a-85f1c7853cd9e1b",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 211,
+        "line": 50,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 280,
+        "line": 115,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 349,
+        "line": 177,
         "column": 10
       }
     },
@@ -53,7 +53,319 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 429,
+        "line": 241,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-ba4af27519ebee0",
+      "title": "Find rules API search: should find rules by name prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-f997b5c125e7d4d",
+      "title": "Find rules API search: should find rules by description prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-9ff037b1732d39e",
+      "title": "Find rules API search: should AND multiple terms together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-08e13abcec5a402",
+      "title": "Find rules API search: should match the name regardless of casing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-4608c273fe506d7",
+      "title": "Find rules API search: should not error on simple_query_string operators in user input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 139,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-4721d07bc458d19",
+      "title": "Find rules API search: should return empty results when no fields match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 161,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3adb1c87eb03b3e",
+      "title": "Find rules API pagination: should respect page and perPage and report total / current page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 179,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-6bc4b8dbd227a03",
+      "title": "Find rules API pagination: should return zero items when page is beyond the result set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 212,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-57d82441b2661de",
+      "title": "Find rules API sort: should sort rules by name in ascending order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 230,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-71a4a22f9bafecd",
+      "title": "Find rules API sort: should sort rules by name in descending order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 247,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-625a67a728124a4",
+      "title": "Find rules API filter: should filter rules by enabled state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 264,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3e558fb6db824a7",
+      "title": "Find rules API filter: should filter rules by metadata.tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 303,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-8b762cf8d4de1c7",
+      "title": "Find rules API filter: should support compound expressions with AND/OR/NOT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 321,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-109d917528a30f4",
+      "title": "Find rules API filter: should reject filters that reference unknown fields with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 348,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3ff5bbecd4aa93b",
+      "title": "Find rules API validation: should reject perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 374,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-1cf96463f2a8b81",
+      "title": "Find rules API validation: should reject perPage below the minimum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 384,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-ffd9a719250529e",
+      "title": "Find rules API validation: should reject page values below 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 394,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-9fdcffaf84461ed",
+      "title": "Find rules API validation: should reject non-numeric page values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 404,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-d39d34a9b026eee",
+      "title": "Find rules API validation: should reject unknown sortField values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 414,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-7bf5bc5baa4ee8a",
+      "title": "Find rules API validation: should reject unknown sortOrder values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 424,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3b75bb674fa02c5",
+      "title": "Find rules API validation: should reject empty search after trimming whitespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 434,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-02c2fc5aa4d5806",
+      "title": "Find rules API authorization: should return 200 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 447,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-80e7c33cbe1160f",
+      "title": "Find rules API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 467,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-cd0a223f395855a",
+      "title": "Find rules API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 486,
         "column": 10
       }
     },
@@ -67,7 +379,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 99,
+        "line": 35,
         "column": 10
       }
     },
@@ -81,7 +393,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 112,
+        "line": 51,
         "column": 10
       }
     },
@@ -95,7 +407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 125,
+        "line": 64,
         "column": 10
       }
     },
@@ -109,7 +421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 136,
+        "line": 78,
         "column": 10
       }
     },
@@ -123,7 +435,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 145,
+        "line": 87,
         "column": 10
       }
     },
@@ -137,63 +449,357 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 163,
+        "line": 108,
         "column": 10
       }
     },
     {
-      "id": "c54256d5fae7766-a41bda64b59ff23",
-      "title": "Search rules by name and description should find rules by name prefix",
+      "id": "2438f1e77f2c56f-0e977e98fb99ba7",
+      "title": "Rule executor writes one breach event per matching ES|QL row",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 30,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 72,
         "column": 10
       }
     },
     {
-      "id": "c54256d5fae7766-9b60bc16fe20e1a",
-      "title": "Search rules by name and description should find rules by description prefix",
+      "id": "2438f1e77f2c56f-77d63b284d4de05",
+      "title": "Rule executor writes the columns returned by the query to the data field correctly",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 57,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 116,
         "column": 10
       }
     },
     {
-      "id": "c54256d5fae7766-b3c19ceb2d2b713",
-      "title": "Search rules by name and description should AND multiple search terms together",
+      "id": "2438f1e77f2c56f-ea445300011525e",
+      "title": "Rule executor populates rule, source, and scheduling fields on every breach event",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 89,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 173,
         "column": 10
       }
     },
     {
-      "id": "c54256d5fae7766-51e3dc1672dd5ab",
-      "title": "Search rules by name and description should return empty results when no fields match",
+      "id": "2438f1e77f2c56f-b3f74e144f14a8b",
+      "title": "Rule executor writes one event per group when grouping.fields is set",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 124,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 231,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-58b42763926cd1b",
+      "title": "Rule executor groups multiple documents into the same group correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 281,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-9ee8192456d838b",
+      "title": "Rule executor produces stable group_hash for the same group across executions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 349,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-06a499fd5d06511",
+      "title": "Rule executor produces the correct breach events for match based queries without grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 408,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-cd70e404df6d0ab",
+      "title": "Rule executor includes data within the lookback window even when older than schedule.every",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 467,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0764f6813bc9f63",
+      "title": "Rule executor excludes data outside the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 513,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-338ac7759c20be6",
+      "title": "Rule executor defaults the lookback window to schedule.every when no lookback is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 554,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0363349d4f603b0",
+      "title": "Rule executor uses the configured time_field for the lookback range filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 600,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-885f62d064ffa5a",
+      "title": "Rule executor binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 663,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-c6053795bdb7194",
+      "title": "Rule executor emits a recovered event under no_breach policy when a previously breaching group stops breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 711,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-fa0800ab5bed882",
+      "title": "Rule executor does not emit recovery events for kind: \"signal\" rules when previously matching groups stop matching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 766,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-5ba0845ba35b7c5",
+      "title": "Rule executor uses the configured query under recovery_policy.type=query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 819,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-ea5da1ccca55f29",
+      "title": "Rule executor emits one recovery event per active group when recovery_policy.type=query matches multiple",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 901,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-033f45ff22a1659",
+      "title": "Rule executor does not recover a group when recovery_policy.type=query returns no matching active group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1002,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-be6d6473b1eaeab",
+      "title": "Rule executor does not recover a group when recovery_policy.type=query returns zero rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1077,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-2c933d29b3535e0",
+      "title": "Rule executor emits recovery events only for groups that stop breaching when others keep breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1146,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-c995dce28cb9615",
+      "title": "Rule executor emits both breach and recovery events in the same execution when one group recovers and another keeps breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1256,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-1462dc9dada6f00",
+      "title": "Rule executor writes zero events when the ES|QL query returns no rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1348,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-13e2313a20c3188",
+      "title": "Rule executor a disabled rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1374,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-d716fd4b00f7e6f",
+      "title": "Rule executor resumes producing events after a disabled rule is re-enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1436,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-ad19ddc9e83754c",
+      "title": "Rule executor a deleted rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1517,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-2c0ff1a827876c6",
+      "title": "Rule executor an invalid ES|QL query writes no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1578,
         "column": 10
       }
     }

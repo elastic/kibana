@@ -460,6 +460,67 @@
       },
       {
         "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerObservabilityTraceDocFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerObservabilityTraceDocFlyout",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<(",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.TraceDocFlyoutProps",
+            "text": "TraceDocFlyoutProps"
+          },
+          " | Omit<",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.TraceDocFlyoutProps",
+            "text": "TraceDocFlyoutProps"
+          },
+          " & React.RefAttributes<React.Component<",
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.TraceDocFlyoutProps",
+            "text": "TraceDocFlyoutProps"
+          },
+          ", any, any>>, \"ref\">) & React.RefAttributes<{}>>"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/waterfall_flyout/lazy_trace_doc_flyout.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerObservabilityTraceDocFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "docsReferencedTypeName": "P",
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
         "id": "def-public.UnifiedDocViewerObservabilityTracesOverview",
         "type": "Function",
         "tags": [],
@@ -585,7 +646,7 @@
         "label": "LogsOverviewApi",
         "description": [],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -601,7 +662,7 @@
               "(section: \"stacktrace\" | \"quality_issues\") => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -617,7 +678,7 @@
                   "\"stacktrace\" | \"quality_issues\""
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-                "lineNumber": 63,
+                "lineNumber": 64,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -625,6 +686,49 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.TraceDocFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TraceDocFlyoutProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "unifiedDocViewer",
+            "scope": "public",
+            "docId": "kibUnifiedDocViewerPluginApi",
+            "section": "def-public.TraceDocFlyoutProps",
+            "text": "TraceDocFlyoutProps"
+          },
+          " extends ",
+          "DocumentDetailFlyoutProps"
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/waterfall_flyout/trace_doc_flyout.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.TraceDocFlyoutProps.indexes",
+            "type": "Object",
+            "tags": [],
+            "label": "indexes",
+            "description": [],
+            "signature": [
+              "ObservabilityIndexes"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/full_screen_waterfall/waterfall_flyout/trace_doc_flyout.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1352,7 +1456,24 @@
           " | undefined; profileId: string; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
-        "lineNumber": 49,
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.TraceDocFlyoutType",
+        "type": "Type",
+        "tags": [],
+        "label": "TraceDocFlyoutType",
+        "description": [],
+        "signature": [
+          "\"log\" | \"span\""
+        ],
+        "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/common/types.ts",
+        "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

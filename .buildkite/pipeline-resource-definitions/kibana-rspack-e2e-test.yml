@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-rspack-e2e-test
+  description: 'Builds the Kibana distribution with the Rspack optimizer and runs the full on-merge test suite (Jest, Scout, FTR, Cypress, serverless) every 3 hours.'
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-rspack-e2e-test'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / rspack e2e test
+      description: 'Runs the on-merge build + test fanout with the Rspack optimizer enabled, on a schedule.'
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'false'
+        SCOUT_REPORTER_ENABLED: 'true'
+        # [rspack-transition] Build the distribution and run all tests against the Rspack optimizer
+        KBN_USE_RSPACK: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      # Trimmed on-merge variant: build the distribution and run the full test fanout
+      # (Jest, Scout, FTR, Cypress, serverless) without lint/typecheck/storybooks/api-docs/etc.
+      pipeline_file: .buildkite/pipelines/rspack_e2e_test.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        # Don't auto-build on commits; only run via schedule / manual trigger.
+        trigger_mode: none
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        build_tags: false
+      schedules:
+        Every 3 hours (main):
+          message: Rspack e2e test (every 3 hours)
+          branch: main
+          cronline: 0 */3 * * * America/New_York
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana
+        - rspack
