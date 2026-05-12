@@ -26,23 +26,23 @@ interface DetectionResult {
 }
 
 async function probeEndpoint(url: string, timeoutMs = 3000): Promise<boolean> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
     const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
     return response.ok || response.status === 200;
   } catch {
     return false;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
 async function getOllamaModels(endpoint: string): Promise<LoadedModel | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(`${endpoint}/api/ps`, { signal: controller.signal });
-    clearTimeout(timer);
     if (!response.ok) return null;
     const data = (await response.json()) as { models?: Array<{ name: string; size?: number }> };
     if (data.models && data.models.length > 0) {
@@ -55,15 +55,16 @@ async function getOllamaModels(endpoint: string): Promise<LoadedModel | null> {
     return null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
 async function getLmStudioModel(endpoint: string): Promise<LoadedModel | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(`${endpoint}/v1/models`, { signal: controller.signal });
-    clearTimeout(timer);
     if (!response.ok) return null;
     const data = (await response.json()) as { data?: Array<{ id: string }> };
     if (data.data && data.data.length > 0) {
@@ -72,6 +73,8 @@ async function getLmStudioModel(endpoint: string): Promise<LoadedModel | null> {
     return null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
