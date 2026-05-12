@@ -29,7 +29,7 @@ const EditPrivateLocationSchema = schema.object({
       minLength: 1,
     })
   ),
-  tags: schema.maybe(schema.arrayOf(schema.string())),
+  tags: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });
 
 const EditPrivateLocationQuery = schema.object({
