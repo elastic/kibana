@@ -155,8 +155,7 @@ describe('XYChart component', () => {
 
     formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
       const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
-      const originalConvert =
-        fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
+      const originalConvert = fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
       convertSpy = jest.fn((value) => originalConvert(value));
       fieldFormat.convertToText = convertSpy as typeof fieldFormat.convertToText;
       return fieldFormat;

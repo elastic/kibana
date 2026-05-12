@@ -16,7 +16,9 @@ import { EuiSwitch } from '@elastic/eui';
 
 const fieldType = 'number';
 const format = {
-  convertToReact: jest.fn().mockImplementation((input: string) => `converted duration for ${input}`),
+  convertToReact: jest
+    .fn()
+    .mockImplementation((input: string) => `converted duration for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return {
       inputFormat: 'seconds',
