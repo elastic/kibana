@@ -6,67 +6,89 @@
  */
 
 import type { Evaluator, EvaluationResult } from '@kbn/evals';
+import { createEsqlValidityEvaluator } from '@kbn/evals';
 import type { DashboardExample } from '../../../datasets/dashboards/types';
 import type { MigrationResult } from '../migration_client';
 import { extractEsqlQueries } from '../helpers';
 
-export const createEsqlCompletenessEvaluator = (): Evaluator<
-  DashboardExample,
-  MigrationResult
-> => ({
-  name: 'ES|QL Completeness',
-  kind: 'CODE',
-  evaluate: async ({
-    output,
-  }: {
-    input: unknown;
-    output: MigrationResult;
-    expected: unknown;
-    metadata: unknown;
-  }): Promise<EvaluationResult> => {
-    // Extract queries from the parsed elastic_dashboard.data panels
-    const translatedQueries = extractEsqlQueries(output);
+interface ValidityQueryDetail {
+  query: string;
+  valid: boolean;
+  errors: string[];
+}
 
-    if (translatedQueries.length === 0) {
-      return { score: null, explanation: 'No ES|QL queries found in output' };
-    }
+interface ValidityMetadata {
+  totalQueries: number;
+  validCount: number;
+  invalidCount: number;
+  queries: ValidityQueryDetail[];
+}
 
-    // Check for macro/lookup placeholder patterns that indicate partial translation
-    const panelsWithIssues: Array<{ title: string; issues: string[] }> = [];
-    const validQueries: Array<{ panelTitle: string; query: string }> = [];
+export const createEsqlCompletenessEvaluator = (): Evaluator<DashboardExample, MigrationResult> => {
+  const validityEvaluator = createEsqlValidityEvaluator<DashboardExample, MigrationResult>({
+    queryExtractor: (output) => extractEsqlQueries(output).map(({ query }) => query),
+    scoreOnEmptyQueries: 1,
+  });
 
-    for (const { panelTitle, query } of translatedQueries) {
-      const issues: string[] = [];
-      if (/\[(macro|lookup):.*?\]/i.test(query)) {
-        issues.push('Contains unresolved macro/lookup placeholder');
+  return {
+    name: 'ES|QL Completeness',
+    kind: 'CODE',
+    evaluate: async ({
+      input,
+      output,
+      expected,
+      metadata,
+    }: {
+      input: DashboardExample['input'];
+      output: MigrationResult;
+      expected: DashboardExample['output'];
+      metadata: DashboardExample['metadata'];
+    }): Promise<EvaluationResult> => {
+      const translatedQueries = extractEsqlQueries(output);
+
+      if (translatedQueries.length === 0) {
+        return { score: null, explanation: 'No ES|QL queries found in output' };
       }
-      if (issues.length > 0) {
-        panelsWithIssues.push({ title: panelTitle, issues });
-      } else {
-        validQueries.push({ panelTitle, query });
-      }
-    }
 
-    const score = validQueries.length / translatedQueries.length;
+      const validityResult = await validityEvaluator.evaluate({
+        input,
+        output,
+        expected,
+        metadata,
+      });
 
-    const errorDetails = panelsWithIssues.map((p) => `"${p.title}": ${p.issues.join('; ')}`);
+      const validityMeta = validityResult.metadata as ValidityMetadata | undefined;
+      const totalQueries = validityMeta?.totalQueries ?? translatedQueries.length;
+      const validCount = validityMeta?.validCount ?? translatedQueries.length;
 
-    const explanation =
-      panelsWithIssues.length > 0
-        ? `${validQueries.length}/${
-            translatedQueries.length
-          } queries are complete. Issues: ${errorDetails.join(' | ')}`
-        : `All ${translatedQueries.length} ES|QL queries are fully resolved`;
+      const score = validCount / totalQueries;
 
-    return {
-      score,
-      explanation,
-      metadata: {
-        totalQueries: translatedQueries.length,
-        validQueries: validQueries.length,
-        invalidPanels: panelsWithIssues.map((p) => ({ title: p.title, errors: p.issues })),
-        queries: translatedQueries.map(({ panelTitle, query }) => ({ panelTitle, query })),
-      },
-    };
-  },
-});
+      // Correlate framework per-query details back to panel titles
+      const queryToPanel = new Map(
+        translatedQueries.map(({ panelTitle, query }) => [query, panelTitle])
+      );
+
+      const invalidPanels = (validityMeta?.queries ?? [])
+        .filter((d) => !d.valid)
+        .map((d) => ({ title: queryToPanel.get(d.query) ?? '', errors: d.errors }));
+
+      const explanation =
+        invalidPanels.length > 0
+          ? `${validCount}/${totalQueries} queries are complete. Issues: ${invalidPanels
+              .map((p) => `"${p.title}": ${p.errors.join('; ')}`)
+              .join(' | ')}`
+          : `All ${totalQueries} ES|QL queries are fully resolved`;
+
+      return {
+        score,
+        explanation,
+        metadata: {
+          totalQueries,
+          validQueries: validCount,
+          invalidPanels,
+          queries: translatedQueries.map(({ panelTitle, query }) => ({ panelTitle, query })),
+        },
+      };
+    },
+  };
+};
