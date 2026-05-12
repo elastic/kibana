@@ -290,6 +290,16 @@ export {
   INSIGHT_IMPACT_LEVEL_MAP,
   getImpactLevel,
 } from './src/insights';
+export {
+  detectionSchema,
+  type Detection,
+  discoverySchema,
+  type Discovery,
+  verdictSchema,
+  type Verdict,
+  sigEventSchema,
+  type SigEvent,
+} from './src/sig_events';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';

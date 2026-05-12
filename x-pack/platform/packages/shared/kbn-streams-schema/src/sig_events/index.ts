@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export interface CommonSearchOptions {
-  /** ISO 8601 formatted datetime */
-  from?: string;
-  /** ISO 8601 formatted datetime */
-  to?: string;
-}
+export { detectionSchema, type Detection } from './detections';
+export { discoverySchema, type Discovery } from './discoveries';
+export { verdictSchema, type Verdict } from './verdicts';
+export { sigEventSchema, type SigEvent } from './events';
