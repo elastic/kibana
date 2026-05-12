@@ -7,12 +7,7 @@
 
 import React from 'react';
 import { EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 
 export interface PluginAddMenuPanelProps {
@@ -30,9 +25,9 @@ export const PluginAddMenuPanel: React.FC<PluginAddMenuPanelProps> = ({
         key="fromUrlOrZip"
         icon="link"
         onClick={onInstallFromUrlOrZip}
-        data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_PLUGINS}
-        data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.INSTALL_FROM_URL_OR_ZIP}
-        data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.PLUGIN}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.INSTALL_FROM_URL_OR_ZIP}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
       >
         {labels.agentPlugins.fromUrlOrZipMenuItem}
       </EuiContextMenuItem>,
@@ -40,9 +35,9 @@ export const PluginAddMenuPanel: React.FC<PluginAddMenuPanelProps> = ({
         key="fromLibrary"
         icon="importAction"
         onClick={onAddFromLibrary}
-        data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_PLUGINS}
-        data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_ADD_FROM_LIBRARY}
-        data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.PLUGIN}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_ADD_FROM_LIBRARY}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
       >
         {labels.agentPlugins.fromLibraryMenuItem}
       </EuiContextMenuItem>,

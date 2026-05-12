@@ -13,11 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { ChromeStart } from '@kbn/core/public';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_INAPP_ACTION,
-} from '../../application/agent_builder_ui_ebt';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
@@ -115,8 +112,8 @@ export function AgentBuilderNavControl() {
       iconType="productAgent"
       onClick={handleClick}
       data-test-subj="AgentBuilderNavControlButton"
-      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.INAPP_CHAT}
-      data-ebt-action={AGENT_BUILDER_UI_EBT_INAPP_ACTION.INAPP_CHAT_OPEN}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.INAPP_CHAT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.inapp.INAPP_CHAT_OPEN}
       onMouseLeave={() => setTooltipVisible(true)}
       onBlur={() => setTooltipVisible(true)}
     >
@@ -133,8 +130,8 @@ export function AgentBuilderNavControl() {
       onClick={handleClick}
       aria-label={buttonLabel}
       data-test-subj="AgentBuilderNavControlButtonIcon"
-      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.INAPP_CHAT}
-      data-ebt-action={AGENT_BUILDER_UI_EBT_INAPP_ACTION.INAPP_CHAT_OPEN}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.INAPP_CHAT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.inapp.INAPP_CHAT_OPEN}
       onMouseLeave={() => setTooltipVisible(true)}
       onBlur={() => setTooltipVisible(true)}
     />

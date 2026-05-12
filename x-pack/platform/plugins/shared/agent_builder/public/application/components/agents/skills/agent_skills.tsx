@@ -23,6 +23,7 @@ import type { PublicSkillSummary } from '@kbn/agent-builder-common';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
@@ -32,13 +33,6 @@ import { useQueryState } from '../../../hooks/use_query_state';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { queryKeys } from '../../../query_keys';
 import { searchParamNames } from '../../../search_param_names';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-  AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION,
-  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
-} from '../../../agent_builder_ui_ebt';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
 import { PageWrapper } from '../common/page_wrapper';
@@ -242,9 +236,9 @@ export const AgentSkills: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       href={createAgentBuilderUrl(appPaths.manage.skills)}
-                      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
                       data-ebt-action={
-                        AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION.MANAGE_ENTITY_LIST_VIEW
+                        AGENT_BUILDER_UI_EBT.action.manageGlobal.MANAGE_ENTITY_LIST_VIEW
                       }
                     >
                       {labels.agentSkills.manageAllSkills}
@@ -260,8 +254,8 @@ export const AgentSkills: React.FC = () => {
                             iconType="plusInCircle"
                             iconSide="left"
                             onClick={() => setIsAddMenuOpen((prev) => !prev)}
-                            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
-                            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.OPEN_ADD_MENU}
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
+                            data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.OPEN_ADD_MENU}
                           >
                             {labels.agentSkills.addSkillButton}
                           </EuiButton>
@@ -277,11 +271,11 @@ export const AgentSkills: React.FC = () => {
                               key="importFromLibrary"
                               icon="importAction"
                               onClick={handleImportFromLibrary}
-                              data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
                               data-ebt-action={
-                                AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_ADD_FROM_LIBRARY
+                                AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_ADD_FROM_LIBRARY
                               }
-                              data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
+                              data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
                             >
                               {labels.agentSkills.importFromLibraryMenuItem}
                             </EuiContextMenuItem>,
@@ -291,11 +285,11 @@ export const AgentSkills: React.FC = () => {
                                     key="createSkill"
                                     icon="pencil"
                                     onClick={handleOpenCreateFlyout}
-                                    data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
                                     data-ebt-action={
-                                      AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_CREATE_NEW
+                                      AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_CREATE_NEW
                                     }
-                                    data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
+                                    data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
                                   >
                                     {labels.agentSkills.createSkillMenuItem}
                                   </EuiContextMenuItem>,

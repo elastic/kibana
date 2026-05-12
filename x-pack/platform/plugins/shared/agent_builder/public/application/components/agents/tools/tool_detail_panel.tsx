@@ -16,10 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
 import { appPaths } from '../../../utils/app_paths';
@@ -129,8 +126,8 @@ const ToolHeaderActions = ({
             href={editInLibraryUrl}
             target="_blank"
             external
-            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-            data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_EDIT_FROM_AGENT}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_EDIT_FROM_AGENT}
             data-ebt-detail={toolId}
           >
             {labels.agentTools.editInLibraryLink}
@@ -143,8 +140,8 @@ const ToolHeaderActions = ({
           size="xs"
           color="danger"
           onClick={openConfirmRemove}
-          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-          data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_REMOVE}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_REMOVE}
           data-ebt-detail={toolId}
         >
           {labels.agentTools.removeToolButtonLabel}

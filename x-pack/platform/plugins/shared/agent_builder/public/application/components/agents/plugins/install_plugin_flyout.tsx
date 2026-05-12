@@ -27,10 +27,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import {
   useInstallPluginFromUrl,
@@ -191,8 +188,8 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
               isLoading={isLoading}
               disabled={isInstallDisabled}
               data-test-subj="agentBuilderInstallPluginSubmitButton"
-              data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_PLUGINS}
-              data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.INSTALL_FROM_URL_OR_ZIP}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.INSTALL_FROM_URL_OR_ZIP}
               data-ebt-detail={activeTab === 'url' ? 'install_from_url' : 'install_from_upload'}
             >
               {labels.plugins.installButton}

@@ -9,6 +9,7 @@ import React from 'react';
 import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
@@ -29,11 +30,11 @@ import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
-import {
-  AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM,
-  type AgentBuilderUiEbtSidebarNavItem,
-} from './agent_builder_ui_ebt';
 import { appPaths } from './utils/app_paths';
+
+/** Wire values for sidebar nav `data-ebt-detail` / `ebtNavItem` — derived from the shared EBT catalog */
+type AgentBuilderUiEbtSidebarNavItem =
+  (typeof AGENT_BUILDER_UI_EBT.detail.sidebarNavItem)[keyof typeof AGENT_BUILDER_UI_EBT.detail.sidebarNavItem];
 
 export type SidebarView = 'conversation' | 'manage';
 
@@ -97,7 +98,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentOverview,
     sidebarView: 'conversation',
     navLabel: navLabels.overview,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.INSTRUCTIONS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.INSTRUCTIONS,
     element: <AgentBuilderAgentOverviewPage />,
   },
   {
@@ -105,7 +106,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentSkills,
     sidebarView: 'conversation',
     navLabel: navLabels.skills,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.SKILLS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.SKILLS,
     element: <AgentBuilderAgentSkillsPage />,
   },
   {
@@ -114,7 +115,7 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'conversation',
     isExperimental: true,
     navLabel: navLabels.plugins,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.PLUGINS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.PLUGINS,
     element: <AgentBuilderAgentPluginsPage />,
   },
   {
@@ -122,7 +123,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentTools,
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.TOOLS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.TOOLS,
     element: <AgentBuilderAgentToolsPage />,
   },
   // Catch-all for agent root - must be last
@@ -140,7 +141,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageAgents,
     sidebarView: 'manage',
     navLabel: navLabels.agents,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.AGENTS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.AGENTS,
     element: <AgentBuilderAgentsPage />,
   },
   {
@@ -160,7 +161,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageSkills,
     sidebarView: 'manage',
     navLabel: navLabels.skills,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.SKILLS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.SKILLS,
     element: <AgentBuilderSkillsPage />,
   },
   {
@@ -181,7 +182,7 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     isExperimental: true,
     navLabel: navLabels.plugins,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.PLUGINS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.PLUGINS,
     element: <AgentBuilderPluginsPage />,
   },
   {
@@ -197,7 +198,7 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
     isExperimental: true,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.CONNECTORS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.CONNECTORS,
     element: <AgentBuilderConnectorsPage />,
   },
   {
@@ -205,7 +206,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageTools,
     sidebarView: 'manage',
     navLabel: navLabels.tools,
-    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.TOOLS,
+    ebtNavItem: AGENT_BUILDER_UI_EBT.detail.sidebarNavItem.TOOLS,
     element: <AgentBuilderToolsPage />,
   },
   {

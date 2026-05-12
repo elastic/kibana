@@ -8,10 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -76,8 +73,8 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       flyoutTitleId="skillLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.manage.skills}
-      manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT_ELEMENT.LIBRARY_SKILLS}
-      manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.MANAGE_LIBRARY_LINK}
+      manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_SKILLS}
+      manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT.action.uiChrome.MANAGE_LIBRARY_LINK}
       getItemName={getSkillName}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}

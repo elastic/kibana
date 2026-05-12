@@ -8,10 +8,7 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { ActiveItemRow } from '../common/active_item_row';
 
@@ -49,8 +46,8 @@ export const ActiveSkillRow: React.FC<ActiveSkillRowProps> = ({
           <EuiBadge color="hollow">{labels.agentSkills.elasticCapabilitiesReadOnlyBadge}</EuiBadge>
         ) : undefined
       }
-      removeDataEbtElement={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
-      removeDataEbtAction={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_REMOVE}
+      removeDataEbtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
+      removeDataEbtAction={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_REMOVE}
       removeDataEbtDetail={skill.id}
     />
   );

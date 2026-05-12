@@ -15,10 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
@@ -141,8 +138,8 @@ const SkillHeaderActions = ({
             iconType="pencil"
             size="xs"
             onClick={onEdit}
-            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
-            data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_EDIT_FROM_AGENT}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_EDIT_FROM_AGENT}
             data-ebt-detail={skillId}
           >
             {labels.skills.editSkillButtonLabel}
@@ -155,8 +152,8 @@ const SkillHeaderActions = ({
           size="xs"
           color="danger"
           onClick={openConfirmRemove}
-          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
-          data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_REMOVE}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_REMOVE}
           data-ebt-detail={skillId}
         >
           {labels.agentSkills.removeSkillButtonLabel}

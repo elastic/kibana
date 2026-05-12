@@ -63,7 +63,7 @@ export interface LibraryPanelProps<T extends LibraryItem> {
 
 const defaultGetItemName = <T extends LibraryItem>(item: T): string => item.id;
 
-export const LibraryPanel = <T extends LibraryItem>({
+export function LibraryPanel<T extends LibraryItem>({
   onClose,
   allItems,
   activeItemIdSet,
@@ -78,7 +78,7 @@ export const LibraryPanel = <T extends LibraryItem>({
   disabledItemIdSet,
   readOnlyItemIdSet,
   callout,
-}: LibraryPanelProps<T>) => {
+}: LibraryPanelProps<T>) {
   const { createAgentBuilderUrl } = useNavigation();
   const manageLibraryUrl = createAgentBuilderUrl(manageLibraryPath);
   const { euiTheme } = useEuiTheme();
@@ -194,4 +194,4 @@ export const LibraryPanel = <T extends LibraryItem>({
       </EuiFlyoutBody>
     </EuiFlyout>
   );
-};
+}

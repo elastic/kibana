@@ -17,13 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-  AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION,
-  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -59,9 +53,9 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
               e.preventDefault();
               navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }));
             }}
-            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.CROSS_NAVIGATE}
-            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
           >
             Skills
           </EuiLink>
@@ -74,9 +68,9 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
               e.preventDefault();
               navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }));
             }}
-            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.CROSS_NAVIGATE}
-            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.PLUGIN}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
           >
             Plugins
           </EuiLink>
@@ -96,9 +90,9 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
               e.preventDefault();
               navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }));
             }}
-            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.CROSS_NAVIGATE}
-            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.SKILL}
           >
             Skills
           </EuiLink>
@@ -138,9 +132,9 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
             iconType="plus"
             iconSide="left"
             onClick={onOpenLibrary}
-            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-            data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_ADD_FROM_LIBRARY}
-            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.TOOL}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_ADD_FROM_LIBRARY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
           >
             {labels.agentTools.emptyStateAddButton}
           </EuiButton>
@@ -149,8 +143,8 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
       secondaryAction={
         <EuiButtonEmpty
           href={createAgentBuilderUrl(appPaths.manage.tools)}
-          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-          data-ebt-action={AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION.MANAGE_ENTITY_LIST_VIEW}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageGlobal.MANAGE_ENTITY_LIST_VIEW}
         >
           {labels.agentTools.manageAllTools}
         </EuiButtonEmpty>

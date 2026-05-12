@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -37,12 +38,6 @@ import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { ToolsCustomizeEmptyState } from './tools_customize_empty_state';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-  AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION,
-} from '../../../agent_builder_ui_ebt';
 import { useToolsMutation } from './use_tools_mutation';
 
 const ActiveToolsList: React.FC<{
@@ -101,8 +96,8 @@ const ActiveToolsList: React.FC<{
               ) : undefined
             }
             canEditAgent={canEditAgent}
-            removeDataEbtElement={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
-            removeDataEbtAction={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_REMOVE}
+            removeDataEbtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+            removeDataEbtAction={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_REMOVE}
             removeDataEbtDetail={tool.id}
           />
         );
@@ -253,9 +248,9 @@ export const AgentTools: React.FC = () => {
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       href={createAgentBuilderUrl(appPaths.manage.tools)}
-                      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
                       data-ebt-action={
-                        AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION.MANAGE_ENTITY_LIST_VIEW
+                        AGENT_BUILDER_UI_EBT.action.manageGlobal.MANAGE_ENTITY_LIST_VIEW
                       }
                     >
                       {labels.agentTools.manageAllTools}
@@ -268,11 +263,11 @@ export const AgentTools: React.FC = () => {
                         iconType="plusInCircle"
                         iconSide="left"
                         onClick={openLibrary}
-                        data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
                         data-ebt-action={
-                          AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_ADD_FROM_LIBRARY
+                          AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_ADD_FROM_LIBRARY
                         }
-                        data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.TOOL}
+                        data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
                       >
                         {labels.agentTools.addToolButton}
                       </EuiButton>

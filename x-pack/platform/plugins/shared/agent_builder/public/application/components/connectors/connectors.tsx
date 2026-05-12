@@ -8,12 +8,8 @@
 import { EuiButton, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useConnectorsActions } from '../../context/connectors_provider';
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
-  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
-} from '../../agent_builder_ui_ebt';
 import { labels } from '../../utils/i18n';
 import { AgentBuilderConnectorsTable } from './table/connectors_table';
 import { useHasConnectorsAllPrivileges } from '../../hooks/use_has_connectors_all_privileges';
@@ -39,9 +35,9 @@ export const AgentBuilderConnectors = () => {
                   fill
                   iconType="plusInCircle"
                   onClick={openCreateFlyout}
-                  data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.MANAGE_GLOBAL}
-                  data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_CREATE_NEW}
-                  data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.CONNECTOR}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_GLOBAL}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_CREATE_NEW}
+                  data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.CONNECTOR}
                 >
                   <EuiText size="s">{labels.connectors.createButton}</EuiText>
                 </EuiButton>,

@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { appPaths } from '../../../../../utils/app_paths';
 import {
   getAgentIdFromPath,
@@ -35,10 +36,6 @@ import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import { useSendMessageContext } from '../../../../../context/send_message/send_message_context';
-import {
-  AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION,
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-} from '../../../../../agent_builder_ui_ebt';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -208,9 +205,9 @@ export const ConversationSidebarView: React.FC = () => {
                             color="text"
                             onClick={handlePressNewConversation}
                             data-test-subj="agentBuilderSidebarNewConversationButton"
-                            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CONVERSATION}
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION}
                             data-ebt-action={
-                              AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION.CONVERSATION_START
+                              AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_START
                             }
                           >
                             {newLabel}
@@ -226,9 +223,9 @@ export const ConversationSidebarView: React.FC = () => {
                             onClick={() => setIsSearchModalOpen(true)}
                             disabled={!hasConversations}
                             data-test-subj="agentBuilderSidebarSearchChatsButton"
-                            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CONVERSATION}
+                            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION}
                             data-ebt-action={
-                              AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION.CONVERSATION_SEARCH
+                              AGENT_BUILDER_UI_EBT.action.conversation.CONVERSATION_SEARCH
                             }
                           >
                             {searchLabel}

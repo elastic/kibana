@@ -71,7 +71,7 @@ export const AgentBuilderUiClickTelemetry: React.FC<{ children: ReactNode }> = (
     <div
       ref={rootRef}
       css={rootStyles}
-      data-ebt-element={AGENT_BUILDER_UI_EBT.element.appRoot}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.APP_ROOT}
       data-test-subj="agentBuilderUiClickTelemetryRoot"
     >
       {children}

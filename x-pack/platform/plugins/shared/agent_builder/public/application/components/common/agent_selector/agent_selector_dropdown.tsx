@@ -25,11 +25,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 
-import {
-  AGENT_BUILDER_UI_EBT_ELEMENT,
-  AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION,
-  AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL,
-} from '../../../agent_builder_ui_ebt';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
@@ -92,9 +88,9 @@ const AgentListHeader: React.FC = () => {
           color="text"
           {...(manageAgents ? { href: createAgentHref } : { disabled: true })}
           data-test-subj="agentBuilderAgentSelectorNewAgentButton"
-          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR}
-          data-ebt-action={AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.SIDEBAR_NAVIGATION_CLICK}
-          data-ebt-detail={AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL.NEW_AGENT_FROM_SELECTOR}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.SIDEBAR}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_NAVIGATION_CLICK}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.sidebarChrome.NEW_AGENT_FROM_SELECTOR}
         >
           {labels.newAgent}
         </EuiButton>
@@ -120,9 +116,9 @@ const AgentListFooter: React.FC = () => {
         fullWidth
         size="s"
         data-test-subj="agentBuilderAgentSelectorManageAgentsButton"
-        data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR}
-        data-ebt-action={AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.MANAGE_ALL_AGENTS_CLICK}
-        data-ebt-detail={AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL.MANAGE_AGENTS_FROM_SELECTOR}
+        data-ebt-element={AGENT_BUILDER_UI_EBT.element.SIDEBAR}
+        data-ebt-action={AGENT_BUILDER_UI_EBT.action.navSidebar.MANAGE_ALL_AGENTS_CLICK}
+        data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.sidebarChrome.MANAGE_AGENTS_FROM_SELECTOR}
       >
         {labels.manageAgents}
       </EuiButton>
