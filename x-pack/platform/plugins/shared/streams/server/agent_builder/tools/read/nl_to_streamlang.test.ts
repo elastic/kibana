@@ -7,7 +7,8 @@
 
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
-import { injectIgnoreFailure, nlToStreamlang, type NlToStreamlangDeps } from './nl_to_streamlang';
+import { nlToStreamlang, type NlToStreamlangDeps } from './nl_to_streamlang';
+import { injectIgnoreFailure } from './_pipeline_design_utils';
 
 describe('injectIgnoreFailure', () => {
   // Background: every newly-suggested step the agent emits gets

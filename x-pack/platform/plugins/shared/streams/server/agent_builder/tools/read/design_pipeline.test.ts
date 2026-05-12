@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { NlToStreamlangResult } from './nl_to_streamlang';
+import type { NlToStreamlangResult } from './_pipeline_design_utils';
 import type { RunExtractFieldsOutcome } from './extract_fields_handler';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { IPatternExtractionService } from '../../../lib/pattern_extraction/pattern_extraction_service';

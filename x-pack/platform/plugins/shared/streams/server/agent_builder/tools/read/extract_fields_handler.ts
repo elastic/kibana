@@ -23,6 +23,7 @@ import {
   mergeSeedParsingProcessorIntoSuggestedPipeline,
   postParsePipelineDefinitionSchema,
   suggestProcessingPipeline,
+  type SuggestProcessingPipelineResult,
 } from '@kbn/streams-ai';
 import { addDeterministicCustomIdentifiers } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
@@ -54,7 +55,7 @@ import {
   type NlToStreamlangResult,
   type SamplesConfig,
   type SimulationMode,
-} from './nl_to_streamlang';
+} from './_pipeline_design_utils';
 import { buildDropWarnings, computePipelineDiff } from './pipeline_diff';
 import {
   buildDuplicationWarning,
@@ -65,18 +66,30 @@ import {
 } from './extract_fields_warnings';
 
 /**
- * `extract_fields: true` mode for the `design_pipeline` tool. Mirrors the
- * server-side flow that powers the streams management UI's "Suggest
- * Processing Pipeline" action: heuristic grok/dissect discovery in worker
- * threads, narrow LLM review, post-parse design via the streams-ai
- * reasoning agent, and programmatic merge of the seed pattern.
+ * `extract_fields: true` mode for the `design_pipeline` tool. Reuses the
+ * heuristic grok/dissect discovery + narrow LLM review that powers the
+ * streams management UI's "Suggest Processing Pipeline" action, plus
+ * post-parse design via the streams-ai reasoning agent and a programmatic
+ * merge of the seed pattern into the existing pipeline.
  *
  * The grok/dissect pattern is system-managed: no LLM ever receives it as
  * editable text.
+ *
+ * Agent-only behaviours that have NO UI counterpart — do not grep the UI
+ * code for these:
+ * - Source-field-conflict detection + the post-fact placement /
+ *   duplication / overwrite warnings (see `extract_fields_warnings.ts`).
+ * - Merge placement (append vs prepend) based on whether an existing
+ *   step writes to / removes the seed source field.
+ * - Caller-supplied `seedSourceField` override for explicit steering
+ *   (see `SOURCE_FIELD_CONFLICT_DECISION.md`).
+ * - Key=value prefix hints surfaced through `buildKeyValueHints` for the
+ *   `refine_extracted_field` chain.
+ * - The `unsupported` outcome (non-ingest streams short-circuit instead
+ *   of falling back to the LLM-only path).
  */
 const SUB_AGENT_MAX_STEPS = 6;
-const SUB_AGENT_MAX_DURATION_MS = 180_000;
-const OPERATION_TIMEOUT_MS = 3 * 60 * 1000;
+const SUB_AGENT_MAX_DURATION_MS = 3 * 60 * 1000;
 
 export interface RunExtractFieldsParams {
   streamName: string;
@@ -268,70 +281,30 @@ export const runExtractFieldsFlow = async (
 
   // Combine the caller-provided signal with a 3-minute operation timeout so
   // long heuristic runs cannot hang the agent.
-  const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
+  const timeoutSignal = AbortSignal.timeout(SUB_AGENT_MAX_DURATION_MS);
   const compositeAbort = new AbortController();
   const cleanup = () => compositeAbort.abort();
   signal?.addEventListener('abort', cleanup);
   timeoutSignal.addEventListener('abort', cleanup);
 
   try {
-    log.debug(
-      `Scheduling parallel grok + dissect extraction (stream=${streamName} messages=${messages.length} fieldName=${fieldName})`
-    );
+    const winning = await pickSeedCandidate({
+      messages,
+      fieldName,
+      streamName,
+      connectorId,
+      flattenedDocs,
+      patternExtractionService,
+      inferenceClient,
+      scopedClusterClient,
+      streamsClient,
+      fieldsMetadataClient,
+      useOtelFieldNames: isOtel,
+      signal: compositeAbort.signal,
+      logger: log,
+    });
 
-    const settled = await Promise.allSettled<SeedParsingCandidate | null>([
-      processGrokPatterns({
-        messages,
-        fieldName,
-        streamName,
-        connectorId,
-        documents: flattenedDocs,
-        patternExtractionService,
-        inferenceClient,
-        scopedClusterClient,
-        streamsClient,
-        fieldsMetadataClient,
-        useOtelFieldNames: isOtel,
-        signal: compositeAbort.signal,
-        logger: log,
-      }),
-      processDissectPattern({
-        messages,
-        fieldName,
-        streamName,
-        connectorId,
-        documents: flattenedDocs,
-        patternExtractionService,
-        inferenceClient,
-        scopedClusterClient,
-        streamsClient,
-        fieldsMetadataClient,
-        useOtelFieldNames: isOtel,
-        signal: compositeAbort.signal,
-        logger: log,
-      }),
-    ]);
-
-    const candidates: SeedParsingCandidate[] = [];
-    for (const settledResult of settled) {
-      if (settledResult.status === 'fulfilled' && settledResult.value !== null) {
-        candidates.push(settledResult.value);
-      } else if (settledResult.status === 'rejected') {
-        const { reason } = settledResult;
-        if (isNoLLMSuggestionsError(reason)) {
-          log.debug(`No LLM suggestions available (stream=${streamName})`);
-        } else {
-          log.error(
-            `Candidate failed (stream=${streamName}${formatInferenceErrorMeta(
-              reason
-            )}): ${getErrorMessage(reason)}`
-          );
-        }
-      }
-    }
-
-    if (candidates.length === 0) {
-      log.debug(`No seed candidate produced (stream=${streamName}); falling back`);
+    if (!winning) {
       return {
         kind: 'fallback',
         reason: 'no_candidate',
@@ -341,26 +314,21 @@ export const runExtractFieldsFlow = async (
       };
     }
 
-    candidates.sort((a, b) => b.parsedRate - a.parsedRate);
-    const winning = candidates[0];
-    log.debug(
-      `Selected ${winning.type} processor (stream=${streamName} parsedRate=${winning.parsedRate})`
-    );
-
-    const { parsedDocuments, definitionError } = await extractParsedSampleDocuments({
+    const designed = await designPostParsePipeline({
+      definition,
       streamName,
-      documents: flattenedDocs,
-      parsingProcessor: winning.processor,
+      winning,
+      flattenedDocs,
+      useOtelFieldNames: isOtel,
+      boundInferenceClient,
       scopedClusterClient,
       streamsClient,
       fieldsMetadataClient,
+      signal: compositeAbort.signal,
       logger: log,
     });
 
-    if (definitionError || parsedDocuments.length === 0) {
-      log.debug(
-        `Seed simulation produced no parsed docs (stream=${streamName} definitionError=${definitionError}); falling back`
-      );
+    if (!designed) {
       return {
         kind: 'fallback',
         reason: 'no_parsed_documents',
@@ -370,202 +338,455 @@ export const runExtractFieldsFlow = async (
       };
     }
 
-    const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
-      scopedClusterClient.asCurrentUser,
-      streamName
-    );
-
-    const initialDatasetAnalysisJson = JSON.stringify(
-      await buildDocumentStructureOverviewForPipelinePrompt(
-        parsedDocuments,
-        fieldsMetadataClient,
-        isOtel,
-        mappedFields
-      )
-    );
-
-    const suggestion = await suggestProcessingPipeline({
-      definition,
-      inferenceClient: boundInferenceClient,
-      agentPipelineSchema: postParsePipelineDefinitionSchema,
-      maxSteps: SUB_AGENT_MAX_STEPS,
-      maxDurationMs: SUB_AGENT_MAX_DURATION_MS,
-      signal: compositeAbort.signal,
-      documents: parsedDocuments,
-      esClient: scopedClusterClient.asCurrentUser,
-      fieldsMetadataClient,
-      initialDatasetAnalysisJson,
-      mappedFields,
-      upstreamSeedParsingContextMarkdown: formatUpstreamSeedParsingContextForPromptMarkdown(
-        winning.processor
-      ),
-      simulatePipeline: (pipeline) =>
-        simulateProcessing({
-          params: {
-            path: { name: streamName },
-            body: { processing: pipeline, documents: parsedDocuments },
-          },
-          esClient: scopedClusterClient.asCurrentUser,
-          streamsClient,
-          fieldsMetadataClient,
-        }),
-    });
-
-    const stepsUsed = suggestion.metadata.stepsUsed;
-
-    const newlyAdded = suggestion.pipeline
-      ? mergeSeedParsingProcessorIntoSuggestedPipeline(winning.processor, suggestion.pipeline)
-      : { steps: [{ ...winning.processor }] };
-
-    // Existing steps keep their original position whenever it is structurally
-    // safe to do so — appending new extraction at the END preserves user
-    // intent for the common case where existing steps decorate or transform
-    // attributes.* and do not touch the seed source field.
-    //
-    // Safety override: if any existing step writes to, renames away from, or
-    // removes the seed source field (typically `body.text`), the new
-    // extraction must run BEFORE those steps; otherwise the source would be
-    // mutated or dropped before grok/dissect could read it. In that case we
-    // fall back to prepending new extraction at the start.
-    //
-    // `addDeterministicCustomIdentifiers` ensures every step (new + existing)
-    // carries a `customIdentifier` that the transpiler turns into an ingest
-    // processor `tag`. Without tags the simulation framework cannot recognize
-    // a processor as "successful" (it requires `!!processor.tag`), so a
-    // single untagged existing step would mis-classify every doc as
-    // `partially_parsed` and report a 0% success rate even when every
-    // processor ran cleanly.
-    //
-    // Side-effect to be aware of: this helper strips every pre-existing
-    // `customIdentifier` and re-assigns purely from position in the merged
-    // list (`root.steps[i]`). The existing-step identifiers the caller
-    // passed in (from disk) do NOT survive the merge — the steps the user
-    // sees back carry fresh path-derived ids. This is benign as long as
-    // downstream code never treats `customIdentifier` as a stable
-    // cross-call handle for "is this the same existing step". Today every
-    // matcher that compares existing vs proposed steps strips
-    // `customIdentifier` before comparing (`structuralKey` in
-    // `injectIgnoreFailure`, `SIGNATURE_IGNORED_KEYS` in
-    // `pipeline_diff.ts`), so the identifier swap is invisible. If you
-    // ever need stable-identity matching, use those structural helpers,
-    // not the identifier string.
-    const sourceFieldUsedByExisting = existingSteps.some((step) =>
-      stepWritesOrRemovesField(step, fieldName)
-    );
-    const merged = addDeterministicCustomIdentifiers({
-      steps: sourceFieldUsedByExisting
-        ? [...newlyAdded.steps, ...existingSteps]
-        : [...existingSteps, ...newlyAdded.steps],
-    });
-
-    const shouldSimulatePartial = existingSteps.length > 0 && documentStatus === 'processed';
-    const stepsForFinalSimulation = shouldSimulatePartial
-      ? addDeterministicCustomIdentifiers({ steps: newlyAdded.steps }).steps
-      : merged.steps;
-    const simulationMode: SimulationMode = shouldSimulatePartial ? 'partial' : 'complete';
-
-    const finalSimulation = await simulateProcessing({
-      params: {
-        path: { name: streamName },
-        body: { processing: { steps: stepsForFinalSimulation }, documents: flattenedDocs },
-      },
-      esClient: scopedClusterClient.asCurrentUser,
+    return assembleSuccessOutcome({
+      streamName,
+      streamType,
+      fieldName,
+      sourceFieldConflictDetected,
+      existingSteps,
+      flattenedDocs,
+      documentStatus,
+      samplesInfo,
+      winning,
+      suggestion: designed.suggestion,
+      parsedDocuments: designed.parsedDocuments,
+      scopedClusterClient,
       streamsClient,
       fieldsMetadataClient,
     });
-
-    const baseFields = extractFieldsFromDocuments(flattenedDocs);
-    const fieldChanges = finalSimulation.definition_error
-      ? []
-      : computeFieldChanges(finalSimulation, baseFields);
-    const successRate = finalSimulation.definition_error
-      ? null
-      : computeSuccessRate(finalSimulation);
-    const simErrors = finalSimulation.definition_error
-      ? [finalSimulation.definition_error.message]
-      : extractSimulationErrors(finalSimulation);
-
-    const warnings: string[] = [];
-    if (!suggestion.pipeline) {
-      warnings.push(
-        'Post-parse design produced no additional steps. The proposed pipeline contains only the system-discovered seed parsing step.'
-      );
-    }
-    if (existingSteps.length > 0) {
-      const placementWarning = buildPlacementWarning({
-        existingSteps,
-        sourceFieldUsedByExisting,
-        fieldName,
-      });
-      if (placementWarning) warnings.push(placementWarning);
-
-      const duplicationWarning = buildDuplicationWarning({ existingSteps, fieldName });
-      if (duplicationWarning) warnings.push(duplicationWarning);
-
-      const overwriteWarning = buildOverwriteWarning(existingSteps, fieldChanges);
-      if (overwriteWarning) warnings.push(overwriteWarning);
-    }
-    if (shouldSimulatePartial) {
-      const baseNote =
-        'Simulation is partial — only the newly-added extraction steps were simulated, since the sample documents already reflect the existing pipeline output. Existing steps will continue to run as-is at ingest.';
-      warnings.push(
-        sourceFieldUsedByExisting
-          ? `${baseNote} Because an existing step writes to or removes the source field "${fieldName}", the cached samples may have already been mutated; simulation may under-report the success rate that ingest would actually produce.`
-          : baseNote
-      );
-    }
-    if (simErrors.length > 0) {
-      const rateLabel =
-        successRate !== null ? `${successRate}% success rate with` : 'Simulation failed with';
-      warnings.push(
-        `${rateLabel} ${simErrors.length} error type(s): ${simErrors.slice(0, 3).join('; ')}`
-      );
-    }
-
-    const finalSteps = injectIgnoreFailure(merged.steps, existingSteps);
-
-    // Diff against the pre-existing pipeline so the agent can present a clear
-    // before/after view. With the append-existing strategy above the diff is
-    // typically all-additions plus all-unchanged, but we still build it to
-    // surface any structural mismatch (e.g. a sub-agent surprise) loudly.
-    const diff = computePipelineDiff(existingSteps, finalSteps);
-    const dropWarnings = buildDropWarnings(diff);
-
-    return {
-      kind: 'success',
-      streamType,
-      pickedSourceField: fieldName,
-      sourceFieldConflictDetected,
-      stepsUsed,
-      result: {
-        steps: finalSteps,
-        existing_steps: existingSteps,
-        step_changes: diff.changes,
-        summary: buildSummary(finalSteps),
-        field_changes: fieldChanges,
-        simulation: {
-          success_rate: successRate,
-          ...(simErrors.length > 0 && { errors: simErrors }),
-          sample_count: flattenedDocs.length,
-          mode: simulationMode,
-        },
-        ...(warnings.length + dropWarnings.length > 0 && {
-          warnings: [...warnings, ...dropWarnings],
-        }),
-        hints: [
-          `Seed parsing was discovered automatically using ${winning.type} heuristics on field "${fieldName}".`,
-          ...buildKeyValueHints(
-            parsedDocuments,
-            new Set(fieldChanges.map((change) => change.field))
-          ),
-        ],
-        samples_info: samplesInfo,
-      },
-    };
   } finally {
     signal?.removeEventListener('abort', cleanup);
     timeoutSignal.removeEventListener('abort', cleanup);
   }
+};
+
+// ---------------------------------------------------------------------------
+// Phase 1: parallel grok + dissect heuristics + LLM review
+// ---------------------------------------------------------------------------
+
+interface PickSeedCandidateArgs {
+  messages: string[];
+  fieldName: string;
+  streamName: string;
+  connectorId: string;
+  flattenedDocs: FlattenRecord[];
+  patternExtractionService: IPatternExtractionService;
+  inferenceClient: InferenceClient;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  useOtelFieldNames: boolean;
+  signal: AbortSignal;
+  logger: Logger;
+}
+
+/**
+ * Run grok and dissect heuristic extraction in parallel against the same
+ * sample messages, then return whichever candidate parsed more documents.
+ * Returns `null` when neither branch produced a usable seed pattern (the
+ * caller turns that into a `fallback` outcome).
+ */
+const pickSeedCandidate = async ({
+  messages,
+  fieldName,
+  streamName,
+  connectorId,
+  flattenedDocs,
+  patternExtractionService,
+  inferenceClient,
+  scopedClusterClient,
+  streamsClient,
+  fieldsMetadataClient,
+  useOtelFieldNames,
+  signal,
+  logger,
+}: PickSeedCandidateArgs): Promise<SeedParsingCandidate | null> => {
+  logger.debug(
+    `Scheduling parallel grok + dissect extraction (stream=${streamName} messages=${messages.length} fieldName=${fieldName})`
+  );
+
+  const commonArgs = {
+    messages,
+    fieldName,
+    streamName,
+    connectorId,
+    documents: flattenedDocs,
+    patternExtractionService,
+    inferenceClient,
+    scopedClusterClient,
+    streamsClient,
+    fieldsMetadataClient,
+    useOtelFieldNames,
+    signal,
+    logger,
+  };
+
+  const settled = await Promise.allSettled<SeedParsingCandidate | null>([
+    processGrokPatterns(commonArgs),
+    processDissectPattern(commonArgs),
+  ]);
+
+  const candidates: SeedParsingCandidate[] = [];
+  for (const settledResult of settled) {
+    if (settledResult.status === 'fulfilled' && settledResult.value !== null) {
+      candidates.push(settledResult.value);
+    } else if (settledResult.status === 'rejected') {
+      const { reason } = settledResult;
+      if (isNoLLMSuggestionsError(reason)) {
+        logger.debug(`No LLM suggestions available (stream=${streamName})`);
+      } else {
+        logger.error(
+          `Candidate failed (stream=${streamName}${formatInferenceErrorMeta(
+            reason
+          )}): ${getErrorMessage(reason)}`
+        );
+      }
+    }
+  }
+
+  if (candidates.length === 0) {
+    logger.debug(`No seed candidate produced (stream=${streamName}); falling back`);
+    return null;
+  }
+
+  candidates.sort((a, b) => b.parsedRate - a.parsedRate);
+  const winning = candidates[0];
+  logger.debug(
+    `Selected ${winning.type} processor (stream=${streamName} parsedRate=${winning.parsedRate})`
+  );
+  return winning;
+};
+
+// ---------------------------------------------------------------------------
+// Phase 2: post-parse reasoning agent
+// ---------------------------------------------------------------------------
+
+interface DesignPostParsePipelineArgs {
+  definition: Streams.ingest.all.Definition;
+  streamName: string;
+  winning: SeedParsingCandidate;
+  flattenedDocs: FlattenRecord[];
+  useOtelFieldNames: boolean;
+  boundInferenceClient: BoundInferenceClient;
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  signal: AbortSignal;
+  logger: Logger;
+}
+
+interface DesignPostParsePipelineResult {
+  parsedDocuments: FlattenRecord[];
+  suggestion: SuggestProcessingPipelineResult;
+}
+
+/**
+ * Simulate the seed parser against the sample docs to materialise the
+ * post-parse view, then hand that view (plus mapped fields and a dataset
+ * overview) to the streams-ai reasoning sub-agent. Returns `null` when the
+ * seed simulation produced no usable parsed docs; the caller turns that
+ * into a `fallback` outcome.
+ */
+const designPostParsePipeline = async ({
+  definition,
+  streamName,
+  winning,
+  flattenedDocs,
+  useOtelFieldNames,
+  boundInferenceClient,
+  scopedClusterClient,
+  streamsClient,
+  fieldsMetadataClient,
+  signal,
+  logger,
+}: DesignPostParsePipelineArgs): Promise<DesignPostParsePipelineResult | null> => {
+  const { parsedDocuments, definitionError } = await extractParsedSampleDocuments({
+    streamName,
+    documents: flattenedDocs,
+    parsingProcessor: winning.processor,
+    scopedClusterClient,
+    streamsClient,
+    fieldsMetadataClient,
+    logger,
+  });
+
+  if (definitionError || parsedDocuments.length === 0) {
+    logger.debug(
+      `Seed simulation produced no parsed docs (stream=${streamName} definitionError=${definitionError}); falling back`
+    );
+    return null;
+  }
+
+  const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
+    scopedClusterClient.asCurrentUser,
+    streamName
+  );
+
+  const initialDatasetAnalysisJson = JSON.stringify(
+    await buildDocumentStructureOverviewForPipelinePrompt(
+      parsedDocuments,
+      fieldsMetadataClient,
+      useOtelFieldNames,
+      mappedFields
+    )
+  );
+
+  const suggestion = await suggestProcessingPipeline({
+    definition,
+    inferenceClient: boundInferenceClient,
+    agentPipelineSchema: postParsePipelineDefinitionSchema,
+    maxSteps: SUB_AGENT_MAX_STEPS,
+    maxDurationMs: SUB_AGENT_MAX_DURATION_MS,
+    signal,
+    documents: parsedDocuments,
+    esClient: scopedClusterClient.asCurrentUser,
+    fieldsMetadataClient,
+    initialDatasetAnalysisJson,
+    mappedFields,
+    upstreamSeedParsingContextMarkdown: formatUpstreamSeedParsingContextForPromptMarkdown(
+      winning.processor
+    ),
+    simulatePipeline: (pipeline) =>
+      simulateProcessing({
+        params: {
+          path: { name: streamName },
+          body: { processing: pipeline, documents: parsedDocuments },
+        },
+        esClient: scopedClusterClient.asCurrentUser,
+        streamsClient,
+        fieldsMetadataClient,
+      }),
+  });
+
+  return { parsedDocuments, suggestion };
+};
+
+// ---------------------------------------------------------------------------
+// Phase 3: merge, simulate, build warnings, format result
+// ---------------------------------------------------------------------------
+
+interface AssembleSuccessOutcomeArgs {
+  streamName: string;
+  streamType: StreamType;
+  fieldName: string;
+  sourceFieldConflictDetected: boolean;
+  existingSteps: StreamlangStep[];
+  flattenedDocs: FlattenRecord[];
+  documentStatus: 'processed' | 'unprocessed';
+  samplesInfo: { source: 'stream' | 'inline'; count: number };
+  winning: SeedParsingCandidate;
+  suggestion: SuggestProcessingPipelineResult;
+  parsedDocuments: FlattenRecord[];
+  scopedClusterClient: IScopedClusterClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+}
+
+/**
+ * Merge the seed parser into the proposed sub-agent pipeline, simulate the
+ * combined result against the original sample docs, and assemble the final
+ * `success` outcome. All placement / duplication / overwrite warnings are
+ * computed here and folded into `result.warnings`.
+ *
+ * Existing steps keep their original position whenever it is structurally
+ * safe to do so — appending new extraction at the END preserves user
+ * intent for the common case where existing steps decorate or transform
+ * attributes.* and do not touch the seed source field.
+ *
+ * Safety override: if any existing step writes to, renames away from, or
+ * removes the seed source field (typically `body.text`), the new
+ * extraction must run BEFORE those steps; otherwise the source would be
+ * mutated or dropped before grok/dissect could read it. In that case we
+ * fall back to prepending new extraction at the start.
+ *
+ * `addDeterministicCustomIdentifiers` ensures every step (new + existing)
+ * carries a `customIdentifier` that the transpiler turns into an ingest
+ * processor `tag`. Without tags the simulation framework cannot recognize
+ * a processor as "successful" (it requires `!!processor.tag`), so a single
+ * untagged existing step would mis-classify every doc as
+ * `partially_parsed` and report a 0% success rate even when every
+ * processor ran cleanly.
+ *
+ * Side-effect to be aware of: this helper strips every pre-existing
+ * `customIdentifier` and re-assigns purely from position in the merged
+ * list (`root.steps[i]`). The existing-step identifiers the caller passed
+ * in (from disk) do NOT survive the merge — the steps the user sees back
+ * carry fresh path-derived ids. This is benign as long as downstream code
+ * never treats `customIdentifier` as a stable cross-call handle for "is
+ * this the same existing step". Today every matcher that compares
+ * existing vs proposed steps strips `customIdentifier` before comparing
+ * (`structuralKey` in `injectIgnoreFailure`, `SIGNATURE_IGNORED_KEYS` in
+ * `pipeline_diff.ts`), so the identifier swap is invisible. If you ever
+ * need stable-identity matching, use those structural helpers, not the
+ * identifier string.
+ */
+const assembleSuccessOutcome = async ({
+  streamName,
+  streamType,
+  fieldName,
+  sourceFieldConflictDetected,
+  existingSteps,
+  flattenedDocs,
+  documentStatus,
+  samplesInfo,
+  winning,
+  suggestion,
+  parsedDocuments,
+  scopedClusterClient,
+  streamsClient,
+  fieldsMetadataClient,
+}: AssembleSuccessOutcomeArgs): Promise<RunExtractFieldsOutcome> => {
+  const newlyAdded = suggestion.pipeline
+    ? mergeSeedParsingProcessorIntoSuggestedPipeline(winning.processor, suggestion.pipeline)
+    : { steps: [{ ...winning.processor }] };
+
+  const sourceFieldUsedByExisting = existingSteps.some((step) =>
+    stepWritesOrRemovesField(step, fieldName)
+  );
+  const merged = addDeterministicCustomIdentifiers({
+    steps: sourceFieldUsedByExisting
+      ? [...newlyAdded.steps, ...existingSteps]
+      : [...existingSteps, ...newlyAdded.steps],
+  });
+
+  const shouldSimulatePartial = existingSteps.length > 0 && documentStatus === 'processed';
+  const stepsForFinalSimulation = shouldSimulatePartial
+    ? addDeterministicCustomIdentifiers({ steps: newlyAdded.steps }).steps
+    : merged.steps;
+  const simulationMode: SimulationMode = shouldSimulatePartial ? 'partial' : 'complete';
+
+  const finalSimulation = await simulateProcessing({
+    params: {
+      path: { name: streamName },
+      body: { processing: { steps: stepsForFinalSimulation }, documents: flattenedDocs },
+    },
+    esClient: scopedClusterClient.asCurrentUser,
+    streamsClient,
+    fieldsMetadataClient,
+  });
+
+  const baseFields = extractFieldsFromDocuments(flattenedDocs);
+  const fieldChanges = finalSimulation.definition_error
+    ? []
+    : computeFieldChanges(finalSimulation, baseFields);
+  const successRate = finalSimulation.definition_error ? null : computeSuccessRate(finalSimulation);
+  const simErrors = finalSimulation.definition_error
+    ? [finalSimulation.definition_error.message]
+    : extractSimulationErrors(finalSimulation);
+
+  const warnings = buildSuccessOutcomeWarnings({
+    suggestion,
+    existingSteps,
+    sourceFieldUsedByExisting,
+    fieldName,
+    fieldChanges,
+    shouldSimulatePartial,
+    simErrors,
+    successRate,
+  });
+
+  const finalSteps = injectIgnoreFailure(merged.steps, existingSteps);
+
+  // Diff against the pre-existing pipeline so the agent can present a clear
+  // before/after view. With the append-existing strategy above the diff is
+  // typically all-additions plus all-unchanged, but we still build it to
+  // surface any structural mismatch (e.g. a sub-agent surprise) loudly.
+  const diff = computePipelineDiff(existingSteps, finalSteps);
+  const dropWarnings = buildDropWarnings(diff);
+
+  return {
+    kind: 'success',
+    streamType,
+    pickedSourceField: fieldName,
+    sourceFieldConflictDetected,
+    stepsUsed: suggestion.metadata.stepsUsed,
+    result: {
+      steps: finalSteps,
+      existing_steps: existingSteps,
+      step_changes: diff.changes,
+      summary: buildSummary(finalSteps),
+      field_changes: fieldChanges,
+      simulation: {
+        success_rate: successRate,
+        ...(simErrors.length > 0 && { errors: simErrors }),
+        sample_count: flattenedDocs.length,
+        mode: simulationMode,
+      },
+      ...(warnings.length + dropWarnings.length > 0 && {
+        warnings: [...warnings, ...dropWarnings],
+      }),
+      hints: [
+        `Seed parsing was discovered automatically using ${winning.type} heuristics on field "${fieldName}".`,
+        ...buildKeyValueHints(parsedDocuments, new Set(fieldChanges.map((change) => change.field))),
+      ],
+      samples_info: samplesInfo,
+    },
+  };
+};
+
+interface BuildSuccessOutcomeWarningsArgs {
+  suggestion: SuggestProcessingPipelineResult;
+  existingSteps: StreamlangStep[];
+  sourceFieldUsedByExisting: boolean;
+  fieldName: string;
+  fieldChanges: ReturnType<typeof computeFieldChanges>;
+  shouldSimulatePartial: boolean;
+  simErrors: string[];
+  successRate: number | null;
+}
+
+const buildSuccessOutcomeWarnings = ({
+  suggestion,
+  existingSteps,
+  sourceFieldUsedByExisting,
+  fieldName,
+  fieldChanges,
+  shouldSimulatePartial,
+  simErrors,
+  successRate,
+}: BuildSuccessOutcomeWarningsArgs): string[] => {
+  const warnings: string[] = [];
+
+  if (!suggestion.pipeline) {
+    warnings.push(
+      'Post-parse design produced no additional steps. The proposed pipeline contains only the system-discovered seed parsing step.'
+    );
+  }
+
+  if (existingSteps.length > 0) {
+    const placementWarning = buildPlacementWarning({
+      existingSteps,
+      sourceFieldUsedByExisting,
+      fieldName,
+    });
+    if (placementWarning) warnings.push(placementWarning);
+
+    const duplicationWarning = buildDuplicationWarning({ existingSteps, fieldName });
+    if (duplicationWarning) warnings.push(duplicationWarning);
+
+    const overwriteWarning = buildOverwriteWarning(existingSteps, fieldChanges);
+    if (overwriteWarning) warnings.push(overwriteWarning);
+  }
+
+  if (shouldSimulatePartial) {
+    const baseNote =
+      'Simulation is partial — only the newly-added extraction steps were simulated, since the sample documents already reflect the existing pipeline output. Existing steps will continue to run as-is at ingest.';
+    warnings.push(
+      sourceFieldUsedByExisting
+        ? `${baseNote} Because an existing step writes to or removes the source field "${fieldName}", the cached samples may have already been mutated; simulation may under-report the success rate that ingest would actually produce.`
+        : baseNote
+    );
+  }
+
+  if (simErrors.length > 0) {
+    const rateLabel =
+      successRate !== null ? `${successRate}% success rate with` : 'Simulation failed with';
+    warnings.push(
+      `${rateLabel} ${simErrors.length} error type(s): ${simErrors.slice(0, 3).join('; ')}`
+    );
+  }
+
+  return warnings;
 };
 
 /**

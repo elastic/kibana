@@ -7,7 +7,7 @@
 
 import { isActionBlock, isConditionBlock } from '@kbn/streamlang';
 import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
-import type { FieldChange } from './nl_to_streamlang';
+import type { FieldChange } from './_pipeline_design_utils';
 
 /**
  * Step inspectors + post-fact warning builders for the `extract_fields: true`

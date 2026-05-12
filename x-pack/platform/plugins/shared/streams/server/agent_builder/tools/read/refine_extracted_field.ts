@@ -18,7 +18,7 @@ import {
   type FlattenRecord,
   type StreamType,
 } from '@kbn/streams-schema';
-import type { StreamlangStep } from '@kbn/streamlang';
+import type { StreamlangStep } from '@kbn/streamlang/types/streamlang';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -36,7 +36,7 @@ import {
   resolveSamples,
   type NlToStreamlangResult,
   type SamplesConfig,
-} from './nl_to_streamlang';
+} from './_pipeline_design_utils';
 
 /**
  * Minimum number of populated, non-null sample values required before we'll

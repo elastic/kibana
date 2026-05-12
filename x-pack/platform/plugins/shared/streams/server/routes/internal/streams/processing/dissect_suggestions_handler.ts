@@ -25,9 +25,7 @@ import {
   fetchFieldMetadata,
   normalizeFieldName,
 } from './common_processing_helpers';
-
-const MAX_REVIEW_MESSAGES = 10;
-const NUM_REVIEW_EXAMPLES = 10;
+import { MAX_REVIEW_MESSAGES, NUM_REVIEW_EXAMPLES } from '../management/seed_parsing_helpers';
 
 export interface ProcessingDissectSuggestionsParams {
   path: {
