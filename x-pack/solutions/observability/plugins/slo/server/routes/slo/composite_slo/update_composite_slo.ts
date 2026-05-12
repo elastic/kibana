@@ -7,8 +7,8 @@
 
 import { updateCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient } from '../../../services/burn_rates_client';
-import { persistCompositeSummaryDoc } from '../../../services/composite_summary_writer';
 import { DefaultSummaryClient } from '../../../services/summary_client';
+import { updateCompositeSlo } from '../../../services/update_composite_slo';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -30,34 +30,24 @@ export const updateCompositeSLORoute = createSloServerRoute({
         logger,
       });
 
-    const existing = await compositeSloRepository.findById(params.path.id);
-
     const core = await context.core;
     const userId = core.security.authc.getCurrentUser()?.username;
-
-    const updated = {
-      ...existing,
-      ...params.body,
-      updatedAt: new Date().toISOString(),
-      updatedBy: userId ?? existing.updatedBy,
-    };
-
-    const result = await compositeSloRepository.update(updated);
 
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
       scopedClusterClient.asCurrentUser,
       burnRatesClient
     );
-    await persistCompositeSummaryDoc({
-      esClient: scopedClusterClient.asCurrentUser,
-      summaryClient,
-      sloDefinitionRepository: repository,
-      logger,
-      spaceId,
-      compositeSlo: result,
-    });
 
-    return result;
+    return await updateCompositeSlo(
+      { ...params.body, id: params.path.id, spaceId, userId },
+      {
+        esClient: scopedClusterClient.asCurrentUser,
+        compositeSloRepository,
+        sloDefinitionRepository: repository,
+        summaryClient,
+        logger,
+      }
+    );
   },
 });
