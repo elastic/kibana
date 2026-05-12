@@ -13,7 +13,7 @@ import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { DependencyNodeData } from '../../../../../common/service_map';
 import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
-import { WithSearchHighlight } from './search_highlight_helper';
+import { WithSearchHighlight } from '../../../shared/service_map/__stories__/search_highlight_helper';
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();

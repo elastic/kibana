@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+/**
+ * Service node rendered inside the React Flow Service Map. Lives under
+ * `components/shared/` because it is consumed by both the main Service Map
+ * (`components/app/service_map/graph.tsx`) and the Agent Builder service map
+ * attachment. "Shared" here means intra-APM reuse only — the component still
+ * imports APM plugin context and APM-specific badges. Optional behaviors
+ * (alerts-tab navigation, SLO flyout) are injected via sibling React contexts
+ * so they no-op gracefully when the surrounding providers are absent.
+ */
+
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -23,17 +33,61 @@ import { NodeLabel } from './node_label';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { SloStatusBadge } from '../slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
-import { useServiceMapAlertsNavigate } from './service_map_alerts_navigate_context';
+import {
+  useServiceMapAlertsNavigate,
+  type ServiceMapAlertsNavigateHandler,
+} from './service_map_alerts_navigate_context';
 import { HighlightWrapper } from './highlight_wrapper';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
+
+/**
+ * Renders the alerts-count badge. Returns a clickable, role="button" variant
+ * when `onNavigate` is wired (Service Map) and a plain, non-interactive badge
+ * otherwise (Agent Builder attachment, or any host that didn't wrap the map
+ * in a `ServiceMapAlertsNavigateProvider`). The variants live in one component
+ * because `EuiBadgeProps` is a discriminated union — conditionally spreading
+ * `onClick` violates the union — but they still share their static props.
+ */
+function AlertsCountBadge({
+  count,
+  tooltip,
+  onNavigate,
+}: {
+  count: number;
+  tooltip: string;
+  onNavigate?: ServiceMapAlertsNavigateHandler;
+}) {
+  if (onNavigate) {
+    return (
+      <EuiBadge
+        data-test-subj="serviceMapNodeAlertsBadge"
+        color="danger"
+        iconType="warning"
+        onClick={onNavigate}
+        tabIndex={0}
+        role="button"
+        onClickAriaLabel={tooltip}
+      >
+        {count}
+      </EuiBadge>
+    );
+  }
+  return (
+    <EuiBadge data-test-subj="serviceMapNodeAlertsBadge" color="danger" iconType="warning">
+      {count}
+    </EuiBadge>
+  );
+}
 
 export const ServiceNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<ServiceNodeType>) => {
     const contextHighlight = Boolean(data.contextHighlight);
     const { euiTheme, colorMode } = useEuiTheme();
-    // Optional-chain so the shared component renders safely outside the APM plugin
-    // context (e.g. in the Agent Builder service map attachment).
+    // Optional-chain the APM plugin context: this component also renders in the
+    // Agent Builder service map attachment, where no APM plugin provider is wrapped
+    // and the default context value is `{}`. An empty context means no SLO read
+    // capability is exposed, which intentionally suppresses SLO badges there.
     const apmPluginContext = useApmPluginContext();
     const canReadSlos = !!apmPluginContext?.core?.application?.capabilities?.slo?.read;
     const { onSloBadgeClick } = useServiceMapSloFlyout();
@@ -165,11 +219,19 @@ export const ServiceNode = memo(
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
-    const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
-      defaultMessage:
-        '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
-      values: { count: data.alertsCount ?? 0 },
-    });
+    // Tooltip copy depends on whether a navigation handler is wired: telling a
+    // user to "click to view" on a non-interactive badge is misleading for both
+    // sighted and assistive-tech users.
+    const alertsTooltip = navigateToAlertsTab
+      ? i18n.translate('xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip.navigable', {
+          defaultMessage:
+            '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
+          values: { count: data.alertsCount ?? 0 },
+        })
+      : i18n.translate('xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip', {
+          defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}',
+          values: { count: data.alertsCount ?? 0 },
+        });
 
     return (
       <HighlightWrapper nodeId={data.id} contextHighlight={contextHighlight}>
@@ -213,27 +275,11 @@ export const ServiceNode = memo(
                     onKeyDown={(e) => e.stopPropagation()}
                   >
                     <EuiToolTip position="bottom" content={alertsTooltip}>
-                      {navigateToAlertsTab ? (
-                        <EuiBadge
-                          data-test-subj="serviceMapNodeAlertsBadge"
-                          color="danger"
-                          iconType="warning"
-                          onClick={navigateToAlertsTab}
-                          tabIndex={0}
-                          role="button"
-                          onClickAriaLabel={alertsTooltip}
-                        >
-                          {data.alertsCount}
-                        </EuiBadge>
-                      ) : (
-                        <EuiBadge
-                          data-test-subj="serviceMapNodeAlertsBadge"
-                          color="danger"
-                          iconType="warning"
-                        >
-                          {data.alertsCount}
-                        </EuiBadge>
-                      )}
+                      <AlertsCountBadge
+                        count={data.alertsCount ?? 0}
+                        tooltip={alertsTooltip}
+                        onNavigate={navigateToAlertsTab}
+                      />
                     </EuiToolTip>
                   </span>
                 )}

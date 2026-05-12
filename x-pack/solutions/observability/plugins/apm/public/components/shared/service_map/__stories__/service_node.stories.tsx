@@ -15,9 +15,9 @@ import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_
 import type { ServiceNodeData } from '../../../../../common/service_map';
 import { ServiceMapSearchProvider } from '../service_map_search_context';
 import { ServiceMapAlertsNavigateProvider } from '../service_map_alerts_navigate_context';
-import { WithSearchHighlight } from '../../../app/service_map/__stories__/search_highlight_helper';
+import { WithSearchHighlight } from './search_highlight_helper';
 
-const noopAlertsNavigateHandler = () => () => {};
+const noopMakeAlertsNavigateHandler = () => () => {};
 
 const LabelText = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -27,14 +27,16 @@ const LabelText = ({ children }: { children: React.ReactNode }) => {
 };
 
 const meta: Meta<typeof ServiceNode> = {
-  title: 'app/ServiceMap/ServiceNode',
+  title: 'shared/ServiceMap/ServiceNode',
   component: ServiceNode,
   decorators: [
     (Story) => (
       <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now">
         <ReactFlowProvider>
           <ServiceMapSearchProvider>
-            <ServiceMapAlertsNavigateProvider getAlertsNavigateHandler={noopAlertsNavigateHandler}>
+            <ServiceMapAlertsNavigateProvider
+              makeAlertsNavigateHandler={noopMakeAlertsNavigateHandler}
+            >
               <div style={{ padding: 40, display: 'flex', justifyContent: 'center' }}>
                 <Story />
               </div>

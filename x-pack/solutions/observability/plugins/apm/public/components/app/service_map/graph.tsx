@@ -116,7 +116,7 @@ function GraphInner({
   const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
-  const getAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
+  const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
@@ -484,7 +484,7 @@ function GraphInner({
 
   return (
     <ServiceMapSearchProvider>
-      <ServiceMapAlertsNavigateProvider getAlertsNavigateHandler={getAlertsNavigateHandler}>
+      <ServiceMapAlertsNavigateProvider makeAlertsNavigateHandler={makeAlertsNavigateHandler}>
         <div
           ref={mapRegionRef}
           css={css(containerStyle)}

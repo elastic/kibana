@@ -10,24 +10,34 @@ import React, { createContext, useContext, useMemo } from 'react';
 
 export type ServiceMapAlertsNavigateHandler = (e: MouseEvent | KeyboardEvent) => void;
 
-export type GetAlertsNavigateHandler = (
+/**
+ * Factory that returns a per-service alerts-tab navigate handler.
+ *
+ * Modeled as a factory (rather than a single direct callback like the SLO
+ * flyout context) because the provider's underlying hooks
+ * (`useApmRouter`, `useAnyOfApmParams`, ...) are route-dependent and must be
+ * called once at the map level — not per node — to stay compliant with the
+ * Rules of Hooks. The factory closes over those values and returns a fresh
+ * callback for each `serviceName` the shared `ServiceNode` asks about.
+ */
+export type MakeAlertsNavigateHandler = (
   serviceName: string
 ) => ServiceMapAlertsNavigateHandler | undefined;
 
 interface ServiceMapAlertsNavigateContextValue {
-  getAlertsNavigateHandler?: GetAlertsNavigateHandler;
+  makeAlertsNavigateHandler?: MakeAlertsNavigateHandler;
 }
 
 const ServiceMapAlertsNavigateContext = createContext<ServiceMapAlertsNavigateContextValue>({});
 
 export function ServiceMapAlertsNavigateProvider({
   children,
-  getAlertsNavigateHandler,
+  makeAlertsNavigateHandler,
 }: {
   children: ReactNode;
-  getAlertsNavigateHandler: GetAlertsNavigateHandler;
+  makeAlertsNavigateHandler: MakeAlertsNavigateHandler;
 }) {
-  const value = useMemo(() => ({ getAlertsNavigateHandler }), [getAlertsNavigateHandler]);
+  const value = useMemo(() => ({ makeAlertsNavigateHandler }), [makeAlertsNavigateHandler]);
   return (
     <ServiceMapAlertsNavigateContext.Provider value={value}>
       {children}
@@ -38,9 +48,12 @@ export function ServiceMapAlertsNavigateProvider({
 export function useServiceMapAlertsNavigate(
   serviceName: string
 ): ServiceMapAlertsNavigateHandler | undefined {
-  const { getAlertsNavigateHandler } = useContext(ServiceMapAlertsNavigateContext);
+  const { makeAlertsNavigateHandler } = useContext(ServiceMapAlertsNavigateContext);
+  // Memoize the per-service handler so each `ServiceNode` receives a stable
+  // callback identity across renders, as long as the upstream factory and
+  // service name don't change.
   return useMemo(
-    () => getAlertsNavigateHandler?.(serviceName),
-    [getAlertsNavigateHandler, serviceName]
+    () => makeAlertsNavigateHandler?.(serviceName),
+    [makeAlertsNavigateHandler, serviceName]
   );
 }

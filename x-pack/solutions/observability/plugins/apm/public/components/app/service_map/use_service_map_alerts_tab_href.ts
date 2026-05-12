@@ -5,13 +5,34 @@
  * 2.0.
  */
 
+/**
+ * Alerts-tab navigation helpers for the Service Map.
+ *
+ * The module exposes three related hooks that all resolve the
+ * service-scoped alerts-tab destination from the current map route
+ * (`/service-map`, `/services/{serviceName}/service-map`, or
+ * `/mobile-services/{serviceName}/service-map`) while preserving the
+ * shared time range / query params:
+ *
+ *  - `useServiceMapAlertsTabHref` — returns a plain href for anchor-style use.
+ *  - `useServiceMapAlertsTabNavigate` — returns an SPA-navigation click handler.
+ *  - `useServiceMapAlertsNavigateFactory` — returns a `MakeAlertsNavigateHandler`
+ *    factory injected through `ServiceMapAlertsNavigateProvider` to the shared
+ *    `ServiceNode`, so route-dependent hooks run once at the map level rather
+ *    than per node.
+ *
+ * All three rely on `useAnyOfApmParams` and will throw if called outside a
+ * matching APM map route — callers must mount inside `ServiceMapGraph`, which
+ * is wrapped by `ApmEmbeddableContext` on dashboard embeds.
+ */
+
 import type { KeyboardEvent, MouseEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import type { GetAlertsNavigateHandler } from '../../shared/service_map/service_map_alerts_navigate_context';
+import type { MakeAlertsNavigateHandler } from '../../shared/service_map/service_map_alerts_navigate_context';
 
 /**
  * Alerts tab URL for a service on the service map, matching the service header
@@ -46,17 +67,14 @@ export function useServiceMapAlertsTabHref(serviceName: string) {
  */
 export function useServiceMapAlertsTabNavigate(serviceName: string) {
   const alertsTabHref = useServiceMapAlertsTabHref(serviceName);
-  const {
-    core: {
-      application: { navigateToUrl },
-    },
-  } = useApmPluginContext();
+  const apmPluginContext = useApmPluginContext();
+  const navigateToUrl = apmPluginContext?.core?.application?.navigateToUrl;
 
   return useCallback(
     (e: MouseEvent | KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      navigateToUrl(alertsTabHref);
+      navigateToUrl?.(alertsTabHref);
     },
     [alertsTabHref, navigateToUrl]
   );
@@ -65,9 +83,11 @@ export function useServiceMapAlertsTabNavigate(serviceName: string) {
 /**
  * Factory hook used by `ServiceMapAlertsNavigateProvider` to expose a per-service
  * navigate handler to the shared `ServiceNode`. Computes route-dependent values
- * once and returns a stable factory function.
+ * once and returns a stable factory function. Returns `undefined` for a service
+ * when the surrounding plugin context can't provide SPA navigation, so callers
+ * can degrade gracefully (e.g. render a non-interactive badge).
  */
-export function useServiceMapAlertsNavigateFactory(): GetAlertsNavigateHandler {
+export function useServiceMapAlertsNavigateFactory(): MakeAlertsNavigateHandler {
   const apmRouter = useApmRouter();
   const routePath = useApmRoutePath();
   const { query } = useAnyOfApmParams(
@@ -75,14 +95,14 @@ export function useServiceMapAlertsNavigateFactory(): GetAlertsNavigateHandler {
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-  const {
-    core: {
-      application: { navigateToUrl },
-    },
-  } = useApmPluginContext();
+  const apmPluginContext = useApmPluginContext();
+  const navigateToUrl = apmPluginContext?.core?.application?.navigateToUrl;
 
   return useCallback(
     (serviceName: string) => {
+      if (!navigateToUrl) {
+        return undefined;
+      }
       const isMobileContext = String(routePath).includes('mobile-services');
       const href = isMobileContext
         ? apmRouter.link('/mobile-services/{serviceName}/alerts', {

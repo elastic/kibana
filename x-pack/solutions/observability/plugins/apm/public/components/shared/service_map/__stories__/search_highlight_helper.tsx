@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import {
   ServiceMapSearchProvider,
   useServiceMapSearchContext,
-} from '../../../shared/service_map/service_map_search_context';
+} from '../service_map_search_context';
 
 interface SearchHighlightProps {
   matchNodeIds: Set<string>;

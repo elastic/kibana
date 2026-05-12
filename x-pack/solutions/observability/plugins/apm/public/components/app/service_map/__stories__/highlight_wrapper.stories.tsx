@@ -10,7 +10,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useEuiTheme } from '@elastic/eui';
 import { HighlightWrapper } from '../../../shared/service_map/highlight_wrapper';
 import { ServiceMapSearchProvider } from '../../../shared/service_map/service_map_search_context';
-import { WithSearchHighlight } from './search_highlight_helper';
+import { WithSearchHighlight } from '../../../shared/service_map/__stories__/search_highlight_helper';
 
 const PlaceholderNode = ({ label }: { label: string }) => {
   const { euiTheme } = useEuiTheme();

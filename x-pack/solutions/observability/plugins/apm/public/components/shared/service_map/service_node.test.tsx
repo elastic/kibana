@@ -211,6 +211,10 @@ describe('ServiceNode', () => {
   });
 
   describe('Alerts badge', () => {
+    afterEach(() => {
+      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(jest.fn());
+    });
+
     it('calls the alerts navigation handler when the alerts badge is clicked', () => {
       const navigateCb = jest.fn();
       jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(navigateCb);
@@ -218,6 +222,19 @@ describe('ServiceNode', () => {
       renderServiceNode(createServiceNodeData({ alertsCount: 2 }));
       fireEvent.click(screen.getByTestId('serviceMapNodeAlertsBadge'));
       expect(navigateCb).toHaveBeenCalled();
+    });
+
+    it('renders a non-interactive badge when no navigate handler is injected via context', () => {
+      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(undefined);
+
+      renderServiceNode(createServiceNodeData({ alertsCount: 3 }));
+      const badge = screen.getByTestId('serviceMapNodeAlertsBadge');
+      expect(badge).toBeInTheDocument();
+      // EuiBadge renders as a span (not a button) when `onClick` is omitted,
+      // so the badge does not advertise a click affordance to assistive tech.
+      expect(badge.tagName).toBe('SPAN');
+      expect(badge).not.toHaveAttribute('role', 'button');
+      expect(badge).toHaveTextContent('3');
     });
   });
 
