@@ -125,6 +125,7 @@ safe-outputs:
     max: 10
     target: ${{ env.PR_NUMBER }}
     footer: false
+# Codex engine does not expose workflow env vars like PR_NUMBER and REVIEWER_COMMENT_ID to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
 
 # Codex PR Reviewer
@@ -132,3 +133,7 @@ safe-outputs:
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
+
+For dispatched follow-up runs, use this context:
+- PR number: `${{ github.event.inputs.pr_number }}`
+- Comment id: `${{ github.event.inputs.comment_id }}`
