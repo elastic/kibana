@@ -18,10 +18,10 @@ export {
   type NotificationTypeFilterProps,
 } from './src/filters/notification_type_filter';
 export {
-  NotificationReadStateFilter,
-  type NotificationReadState,
-  type NotificationReadStateFilterProps,
-} from './src/filters/notification_read_state_filter';
+  NotificationStateFilter,
+  type NotificationStateFilterValue,
+  type NotificationStateFilterProps,
+} from './src/filters/notification_state_filter';
 export {
   NotificationSpacesFilter,
   type NotificationSpacesFilterProps,

@@ -36,6 +36,11 @@ export interface NotificationTypeFilterProps {
  * Pure presentational component: state is owned by the caller. Designed to be
  * composed alongside other filter rows (read state, spaces) inside whatever
  * panel layout (accordion, popover) the consumer uses.
+ *
+ * Renders as an `EuiFilterGroup` of `EuiFilterButton`s with `isToggle={true}`.
+ * EUI's filter button switches its color mode to INVERSE when both `isToggle`
+ * and `isSelected` are set, so the selected state is visually obvious (filled
+ * background instead of just a checkmark).
  */
 export function NotificationTypeFilter({
   typeIds,
@@ -91,18 +96,22 @@ export function NotificationTypeFilter({
 
       <EuiSpacer size="s" />
 
-      <EuiFilterGroup compressed>
-        {typeIds.map((typeId) => (
-          <EuiFilterButton
-            key={typeId}
-            hasActiveFilters={selectedTypeIds.has(typeId)}
-            onClick={() => handleToggle(typeId)}
-            data-test-subj={`notificationTypeFilterChip-${typeId}`}
-          >
-            {labels?.[typeId] ?? typeId}
-          </EuiFilterButton>
-        ))}
-      </EuiFilterGroup>
+      {typeIds.length > 0 && (
+        <EuiFilterGroup compressed>
+          {typeIds.map((typeId, idx) => (
+            <EuiFilterButton
+              key={typeId}
+              isToggle
+              isSelected={selectedTypeIds.has(typeId)}
+              withNext={idx < typeIds.length - 1}
+              onClick={() => handleToggle(typeId)}
+              data-test-subj={`notificationTypeFilterChip-${typeId}`}
+            >
+              {labels?.[typeId] ?? typeId}
+            </EuiFilterButton>
+          ))}
+        </EuiFilterGroup>
+      )}
     </div>
   );
 }
