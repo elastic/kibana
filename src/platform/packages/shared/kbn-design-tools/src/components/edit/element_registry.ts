@@ -99,6 +99,14 @@ export class ElementRegistry {
     return this.byElement.has(el) || this.byClone.has(el);
   }
 
+  /** Remove a session from both indexes. */
+  delete(session: ElementSession): void {
+    this.byElement.delete(session.el);
+    if (session.clone) {
+      this.byClone.delete(session.clone);
+    }
+  }
+
   /**
    * Return a lightweight array for APIs that expect a list of tracked elements
    * (e.g. getElementUnder hit-testing).

@@ -11,12 +11,13 @@ import React, { useMemo } from 'react';
 import { css as emotionCss } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import {
+  ALL_HANDLES,
   DEVTOOL_RESIZE_HANDLE_ATTR,
   HANDLE_CURSORS,
   RESIZE_HANDLE_SIZE,
 } from '../../../lib/constants';
-import type { ResizeHandle } from '../../../lib/constants';
-import { getHandleMode } from '../resize_helpers';
+import { useOverlayZIndex } from '../../../hooks';
+import { getHandleMode, getHandlePositions } from '../resize_helpers';
 import { OutlineControls } from './controls';
 
 interface Props {
@@ -24,21 +25,20 @@ interface Props {
   onDelete: () => void;
 }
 
-const ALL_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
-
 export const EditOutline = ({ target, onDelete }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const zIndex = useOverlayZIndex();
 
   const outlineCss = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
     return emotionCss({
       position: 'fixed',
       pointerEvents: 'none',
-      zIndex: Number(euiTheme.levels.toast) + 3,
+      zIndex: zIndex.highlight,
       border: `2px solid ${accentColor}`,
       borderRadius: '2px',
     });
-  }, [euiTheme.colors.primary, euiTheme.levels.toast]);
+  }, [euiTheme.colors.primary, zIndex.highlight]);
 
   const handleCss = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
@@ -54,7 +54,6 @@ export const EditOutline = ({ target, onDelete }: Props) => {
   }, [euiTheme.colors.primary]);
 
   const rect = target.getBoundingClientRect();
-  const half = RESIZE_HANDLE_SIZE / 2;
   const mode = getHandleMode(rect);
   const visibleHandles =
     mode === 'none'
@@ -63,16 +62,7 @@ export const EditOutline = ({ target, onDelete }: Props) => {
       ? ALL_HANDLES.filter((h) => h.length === 2)
       : ALL_HANDLES;
 
-  const handlePositions: Record<ResizeHandle, { top: number; left: number }> = {
-    nw: { top: -half, left: -half },
-    n: { top: -half, left: rect.width / 2 - half },
-    ne: { top: -half, left: rect.width - half },
-    e: { top: rect.height / 2 - half, left: rect.width - half },
-    se: { top: rect.height - half, left: rect.width - half },
-    s: { top: rect.height - half, left: rect.width / 2 - half },
-    sw: { top: rect.height - half, left: -half },
-    w: { top: rect.height / 2 - half, left: -half },
-  };
+  const handlePositions = getHandlePositions(rect.width, rect.height, RESIZE_HANDLE_SIZE);
 
   return (
     <div

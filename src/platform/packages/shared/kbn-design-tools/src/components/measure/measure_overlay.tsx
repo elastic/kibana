@@ -10,18 +10,20 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
-import { Global } from '@emotion/react';
 import { EuiBadge, EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 
 import { SpacingMeasurement } from './spacing_measurement';
-import { getElementFromPoint, isEscapeKey } from '../../lib';
+import { getElementFromPoint } from '../../lib';
 import { handleEventPropagation } from '../../lib/dom/handle_event_propagation';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
+import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 
 import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
 
 import { MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { useEscapeKey, useOverlayZIndex } from '../../hooks';
+import { GlobalCursorOverride } from '../global_cursor_override';
 
 interface Props {
   setIsMeasuring: Dispatch<SetStateAction<boolean>>;
@@ -35,6 +37,7 @@ interface Props {
  */
 export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const zIndex = useOverlayZIndex();
 
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -48,27 +51,14 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
         backgroundColor: transparentize(euiTheme.colors.backgroundFilledText, 0.1),
         inset: 0,
         position: 'fixed',
-        zIndex: Number(euiTheme.levels.toast) + 2,
+        zIndex: zIndex.overlay,
         pointerEvents: 'none',
       }),
-    [euiTheme.colors.backgroundFilledText, euiTheme.levels.toast]
+    [euiTheme.colors.backgroundFilledText, zIndex.overlay]
   );
 
-  const handleKeydown = useCallback(
-    (event: KeyboardEvent) => {
-      if (isEscapeKey(event)) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        setIsMeasuring(false);
-      }
-    },
-    [setIsMeasuring]
-  );
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeydown, true);
-    return () => document.removeEventListener('keydown', handleKeydown, true);
-  }, [handleKeydown]);
+  const handleEscape = useCallback(() => setIsMeasuring(false), [setIsMeasuring]);
+  useEscapeKey(handleEscape);
 
   // Clamp anchor badge position after render so it doesn't overflow the viewport
   useEffect(() => {
@@ -137,47 +127,21 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     };
   }, [handleMouseEvent]);
 
-  const highlightZIndex = Number(euiTheme.levels.toast) + 3;
+  const anchorHighlightCss = useMemo(
+    () =>
+      anchorRect ? buildHighlightCss(anchorRect, euiTheme.colors.success, zIndex.highlight) : '',
+    [anchorRect, euiTheme.colors.success, zIndex.highlight]
+  );
 
-  const anchorHighlightCss = useMemo(() => {
-    if (!anchorRect) return '';
-    return css({
-      position: 'fixed',
-      left: `${anchorRect.left}px`,
-      top: `${anchorRect.top}px`,
-      width: `${anchorRect.width}px`,
-      height: `${anchorRect.height}px`,
-      border: `2px solid ${euiTheme.colors.success}`,
-      backgroundColor: transparentize(euiTheme.colors.success, 0.15),
-      pointerEvents: 'none',
-      zIndex: highlightZIndex,
-    });
-  }, [anchorRect, euiTheme.colors.success, highlightZIndex]);
-
-  const hoverHighlightCss = useMemo(() => {
-    if (!hoverRect) return '';
-    return css({
-      position: 'fixed',
-      left: `${hoverRect.left}px`,
-      top: `${hoverRect.top}px`,
-      width: `${hoverRect.width}px`,
-      height: `${hoverRect.height}px`,
-      border: `2px solid ${euiTheme.colors.primary}`,
-      backgroundColor: transparentize(euiTheme.colors.primary, 0.15),
-      pointerEvents: 'none',
-      zIndex: highlightZIndex,
-    });
-  }, [hoverRect, euiTheme.colors.primary, highlightZIndex]);
+  const hoverHighlightCss = useMemo(
+    () =>
+      hoverRect ? buildHighlightCss(hoverRect, euiTheme.colors.primary, zIndex.highlight) : '',
+    [hoverRect, euiTheme.colors.primary, zIndex.highlight]
+  );
 
   return (
     <EuiPortal>
-      <Global
-        styles={{
-          'body *': {
-            cursor: 'crosshair !important',
-          },
-        }}
-      />
+      <GlobalCursorOverride cursor="crosshair" />
       <div className={overlayCss} id={MEASURE_OVERLAY_ID} data-test-subj="measureOverlayContainer">
         <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
       </div>
@@ -190,7 +154,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
               position: 'fixed',
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
-              zIndex: highlightZIndex + 1,
+              zIndex: zIndex.label,
             })}
           >
             <EuiBadge

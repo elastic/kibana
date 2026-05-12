@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
-import { EuiPortal, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiPortal, useResizeObserver } from '@elastic/eui';
 import type { LayoutConfig } from '../../../lib/layout/layout_config';
-import { DEVELOPER_TOOLBAR_ID, LAYOUT_OVERLAY_ID } from '../../../lib/constants';
+import { LAYOUT_OVERLAY_ID } from '../../../lib/constants';
+import { useToolbarHeight, useOverlayZIndex } from '../../../hooks';
 import { GridPattern, RowPattern, ColumnPattern } from '.';
 
 interface Props {
@@ -19,24 +20,12 @@ interface Props {
 }
 
 export const LayoutOverlay = ({ layoutConfig }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
   const containerRef = useCallback((node: HTMLDivElement | null) => setContainerEl(node), []);
   const { width: viewportWidth, height: viewportHeight } = useResizeObserver(containerEl);
 
-  // Measure the developer toolbar height so stripes don't overlap it
-  const [toolbarHeight, setToolbarHeight] = useState(0);
-  useEffect(() => {
-    const toolbar = document.getElementById(DEVELOPER_TOOLBAR_ID);
-    if (!toolbar) return;
-
-    const update = () => setToolbarHeight(toolbar.getBoundingClientRect().height);
-    update();
-
-    const observer = new ResizeObserver(update);
-    observer.observe(toolbar);
-    return () => observer.disconnect();
-  }, []);
+  const toolbarHeight = useToolbarHeight();
+  const zIndex = useOverlayZIndex();
 
   const { containerCss, content } = useMemo(() => {
     const container = css({
@@ -46,7 +35,7 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
       right: 0,
       bottom: toolbarHeight,
       pointerEvents: 'none',
-      zIndex: Number(euiTheme.levels.toast) + 2,
+      zIndex: zIndex.overlay,
     });
 
     let pattern: React.ReactNode;
@@ -60,7 +49,7 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
     }
 
     return { containerCss: container, content: pattern };
-  }, [viewportWidth, viewportHeight, toolbarHeight, layoutConfig, euiTheme.levels.toast]);
+  }, [viewportWidth, viewportHeight, toolbarHeight, layoutConfig, zIndex.overlay]);
 
   return (
     <EuiPortal>

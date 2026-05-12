@@ -15,6 +15,8 @@ import {
   DEVELOPER_TOOLBAR_ID,
   DEVTOOL_IGNORE_ATTR,
   DEVTOOL_RESIZE_HANDLE_ATTR,
+  IGNORED_CLASS_LABELS,
+  IGNORED_CLASS_PREFIXES,
 } from '../constants';
 
 const IGNORED_ELEMENT_IDS = new Set([
@@ -33,13 +35,6 @@ const IGNORED_SELECTOR = [
   DEVTOOL_IGNORE_SELECTOR,
   DEVTOOL_RESIZE_SELECTOR,
 ].join(',');
-
-// Class name substrings for purely structural components (e.g. EuiSpacer
-// renders with a class like `css-xxxxx-euiSpacer`).
-const IGNORED_CLASS_LABELS = ['euiSpacer'];
-
-// Class name prefixes for structural/chrome elements that should always be ignored.
-const IGNORED_CLASS_PREFIXES = ['kbnChromeLayout'];
 
 /**
  * Returns true if the element is, is inside, or contains a tool overlay

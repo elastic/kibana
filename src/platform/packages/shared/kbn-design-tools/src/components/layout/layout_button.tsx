@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
@@ -27,7 +27,12 @@ import { getDefaultLayoutConfig, type LayoutConfig } from '../../lib';
 import { LayoutSettingsPanel } from './settings/layout_settings_panel';
 import { EditOverlay } from '../edit/edit_overlay';
 import type { EditOverlayHandle } from '../edit/edit_overlay';
-import { DEVTOOL_IGNORE_ATTR, LAYOUT_SETTINGS_FLYOUT_ID } from '../../lib/constants';
+import {
+  DEVTOOL_IGNORE_ATTR,
+  LAYOUT_POPOVER_ID,
+  LAYOUT_SETTINGS_FLYOUT_ID,
+} from '../../lib/constants';
+import { useOverlayZIndex, usePortalZIndex } from '../../hooks';
 
 /**
  * Toggles a column layout overlay and provides layout settings.
@@ -44,29 +49,10 @@ export const LayoutButton = () => {
   );
   const editHandleRef = useRef<EditOverlayHandle>(null);
   const defaultLayoutConfig = getDefaultLayoutConfig(parseInt(euiTheme.size.base, 10));
+  const zIndex = useOverlayZIndex();
 
-  // Raise the flyout's EuiPortal z-index above the layout overlay (toast + 2)
-  // so the settings panel isn't visually covered by the overlay stripes.
-  // Uses useEffect + requestAnimationFrame because the flyout renders in its
-  // own portal, so the DOM element doesn't exist during useLayoutEffect.
-  useEffect(() => {
-    if (!isFlyoutOpen) return;
-    const zIndex = String(Number(euiTheme.levels.toast) + 5);
-
-    const rafId = requestAnimationFrame(() => {
-      const flyoutEl = document.getElementById(LAYOUT_SETTINGS_FLYOUT_ID);
-      const portalParent = flyoutEl?.closest('[data-euiportal="true"]');
-
-      if (portalParent instanceof HTMLElement) {
-        portalParent.style.zIndex = zIndex;
-      }
-      if (flyoutEl instanceof HTMLElement) {
-        flyoutEl.style.zIndex = zIndex;
-      }
-    });
-
-    return () => cancelAnimationFrame(rafId);
-  }, [isFlyoutOpen, euiTheme.levels.toast]);
+  usePortalZIndex(LAYOUT_SETTINGS_FLYOUT_ID, zIndex.flyout, isFlyoutOpen);
+  usePortalZIndex(LAYOUT_POPOVER_ID, zIndex.popover, isPopoverOpen);
 
   const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();
@@ -149,7 +135,9 @@ export const LayoutButton = () => {
   return (
     <>
       <EuiPopover
-        panelProps={{ [DEVTOOL_IGNORE_ATTR]: true } as Record<string, unknown>}
+        panelProps={
+          { id: LAYOUT_POPOVER_ID, [DEVTOOL_IGNORE_ATTR]: true } as Record<string, unknown>
+        }
         button={
           <EuiToolTip
             content={

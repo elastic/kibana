@@ -10,17 +10,31 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
-export const useEuiSizeLookup = () => {
+export interface OverlayZIndex {
+  clone: number;
+  overlay: number;
+  highlight: number;
+  label: number;
+  flyout: number;
+  popover: number;
+}
+
+/**
+ * Returns a memoized z-index map for all overlay layers.
+ * All values are derived from `euiTheme.levels.toast` as the base.
+ */
+export const useOverlayZIndex = (): OverlayZIndex => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const lookup = new Map<number, string>();
-    for (const [key, value] of Object.entries(euiTheme.size)) {
-      const parsed = parseInt(value, 10);
-      if (!isNaN(parsed)) {
-        lookup.set(parsed, key);
-      }
-    }
-    return lookup;
-  }, [euiTheme.size]);
+    const base = Number(euiTheme.levels.toast);
+    return {
+      clone: base + 1,
+      overlay: base + 2,
+      highlight: base + 3,
+      label: base + 4,
+      flyout: base + 5,
+      popover: base + 6,
+    };
+  }, [euiTheme.levels.toast]);
 };

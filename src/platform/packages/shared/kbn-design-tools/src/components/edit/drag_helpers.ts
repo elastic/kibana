@@ -9,8 +9,11 @@
 
 import { DEVTOOL_CLONE_ATTR } from '../../lib/constants';
 import { cloneElement } from '../../lib/dom/clone_element';
+import { snapToGrid } from '../../lib/dom/snap_to_grid';
+import type { LayoutConfig } from '../../lib/layout/layout_config';
 import type { ElementSession, ElementRegistry } from './element_registry';
 import type { DragState } from './interaction_state';
+import { buildTransform } from './resize_helpers';
 
 /**
  * Begin dragging an existing clone (re-grab).
@@ -102,4 +105,53 @@ export const findExistingClone = (
 ): ElementSession | null => {
   if (!target.hasAttribute(DEVTOOL_CLONE_ATTR)) return null;
   return registry.getByClone(target) ?? null;
+};
+
+/**
+ * Apply a drag frame: computes translate (with optional snap-to-grid), updates
+ * the clone transform, and writes the new offsets back to the registry session.
+ */
+export const applyDragMove = (
+  state: DragState,
+  clientX: number,
+  clientY: number,
+  shiftKey: boolean,
+  registry: { get(el: HTMLElement): ElementSession | undefined },
+  options: {
+    isLayoutVisible: boolean;
+    layoutConfig: LayoutConfig;
+    toolbarHeight: number;
+  }
+): void => {
+  const { clone, startX, startY, baseOffsetX, baseOffsetY, originalRect } = state;
+  const mouseDx = clientX - startX;
+  const mouseDy = clientY - startY;
+  let dx = baseOffsetX + mouseDx;
+  let dy = baseOffsetY + mouseDy;
+
+  if (!shiftKey && options.isLayoutVisible) {
+    const snapped = snapToGrid(
+      dx,
+      dy,
+      originalRect.left,
+      originalRect.top,
+      options.layoutConfig,
+      window.innerWidth,
+      window.innerHeight - options.toolbarHeight
+    );
+    dx = snapped.dx;
+    dy = snapped.dy;
+  }
+
+  const session = registry.get(state.el);
+  const origW = originalRect.width;
+  const origH = originalRect.height;
+  const scaleX = session ? (origW + session.dw) / origW : 1;
+  const scaleY = session ? (origH + session.dh) / origH : 1;
+  clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+
+  if (session) {
+    session.dx = dx;
+    session.dy = dy;
+  }
 };

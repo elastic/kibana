@@ -9,3 +9,10 @@
 
 export { useEuiSizeLookup } from './use_eui_size_lookup';
 export { useToolbarHeight } from './use_toolbar_height';
+export { useHoverLock } from './use_hover_lock';
+export { useDeleteElement } from './use_delete_element';
+export { useEditListeners } from './use_edit_listeners';
+export { useEscapeKey } from './use_escape_key';
+export { useOverlayZIndex } from './use_overlay_z_index';
+export { usePortalZIndex } from './use_portal_z_index';
+export { useScrollSync } from './use_scroll_sync';

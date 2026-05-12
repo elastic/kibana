@@ -9,16 +9,27 @@
 
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { Dispatch, Ref, SetStateAction } from 'react';
-import { css, Global } from '@emotion/react';
-import { EuiPortal, useEuiTheme } from '@elastic/eui';
-import { useToolbarHeight } from '../../hooks';
-import { DEVELOPER_TOOLBAR_ID, HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { EuiPortal } from '@elastic/eui';
+import {
+  useToolbarHeight,
+  useHoverLock,
+  useDeleteElement,
+  useEditListeners,
+  useOverlayZIndex,
+  useScrollSync,
+} from '../../hooks';
+import { HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { getElementUnder } from '../../lib/dom/get_element_under';
-import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
+import { GlobalCursorOverride } from '../global_cursor_override';
 import { ElementRegistry } from './element_registry';
-import { findExistingClone, startDragFromClone, startDragFromElement } from './drag_helpers';
-import { buildTransform, calcResizeDeltas, findNearHandle, startResize } from './resize_helpers';
+import {
+  findExistingClone,
+  startDragFromClone,
+  startDragFromElement,
+  applyDragMove,
+} from './drag_helpers';
+import { findNearHandle, startResize, applyResizeMove } from './resize_helpers';
 import type { InteractionState } from './interaction_state';
 import { IDLE } from './interaction_state';
 import { EditOutline } from './outline';
@@ -36,8 +47,6 @@ interface Props {
   handleRef?: Ref<EditOverlayHandle>;
 }
 
-const NON_DELETABLE_TAGS = ['BODY', 'HTML'];
-
 /**
  * Captures pointer events on the document to enable dragging and resizing elements
  * via CSS transforms. Press Escape to exit edit mode.
@@ -50,37 +59,46 @@ export const EditOverlay = ({
   onChangeCount,
   handleRef,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const toolbarHeight = useToolbarHeight();
+  const zIndex = useOverlayZIndex();
   const [cursor, setCursor] = useState('');
   const [hoverTarget, setHoverTarget] = useState<HTMLElement | null>(null);
 
-  // Current interaction — only one gesture (drag, resize, hover) can be active at a time
   const interaction = useRef<InteractionState>(IDLE);
   const registry = useRef(new ElementRegistry());
   const rafId = useRef<number>(0);
-  const deletedElements = useRef(new Set<HTMLElement>());
-  const hoverLockBounds = useRef<{
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-    elementBottom: number;
-  } | null>(null);
 
-  const isInsideHoverLock = useCallback((x: number, y: number): boolean => {
-    const bounds = hoverLockBounds.current;
-    if (!bounds) return false;
-    const padding = 12;
-    // Only lock when cursor is in the controls zone below the element,
-    // not inside the element itself (so children can still be targeted)
-    return (
-      x >= bounds.left - padding &&
-      x <= bounds.right + padding &&
-      y > bounds.elementBottom &&
-      y <= bounds.bottom + padding
-    );
-  }, []);
+  const updateCursor = useCallback(
+    (next: string) => setCursor((prev) => (prev === next ? prev : next)),
+    []
+  );
+
+  const { isInsideHoverLock, clearLock } = useHoverLock(hoverTarget);
+
+  const { deleteElement: rawDeleteElement, restoreAll, deletedCount } = useDeleteElement();
+
+  const deleteElement = useCallback(
+    (el: HTMLElement) => {
+      // If the target is a clone, resolve to the original element,
+      // remove the clone from DOM, and clean up the registry entry.
+      const session = registry.current.getByClone(el);
+      const target = session ? session.el : el;
+
+      if (session) {
+        session.clone?.remove();
+        registry.current.delete(session);
+        target.style.pointerEvents = '';
+        target.style.transform = session.originalTransform;
+      }
+
+      rawDeleteElement(target);
+      setHoverTarget(null);
+      clearLock();
+      setCursor('');
+      onChangeCount?.(registry.current.size + deletedCount() + 1);
+    },
+    [rawDeleteElement, clearLock, onChangeCount, deletedCount]
+  );
 
   const resetAll = useCallback(() => {
     if (interaction.current.type === 'drag') {
@@ -88,13 +106,9 @@ export const EditOverlay = ({
     }
     interaction.current = IDLE;
     registry.current.resetAll();
-    for (const el of deletedElements.current) {
-      el.style.visibility = '';
-      el.style.pointerEvents = '';
-    }
-    deletedElements.current.clear();
+    restoreAll();
     onChangeCount?.(0);
-  }, [onChangeCount]);
+  }, [onChangeCount, restoreAll]);
 
   useImperativeHandle(handleRef, () => ({ resetAll }), [resetAll]);
 
@@ -111,113 +125,43 @@ export const EditOverlay = ({
 
         switch (state.type) {
           case 'resize': {
-            const {
-              clone,
-              handle,
-              startX,
-              startY,
-              baseWidth,
-              baseHeight,
-              baseDx,
-              baseDy,
-              originalRect,
-            } = state;
-            const mouseDx = event.clientX - startX;
-            const mouseDy = event.clientY - startY;
-            const { dx, dy, width, height } = calcResizeDeltas(
-              handle,
-              mouseDx,
-              mouseDy,
-              baseWidth,
-              baseHeight,
-              baseDx,
-              baseDy
-            );
-
-            const scaleX = width / originalRect.width;
-            const scaleY = height / originalRect.height;
-            clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
-
-            const session = registry.current.get(state.el);
-            if (session) {
-              session.dx = dx;
-              session.dy = dy;
-              session.dw = width - session.originalRect.width;
-              session.dh = height - session.originalRect.height;
-            }
+            applyResizeMove(state, event.clientX, event.clientY, registry.current);
             onChangeCount?.(registry.current.size);
             break;
           }
 
           case 'drag': {
-            const { clone, startX, startY, baseOffsetX, baseOffsetY, originalRect } = state;
-            const mouseDx = event.clientX - startX;
-            const mouseDy = event.clientY - startY;
-            let dx = baseOffsetX + mouseDx;
-            let dy = baseOffsetY + mouseDy;
-
-            if (!event.shiftKey && isLayoutVisible) {
-              const snapped = snapToGrid(
-                dx,
-                dy,
-                originalRect.left,
-                originalRect.top,
-                layoutConfig,
-                window.innerWidth,
-                window.innerHeight - toolbarHeight
-              );
-              dx = snapped.dx;
-              dy = snapped.dy;
-            }
-
-            const session = registry.current.get(state.el);
-            const origW = originalRect.width;
-            const origH = originalRect.height;
-            const scaleX = session ? (origW + session.dw) / origW : 1;
-            const scaleY = session ? (origH + session.dh) / origH : 1;
-            clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
-
-            if (session) {
-              session.dx = dx;
-              session.dy = dy;
-            }
+            applyDragMove(state, event.clientX, event.clientY, event.shiftKey, registry.current, {
+              isLayoutVisible,
+              layoutConfig,
+              toolbarHeight,
+            });
             onChangeCount?.(registry.current.size);
             break;
           }
 
           default: {
             // No active gesture — update hover target and resize handle detection
+            const detectHandle = (x: number, y: number, target: HTMLElement): boolean => {
+              const nearHandle = findNearHandle(x, y, target.getBoundingClientRect());
+              if (nearHandle) {
+                interaction.current = { type: 'hover', target, handle: nearHandle };
+                updateCursor(HANDLE_CURSORS[nearHandle]);
+                return true;
+              }
+              return false;
+            };
+
             if (hoverTarget) {
               if (isInsideHoverLock(event.clientX, event.clientY)) {
-                const nearHandle = findNearHandle(
-                  event.clientX,
-                  event.clientY,
-                  hoverTarget.getBoundingClientRect()
-                );
-                if (nearHandle) {
-                  interaction.current = { type: 'hover', target: hoverTarget, handle: nearHandle };
-                  setCursor((prev) => {
-                    const next = HANDLE_CURSORS[nearHandle];
-                    return prev === next ? prev : next;
-                  });
-                } else {
+                if (!detectHandle(event.clientX, event.clientY, hoverTarget)) {
                   interaction.current = IDLE;
-                  setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
+                  updateCursor('grab');
                 }
                 return;
               }
 
-              const nearHandle = findNearHandle(
-                event.clientX,
-                event.clientY,
-                hoverTarget.getBoundingClientRect()
-              );
-              if (nearHandle) {
-                interaction.current = { type: 'hover', target: hoverTarget, handle: nearHandle };
-                setCursor((prev) => {
-                  const next = HANDLE_CURSORS[nearHandle];
-                  return prev === next ? prev : next;
-                });
+              if (detectHandle(event.clientX, event.clientY, hoverTarget)) {
                 return;
               }
             }
@@ -226,7 +170,7 @@ export const EditOverlay = ({
             const nextTarget = findElement(event.clientX, event.clientY);
             const nextCursor = nextTarget ? 'grab' : '';
             setHoverTarget((prev) => (prev === nextTarget ? prev : nextTarget));
-            setCursor((prev) => (prev === nextCursor ? prev : nextCursor));
+            updateCursor(nextCursor);
           }
         }
       });
@@ -239,6 +183,7 @@ export const EditOverlay = ({
       onChangeCount,
       hoverTarget,
       isInsideHoverLock,
+      updateCursor,
     ]
   );
 
@@ -255,11 +200,10 @@ export const EditOverlay = ({
         let session = registry.current.find(state.target);
         if (!session || !session.clone) {
           const target = session?.el ?? state.target;
-          const cloneZIndex = Number(euiTheme.levels.toast) + 1;
           const dragState = startDragFromElement(
             target,
             registry.current,
-            cloneZIndex,
+            zIndex.clone,
             event.clientX,
             event.clientY
           );
@@ -286,11 +230,10 @@ export const EditOverlay = ({
       if (existingSession) {
         interaction.current = startDragFromClone(existingSession, event.clientX, event.clientY);
       } else {
-        const cloneZIndex = Number(euiTheme.levels.toast) + 1;
         interaction.current = startDragFromElement(
           target,
           registry.current,
-          cloneZIndex,
+          zIndex.clone,
           event.clientX,
           event.clientY
         );
@@ -300,7 +243,7 @@ export const EditOverlay = ({
       setCursor('grabbing');
       onChangeCount?.(registry.current.size);
     },
-    [findElement, euiTheme.levels.toast, onChangeCount]
+    [findElement, zIndex.clone, onChangeCount]
   );
 
   const parkInteraction = useCallback(() => {
@@ -325,33 +268,6 @@ export const EditOverlay = ({
       parkInteraction();
     },
     [parkInteraction]
-  );
-
-  const isDeletable = useCallback((el: HTMLElement): boolean => {
-    if (NON_DELETABLE_TAGS.includes(el.tagName)) return false;
-    if (el.id === DEVELOPER_TOOLBAR_ID) return false;
-    if (el.querySelector(`#${DEVELOPER_TOOLBAR_ID}`)) return false;
-    return true;
-  }, []);
-
-  const deleteElement = useCallback(
-    (el: HTMLElement) => {
-      if (!isDeletable(el)) return;
-      el.style.transition = 'opacity 120ms ease';
-      el.style.opacity = '0';
-      setTimeout(() => {
-        el.style.visibility = 'hidden';
-        el.style.pointerEvents = 'none';
-        el.style.transition = '';
-        el.style.opacity = '';
-        deletedElements.current.add(el);
-      }, 120);
-      setHoverTarget(null);
-      hoverLockBounds.current = null;
-      setCursor('');
-      onChangeCount?.(registry.current.size + deletedElements.current.size);
-    },
-    [isDeletable, onChangeCount]
   );
 
   const handleKeydown = useCallback(
@@ -387,31 +303,6 @@ export const EditOverlay = ({
     parkInteraction();
   }, [parkInteraction]);
 
-  const handleScroll = useCallback(() => {
-    for (const session of registry.current.values()) {
-      if (!session.clone) continue;
-      const rect = session.el.getBoundingClientRect();
-      session.clone.style.left = `${rect.left}px`;
-      session.clone.style.top = `${rect.top}px`;
-    }
-  }, []);
-
-  // Reset hover/drag state when deactivated (e.g. Escape exits edit mode)
-  useEffect(() => {
-    if (hoverTarget) {
-      const rect = hoverTarget.getBoundingClientRect();
-      hoverLockBounds.current = {
-        left: rect.left,
-        top: rect.top,
-        right: rect.right,
-        bottom: rect.bottom + 40,
-        elementBottom: rect.bottom,
-      };
-    } else {
-      hoverLockBounds.current = null;
-    }
-  }, [hoverTarget]);
-
   useEffect(() => {
     if (!isActive) {
       setCursor('');
@@ -420,50 +311,20 @@ export const EditOverlay = ({
     }
   }, [isActive, abortDrag]);
 
-  useEffect(() => {
-    if (!isActive) return;
-
-    const handleBlur = () => abortDrag();
-    const handleVisibilityChange = () => {
-      if (document.hidden) abortDrag();
-    };
-
-    document.addEventListener('pointermove', handlePointerMove, true);
-    document.addEventListener('pointerdown', handlePointerDown, true);
-    document.addEventListener('pointerup', handlePointerUp, true);
-    document.addEventListener('pointercancel', handlePointerUp, true);
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('keydown', handleKeydown, true);
-    window.addEventListener('blur', handleBlur);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      cancelAnimationFrame(rafId.current);
-      document.removeEventListener('pointermove', handlePointerMove, true);
-      document.removeEventListener('pointerdown', handlePointerDown, true);
-      document.removeEventListener('pointerup', handlePointerUp, true);
-      document.removeEventListener('pointercancel', handlePointerUp, true);
-      document.removeEventListener('click', handleClick, true);
-      document.removeEventListener('keydown', handleKeydown, true);
-      window.removeEventListener('blur', handleBlur);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [
+  useEditListeners(
     isActive,
-    handlePointerMove,
-    handlePointerDown,
-    handlePointerUp,
-    handleClick,
-    handleKeydown,
-    resetAll,
-    abortDrag,
-  ]);
+    {
+      onPointerMove: handlePointerMove,
+      onPointerDown: handlePointerDown,
+      onPointerUp: handlePointerUp,
+      onClick: handleClick,
+      onKeydown: handleKeydown,
+      onAbort: abortDrag,
+    },
+    rafId
+  );
 
-  // Keep scroll listener active independently of edit mode so clones that
-  // remain on-screen after exiting edit mode still track their originals.
-  useEffect(() => {
-    document.addEventListener('scroll', handleScroll, true);
-    return () => document.removeEventListener('scroll', handleScroll, true);
-  }, [handleScroll]);
+  useScrollSync(registry);
 
   const showOutline =
     hoverTarget && interaction.current.type !== 'drag' && interaction.current.type !== 'resize';
@@ -475,18 +336,7 @@ export const EditOverlay = ({
 
   return (
     <>
-      {cursor && (
-        <Global
-          styles={css({
-            'body *': {
-              cursor: `${cursor} !important`,
-            },
-            '[data-devtool-ignore] button, [data-devtool-ignore] [role="button"]': {
-              cursor: 'pointer !important',
-            },
-          })}
-        />
-      )}
+      {cursor && <GlobalCursorOverride cursor={cursor} allowButtons />}
       {showOutline ? (
         <EuiPortal>
           <EditOutline target={hoverTarget} onDelete={handleDelete} />

@@ -154,3 +154,61 @@ export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: n
   }
   return `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
 };
+
+/**
+ * Apply a resize frame: computes deltas, updates the clone transform, and
+ * writes the new offsets back to the registry session.
+ */
+export const applyResizeMove = (
+  state: ResizeState,
+  clientX: number,
+  clientY: number,
+  registry: { get(el: HTMLElement): ElementSession | undefined }
+): void => {
+  const { clone, handle, startX, startY, baseWidth, baseHeight, baseDx, baseDy, originalRect } =
+    state;
+  const mouseDx = clientX - startX;
+  const mouseDy = clientY - startY;
+  const { dx, dy, width, height } = calcResizeDeltas(
+    handle,
+    mouseDx,
+    mouseDy,
+    baseWidth,
+    baseHeight,
+    baseDx,
+    baseDy
+  );
+
+  const scaleX = width / originalRect.width;
+  const scaleY = height / originalRect.height;
+  clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+
+  const session = registry.get(state.el);
+  if (session) {
+    session.dx = dx;
+    session.dy = dy;
+    session.dw = width - session.originalRect.width;
+    session.dh = height - session.originalRect.height;
+  }
+};
+
+/**
+ * Compute the absolute position of each resize handle relative to the outline box.
+ */
+export const getHandlePositions = (
+  width: number,
+  height: number,
+  handleSize: number
+): Record<ResizeHandle, { top: number; left: number }> => {
+  const half = handleSize / 2;
+  return {
+    nw: { top: -half, left: -half },
+    n: { top: -half, left: width / 2 - half },
+    ne: { top: -half, left: width - half },
+    e: { top: height / 2 - half, left: width - half },
+    se: { top: height - half, left: width - half },
+    s: { top: height - half, left: width / 2 - half },
+    sw: { top: height - half, left: -half },
+    w: { top: height / 2 - half, left: -half },
+  };
+};

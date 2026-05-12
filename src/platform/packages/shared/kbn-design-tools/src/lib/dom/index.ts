@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { buildHighlightCss } from './build_highlight_css';
 export { calculateSpacingLines } from './calculate_spacing';
 export { clampToViewport } from './clamp_to_viewport';
 export { cloneElement } from './clone_element';

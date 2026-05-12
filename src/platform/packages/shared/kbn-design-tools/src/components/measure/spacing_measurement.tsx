@@ -10,7 +10,7 @@
 import React, { Fragment, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
-import { useEuiSizeLookup } from '../../hooks';
+import { useEuiSizeLookup, useOverlayZIndex } from '../../hooks';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { ENDPOINT_SIZE } from '../../lib/constants';
@@ -26,8 +26,9 @@ interface Props {
 export const SpacingMeasurement = ({ lines }: Props) => {
   const { euiTheme } = useEuiTheme();
   const sizeLookup = useEuiSizeLookup();
-  const lineZIndex = Number(euiTheme.levels.toast) + 3;
-  const labelZIndex = Number(euiTheme.levels.toast) + 4;
+  const zIndex = useOverlayZIndex();
+  const lineZIndex = zIndex.highlight;
+  const labelZIndex = zIndex.label;
 
   const clampLabel = useCallback(
     (el: HTMLElement | null, midpoint: { x: number; y: number }, horizontal: boolean) => {

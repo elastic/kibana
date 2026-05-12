@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_CLONE_ATTR } from '../constants';
+import { DEVTOOL_CLONE_ATTR, TRUNCATION_CLASSES } from '../constants';
 
 /**
  * Copy pixel data from all canvas elements in the original tree to their
@@ -103,10 +103,6 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
     }
   }
 };
-
-// EUI truncation classes use !important and must be stripped so they don't
-// clip content that was visible in the original flex/grid context.
-const TRUNCATION_CLASSES = ['eui-textTruncate', 'eui-textBreakWord', 'eui-textBreakAll'];
 
 /**
  * Recursively copy inherited and custom CSS properties from the original tree
