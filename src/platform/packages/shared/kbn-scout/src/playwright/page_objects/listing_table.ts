@@ -15,9 +15,7 @@ export class ListingTable {
   private readonly table: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.table = this.page.locator(
-      '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
-    );
+    this.table = this.page.testSubj.locator('listingTable-isLoaded');
   }
 
   async waitUntilTableIsLoaded(options?: { timeout?: number }) {

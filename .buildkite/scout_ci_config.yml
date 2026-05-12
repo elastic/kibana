@@ -10,6 +10,7 @@ plugins:
     - banners
     - cloud_security_posture
     - console
+    - contentManagementExamples
     - custom_branding
     - dashboard
     - dashboard_markdown
@@ -17,7 +18,6 @@ plugins:
     - data_views
     - discover
     - discover_enhanced
-    - contentManagementExamples
     - entity_store
     - error_boundary_example
     - exploratory_view
