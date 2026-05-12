@@ -15,8 +15,7 @@ import {
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
 import { guardedExpandStep } from '../stream_utils';
-import { emitEvent } from '../events';
-import type { BatchProcessedEvent, QueryExecutedEvent } from '../events';
+import { withStreamingQueryTelemetry } from '../telemetry';
 
 /**
  * Returns the query to execute for this rule.
@@ -62,31 +61,23 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           })}`,
       });
 
-      const esqlRowBatchStream = step.queryService.executeQueryStream({
-        query: effectiveQuery,
-        filter: queryPayload.filter,
-        params: queryPayload.params,
-        abortSignal: input.executionContext.signal,
-      });
+      // Per-batch (`batch_processed`) and summary (`query_executed`) events
+      // are emitted by the helper, so this step contains zero bespoke
+      // telemetry plumbing — see `lib/rule_executor/telemetry/`.
+      const instrumentedStream = withStreamingQueryTelemetry(
+        input,
+        step.name,
+        step.queryService.executeQueryStream({
+          query: effectiveQuery,
+          filter: queryPayload.filter,
+          params: queryPayload.params,
+          abortSignal: input.executionContext.signal,
+        })
+      );
 
-      // The step emits domain events about what happened — the QueryService
-      // is a generic ES|QL client and stays free of rule-executor concepts.
-      // We measure wall-clock around the stream and emit one
-      // `batch_processed` per yield + a single `query_executed` summary
-      // when the stream completes. Consumers (telemetry observer today,
-      // others tomorrow) decide what to do with the data.
-      const startedAt = Date.now();
-      let rowCount = 0;
       let yielded = false;
-
-      for await (const batch of esqlRowBatchStream) {
+      for await (const batch of instrumentedStream) {
         yielded = true;
-        rowCount += batch.length;
-        emitEvent<BatchProcessedEvent>(input.executionContext, input.executionUuid, {
-          kind: 'batch_processed',
-          step: step.name,
-          rowCount: batch.length,
-        });
         yield {
           type: 'continue',
           state: { ...state, queryPayload, esqlRowBatch: batch },
@@ -99,17 +90,6 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           state: { ...state, queryPayload, esqlRowBatch: [] },
         };
       }
-
-      const durationMs = Date.now() - startedAt;
-      // ES `took` is not surfaced for arrow streams, so wall-clock acts as
-      // the proxy for `es_search_duration_ms`.
-      emitEvent<QueryExecutedEvent>(input.executionContext, input.executionUuid, {
-        kind: 'query_executed',
-        step: step.name,
-        esTookMs: durationMs,
-        durationMs,
-        rowCount,
-      });
     });
   }
 }

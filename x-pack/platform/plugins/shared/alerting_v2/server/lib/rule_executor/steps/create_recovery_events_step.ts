@@ -26,11 +26,8 @@ import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../../execution_context';
 import { emitEvent } from '../events';
-import type {
-  QueryExecutedEvent,
-  RecoveryEventBuiltEvent,
-  RecoveryModeSelectedEvent,
-} from '../events';
+import type { RecoveryEventBuiltEvent, RecoveryModeSelectedEvent } from '../events';
+import { withQueryTelemetry } from '../telemetry';
 
 @injectable()
 export class CreateRecoveryEventsStep implements RuleExecutionStep {
@@ -57,9 +54,8 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       }
 
       const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
-      // Emit the mode regardless of whether any active episodes need
-      // recovery — the operator dashboard wants to know which recovery
-      // flavour ran.
+      // Domain event: only this step knows the configured mode, so it
+      // must emit it directly. Helpers cannot derive this.
       emitEvent<RecoveryModeSelectedEvent>(input.executionContext, input.executionUuid, {
         kind: 'recovery_mode_selected',
         mode: recoveryType === recoveryPolicyType.query ? 'query' : 'no_breach',
@@ -137,25 +133,16 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         })}`,
     });
 
-    // Step owns the query telemetry, not the QueryService — see
-    // `ExecuteRuleQueryStep` for the same pattern. We emit one
-    // `query_executed` after the call returns; the telemetry observer
-    // tallies them across all steps that issue queries.
-    const startedAt = Date.now();
-    const esqlResponse = await this.scopedQueryService.executeQuery({
-      query: effectiveQuery,
-      filter: queryPayload.filter,
-      params: queryPayload.params,
-      abortSignal: input.executionContext.signal,
-    });
-    const durationMs = Date.now() - startedAt;
-    emitEvent<QueryExecutedEvent>(input.executionContext, input.executionUuid, {
-      kind: 'query_executed',
-      step: this.name,
-      esTookMs: typeof esqlResponse.took === 'number' ? esqlResponse.took : durationMs,
-      durationMs,
-      rowCount: esqlResponse.values?.length ?? 0,
-    });
+    // `query_executed` is emitted by the helper, so this step never
+    // touches the recorder/event APIs for query telemetry.
+    const esqlResponse = await withQueryTelemetry(input, this.name, () =>
+      this.scopedQueryService.executeQuery({
+        query: effectiveQuery,
+        filter: queryPayload.filter,
+        params: queryPayload.params,
+        abortSignal: input.executionContext.signal,
+      })
+    );
 
     return buildQueryRecoveryAlertEvents({
       ruleId: rule.id,

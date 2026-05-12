@@ -209,6 +209,37 @@ The executor emits a typed stream of {@link RuleExecutionEvent}s. The pipeline a
 
 Observers subscribe via DI multi-injection. The {@link RuleExecutionObserverHub} fans every event out to every observer; observer errors are caught by the hub and never affect the rule execution.
 
+### Where events come from
+
+Three categories, each with a different "remember to emit" answer:
+
+| Category | Examples | Who emits | What you do |
+| --- | --- | --- | --- |
+| Lifecycle (universal) | `step_started`, `step_completed`, `step_cancelled`, `execution_*` | Middleware + task runner | Nothing — automatic. |
+| Operation (any step that does X) | `query_executed`, `batch_processed`, `alert_event_stored` | Composition helpers in `lib/rule_executor/telemetry/` | Use the helper instead of calling the service directly (see below). |
+| Domain (only this step knows) | `recovery_mode_selected`, `recovery_event_built`, `episode_transitioned` | The step or service itself | Emit explicitly via `emitEvent(...)`. |
+
+If you can fit your new metric into one of the existing helpers, prefer that — it removes the "remember to emit" risk.
+
+### Operation helpers — `lib/rule_executor/telemetry/`
+
+| Helper | Wraps | Emits |
+| --- | --- | --- |
+| `withQueryTelemetry(input, step, () => qs.executeQuery(...))` | A single `executeQuery` call | `query_executed` on success |
+| `withStreamingQueryTelemetry(input, step, qs.executeQueryStream(...))` | An `executeQueryStream` async iterable | `batch_processed` per yield, `query_executed` once at the end |
+| `withAlertEventStorageTelemetry(input, docs, () => ss.bulkIndexDocs(...))` | A `bulkIndexDocs` call for alert events | `alert_event_stored` per persisted doc |
+
+Use these from steps so the telemetry contract is satisfied by composition. The current steps pass them around like this:
+
+```typescript
+const stream = withStreamingQueryTelemetry(
+  state.input,
+  this.name,
+  this.queryService.executeQueryStream({ query, filter, params, abortSignal })
+);
+for await (const batch of stream) { /* ... */ }
+```
+
 ### Adding a new metric (case A — derivable from existing events)
 
 Edit `TelemetryObserver` only. Add a switch arm for the event you need and update the `ExecutionMetricsCollector` if you're persisting a new counter. No other files change.
@@ -229,6 +260,7 @@ Edit `TelemetryObserver` only. Add a switch arm for the event you need and updat
    ```
 
 3. Handle it in `TelemetryObserver` (or a new observer if it's a separate sink).
+4. If the event is operation-shaped (i.e. "any step that does X should emit it"), consider adding a helper in `lib/rule_executor/telemetry/` and routing call sites through it, so future steps don't need to remember to emit.
 
 ### Adding a new observer (e.g. audit log, profiler, debug tracer)
 

@@ -7,21 +7,15 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import {
-  ALERT_EVENTS_DATA_STREAM,
-  alertEventStatus,
-  type AlertEvent,
-} from '../../../resources/datastreams/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { ExecutionContext } from '../../execution_context';
 import { guardedMapStep } from '../stream_utils';
-import { emitEvent } from '../events';
-import type { AlertEventStatusKind, AlertEventStoredEvent } from '../events';
+import { withAlertEventStorageTelemetry } from '../telemetry';
 
 @injectable()
 export class StoreAlertEventsStep implements RuleExecutionStep {
@@ -38,20 +32,14 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
       });
 
-      await this.storageService.bulkIndexDocs({
-        index: ALERT_EVENTS_DATA_STREAM,
-        docs: state.alertEventsBatch,
-      });
-
-      // Step emits one `alert_event_stored` per persisted document. The
-      // StorageService stays a generic bulk indexer — it does not know
-      // about alert-event `status` semantics. Per-item bulk errors are
-      // surfaced via service logs and intentionally not subtracted here
-      // for the PoC.
-      emitStoredEvents(
-        state.alertEventsBatch,
-        state.input.executionContext,
-        state.input.executionUuid
+      // `alert_event_stored` (one per persisted document, with the right
+      // status discriminator) is emitted by the helper. The step never
+      // touches the event API directly.
+      await withAlertEventStorageTelemetry(state.input, state.alertEventsBatch, () =>
+        this.storageService.bulkIndexDocs({
+          index: ALERT_EVENTS_DATA_STREAM,
+          docs: state.alertEventsBatch,
+        })
       );
 
       this.logger.debug({
@@ -62,25 +50,3 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
     });
   }
 }
-
-const STATUS_TO_KIND: Record<string, AlertEventStatusKind> = {
-  [alertEventStatus.breached]: 'breached',
-  [alertEventStatus.recovered]: 'recovered',
-  [alertEventStatus.no_data]: 'no_data',
-};
-
-const emitStoredEvents = (
-  events: ReadonlyArray<AlertEvent>,
-  executionContext: ExecutionContext,
-  executionUuid: string
-): void => {
-  for (const event of events) {
-    const status = STATUS_TO_KIND[event.status];
-    if (status != null) {
-      emitEvent<AlertEventStoredEvent>(executionContext, executionUuid, {
-        kind: 'alert_event_stored',
-        status,
-      });
-    }
-  }
-};
