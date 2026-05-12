@@ -166,7 +166,6 @@ export class ESQLService extends FtrService {
     await this.retry.waitFor('control flyout to open', async () => {
       await this.typeEsqlEditorQuery(query);
       // Wait until the suggestion widget actually has rows rendered
-      // (replaces a fixed 1s sleep that races with Monaco on slow CI agents).
       await this.retry.try(async () => {
         const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
         expect(await suggestionWidget.isDisplayed()).to.be(true);
@@ -183,19 +182,13 @@ export class ESQLService extends FtrService {
     await this.waitESQLEditorLoaded();
     await this.openEsqlControlFlyout(query);
 
-    // Save the control. waitForEnabled is the lower bound (the button is
-    // gated on the async values-fetch populating controlState in the parent),
-    // but it is not sufficient on its own: the click can race with the React
-    // commit that wires the latest onClick handler, and a click during that
-    // window is silently dropped (the form's onCreateControl early-returns on
-    // an empty controlState). Use the flyout closing as the positive signal
-    // that the save handler actually ran, and retry the click if it didn't.
-    await this.retry.waitFor('ES|QL control flyout to close after save', async () => {
+    await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
       await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await this.testSubjects.click('saveEsqlControlsFlyoutButton');
-      return !(await this.testSubjects.exists('create_esql_control_flyout', {
+      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout', {
         timeout: 2000,
-      }));
+      });
+      return !flyoutOpen;
     });
 
     await this.waitESQLEditorLoaded();

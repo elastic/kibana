@@ -121,14 +121,7 @@ export const useESQLVariables = ({
     return () => {
       variablesSubscription.unsubscribe();
     };
-  }, [
-    controlGroupApi,
-    currentEsqlVariables,
-    dispatch,
-    fetchData,
-    isEsqlMode,
-    setEsqlVariables,
-  ]);
+  }, [controlGroupApi, currentEsqlVariables, dispatch, fetchData, isEsqlMode, setEsqlVariables]);
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
