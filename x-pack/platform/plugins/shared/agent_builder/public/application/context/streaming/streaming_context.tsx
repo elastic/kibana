@@ -230,9 +230,3 @@ export const useStreamRecord = (conversationId: string | undefined): StreamRecor
   if (!conversationId) return emptyRecord;
   return byConversationId[conversationId] ?? emptyRecord;
 };
-
-// Re-exported so consumers can keep importing `useSendMessage` from this file. The actual
-// implementation lives in `./use_send_message` to avoid a circular import with
-// `use_conversation.ts` (the per-conversation scoped hook reads from `useConversation()`,
-// while `useConversation()` reads from `useStreamingContext` here).
-export { useSendMessage } from './use_send_message';
