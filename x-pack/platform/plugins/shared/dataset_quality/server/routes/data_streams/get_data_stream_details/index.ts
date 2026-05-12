@@ -161,7 +161,7 @@ async function getDataStreamSummaryStats(
 }> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const fieldCapsResponse = await esClient.fieldCaps({
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
     index: dataStream,
     fields: ['*'],
     include_unmapped: false,

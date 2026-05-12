@@ -57,6 +57,7 @@ describe('getDataStreamDetails', () => {
   let mockESClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let mockDatasetQualityESClient: {
     search: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['search']>;
+    fieldCaps: jest.MockedFunction<ReturnType<typeof createDatasetQualityESClient>['fieldCaps']>;
   };
 
   beforeEach(() => {
@@ -64,6 +65,7 @@ describe('getDataStreamDetails', () => {
     mockESClient = elasticsearchServiceMock.createElasticsearchClient();
     mockDatasetQualityESClient = {
       search: jest.fn(),
+      fieldCaps: jest.fn(),
     };
     esClient.asCurrentUser = mockESClient;
 
@@ -121,7 +123,7 @@ describe('getDataStreamDetails', () => {
       },
     } as Awaited<ReturnType<typeof mockESClient.indices.stats>>);
 
-    mockESClient.fieldCaps.mockResolvedValue({
+    mockDatasetQualityESClient.fieldCaps.mockResolvedValue({
       fields: {
         'host.name': {
           keyword: { type: 'keyword', aggregatable: true },
@@ -344,6 +346,33 @@ describe('getDataStreamDetails', () => {
         });
 
         expect(result).toEqual({});
+      });
+
+      it('calls the wrapped fieldCaps (not the raw esClient.fieldCaps) so ignore_unavailable is applied', async () => {
+        mockDatasetQualityPrivileges.getHasIndexPrivileges.mockResolvedValue({
+          'logs-test-default': {
+            monitor: true,
+            read_failure_store: true,
+            manage_failure_store: true,
+          },
+        });
+
+        const result = await getDataStreamDetails({
+          esClient,
+          dataStream: 'logs-test-default',
+          start: 1234567890,
+          end: 1234567900,
+          isServerless: false,
+          isSecurityEnabled: true,
+        });
+
+        expect(mockDatasetQualityESClient.fieldCaps).toHaveBeenCalledWith({
+          index: 'logs-test-default',
+          fields: ['*'],
+          include_unmapped: false,
+        });
+        expect(mockESClient.fieldCaps).not.toHaveBeenCalled();
+        expect(result).toEqual(detailsObject);
       });
 
       it('returns docs/services/hosts but sizeBytes=0 when indices.stats throws index_not_found_exception', async () => {
