@@ -19,9 +19,9 @@ steps:
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
 permissions:
-  contents: write
+  contents: read
   issues: read
-  pull-requests: write
+  pull-requests: read
 engine:
   id: claude
   version: "2.1.111"
