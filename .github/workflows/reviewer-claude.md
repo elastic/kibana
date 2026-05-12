@@ -106,6 +106,7 @@ steps:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
 safe-outputs:
+  footer: true
   noop:
     report-as-issue: false
   create-pull-request-review-comment:
@@ -115,16 +116,13 @@ safe-outputs:
     max: 1
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
-    footer: none
   add-comment:
     max: 1
     target: ${{ env.PR_NUMBER }}
     discussions: false
-    footer: false
   reply-to-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
-    footer: false
 ---
 
 # Claude PR Reviewer
