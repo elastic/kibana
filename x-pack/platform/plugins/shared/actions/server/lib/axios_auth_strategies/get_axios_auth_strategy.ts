@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OAuthEntraClientCertificateStrategy } from './oauth_entra_client_certificate_strategy';
 import type { AxiosAuthStrategy } from './types';
 import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
@@ -22,7 +23,7 @@ export const getAxiosAuthStrategy = (authTypeId: string): AxiosAuthStrategy => {
     case 'oauth_authorization_code':
       return new OAuthAuthCodeStrategy();
     case 'oauth_entra_client_certificate':
-      return new OAuthAuthCodeStrategy();
+      return new OAuthEntraClientCertificateStrategy();
     default:
       return new DefaultStrategy();
   }
