@@ -531,12 +531,12 @@ describe('partitionStream', () => {
         >[0]
       ).input;
       expect(callInput).not.toHaveProperty('user_prompt');
-      expect(callInput).not.toHaveProperty('existing_partitions');
+      expect(callInput).not.toHaveProperty('previous_suggestions');
     });
 
-    it('should seed initial clustering with existingPartitions', async () => {
+    it('should seed initial clustering with previousSuggestions', async () => {
       const definition = createMockDefinition();
-      const existingPartitions = [
+      const previousSuggestions = [
         { name: 'logs.test.api', condition: { field: 'service.name' as const, eq: 'api' } },
       ];
 
@@ -568,19 +568,19 @@ describe('partitionStream', () => {
       await partitionStream({
         ...defaultParams,
         definition,
-        existingPartitions,
+        previousSuggestions,
       });
 
       expect(mockClusterLogs).toHaveBeenCalledWith(
         expect.objectContaining({
-          partitions: existingPartitions,
+          partitions: previousSuggestions,
         })
       );
 
       expect(mockExecuteAsReasoningAgent).toHaveBeenCalledWith(
         expect.objectContaining({
           input: expect.objectContaining({
-            existing_partitions: JSON.stringify(existingPartitions),
+            previous_suggestions: JSON.stringify(previousSuggestions),
           }),
         })
       );

@@ -52,7 +52,7 @@ export async function partitionStream({
   signal,
   getFeatures,
   userPrompt,
-  existingPartitions = [],
+  previousSuggestions = [],
 }: {
   definition: Streams.WiredStream.Definition;
   inferenceClient: BoundInferenceClient;
@@ -68,7 +68,18 @@ export async function partitionStream({
     limit?: number;
   }): Promise<Feature[]>;
   userPrompt?: string;
-  existingPartitions?: Array<{ name: string; condition: Condition }>;
+  /**
+   * Partitions that were suggested in a prior call but have not yet been
+   * applied to the stream. The clustering step seeds these into the LLM's
+   * context so it can refine or replace them; passing them does NOT exclude
+   * matching docs from sampling. The stream's *actual* enabled child
+   * routes are derived from `definition.ingest.wired.routing` and applied
+   * as exclusions automatically.
+   *
+   * Previously named `existingPartitions`, which collided with the agent
+   * tool's `existing_partitions` result field (real disk-stored children).
+   */
+  previousSuggestions?: Array<{ name: string; condition: Condition }>;
 }): Promise<PartitionStreamResponse> {
   const enabledChildConditions = definition.ingest.wired.routing
     .filter((route) => route.status !== 'disabled')
@@ -80,7 +91,7 @@ export async function partitionStream({
     end,
     index: definition.name,
     logger,
-    partitions: existingPartitions,
+    partitions: previousSuggestions,
     excludeConditions: enabledChildConditions,
     size: 1000,
   });
@@ -136,8 +147,8 @@ export async function partitionStream({
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
       ...(userPrompt ? { user_prompt: userPrompt } : {}),
-      ...(existingPartitions.length > 0
-        ? { existing_partitions: JSON.stringify(existingPartitions) }
+      ...(previousSuggestions.length > 0
+        ? { previous_suggestions: JSON.stringify(previousSuggestions) }
         : {}),
       ...(processingSummary ? { processing_summary: processingSummary } : {}),
     },

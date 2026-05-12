@@ -25,7 +25,13 @@ export interface FetchSuggestedPartitionsParams {
   start: number;
   end: number;
   userPrompt?: string;
-  existingPartitions?: PartitionSuggestion[];
+  /**
+   * Partitions that were suggested in a prior call but have not yet been
+   * applied to the stream. Pass these when iterating on suggestions; the
+   * stream's real existing children are fetched server-side from the
+   * stream definition and do NOT need to be passed here.
+   */
+  previousSuggestions?: PartitionSuggestion[];
 }
 
 export interface PartitionSuggestion {
@@ -73,8 +79,8 @@ export function useReviewSuggestionsForm() {
               start: params.start,
               end: params.end,
               ...(params.userPrompt ? { user_prompt: params.userPrompt } : {}),
-              ...(params.existingPartitions?.length
-                ? { existing_partitions: params.existingPartitions }
+              ...(params.previousSuggestions?.length
+                ? { previous_suggestions: params.previousSuggestions }
                 : {}),
             },
           },

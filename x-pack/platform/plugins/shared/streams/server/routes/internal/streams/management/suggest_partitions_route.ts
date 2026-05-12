@@ -28,7 +28,14 @@ export interface SuggestPartitionsParams {
     start: number;
     end: number;
     user_prompt?: string;
-    existing_partitions?: Array<{ name: string; condition: z.infer<typeof conditionSchema> }>;
+    /**
+     * Partitions that were suggested in a prior call but have not yet been
+     * applied to the stream. Pass these when iterating on suggestions
+     * (e.g. "give me different ones"). The stream's *real* existing
+     * children are fetched server-side from the stream definition — do
+     * NOT pass them here.
+     */
+    previous_suggestions?: Array<{ name: string; condition: z.infer<typeof conditionSchema> }>;
   };
 }
 
@@ -39,7 +46,7 @@ export const suggestPartitionsSchema = z.object({
     start: z.number(),
     end: z.number(),
     user_prompt: z.string().max(2000).optional(),
-    existing_partitions: z
+    previous_suggestions: z
       .array(z.object({ name: z.string(), condition: conditionSchema }))
       .optional(),
   }),
@@ -94,7 +101,7 @@ export const suggestPartitionsRoute = createServerRoute({
       maxSteps: 4, // Longer reasoning seems to add unnecessary conditions (and latency), instead of improving accuracy, so we limit the steps.
       signal: getRequestAbortSignal(request),
       userPrompt: params.body.user_prompt,
-      existingPartitions: params.body.existing_partitions,
+      previousSuggestions: params.body.previous_suggestions,
       getFeatures: async (filters) => {
         const featureClient = await getFeatureClient();
         const { hits } = await featureClient.getFeatures(params.path.name, filters);

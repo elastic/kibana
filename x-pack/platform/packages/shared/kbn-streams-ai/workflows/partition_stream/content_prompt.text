@@ -12,18 +12,18 @@ Stream description:
 User guidance:
 {{{user_prompt}}}
 {{/user_prompt}}
-{{#existing_partitions}}
+{{#previous_suggestions}}
 {{#user_prompt}}
 
-Existing partitions (previously suggested — keep, modify, or replace based on the user's guidance above):
-{{{existing_partitions}}}
+Previously suggested partitions (keep, modify, or replace based on the user's guidance above):
+{{{previous_suggestions}}}
 {{/user_prompt}}
 {{^user_prompt}}
 
 Previously suggested partitions (REJECTED — the user wants a different approach; pick a different field entirely):
-{{{existing_partitions}}}
+{{{previous_suggestions}}}
 {{/user_prompt}}
-{{/existing_partitions}}
+{{/previous_suggestions}}
 
 Initial clustering:
 {{{initial_clustering}}}

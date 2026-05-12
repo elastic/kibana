@@ -26,7 +26,7 @@ export interface PartitioningEvaluationExample {
     start?: number;
     end?: number;
     user_prompt?: string;
-    existing_partitions?: Array<{ name: string; condition: Condition }>;
+    previous_suggestions?: Array<{ name: string; condition: Condition }>;
     refinement_history?: string[];
   };
   output: PartitioningGroundTruth;
@@ -95,12 +95,12 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
     name: 'Refinement',
     description:
-      'Same diverse data but with an existing partition already defined. The LLM should suggest partitions for the remaining unrouted data.',
+      'Same diverse data but with a partition already suggested in a prior turn. The LLM should refine or replace the suggestion based on the unrouted data.',
     examples: [
       {
         input: {
           stream_name: 'logs.otel.partition-eval',
-          existing_partitions: [
+          previous_suggestions: [
             {
               name: 'hadoop',
               condition: {
@@ -333,12 +333,12 @@ export const PARTITIONING_DATASETS: PartitioningEvaluationDataset[] = [
   {
     name: 'User-Guided Refinement',
     description:
-      'Existing partitions with additional user guidance for the remaining unrouted data.',
+      'Previously suggested partitions with additional user guidance for the remaining unrouted data.',
     examples: [
       {
         input: {
           stream_name: 'logs.otel.partition-eval',
-          existing_partitions: [
+          previous_suggestions: [
             {
               name: 'hadoop',
               condition: {

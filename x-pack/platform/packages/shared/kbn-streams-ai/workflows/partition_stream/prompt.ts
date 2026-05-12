@@ -20,7 +20,7 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
     condition_schema: z.string(),
     initial_clustering: z.string(),
     user_prompt: z.string().optional(),
-    existing_partitions: z.string().optional(),
+    previous_suggestions: z.string().optional(),
     processing_summary: z.string().optional(),
   }),
 })

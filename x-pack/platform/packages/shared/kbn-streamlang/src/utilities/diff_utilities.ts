@@ -64,6 +64,21 @@ export function streamlangDSLFromIngestProcessing(
  * Adds deterministic `customIdentifier` values on every step. Input must be a pure
  * {@link StreamlangDSL}; use {@link addDeterministicCustomIdentifiersFromIngestProcessing} for
  * `ingest.processing` values that include `updated_at`.
+ *
+ * **Important:** this strips any pre-existing `customIdentifier` and
+ * re-assigns purely from each step's position in the DSL (e.g.
+ * `root.steps[0]`, `root.condition.steps[1]`). The output identifiers are
+ * therefore a function of the *current* position, not of identity. Two
+ * structurally identical pipelines produce identical ids — that's the
+ * "deterministic" part — but a step that gets re-ordered, merged with new
+ * neighbours, or nested differently will come out with a different
+ * identifier than it had on input.
+ *
+ * Consequence: `customIdentifier` is **not** a stable cross-call handle.
+ * Do not key into it from caller code to track "is this the same step
+ * across two versions of the pipeline?". For that, use
+ * {@link checkAdditiveChanges} or compare on structural content with
+ * {@link stripCustomIdentifiers} applied first.
  */
 export const addDeterministicCustomIdentifiers = (dsl: StreamlangDSL): StreamlangDSL => {
   // Deep clone the DSL to avoid mutating the original (we can get away with parse / stringify at

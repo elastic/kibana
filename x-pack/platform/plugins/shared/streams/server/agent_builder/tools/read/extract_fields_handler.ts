@@ -433,6 +433,20 @@ export const runExtractFieldsFlow = async (
     // single untagged existing step would mis-classify every doc as
     // `partially_parsed` and report a 0% success rate even when every
     // processor ran cleanly.
+    //
+    // Side-effect to be aware of: this helper strips every pre-existing
+    // `customIdentifier` and re-assigns purely from position in the merged
+    // list (`root.steps[i]`). The existing-step identifiers the caller
+    // passed in (from disk) do NOT survive the merge — the steps the user
+    // sees back carry fresh path-derived ids. This is benign as long as
+    // downstream code never treats `customIdentifier` as a stable
+    // cross-call handle for "is this the same existing step". Today every
+    // matcher that compares existing vs proposed steps strips
+    // `customIdentifier` before comparing (`structuralKey` in
+    // `injectIgnoreFailure`, `SIGNATURE_IGNORED_KEYS` in
+    // `pipeline_diff.ts`), so the identifier swap is invisible. If you
+    // ever need stable-identity matching, use those structural helpers,
+    // not the identifier string.
     const sourceFieldUsedByExisting = existingSteps.some((step) =>
       stepWritesOrRemovesField(step, fieldName)
     );

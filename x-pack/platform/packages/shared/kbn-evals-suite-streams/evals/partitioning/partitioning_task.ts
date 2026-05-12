@@ -15,11 +15,24 @@ import type {
 } from './partitioning_datasets';
 import { calculatePartitioningMetrics, type PartitioningMetrics } from './partitioning_metrics';
 
+/**
+ * The set of typed `reason` values the `suggest_partitions` HTTP route /
+ * agent tool can return on its non-success paths. Centralized here so the
+ * SSE-payload hint, the per-call return type, and the
+ * `PartitionSuggestionResult` shape stay in sync — drifting any of them
+ * silently swallows a real reason in evals.
+ */
+type PartitionSuggestionReason =
+  | 'no_clusters'
+  | 'no_samples'
+  | 'insufficient_samples'
+  | 'all_data_partitioned';
+
 export interface PartitionSuggestionResult {
   input: PartitioningEvaluationExample['input'];
   output: {
     suggestedPartitions: Array<{ name: string; condition: Condition }>;
-    reason?: 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+    reason?: PartitionSuggestionReason;
     metrics: PartitioningMetrics;
   };
   expected: PartitioningGroundTruth;
@@ -32,12 +45,12 @@ const suggestPartitions = async (
   connectorId: string,
   start: number,
   end: number,
-  existingPartitions?: Array<{ name: string; condition: Condition }>,
+  previousSuggestions?: Array<{ name: string; condition: Condition }>,
   userPrompt?: string,
   refinementHistory?: string[]
 ): Promise<{
   partitions: Array<{ name: string; condition: Condition }>;
-  reason?: 'no_clusters' | 'no_samples' | 'all_data_partitioned';
+  reason?: PartitionSuggestionReason;
   rawResponse: string;
 }> => {
   const body: Record<string, unknown> = {
@@ -46,8 +59,8 @@ const suggestPartitions = async (
     end,
   };
 
-  if (existingPartitions && existingPartitions.length > 0) {
-    body.existing_partitions = existingPartitions;
+  if (previousSuggestions && previousSuggestions.length > 0) {
+    body.previous_suggestions = previousSuggestions;
   }
   if (userPrompt) {
     body.user_prompt = userPrompt;
@@ -65,7 +78,7 @@ const suggestPartitions = async (
   const rawResponse = response.data as string;
   const data = findSSEEventData<{
     partitions: Array<{ name: string; condition: Condition }>;
-    reason?: 'no_clusters' | 'no_samples';
+    reason?: PartitionSuggestionReason;
   }>(rawResponse, 'suggested_partitions');
 
   return {
@@ -94,7 +107,7 @@ export const runPartitionSuggestion = async (
       connector.id,
       start,
       end,
-      input.existing_partitions,
+      input.previous_suggestions,
       input.user_prompt,
       input.refinement_history
     );
