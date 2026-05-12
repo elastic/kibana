@@ -63,6 +63,7 @@ describe('resolveResource', () => {
           expect.objectContaining({ path: 'message', type: 'text' }),
           expect.objectContaining({ path: 'status', type: 'keyword' }),
         ]),
+        isTsdb: false,
       });
 
       // CCS resources should not have description (not available via _field_caps)
@@ -109,6 +110,7 @@ describe('resolveResource', () => {
           expect.objectContaining({ path: '@timestamp', type: 'date' }),
           expect.objectContaining({ path: 'level', type: 'keyword' }),
         ]),
+        isTsdb: false,
       });
 
       // CCS resources should not have description
@@ -149,6 +151,7 @@ describe('resolveResource', () => {
         type: EsResourceType.index,
         fields: [{ path: 'title', type: 'text', meta: {}, searchable: true }],
         description: 'A test index',
+        isTsdb: false,
       });
     });
   });
@@ -187,6 +190,7 @@ describe('resolveResource', () => {
         type: EsResourceType.index,
         fields: [{ path: 'message', type: 'text', searchable: true, meta: {} }],
         description: 'logs index',
+        isTsdb: false,
       });
     });
 
@@ -222,6 +226,7 @@ describe('resolveResource', () => {
         fields: expect.arrayContaining([
           expect.objectContaining({ path: '@timestamp', type: 'date' }),
         ]),
+        isTsdb: false,
       });
     });
 
@@ -276,6 +281,7 @@ describe('resolveResource', () => {
         fields: expect.arrayContaining([
           expect.objectContaining({ path: 'host', type: 'keyword' }),
         ]),
+        isTsdb: false,
       });
     });
 
@@ -303,6 +309,105 @@ describe('resolveResource', () => {
       expect(result.fields).toEqual(
         expect.arrayContaining([expect.objectContaining({ path: '@timestamp', type: 'date' })])
       );
+    });
+  });
+
+  describe('isTsdb flag', () => {
+    it('is true when at least one field has tsDimension or tsMetric (index branch)', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'metrics-host', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'metrics-host': {
+          mappings: {
+            properties: {
+              'host.name': { type: 'keyword', time_series_dimension: true } as any,
+              'system.cpu.pct': { type: 'float', time_series_metric: 'gauge' } as any,
+            },
+          },
+        },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'metrics-host', esClient });
+
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('is false when no field carries tsdb markers (index branch)', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        logs: {
+          mappings: {
+            properties: {
+              message: { type: 'text' },
+              level: { type: 'keyword' },
+            },
+          },
+        },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'logs', esClient });
+
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('is true for an alias whose merged field_caps surfaces tsdb markers', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [{ name: 'metrics-alias', indices: ['metrics-host'] }],
+        data_streams: [],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['metrics-host'],
+        fields: {
+          'host.name': {
+            keyword: {
+              type: 'keyword',
+              searchable: true,
+              aggregatable: true,
+              time_series_dimension: true,
+            },
+          },
+        },
+      });
+
+      const result = await resolveResource({ resourceName: 'metrics-alias', esClient });
+
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('is set on multi-target resolveResourceForEsql results', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [
+          { name: 'metrics-1', attributes: ['open'] },
+          { name: 'metrics-2', attributes: ['open'] },
+        ],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['metrics-1', 'metrics-2'],
+        fields: {
+          'system.cpu.pct': {
+            float: {
+              type: 'float',
+              searchable: true,
+              aggregatable: true,
+              time_series_metric: 'gauge',
+            },
+          },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: 'metrics-*', esClient });
+
+      expect(result.isTsdb).toBe(true);
     });
   });
 });

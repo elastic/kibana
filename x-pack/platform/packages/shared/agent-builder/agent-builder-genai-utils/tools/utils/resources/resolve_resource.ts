@@ -23,8 +23,16 @@ export interface ResolveResourceResponse {
   fields: MappingField[];
   /** description from the meta, if available */
   description?: string;
+  /** whether the resource is a TSDB resource (any field has tsDimension or tsMetric) */
+  isTsdb: boolean;
 }
 
+/**
+ * Returns true when any of the provided fields carries a TSDB marker.
+ */
+export const deriveIsTsdb = (fields: MappingField[]): boolean => {
+  return fields.some((f) => f.tsDimension === true || typeof f.tsMetric === 'string');
+}
 /**
  * Retrieve the field list and other relevant info from the given resource name (index, alias or datastream)
  * Note: this can target a single resource, the resource name must not be a pattern.
@@ -112,6 +120,7 @@ export const resolveResourceForEsql = async ({
     name: resourceName,
     type: EsResourceType.indexPattern,
     fields,
+    isTsdb: deriveIsTsdb(fields),
   };
 };
 
@@ -137,6 +146,7 @@ const resolveSingleResource = async ({
         name: resourceName,
         type: EsResourceType.index,
         fields,
+        isTsdb: deriveIsTsdb(fields),
       };
     }
 
@@ -148,6 +158,7 @@ const resolveSingleResource = async ({
       type: EsResourceType.index,
       fields,
       description: mappings._meta?.description,
+      isTsdb: deriveIsTsdb(fields),
     };
   }
   // target is a datastream
@@ -163,6 +174,7 @@ const resolveSingleResource = async ({
         name: resourceName,
         type: EsResourceType.dataStream,
         fields,
+        isTsdb: deriveIsTsdb(fields),
       };
     }
 
@@ -178,6 +190,7 @@ const resolveSingleResource = async ({
       type: EsResourceType.dataStream,
       fields,
       description: mappings._meta?.description,
+      isTsdb: deriveIsTsdb(fields),
     };
   }
   // target is an alias
@@ -195,6 +208,7 @@ const resolveSingleResource = async ({
       name: resourceName,
       type: EsResourceType.alias,
       fields,
+      isTsdb: deriveIsTsdb(fields),
     };
   }
 
