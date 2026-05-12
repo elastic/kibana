@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { DEV_TOOLS_READ_ROLE, DEV_TOOL_APPS } from '../fixtures/constants';
+import { test, testData } from '../fixtures';
 
 test.describe('Dev Tools breadcrumbs', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(DEV_TOOLS_READ_ROLE);
+    await browserAuth.loginAsDevToolsRead();
   });
 
-  for (const { hash, label } of DEV_TOOL_APPS) {
-    test(`sets the last breadcrumb for ${label}`, async ({ page }) => {
-      await page.gotoApp('dev_tools', { hash });
+  for (const { hash, label } of testData.DEV_TOOL_APPS) {
+    test(`sets the last breadcrumb for ${label}`, async ({ pageObjects }) => {
+      await pageObjects.devTools.goto(hash);
 
-      await expect(page.testSubj.locator('breadcrumb last')).toHaveText(label);
+      await expect(pageObjects.devTools.lastBreadcrumb).toHaveText(label);
     });
   }
 });

@@ -22,6 +22,38 @@ export const NO_DEV_TOOLS_ROLE = {
   kibana: [{ base: [], feature: { discover: ['all'] }, spaces: ['*'] }],
 };
 
+export const COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'kibana',
+  'Content-Type': 'application/json;charset=UTF-8',
+};
+
+export const CAPABILITIES_API_PATH = '/api/core/capabilities';
+
+export const CUSTOM_SPACE = {
+  id: 'custom_space',
+  name: 'custom_space',
+  disabledFeatures: [],
+};
+
+export const CUSTOM_SPACE_DEV_TOOLS_DISABLED = {
+  id: 'custom_space_dev_tools_disabled',
+  name: 'custom_space_dev_tools_disabled',
+  disabledFeatures: ['dev_tools'],
+};
+
+export const API_CUSTOM_SPACE = {
+  id: 'api_custom_space',
+  name: 'api_custom_space',
+  disabledFeatures: [],
+};
+
+export const API_CUSTOM_SPACE_DEV_TOOLS_DISABLED = {
+  id: 'api_custom_space_dev_tools_disabled',
+  name: 'api_custom_space_dev_tools_disabled',
+  disabledFeatures: ['dev_tools'],
+};
+
 export const DEV_TOOL_APPS = [
   { hash: 'console', label: 'Console', readySubject: 'console' },
   { hash: 'grokdebugger', label: 'Grok Debugger', readySubject: 'grokDebuggerContainer' },

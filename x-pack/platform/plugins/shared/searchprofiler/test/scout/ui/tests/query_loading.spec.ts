@@ -6,8 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
-import { SEARCH_PROFILER_TAGS, SEARCH_PROFILER_USER_ROLE } from '../fixtures/constants';
+import { test, testData } from '../fixtures';
 
 const INDEX_NAME = 'test';
 const PRECONFIGURED_QUERY = JSON.stringify(
@@ -22,9 +21,9 @@ const PRECONFIGURED_QUERY = JSON.stringify(
   2
 );
 
-test.describe('Search Profiler query loading', { tag: SEARCH_PROFILER_TAGS }, () => {
+test.describe('Search Profiler query loading', { tag: testData.SEARCH_PROFILER_TAGS }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(SEARCH_PROFILER_USER_ROLE);
+    await browserAuth.loginAsSearchProfilerUser();
   });
 
   test('loads index and query from URL parameters', async ({ pageObjects }) => {

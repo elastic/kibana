@@ -6,16 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test } from '../fixtures';
-import {
-  SEARCH_PROFILER_TAGS,
-  SEARCH_PROFILER_USER_ROLE,
-  SIMPLE_QUERY,
-} from '../fixtures/constants';
+import { test, testData } from '../fixtures';
 
-test.describe('Search Profiler JSON parsing', { tag: SEARCH_PROFILER_TAGS }, () => {
+test.describe('Search Profiler JSON parsing', { tag: testData.SEARCH_PROFILER_TAGS }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(SEARCH_PROFILER_USER_ROLE);
+    await browserAuth.loginAsSearchProfilerUser();
     await pageObjects.searchProfiler.goto();
   });
 
@@ -49,7 +44,7 @@ test.describe('Search Profiler JSON parsing', { tag: SEARCH_PROFILER_TAGS }, () 
     pageObjects,
   }) => {
     await pageObjects.searchProfiler.setIndex('search-profiler-missing-index-*');
-    await pageObjects.searchProfiler.setQuery(SIMPLE_QUERY);
+    await pageObjects.searchProfiler.setQuery(testData.SIMPLE_QUERY);
 
     await pageObjects.searchProfiler.profile();
     await expect(pageObjects.searchProfiler.noShardsNotification).toBeVisible();

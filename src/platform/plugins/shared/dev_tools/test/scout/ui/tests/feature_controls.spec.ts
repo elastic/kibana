@@ -7,88 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { test, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { DEV_TOOLS_ALL_ROLE, DEV_TOOLS_READ_ROLE, NO_DEV_TOOLS_ROLE, DEV_TOOL_APPS } from '../fixtures/constants';
-
-const CUSTOM_SPACE = {
-  id: 'custom_space',
-  name: 'custom_space',
-  disabledFeatures: [],
-};
-
-const CUSTOM_SPACE_DEV_TOOLS_DISABLED = {
-  id: 'custom_space_dev_tools_disabled',
-  name: 'custom_space_dev_tools_disabled',
-  disabledFeatures: ['dev_tools'],
-};
-
-const expectDevToolsNavLink = async (page: ScoutPage, visible: boolean) => {
-  const devToolsLink = page.getByRole('link', { name: 'Dev Tools' });
-  if (visible) {
-    await expect(devToolsLink).toBeVisible();
-  } else {
-    await expect(devToolsLink).toBeHidden();
-  }
-};
-
-const expectReadOnlyBadge = async (page: ScoutPage, visible: boolean) => {
-  const readOnlyBadge = page.getByText('Read only', { exact: true });
-  if (visible) {
-    await expect(readOnlyBadge).toBeVisible();
-  } else {
-    await expect(readOnlyBadge).toBeHidden();
-  }
-};
+import { test, testData } from '../fixtures';
 
 test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
-    await apiServices.spaces.delete(CUSTOM_SPACE.id).catch(() => {});
-    await apiServices.spaces.delete(CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
+    await apiServices.spaces.delete(testData.CUSTOM_SPACE.id).catch(() => {});
+    await apiServices.spaces.delete(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
   });
 
   test('dev tools all privileges allow navigation without read-only badge', async ({
     browserAuth,
-    page,
+    pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(DEV_TOOLS_ALL_ROLE);
-    await page.gotoApp('home');
-    await expectDevToolsNavLink(page, true);
+    await browserAuth.loginAsDevToolsAll();
 
-    for (const { hash, readySubject } of DEV_TOOL_APPS) {
-      await page.gotoApp('dev_tools', { hash });
-      await expect(page.testSubj.locator(readySubject)).toBeVisible();
-      await expectReadOnlyBadge(page, false);
+    for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
+      await pageObjects.devTools.goto(hash);
+      await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
+      await expect(pageObjects.devTools.readOnlyBadge).toBeHidden();
     }
   });
 
   test('dev tools read privileges allow navigation with read-only badge', async ({
     browserAuth,
-    page,
+    pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(DEV_TOOLS_READ_ROLE);
-    await page.gotoApp('home');
-    await expectDevToolsNavLink(page, true);
+    await browserAuth.loginAsDevToolsRead();
 
-    for (const { hash, readySubject } of DEV_TOOL_APPS) {
-      await page.gotoApp('dev_tools', { hash });
-      await expect(page.testSubj.locator(readySubject)).toBeVisible();
-      await expectReadOnlyBadge(page, true);
+    for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
+      await pageObjects.devTools.goto(hash);
+      await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
+      await expect(pageObjects.devTools.readOnlyBadge).toBeVisible();
     }
   });
 
   test('users without dev tools privileges cannot access dev tools apps', async ({
     browserAuth,
-    page,
+    pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(NO_DEV_TOOLS_ROLE);
-    await page.gotoApp('home');
-    await expectDevToolsNavLink(page, false);
+    await browserAuth.loginAsNoDevToolsPrivileges();
 
-    for (const { hash } of DEV_TOOL_APPS) {
-      await page.gotoApp('dev_tools', { hash });
-      await expect(page.getByText('Application Not Found')).toBeVisible();
+    for (const { hash } of testData.DEV_TOOL_APPS) {
+      await pageObjects.devTools.goto(hash);
+      await expect(pageObjects.devTools.appNotFoundMessage).toBeVisible();
     }
   });
 
@@ -97,20 +60,20 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     browserAuth,
     kbnUrl,
     page,
+    pageObjects,
   }) => {
-    await apiServices.spaces.create(CUSTOM_SPACE);
-    await browserAuth.loginWithCustomRole(DEV_TOOLS_READ_ROLE);
-    await page.goto(kbnUrl.app('home', { space: CUSTOM_SPACE.id }));
-    await expectDevToolsNavLink(page, true);
+    await apiServices.spaces.delete(testData.CUSTOM_SPACE.id).catch(() => {});
+    await apiServices.spaces.create(testData.CUSTOM_SPACE);
+    await browserAuth.loginAsDevToolsRead();
 
-    for (const { hash, readySubject } of DEV_TOOL_APPS) {
+    for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
       await page.goto(
         kbnUrl.app('dev_tools', {
-          space: CUSTOM_SPACE.id,
+          space: testData.CUSTOM_SPACE.id,
           pathOptions: { hash },
         })
       );
-      await expect(page.testSubj.locator(readySubject)).toBeVisible();
+      await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
     }
   });
 
@@ -119,20 +82,20 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     browserAuth,
     kbnUrl,
     page,
+    pageObjects,
   }) => {
-    await apiServices.spaces.create(CUSTOM_SPACE_DEV_TOOLS_DISABLED);
-    await browserAuth.loginWithCustomRole(DEV_TOOLS_ALL_ROLE);
-    await page.goto(kbnUrl.app('home', { space: CUSTOM_SPACE_DEV_TOOLS_DISABLED.id }));
-    await expectDevToolsNavLink(page, false);
+    await apiServices.spaces.delete(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
+    await apiServices.spaces.create(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED);
+    await browserAuth.loginAsDevToolsAll();
 
-    for (const { hash } of DEV_TOOL_APPS) {
+    for (const { hash } of testData.DEV_TOOL_APPS) {
       await page.goto(
         kbnUrl.app('dev_tools', {
-          space: CUSTOM_SPACE_DEV_TOOLS_DISABLED.id,
+          space: testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id,
           pathOptions: { hash },
         })
       );
-      await expect(page.getByText('Application Not Found')).toBeVisible();
+      await expect(pageObjects.devTools.appNotFoundMessage).toBeVisible();
     }
   });
 });

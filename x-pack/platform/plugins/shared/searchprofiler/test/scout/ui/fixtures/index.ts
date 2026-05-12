@@ -6,16 +6,38 @@
  */
 
 import { test as base } from '@kbn/scout';
-import type { PageObjects, ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type {
+  BrowserAuthFixture,
+  PageObjects,
+  ScoutPage,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+} from '@kbn/scout';
 
+import * as testData from './constants';
 import type { SearchProfilerPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
+export interface SearchProfilerBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsSearchProfilerUser: () => Promise<void>;
+}
+
 export interface SearchProfilerTestFixtures extends ScoutTestFixtures {
+  browserAuth: SearchProfilerBrowserAuthFixture;
   pageObjects: SearchProfilerPageObjects;
 }
 
 export const test = base.extend<SearchProfilerTestFixtures, ScoutWorkerFixtures>({
+  browserAuth: async (
+    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    use: (browserAuth: SearchProfilerBrowserAuthFixture) => Promise<void>
+  ) => {
+    await use({
+      ...browserAuth,
+      loginAsSearchProfilerUser: () =>
+        browserAuth.loginWithCustomRole(testData.SEARCH_PROFILER_USER_ROLE),
+    });
+  },
   pageObjects: async (
     {
       pageObjects,
@@ -30,3 +52,5 @@ export const test = base.extend<SearchProfilerTestFixtures, ScoutWorkerFixtures>
     await use(extendedPageObjects);
   },
 });
+
+export { testData };
