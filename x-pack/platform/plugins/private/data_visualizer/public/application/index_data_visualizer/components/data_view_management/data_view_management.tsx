@@ -67,6 +67,12 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
       }}
       ownFocus
       data-test-subj="dataVisualizerDataViewManagementPopover"
+      aria-label={i18n.translate(
+        'xpack.dataVisualizer.index.dataViewManagement.popoverAriaLabel',
+        {
+          defaultMessage: 'Data view management',
+        }
+      )}
       button={
         <EuiButtonIcon
           color="text"

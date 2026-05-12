@@ -242,6 +242,12 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         <EuiFlexItem grow={false}>
           <EuiPopover
             id={'mlFullTimeRangeSelectorOption'}
+            aria-label={i18n.translate(
+              'xpack.ml.datePicker.fullTimeRangeSelector.timeRangeOptionsAriaLabel',
+              {
+                defaultMessage: 'Time range options',
+              }
+            )}
             button={
               <EuiButtonIcon
                 data-test-subj="mlDatePickerButtonDataTierOptions"
