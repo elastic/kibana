@@ -378,6 +378,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 ? KBN_FIELD_TYPES.CONFLICT
                 : esFieldTypeToKibanaFieldType(type);
 
+              const sourceField =
+                querySummary.renamedColumnsPairs && querySummary.renamedColumnsPairs.size > 0
+                  ? resolveRenamedSourceField(name, query)
+                  : name;
+
               return {
                 id: name,
                 name,
@@ -390,17 +395,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           appliedTimeRange,
                           params: {},
                           indexPattern,
-                          sourceField: resolveRenamedSourceField(
-                            name,
-                            querySummary.renamedColumnsPairs
-                          ),
+                          sourceField,
                         }
                       : {
                           indexPattern,
-                          sourceField: resolveRenamedSourceField(
-                            name,
-                            querySummary.renamedColumnsPairs
-                          ),
+                          sourceField,
                         },
                   params: {
                     id: kibanaFieldType,
