@@ -29,25 +29,19 @@ export type DiscoverySort =
   | 'criticality:desc';
 
 export interface DiscoveriesSearchOptions extends CommonSearchOptions {
-  /** Discovery `status` (e.g. "finding" | "clearance"). */
-  status?: string[];
-  /** Include only discoveries with these `discovery_id` values. */
+  status?: string;
   discovery_id?: string[];
-  /** Exclude discoveries with these `discovery_id` values. */
   exclude_discovery_id?: string[];
-  /** Drop discoveries that have already been folded into another (i.e. `grouped_into IS NOT NULL`). */
   exclude_grouped?: boolean;
-  /** Max number of latest discoveries to return. */
   size?: number;
-  /** Sort tokens of the form `field:asc` or `field:desc`. */
   sort?: DiscoverySort[];
 }
 
 const buildWhere = (options: DiscoveriesSearchOptions): LatestSourceWhereCondition | undefined => {
   let where: LatestSourceWhereCondition | undefined;
 
-  if (options.status?.length) {
-    where = andWhere(where, inList('status', options.status));
+  if (options.status) {
+    where = andWhere(where, esql.exp`${esql.col('status')} == ${esql.str(options.status)}`);
   }
 
   if (options.discovery_id?.length) {
