@@ -28,7 +28,7 @@ export type { Verdict };
 
 export const verdictsDataStream: DataStreamDefinition<typeof verdictsMappings, StoredVerdict> = {
   name: VERDICTS_DATA_STREAM,
-  version: 3,
+  version: 2,
   hidden: true,
   template: {
     priority: 500,
