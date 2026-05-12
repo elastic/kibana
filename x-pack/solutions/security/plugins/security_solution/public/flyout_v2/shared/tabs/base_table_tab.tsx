@@ -19,6 +19,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FlyoutError } from '../components/flyout_error';
 import type { CellActionRenderer } from '../components/cell_actions';
+import { TABLE_TAB_PIN_ACTION_TEST_ID } from '../components/test_ids';
 
 export interface TableTabItem {
   field: string;
@@ -120,6 +121,7 @@ export const TableTab = memo(
                   onClick={() => onPinField(item.field, isPinned ? 'unpin' : 'pin')}
                   size="xs"
                   color="text"
+                  data-test-subj={TABLE_TAB_PIN_ACTION_TEST_ID}
                 />
               </EuiToolTip>
             );

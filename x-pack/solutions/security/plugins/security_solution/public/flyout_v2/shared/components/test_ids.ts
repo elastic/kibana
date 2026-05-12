@@ -48,6 +48,8 @@ export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
 /* Table tab */
 
 export const TABLE_TAB_TEST_ID = `${PREFIX}TableTab` as const;
+export const TABLE_TAB_PIN_ACTION_TEST_ID = `${PREFIX}TableTabPinAction` as const;
+export const TABLE_TAB_TOUR_TEST_ID = `${PREFIX}TableTabTour` as const;
 
 const TABLE_TAB_SETTING_TEST_ID = `${PREFIX}TableTabSetting` as const;
 export const TABLE_TAB_SETTING_BUTTON_TEST_ID = `${TABLE_TAB_SETTING_TEST_ID}Button` as const;

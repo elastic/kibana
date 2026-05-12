@@ -13,4 +13,5 @@ export const FLYOUT_STORAGE_KEYS = {
     'securitySolution.documentDetailsFlyout.threatIntelligenceTimeRange',
   PREVALENCE_TIME_RANGE: 'securitySolution.documentDetailsFlyout.prevalenceTimeRange',
   TABLE_TAB_STATE: 'securitySolution.documentDetailsFlyoutV2.tableTabState',
+  TABLE_TAB_TOUR: 'securitySolution.documentDetailsFlyoutV2.tableTabTourState',
 };
