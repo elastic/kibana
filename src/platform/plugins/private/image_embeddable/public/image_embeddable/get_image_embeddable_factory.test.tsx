@@ -8,6 +8,7 @@
  */
 
 import { IMAGE_EMBEDDABLE_TYPE } from '../../common/constants';
+import type { ImageEmbeddableApi } from '../types';
 import { getImageEmbeddableFactory } from './get_image_embeddable_factory';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import { BehaviorSubject } from 'rxjs';
@@ -23,44 +24,50 @@ describe('image embeddable', () => {
     phase$: new BehaviorSubject(undefined),
   });
 
+  let embeddableApi: ImageEmbeddableApi;
+  beforeEach((done) => {
+    const { buildEmbeddable } = getImageEmbeddableFactory();
+    buildEmbeddable({
+      initializeDrilldownsManager,
+      initialState: {
+        image_config: {
+          src: {
+            type: 'file',
+            file_id: 'puppy.png',
+          },
+          object_fit: 'fill',
+        },
+      },
+      finalizeApi,
+      uuid: '1',
+      parentApi: {},
+    })
+      .then(({ api }) => {
+        embeddableApi = api;
+        done();
+      })
+      .catch(done);
+  });
+
   describe('anyStateChange$', () => {
     test('should not emit on subscribe and emit when any state changes', (done) => {
-      const { buildEmbeddable } = getImageEmbeddableFactory();
-      buildEmbeddable({
-        initializeDrilldownsManager,
-        initialState: {
-          image_config: {
-            src: {
-              type: 'file',
-              file_id: 'puppy.png',
-            },
-            object_fit: 'fill',
-          },
-        },
-        finalizeApi,
-        uuid: '1',
-        parentApi: {},
-      })
-        .then(({ api }) => {
-          let emitCount = 0;
-          api.anyStateChange$.subscribe(() => {
-            emitCount++;
-            if (emitCount === 1) {
-              try {
-                const { title } = api.serializeState();
-                expect(title).toBe('cute puppies');
-              } catch (error) {
-                // title assertion fails when
-                // anyStateChange$ emits on subscribe
-                done(error);
-                return;
-              }
-              done();
-            }
-          });
-          api.setTitle('cute puppies');
-        })
-        .catch(done);
+      let emitCount = 0;
+      embeddableApi.anyStateChange$.subscribe(() => {
+        emitCount++;
+        if (emitCount === 1) {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        }
+      });
+      embeddableApi.setTitle('cute puppies');
     });
   });
 });
