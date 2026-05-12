@@ -151,7 +151,7 @@ export const RulesListPage = () => {
               {/* Primary create button — navigates to the full-page form (existing flow) */}
               <EuiButton
                 fill
-                href="/app/management/alertingV2/rules/create"
+                href={http.basePath.prepend('/app/management/alertingV2/rules/create')}
                 data-test-subj="createRuleButton"
               >
                 <FormattedMessage
