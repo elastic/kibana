@@ -1330,7 +1330,7 @@ groups:
 
       - setting: xpack.alerting.maxEphemeralActionsPerAlert
         description: |
-          The maximum number of actions that a single alert instance could run using ephemeral tasks (in-memory, non-persisted). Deprecated and ignored in 9.0; remove this setting from your configuration.
+          The maximum number of actions that a single alert instance could run using ephemeral tasks (in-memory, non-persisted).
         datatype: int
         applies_to:
           - "stack: ga 7.15, removed 9.0"
