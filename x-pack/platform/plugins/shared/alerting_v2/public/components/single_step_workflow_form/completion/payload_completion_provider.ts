@@ -6,23 +6,9 @@
  */
 
 import { monaco } from '@kbn/code-editor';
+import { parseLineForCompletion } from '@kbn/workflows-management-plugin/public';
 import type { PayloadVariable } from '../registry';
-import { DISPATCH_PAYLOAD_VARIABLES } from '../registry';
-
-const TEMPLATE_OPEN = '{{';
-const TEMPLATE_CLOSE = '}}';
-
-const isInsideTemplate = (textUpToCursor: string): boolean => {
-  const lastOpen = textUpToCursor.lastIndexOf(TEMPLATE_OPEN);
-  if (lastOpen === -1) return false;
-  const lastClose = textUpToCursor.lastIndexOf(TEMPLATE_CLOSE);
-  return lastClose < lastOpen;
-};
-
-const getCurrentToken = (textUpToCursor: string): string => {
-  const match = textUpToCursor.match(/([A-Za-z0-9_.[\]]*)$/);
-  return match ? match[1] : '';
-};
+import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
 
 const buildItem = (
   variable: PayloadVariable,
@@ -36,26 +22,40 @@ const buildItem = (
   range,
 });
 
-export const createPayloadCompletionProvider = (
-  variables: readonly PayloadVariable[] = DISPATCH_PAYLOAD_VARIABLES
-): monaco.languages.CompletionItemProvider => ({
+const isEpisodeContext = (pathSegments: string[] | null): boolean =>
+  pathSegments !== null &&
+  pathSegments.length >= 2 &&
+  pathSegments[0] === 'episodes' &&
+  /^\d+$/.test(pathSegments[1]);
+
+export const createPayloadCompletionProvider = (): monaco.languages.CompletionItemProvider => ({
   triggerCharacters: ['{', '.'],
   provideCompletionItems(model, position) {
     const lineContent = model.getLineContent(position.lineNumber);
     const textUpToCursor = lineContent.slice(0, position.column - 1);
+    const parseResult = parseLineForCompletion(textUpToCursor);
 
-    if (!isInsideTemplate(textUpToCursor)) {
+    if (
+      !parseResult ||
+      (parseResult.matchType !== 'variable-unfinished' &&
+        parseResult.matchType !== 'variable-complete' &&
+        parseResult.matchType !== 'at')
+    ) {
       return { suggestions: [] };
     }
 
-    const currentToken = getCurrentToken(textUpToCursor);
+    const { pathSegments, lastPathSegment } = parseResult;
+    const lastSegmentLen = lastPathSegment?.length ?? 0;
     const range: monaco.IRange = {
       startLineNumber: position.lineNumber,
       endLineNumber: position.lineNumber,
-      startColumn: position.column - currentToken.length,
+      startColumn: position.column - lastSegmentLen,
       endColumn: position.column,
     };
 
-    return { suggestions: variables.map((variable) => buildItem(variable, range)) };
+    const candidates = isEpisodeContext(pathSegments)
+      ? ALERT_EPISODE_FIELDS
+      : DISPATCH_PAYLOAD_VARIABLES;
+    return { suggestions: candidates.map((variable) => buildItem(variable, range)) };
   },
 });

@@ -31,3 +31,37 @@ export const DISPATCH_PAYLOAD_VARIABLES: readonly PayloadVariable[] = [
     documentation: 'Alert episodes included in this dispatch.',
   },
 ];
+
+// Mirrors `AlertEpisode` from server/lib/dispatcher/types.ts — keep in sync.
+export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
+  {
+    path: 'last_event_timestamp',
+    detail: 'string',
+    documentation: 'Timestamp of the most recent event in this episode.',
+  },
+  {
+    path: 'rule_id',
+    detail: 'string',
+    documentation: 'ID of the rule that produced this episode.',
+  },
+  {
+    path: 'group_hash',
+    detail: 'string',
+    documentation: 'Hash identifying the alert group.',
+  },
+  {
+    path: 'episode_id',
+    detail: 'string',
+    documentation: 'Unique identifier for this episode.',
+  },
+  {
+    path: 'episode_status',
+    detail: "'inactive' | 'pending' | 'active' | 'recovering'",
+    documentation: 'Current lifecycle status of the episode.',
+  },
+  {
+    path: 'data',
+    detail: 'Record<string, unknown>',
+    documentation: 'Additional event data attached to the episode.',
+  },
+];

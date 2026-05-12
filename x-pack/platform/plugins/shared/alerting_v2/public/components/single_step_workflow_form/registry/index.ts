@@ -11,4 +11,4 @@ export {
   getSingleStepWorkflowType,
   getDefaultSingleStepWorkflowType,
 } from './registry';
-export { DISPATCH_PAYLOAD_VARIABLES } from './payload_variables';
+export { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from './payload_variables';

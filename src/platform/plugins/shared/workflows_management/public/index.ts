@@ -17,3 +17,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';
 export type { WorkflowsBaseTelemetry } from './common/service/telemetry';
+
+export { parseLineForCompletion } from './widgets/workflow_yaml_editor/lib/autocomplete/context/parse_line_for_completion';
+
+export type {
+  LineParseResult,
+  VariableLineParseResult,
+  ForeachVariableLineParseResult,
+  LiquidLineParseResult,
+  LiquidSyntaxLineParseResult,
+} from './widgets/workflow_yaml_editor/lib/autocomplete/context/parse_line_for_completion';
