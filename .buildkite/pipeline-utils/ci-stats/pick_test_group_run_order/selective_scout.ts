@@ -43,13 +43,18 @@ const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
 ];
 // LOCKSTEP:scout-info END
 
-const compile = (patterns: readonly string[]): Minimatch[] =>
+// Type left inferred so this module works against either the legacy
+// `@types/minimatch` (where `Minimatch` is a value and the instance type is
+// `IMinimatch`) or the bundled types in modern `minimatch` releases
+// (where `Minimatch` is both value and type). The .buildkite/ workspace
+// currently resolves to the legacy variant via `@types/minimatch@3.x`.
+const compile = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 
 const NOISE = compile(SCOUT_TESTS_ONLY_NOISE_PATTERNS);
 const SCOPES = compile(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
 
-const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
+const matchesAny = (file: string, matchers: ReturnType<typeof compile>): boolean =>
   matchers.some((m) => m.match(file));
 
 /**
