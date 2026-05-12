@@ -155,7 +155,7 @@ interface DraftSampleSource {
  *
  * Falls back to a simple `FROM <root>` when the parent cannot be resolved.
  */
-async function resolveDraftSampleSource(
+export async function resolveDraftSampleSource(
   streamsRepositoryClient: StreamsRepositoryClient,
   streamName: string
 ): Promise<DraftSampleSource> {

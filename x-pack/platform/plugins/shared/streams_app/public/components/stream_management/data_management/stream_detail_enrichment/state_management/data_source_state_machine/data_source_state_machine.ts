@@ -236,9 +236,7 @@ export const dataSourceMachine = setup({
                 { type: 'dataSource.fetchMore' }
               >;
               return {
-                streamName: context.streamName,
-                condition: fetchMoreEvent.condition,
-                runtimeMappings: fetchMoreEvent.runtimeMappings,
+                esqlQuery: fetchMoreEvent.esqlQuery,
                 existingDocuments: context.data,
               };
             },

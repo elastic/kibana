@@ -6,11 +6,7 @@
  */
 
 import type { SampleDocument } from '@kbn/streams-schema';
-import {
-  findConditionById,
-  buildFetchMoreSearchParams,
-  deduplicateDocuments,
-} from './fetch_more_actor';
+import { findConditionById, deduplicateDocuments } from './fetch_more_actor';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 
 describe('fetch_more_actor', () => {
@@ -63,59 +59,6 @@ describe('fetch_more_actor', () => {
       ];
       const result = findConditionById(steps as StreamlangStepWithUIAttributes[], 'cond-2');
       expect(result).toEqual({ field: 'service.name', eq: 'api' });
-    });
-  });
-
-  describe('buildFetchMoreSearchParams', () => {
-    it('builds correct search params with condition and stream name', () => {
-      const result = buildFetchMoreSearchParams(
-        'logs.test',
-        { field: 'log.level', eq: 'info' },
-        {}
-      );
-
-      expect(result.index).toBe('logs.test');
-      expect(result.size).toBe(100);
-      expect(result.track_total_hits).toBe(false);
-      expect(result.terminate_after).toBe(100);
-      expect(result.allow_partial_search_results).toBe(true);
-      expect(result.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
-    });
-
-    it('includes the condition in the query DSL', () => {
-      const result = buildFetchMoreSearchParams(
-        'logs.test',
-        { field: 'log.level', eq: 'info' },
-        {}
-      );
-
-      expect(result.query.bool.must).toHaveLength(1);
-      expect(result.query.bool.must[0]).toBeDefined();
-    });
-
-    it('includes runtime_mappings when provided', () => {
-      const runtimeMappings = {
-        'user.name': { type: 'keyword' as const },
-        'response.status': { type: 'double' as const },
-      };
-
-      const result = buildFetchMoreSearchParams(
-        'logs.test',
-        { field: 'user.name', eq: 'user1' },
-        runtimeMappings
-      );
-
-      expect(result.runtime_mappings).toEqual(runtimeMappings);
-    });
-
-    it('passes empty runtime_mappings when none are needed', () => {
-      const result = buildFetchMoreSearchParams(
-        'logs.test',
-        { field: 'log.level', eq: 'info' },
-        {}
-      );
-
-      expect(result.runtime_mappings).toEqual({});
     });
   });
 

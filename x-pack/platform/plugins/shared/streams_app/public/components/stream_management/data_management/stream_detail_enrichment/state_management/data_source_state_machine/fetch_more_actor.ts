@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl, isConditionBlock } from '@kbn/streamlang';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import type { SampleDocument } from '@kbn/streams-schema';
+import { isConditionBlock } from '@kbn/streamlang';
+import type { Condition, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import {
+  mergeSourceIntoDocuments,
+  stripOtelAliases,
+  type SampleDocument,
+} from '@kbn/streams-schema';
 import { fromObservable } from 'xstate';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { IEsSearchResponse } from '@kbn/search-types';
-import { Observable, filter, map } from 'rxjs';
-
-const FETCH_MORE_LIMIT = 100;
+import { getESQLResults } from '@kbn/esql-utils';
+import { Observable } from 'rxjs';
+import { esqlResultToPlainObjects } from '../../../../../../util/esql_result_to_plain_objects';
 
 export interface FetchMoreInput {
-  streamName: string;
-  condition: Condition;
-  runtimeMappings: MappingRuntimeFields;
+  esqlQuery: string;
   existingDocuments: SampleDocument[];
 }
 
@@ -40,37 +38,6 @@ export function findConditionById(
   return undefined;
 }
 
-export function buildFetchMoreSearchParams(
-  streamName: string,
-  condition: Condition,
-  runtimeMappings: MappingRuntimeFields
-) {
-  const conditionClause = conditionToQueryDsl(condition);
-
-  return {
-    index: streamName,
-    query: {
-      bool: {
-        must: [conditionClause],
-      },
-    },
-    runtime_mappings: runtimeMappings,
-    size: FETCH_MORE_LIMIT,
-    sort: [{ '@timestamp': { order: 'desc' as const } }],
-    terminate_after: FETCH_MORE_LIMIT,
-    track_total_hits: false,
-    allow_partial_search_results: true,
-  };
-}
-
-function isValidSearchResult(result: IEsSearchResponse): boolean {
-  return !isRunningResponse(result) && result.rawResponse.hits?.hits !== undefined;
-}
-
-function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
-  return result.rawResponse.hits.hits.map((hit) => hit._source);
-}
-
 export function deduplicateDocuments(
   existingDocs: SampleDocument[],
   newDocs: SampleDocument[]
@@ -82,23 +49,30 @@ export function deduplicateDocuments(
 
 export function createFetchMoreDocumentsActor({ data }: FetchMoreDeps) {
   return fromObservable<SampleDocument[], FetchMoreInput>(({ input }) => {
-    const { streamName, condition, runtimeMappings, existingDocuments } = input;
+    const { esqlQuery, existingDocuments } = input;
     const abortController = new AbortController();
-    const params = buildFetchMoreSearchParams(streamName, condition, runtimeMappings);
 
     return new Observable((observer) => {
-      const subscription = data.search
-        .search({ params }, { abortSignal: abortController.signal })
-        .pipe(
-          filter(isValidSearchResult),
-          map(extractDocumentsFromResult),
-          map((newDocs) => deduplicateDocuments(existingDocuments, newDocs))
-        )
-        .subscribe(observer);
+      getESQLResults({
+        esqlQuery,
+        search: data.search.search,
+        signal: abortController.signal,
+      })
+        .then(({ response }) => {
+          let docs = esqlResultToPlainObjects<SampleDocument>(response);
+          docs = mergeSourceIntoDocuments(docs);
+          docs = stripOtelAliases(docs);
+          observer.next(deduplicateDocuments(existingDocuments, docs));
+          observer.complete();
+        })
+        .catch((err) => {
+          if (!abortController.signal.aborted) {
+            observer.error(err);
+          }
+        });
 
       return () => {
         abortController.abort();
-        subscription.unsubscribe();
       };
     });
   });

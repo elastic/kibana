@@ -10,6 +10,7 @@ import {
   isEnabledFailureStore,
   LOGS_ECS_STREAM_NAME,
   Streams,
+  withUnmappedFieldsDirective,
 } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
@@ -19,11 +20,14 @@ import {
   addDeterministicCustomIdentifiers,
   addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
-  getConditionFields,
+  conditionToESQL,
+  convertUIStepsToDSL,
+  isConditionBlock,
+  transpileEsql,
   validateStreamlang,
   validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
@@ -52,6 +56,7 @@ import {
   dataSourceMachine,
 } from '../data_source_state_machine';
 import { findConditionById } from '../data_source_state_machine/fetch_more_actor';
+import { resolveDraftSampleSource } from '../data_source_state_machine/data_collector_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
@@ -299,20 +304,7 @@ export const streamEnrichmentMachine = setup({
     sendResetToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
     sendResetEventToSimulator: sendTo('simulator', { type: 'simulation.reset' }),
 
-    fetchMoreSamples: ({ context }) => {
-      const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
-      if (!selectedConditionId) return;
-
-      const steps = context.simulatorRef.getSnapshot().context.steps;
-      const condition = findConditionById(steps, selectedConditionId);
-      if (!condition) return;
-
-      const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
-      if (!activeDataSourceRef) return;
-
-      const runtimeMappings = getRuntimeMappingsForCondition(context.definition, condition);
-      activeDataSourceRef.send({ type: 'dataSource.fetchMore', condition, runtimeMappings });
-    },
+    fetchMoreSamples: getPlaceholderFor(createFetchMoreSamplesAction),
 
     filterByCondition: ({ context }, params: { conditionId: string }) => {
       context.interactiveModeRef?.send({
@@ -732,6 +724,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   actions: {
     refreshDefinition,
     syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
+    fetchMoreSamples: createFetchMoreSamplesAction({ streamsRepositoryClient }),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),
@@ -741,31 +734,91 @@ export const createStreamEnrichmentMachineImplementations = ({
   },
 });
 
-function getRuntimeMappingsForCondition(
-  definition: Streams.ingest.all.GetResponse,
-  condition: Parameters<typeof getConditionFields>[0]
-): MappingRuntimeFields {
-  if (!Streams.WiredStream.Definition.is(definition.stream)) {
-    return {};
+const FETCH_MORE_LIMIT = 100;
+
+/**
+ * Builds an ES|QL query that applies processing steps and filters by a condition.
+ * For non-draft streams: FROM <streamName> | <processing> | WHERE <condition>
+ * For draft streams: uses the parent view with routing condition as the base query.
+ */
+async function buildFetchMoreEsqlQuery({
+  streamName,
+  condition,
+  processingSteps,
+  isDraft,
+  streamsRepositoryClient,
+}: {
+  streamName: string;
+  condition: string;
+  processingSteps: ReturnType<typeof convertUIStepsToDSL>;
+  isDraft: boolean;
+  streamsRepositoryClient: StreamsRepositoryClient;
+}): Promise<string> {
+  let baseQuery: string;
+
+  if (isDraft) {
+    const { baseQuery: draftBaseQuery } = await resolveDraftSampleSource(
+      streamsRepositoryClient,
+      streamName
+    );
+    baseQuery = draftBaseQuery;
+  } else {
+    baseQuery = `FROM ${streamName} METADATA _source`;
   }
 
-  const wiredDefinition = definition as Streams.WiredStream.GetResponse;
-  const mappedFields = Object.keys({
-    ...wiredDefinition.inherited_fields,
-    ...wiredDefinition.stream.ingest.wired.fields,
-  });
+  if (processingSteps.steps.length > 0) {
+    const result = await transpileEsql(processingSteps);
+    if (result.commands.length > 0) {
+      baseQuery += `\n| ${result.commands.join('\n| ')}`;
+    }
+  }
 
-  return Object.fromEntries(
-    getConditionFields(condition)
-      .filter((field) => !mappedFields.includes(field.name))
-      .map((field) => [
-        field.name,
-        {
-          type:
-            field.type === 'boolean' ? 'boolean' : field.type === 'number' ? 'double' : 'keyword',
-        },
-      ])
-  );
+  baseQuery += `\n| WHERE ${condition}`;
+  baseQuery += `\n| SORT @timestamp DESC`;
+  baseQuery += `\n| LIMIT ${FETCH_MORE_LIMIT}`;
+
+  return withUnmappedFieldsDirective(baseQuery);
+}
+
+function createFetchMoreSamplesAction({
+  streamsRepositoryClient,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+}) {
+  return ({ context }: { context: StreamEnrichmentContextType }) => {
+    const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
+    if (!selectedConditionId) return;
+
+    const steps = context.simulatorRef.getSnapshot().context.steps;
+    const condition = findConditionById(steps, selectedConditionId);
+    if (!condition) return;
+
+    const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
+    if (!activeDataSourceRef) return;
+
+    const streamName = context.definition.stream.name;
+    const isDraft = isDraftStream(context.definition.stream);
+
+    // Get steps before the selected condition to include as ESQL processing.
+    // The condition itself becomes the WHERE clause; its children are excluded.
+    const conditionIndex = steps.findIndex(
+      (s) => isConditionBlock(s) && s.customIdentifier === selectedConditionId
+    );
+    const stepsBeforeCondition = conditionIndex > 0 ? steps.slice(0, conditionIndex) : [];
+    const processingDsl = convertUIStepsToDSL(stepsBeforeCondition);
+    const conditionEsql = conditionToESQL(condition);
+
+    // Build and send the ESQL query asynchronously
+    buildFetchMoreEsqlQuery({
+      streamName,
+      condition: conditionEsql,
+      processingSteps: processingDsl,
+      isDraft,
+      streamsRepositoryClient,
+    }).then((esqlQuery) => {
+      activeDataSourceRef.send({ type: 'dataSource.fetchMore', esqlQuery });
+    });
+  };
 }
 
 const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
