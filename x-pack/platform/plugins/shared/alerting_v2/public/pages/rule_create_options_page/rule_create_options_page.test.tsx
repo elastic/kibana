@@ -52,7 +52,7 @@ describe('RuleCreateOptionsPage', () => {
   it('renders the rule creation method cards', () => {
     renderPage();
 
-    expect(screen.getByText('Create with ES|QL')).toBeInTheDocument();
+    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
     expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
   });

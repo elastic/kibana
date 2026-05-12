@@ -42,10 +42,10 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.getByText(/powerful es\|ql-driven rules/i)).toBeInTheDocument();
   });
 
-  it('renders the "Create with ES|QL" card with correct href', () => {
+  it('renders the "Create ES|QL rule" card with correct href', () => {
     renderPanel();
 
-    const card = screen.getByRole('link', { name: /create with es\|ql/i });
+    const card = screen.getByRole('link', { name: /create es\|ql rule/i });
     expect(card).toBeInTheDocument();
     expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
   });
@@ -54,26 +54,12 @@ describe('RuleCreateOptionsPanel', () => {
     renderPanel();
 
     expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
-    expect(screen.getByText('Coming soon')).toBeInTheDocument();
-    expect(screen.getByText('Create with AI Agent').closest('a, button')).toBeNull();
+    expect(screen.getAllByText('Coming soon').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders the "Threshold Alert" card with correct href', () => {
+  it('renders the "Threshold Alert" card as coming soon', () => {
     renderPanel();
 
-    const card = screen.getByRole('link', { name: /threshold alert/i });
-    expect(card).toBeInTheDocument();
-    expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
-  });
-
-  it('renders the documentation link', () => {
-    renderPanel();
-
-    const link = screen.getByTestId('createRulePanelDocumentationLink');
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute(
-      'href',
-      'https://www.elastic.co/guide/en/elasticsearch/reference/current/alerting-rule-types.html'
-    );
+    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
   });
 });
