@@ -56,15 +56,23 @@ export async function getAlertSnoozeSnapshot({
     if (!source) {
       return null;
     }
+    console.log('getAlertSnoozeSnapshot', { response: response.hits.hits[0], source, fields });
 
     return fields.reduce<Record<string, unknown>>((snapshot, field) => {
-      const value = field.split('.').reduce<unknown>((obj, key) => {
-        if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
-          return (obj as Record<string, unknown>)[key];
-        }
-        return null;
-      }, source);
-      snapshot[field] = value;
+      // ES documents may store alert fields as flat dot-notation keys
+      // (e.g. { 'kibana.alert.consecutive_matches': 1 }) or as nested objects.
+      // Try the flat key first, fall back to nested path traversal.
+      if (Object.prototype.hasOwnProperty.call(source, field)) {
+        snapshot[field] = source[field];
+      } else {
+        const value = field.split('.').reduce<unknown>((obj, key) => {
+          if (obj && typeof obj === 'object' && Object.prototype.hasOwnProperty.call(obj, key)) {
+            return (obj as Record<string, unknown>)[key];
+          }
+          return null;
+        }, source);
+        snapshot[field] = value;
+      }
       return snapshot;
     }, {});
   } catch (error) {

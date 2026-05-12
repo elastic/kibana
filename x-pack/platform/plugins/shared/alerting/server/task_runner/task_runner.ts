@@ -409,12 +409,12 @@ export class TaskRunner<
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
     const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
-    for (const [instanceId, alert] of Object.entries(
-      alertsClient.getProcessedAlerts('active') ?? {}
-    )) {
-      const alertAsData = alert.getAlertAsData();
-      if (alertAsData) {
-        alertAsDataByInstanceId.set(instanceId, alertAsData as Record<string, unknown>);
+    for (const instance of activeInstances) {
+      if (!instance.conditions?.length) continue;
+      const data = alertsClient.getBuiltActiveAlertDataByInstanceId(instance.instanceId);
+      console.log('getBuiltActiveAlertDataByInstanceId', instance.instanceId, data);
+      if (data) {
+        alertAsDataByInstanceId.set(instance.instanceId, data);
       }
     }
 
@@ -422,12 +422,14 @@ export class TaskRunner<
       activeInstances,
       alertAsDataByInstanceId
     );
+
+    console.log('conditionExpiredInstances', conditionExpiredInstances);
     const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
     const updatedActiveInstances =
       conditionExpiredInstances.length > 0
         ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
         : activeInstances;
-
+    console.log({ conditionExpiredIds, updatedActiveInstances });
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,

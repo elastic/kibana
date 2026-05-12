@@ -119,6 +119,7 @@ export interface IAlertsClient<
     alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
   }): Promise<void>;
   isTrackedAlert(id: string): boolean;
+  getBuiltActiveAlertDataByInstanceId(instanceId: string): Record<string, unknown> | undefined;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {
     rawActiveAlerts: Record<string, RawAlertInstance>;

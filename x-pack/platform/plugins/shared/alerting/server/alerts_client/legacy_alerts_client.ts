@@ -340,6 +340,10 @@ export class LegacyAlertsClient<
     return;
   }
 
+  public getBuiltActiveAlertDataByInstanceId(_instanceId: string): undefined {
+    return undefined;
+  }
+
   private removeExpiredMaintenanceWindows({
     processedAlertsActive,
     processedAlertsRecovered,

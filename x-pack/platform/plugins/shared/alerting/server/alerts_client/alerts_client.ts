@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
@@ -111,6 +112,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private builtAlertDataCache: Map<string, Record<string, unknown>> = new Map();
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -316,6 +318,20 @@ export class AlertsClient<
     return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
   }
 
+  /**
+   * Returns the built alert document for a given alert instance ID as it was
+   * constructed and indexed during `persistAlerts()` for this execution.
+   * Used to evaluate field-change-based unsnooze conditions against current
+   * alert state without an additional ES round-trip.
+   * Returns undefined when the alert was not indexed this execution (e.g. rule
+   * types without AAD write, or alert not currently active).
+   */
+  public getBuiltActiveAlertDataByInstanceId(
+    instanceId: string
+  ): Record<string, unknown> | undefined {
+    return this.builtAlertDataCache.get(instanceId);
+  }
+
   public factory() {
     return this.legacyAlertsClient.factory();
   }
@@ -413,6 +429,15 @@ export class AlertsClient<
     });
 
     const alertsToIndex = alertBuilder.buildAlerts();
+
+    this.builtAlertDataCache = new Map();
+    for (const alert of alertsToIndex) {
+      const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
+      if (instanceId) {
+        this.builtAlertDataCache.set(instanceId, alert as Record<string, unknown>);
+        console.log('builtAlertDataCache', instanceId, alert);
+      }
+    }
 
     if (alertsToIndex.length > 0) {
       const bulkBody = alertBuilder.getBulkBody(alertsToIndex);

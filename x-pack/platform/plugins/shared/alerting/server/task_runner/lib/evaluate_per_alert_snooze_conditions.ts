@@ -47,7 +47,21 @@ export const evaluatePerAlertSnoozeConditions = (
     }
   }
 
+  console.log('evaluatePerAlertSnoozeConditions', { conditionExpiredInstances });
   return { conditionExpiredInstances };
+};
+
+/**
+ * Reads a field value from an alert-as-data document that may use either
+ * flat dot-notation keys (as produced by AlertBuilder for framework fields)
+ * or nested object structure (as returned from ES queries). Flat key takes
+ * priority since it reflects the current execution's computed value.
+ */
+const getAlertFieldValue = (alertAsData: Record<string, unknown>, fieldPath: string): unknown => {
+  if (Object.prototype.hasOwnProperty.call(alertAsData, fieldPath)) {
+    return alertAsData[fieldPath];
+  }
+  return get(alertAsData, fieldPath);
 };
 
 const shouldUnsnoozeByConditions = (
@@ -73,6 +87,7 @@ const evaluateSingleCondition = (
   snoozeSnapshot: RawRuleSnoozedInstance['snoozeSnapshot'],
   alertAsData: Record<string, unknown>
 ): boolean => {
+  console.log('evaluateSingleCondition', { condition, snoozeSnapshot, alertAsData });
   if (condition.type === 'field_change') {
     return evaluateFieldChange(condition.field, snoozeSnapshot, alertAsData);
   }
@@ -80,7 +95,7 @@ const evaluateSingleCondition = (
     return evaluateFieldChange(ALERT_SEVERITY, snoozeSnapshot, alertAsData);
   }
   if (condition.type === 'severity_equals') {
-    return get(alertAsData, ALERT_SEVERITY) === condition.value;
+    return getAlertFieldValue(alertAsData, ALERT_SEVERITY) === condition.value;
   }
   return false;
 };
@@ -93,5 +108,10 @@ const evaluateFieldChange = (
   if (!snoozeSnapshot || !(fieldPath in snoozeSnapshot)) {
     return false;
   }
-  return get(alertAsData, fieldPath) !== snoozeSnapshot[fieldPath];
+  console.log('evaluateFieldChange', {
+    fieldPath,
+    snoozeSnapshot: snoozeSnapshot[fieldPath],
+    alertAsData: getAlertFieldValue(alertAsData, fieldPath),
+  });
+  return getAlertFieldValue(alertAsData, fieldPath) !== snoozeSnapshot[fieldPath];
 };
