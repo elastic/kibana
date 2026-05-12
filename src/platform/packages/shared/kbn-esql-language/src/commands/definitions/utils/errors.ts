@@ -222,6 +222,17 @@ Expected one of:
           },
         }),
       };
+    case 'expectedAggregationArgument':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
+          defaultMessage:
+            'Argument "{paramName}" of {parentName} must be an aggregation function.',
+          values: {
+            parentName: out.parentName.toUpperCase(),
+            paramName: out.paramName,
+          },
+        }),
+      };
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknowAggregateFunction', {
@@ -619,6 +630,16 @@ export const errors = {
     errors.byId('nestedAggFunction', fn.location, {
       name: fn.name,
       parentName,
+    }),
+
+  expectedAggregationArgument: (
+    parentFn: ESQLFunction,
+    paramName: string,
+    location: ESQLLocation = parentFn.location
+  ): ESQLMessage =>
+    errors.byId('expectedAggregationArgument', location, {
+      parentName: parentFn.name,
+      paramName,
     }),
 
   unknownAggFunction: (

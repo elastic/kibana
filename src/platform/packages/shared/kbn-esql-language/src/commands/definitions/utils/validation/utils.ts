@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isInlineCast } from '@elastic/esql';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import { buildSignatureTypes } from '../errors';
 import { buildFunctionLookup } from '../functions';
+
+/** Recursively unwrap inline casts (e.g. `field::keyword`) from an AST argument. */
+export function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
+  if (isInlineCast(arg)) {
+    return removeInlineCasts(arg.value);
+  }
+  return arg;
+}
 
 // used for testing... eventually should be moved to the __tests__ directory once
 // kbn-esql-language is merged into this package and this no longer

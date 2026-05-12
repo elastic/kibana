@@ -358,6 +358,10 @@ export interface ValidationErrors {
     message: string;
     type: { parentName: string; name: string };
   };
+  expectedAggregationArgument: {
+    message: string;
+    type: { parentName: string; paramName: string };
+  };
   unknownAggregateFunction: {
     message: string;
     type: { type: string; value: string };

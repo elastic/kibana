@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import {
-  isColumn,
-  isFunctionExpression,
-  isIdentifier,
-  isInlineCast,
-  isParamLiteral,
-} from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
+import { isColumn, isFunctionExpression, isIdentifier, isParamLiteral } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLFunction } from '@elastic/esql/types';
 import type { PromQLFunction } from '@elastic/esql';
 import { errors, getFunctionDefinition } from '..';
 import { FunctionDefinitionTypes } from '../../../../..';
@@ -33,6 +27,8 @@ import type {
 import { resolveArgumentTypes } from '../expressions';
 import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
+import { kindBasedValidators, type KindBasedValidator } from './parameters_from_hints';
+import { removeInlineCasts } from './utils';
 
 export function validateFunction({
   fn,
@@ -124,6 +120,34 @@ class FunctionValidator {
     this.validateArguments();
   }
 
+  /** Resolves the `hint.kind` at a given positional index across all signatures. */
+  private hintKindAt(position: number): string | undefined {
+    for (const sig of this.definition?.signatures ?? []) {
+      const kind = sig.params[position]?.hint?.kind;
+      if (kind !== undefined) return kind;
+    }
+    return undefined;
+  }
+
+  /** Looks up a `KindBasedValidator` for a position based on its `hint.kind`. */
+  private getKindValidatorForPosition(position: number): KindBasedValidator | undefined {
+    const kind = this.hintKindAt(position);
+    return kind !== undefined ? kindBasedValidators[kind] : undefined;
+  }
+
+  private paramNameAt(position: number): string | undefined {
+    if (!this.definition) {
+      return undefined;
+    }
+    for (const sig of this.definition.signatures) {
+      const name = sig.params[position]?.name;
+      if (name) {
+        return name;
+      }
+    }
+    return undefined;
+  }
+
   /**
    * Validates the function arguments against the function definition
    */
@@ -182,7 +206,13 @@ class FunctionValidator {
   }
 
   /**
-   * Validates the nested functions within the current function
+   * Validates the nested functions within the current function.
+   *
+   * Positions whose param defines a `hint.kind` are delegated to the matching
+   * entry in `kindBasedValidators`. The kind entry owns whether and how to
+   * invoke the default recursive validation (via the `runStandardChildValidation`
+   * helper). Errors it produces are reported inline so the parent's subsequent
+   * validation (license / allowedHere / arity / arguments) is not short-circuited.
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
@@ -193,8 +223,42 @@ class FunctionValidator {
       ? this.definition?.name
       : undefined;
 
-    for (const _arg of this.fn.args.flat()) {
-      const arg = removeInlineCasts(_arg);
+    const flatArgs = this.fn.args.flat();
+    for (let i = 0; i < flatArgs.length; i++) {
+      const arg = removeInlineCasts(flatArgs[i]);
+      const kindValidator = this.getKindValidatorForPosition(i);
+
+      if (kindValidator) {
+        const paramName = this.paramNameAt(i) ?? `argument ${i + 1}`;
+
+        const runStandardChildValidation = (
+          options?: { inheritsParentContext?: boolean }
+        ): ESQLMessage[] => {
+          if (!isFunctionExpression(arg)) return [];
+          const inherits = options?.inheritsParentContext ?? true;
+          const childParentContext = inherits ? parentAggFunction : undefined;
+          const child = new FunctionValidator(
+            arg,
+            this.parentCommand,
+            this.ast,
+            this.context,
+            this.callbacks,
+            childParentContext
+          );
+          child.validate();
+          return child.messages;
+        };
+
+        this.report(
+          ...kindValidator.validateChild(arg, this.fn, paramName, {
+            runStandardChildValidation,
+          })
+        );
+        continue;
+      }
+
+      // Default path: legacy nested-agg / license errors propagate via nestedErrors
+      // and short-circuit further parent validation.
       if (isFunctionExpression(arg)) {
         const validator = new FunctionValidator(
           arg,
@@ -264,13 +328,6 @@ class FunctionValidator {
     const arity = this.fn.args.length;
     return arity >= min && arity <= max;
   }
-}
-
-function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
-  if (isInlineCast(arg)) {
-    return removeInlineCasts(arg.value);
-  }
-  return arg;
 }
 
 // ----------------------------------------------------------------------------
