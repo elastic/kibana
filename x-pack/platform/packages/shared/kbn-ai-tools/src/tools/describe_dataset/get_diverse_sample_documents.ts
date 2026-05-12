@@ -46,7 +46,6 @@ export async function getDiverseSampleDocuments({
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
-  // TODO: migrate this fieldCaps probe to ES|QL in https://github.com/elastic/streams-program/issues/1220.
   const [messageField, totalDocs] = await Promise.all([
     detectMessageField({ esClient, index, start, end }),
     runEsqlCount({ esClient, indices, filter }),
