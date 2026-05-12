@@ -5211,7 +5211,7 @@ const embeddingDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.EMBEDDING,
   description: i18n.translate('kbn-esql-language.esql.definitions.embedding', {
     defaultMessage:
-      'Generates dense vector embeddings from multimodal input using a specified inference endpoint with the {@code embedding} task type. Use this function to generate query vectors for KNN searches from multimodal inputs against your vectorized data or other dense vector based operations.',
+      'Generates dense vector embeddings from multimodal input using a specified inference endpoint with the `embedding` task type. Use this function to generate query vectors for KNN searches from multimodal inputs against your vectorized data or other dense vector based operations.',
   }),
   preview: false,
   alias: undefined,
