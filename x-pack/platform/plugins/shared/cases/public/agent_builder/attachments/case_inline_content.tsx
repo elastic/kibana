@@ -23,8 +23,9 @@ import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  CASE_ATTACHMENT_TYPE} from '../../../common/types/agent_builder/attachment_schemas';
 import {
-  CASE_ATTACHMENT_TYPE,
   type CaseAttachmentData,
 } from '../../../common/types/agent_builder/attachment_schemas';
 import { SeverityBadge } from './severity_badge';
