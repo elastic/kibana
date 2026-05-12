@@ -164,6 +164,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getHeaderIcon?: (params: GetHeaderParams<TAttachment>) => IconType | undefined;
   /**
+   * Returns a secondary line to render under the attachment title in the
+   * header. Falls back to no subtitle when not provided.
+   */
+  getHeaderSubtitle?: (params: GetHeaderParams<TAttachment>) => string | undefined;
+  /**
    * Returns badges to render in the attachment header (inline / canvas), next
    * to the title. Falls back to no badges when not provided.
    */

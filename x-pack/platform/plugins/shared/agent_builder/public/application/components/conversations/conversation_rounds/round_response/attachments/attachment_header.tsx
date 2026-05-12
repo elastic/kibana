@@ -42,6 +42,8 @@ export const HEADER_HEIGHT = 72;
 interface AttachmentHeaderProps {
   icon?: IconType;
   title: string;
+  /** Optional subtitle rendered under the title. */
+  subtitle?: string;
   /** Optional badges rendered alongside the title. */
   badges?: HeaderBadge[];
   actionButtons?: ActionButton[];
@@ -58,6 +60,7 @@ interface AttachmentHeaderProps {
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   icon,
   title,
+  subtitle,
   badges,
   actionButtons,
   onClose,
@@ -67,6 +70,12 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
 
   const textStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  `;
+
+  const subtitleStyles = css`
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -114,24 +123,40 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
         )}
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
+            direction="column"
+            gutterSize="xs"
             responsive={false}
-            wrap
             style={{ minWidth: 0 }}
           >
-            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
-              <EuiText css={textStyles} size="s">
-                {title}
-              </EuiText>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup
+                gutterSize="s"
+                alignItems="center"
+                responsive={false}
+                wrap
+                style={{ minWidth: 0 }}
+              >
+                <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                  <EuiText css={textStyles} size="s">
+                    {title}
+                  </EuiText>
+                </EuiFlexItem>
+                {badges?.map((badge, index) => (
+                  <EuiFlexItem grow={false} key={index}>
+                    <EuiBadge color={badge.color ?? 'hollow'} iconType={badge.iconType}>
+                      {badge.label}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </EuiFlexItem>
-            {badges?.map((badge, index) => (
-              <EuiFlexItem grow={false} key={index}>
-                <EuiBadge color={badge.color ?? 'hollow'} iconType={badge.iconType}>
-                  {badge.label}
-                </EuiBadge>
+            {subtitle && (
+              <EuiFlexItem grow={false}>
+                <EuiText css={subtitleStyles} size="xs" color="subdued">
+                  {subtitle}
+                </EuiText>
               </EuiFlexItem>
-            ))}
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         {previewBadgeState !== 'previewing' && (

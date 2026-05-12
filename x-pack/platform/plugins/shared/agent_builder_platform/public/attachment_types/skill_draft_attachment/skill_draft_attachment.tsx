@@ -405,6 +405,7 @@ export const createSkillDraftAttachmentDefinition = ({
         defaultMessage: 'Skill draft',
       }),
     getHeaderIcon: () => 'sparkles',
+    getHeaderSubtitle: ({ attachment }) => attachment.data.id,
     getHeaderBadges: ({ attachment, version, versionCount }) => {
       const headerBadges: HeaderBadge[] = [];
       const isCreated = Boolean(attachment.origin);

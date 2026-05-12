@@ -122,6 +122,11 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     version: canvasState.version,
     versionCount: canvasState.versionCount,
   });
+  const headerSubtitle = uiDefinition?.getHeaderSubtitle?.({
+    attachment,
+    version: canvasState.version,
+    versionCount: canvasState.versionCount,
+  });
   const headerBadges = uiDefinition?.getHeaderBadges?.({
     attachment,
     version: canvasState.version,
@@ -161,6 +166,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       <AttachmentHeader
         icon={headerIcon}
         title={title}
+        subtitle={headerSubtitle}
         badges={headerBadges}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
