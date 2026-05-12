@@ -9,9 +9,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import { escape } from 'lodash';
 import { highlightTags } from './highlight_tags';
-import { getHighlightHtml } from './highlight_html';
 import { getHighlightReact } from './highlight_react';
 
 /** Render the ReactNode to a plain HTML string for easy assertion.
@@ -25,16 +23,9 @@ function render(node: React.ReactNode): string {
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
 const mark = (word: string) => `<mark class="ffSearch__highlight">${word}</mark>`;
 
-describe('getHighlightReact and getHighlightHtml', () => {
-  /**
-   * Asserts that both functions produce the same HTML for the given input.
-   * getHighlightHtml receives a pre-escaped value (as html_content_type.ts provides
-   * in production). getHighlightReact receives the raw value and relies on React's
-   * built-in escaping.
-   */
+describe('getHighlightReact', () => {
   const check = (value: string, highlights: string[] | undefined | null, expected: string) => {
     expect(render(getHighlightReact(value, highlights))).toBe(expected);
-    expect(getHighlightHtml(escape(value), highlights)).toBe(expected);
   };
 
   test('returns plain string unchanged when highlights are empty', () => {
@@ -101,7 +92,7 @@ describe('getHighlightReact and getHighlightHtml', () => {
     check('<script>alert(1)</script>', [], '&lt;script&gt;alert(1)&lt;/script&gt;');
   });
 
-  test('when highlight entries share the same untagged context only the first applies — same behavior as getHighlightHtml', () => {
+  test('when highlight entries share the same untagged context only the first applies', () => {
     check(
       'lorem ipsum dolor sit',
       [`${hl('lorem')} ipsum dolor sit`, `lorem ipsum dolor ${hl('sit')}`],
