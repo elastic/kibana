@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-prompt-utils'
   - '@kbn/zod'
-  - '@kbn/es-snapshot-loader'
 tags:
   - functional-tests
   - package

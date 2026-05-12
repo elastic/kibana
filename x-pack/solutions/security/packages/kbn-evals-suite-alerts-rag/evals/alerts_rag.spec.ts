@@ -6,13 +6,15 @@
  */
 
 import { tags } from '@kbn/evals';
-import { evaluate } from '../src/evaluate';
-import { alertsRagDataset, filterByCategory, getDatasetCategories } from '../src/datasets';
 import {
   DEFAULT_ALERTS_SNAPSHOT_CONFIG,
   resolveAlertsSnapshotConfig,
   restoreAlertsSnapshot,
-} from '../src/data_generators/restore_alerts_snapshot';
+} from '@kbn/security-evals-alerts-snapshot';
+import { evaluate } from '../src/evaluate';
+import { alertsRagDataset, filterByCategory, getDatasetCategories } from '../src/datasets';
+
+const ALERTS_SNAPSHOT_ENV_PREFIX = 'ALERTS_RAG_ALERTS_SNAPSHOT';
 
 const DATASET_NAME = 'Security Alerts RAG Regression';
 const DATASET_DESCRIPTION =
@@ -21,7 +23,7 @@ const DATASET_DESCRIPTION =
 
 evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ esClient, log }) => {
-    const snapshotConfig = resolveAlertsSnapshotConfig();
+    const snapshotConfig = resolveAlertsSnapshotConfig(ALERTS_SNAPSHOT_ENV_PREFIX);
     if (snapshotConfig) {
       log.info(
         `[alerts-rag] restoring alerts snapshot for evaluation cluster ` +

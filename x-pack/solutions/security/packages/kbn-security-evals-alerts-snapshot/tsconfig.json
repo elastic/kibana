@@ -6,11 +6,5 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/agent-builder-common",
-    "@kbn/core",
-    "@kbn/evals",
-    "@kbn/security-evals-alerts-snapshot",
-    "@kbn/tooling-log"
-  ]
+  "kbn_references": ["@kbn/es-snapshot-loader", "@kbn/tooling-log"]
 }

@@ -1823,6 +1823,7 @@
     "@kbn/scout-security": "link:x-pack/solutions/security/packages/kbn-scout-security",
     "@kbn/scout-synthtrace": "link:src/platform/packages/shared/kbn-scout-synthtrace",
     "@kbn/security-api-integration-helpers": "link:x-pack/platform/test/security_api_integration/packages/helpers",
+    "@kbn/security-evals-alerts-snapshot": "link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot",
     "@kbn/security-labs-artifact-builder": "link:x-pack/packages/ai-infra/security-labs-artifact-builder",
     "@kbn/security-solution-test-api-clients": "link:x-pack/solutions/security/packages/test-api-clients",
     "@kbn/set-map": "link:packages/kbn-set-map",
