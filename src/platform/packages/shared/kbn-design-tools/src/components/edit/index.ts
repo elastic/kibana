@@ -8,7 +8,7 @@
  */
 
 export { EditOverlay } from './edit_overlay';
-export { EditOutline } from './outline';
+export { EditOutline, OutlineControls } from './outline';
 export { ElementRegistry } from './element_registry';
 export { IDLE } from './interaction_state';
 export { startDragFromClone, startDragFromElement, findExistingClone } from './drag_helpers';

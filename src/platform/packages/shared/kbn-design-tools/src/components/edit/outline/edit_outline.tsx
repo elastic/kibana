@@ -17,14 +17,16 @@ import {
 } from '../../../lib/constants';
 import type { ResizeHandle } from '../../../lib/constants';
 import { getHandleMode } from '../resize_helpers';
+import { OutlineControls } from './controls';
 
 interface Props {
   target: HTMLElement;
+  onDelete: () => void;
 }
 
 const ALL_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
-export const EditOutline = ({ target }: Props) => {
+export const EditOutline = ({ target, onDelete }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const outlineCss = useMemo(() => {
@@ -96,6 +98,7 @@ export const EditOutline = ({ target }: Props) => {
           data-test-subj={`editOverlayResizeHandle-${h}`}
         />
       ))}
+      <OutlineControls onDelete={onDelete} />
     </div>
   );
 };

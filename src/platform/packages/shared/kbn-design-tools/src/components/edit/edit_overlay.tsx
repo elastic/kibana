@@ -12,7 +12,7 @@ import type { Dispatch, Ref, SetStateAction } from 'react';
 import { css, Global } from '@emotion/react';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { useToolbarHeight } from '../../hooks';
-import { HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { DEVELOPER_TOOLBAR_ID, HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
@@ -36,6 +36,8 @@ interface Props {
   handleRef?: Ref<EditOverlayHandle>;
 }
 
+const NON_DELETABLE_TAGS = ['BODY', 'HTML'];
+
 /**
  * Captures pointer events on the document to enable dragging and resizing elements
  * via CSS transforms. Press Escape to exit edit mode.
@@ -57,6 +59,28 @@ export const EditOverlay = ({
   const interaction = useRef<InteractionState>(IDLE);
   const registry = useRef(new ElementRegistry());
   const rafId = useRef<number>(0);
+  const deletedElements = useRef(new Set<HTMLElement>());
+  const hoverLockBounds = useRef<{
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    elementBottom: number;
+  } | null>(null);
+
+  const isInsideHoverLock = useCallback((x: number, y: number): boolean => {
+    const bounds = hoverLockBounds.current;
+    if (!bounds) return false;
+    const padding = 12;
+    // Only lock when cursor is in the controls zone below the element,
+    // not inside the element itself (so children can still be targeted)
+    return (
+      x >= bounds.left - padding &&
+      x <= bounds.right + padding &&
+      y > bounds.elementBottom &&
+      y <= bounds.bottom + padding
+    );
+  }, []);
 
   const resetAll = useCallback(() => {
     if (interaction.current.type === 'drag') {
@@ -64,6 +88,11 @@ export const EditOverlay = ({
     }
     interaction.current = IDLE;
     registry.current.resetAll();
+    for (const el of deletedElements.current) {
+      el.style.visibility = '';
+      el.style.pointerEvents = '';
+    }
+    deletedElements.current.clear();
     onChangeCount?.(0);
   }, [onChangeCount]);
 
@@ -159,6 +188,25 @@ export const EditOverlay = ({
           default: {
             // No active gesture — update hover target and resize handle detection
             if (hoverTarget) {
+              if (isInsideHoverLock(event.clientX, event.clientY)) {
+                const nearHandle = findNearHandle(
+                  event.clientX,
+                  event.clientY,
+                  hoverTarget.getBoundingClientRect()
+                );
+                if (nearHandle) {
+                  interaction.current = { type: 'hover', target: hoverTarget, handle: nearHandle };
+                  setCursor((prev) => {
+                    const next = HANDLE_CURSORS[nearHandle];
+                    return prev === next ? prev : next;
+                  });
+                } else {
+                  interaction.current = IDLE;
+                  setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
+                }
+                return;
+              }
+
               const nearHandle = findNearHandle(
                 event.clientX,
                 event.clientY,
@@ -183,7 +231,15 @@ export const EditOverlay = ({
         }
       });
     },
-    [findElement, layoutConfig, isLayoutVisible, toolbarHeight, onChangeCount, hoverTarget]
+    [
+      findElement,
+      layoutConfig,
+      isLayoutVisible,
+      toolbarHeight,
+      onChangeCount,
+      hoverTarget,
+      isInsideHoverLock,
+    ]
   );
 
   const handlePointerDown = useCallback(
@@ -271,6 +327,33 @@ export const EditOverlay = ({
     [parkInteraction]
   );
 
+  const isDeletable = useCallback((el: HTMLElement): boolean => {
+    if (NON_DELETABLE_TAGS.includes(el.tagName)) return false;
+    if (el.id === DEVELOPER_TOOLBAR_ID) return false;
+    if (el.querySelector(`#${DEVELOPER_TOOLBAR_ID}`)) return false;
+    return true;
+  }, []);
+
+  const deleteElement = useCallback(
+    (el: HTMLElement) => {
+      if (!isDeletable(el)) return;
+      el.style.transition = 'opacity 120ms ease';
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+        el.style.transition = '';
+        el.style.opacity = '';
+        deletedElements.current.add(el);
+      }, 120);
+      setHoverTarget(null);
+      hoverLockBounds.current = null;
+      setCursor('');
+      onChangeCount?.(registry.current.size + deletedElements.current.size);
+    },
+    [isDeletable, onChangeCount]
+  );
+
   const handleKeydown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -278,9 +361,16 @@ export const EditOverlay = ({
         event.preventDefault();
         event.stopImmediatePropagation();
         setIsEditMode(false);
+        return;
+      }
+
+      if ((event.key === 'Delete' || event.key === 'Backspace') && hoverTarget) {
+        event.preventDefault();
+        event.stopPropagation();
+        deleteElement(hoverTarget);
       }
     },
-    [setIsEditMode]
+    [setIsEditMode, hoverTarget, deleteElement]
   );
 
   const handleClick = useCallback(
@@ -307,6 +397,21 @@ export const EditOverlay = ({
   }, []);
 
   // Reset hover/drag state when deactivated (e.g. Escape exits edit mode)
+  useEffect(() => {
+    if (hoverTarget) {
+      const rect = hoverTarget.getBoundingClientRect();
+      hoverLockBounds.current = {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom + 40,
+        elementBottom: rect.bottom,
+      };
+    } else {
+      hoverLockBounds.current = null;
+    }
+  }, [hoverTarget]);
+
   useEffect(() => {
     if (!isActive) {
       setCursor('');
@@ -363,6 +468,11 @@ export const EditOverlay = ({
   const showOutline =
     hoverTarget && interaction.current.type !== 'drag' && interaction.current.type !== 'resize';
 
+  const handleDelete = useCallback(() => {
+    if (!hoverTarget) return;
+    deleteElement(hoverTarget);
+  }, [hoverTarget, deleteElement]);
+
   return (
     <>
       {cursor && (
@@ -371,12 +481,15 @@ export const EditOverlay = ({
             'body *': {
               cursor: `${cursor} !important`,
             },
+            '[data-devtool-ignore] button, [data-devtool-ignore] [role="button"]': {
+              cursor: 'pointer !important',
+            },
           })}
         />
       )}
       {showOutline ? (
         <EuiPortal>
-          <EditOutline target={hoverTarget} />
+          <EditOutline target={hoverTarget} onDelete={handleDelete} />
         </EuiPortal>
       ) : null}
     </>

@@ -8,3 +8,4 @@
  */
 
 export { EditOutline } from './edit_outline';
+export { OutlineControls } from './controls';

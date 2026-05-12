@@ -24,6 +24,7 @@ export {
 export {
   EditOverlay,
   EditOutline,
+  OutlineControls,
   ElementRegistry,
   IDLE,
   startDragFromClone,
