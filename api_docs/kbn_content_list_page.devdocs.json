@@ -34,10 +34,10 @@
             "section": "def-public.KibanaContentListPage.Section",
             "text": "KibanaContentListPage.Section"
           },
-          " — a labelled `KibanaPageTemplate.Section`.\n"
+          " — a labelled `KibanaPageTemplate.Section`.\n\nThe page renders full-width by default (`restrictWidth={false}`). The\n`ContentListTable` column presets each have their own `maxWidth` cap, so\ntrailing whitespace lives inside the table rather than as a centred\npage-section gutter. Pass `restrictWidth={true}` (or a specific\nnumber/string) to opt back into a centred page chrome.\n"
         ],
         "signature": [
-          "(({ children, headingId: headingIdProp, \"data-test-subj\": dataTestSubj, }: ",
+          "(({ children, headingId: headingIdProp, restrictWidth, \"data-test-subj\": dataTestSubj, }: ",
           {
             "pluginId": "@kbn/content-list-page",
             "scope": "public",
@@ -64,7 +64,7 @@
           ") => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
-        "lineNumber": 213,
+        "lineNumber": 242,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -75,7 +75,7 @@
             "id": "def-public.KibanaContentListPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  children,\n  headingId: headingIdProp,\n  'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
+            "label": "{\n  children,\n  headingId: headingIdProp,\n  restrictWidth = false,\n  'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
             "description": [],
             "signature": [
               {
@@ -87,7 +87,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
-            "lineNumber": 165,
+            "lineNumber": 179,
             "columnNumber": 36,
             "deprecated": false,
             "docsReferencedTypeName": "KibanaContentListPageProps",
@@ -303,6 +303,32 @@
           },
           {
             "parentPluginId": "@kbn/content-list-page",
+            "id": "def-public.KibanaContentListPageProps.restrictWidth",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "restrictWidth",
+            "description": [
+              "\nForwarded to ",
+              {
+                "pluginId": "@kbn/content-list-page",
+                "scope": "public",
+                "docId": "kibKbnContentListPagePluginApi",
+                "section": "def-public.KibanaPageTemplate",
+                "text": "KibanaPageTemplate"
+              },
+              "'s `restrictWidth` prop.\n\nDefaults to `false` so listing pages run full-width — the\n`ContentListTable` column presets each have their own `maxWidth` cap, so\ntrailing whitespace lives inside the table rather than as a centred\npage-section gutter. This intentionally overrides EUI's `true` default\n(which resolves to a 1200px page cap and would prevent column\n`maxWidth` defaults from engaging on wide viewports).\n\nPass `true` for the EUI default (1200px), or a specific number/string\nto centre the page chrome at a custom width."
+            ],
+            "signature": [
+              "string | number | boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-page",
             "id": "def-public.KibanaContentListPageProps.datatestsubj",
             "type": "string",
             "tags": [],
@@ -314,7 +340,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-page/src/kibana_content_list_page.tsx",
-            "lineNumber": 161,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
