@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { AgentHandlerFn } from '@kbn/agent-builder-server';
 import type { InternalAgentDefinition } from '../../agents/agent_registry';
 import { runAgent } from './run_agent';
@@ -14,8 +15,10 @@ import { runAgent } from './run_agent';
  */
 export const createAgentHandler = ({
   agent,
+  effectiveConfiguration,
 }: {
   agent: InternalAgentDefinition;
+  effectiveConfiguration: AgentConfiguration;
 }): AgentHandlerFn => {
   return async (
     {
@@ -35,11 +38,6 @@ export const createAgentHandler = ({
     },
     context
   ) => {
-    const effectiveConfiguration = {
-      ...agent.configuration,
-      ...(configurationOverrides || {}),
-    };
-
     const { round } = await runAgent(
       {
         nextInput,

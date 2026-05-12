@@ -9,6 +9,8 @@
 
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../content_management';
 import { extractReferences, injectReferences } from './references';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../constants';
 
 jest.mock('uuid', () => ({
   v4: jest
@@ -23,14 +25,17 @@ describe('extractReferences', () => {
       {
         type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
         destination: '19e149f0-e95e-404b-b6f8-fc751317c6be',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       {
         type: EXTERNAL_LINK_TYPE as typeof EXTERNAL_LINK_TYPE,
         destination: 'https://example.com',
+        options: DEFAULT_EXTERNAL_LINK_OPTIONS,
       },
       {
         type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
         destination: '39555f99-a3b8-4210-b1ef-fa0fa86fa3da',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
     ];
     expect(extractReferences(links)).toEqual({
@@ -38,14 +43,17 @@ describe('extractReferences', () => {
         {
           type: 'dashboardLink',
           destinationRefName: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
+          options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
         },
         {
           type: 'externalLink',
           destination: 'https://example.com',
+          options: DEFAULT_EXTERNAL_LINK_OPTIONS,
         },
         {
           type: 'dashboardLink',
           destinationRefName: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
+          options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
         },
       ],
       references: [
@@ -70,14 +78,17 @@ describe('injectReferences', () => {
       {
         type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
         destinationRefName: 'link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       {
         type: EXTERNAL_LINK_TYPE as typeof EXTERNAL_LINK_TYPE,
         destination: 'https://example.com',
+        options: DEFAULT_EXTERNAL_LINK_OPTIONS,
       },
       {
         type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
         destinationRefName: 'link_1409fabb-1d2b-49c2-a2dc-705bd8fabd0c_dashboard',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
     ];
     const references = [
@@ -96,14 +107,17 @@ describe('injectReferences', () => {
       {
         type: 'dashboardLink',
         destination: '19e149f0-e95e-404b-b6f8-fc751317c6be',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
       {
         type: 'externalLink',
         destination: 'https://example.com',
+        options: DEFAULT_EXTERNAL_LINK_OPTIONS,
       },
       {
         type: 'dashboardLink',
         destination: '39555f99-a3b8-4210-b1ef-fa0fa86fa3da',
+        options: DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
       },
     ]);
   });

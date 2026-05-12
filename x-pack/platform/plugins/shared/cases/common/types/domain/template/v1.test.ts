@@ -207,6 +207,8 @@ describe('ParsedTemplateSchema', () => {
         },
       ],
     },
+    definitionString:
+      'name: template-definition-name\nfields:\n  - control: INPUT_TEXT\n    name: field1\n    type: keyword',
     templateVersion: 2,
     deletedAt: null,
     author: 'test-user',

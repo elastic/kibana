@@ -743,6 +743,7 @@ export interface DocLinks {
   readonly subscriptions: string;
   readonly cases: {
     readonly casesPermissions: string;
+    readonly configureCaseSettings: string;
   };
 }
 

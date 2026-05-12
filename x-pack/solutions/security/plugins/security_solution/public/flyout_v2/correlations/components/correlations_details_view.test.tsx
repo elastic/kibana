@@ -62,10 +62,8 @@ const mockOnShowAlert = jest.fn();
 
 const renderCorrelationsDetailsView = ({
   isRulePreview = false,
-  hidePreviewLink = true,
 }: {
   isRulePreview?: boolean;
-  hidePreviewLink?: boolean;
 } = {}) =>
   render(
     <TestProviders>
@@ -74,7 +72,7 @@ const renderCorrelationsDetailsView = ({
         scopeId="test-scope"
         isRulePreview={isRulePreview}
         onShowAlert={mockOnShowAlert}
-        hidePreviewLink={hidePreviewLink}
+        useLegacyExpandableFlyout={false}
       />
     </TestProviders>
   );
@@ -237,23 +235,5 @@ describe('CorrelationsDetailsView', () => {
     expect(
       queryByTestId(CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID)
     ).not.toBeInTheDocument();
-  });
-
-  it('passes hidePreviewLink=false down to source and session sections', () => {
-    mockAllShowHooksFalse();
-    jest
-      .mocked(useShowRelatedAlertsBySameSourceEvent)
-      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
-    (useFetchRelatedAlertsBySameSourceEvent as jest.Mock).mockReturnValue({
-      loading: false,
-      error: false,
-      data: [],
-      dataCount: 1,
-    });
-
-    // Should render without errors when hidePreviewLink is false
-    const { getByTestId } = renderCorrelationsDetailsView({ hidePreviewLink: false });
-
-    expect(getByTestId(CORRELATIONS_DETAILS_BY_SOURCE_SECTION_TABLE_TEST_ID)).toBeInTheDocument();
   });
 });

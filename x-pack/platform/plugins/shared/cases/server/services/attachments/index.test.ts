@@ -422,6 +422,151 @@ describe('AttachmentService', () => {
         expect.any(Object)
       );
     });
+
+    // Regression: when a unified-shape payload (e.g. `security.endpoint`) is
+    // written via the legacy `cases-comments` storage, the persisted SO must be
+    // byte-for-byte equivalent to a pre-migration legacy attachment — i.e. no
+    // orphan `attachmentId: null`, `metadata: null`, or `data: null` keys
+    // leaking from the unified shape into the legacy `_source`.
+    describe('byte-for-byte legacy storage equivalence', () => {
+      const unifiedEndpointAttrs = {
+        type: 'security.endpoint',
+        attachmentId: 'sec-endpoint-1',
+        metadata: {
+          command: 'isolate',
+          comment: 'isolated by op',
+          targets: [
+            {
+              endpointId: 'endpoint-1',
+              hostname: 'host-1',
+              agentType: 'endpoint' as const,
+            },
+          ],
+        },
+        owner: SECURITY_SOLUTION_OWNER,
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+
+      const expectNoUnifiedOrphans = (persistedAttributes: unknown): void => {
+        expect(persistedAttributes).not.toHaveProperty('attachmentId');
+        expect(persistedAttributes).not.toHaveProperty('metadata');
+        expect(persistedAttributes).not.toHaveProperty('data');
+      };
+
+      it('create strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          id: '1',
+          type: CASE_COMMENT_SAVED_OBJECT,
+          attributes: { ...createUserAttachment().attributes },
+          references: [],
+        });
+
+        await service.create({
+          attributes: unifiedEndpointAttrs,
+          references: [],
+          id: '1',
+        });
+
+        const [soType, persistedAttributes] = unsecuredSavedObjectsClient.create.mock.calls[0];
+        expect(soType).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedAttributes);
+        // Sanity: the payload was actually converted to legacy externalReference shape.
+        expect(persistedAttributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('bulkCreate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createUserAttachment()],
+        });
+
+        await service.bulkCreate({
+          attachments: [{ attributes: unifiedEndpointAttrs, references: [], id: '1' }],
+          refresh: false,
+        });
+
+        const persistedSos = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+        expect(persistedSos).toHaveLength(1);
+        expect(persistedSos[0].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedSos[0].attributes);
+        expect(persistedSos[0].attributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('update strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        // `update` first resolves the SO type via `resolveAttachmentSavedObjectType`,
+        // which probes `cases-attachments` then falls back to `cases-comments`.
+        // Simulate the legacy-only state: 404 on the unified type, hit on the legacy type.
+        unsecuredSavedObjectsClient.get.mockImplementation((type: string) => {
+          if (type === CASE_ATTACHMENT_SAVED_OBJECT) {
+            return Promise.reject(Object.assign(new Error('Not found'), { statusCode: 404 }));
+          }
+          return Promise.resolve(createUserAttachment());
+        });
+
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUserAttachment());
+
+        await service.update({
+          savedObjectId: '1',
+          updatedAttributes: unifiedEndpointAttrs,
+          options: { references: [] },
+        });
+
+        const [soType, , persistedAttributes] = unsecuredSavedObjectsClient.update.mock.calls[0];
+        expect(soType).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedAttributes);
+        expect(persistedAttributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+
+      it('bulkUpdate strips attachmentId/metadata/data when writing unified payload to cases-comments', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createUserAttachment()],
+        });
+
+        await service.bulkUpdate({
+          comments: [
+            {
+              savedObjectId: '1',
+              updatedAttributes: unifiedEndpointAttrs,
+              options: { references: [] },
+            },
+          ],
+        });
+
+        const persistedSos = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0];
+        expect(persistedSos).toHaveLength(1);
+        expect(persistedSos[0].type).toBe(CASE_COMMENT_SAVED_OBJECT);
+        expectNoUnifiedOrphans(persistedSos[0].attributes);
+        expect(persistedSos[0].attributes).toEqual(
+          expect.objectContaining({
+            type: 'externalReference',
+            externalReferenceId: 'sec-endpoint-1',
+            externalReferenceAttachmentTypeId: 'endpoint',
+          })
+        );
+      });
+    });
   });
 
   describe('update', () => {

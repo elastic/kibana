@@ -47,6 +47,8 @@ import type { ServicesItemsResponse } from './get_services/get_services_items';
 import { getServicesItems } from './get_services/get_services_items';
 import type { ServiceAlertsResponse } from './get_services/get_service_alerts';
 import { getServicesAlerts } from './get_services/get_service_alerts';
+import type { ServiceAnomalyScoreResponse } from './get_services/get_service_anomaly_score_for_service';
+import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
 import type { ServiceSlosResponse } from './get_service_slos';
 import { getServiceSlos } from './get_service_slos';
 import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
@@ -913,6 +915,47 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceAnomalyScoreRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_score',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, environmentRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceAnomalyScoreResponse> => {
+    const mlClient = await getMlClient(resources);
+    if (!mlClient) {
+      return {};
+    }
+
+    const { path, query } = resources.params;
+    const { serviceName } = path;
+    const { start, end, environment } = query;
+
+    try {
+      return await getServiceAnomalyScoreForService({
+        mlClient,
+        environment,
+        start,
+        end,
+        serviceName,
+      });
+    } catch (error) {
+      if (
+        (Boom.isBoom(error) && error.output.statusCode === 501) ||
+        error instanceof UnknownMLCapabilitiesError ||
+        error instanceof InsufficientMLCapabilities ||
+        error instanceof MLPrivilegesUninitialized
+      ) {
+        return {};
+      }
+      throw error;
+    }
+  },
+});
+
 const serviceSlosRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/slos',
   params: t.type({
@@ -973,5 +1016,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
 };
