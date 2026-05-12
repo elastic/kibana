@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   EuiButton,
