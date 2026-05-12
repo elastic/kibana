@@ -7,10 +7,10 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema/src/queries';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '../../../../../common/sig_events_tuning_config';
 import type { QueryStorageSettings } from '../storage_settings';
 import {
   ASSET_ID,
@@ -922,7 +922,7 @@ describe('rule lifecycle — syncQueries', () => {
           logger: createMockLogger() as unknown as Logger,
         },
         sigEventsEnabled,
-        false
+        DEFAULT_SIG_EVENTS_TUNING_CONFIG
       ),
       storageClient: sc,
       rc,
@@ -1196,9 +1196,7 @@ describe('rule lifecycle — syncQueries', () => {
       const ruleId1 = ruleIdFor('q1', esql1);
       const ruleId2 = ruleIdFor('q2', esql2);
 
-      expect(rc.bulkDeleteRules).toHaveBeenCalledWith(
-        expect.arrayContaining([ruleId1, ruleId2])
-      );
+      expect(rc.bulkDeleteRules).toHaveBeenCalledWith(expect.arrayContaining([ruleId1, ruleId2]));
     });
 
     it('does not call bulkDeleteRules for update-only queries when install fails', async () => {

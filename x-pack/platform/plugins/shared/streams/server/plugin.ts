@@ -210,12 +210,17 @@ export class StreamsPlugin
             DEFAULT_SPACE_ID,
             rulesClientOptions
           );
+          const alertingV2RulesClient = pluginsStart.alertingVTwo
+            ? await pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(
+                request,
+                DEFAULT_SPACE_ID
+              )
+            : undefined;
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
             alertingRulesClient: rulesClient,
-            coreStart,
-            request,
+            alertingV2RulesClient,
             config: tuningConfig,
           });
         })();
@@ -382,7 +387,9 @@ export class StreamsPlugin
 
     registerRoutes({ repository: streamsRouteRepository, ...routeRegistrationOptions });
 
-    registerFeatureFlags(core, this.logger, { isAlertingV2PluginAvailable: 'alertingVTwo' in plugins });
+    registerFeatureFlags(core, this.logger, {
+      isAlertingV2PluginAvailable: 'alertingVTwo' in plugins,
+    });
 
     if (plugins.globalSearch) {
       plugins.globalSearch.registerResultProvider(

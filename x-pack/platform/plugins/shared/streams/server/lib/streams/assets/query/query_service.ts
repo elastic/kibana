@@ -7,17 +7,14 @@
 
 import type {
   CoreSetup,
-  CoreStart,
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import {
   ensureMetadata,
@@ -27,6 +24,7 @@ import {
 } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
   QUERY_DESCRIPTION,
@@ -48,9 +46,8 @@ import {
 } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
-import type { InferenceResolver } from './helpers/inference_availability';
 import { V1RulesAdapter } from './v1_rules_adapter';
-import { V2RulesHttpClient } from './v2_rules_http_client';
+import { V2RulesAdapter, V2RulesUnavailableAdapter } from './v2_rules_adapter';
 import { DualCleanupRulesAdapter } from './dual_cleanup_rules_adapter';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -68,21 +65,19 @@ export class QueryService {
     esClient,
     soClient,
     alertingRulesClient,
-    coreStart,
-    request,
+    alertingV2RulesClient,
     config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
     alertingRulesClient: RulesClient;
-    coreStart: CoreStart;
-    request: KibanaRequest;
+    alertingV2RulesClient?: RulesClientApi;
     config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
   }): Promise<QueryClient> {
     const [core] = await this.coreSetup.getStartServices();
 
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const [isSignificantEventsEnabled, alertingV2Enabled] = await Promise.all([
+    const [isSignificantEventsEnabled, alertingV2UiEnabled] = await Promise.all([
       uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
       uiSettings
         .get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2)
@@ -96,6 +91,14 @@ export class QueryService {
           return false;
         }),
     ]);
+
+    if (alertingV2UiEnabled && !alertingV2RulesClient) {
+      this.logger.warn(
+        'Observability Streams alerting v2 UI setting is enabled but the alerting v2 plugin is not available; using v1 rules only.'
+      );
+    }
+
+    const alertingV2Enabled = alertingV2UiEnabled && alertingV2RulesClient != null;
 
     const existingInferenceId = await getInferenceIdFromIndex(
       esClient,
@@ -211,12 +214,9 @@ export class QueryService {
     );
 
     const v1Adapter = new V1RulesAdapter(alertingRulesClient);
-    const v2Client = new V2RulesHttpClient(
-      request,
-      coreStart.http.getServerInfo(),
-      coreStart.http.basePath.serverBasePath,
-      this.logger
-    );
+    const v2Client = alertingV2RulesClient
+      ? new V2RulesAdapter(alertingV2RulesClient, this.logger)
+      : new V2RulesUnavailableAdapter(this.logger);
 
     const rulesManagementClient = alertingV2Enabled
       ? new DualCleanupRulesAdapter(v2Client, v1Adapter, this.logger)

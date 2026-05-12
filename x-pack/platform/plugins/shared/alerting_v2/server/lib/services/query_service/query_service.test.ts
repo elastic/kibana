@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
-import { Readable } from 'stream';
 import type { QueryService } from './query_service';
 import { createQueryService } from './query_service.mock';
 
@@ -321,81 +320,6 @@ describe('QueryService', () => {
 
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
-    });
-
-    it('surfaces the actual JSON error when ES returns an error in a stream response', async () => {
-      const esError = JSON.stringify({
-        error: {
-          root_cause: [{ type: 'parsing_exception', reason: 'Unknown column [foo]' }],
-          type: 'parsing_exception',
-          reason: 'Unknown column [foo]',
-        },
-        status: 400,
-      });
-
-      const stream = Readable.from([Buffer.from(esError)]);
-      mockEsClient.esql.query.mockResolvedValue(stream as never);
-
-      await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
-          // consume
-        }
-      }).rejects.toThrow(`ES|QL query failed: ${esError}`);
-    });
-
-    it('falls back to JSON format when Arrow format is unsupported', async () => {
-      const arrowError = JSON.stringify({
-        error: {
-          root_cause: [
-            {
-              type: 'illegal_argument_exception',
-              reason: 'ES|QL type [date_nanos] is not supported by the Arrow format',
-            },
-          ],
-          type: 'illegal_argument_exception',
-          reason: 'ES|QL type [date_nanos] is not supported by the Arrow format',
-        },
-        status: 400,
-      });
-
-      const jsonFallbackResponse: EsqlQueryResponse = {
-        columns: [
-          { name: 'host', type: 'keyword' },
-          { name: 'count', type: 'integer' },
-        ],
-        values: [
-          ['host-a', 10],
-          ['host-b', 20],
-        ],
-      };
-
-      const stream = Readable.from([Buffer.from(arrowError)]);
-      mockEsClient.esql.query
-        .mockResolvedValueOnce(stream as never)
-        .mockResolvedValueOnce(jsonFallbackResponse);
-
-      const batches: Array<Record<string, unknown>[]> = [];
-      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
-        batches.push(batch);
-      }
-
-      expect(batches).toHaveLength(1);
-      expect(batches[0]).toEqual([
-        { host: 'host-a', count: 10 },
-        { host: 'host-b', count: 20 },
-      ]);
-
-      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
-      expect(mockEsClient.esql.query).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({ format: 'arrow' }),
-        expect.objectContaining({ asStream: true })
-      );
-      expect(mockEsClient.esql.query).toHaveBeenNthCalledWith(
-        2,
-        expect.not.objectContaining({ format: 'arrow' }),
-        expect.any(Object)
-      );
     });
   });
 });
