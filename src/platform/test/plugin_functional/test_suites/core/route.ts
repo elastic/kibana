@@ -12,7 +12,7 @@ import http from 'node:http';
 import https from 'node:https';
 import type { ClientRequest } from 'http';
 import type { Socket } from 'net';
-import { format as formatUrl, type UrlObject } from 'node:url';
+import { format as formatUrl } from 'node:url';
 import type { Test } from 'supertest';
 import type { PluginFunctionalProviderContext } from '../../services';
 
