@@ -10,7 +10,6 @@ import { fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
@@ -94,16 +93,21 @@ const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
-const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
-  { field: 'host.name', values: ['test-host'], originalValue: ['test-host'], isObjectArray: false },
+const expectedDataFormattedForFieldBrowser = [
+  {
+    category: 'host',
+    field: 'host.name',
+    values: ['test-host'],
+    originalValue: ['test-host'],
+    isObjectArray: false,
+  },
 ];
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
 const defaultProps = {
-  hit: createMockHit(),
+  hit: createMockHit({ 'host.name': ['test-host'] }),
   ecsData: mockEcsData,
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   nonEcsData: mockNonEcsData,
   refetchFlyoutData: mockRefetchFlyoutData,
   onAlertUpdated: mockOnAlertUpdated,
@@ -310,7 +314,7 @@ describe('<TakeActionButton />', () => {
     renderTakeActionButton();
 
     expect(mockUseResponderActionItem).toHaveBeenCalledWith(
-      mockDataFormattedForFieldBrowser,
+      expectedDataFormattedForFieldBrowser,
       expect.any(Function)
     );
   });

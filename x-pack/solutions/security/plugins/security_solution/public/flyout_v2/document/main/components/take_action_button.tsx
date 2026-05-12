@@ -13,7 +13,6 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -27,6 +26,7 @@ import { useRunAlertWorkflowPanel } from '../../../../detections/components/aler
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useExploreActions } from '../hooks/use_explore_actions';
+import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -54,10 +54,6 @@ export interface TakeActionButtonProps {
    */
   ecsData: Ecs;
   /**
-   * Field-browser-shaped event data used by endpoint response action helpers.
-   */
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
-  /**
    * Non-ECS data for the document
    */
   nonEcsData: TimelineNonEcsData[];
@@ -83,7 +79,6 @@ export const TakeActionButton = memo(
   ({
     hit,
     ecsData,
-    dataFormattedForFieldBrowser,
     nonEcsData,
     refetchFlyoutData,
     onAlertUpdated,
@@ -182,6 +177,11 @@ export const TakeActionButton = memo(
       hit,
       closePopover: closePopoverHandler,
     });
+
+    const dataFormattedForFieldBrowser = useMemo(
+      () => getTimelineEventsDetailsFromRecord(hit),
+      [hit]
+    );
 
     const endpointResponseActionsConsoleItems = useResponderActionItem(
       dataFormattedForFieldBrowser,

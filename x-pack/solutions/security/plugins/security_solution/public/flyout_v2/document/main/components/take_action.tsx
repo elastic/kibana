@@ -11,6 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -43,21 +44,25 @@ export interface TakeActionProps {
  * We show a loading button while we fetch the document.
  * If the call succeeds we show the Take action button.
  * If the call fails, we show a disabled button.
- * We're doing all of this to avoid having to refactor all the actions that are currently using dataAsNestedObject and dataFormattedForFieldBrowser/
+ * We're doing all of this to avoid having to refactor all the actions that are currently using dataAsNestedObject.
  * // TODO: refactor all actions to take a DataTableRecord as input.
  */
 export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNotes }) => {
   const eventId = hit.raw._id;
   const indexName = hit.raw._index;
 
-  const { dataAsNestedObject, dataFormattedForFieldBrowser, refetchFlyoutData, loading } =
-    useEventDetails({
-      eventId,
-      indexName,
-    });
+  const { dataAsNestedObject, refetchFlyoutData, loading } = useEventDetails({
+    eventId,
+    indexName,
+  });
+
+  const dataFormattedForFieldBrowser = useMemo(
+    () => getTimelineEventsDetailsFromRecord(hit),
+    [hit]
+  );
 
   const nonEcsData = useMemo(
-    () => dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values ?? null })),
+    () => dataFormattedForFieldBrowser.map((d) => ({ field: d.field, value: d.values ?? null })),
     [dataFormattedForFieldBrowser]
   );
 
@@ -69,7 +74,7 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
     );
   }
 
-  if (!dataAsNestedObject || !dataFormattedForFieldBrowser || !nonEcsData) {
+  if (!dataAsNestedObject) {
     return (
       <EuiButton data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID} fill isDisabled>
         {TAKE_ACTION}
@@ -81,7 +86,6 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
     <TakeActionButton
       hit={hit}
       ecsData={dataAsNestedObject}
-      dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
       nonEcsData={nonEcsData}
       refetchFlyoutData={refetchFlyoutData}
       onAlertUpdated={onAlertUpdated}
