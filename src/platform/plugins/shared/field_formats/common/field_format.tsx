@@ -93,6 +93,7 @@ export abstract class FieldFormat {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
+    // format a single item as text fallback
     const formatted = this.textConvert
       ? this.textConvert(val, options)
       : asPrettyString(val, options);
@@ -224,7 +225,8 @@ export abstract class FieldFormat {
     return Boolean(
       fieldFormat &&
         typeof fieldFormat === 'object' &&
-        ('convertToText' in fieldFormat || 'convertToReact' in fieldFormat)
+        (typeof (fieldFormat as FieldFormat).convertToText === 'function' ||
+          typeof (fieldFormat as FieldFormat).convertToReact === 'function')
     );
   }
 
