@@ -124,6 +124,7 @@ Set the `fixability` field to exactly one of:
   - `confidence` is `high` or `medium`
   - You can identify a concrete test file path that currently exists on the default branch
   - Failure happened on the `kibana-on-merge` Buildkite pipeline
+  - The fix lives in the test code (spec, fixtures, helpers, setup/teardown), or it's a narrowly scoped app-code change such as adding a missing `data-test-subj` to make page-readiness checks reliable
   - No open PR already targets the same test file with a `flaky-fix:` label (search PRs to verify)
   - The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
 
