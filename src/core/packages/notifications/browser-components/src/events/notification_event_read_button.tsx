@@ -24,10 +24,6 @@ export type NotificationEventReadButtonProps = Omit<
    */
   isRead: boolean;
   /**
-   * Applies an `onClick` handler to the `read` indicator.
-   */
-  onClick: () => void;
-  /**
    * A unique, human-friendly name for the event to be used in aria attributes (e.g. "alert-critical-01", "cloud-no-severity-12", etc..).
    */
   eventName: string;
@@ -36,7 +32,6 @@ export type NotificationEventReadButtonProps = Omit<
 export const NotificationEventReadButton: FunctionComponent<NotificationEventReadButtonProps> = ({
   id,
   isRead,
-  onClick,
   eventName,
   ...rest
 }) => {
@@ -79,7 +74,6 @@ export const NotificationEventReadButton: FunctionComponent<NotificationEventRea
       aria-label={buttonAriaLabel}
       title={buttonTitle}
       className={readButtonClassName}
-      onClick={onClick}
       data-test-subj={`${id}-notificationEventReadButton`}
       {...rest}
     />
