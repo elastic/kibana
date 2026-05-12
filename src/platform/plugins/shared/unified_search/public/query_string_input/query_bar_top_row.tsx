@@ -811,9 +811,19 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
+        // TODO: rename `autoRefreshOnlyDisabled` and tighten the surrounding
+        // comments — kept verbose here for the CI-green pass.
+        // Visualize-style consumers signal "no time filter applicable" via
+        // `showAutoRefreshOnly` (true) + `showDatePicker` (false). The legacy
+        // picker honoured this by rendering an auto-refresh-only readOnly UI;
+        // the new picker has no equivalent prop, so disable it explicitly here
+        // to keep the time-filter-off semantics consistent.
+        const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
+        const pickerDisabled =
+          Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
         datePicker = (
           <>
-            {noTimeFieldNameDisabled && (
+            {(noTimeFieldNameDisabled || autoRefreshOnlyDisabled) && (
               // Hidden sibling so FTR tests can detect the disabled state via
               // testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'), matching
               // the span the legacy picker renders inside its isDisabled.display node.
@@ -822,12 +832,14 @@ export const QueryBarTopRow = React.memo(
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled ? strings.getDisabledDatePickerLabel() : dateRangeValue
+                noTimeFieldNameDisabled || autoRefreshOnlyDisabled
+                  ? strings.getDisabledDatePickerLabel()
+                  : dateRangeValue
               }
               onChange={onDateRangeChange}
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
-              disabled={props.isDisabled || noTimeFieldNameDisabled}
+              disabled={pickerDisabled}
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}
