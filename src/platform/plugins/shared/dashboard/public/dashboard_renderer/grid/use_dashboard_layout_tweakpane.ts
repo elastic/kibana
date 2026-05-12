@@ -7,35 +7,84 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { DASHBOARD_HORIZONTAL_PADDING_PX, DASHBOARD_MARGIN_SIZE } from './constants';
+import {
+  DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+  getDashboardBackgroundBaseTokenOptions,
+  type DashboardBackgroundBaseToken,
+} from './dashboard_background_tokens';
 
-/** Published `Pane` typings omit `addBinding` (it lives on the runtime prototype). */
-interface TweakpanePaneWithBindings {
-  addBinding<T extends Record<string, unknown>>(
-    target: T,
-    key: keyof T,
-    options: { label: string; min: number; max: number; step: number }
-  ): {
-    on(event: 'change', handler: (ev: { value: unknown }) => void): void;
-  };
+/** Parse EUI border radius tokens (e.g. `6px`, `0.375rem`) into pixels for Tweakpane. */
+export function parseCssLengthToPx(value: string | number): number {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  const s = String(value).trim();
+  const pxMatch = /^(\d+(?:\.\d+)?)px$/i.exec(s);
+  if (pxMatch) {
+    return Number(pxMatch[1]);
+  }
+  const remMatch = /^(\d+(?:\.\d+)?)rem$/i.exec(s);
+  if (remMatch && typeof document !== 'undefined') {
+    const rootPx = Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
+    return Number(remMatch[1]) * rootPx;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
+type TweakpaneChangeHandler = (ev: { value: unknown }) => void;
+
+interface TweakpaneBindingApi {
+  on(type: 'change', handler: TweakpaneChangeHandler): void;
+}
+
+interface DashboardLayoutTweakpanePane {
+  addBinding(
+    target: Record<string, unknown>,
+    key: string,
+    options:
+      | { label: string; min: number; max: number; step: number }
+      | { label: string; options: ReadonlyArray<{ text: string; value: string }> }
+  ): TweakpaneBindingApi;
   dispose(): void;
 }
 
 export interface DashboardLayoutTweakpaneValues {
   marginGutterPx: number;
   horizontalPaddingPx: number;
+  panelBorderRadiusPx: number;
+  dashboardBackgroundToken: DashboardBackgroundBaseToken;
 }
 
 /**
  * Live dashboard layout tuning via [Tweakpane](https://tweakpane.github.io/docs/): grid gutter
- * (when margins are on) and viewport left/right padding. Pane is fixed bottom-right while the
- * dashboard viewport is mounted.
+ * (when margins are on), viewport left/right padding, panel corner radius (defaults to the
+ * active EUI theme `border.radius.medium` value), and dashboard canvas background using EUI
+ * `backgroundBase*` tokens (see
+ * https://eui.elastic.co/docs/getting-started/theming/tokens/colors/#background-colors).
+ * Pane is fixed bottom-right while the dashboard viewport is mounted.
  */
 export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
+  const { euiTheme } = useEuiTheme();
+  const euiThemeRef = useRef(euiTheme);
+  euiThemeRef.current = euiTheme;
+
+  const defaultPanelBorderRadiusPx = useMemo(
+    () => parseCssLengthToPx(euiTheme.border.radius.medium as string | number),
+    [euiTheme.border.radius.medium]
+  );
+  const defaultPanelRadiusRef = useRef(defaultPanelBorderRadiusPx);
+  defaultPanelRadiusRef.current = defaultPanelBorderRadiusPx;
+
   const [marginGutterPx, setMarginGutterPx] = useState(DASHBOARD_MARGIN_SIZE);
   const [horizontalPaddingPx, setHorizontalPaddingPx] = useState(DASHBOARD_HORIZONTAL_PADDING_PX);
+  const [panelBorderRadiusPx, setPanelBorderRadiusPx] = useState(defaultPanelBorderRadiusPx);
+  const [dashboardBackgroundToken, setDashboardBackgroundToken] =
+    useState<DashboardBackgroundBaseToken>(DASHBOARD_DEFAULT_BACKGROUND_TOKEN);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,16 +106,20 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
       container.dataset.testSubj = 'dashboardLayoutTweakpane';
       document.body.appendChild(container);
 
+      const bgOptions = getDashboardBackgroundBaseTokenOptions(euiThemeRef.current.colors);
+
       const params = {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
         horizontalPaddingPx: DASHBOARD_HORIZONTAL_PADDING_PX,
+        panelBorderRadiusPx: defaultPanelRadiusRef.current,
+        dashboardBackgroundToken: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
       };
 
       const pane = new Pane({
         container,
         title: 'Dashboard layout',
         expanded: true,
-      }) as unknown as TweakpanePaneWithBindings;
+      }) as unknown as DashboardLayoutTweakpanePane;
 
       const readNumber = (value: unknown): number | undefined => {
         if (typeof value === 'number' && Number.isFinite(value)) {
@@ -103,8 +156,35 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           setHorizontalPaddingPx(next);
         });
 
+      pane
+        .addBinding(params, 'panelBorderRadiusPx', {
+          label: 'Panel radius (px)',
+          min: 0,
+          max: 48,
+          step: 1,
+        })
+        .on('change', (ev) => {
+          const next = readNumber(ev.value) ?? params.panelBorderRadiusPx;
+          setPanelBorderRadiusPx(next);
+        });
+
+      pane
+        .addBinding(params, 'dashboardBackgroundToken', {
+          label: 'Dashboard background',
+          options:
+            bgOptions.length > 0
+              ? bgOptions
+              : [{ text: 'Subdued', value: DASHBOARD_DEFAULT_BACKGROUND_TOKEN }],
+        })
+        .on('change', (ev) => {
+          const next = typeof ev.value === 'string' ? ev.value : params.dashboardBackgroundToken;
+          setDashboardBackgroundToken(next);
+        });
+
       setMarginGutterPx(params.marginGutterPx);
       setHorizontalPaddingPx(params.horizontalPaddingPx);
+      setPanelBorderRadiusPx(params.panelBorderRadiusPx);
+      setDashboardBackgroundToken(params.dashboardBackgroundToken);
 
       disposePane = () => {
         pane.dispose();
@@ -118,5 +198,10 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
     };
   }, []);
 
-  return { marginGutterPx, horizontalPaddingPx };
+  return {
+    marginGutterPx,
+    horizontalPaddingPx,
+    panelBorderRadiusPx,
+    dashboardBackgroundToken,
+  };
 }

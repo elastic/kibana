@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
+import { EuiPortal, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -18,6 +18,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
+import { resolveDashboardBackgroundBaseColor } from '../grid/dashboard_background_tokens';
 import { useDashboardLayoutTweakpane } from '../grid/use_dashboard_layout_tweakpane';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
@@ -64,7 +65,26 @@ export const DashboardViewport = () => {
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
-  const { marginGutterPx, horizontalPaddingPx } = useDashboardLayoutTweakpane();
+  const { euiTheme } = useEuiTheme();
+  const { marginGutterPx, horizontalPaddingPx, panelBorderRadiusPx, dashboardBackgroundToken } =
+    useDashboardLayoutTweakpane();
+
+  const dashboardWrapperBackgroundStyle = useMemo(
+    () =>
+      css({
+        backgroundColor: resolveDashboardBackgroundBaseColor(
+          euiTheme.colors,
+          dashboardBackgroundToken
+        ),
+        '&.dshDashboardViewportWrapper--defaultBg': {
+          backgroundColor: resolveDashboardBackgroundBaseColor(
+            euiTheme.colors,
+            dashboardBackgroundToken
+          ),
+        },
+      }),
+    [euiTheme.colors, dashboardBackgroundToken]
+  );
 
   const viewportSidePaddingStyle = useMemo(
     () =>
@@ -75,13 +95,30 @@ export const DashboardViewport = () => {
     [horizontalPaddingPx]
   );
 
+  const viewportPanelRadiusStyle = useMemo(
+    () =>
+      css({
+        '.embPanel': {
+          borderRadius: `${panelBorderRadiusPx}px !important`,
+        },
+        '.embPanel__content, .embPanel__header, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer':
+          {
+            borderRadius: `${panelBorderRadiusPx}px !important`,
+          },
+        '[data-test-subj="embeddablePanelLoadingIndicator"]': {
+          borderRadius: `${panelBorderRadiusPx}px !important`,
+        },
+      }),
+    [panelBorderRadiusPx]
+  );
+
   return (
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
         'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
-      css={styles.wrapper}
+      css={[styles.wrapper, dashboardWrapperBackgroundStyle]}
     >
       {fullScreenMode && (
         <EuiPortal>
@@ -90,7 +127,7 @@ export const DashboardViewport = () => {
       )}
       <div
         className={classes}
-        css={[styles.viewport, viewportSidePaddingStyle]}
+        css={[styles.viewport, viewportSidePaddingStyle, viewportPanelRadiusStyle]}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
@@ -113,10 +150,6 @@ const dashboardViewportStyles = {
     display: 'flex',
     flexDirection: 'column' as 'column',
     width: '100%',
-    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    '&.dshDashboardViewportWrapper--defaultBg': {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    },
     '.dshDashboardViewport-controls': {
       margin: `0 ${euiTheme.size.s}`,
       paddingTop: euiTheme.size.s,

@@ -32,6 +32,8 @@ jest.mock('../grid/use_dashboard_layout_tweakpane', () => {
     useDashboardLayoutTweakpane: () => ({
       marginGutterPx: DASHBOARD_MARGIN_SIZE,
       horizontalPaddingPx: DASHBOARD_HORIZONTAL_PADDING_PX,
+      panelBorderRadiusPx: 6,
+      dashboardBackgroundToken: 'backgroundBaseSubdued',
     }),
   };
 });
