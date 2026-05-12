@@ -255,7 +255,7 @@ groups:
           Add sources for the [Content Security Policy `form-action` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) in reporting mode.
         datatype: string
         applies_to:
-          - "stack: ga, deprecated 9.5"
+          - "stack: deprecated 9.5"
           - "ech: ga"
           - "self: ga"
         deprecation_details: "Use `csp.form_action` instead."
