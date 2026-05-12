@@ -730,7 +730,7 @@ evaluate('my test', async ({ executorClient }) => {
 
 ## Score Ingestion via Kibana
 
-Evaluation results are ingested through the evals plugin route `POST /internal/evals/scores` on the target Kibana. The plugin persists docs into the `kibana-evaluations` data stream, which provides durable storage and supports run analysis over time.
+Evaluation results are ingested through the evals plugin route `POST /internal/evals/scores` on the target Kibana. The plugin persists docs into the `.kibana-evaluations` data stream, which provides durable storage and supports run analysis over time.
 
 For non-local targets, set both `EVALUATIONS_KBN_URL` and `EVALUATIONS_KBN_API_KEY`.
 
@@ -756,7 +756,7 @@ For manual use, add a `"name"` (e.g. `"kbn-evals-<your-email>"`) and `"expiratio
 
 This grants:
 
-- **Evaluation results**: write/read `kibana-evaluations*` data stream (index privileges)
+- **Evaluation results**: write/read `.kibana-evaluations*` data stream (index privileges)
 - **Tracing**: write/read `traces-*` indices (for OTLP trace ingest and trace-based evaluators)
 - **Dataset storage**: write/read/delete `kibana-evaluation-dataset*` indices (backing storage for managed datasets)
 - **Dataset API access**: Kibana `evals` feature privilege (`all`) for `/internal/evals/datasets/*` routes
@@ -782,8 +782,8 @@ EVALUATIONS_KBN_URL=http://elastic:changeme@localhost:5601 node scripts/playwrig
 
 The evaluation data is stored with the following structure:
 
-- **Index Pattern**: `kibana-evaluations*`
-- **Datastream**: `kibana-evaluations`
+- **Index Pattern**: `.kibana-evaluations*`
+- **Datastream**: `.kibana-evaluations`
 - **Document Structure**:
 
   ```json

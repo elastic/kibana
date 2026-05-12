@@ -11,7 +11,7 @@
 import { Client } from '@elastic/elasticsearch';
 
 const ES_URL = process.env.EVALUATIONS_ES_URL ?? 'http://elastic:changeme@localhost:9220';
-const INDEX = 'kibana-evaluations';
+const INDEX = '.kibana-evaluations';
 
 interface EvalDoc {
   run_id: string;

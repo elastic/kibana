@@ -19,7 +19,7 @@ export const goldenClusterPrivileges = {
         cluster: ['manage_index_templates'],
         indices: [
           {
-            names: ['kibana-evaluations*'],
+            names: ['.kibana-evaluations*'],
             privileges: [
               'auto_configure',
               'create_index',

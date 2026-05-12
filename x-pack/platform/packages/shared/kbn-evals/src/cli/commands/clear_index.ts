@@ -12,9 +12,9 @@ import { isNotFoundError } from '@kbn/es-errors';
 import { createEsClientForTesting } from '@kbn/test';
 import { isTTY } from '../prompts';
 
-const DEFAULT_PATTERN = 'kibana-evaluations*';
-const DEFAULT_DATA_STREAM = 'kibana-evaluations';
-const DEFAULT_TEMPLATE = 'kibana-evaluations-template';
+const DEFAULT_PATTERN = '.kibana-evaluations*';
+const DEFAULT_DATA_STREAM = '.kibana-evaluations';
+const DEFAULT_TEMPLATE = '.kibana-evaluations-template';
 
 const parseEsUrl = (esUrl: string): URL => {
   const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `http://${esUrl}`;
@@ -49,7 +49,7 @@ export const clearIndexCmd: Command<void> = {
 
   Examples:
     node scripts/evals clear-index
-    node scripts/evals clear-index --pattern kibana-evaluations* --force
+    node scripts/evals clear-index --pattern .kibana-evaluations* --force
     node scripts/evals clear-index --es-url http://elastic:changeme@localhost:9201 --force
   `,
   flags: {
@@ -63,7 +63,7 @@ export const clearIndexCmd: Command<void> = {
       throw createFlagError(
         [
           'No Elasticsearch URL configured for clearing indices.',
-          'Provide --es-url to target the Elasticsearch cluster backing kibana-evaluations.',
+          'Provide --es-url to target the Elasticsearch cluster backing .kibana-evaluations.',
         ].join('\n')
       );
     }

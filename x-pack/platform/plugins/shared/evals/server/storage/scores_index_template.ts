@@ -8,8 +8,8 @@
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
 import type { MappingsDefinition } from '@kbn/es-mappings';
 
-export const EVALUATIONS_DATA_STREAM_NAME = 'kibana-evaluations';
-export const EVALUATIONS_DATA_STREAM_WILDCARD = 'kibana-evaluations*';
+export const EVALUATIONS_DATA_STREAM_NAME = '.kibana-evaluations';
+export const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
 
 const evaluationsDataStreamMappings = {
   properties: {
