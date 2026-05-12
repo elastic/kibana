@@ -48,11 +48,13 @@ describe('GET /api/status', () => {
 
   const setupServer = async ({
     allowAnonymous = true,
+    statusPageBypassMonitorPrivilege = false,
     coreOverall,
     overall,
     hasPrivilegesImpl,
   }: {
     allowAnonymous?: boolean;
+    statusPageBypassMonitorPrivilege?: boolean;
     coreOverall?: ServiceStatus;
     overall?: ServiceStatus;
     hasPrivilegesImpl?: () => Promise<{ has_all_requested: boolean }>;
@@ -109,6 +111,7 @@ describe('GET /api/status', () => {
       logger,
       config: {
         allowAnonymous,
+        statusPageBypassMonitorPrivilege,
         packageInfo: {
           branch: 'xbranch',
           buildNum: 1234,
@@ -589,7 +592,52 @@ describe('GET /api/status', () => {
       await supertest(httpSetup.server.listener).get('/api/status').expect(200);
 
       expect(hasPrivileges).not.toHaveBeenCalled();
-      expect(incrementUsageCounter).not.toHaveBeenCalled();
+      expect(incrementUsageCounter).toHaveBeenCalledWith({
+        counterName: 'status_redacted_unauthenticated',
+      });
+    });
+  });
+
+  describe('statusPageBypassMonitorPrivilege: true', () => {
+    const REDACTED_BODY = { status: { overall: { level: 'available' } } };
+
+    it('returns the full body for authenticated callers without checking monitor privilege', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        statusPageBypassMonitorPrivilege: true,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        hasPrivilegesImpl: async () => ({ has_all_requested: false }),
+      });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          name: 'xkibana',
+          status: expect.any(Object),
+          metrics: expect.any(Object),
+        })
+      );
+      expect(hasPrivileges).not.toHaveBeenCalled();
+      expect(incrementUsageCounter).not.toHaveBeenCalledWith({
+        counterName: 'status_redacted_no_monitor',
+      });
+    });
+
+    it('keeps unauthenticated callers redacted', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        statusPageBypassMonitorPrivilege: true,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+      });
+
+      const response = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+
+      expect(response.body).toEqual(REDACTED_BODY);
+      expect(hasPrivileges).not.toHaveBeenCalled();
     });
   });
 

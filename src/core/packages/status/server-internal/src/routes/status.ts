@@ -32,6 +32,7 @@ interface Deps {
   logger: Logger;
   config: {
     allowAnonymous: boolean;
+    statusPageBypassMonitorPrivilege: boolean;
     packageInfo: PackageInfo;
     serverName: string;
     uuid: string;
@@ -66,11 +67,13 @@ type StatusDecision = 'unauthenticated' | 'no-monitor' | 'full';
 
 const resolveStatusDecision = async ({
   authRequired,
+  bypassMonitorPrivilege,
   isAuthenticated,
   coreContext,
   logger,
 }: {
   authRequired: boolean;
+  bypassMonitorPrivilege: boolean;
   isAuthenticated: boolean;
   coreContext: CoreRequestHandlerContext;
   logger: Logger;
@@ -80,6 +83,9 @@ const resolveStatusDecision = async ({
   }
   if (!isAuthenticated) {
     return 'unauthenticated';
+  }
+  if (bypassMonitorPrivilege) {
+    return 'full';
   }
   try {
     const { has_all_requested: hasAllRequested } =
@@ -190,6 +196,7 @@ export const registerStatusRoute = ({
         context.core.then((coreContext) =>
           resolveStatusDecision({
             authRequired: !config.allowAnonymous,
+            bypassMonitorPrivilege: config.statusPageBypassMonitorPrivilege,
             isAuthenticated: req.auth.isAuthenticated,
             coreContext,
             logger,
@@ -205,6 +212,7 @@ export const registerStatusRoute = ({
           responseBody = getRedactedStatusResponse({ coreOverall });
           break;
         case 'unauthenticated':
+          incrementUsageCounter({ counterName: 'status_redacted_unauthenticated' });
           responseBody = getRedactedStatusResponse({ coreOverall });
           break;
         case 'full':

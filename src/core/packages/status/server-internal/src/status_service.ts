@@ -157,6 +157,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const commonRouteDeps = {
       config: {
         allowAnonymous: statusConfig.allowAnonymous,
+        statusPageBypassMonitorPrivilege: statusConfig.statusPageBypassMonitorPrivilege,
         packageInfo: this.coreContext.env.packageInfo,
         serverName: http.getServerInfo().name,
         uuid: environment.instanceUuid,
