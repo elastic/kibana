@@ -62,14 +62,14 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Waits until the first chart card matches the expected id (pagination/query updates replace cards
+   * Waits until the first chart card matches the expected id (since pagination/query updates replace cards
    * asynchronously). Call before `expect(cards).toHaveCount(...)` so the count is not asserted
    * against a stale page.
    */
-  public async waitForFirstCard(expectedFirstCardId: string, timeoutMs = 30_000): Promise<void> {
+  public async waitForFirstCard(expectedFirstCardId: string): Promise<void> {
     await this.grid
       .locator(`[data-chart-index="0"][id="${expectedFirstCardId}"]`)
-      .waitFor({ state: 'visible', timeout: timeoutMs });
+      .waitFor({ state: 'visible' });
   }
 
   /**
