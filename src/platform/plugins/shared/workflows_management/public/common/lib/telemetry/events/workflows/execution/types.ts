@@ -173,7 +173,13 @@ export interface ReportWorkflowRunResumedActionParams extends BaseResultActionPa
    */
   workflowId?: string;
   /**
-   * Time in milliseconds from when the modal was opened to when the user submitted
+   * Time in milliseconds from when the resume modal was opened until submit (UX / form latency).
    */
-  timeToSubmitMs?: number;
+  timeInModalMs?: number;
+  /**
+   * Milliseconds from this step execution's `startedAt` (server) until submit.
+   * Proxy for "time blocked on human" when the step is `waitForInput`; may include any work
+   * before the run entered `WAITING_FOR_INPUT` because we do not persist a separate wait timestamp yet.
+   */
+  timeSinceStepStartedMs?: number;
 }

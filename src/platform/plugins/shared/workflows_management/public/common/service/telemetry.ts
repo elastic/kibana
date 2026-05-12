@@ -468,15 +468,18 @@ export class WorkflowsBaseTelemetry {
   reportWorkflowRunResumed = (params: {
     workflowExecutionId: string;
     workflowId?: string;
-    timeToSubmitMs?: number;
+    timeInModalMs?: number;
+    timeSinceStepStartedMs?: number;
     error?: Error;
   }) => {
-    const { workflowExecutionId, workflowId, timeToSubmitMs, error } = params;
+    const { workflowExecutionId, workflowId, timeInModalMs, timeSinceStepStartedMs, error } =
+      params;
     this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunResumed, {
       eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunResumed],
       workflowExecutionId,
       ...(workflowId && { workflowId }),
-      ...(timeToSubmitMs !== undefined && { timeToSubmitMs }),
+      ...(timeInModalMs !== undefined && { timeInModalMs }),
+      ...(timeSinceStepStartedMs !== undefined && { timeSinceStepStartedMs }),
       ...this.getBaseResultParams(error),
     });
   };

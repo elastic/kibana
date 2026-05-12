@@ -26,6 +26,8 @@ import type { ContextOverrideData } from '../../../shared/utils/build_step_conte
 interface ResumeExecutionButtonProps {
   executionId: string;
   workflowId?: string;
+  /** Step execution `startedAt` (ISO) for telemetry: approximate human-wait duration vs time in modal */
+  stepStartedAt?: string;
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
@@ -37,6 +39,7 @@ interface ResumeExecutionButtonProps {
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   executionId,
   workflowId,
+  stepStartedAt,
   resumeMessage,
   resumeSchema,
   autoOpen = false,
@@ -95,8 +98,13 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const handleSubmit = useCallback(
     async ({ stepInputs }: { stepInputs: Record<string, unknown> }) => {
       setIsSubmitting(true);
-      const timeToSubmitMs =
-        modalOpenedAtRef.current != null ? Date.now() - modalOpenedAtRef.current : undefined;
+      const submittedAt = Date.now();
+      const timeInModalMs =
+        modalOpenedAtRef.current != null ? submittedAt - modalOpenedAtRef.current : undefined;
+      const stepStartMs = stepStartedAt != null ? Date.parse(stepStartedAt) : NaN;
+      const timeSinceStepStartedMs = !Number.isNaN(stepStartMs)
+        ? Math.max(0, submittedAt - stepStartMs)
+        : undefined;
       try {
         await workflowsApi.resumeExecution(executionId, { input: stepInputs });
         notifications?.toasts.addSuccess({
@@ -108,7 +116,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         telemetry.reportWorkflowRunResumed({
           workflowExecutionId: executionId,
           workflowId,
-          timeToSubmitMs,
+          timeInModalMs,
+          timeSinceStepStartedMs,
         });
         setIsSubmitted(true);
         closeModal();
@@ -123,14 +132,15 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         telemetry.reportWorkflowRunResumed({
           workflowExecutionId: executionId,
           workflowId,
-          timeToSubmitMs,
+          timeInModalMs,
+          timeSinceStepStartedMs,
           error: errorObj,
         });
       } finally {
         setIsSubmitting(false);
       }
     },
-    [executionId, workflowId, workflowsApi, notifications, telemetry, closeModal]
+    [executionId, workflowId, stepStartedAt, workflowsApi, notifications, telemetry, closeModal]
   );
 
   return (

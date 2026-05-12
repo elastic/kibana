@@ -245,10 +245,19 @@ const workflowRunResumedSchema: RootSchema<ReportWorkflowRunResumedActionParams>
       optional: true,
     },
   },
-  timeToSubmitMs: {
+  timeInModalMs: {
     type: 'long',
     _meta: {
-      description: 'Time in milliseconds from when the modal was opened to when the user submitted',
+      description:
+        'Time in milliseconds from when the resume modal was opened until the user submitted (UX)',
+      optional: true,
+    },
+  },
+  timeSinceStepStartedMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Milliseconds from the step execution startedAt (server) until submit; proxy for human-wait duration for waitForInput steps',
       optional: true,
     },
   },
