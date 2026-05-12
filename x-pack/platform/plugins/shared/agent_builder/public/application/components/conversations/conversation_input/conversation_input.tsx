@@ -21,9 +21,6 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
-// Submit is gated globally on any-conversation streaming until concurrent streams are
-// unblocked in a future PR — at which point it becomes a per-conversation check.
-import { useIsAnyConversationStreaming } from '../../../hooks/use_is_any_conversation_streaming';
 import {
   useAgentId,
   useConversationTitle,
@@ -147,8 +144,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   onSubmit,
   onEditorFocus,
 }) => {
-  const isSendingMessage = useIsAnyConversationStreaming();
-  const { pendingMessage, error, isResuming } = useSendMessage();
+  const { pendingMessage, error, isResuming, isResponseLoading } = useSendMessage();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
@@ -169,7 +165,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
   const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
   const isSubmitDisabled =
-    messageEditorController.isEmpty || isSendingMessage || !isAgentIdValid || isAwaitingPrompt;
+    messageEditorController.isEmpty || isResponseLoading || !isAgentIdValid || isAwaitingPrompt;
 
   const placeholder = isAgentDeleted ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
@@ -179,9 +175,9 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     height: 100%;
   `;
   // Hide attachments if there's an error from current round or if message has been just sent
-  const shouldHideAttachments = Boolean(error) || isSendingMessage;
+  const shouldHideAttachments = Boolean(error) || isResponseLoading;
 
-  const shouldCollapseInput = isSendingMessage || hasActiveConversation;
+  const shouldCollapseInput = isResponseLoading || hasActiveConversation;
 
   const visibleAttachments = useMemo(() => {
     if (!attachments || shouldHideAttachments) return [];
