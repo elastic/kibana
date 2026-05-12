@@ -8,7 +8,10 @@
  */
 
 export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
-export { findInputsInGraph } from './find_inputs_in_graph/find_inputs_in_graph';
+export {
+  findInputsInGraph,
+  scanForTemplateVariables,
+} from './find_inputs_in_graph/find_inputs_in_graph';
 export {
   extractSchemaPropertyPaths,
   type ExtractedSchemaPropertyPath,
