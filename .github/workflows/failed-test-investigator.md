@@ -92,20 +92,18 @@ The test's **target** (e.g. `local-stateful-classic`, `cloud-serverless-security
 ## Investigate
 
 1. Read the issue title, body, labels, and all comments.
-2. Parse test metadata if present: location (test file path), config path, code owners, target)
+2. Parse test metadata if present: location (test file path), config path, code owners, target.
 3. Look at all the failures reported in the issue. The very same test could have been failing with different error messages, for different reasons, on different pipelines, and on different branches.
 4. Inspect the relevant test file and nearby helpers/fixtures. For Scout, start from the reported location; otherwise infer from the title.
 5. Check recent git history and blame on the test file and related product code.
 
 Every conclusion must cite specific evidence. Do not guess.
 
-## Ways to fix a flaky test failure
-
 ## Classify
 
 Set `classification` based on where the evidence points:
 
-- **`test`**: timing, waits, selectors, fixtures, retries, setup/teardown, test data coupling, cleanup, or isolation issues in the test harness.
+- **`test-design`**: timing, waits, selectors, fixtures, retries, setup/teardown, test data coupling, cleanup, or isolation issues in the test harness.
 - **`application`**: real product bug, broken contract, regression, or race in app/server/shared code.
 - **`external`**: CI instability, downed dependency, env/network/credentials, or unrelated platform incidents.
 - **`inconclusive`**: evidence does not support a defensible call.
@@ -113,9 +111,8 @@ Set `classification` based on where the evidence points:
 Set `fixability` to exactly one of:
 
 - **`fixable`** — a concrete fix was identified.
-- **`needs-human`** — test-side failure that needs human judgment:
-- **`not-a-flake`** — real product bug. Ideally back ths with a recent commit, a feature-flag-exposed race, or a consistent reproducible failure.
-- **`env-issue`**
+- **`not-a-flake`** — real product bug. Ideally back this with a recent commit, a feature-flag-exposed race, or a consistent reproducible failure.
+- **`env-issue`**: failure caused by CI/infrastructure (matches `classification: external`), or a stale failure with no recent recurrence.
 - **`noop`** — no further action needed.
 - **`inconclusive`** — none of the above apply with enough confidence.
 
@@ -152,7 +149,12 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment. Two parts: visible summary on top, collapsed `<details>` block for evidence.
+Post exactly one comment with two main parts:
+
+- **Visible section**: a very concise summary that would inform a developer with a quick glance. Highlight main findings. Keep it high-signal and to the point.
+- **Collapsed `<details>` section**: full long-form context for the downstream auto-fix agent (and any human who wants to audit the call).
+
+The visible section is a _distillation_ of the collapsed one. Do not repeat content verbatim across both: the visible bullets summarize, the collapsed block holds the full evidence the summary was derived from.
 
 ### Visible (top), in this order:
 
@@ -163,12 +165,38 @@ Post exactly one comment. Two parts: visible summary on top, collapsed `<details
 3. **One-line action hint**: the proposed fix, recommended action, or missing evidence. Skip if the paragraph already covers it.
 
 4. **Flakiness Finding bullets** — exactly these five, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
-   - `classification`: `test` | `code` | `external` | `inconclusive`
+
+   - `classification`: `test-design` | `application` | `external` | `inconclusive`
    - `confidence`: `high` | `medium` | `low`
-   - `fixability`: `fixable` | `needs-human` | `not-a-flake` | `env-issue` | `inconclusive`
+   - `fixability`: `fixable` | `not-a-flake` | `env-issue` | `inconclusive` | `noop`
    - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
    - `test.file`: repo-relative path, or `unknown`
 
+5. **Suspected root cause** — 2–4 short bullets, each tied to a specific piece of evidence. Skip the section entirely when `fixability` is `not-a-flake`, `env-issue`, or `inconclusive` and there is nothing concrete to assert.
+
+6. **Key references** — at most 3 Markdown links: the failing test file, the failing CI run, and the implicated commit (when one exists). Skip any of the three that are not applicable; skip the section entirely when none apply.
+
 ### Collapsed (`<details>`):
 
-Use this exact structure (the blank lines around `</summary>` and `</details>` are required for inner markdown to render):
+This section is the full context for agents and humans to dive deep into the findings. Verify all information. Wrap it in a single `<details>` block. The blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+
+```
+<details>
+<summary>See full details</summary>
+
+#### Full root-cause analysis
+
+The long-form version of the visible "Suspected root cause" bullets. Walk through the evidence chain step by step. Cite the specific log lines, stack frames, blame results, or related PRs that led to the conclusion.
+
+#### Evidence used
+
+A complete list of the evidence consulted: issue comments, file paths, commits, CI runs, blame output, related PRs. Each item should be a Markdown link, not a bare path or SHA.
+
+#### Suggested patch
+
+Only when justified by the evidence: a small diff-style snippet showing the suggested edit. Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior to change. Omit this section entirely when no defensible patch can be proposed.
+
+</details>
+```
+
+Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure. Any of the three subsections may be omitted when there is nothing meaningful to put in it.
