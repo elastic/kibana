@@ -9,16 +9,24 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlyout } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import { TakeActionDropdown } from './take_action_dropdown';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { useDocumentDetailsContext } from '../context';
 import { useHostIsolation } from '../hooks/use_host_isolation';
-import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
+import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { IsolateHostPanelHeader } from '../../isolate_host/header';
 import { IsolateHostPanelContent } from '../../isolate_host/content';
+
+const HOST_ISOLATION_FLYOUT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.takeAction.hostIsolationFlyoutAriaLabel',
+  {
+    defaultMessage: 'Host isolation details',
+  }
+);
 
 /**
  * Take action button in the panel footer
@@ -95,7 +103,11 @@ export const TakeActionButton: FC = () => {
       )}
 
       {isHostIsolationPanelOpen && (
-        <EuiFlyout onClose={showAlertDetails} size="m">
+        <EuiFlyout
+          aria-label={HOST_ISOLATION_FLYOUT_ARIA_LABEL}
+          onClose={showAlertDetails}
+          size="m"
+        >
           <IsolateHostPanelHeader
             isolateAction={isolateAction}
             data={dataFormattedForFieldBrowser}

@@ -34,6 +34,13 @@ jest.mock('../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
 }));
 
+jest.mock(
+  '../../../../flyout_v2/document/tools/add_rule_exception/hooks/use_open_add_rule_exception',
+  () => ({
+    useOpenAddRuleException: jest.fn().mockReturnValue(jest.fn()),
+  })
+);
+
 const ecsRowData: Ecs = {
   _id: '1',
   agent: { type: ['blah'] },
@@ -106,7 +113,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 });
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
-  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true }),
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
 }));
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({

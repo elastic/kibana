@@ -25,7 +25,7 @@ import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_a
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import { useOpenAddRuleException } from '../../../../flyout_v2/add_rule_exception/hooks/use_open_add_rule_exception';
+import { useOpenAddRuleException } from '../../../../flyout_v2/document/tools/add_rule_exception/hooks/use_open_add_rule_exception';
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';

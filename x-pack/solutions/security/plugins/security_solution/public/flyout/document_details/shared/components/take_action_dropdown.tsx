@@ -17,7 +17,7 @@ import type { EsHitRecord } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { isActiveTimeline } from '../../../../helpers';
-import { useOpenAddRuleException } from '../../../../flyout_v2/add_rule_exception/hooks/use_open_add_rule_exception';
+import { useOpenAddRuleException } from '../../../../flyout_v2/document/tools/add_rule_exception/hooks/use_open_add_rule_exception';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
