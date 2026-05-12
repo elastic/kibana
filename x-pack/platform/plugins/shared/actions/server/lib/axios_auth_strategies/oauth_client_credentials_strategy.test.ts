@@ -15,7 +15,7 @@ import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
-import { DefaultStrategy } from './default_strategy';
+import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
 import type { AuthStrategyDeps } from './types';
 
 const mockGetOAuthClientCredentialsAccessToken =
@@ -48,15 +48,15 @@ const createMockAxiosInstance = () =>
     interceptors: { response: { use: jest.fn() } },
   } as unknown as AxiosInstance);
 
-describe('DefaultStrategy', () => {
-  let strategy: DefaultStrategy;
+describe('OAuthClientCredentialsStrategy', () => {
+  let strategy: OAuthClientCredentialsStrategy;
 
   const mockOnFulfilled = jest.fn();
   const mockOnRejected = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    strategy = new DefaultStrategy();
+    strategy = new OAuthClientCredentialsStrategy();
     mockGetDeleteTokenAxiosInterceptor.mockReturnValue({
       onFulfilled: mockOnFulfilled,
       onRejected: mockOnRejected,
@@ -83,7 +83,7 @@ describe('DefaultStrategy', () => {
     it('throws when opts authType is not oauth', async () => {
       const opts: GetTokenOpts = { authType: 'ears', provider: 'google' };
       await expect(strategy.getToken(opts, baseDeps)).rejects.toThrow(
-        'DefaultStrategy received non-oauth token opts'
+        'OAuthClientCredentialsStrategy received non-oauth token opts'
       );
     });
 

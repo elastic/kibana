@@ -11,7 +11,7 @@ import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_creden
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
 
-export class DefaultStrategy implements AxiosAuthStrategy {
+export class OAuthClientCredentialsStrategy implements AxiosAuthStrategy {
   installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
     const { connectorId, connectorTokenClient } = deps;
     if (!connectorTokenClient) {
@@ -26,7 +26,7 @@ export class DefaultStrategy implements AxiosAuthStrategy {
 
   async getToken(opts: GetTokenOpts, deps: AuthStrategyDeps): Promise<string | null> {
     if (opts.authType !== 'oauth') {
-      throw new Error('DefaultStrategy received non-oauth token opts');
+      throw new Error('OAuthClientCredentialsStrategy received non-oauth token opts');
     }
 
     const { connectorId, connectorTokenClient, logger, configurationUtilities } = deps;
