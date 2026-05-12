@@ -8,8 +8,8 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-llm-trace-waterfall'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/llm-trace-waterfall'],
   setupFilesAfterEnv: [
-    '<rootDir>/x-pack/platform/packages/shared/kbn-llm-trace-waterfall/setup_tests.ts',
+    '<rootDir>/x-pack/platform/packages/shared/llm-trace-waterfall/setup_tests.ts',
   ],
 };

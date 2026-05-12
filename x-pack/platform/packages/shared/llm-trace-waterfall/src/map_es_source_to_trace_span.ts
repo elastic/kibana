@@ -7,6 +7,8 @@
 
 import type { TraceSpan } from './types';
 
+const NANOSECONDS_PER_MILLISECOND = 1_000_000;
+
 interface TraceSpanSource {
   span_id?: string;
   parent_span_id?: string;
@@ -29,6 +31,6 @@ export const mapEsSourceToTraceSpan = (source: TraceSpanSource, id?: string): Tr
   status: source.status?.code != null ? String(source.status.code) : undefined,
   start_time: source['@timestamp'] ?? '',
   end_time: source.end_time,
-  duration_ms: (source.duration ?? 0) / 1_000_000,
+  duration_ms: (source.duration ?? 0) / NANOSECONDS_PER_MILLISECOND,
   attributes: source.attributes ?? {},
 });

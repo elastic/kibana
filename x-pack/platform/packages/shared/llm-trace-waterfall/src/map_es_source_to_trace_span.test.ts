@@ -55,4 +55,21 @@ describe('mapEsSourceToTraceSpan', () => {
       attributes: {},
     });
   });
+
+  it('falls back to an empty span_id when source and hit id are both missing', () => {
+    const span = mapEsSourceToTraceSpan({}, undefined);
+
+    expect(span).toEqual({
+      span_id: '',
+      trace_id: '',
+      parent_span_id: undefined,
+      name: 'unknown',
+      kind: undefined,
+      status: undefined,
+      start_time: '',
+      end_time: undefined,
+      duration_ms: 0,
+      attributes: {},
+    });
+  });
 });

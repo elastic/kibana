@@ -10,7 +10,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { useTraceSpans } from './use_trace_spans';
 
 const createWrapper = () => {
@@ -121,6 +121,58 @@ describe('useTraceSpans', () => {
       isLoading: false,
       error: null,
     });
+
+    queryClient.clear();
+  });
+
+  it('returns query error and no spans when search request fails', async () => {
+    const error = new Error('boom');
+    const search = jest.fn().mockReturnValue(throwError(() => error));
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useTraceSpans('trace-1', {
+          search: search as unknown as DataPublicPluginStart['search']['search'],
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.error).toBe(error));
+
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(result.current.spans).toEqual([]);
+    expect(result.current.durationMs).toBe(0);
+
+    queryClient.clear();
+  });
+
+  it('returns empty spans and zero duration when search returns no hits', async () => {
+    const search = jest.fn().mockReturnValue(
+      of({
+        rawResponse: {
+          hits: {
+            hits: [],
+          },
+        },
+      })
+    );
+    const { queryClient, Wrapper } = createWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useTraceSpans('trace-1', {
+          search: search as unknown as DataPublicPluginStart['search']['search'],
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(result.current.spans).toEqual([]);
+    expect(result.current.durationMs).toBe(0);
+    expect(result.current.error).toBeNull();
 
     queryClient.clear();
   });

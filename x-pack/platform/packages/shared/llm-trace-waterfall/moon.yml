@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/llm-trace-waterfall
   channel: ''
   owner: '@elastic/obs-ai-team'
-  sourceRoot: x-pack/platform/packages/shared/kbn-llm-trace-waterfall
+  sourceRoot: x-pack/platform/packages/shared/llm-trace-waterfall
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'

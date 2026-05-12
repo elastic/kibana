@@ -11,9 +11,12 @@ import { lastValueFrom } from 'rxjs';
 import { mapEsSourceToTraceSpan } from './map_es_source_to_trace_span';
 import type { TraceSpan } from './types';
 
+const TRACES_INDEX_PATTERN = 'traces-*';
+const MAX_SPANS_PER_TRACE = 10_000;
+
 interface TraceSearchRequest {
   params: {
-    index: 'traces-*';
+    index: typeof TRACES_INDEX_PATTERN;
     body: {
       query: {
         term: {
@@ -89,11 +92,11 @@ export const useTraceSpans = (
       const response = await lastValueFrom(
         search<TraceSearchRequest, TraceSearchResponse>({
           params: {
-            index: 'traces-*',
+            index: TRACES_INDEX_PATTERN,
             body: {
               query: { term: { trace_id: traceId } },
               sort: [{ '@timestamp': { order: 'asc' } }],
-              size: 10000,
+              size: MAX_SPANS_PER_TRACE,
             },
           },
         })

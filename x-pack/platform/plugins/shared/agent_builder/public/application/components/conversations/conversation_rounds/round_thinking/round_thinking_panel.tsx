@@ -18,7 +18,6 @@ import {
 import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
-import { useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
@@ -61,7 +60,6 @@ export const RoundThinkingPanel = ({
 }: RoundThinkingPanelProps) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
-  const { data } = services.plugins;
   const [showFlyout, setShowFlyout] = useState(false);
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
@@ -71,9 +69,6 @@ export const RoundThinkingPanel = ({
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
-  const traceSpansResult = useTraceSpans(traceId ?? null, {
-    search: data.search.search,
-  });
   const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
     ? services.plugins.evals.getAddToDatasetAction({
         initialExample: {
@@ -185,14 +180,7 @@ export const RoundThinkingPanel = ({
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
       {showTraceFlyout && traceId && (
-        <TraceFlyout
-          traceId={traceId}
-          onClose={() => setShowTraceFlyout(false)}
-          spans={traceSpansResult.spans}
-          durationMs={traceSpansResult.durationMs}
-          isLoading={traceSpansResult.isLoading}
-          error={traceSpansResult.error}
-        />
+        <TraceFlyout traceId={traceId} onClose={() => setShowTraceFlyout(false)} />
       )}
     </>
   );
