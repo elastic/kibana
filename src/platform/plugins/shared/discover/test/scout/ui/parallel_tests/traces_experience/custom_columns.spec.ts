@@ -8,12 +8,12 @@
  */
 
 import { tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
   TRACES,
   setupTracesExperience,
   teardownTracesExperience,
+  expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
 
 spaceTest.describe(
@@ -39,10 +39,7 @@ spaceTest.describe(
       'should display trace-specific columns in data view mode',
       async ({ pageObjects }) => {
         await spaceTest.step('verify trace-specific column headers', async () => {
-          await pageObjects.discover.waitForDocTableRendered();
-          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-          }
+          await expectTracesExperienceEnabled(pageObjects);
         });
       }
     );
@@ -53,10 +50,7 @@ spaceTest.describe(
       });
 
       await spaceTest.step('verify trace-specific column headers', async () => {
-        await pageObjects.discover.waitForDocTableRendered();
-        for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-          await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-        }
+        await expectTracesExperienceEnabled(pageObjects);
       });
     });
   }
