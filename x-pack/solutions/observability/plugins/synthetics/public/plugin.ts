@@ -70,6 +70,7 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
+import { bindAgentBuilderOnStart } from './agent_builder/bind_on_start';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
@@ -264,6 +265,12 @@ export class SyntheticsPlugin
       if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
         observabilityRuleTypeRegistry.register(alertInitializer);
       }
+    });
+
+    bindAgentBuilderOnStart({
+      agentBuilder: pluginsStart.agentBuilder,
+      http: coreStart.http,
+      application: coreStart.application,
     });
   }
 

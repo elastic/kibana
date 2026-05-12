@@ -141,6 +141,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.investigation',
   'observability.service-map',
 
+  // O11Y – Synthetics
+  'monitor-management',
+
   // Search
   `${internalNamespaces.search}.keyword-search`,
   `${internalNamespaces.search}.catalog-ecommerce`,
