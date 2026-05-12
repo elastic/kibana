@@ -97,6 +97,17 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
+  // When the index changes and the selected time field isn't present in the new
+  // index's date fields, auto-select the first available one to avoid query errors.
+  useEffect(() => {
+    const dateFieldNames = Object.values(fieldMap)
+      .filter((f) => f.type === 'date')
+      .map((f) => f.name);
+    if (dateFieldNames.length > 0 && !dateFieldNames.includes(timeField)) {
+      setFormValue('timeField', dateFieldNames[0]);
+    }
+  }, [fieldMap, timeField, setFormValue]);
+
   const {
     columns,
     rows,
