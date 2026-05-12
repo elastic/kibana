@@ -52,9 +52,15 @@ test.describe(
 
         // Thread count column ("Thread count max") backed by jvm.thread.count;
         // we target the column directly so we are not vulnerable to other
-        // cells happening to render the same integer.
-        const threadCountCell = row.locator(`td:nth-of-type(${THREAD_COUNT_COLUMN_NTH_OF_TYPE})`);
-        await expect(threadCountCell).toHaveText(EXPECTED_JRUBY_THREAD_COUNT);
+        // cells happening to render the same integer. The value is read from
+        // the inner `.euiTableCellContent` div so we exclude EUI's visually
+        // hidden tabular-copy markers (e.g. the `U+21B5` "↵" span appended
+        // to the `<td>`) which would otherwise pollute `textContent` and
+        // defeat `toHaveText` (it does not normalize that character).
+        const threadCountValue = row.locator(
+          `td:nth-of-type(${THREAD_COUNT_COLUMN_NTH_OF_TYPE}) .euiTableCellContent`
+        );
+        await expect(threadCountValue).toHaveText(EXPECTED_JRUBY_THREAD_COUNT);
       });
 
       await test.step('Dashboard panels are not shown', async () => {
