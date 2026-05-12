@@ -628,6 +628,11 @@ const assembleSuccessOutcome = async ({
   streamsClient,
   fieldsMetadataClient,
 }: AssembleSuccessOutcomeArgs): Promise<RunExtractFieldsOutcome> => {
+  // The seed grok/dissect MUST be the first step of the newly-added prefix
+  // (see `mergeSeedParsingProcessorIntoSuggestedPipeline` for the invariant).
+  // The post-parse sub-agent's steps reference the fields the seed produces
+  // (e.g. a `convert` on `attributes.status_code` only makes sense AFTER the
+  // grok captures it). Reordering would break the downstream steps.
   const newlyAdded = suggestion.pipeline
     ? mergeSeedParsingProcessorIntoSuggestedPipeline(winning.processor, suggestion.pipeline)
     : { steps: [{ ...winning.processor }] };
