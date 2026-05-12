@@ -58,9 +58,9 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
       const value = getFieldValue(hit, ALERT_RULE_UUID);
       return (Array.isArray(value) ? value[0] : value) as string | undefined;
     }, [hit]);
-    const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
+    const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId ?? '');
     const rules = useMemo<Rule[] | null>(() => (maybeRule ? [maybeRule] : null), [maybeRule]);
-    // Without a ruleId, useRuleWithFallback skips; keep loading instead of rendering with rules=null.
+    // Without a ruleId, keep loading instead of rendering with rules=null.
     const isLoading = !ruleId || isRuleLoading;
 
     const isEndpointItem = exceptionListType === ExceptionListTypeEnum.ENDPOINT;

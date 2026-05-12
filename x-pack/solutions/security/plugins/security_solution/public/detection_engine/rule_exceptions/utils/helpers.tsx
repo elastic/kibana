@@ -56,6 +56,7 @@ import type { AlertData, Flattened, FlattenedCodeSignature } from './types';
 
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
+import { asArrayIfExists } from '../../../common/lib/helpers';
 import {
   EVENT_CODE,
   EVENT_CATEGORY,
@@ -255,13 +256,11 @@ export const enrichExceptionItemsWithOS = (
 export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
   const osDefaults: OsTypeArray = ['windows', 'macos'];
   if (alertData != null) {
-    const rawAgentType = alertData.agent?.type as string | string[] | undefined;
-    const agentType = Array.isArray(rawAgentType) ? rawAgentType[0] : rawAgentType;
-    const rawOs =
-      agentType === 'endpoint'
-        ? (alertData.host?.os?.name as string | string[] | undefined)
-        : (alertData.host?.os?.family as string | string[] | undefined);
-    const osValue = Array.isArray(rawOs) ? rawOs[0] : rawOs;
+    // Flattened alert fields can still arrive as single-value arrays from event data.
+    const agentType = asArrayIfExists(alertData.agent?.type)?.[0];
+    const osValue = asArrayIfExists(
+      agentType === 'endpoint' ? alertData.host?.os?.name : alertData.host?.os?.family
+    )?.[0];
     const os = typeof osValue === 'string' ? osValue.toLowerCase() : undefined;
     if (os != null) {
       return osType.is(os) ? [os] : osDefaults;
