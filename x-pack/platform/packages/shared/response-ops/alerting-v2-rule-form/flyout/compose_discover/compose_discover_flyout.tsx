@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
@@ -164,15 +163,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <h2>{title}</h2>
             </EuiTitle>
 
-            <EuiSpacer size="s" />
-
-            <HorizontalMinimalStepper
-              steps={stepTitles.map((stepTitle, i): MinimalStep => ({
-                title: stepTitle,
-                status: i < uiState.step ? 'complete' : i === uiState.step ? 'current' : 'incomplete',
-              }))}
-            />
-            {/* YAML mode coming in follow-up PR */}
+            {/* Step indicator coming in PR A — HorizontalMinimalStepper */}
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
