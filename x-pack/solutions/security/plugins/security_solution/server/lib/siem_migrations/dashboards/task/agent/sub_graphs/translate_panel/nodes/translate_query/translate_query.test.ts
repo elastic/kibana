@@ -99,7 +99,9 @@ describe('getTranslateQueryNode', () => {
 
     const result = await node(state, {});
 
-    expect(result.esql_query).toBe(buildMockEsqlQuery(TRANSLATION_INDEX_PATTERN));
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({ indexPattern: 'logs-windows.sysmon_operational-default' })
+    );
     expect(result.comments![0].message).toBe(buildMockSummary(TRANSLATION_INDEX_PATTERN));
   });
 });
