@@ -159,7 +159,6 @@ tags:
   - prod
   - group-platform
   - shared
-  - jest-unit-tests
 fileGroups:
   src:
     - '*.ts'
@@ -168,6 +167,4 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
