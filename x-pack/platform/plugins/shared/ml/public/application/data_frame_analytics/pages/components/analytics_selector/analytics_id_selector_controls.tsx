@@ -90,7 +90,7 @@ const SelectorControl = ({ analyticsId, 'data-test-subj': dataTestSubj }: Select
       aria-label={i18n.translate(
         'xpack.ml.overview.dataFrameAnalytics.analyticsDetailsPopoverAriaLabel',
         {
-          defaultMessage: 'Analytics details',
+          defaultMessage: 'Job details',
         }
       )}
     >
