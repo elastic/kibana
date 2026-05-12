@@ -118,8 +118,8 @@ steps:
     run: |
       set -euo pipefail
 
-      source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --template '{{.merge_commit_sha}}')"
-      if [ -z "${source_sha}" ]; then
+      source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.merge_commit_sha')"
+      if [ -z "${source_sha}" ] || [ "${source_sha}" = "null" ]; then
         echo "No merge_commit_sha found for PR ${PR_NUMBER}" >&2
         exit 1
       fi
