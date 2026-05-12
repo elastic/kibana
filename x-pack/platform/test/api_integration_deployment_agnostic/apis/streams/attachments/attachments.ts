@@ -54,7 +54,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       await indexDocument(esClient, 'logs.otel', {
         '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -64,7 +63,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
-      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('List attachments', () => {
