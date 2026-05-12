@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiIcon, EuiIconTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import classnames from 'classnames';
 
