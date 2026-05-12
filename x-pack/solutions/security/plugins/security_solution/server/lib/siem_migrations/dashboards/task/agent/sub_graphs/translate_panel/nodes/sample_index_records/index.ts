@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getCorrectColumnsFromMappingNode } from './correct_columns_from_mapping';
+export { getSampleIndexRecordsNode } from './sample_index_records';
