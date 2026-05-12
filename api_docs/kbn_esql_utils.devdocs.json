@@ -615,6 +615,116 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.convertFiltersToESQLExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "convertFiltersToESQLExpression",
+        "description": [
+          "\nConverts an array of Elasticsearch Query DSL filters to an ES|QL WHERE clause expression.\nDisabled filters are skipped. Negated filters are wrapped with NOT.\nUntranslatable filter types (custom, spatial, scripted) are returned separately."
+        ],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]) => ",
+          "FilterTranslationResult"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/convert_filters_to_esql.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.convertFiltersToESQLExpression.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/convert_filters_to_esql.ts",
+            "lineNumber": 47,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.convertQueryToESQLExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "convertQueryToESQLExpression",
+        "description": [
+          "\nConverts a KQL or Lucene query into an ES|QL expression that can be used inside a WHERE\nclause. KQL maps to the `KQL(...)` function and Lucene maps to `QSTR(...)`.\n\nReturns an empty string when the query is missing, has no body, or uses an unsupported\nlanguage."
+        ],
+        "signature": [
+          "(query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/convert_query_to_esql.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.convertQueryToESQLExpression.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/convert_query_to_esql.ts",
+            "lineNumber": 19,
+            "columnNumber": 46,
+            "deprecated": false,
+            "docsReferencedTypeName": "Query",
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.convertTimeseriesCommandToFrom",
         "type": "Function",
         "tags": [],
@@ -1006,6 +1116,57 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getDatasets",
+        "type": "Function",
+        "tags": [],
+        "label": "getDatasets",
+        "description": [
+          "\nFetches all ES|QL datasets from the cluster (GET _query/dataset)."
+        ],
+        "signature": [
+          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "HttpSetup",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.EsqlDatasetsResult",
+            "text": "EsqlDatasetsResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/datasets.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [
+          "A promise that resolves to the datasets list."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getDatasets.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
+            "lineNumber": 90,
+            "columnNumber": 73,
+            "deprecated": false,
+            "docsReferencedTypeName": "Args",
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3206,7 +3367,7 @@
           "[] | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-        "lineNumber": 43,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3228,7 +3389,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 52,
+            "lineNumber": 36,
             "columnNumber": 37,
             "deprecated": false,
             "docsReferencedTypeName": "DataView",
@@ -3253,7 +3414,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 52,
+            "lineNumber": 36,
             "columnNumber": 57,
             "deprecated": false,
             "docsReferencedTypeName": "Query",
@@ -3280,7 +3441,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_initial_esql_query.ts",
-            "lineNumber": 52,
+            "lineNumber": 36,
             "columnNumber": 72,
             "deprecated": false,
             "trackAdoption": false,
@@ -4332,6 +4493,66 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.injectWhereClauseAfterSourceCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "injectWhereClauseAfterSourceCommand",
+        "description": [
+          "\nInjects a WHERE clause immediately after the source command (FROM/TS/etc.) of an ES|QL query.\n\nFilters reference source-level fields, so a WHERE has to run before any transformational\ncommand (STATS, KEEP, DROP, RENAME) that may rename or remove those fields. Appending the\nWHERE to the end of the pipeline would break valid filters; injecting it right after the\nsource keeps them at the earliest safe position.\n\nReturns the original query unchanged when the expression is empty or no source command\ncan be found in the query.\n"
+        ],
+        "signature": [
+          "(esql: string, whereExpression: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/inject_where_after_source.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.injectWhereClauseAfterSourceCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [
+              "- The base ES|QL query"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/inject_where_after_source.ts",
+            "lineNumber": 27,
+            "columnNumber": 53,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.injectWhereClauseAfterSourceCommand.$2",
+            "type": "string",
+            "tags": [],
+            "label": "whereExpression",
+            "description": [
+              "- The WHERE expression body (without the leading `WHERE`)"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/inject_where_after_source.ts",
+            "lineNumber": 27,
+            "columnNumber": 67,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.isComputedColumn",
         "type": "Function",
         "tags": [],
@@ -4428,7 +4649,7 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-        "lineNumber": 70,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4452,7 +4673,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-            "lineNumber": 70,
+            "lineNumber": 80,
             "columnNumber": 39,
             "deprecated": false,
             "docsReferencedTypeName": "DatatableColumn",
@@ -4486,7 +4707,7 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4510,7 +4731,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 38,
             "deprecated": false,
             "docsReferencedTypeName": "DatatableColumn",
@@ -4542,7 +4763,7 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-        "lineNumber": 74,
+        "lineNumber": 84,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4564,7 +4785,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-            "lineNumber": 74,
+            "lineNumber": 84,
             "columnNumber": 38,
             "deprecated": false,
             "docsReferencedTypeName": "FieldSpec",

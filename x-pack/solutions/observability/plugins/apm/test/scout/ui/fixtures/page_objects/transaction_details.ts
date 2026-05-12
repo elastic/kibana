@@ -13,9 +13,14 @@ import {
   waitForSearchBarReady,
 } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
+import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_waterfall_flyout';
 
 export class TransactionDetailsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly traceWaterfallFlyout: TraceWaterfallFlyout;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.traceWaterfallFlyout = createTraceWaterfallFlyout(page);
+  }
 
   async goToTransactionDetails(params: {
     serviceName: string;

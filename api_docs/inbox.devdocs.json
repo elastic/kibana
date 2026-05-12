@@ -10,62 +10,735 @@
     "setup": {
       "parentPluginId": "inbox",
       "id": "def-public.InboxPublicSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "InboxPublicSetup",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
-      "lineNumber": 12,
+      "lineNumber": 32,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "inbox",
+          "id": "def-public.InboxPublicSetup.registerActionDetailRenderer",
+          "type": "Function",
+          "tags": [],
+          "label": "registerActionDetailRenderer",
+          "description": [
+            "\nRegister a per-`sourceApp` React component that renders rich detail for\nan inbox action inside the respond flyout (diffs, reasoning, etc.).\n\nThe flyout always renders the standard HITL schema form derived from\n`InboxAction.input_schema`; the registered component is mounted below\nit. Providers that only need the default form do not need to register\nanything.\n\nThis is the designated extension point for provider-specific UI — do\nNOT add source-specific fields to `@kbn/inbox-common`'s `InboxAction`\nschema."
+          ],
+          "signature": [
+            "(sourceApp: string, load: ",
+            "InboxActionDetailRendererLoader",
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inbox",
+              "id": "def-public.InboxPublicSetup.registerActionDetailRenderer.$1",
+              "type": "string",
+              "tags": [],
+              "label": "sourceApp",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+              "lineNumber": 46,
+              "columnNumber": 32,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "inbox",
+              "id": "def-public.InboxPublicSetup.registerActionDetailRenderer.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "load",
+              "description": [],
+              "signature": [
+                "InboxActionDetailRendererLoader"
+              ],
+              "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+              "lineNumber": 46,
+              "columnNumber": 51,
+              "deprecated": false,
+              "docsReferencedTypeName": "InboxActionDetailRendererLoader",
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
       "parentPluginId": "inbox",
       "id": "def-public.InboxPublicStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "InboxPublicStart",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
-      "lineNumber": 13,
+      "lineNumber": 49,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "inbox",
+          "id": "def-public.InboxPublicStart.getActionDetailRenderer",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionDetailRenderer",
+          "description": [
+            "\nLook up a previously-registered detail renderer for a given `sourceApp`.\nReturns `undefined` when no renderer has been registered."
+          ],
+          "signature": [
+            "(sourceApp: string) => ",
+            "InboxActionDetailRendererLoader",
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+          "lineNumber": 50,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inbox",
+              "id": "def-public.InboxPublicStart.getActionDetailRenderer.$1",
+              "type": "string",
+              "tags": [],
+              "label": "sourceApp",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/inbox/public/types.ts",
+              "lineNumber": 54,
+              "columnNumber": 27,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.createInboxActionConflictError",
+        "type": "Function",
+        "tags": [],
+        "label": "createInboxActionConflictError",
+        "description": [],
+        "signature": [
+          "(sourceApp: string, sourceId: string, reason: string) => ",
+          {
+            "pluginId": "inbox",
+            "scope": "server",
+            "docId": "kibInboxPluginApi",
+            "section": "def-server.InboxActionConflictError",
+            "text": "InboxActionConflictError"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.createInboxActionConflictError.$1",
+            "type": "string",
+            "tags": [],
+            "label": "sourceApp",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.createInboxActionConflictError.$2",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.createInboxActionConflictError.$3",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.isInboxActionConflictError",
+        "type": "Function",
+        "tags": [],
+        "label": "isInboxActionConflictError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => error is ",
+          {
+            "pluginId": "inbox",
+            "scope": "server",
+            "docId": "kibInboxPluginApi",
+            "section": "def-server.InboxActionConflictError",
+            "text": "InboxActionConflictError"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+        "lineNumber": 63,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.isInboxActionConflictError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+            "lineNumber": 63,
+            "columnNumber": 44,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.InboxActionConflictError",
+        "type": "Interface",
+        "tags": [],
+        "label": "InboxActionConflictError",
+        "description": [
+          "\nSignals that an inbox action exists in our addressing scheme but is no\nlonger in a state that can accept a response — the underlying resource\n(e.g. a workflow step) has already been advanced, cancelled, or\nclaimed by another responder.\n\nProvider implementations throw this so the framework can surface a\nstable HTTP 409 Conflict back to the caller instead of a generic 500.\nThat, in turn, lets clients (UI, MCP, evals) distinguish \"the action\nis gone, refresh your inbox\" from a real server error.\n\nModeled as an `interface` + factory + type guard (rather than a\nsubclass) to mirror the colocated `UnknownInboxSourceAppError` and\nkeep this file under the `max-classes-per-file` lint cap."
+        ],
+        "signature": [
+          {
+            "pluginId": "inbox",
+            "scope": "server",
+            "docId": "kibInboxPluginApi",
+            "section": "def-server.InboxActionConflictError",
+            "text": "InboxActionConflictError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionConflictError.sourceApp",
+            "type": "string",
+            "tags": [],
+            "label": "sourceApp",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionConflictError.sourceId",
+            "type": "string",
+            "tags": [],
+            "label": "sourceId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_registry.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.InboxActionProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "InboxActionProvider",
+        "description": [
+          "\nContract that any plugin wishing to contribute HITL entries to the Inbox\nmust implement. Aligns with the \"channel extensibility\" vision of the\nHITL GA epic ([security-team#16712](https://github.com/elastic/security-team/issues/16712)).\n\n`respond(input)` is intentionally opaque — the payload shape is defined by\nthe `input_schema` on the matching `InboxAction`. The provider is\nresponsible for any downstream dispatch (e.g. resuming a workflow,\npatching a rule, posting to Slack)."
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionProvider.sourceApp",
+            "type": "string",
+            "tags": [],
+            "label": "sourceApp",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionProvider.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "inbox",
+                "scope": "server",
+                "docId": "kibInboxPluginApi",
+                "section": "def-server.InboxActionProviderListParams",
+                "text": "InboxActionProviderListParams"
+              },
+              ", ctx: ",
+              {
+                "pluginId": "inbox",
+                "scope": "server",
+                "docId": "kibInboxPluginApi",
+                "section": "def-server.InboxRequestContext",
+                "text": "InboxRequestContext"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "inbox",
+                "scope": "server",
+                "docId": "kibInboxPluginApi",
+                "section": "def-server.InboxActionProviderListResult",
+                "text": "InboxActionProviderListResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inbox",
+                "id": "def-server.InboxActionProvider.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inbox",
+                    "scope": "server",
+                    "docId": "kibInboxPluginApi",
+                    "section": "def-server.InboxActionProviderListParams",
+                    "text": "InboxActionProviderListParams"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "InboxActionProviderListParams",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inbox",
+                "id": "def-server.InboxActionProvider.list.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inbox",
+                    "scope": "server",
+                    "docId": "kibInboxPluginApi",
+                    "section": "def-server.InboxRequestContext",
+                    "text": "InboxRequestContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+                "lineNumber": 56,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "InboxRequestContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionProvider.respond",
+            "type": "Function",
+            "tags": [],
+            "label": "respond",
+            "description": [],
+            "signature": [
+              "(sourceId: string, input: Record<string, unknown>, ctx: ",
+              {
+                "pluginId": "inbox",
+                "scope": "server",
+                "docId": "kibInboxPluginApi",
+                "section": "def-server.InboxRequestContext",
+                "text": "InboxRequestContext"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "inbox",
+                "id": "def-server.InboxActionProvider.respond.$1",
+                "type": "string",
+                "tags": [],
+                "label": "sourceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+                "lineNumber": 60,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inbox",
+                "id": "def-server.InboxActionProvider.respond.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+                "lineNumber": 61,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "Record",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "inbox",
+                "id": "def-server.InboxActionProvider.respond.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inbox",
+                    "scope": "server",
+                    "docId": "kibInboxPluginApi",
+                    "section": "def-server.InboxRequestContext",
+                    "text": "InboxRequestContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+                "lineNumber": 62,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "InboxRequestContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.InboxActionProviderListParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "InboxActionProviderListParams",
+        "description": [
+          "\nFilters a provider sees when satisfying a list request. These mirror the\npublic `ListInboxActionsRequestQuery` but are pre-validated by the framework\nand exclude cross-provider pagination concerns (those are handled by the\nregistry after fan-out)."
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionProviderListParams.status",
+            "type": "Any",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.InboxActionProviderListResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "InboxActionProviderListResult",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionProviderListResult.actions",
+            "type": "Array",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; status: any; source_app: string; source_id: string; created_at: string; response_mode: any; description?: string | null | undefined; requested_by?: string | null | undefined; input_schema?: { [x: string]: unknown; } | null | undefined; input_message?: string | null | undefined; timeout_at?: string | null | undefined; responded_by?: string | null | undefined; responded_at?: string | null | undefined; channel?: string | null | undefined; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxActionProviderListResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [
+              "\nPre-pagination total for this provider. The registry sums these to report\nan accurate cross-source total even when a page only surfaces results\nfrom one provider."
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-server.InboxRequestContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "InboxRequestContext",
+        "description": [
+          "\nRequest-scoped context passed to every provider call. Providers receive the\noriginating `KibanaRequest` so they can call their own plugin's APIs as the\ncurrent user (via scoped clients) and honor space/auth semantics."
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxRequestContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inbox",
+            "id": "def-server.InboxRequestContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/inbox/server/services/inbox_action_provider.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "inbox",
       "id": "def-server.InboxPluginSetup",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "InboxPluginSetup",
-      "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
+      "description": [
+        "\nPublic server-side setup contract. Exposed to plugins that depend on the\nInbox plugin so they can contribute their own HITL sources."
       ],
       "path": "x-pack/platform/plugins/shared/inbox/server/types.ts",
-      "lineNumber": 11,
+      "lineNumber": 13,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "inbox",
+          "id": "def-server.InboxPluginSetup.registerActionProvider",
+          "type": "Function",
+          "tags": [],
+          "label": "registerActionProvider",
+          "description": [
+            "\nRegister an ",
+            {
+              "pluginId": "inbox",
+              "scope": "server",
+              "docId": "kibInboxPluginApi",
+              "section": "def-server.InboxActionProvider",
+              "text": "InboxActionProvider"
+            },
+            " that contributes actions under\na specific `sourceApp` namespace. Idempotent across the server lifetime\nfor a given `sourceApp` — registering twice throws.\n\nIf the Inbox plugin is disabled (`xpack.inbox.enabled: false`), this\ncall is a no-op, letting providers register unconditionally."
+          ],
+          "signature": [
+            "(provider: ",
+            {
+              "pluginId": "inbox",
+              "scope": "server",
+              "docId": "kibInboxPluginApi",
+              "section": "def-server.InboxActionProvider",
+              "text": "InboxActionProvider"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/inbox/server/types.ts",
+          "lineNumber": 18,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "inbox",
+              "id": "def-server.InboxPluginSetup.registerActionProvider.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "provider",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "inbox",
+                  "scope": "server",
+                  "docId": "kibInboxPluginApi",
+                  "section": "def-server.InboxActionProvider",
+                  "text": "InboxActionProvider"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/inbox/server/types.ts",
+              "lineNumber": 26,
+              "columnNumber": 26,
+              "deprecated": false,
+              "docsReferencedTypeName": "InboxActionProvider",
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -80,7 +753,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/shared/inbox/server/types.ts",
-      "lineNumber": 12,
+      "lineNumber": 29,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -106,6 +779,42 @@
         ],
         "path": "x-pack/platform/plugins/shared/inbox/common/index.ts",
         "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-common.INBOX_API_PRIVILEGE_READ",
+        "type": "string",
+        "tags": [],
+        "label": "INBOX_API_PRIVILEGE_READ",
+        "description": [
+          "\nAPI privilege names. Kept distinct so the Kibana feature model can grant\nread-only users listing access without also letting them POST a response.\nRoute handlers reference these directly via `requiredPrivileges`."
+        ],
+        "signature": [
+          "\"inbox_read\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/common/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inbox",
+        "id": "def-common.INBOX_API_PRIVILEGE_RESPOND",
+        "type": "string",
+        "tags": [],
+        "label": "INBOX_API_PRIVILEGE_RESPOND",
+        "description": [],
+        "signature": [
+          "\"inbox_respond\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inbox/common/index.ts",
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
