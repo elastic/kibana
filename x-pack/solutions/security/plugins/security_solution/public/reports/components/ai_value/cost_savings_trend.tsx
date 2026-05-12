@@ -86,53 +86,55 @@ const SampleTrendVisualization: React.FC = () => {
   const { baseTheme, theme } = useThemes();
 
   return (
-    <Chart size={{ height: 300 }}>
-      <Settings
-        theme={[
-          {
-            background: { color: 'transparent' },
-            legend: { spacingBuffer: 100 },
-          },
-          theme,
-        ]}
-        baseTheme={baseTheme}
-        locale={i18nLib.getLocale()}
-        showLegend={false}
-        legendPosition={Position.Right}
-      />
-      <Tooltip
-        headerFormatter={({ value }) => {
-          const d = new Date(value);
-          const year = d.getFullYear();
-          const month = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          const hour = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
-          return `${year}-${month}-${day} ${hour}:${min}`;
-        }}
-        type="follow"
-      />
-      <Axis
-        id="bottom"
-        position={Position.Bottom}
-        /* no title — matches axisTitlesVisibilitySettings.x: false */
-      />
-      <Axis
-        id="left"
-        position={Position.Left}
-        tickFormat={(v) => formatDollars(v)}
-        /* no title — matches axisTitlesVisibilitySettings.yLeft: false */
-      />
-      <LineSeries
-        id="cost-savings"
-        name={COST_SAVINGS_TITLE}
-        xScaleType={ScaleType.Time}
-        yScaleType={ScaleType.Linear}
-        xAccessor="timestamp"
-        yAccessors={['costSavings']}
-        data={SAMPLE_TREND_DATA}
-      />
-    </Chart>
+    <div data-test-subj="sample-cost-savings-trend">
+      <Chart size={{ height: 300 }}>
+        <Settings
+          theme={[
+            {
+              background: { color: 'transparent' },
+              legend: { spacingBuffer: 100 },
+            },
+            theme,
+          ]}
+          baseTheme={baseTheme}
+          locale={i18nLib.getLocale()}
+          showLegend={false}
+          legendPosition={Position.Right}
+        />
+        <Tooltip
+          headerFormatter={({ value }) => {
+            const d = new Date(value);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hour = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hour}:${min}`;
+          }}
+          type="follow"
+        />
+        <Axis
+          id="bottom"
+          position={Position.Bottom}
+          /* no title — matches axisTitlesVisibilitySettings.x: false */
+        />
+        <Axis
+          id="left"
+          position={Position.Left}
+          tickFormat={(v) => formatDollars(v)}
+          /* no title — matches axisTitlesVisibilitySettings.yLeft: false */
+        />
+        <LineSeries
+          id="cost-savings"
+          name={COST_SAVINGS_TITLE}
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor="timestamp"
+          yAccessors={['costSavings']}
+          data={SAMPLE_TREND_DATA}
+        />
+      </Chart>
+    </div>
   );
 };
 

@@ -13,9 +13,17 @@ import { getAlertProcessingDonutAttributes } from '../../../common/components/vi
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { PageScope } from '../../../data_view_manager/constants';
+import { I18nProvider } from '@kbn/i18n-react';
+import { DonutChartWrapper } from '../../../common/components/charts/donutchart';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+}));
+
+jest.mock('../../../common/components/charts/donutchart', () => ({
+  DonutChartWrapper: jest.fn(({ children }) => (
+    <div data-test-subj="mock-donut-chart-wrapper">{children}</div>
+  )),
 }));
 
 jest.mock(
@@ -46,6 +54,17 @@ describe('AlertProcessingDonut', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseSpaceId.mockReturnValue('test-space-id');
+  });
+
+  it('sample data is not rendering the VisualizationEmbeddable and does render sample component', () => {
+    render(
+      <I18nProvider>
+        <AlertProcessingDonut {...defaultProps} isSample={true} />
+      </I18nProvider>
+    );
+
+    expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+    expect(DonutChartWrapper).toHaveBeenCalled();
   });
 
   it('calls useSpaceId hook and passes correct props to VisualizationEmbeddable', () => {

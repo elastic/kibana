@@ -106,6 +106,7 @@ describe('CostSavingsMetric', () => {
     it('renders the sample metric and skips the live Lens visualization', () => {
       render(<CostSavingsMetric {...defaultProps} isSample={true} />);
       expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+      expect(screen.getByTestId('mock-sample-metric')).toBeInTheDocument();
       expect(screen.getByText(i18n.COST_SAVINGS_TITLE)).toBeInTheDocument();
     });
 

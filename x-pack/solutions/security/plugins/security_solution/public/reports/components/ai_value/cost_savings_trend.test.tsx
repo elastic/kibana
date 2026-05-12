@@ -150,4 +150,11 @@ describe('CostSavingsTrend', () => {
     render(<CostSavingsTrend {...defaultProps} />, { wrapper });
     expect(mockUseSignalIndexWithDefault).toHaveBeenCalled();
   });
+
+  it('does not render VisualizationEmbeddable if isSample is set to true', () => {
+    render(<CostSavingsTrend {...defaultProps} isSample={true} />, { wrapper });
+    expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mock-visualization-embeddable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sample-cost-savings-trend')).toBeInTheDocument();
+  });
 });
