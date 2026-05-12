@@ -165,18 +165,21 @@ export const FlyoutSummaryKPIs = ({
   from,
   to,
   dateLabel,
+  remoteName,
 }: {
   monitorId: string;
   locationLabel: string;
   from: string;
   to: string;
   dateLabel: string;
+  remoteName?: string;
 }) => {
   const { data, loading } = useMonitorSummaryStats({
     monitorId,
     locationLabel,
     from,
     to,
+    remoteName,
   });
 
   const availabilityColor =

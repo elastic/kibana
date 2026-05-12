@@ -216,7 +216,15 @@ export function LoadingState() {
   );
 }
 
-function DetailFlyoutStatusHistory({ configId, location }: { configId: string; location: string }) {
+function DetailFlyoutStatusHistory({
+  configId,
+  location,
+  remoteName,
+}: {
+  configId: string;
+  location: string;
+  remoteName?: string;
+}) {
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">
@@ -230,6 +238,7 @@ function DetailFlyoutStatusHistory({ configId, location }: { configId: string; l
         periodCaption={LAST_24H_TEXT}
         monitorId={configId}
         locationLabel={location}
+        remoteName={remoteName}
       />
     </EuiPageSection>
   );
@@ -454,8 +463,13 @@ export function MonitorDetailFlyout(props: Props) {
               from="now-30d"
               to="now"
               dateLabel={LAST_30_DAYS_LABEL}
+              remoteName={monitor?.remote?.remoteName}
             />
-            <DetailFlyoutStatusHistory configId={configId} location={props.location} />
+            <DetailFlyoutStatusHistory
+              configId={configId}
+              location={props.location}
+              remoteName={monitor?.remote?.remoteName}
+            />
           </>
         )}
         {selectedTab === 'performance' && (
