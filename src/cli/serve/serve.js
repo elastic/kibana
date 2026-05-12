@@ -623,17 +623,18 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
   }
 
-  // Expose the proxy URL so the mock IdP stamps `Destination` correctly — the inner port from
-  // `getServerInfo()` would mismatch the realm config.
+  const basePath =
+    _.get(extraCliOptions, 'server.basePath') ?? _.get(rawConfig, 'server.basePath', '');
+
   if (!_.has(rawConfig, 'server.publicBaseUrl')) {
     const protocol = _.get(rawConfig, 'server.ssl.enabled') ? 'https' : 'http';
     const host = _.get(rawConfig, 'server.host', 'localhost');
     const port = _.get(rawConfig, 'server.port', 5601);
-    const basePath = _.get(rawConfig, 'server.basePath', '');
+
     lodashSet(rawConfig, 'server.publicBaseUrl', `${protocol}://${host}:${port}${basePath}`);
   }
 
-  if (_.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH) {
+  if (basePath !== MOCK_IDP_KIBANA_BASE_PATH) {
     const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
     const label = chalk.black.bgYellow(' saml-mock-idp ');
     console.warn(label, '='.repeat(100));
