@@ -522,9 +522,12 @@ const FieldPanel: FC<FieldPanelProps> = ({
             data-test-subj="aiopsChangePointDetectionExpandConfigButton"
             iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-            aria-label={i18n.translate('xpack.aiops.changePointDetection.toggleChangePointsTableLabel', {
-              defaultMessage: 'Toggle change points table',
-            })}
+            aria-label={i18n.translate(
+              'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
+              {
+                defaultMessage: 'Toggle change points table',
+              }
+            )}
             aria-expanded={isExpanded}
             size="s"
           />
