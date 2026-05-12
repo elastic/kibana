@@ -574,8 +574,13 @@ export interface ApiKeyOptions {
 export type ScheduleOptions = Record<string, unknown> &
   ApiKeyOptions & {
     /**
-     * Controls SO refresh behavior after scheduling. Use `true` only for
-     * latency-sensitive scheduling paths.
+     * Requests immediate claiming behavior for latency-sensitive tasks where a user
+     * is waiting on a result. This maps to refresh + claim nudge internally.
+     */
+    requestImmediateClaim?: boolean;
+    /**
+     * Controls SO refresh behavior after scheduling.
+     * Prefer `requestImmediateClaim` for user-facing latency-sensitive paths.
      */
     refresh?: boolean;
   };

@@ -98,6 +98,10 @@ export class TaskScheduling {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
+    const shouldRequestImmediateClaim =
+      options?.requestImmediateClaim === true || options?.refresh === true;
+    const effectiveRefresh = shouldRequestImmediateClaim ? true : options?.refresh;
+
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...omit(options, 'apiKey', 'request'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
@@ -114,15 +118,15 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      options?.request || options?.refresh !== undefined
+      options?.request || effectiveRefresh !== undefined
         ? {
             request: options?.request,
-            refresh: options?.refresh,
+            refresh: effectiveRefresh,
           }
         : undefined
     );
 
-    if (options?.refresh === true && this.claimNudgeService) {
+    if (shouldRequestImmediateClaim && this.claimNudgeService) {
       try {
         await this.claimNudgeService.notify();
       } catch (err) {

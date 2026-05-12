@@ -164,6 +164,32 @@ describe('TaskScheduling', () => {
     expect(claimNudgeService.notify).toHaveBeenCalledTimes(1);
   });
 
+  test('should call task store with refresh and notify when requestImmediateClaim is provided', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+
+    await taskScheduling.schedule(task, { requestImmediateClaim: true });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      },
+      {
+        request: undefined,
+        refresh: true,
+      }
+    );
+    expect(claimNudgeService.notify).toHaveBeenCalledTimes(1);
+  });
+
   test('allows scheduling tasks that are disabled', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     const task = {
