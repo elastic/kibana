@@ -8,8 +8,13 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions, andWhere, inList, parseSort } from '../query_utils';
-import { type LatestSourceWhereCondition, runLatestSourceEsqlQuery } from '../latest_source_query';
+import { type CommonSearchOptions, inList, parseSort } from '../query_utils';
+import {
+  applyTimeWindow,
+  baseSpaceScopedQuery,
+  collapseToLatest,
+  executeSourceQuery,
+} from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
   type Discovery,
@@ -37,31 +42,6 @@ export interface DiscoveriesSearchOptions extends CommonSearchOptions {
   sort?: DiscoverySort[];
 }
 
-const buildWhere = (options: DiscoveriesSearchOptions): LatestSourceWhereCondition | undefined => {
-  let where: LatestSourceWhereCondition | undefined;
-
-  if (options.kind) {
-    where = andWhere(where, esql.exp`${esql.col('kind')} == ${esql.str(options.kind)}`);
-  }
-
-  if (options.discovery_id?.length) {
-    where = andWhere(where, inList('discovery_id', options.discovery_id));
-  }
-
-  if (options.exclude_discovery_id?.length) {
-    where = andWhere(
-      where,
-      esql.exp`NOT (${inList('discovery_id', options.exclude_discovery_id)})`
-    );
-  }
-
-  if (options.exclude_grouped) {
-    where = andWhere(where, esql.exp`${esql.col('grouped_into')} IS NULL`);
-  }
-
-  return where;
-};
-
 export class DiscoveryClient {
   constructor(
     private readonly clients: {
@@ -79,28 +59,66 @@ export class DiscoveryClient {
   }
 
   async findLatest(options: DiscoveriesSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    return runLatestSourceEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: DISCOVERIES_DATA_STREAM,
-      where: buildWhere(options),
-      sort: options.sort?.map(parseSort),
-      limit: options.size,
-      groupBy: 'discovery_id',
-    });
+    let query = baseSpaceScopedQuery(DISCOVERIES_DATA_STREAM, this.clients.space);
+
+    query = applyTimeWindow(query, options);
+
+    if (options.kind) {
+      query = query.where`${esql.col('kind')} == ${esql.str(options.kind)}`;
+    }
+    if (options.discovery_id?.length) {
+      query = query.where`${inList('discovery_id', options.discovery_id)}`;
+    }
+    if (options.exclude_discovery_id?.length) {
+      query = query.where`NOT (${inList('discovery_id', options.exclude_discovery_id)})`;
+    }
+    if (options.exclude_grouped) {
+      query = query.where`${esql.col('grouped_into')} IS NULL`;
+    }
+
+    query = collapseToLatest(query, 'discovery_id');
+
+    if (options.sort?.length) {
+      const sort = options.sort.map(parseSort);
+      query = query.sort(sort[0], ...sort.slice(1));
+    }
+    query = query.keep('_source');
+    if (options.size !== undefined) {
+      query = query.limit(options.size);
+    }
+
+    return executeSourceQuery<Discovery>(this.clients.esClient, query);
   }
 
   async findLatestPerSlug(options: DiscoveriesSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    return runLatestSourceEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: DISCOVERIES_DATA_STREAM,
-      where: buildWhere(options),
-      sort: options.sort?.map(parseSort),
-      limit: options.size,
-      groupBy: 'discovery_slug',
-    });
+    let query = baseSpaceScopedQuery(DISCOVERIES_DATA_STREAM, this.clients.space);
+
+    query = applyTimeWindow(query, options);
+
+    query = collapseToLatest(query, 'discovery_slug');
+
+    if (options.kind) {
+      query = query.where`${esql.col('kind')} == ${esql.str(options.kind)}`;
+    }
+    if (options.discovery_id?.length) {
+      query = query.where`${inList('discovery_id', options.discovery_id)}`;
+    }
+    if (options.exclude_discovery_id?.length) {
+      query = query.where`NOT (${inList('discovery_id', options.exclude_discovery_id)})`;
+    }
+    if (options.exclude_grouped) {
+      query = query.where`${esql.col('grouped_into')} IS NULL`;
+    }
+
+    if (options.sort?.length) {
+      const sort = options.sort.map(parseSort);
+      query = query.sort(sort[0], ...sort.slice(1));
+    }
+    query = query.keep('_source');
+    if (options.size !== undefined) {
+      query = query.limit(options.size);
+    }
+
+    return executeSourceQuery<Discovery>(this.clients.esClient, query);
   }
 }

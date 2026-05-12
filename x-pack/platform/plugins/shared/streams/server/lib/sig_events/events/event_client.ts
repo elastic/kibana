@@ -8,8 +8,13 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions, andWhere, inList, parseSort } from '../query_utils';
-import { type LatestSourceWhereCondition, runLatestSourceEsqlQuery } from '../latest_source_query';
+import { type CommonSearchOptions, inList, parseSort } from '../query_utils';
+import {
+  applyTimeWindow,
+  baseSpaceScopedQuery,
+  collapseToLatest,
+  executeSourceQuery,
+} from '../latest_source_query';
 import {
   EVENTS_DATA_STREAM,
   type SigEvent,
@@ -43,53 +48,6 @@ export interface EventsSearchOptions extends CommonSearchOptions {
   sort?: EventSort[];
 }
 
-const buildWhere = (options: EventsSearchOptions): LatestSourceWhereCondition | undefined => {
-  let where: LatestSourceWhereCondition | undefined;
-
-  if (options.verdict?.length) {
-    where = andWhere(where, inList('verdict', options.verdict));
-  }
-
-  if (options.slug?.length) {
-    where = andWhere(where, inList('discovery_slug', options.slug));
-  }
-
-  if (options.exclude_slug?.length) {
-    where = andWhere(where, esql.exp`NOT (${inList('discovery_slug', options.exclude_slug)})`);
-  }
-
-  if (options.discovery_id?.length) {
-    where = andWhere(where, inList('discovery_id', options.discovery_id));
-  }
-
-  if (options.exclude_grouped) {
-    where = andWhere(where, esql.exp`${esql.col('grouped_into')} IS NULL`);
-  }
-
-  const { last_reviewed_before: before, or_last_reviewed_lte: lte } = options;
-
-  if (before && lte) {
-    where = andWhere(
-      where,
-      esql.exp`(${esql.col('last_reviewed_at')} < TO_DATETIME(${esql.str(before)}) OR ${esql.col(
-        'last_reviewed_at'
-      )} <= TO_DATETIME(${esql.str(lte)}))`
-    );
-  } else if (before) {
-    where = andWhere(
-      where,
-      esql.exp`${esql.col('last_reviewed_at')} < TO_DATETIME(${esql.str(before)})`
-    );
-  } else if (lte) {
-    where = andWhere(
-      where,
-      esql.exp`${esql.col('last_reviewed_at')} <= TO_DATETIME(${esql.str(lte)})`
-    );
-  }
-
-  return where;
-};
-
 export class EventClient {
   constructor(
     private readonly clients: {
@@ -107,15 +65,49 @@ export class EventClient {
   }
 
   async findLatest(options: EventsSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
-    return runLatestSourceEsqlQuery<SigEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: EVENTS_DATA_STREAM,
-      where: buildWhere(options),
-      sort: options.sort?.map(parseSort),
-      limit: options.size,
-      groupBy: 'event_id',
-    });
+    let query = baseSpaceScopedQuery(EVENTS_DATA_STREAM, this.clients.space);
+
+    query = applyTimeWindow(query, options);
+
+    if (options.slug?.length) {
+      query = query.where`${inList('discovery_slug', options.slug)}`;
+    }
+    if (options.exclude_slug?.length) {
+      query = query.where`NOT (${inList('discovery_slug', options.exclude_slug)})`;
+    }
+
+    query = collapseToLatest(query, 'event_id');
+
+    if (options.verdict?.length) {
+      query = query.where`${inList('verdict', options.verdict)}`;
+    }
+    if (options.discovery_id?.length) {
+      query = query.where`${inList('discovery_id', options.discovery_id)}`;
+    }
+    if (options.exclude_grouped) {
+      query = query.where`${esql.col('grouped_into')} IS NULL`;
+    }
+
+    const { last_reviewed_before: before, or_last_reviewed_lte: lte } = options;
+    if (before && lte) {
+      query = query.where`(${esql.col('last_reviewed_at')} < TO_DATETIME(${esql.str(
+        before
+      )}) OR ${esql.col('last_reviewed_at')} <= TO_DATETIME(${esql.str(lte)}))`;
+    } else if (before) {
+      query = query.where`${esql.col('last_reviewed_at')} < TO_DATETIME(${esql.str(before)})`;
+    } else if (lte) {
+      query = query.where`${esql.col('last_reviewed_at')} <= TO_DATETIME(${esql.str(lte)})`;
+    }
+
+    if (options.sort?.length) {
+      const sort = options.sort.map(parseSort);
+      query = query.sort(sort[0], ...sort.slice(1));
+    }
+    query = query.keep('_source');
+    if (options.size !== undefined) {
+      query = query.limit(options.size);
+    }
+
+    return executeSourceQuery<SigEvent>(this.clients.esClient, query);
   }
 }

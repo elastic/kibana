@@ -6,14 +6,15 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import { esql, type ComposerSortShorthand } from '@elastic/esql';
+import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { type CommonSearchOptions, andWhere, inList, parseSort } from '../query_utils';
+import { type CommonSearchOptions, inList, parseSort } from '../query_utils';
 import {
-  type LatestSourceEvalColumn,
-  type LatestSourceWhereCondition,
-  runLatestSourceEsqlQuery,
+  applyTimeWindow,
+  baseSpaceScopedQuery,
+  collapseToLatest,
+  executeSourceQuery,
 } from '../latest_source_query';
 import {
   VERDICTS_DATA_STREAM,
@@ -41,52 +42,6 @@ export interface VerdictsSearchOptions extends CommonSearchOptions {
 
 const SLUG_PRIORITY_COLUMN = '_slug_priority';
 
-const buildWhere = (options: VerdictsSearchOptions): LatestSourceWhereCondition | undefined => {
-  let where: LatestSourceWhereCondition | undefined;
-
-  if (options.verdict?.length) {
-    where = andWhere(where, inList('verdict', options.verdict));
-  }
-
-  if (options.discovery_id?.length) {
-    where = andWhere(where, inList('discovery_id', options.discovery_id));
-  }
-
-  return where;
-};
-
-/**
- * Build the EVAL column + matching primary sort entry for `prioritize_slug`.
- * Returns `undefined` for both when the list is empty so the caller can leave
- * its sort pipeline unchanged.
- */
-const buildSlugPriority = (
-  options: VerdictsSearchOptions
-): { evalColumn: LatestSourceEvalColumn; sort: ComposerSortShorthand } | undefined => {
-  if (!options.prioritize_slug?.length) {
-    return undefined;
-  }
-  const literals = options.prioritize_slug.map((slug) => esql.str(slug));
-  return {
-    evalColumn: {
-      name: SLUG_PRIORITY_COLUMN,
-      expression: esql.exp`CASE(${esql.col('discovery_slug')} IN (${literals}), 0, 1)`,
-    },
-    sort: [SLUG_PRIORITY_COLUMN, 'ASC'],
-  };
-};
-
-const buildSort = (
-  options: VerdictsSearchOptions,
-  priority: ReturnType<typeof buildSlugPriority>
-): ComposerSortShorthand[] | undefined => {
-  const userSort = options.sort?.map(parseSort) ?? [];
-  if (!priority) {
-    return userSort.length ? userSort : undefined;
-  }
-  return [priority.sort, ...userSort];
-};
-
 export class VerdictClient {
   constructor(
     private readonly clients: {
@@ -104,29 +59,52 @@ export class VerdictClient {
   }
 
   async findLatest(options: VerdictsSearchOptions = {}): Promise<{ hits: Verdict[] }> {
-    return this.runFindLatest(options, 'verdict_id');
+    let query = baseSpaceScopedQuery(VERDICTS_DATA_STREAM, this.clients.space);
+    query = applyTimeWindow(query, options);
+
+    if (options.verdict?.length) {
+      query = query.where`${inList('verdict', options.verdict)}`;
+    }
+
+    if (options.discovery_id?.length) {
+      query = query.where`${inList('discovery_id', options.discovery_id)}`;
+    }
+
+    query = this.applySlugPriorityEval(query, options);
+    query = collapseToLatest(query, 'verdict_id');
+    query = this.applySort(query, options);
+    query = query.keep('_source');
+
+    if (options.size !== undefined) {
+      query = query.limit(options.size);
+    }
+
+    return executeSourceQuery<Verdict>(this.clients.esClient, query);
   }
 
   async findLatestPerSlug(options: VerdictsSearchOptions = {}): Promise<{ hits: Verdict[] }> {
-    return this.runFindLatest(options, 'discovery_slug');
-  }
+    let query = baseSpaceScopedQuery(VERDICTS_DATA_STREAM, this.clients.space);
 
-  private async runFindLatest(
-    options: VerdictsSearchOptions,
-    groupBy: 'verdict_id' | 'discovery_slug'
-  ): Promise<{ hits: Verdict[] }> {
-    const priority = buildSlugPriority(options);
-    return runLatestSourceEsqlQuery<Verdict>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: VERDICTS_DATA_STREAM,
-      where: buildWhere(options),
-      evalColumns: priority ? [priority.evalColumn] : undefined,
-      sort: buildSort(options, priority),
-      limit: options.size,
-      groupBy,
-    });
+    query = applyTimeWindow(query, options);
+
+    query = this.applySlugPriorityEval(query, options);
+
+    query = collapseToLatest(query, 'discovery_slug');
+
+    if (options.verdict?.length) {
+      query = query.where`${inList('verdict', options.verdict)}`;
+    }
+    if (options.discovery_id?.length) {
+      query = query.where`${inList('discovery_id', options.discovery_id)}`;
+    }
+
+    query = this.applySort(query, options);
+    query = query.keep('_source');
+    if (options.size !== undefined) {
+      query = query.limit(options.size);
+    }
+
+    return executeSourceQuery<Verdict>(this.clients.esClient, query);
   }
 
   async getReviewedSummary(
@@ -163,6 +141,30 @@ export class VerdictClient {
       reviewed_discovery_ids: toStringArray(row[idsIdx]),
       reviewed_slugs: toStringArray(row[slugsIdx]),
     };
+  }
+
+  private applySlugPriorityEval(
+    query: ComposerQuery,
+    options: VerdictsSearchOptions
+  ): ComposerQuery {
+    if (!options.prioritize_slug?.length) {
+      return query;
+    }
+    const literals = options.prioritize_slug.map((slug) => esql.str(slug));
+    return query.pipe`EVAL ${esql.col(SLUG_PRIORITY_COLUMN)} = CASE(${esql.col(
+      'discovery_slug'
+    )} IN (${literals}), 0, 1)`;
+  }
+
+  private applySort(query: ComposerQuery, options: VerdictsSearchOptions): ComposerQuery {
+    const userSort = options.sort?.map(parseSort) ?? [];
+    const sortKeys: ComposerSortShorthand[] = options.prioritize_slug?.length
+      ? [[SLUG_PRIORITY_COLUMN, 'ASC'], ...userSort]
+      : userSort;
+    if (!sortKeys.length) {
+      return query;
+    }
+    return query.sort(sortKeys[0], ...sortKeys.slice(1));
   }
 }
 

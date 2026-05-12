@@ -15,13 +15,6 @@ export interface CommonSearchOptions {
   to?: string;
 }
 
-export const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
-  return current ? esql.exp`${current} AND ${next}` : next;
-};
-
 export const inList = (col: string, values: string[]): LatestSourceWhereCondition => {
   const literals = values.map((v) => esql.str(v));
   return esql.exp`${esql.col(col)} IN (${literals})`;
