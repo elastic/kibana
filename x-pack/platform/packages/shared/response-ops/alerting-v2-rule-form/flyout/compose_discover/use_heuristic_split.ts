@@ -86,18 +86,6 @@ export function splitQuery(query: string): SplitResult {
   return { base, alertBlock, confidence: 'high' };
 }
 
-export function guessRecoveryBlock(alertBlock: string): string {
-  return alertBlock
-    .replace(/>=/, '⟨LE⟩')
-    .replace(/<=/, '⟨GE⟩')
-    .replace(/>/, '⟨LT⟩')
-    .replace(/</, '⟨GT⟩')
-    .replace(/⟨LE⟩/, '<=')
-    .replace(/⟨GE⟩/, '>=')
-    .replace(/⟨LT⟩/, '<')
-    .replace(/⟨GT⟩/, '>');
-}
-
 export const useHeuristicSplit = (fullQuery: string): SplitResult => {
   return useMemo(() => splitQuery(fullQuery), [fullQuery]);
 };
