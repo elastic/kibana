@@ -22,18 +22,18 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test')) }}"
 
 concurrency:
-  group: "failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}"
+  group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
   cancel-in-progress: true
 
 engine:
   id: claude
-  version: "2.1.111"
+  version: '2.1.111'
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: "1"
+    ENABLE_PROMPT_CACHING_1H: '1'
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
@@ -49,25 +49,25 @@ network:
   allowed:
     - defaults
     - buildkite.com
-    - "*.buildkite.com"
+    - '*.buildkite.com'
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
     - chatgpt.com
     - elastic.litellm-prod.ai
 sandbox:
-  agent: awf  # Migrated from deprecated network setting
+  agent: awf # Migrated from deprecated network setting
 safe-outputs:
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
     max: 1
-    target: "*"
+    target: '*'
     hide-older-comments: true
   add-labels:
-    allowed: [needs-flaky-fix]
+    allowed: [ai:auto-flaky-fix]
     max: 1
-    target: "triggering"
+    target: 'triggering'
 
 strict: false
 timeout-minutes: 20
@@ -75,7 +75,7 @@ timeout-minutes: 20
 
 # Failed Test Investigator
 
-Investigate a failed-test issue selected by the trigger.
+Investigate and triage a failed-test issue selected by the trigger. The end goal is to investigate the cause of the test failure, and suggest a change test when appropriate.
 
 ## Target Issue Selection
 
@@ -89,7 +89,7 @@ Your job is to determine:
 - the most likely root cause
 - whether the flakiness is more likely in the test, in the underlying product code, due to an external cause, or inconclusive
 - the smallest credible fix to try next
-- whether this failure is a good candidate for the **automated Flaky Test Auto-Fix** pipeline (the `fixability` field — see "Fixability classification" below). If yes, apply the `needs-flaky-fix` label so a downstream agent picks it up.
+- whether this failure is a good candidate for the **automated Flaky Test Auto-Fix** pipeline (the `fixability` field — see "Fixability classification" below). If yes, apply the `ai:auto-flaky-fix` label so a downstream agent picks it up.
 
 ## What to inspect
 
@@ -106,7 +106,6 @@ Your job is to determine:
    - For FTR and other failures, infer the test file from the issue title and repository search results.
 5. Check recent git history and blame for the likely test file and any closely related product code that could explain the failure.
 
-
 ## Classification rules
 
 - Classify as `test` when the evidence points to timing, waits, selectors, fixtures, retries, setup or teardown, test data coupling, cleanup, or isolation problems in the test harness.
@@ -120,6 +119,7 @@ Your job is to determine:
 Beyond the root-cause `classification` above, decide whether this failure should be picked up by the **Flaky Test Auto-Fix** pipeline. Set the `fixability` field to exactly one of:
 
 - `auto-fixable` — the Auto-Fix agent should attempt a patch. **All** of these must hold:
+
   - `classification` is `test`
   - `confidence` is `high` or `medium`
   - You can identify a concrete test file path that currently exists on the default branch
@@ -129,16 +129,19 @@ Beyond the root-cause `classification` above, decide whether this failure should
   - The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
 
 - `needs-human` — the failure looks test-side but the action requires human judgment:
+
   - `classification` is `test` but `confidence` is `low`, OR
   - Fix would require deleting a test, migrating layer, unskipping a test pending feature-validity check, OR
   - Multiple plausible root causes with comparable confidence, OR
   - A `flaky-fix:` PR already exists for this test and the new failure has the same stack trace
 
 - `not-a-flake` — this is a real product bug, not flakiness:
+
   - `classification` is `code` with `confidence` `high` or `medium`
   - Evidence points to a recent product-code commit, a feature-flag-exposed race in app code, or a consistent reproducible failure
 
 - `env-issue` — external / infrastructure cause; Auto-Fix cannot help:
+
   - `classification` is `external`, OR
   - Stale failure: no new failures in the last 2–3 weeks and no PR in flight
 
@@ -178,6 +181,7 @@ Emit these elements in this order, with no other content between them:
 1. **A one-line headline**, bold, that tells the reader at a glance what kind of result this is and one identifying detail (test name or one-phrase root cause). Phrase it however reads best for the situation — it should be obviously consistent with the `fixability` value below, but you do not need to follow a template. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
 
 2. **A 3–5 sentence narrative paragraph**, plain prose (no nested headings, no bullet lists), covering:
+
    - what broke and where (name the test file or test name),
    - the most likely root cause,
    - any author attribution that follows the Attribution rules above (mention the implicated author with `@username` here so they get notified on first read, not after expanding the details).
@@ -194,7 +198,7 @@ Emit these elements in this order, with no other content between them:
 - `test.type`: one of `scout`, `ftr`, `jest`, `unknown`. Use `scout` if the issue carries the `scout-playwright` label; otherwise `ftr` for an FTR-style failure, `jest` for a Jest failure, or `unknown` if you cannot tell.
 - `test.file`: repo-relative path to the failing test, or `unknown`.
 
-If `fixability` is `auto-fixable`, you must also apply the `needs-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
+If `fixability` is `auto-fixable`, you must also apply the `ai:auto-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
 
 ### More details (collapsed)
 
