@@ -98,9 +98,9 @@ describe('String Format', () => {
       },
       jest.fn()
     );
-    expect(
-      string.convertToText('%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98')
-    ).toBe('안녕 키바나');
+    expect(string.convertToText('%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98')).toBe(
+      '안녕 키바나'
+    );
     expect(string.convertToReact('%EC%95%88%EB%85%95%20%ED%82%A4%EB%B0%94%EB%82%98')).toBe(
       '안녕 키바나'
     );

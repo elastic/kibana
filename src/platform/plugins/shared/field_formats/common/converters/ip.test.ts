@@ -36,9 +36,7 @@ describe('IP Address Format', () => {
   });
 
   test('wraps a multi-value array with bracket notation', () => {
-    expect(ip.convertToText([1186489492, 16777343])).toBe(
-      '["70.184.100.148","1.0.0.127"]'
-    );
+    expect(ip.convertToText([1186489492, 16777343])).toBe('["70.184.100.148","1.0.0.127"]');
     expectReactElementAsArray(ip.convertToReact([1186489492, 16777343]), [
       '70.184.100.148',
       '1.0.0.127',

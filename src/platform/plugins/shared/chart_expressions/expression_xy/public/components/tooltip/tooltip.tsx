@@ -100,7 +100,9 @@ export const Tooltip: FC<Props> = ({
       : layerFormats.splitSeriesAccessors[key].formatter;
 
     const label = layerTitles?.splitSeriesTitles?.[key];
-    const value = splitSeriesFormatter ? splitSeriesFormatter.convertToText(splitValue) : `${splitValue}`;
+    const value = splitSeriesFormatter
+      ? splitSeriesFormatter.convertToText(splitValue)
+      : `${splitValue}`;
     data.push({ label, value });
   });
 

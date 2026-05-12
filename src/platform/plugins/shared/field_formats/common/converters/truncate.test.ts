@@ -93,9 +93,7 @@ describe('String TruncateFormat', () => {
   test('wraps a multi-value array with bracket notation', () => {
     const truncate = new TruncateFormat({ fieldLength: 4 }, jest.fn());
 
-    expect(truncate.convertToText(['hello world', 'foo bar'])).toBe(
-      '["hell...","foo bar"]'
-    );
+    expect(truncate.convertToText(['hello world', 'foo bar'])).toBe('["hell...","foo bar"]');
     expectReactElementAsArray(truncate.convertToReact(['hello world', 'foo bar']), [
       'hell...',
       'foo bar',

@@ -74,7 +74,8 @@ export const getFilterClickData = (
         return isCurrentLayer;
       }
       const value =
-        splitChartFormatter?.convertToText(row[splitChartDimension.id]) || row[splitChartDimension.id];
+        splitChartFormatter?.convertToText(row[splitChartDimension.id]) ||
+        row[splitChartDimension.id];
       return isCurrentLayer && value === layer.smAccessorValue;
     })
   );

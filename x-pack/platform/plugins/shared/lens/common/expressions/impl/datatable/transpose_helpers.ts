@@ -206,7 +206,9 @@ function groupRowsByBucketColumns(
 ) {
   const rowsByBucketColumns: Record<string, DatatableRow[]> = {};
   firstTable.rows.forEach((row) => {
-    const key = bucketColumns.map((c) => formatters[c.columnId].convertToText(row[c.columnId])).join(',');
+    const key = bucketColumns
+      .map((c) => formatters[c.columnId].convertToText(row[c.columnId]))
+      .join(',');
     if (!rowsByBucketColumns[key]) {
       rowsByBucketColumns[key] = [];
     }
