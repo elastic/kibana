@@ -1,4 +1,4 @@
-# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"cfa24758bef99c22ff1d344196057618fd87bd2ad3e01787583b80c6049a748d","compiler_version":"v0.71.5","agent_id":"claude","agent_model":"opus"}
+# gh-aw-metadata: {"schema_version":"v3","frontmatter_hash":"3a412538561b6a1881690ed31624f6f6ec55cfc83675a050149d27752fc124a7","compiler_version":"v0.71.5","agent_id":"claude","agent_model":"opus"}
 # gh-aw-manifest: {"version":1,"secrets":["GH_AW_CI_TRIGGER_TOKEN","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","LITELLM_API_KEY"],"actions":[{"repo":"actions/checkout","sha":"de0fac2e4500dabe0009e67214ff5f5447ce83dd","version":"v6.0.2"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"373c709c69115d41ff229c7e5df9f8788daa9553","version":"v9"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-node","sha":"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e","version":"v6.4.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"b8068426813005612b960b5ab0b8bd2c27142323","version":"v0.71.5"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.25.40","digest":"sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.25.40@sha256:14ff567e8d9d4c2fbc5e55c973488381c71d7e0fdbe72d30ee7b8a738fd86504"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40","digest":"sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.25.40@sha256:2883ca3e5ae9f330cafdd9345bfd4ae17fc8da36c96d4c9a1f76e922b4c45280"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.25.40","digest":"sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.25.40@sha256:b084f4a2c771f584ee68084ced52fa6b3245197a1889645d817462d307d3ac51"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.3.6","digest":"sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.3.6@sha256:2bb8eef86006a4c5963c55616a9c51c32f27bfdecb023b8aa6f91f6718d9171c"},{"image":"ghcr.io/github/github-mcp-server:v1.0.3","digest":"sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959","pinned_image":"ghcr.io/github/github-mcp-server:v1.0.3@sha256:2ac27ef03461ef2b877031b838a7d1fd7f12b12d4ace7796d8cad91446d55959"},{"image":"node:lts-alpine","digest":"sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f","pinned_image":"node:lts-alpine@sha256:d1b3b4da11eefd5941e7f0b9cf17783fc99d9c6fc34884a665f40a06dbdfc94f"}]}
 #    ___                   _   _      
 #   / _ \                 | | (_)     
@@ -69,7 +69,7 @@ permissions: {}
 
 concurrency:
   cancel-in-progress: false
-  group: flaky-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}
+  group: flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 run-name: "Flaky Test Fixer"
 
@@ -106,7 +106,7 @@ jobs:
           trace-id: ${{ needs.pre_activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Flaky Test Fixer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fixer.lock.yml@${{ github.ref }}
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-test-fixer.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Generate agentic run info
         id: generate_aw_info
@@ -164,7 +164,7 @@ jobs:
         id: check-lock-file
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          GH_AW_WORKFLOW_FILE: "flaky-fixer.lock.yml"
+          GH_AW_WORKFLOW_FILE: "flaky-test-fixer.lock.yml"
           GH_AW_CONTEXT_WORKFLOW_REF: "${{ github.workflow_ref }}"
         with:
           script: |
@@ -210,23 +210,23 @@ jobs:
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/create_prompt_first.sh"
           {
-          cat << 'GH_AW_PROMPT_aee72e08b65cb22e_EOF'
+          cat << 'GH_AW_PROMPT_fe43c1c25bf40635_EOF'
           <system>
-          GH_AW_PROMPT_aee72e08b65cb22e_EOF
+          GH_AW_PROMPT_fe43c1c25bf40635_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/xpia.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/temp_folder_prompt.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/markdown.md"
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_prompt.md"
-          cat << 'GH_AW_PROMPT_aee72e08b65cb22e_EOF'
+          cat << 'GH_AW_PROMPT_fe43c1c25bf40635_EOF'
           <safe-output-tools>
           Tools: add_comment, create_pull_request, missing_tool, missing_data, noop
-          GH_AW_PROMPT_aee72e08b65cb22e_EOF
+          GH_AW_PROMPT_fe43c1c25bf40635_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/safe_outputs_create_pull_request.md"
-          cat << 'GH_AW_PROMPT_aee72e08b65cb22e_EOF'
+          cat << 'GH_AW_PROMPT_fe43c1c25bf40635_EOF'
           </safe-output-tools>
-          GH_AW_PROMPT_aee72e08b65cb22e_EOF
+          GH_AW_PROMPT_fe43c1c25bf40635_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/mcp_cli_tools_prompt.md"
-          cat << 'GH_AW_PROMPT_aee72e08b65cb22e_EOF'
+          cat << 'GH_AW_PROMPT_fe43c1c25bf40635_EOF'
           <github-context>
           The following GitHub context information is available for this workflow:
           {{#if __GH_AW_GITHUB_ACTOR__ }}
@@ -255,12 +255,12 @@ jobs:
           {{/if}}
           </github-context>
           
-          GH_AW_PROMPT_aee72e08b65cb22e_EOF
+          GH_AW_PROMPT_fe43c1c25bf40635_EOF
           cat "${RUNNER_TEMP}/gh-aw/prompts/github_mcp_tools_with_safeoutputs_prompt.md"
-          cat << 'GH_AW_PROMPT_aee72e08b65cb22e_EOF'
+          cat << 'GH_AW_PROMPT_fe43c1c25bf40635_EOF'
           </system>
-          {{#runtime-import .github/workflows/flaky-fixer.md}}
-          GH_AW_PROMPT_aee72e08b65cb22e_EOF
+          {{#runtime-import .github/workflows/flaky-test-fixer.md}}
+          GH_AW_PROMPT_fe43c1c25bf40635_EOF
           } > "$GH_AW_PROMPT"
       - name: Interpolate variables and render templates
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -353,7 +353,7 @@ jobs:
       GH_AW_ASSETS_BRANCH: ""
       GH_AW_ASSETS_MAX_SIZE_KB: 0
       GH_AW_MCP_LOG_DIR: /tmp/gh-aw/mcp-logs/safeoutputs
-      GH_AW_WORKFLOW_ID_SANITIZED: flakyfixer
+      GH_AW_WORKFLOW_ID_SANITIZED: flakytestfixer
     outputs:
       checkout_pr_success: ${{ steps.checkout-pr.outputs.checkout_pr_success || 'true' }}
       effective_tokens: ${{ steps.parse-mcp-gateway.outputs.effective_tokens }}
@@ -372,7 +372,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Flaky Test Fixer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fixer.lock.yml@${{ github.ref }}
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-test-fixer.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Set runtime paths
         id: set-runtime-paths
@@ -456,9 +456,9 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/gh-aw/safeoutputs"
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
-          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_be9943b2391c0e2a_EOF'
+          cat > "${RUNNER_TEMP}/gh-aw/safeoutputs/config.json" << 'GH_AW_SAFE_OUTPUTS_CONFIG_9adc7b46f1a71515_EOF'
           {"add_comment":{"hide_older_comments":true,"max":1,"target":"triggering"},"create_pull_request":{"allowed_base_branches":["main"],"base_branch":"main","draft":true,"excluded_files":[".github/**",".buildkite/**","**/package.json","**/yarn.lock","**/*.lock","renovate.json5",".gitattributes",".gitignore","**/secrets/**","**/.env*"],"if_no_changes":"ignore","labels":["auto:flaky-fix","flaky-fix:running"],"max":1,"max_patch_files":100,"max_patch_size":1024,"protect_top_level_dot_folders":true,"protected_files":["package.json","bun.lockb","bunfig.toml","deno.json","deno.jsonc","deno.lock","global.json","NuGet.Config","Directory.Packages.props","mix.exs","mix.lock","go.mod","go.sum","stack.yaml","stack.yaml.lock","pom.xml","build.gradle","build.gradle.kts","settings.gradle","settings.gradle.kts","gradle.properties","package-lock.json","yarn.lock","pnpm-lock.yaml","npm-shrinkwrap.json","requirements.txt","Pipfile","Pipfile.lock","pyproject.toml","setup.py","setup.cfg","Gemfile","Gemfile.lock","uv.lock","CODEOWNERS","DESIGN.md","README.md","CONTRIBUTING.md","CHANGELOG.md","SECURITY.md","CODE_OF_CONDUCT.md","CLAUDE.md","AGENTS.md"],"protected_files_policy":"fallback-to-issue","title_prefix":"[flaky-fix] "},"create_report_incomplete_issue":{},"missing_data":{},"missing_tool":{},"noop":{"max":1,"report-as-issue":"true"},"report_incomplete":{}}
-          GH_AW_SAFE_OUTPUTS_CONFIG_be9943b2391c0e2a_EOF
+          GH_AW_SAFE_OUTPUTS_CONFIG_9adc7b46f1a71515_EOF
       - name: Generate Safe Outputs Tools
         env:
           GH_AW_TOOLS_META_JSON: |
@@ -688,7 +688,7 @@ jobs:
           export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network host --add-host host.docker.internal:127.0.0.1 --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v /var/run/docker.sock:/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_API_KEY -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e GH_AW_SAFE_OUTPUTS_PORT -e GH_AW_SAFE_OUTPUTS_API_KEY -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw ghcr.io/github/gh-aw-mcpg:v0.3.6'
           
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
-          cat << GH_AW_MCP_CONFIG_4e051f22f68c1e12_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
+          cat << GH_AW_MCP_CONFIG_49240fe757578641_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
             "mcpServers": {
               "github": {
@@ -728,7 +728,7 @@ jobs:
               "payloadDir": "${MCP_GATEWAY_PAYLOAD_DIR}"
             }
           }
-          GH_AW_MCP_CONFIG_4e051f22f68c1e12_EOF
+          GH_AW_MCP_CONFIG_49240fe757578641_EOF
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true
@@ -1025,7 +1025,7 @@ jobs:
       issues: write
       pull-requests: write
     concurrency:
-      group: "gh-aw-conclusion-flaky-fixer"
+      group: "gh-aw-conclusion-flaky-test-fixer"
       cancel-in-progress: false
     outputs:
       incomplete_count: ${{ steps.report_incomplete.outputs.incomplete_count }}
@@ -1042,7 +1042,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Flaky Test Fixer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fixer.lock.yml@${{ github.ref }}
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-test-fixer.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Download agent output artifact
         id: download-agent-output
@@ -1128,7 +1128,7 @@ jobs:
           GH_AW_WORKFLOW_NAME: "Flaky Test Fixer"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
-          GH_AW_WORKFLOW_ID: "flaky-fixer"
+          GH_AW_WORKFLOW_ID: "flaky-test-fixer"
           GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS: "168"
           GH_AW_ENGINE_ID: "claude"
           GH_AW_SECRET_VERIFICATION_RESULT: ${{ needs.activation.outputs.secret_verification_result }}
@@ -1175,7 +1175,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Flaky Test Fixer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fixer.lock.yml@${{ github.ref }}
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-test-fixer.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Download agent output artifact
         id: download-agent-output
@@ -1373,7 +1373,7 @@ jobs:
           job-name: ${{ github.job }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Flaky Test Fixer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fixer.lock.yml@${{ github.ref }}
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-test-fixer.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Check team membership for workflow
         id: check_membership
@@ -1402,7 +1402,7 @@ jobs:
       pull-requests: write
     timeout-minutes: 15
     env:
-      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/flaky-fixer"
+      GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/flaky-test-fixer"
       GH_AW_DETECTION_CONCLUSION: ${{ needs.detection.outputs.detection_conclusion }}
       GH_AW_DETECTION_REASON: ${{ needs.detection.outputs.detection_reason }}
       GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens }}
@@ -1410,7 +1410,7 @@ jobs:
       GH_AW_ENGINE_MODEL: "opus"
       GH_AW_ENGINE_VERSION: "2.1.111"
       GH_AW_SAFE_OUTPUT_MESSAGES: "{\"activationComments\":\"false\"}"
-      GH_AW_WORKFLOW_ID: "flaky-fixer"
+      GH_AW_WORKFLOW_ID: "flaky-test-fixer"
       GH_AW_WORKFLOW_NAME: "Flaky Test Fixer"
     outputs:
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
@@ -1433,7 +1433,7 @@ jobs:
           trace-id: ${{ needs.activation.outputs.setup-trace-id }}
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "Flaky Test Fixer"
-          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-fixer.lock.yml@${{ github.ref }}
+          GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/flaky-test-fixer.lock.yml@${{ github.ref }}
           GH_AW_INFO_VERSION: "2.1.111"
       - name: Download agent output artifact
         id: download-agent-output

@@ -22,7 +22,7 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'needs-flaky-fix' && !github.event.issue.pull_request) }}"
 
 concurrency:
-  group: "flaky-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}"
+  group: "flaky-test-fixer-${{ github.event.issue.number || github.event.inputs.issue_number }}"
   cancel-in-progress: false
 
 engine:
