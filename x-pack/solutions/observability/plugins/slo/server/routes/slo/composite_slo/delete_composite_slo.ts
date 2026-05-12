@@ -34,7 +34,7 @@ export const deleteCompositeSummaryDoc = async (
   } catch (err) {
     // 404 means the summary doc was never written (e.g. task hasn't run yet) — not an error
     if (err?.statusCode !== 404) {
-      logger.error(`Failed to delete composite summary doc [${docId}]: ${err}`);
+      logger.debug(`Failed to delete composite summary doc [${docId}]: ${err}`);
     }
   }
 };
