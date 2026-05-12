@@ -13,6 +13,7 @@ export const verdictSchema = z.object({
   verdict_id: z.string(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  criticality: z.number().int().optional(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
   recommended_action: z.string().optional(),

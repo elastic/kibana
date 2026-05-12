@@ -20,6 +20,7 @@ export const verdictsMappings = {
     verdict_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
+    criticality: mappings.integer(),
     rule_names: mappings.keyword(),
     stream_names: mappings.keyword(),
     recommended_action: mappings.keyword(),
@@ -41,7 +42,7 @@ export type { Verdict };
 
 export const verdictsDataStream: DataStreamDefinition<typeof verdictsMappings, StoredVerdict> = {
   name: VERDICTS_DATA_STREAM,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     priority: 500,
