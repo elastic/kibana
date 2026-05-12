@@ -23,7 +23,7 @@ import {
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 import { createResultTransformer } from './utils/create_result_transformer';
@@ -107,11 +107,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skillsStore,
     toolManager,
     experimentalFeatures,
+    todoStateManager,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
+  // Capture todos before the round runs so they can be carried over if the agent doesn't write new todos
+  const initialTodos = todoStateManager.get();
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
 
   // Only clear access tracking for a brand new round; keep it when resuming (HITL).
@@ -178,6 +181,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
+    todoStateManager,
   });
 
   // First add static tools
@@ -345,6 +349,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
           toolManager,
           compactionSummary: compactionResult.summary,
           backgroundExecutionService,
+          todoStateManager,
         }),
       pendingRound,
       startTime,
@@ -354,6 +359,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       configurationOverrides: effectiveOverrides,
       compactionResult,
       roundId,
+      initialTodos,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -377,18 +383,22 @@ const getConversationState = ({
   toolManager,
   backgroundExecutionService,
   compactionSummary,
+  todoStateManager,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
   backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
+  todoStateManager: TodoStateManager;
 }): ConversationInternalState => {
   const bgState = backgroundExecutionService.getPendingState();
+  const todos = todoStateManager.get();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
     ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
+    ...(todos !== undefined ? { todos } : {}),
   };
 };
 

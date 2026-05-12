@@ -15,11 +15,17 @@ import type {
   registerPanelPlacementSettings,
 } from './registries/panel_placement';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PresentationUtilPluginSetup {}
+export interface PresentationUtilPluginSetup {
+  registerPanelPlacementSettings: typeof registerPanelPlacementSettings;
+}
 
 export interface PresentationUtilPluginStart {
   labsService: PresentationLabsService;
+  /**
+   * @deprecated
+   *
+   * Use setup.registerPanelPlacementSettings
+   */
   registerPanelPlacementSettings: typeof registerPanelPlacementSettings;
   getPanelPlacementSettings: typeof getPanelPlacementSettings;
 }

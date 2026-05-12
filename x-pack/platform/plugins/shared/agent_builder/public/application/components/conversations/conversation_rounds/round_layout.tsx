@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
@@ -24,6 +25,7 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
+import { TodosStepDisplay } from './round_thinking/steps/todos_step_display';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -80,6 +82,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
   const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
+  const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
   const {
     isResponseLoading,
@@ -165,7 +168,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="s"
       aria-label={labels.container}
       css={roundContainerStyles}
     >
@@ -191,6 +194,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           />
         )}
       </EuiFlexItem>
+
+      {/* Todos */}
+      {todosStep && (
+        <EuiFlexItem grow={false}>
+          <TodosStepDisplay step={todosStep} />
+        </EuiFlexItem>
+      )}
 
       {/* Confirmation Prompts */}
       {isAwaitingPrompt &&
