@@ -136,6 +136,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/test'
   - '@kbn/test-es-server'
+  - '@kbn/react-kibana-mount'
 tags:
   - plugin
   - prod
