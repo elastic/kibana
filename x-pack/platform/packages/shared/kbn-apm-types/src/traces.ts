@@ -50,6 +50,7 @@ export interface TraceItem {
   coldstart?: boolean;
   composite?: TraceItemComposite;
   docType: TraceItemDocType;
+  missingDestination?: boolean;
 }
 
 export interface TraceItemChild {
