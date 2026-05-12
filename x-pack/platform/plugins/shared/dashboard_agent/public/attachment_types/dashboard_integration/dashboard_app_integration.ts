@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import { debounceTime, Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
@@ -132,7 +132,9 @@ export const registerDashboardAppIntegration = ({
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
 
-  const manualChangesSubscription = api.anyStateChange$.subscribe(addAttachmentFromDashboard);
+  const manualChangesSubscription = api.anyStateChange$
+    .pipe(debounceTime(150))
+    .subscribe(addAttachmentFromDashboard);
 
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();
