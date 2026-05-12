@@ -31,16 +31,18 @@ describe('ContentListUrlSync', () => {
   const createWrapper = ({
     history,
     features,
+    id = 'test-list',
   }: {
     history?: MemoryHistory;
     features?: ContentListFeatures;
+    id?: string;
   } = {}) => {
     const providerFeatures = features;
 
     return ({ children }: { children: React.ReactNode }) => {
       const content = (
         <ContentListProvider
-          id="test-list"
+          id={id}
           labels={{ entity: 'item', entityPlural: 'items' }}
           dataSource={{ findItems: mockFindItems }}
           features={providerFeatures}
@@ -319,5 +321,200 @@ describe('ContentListUrlSync', () => {
     rerender();
 
     expect(listenSpy).toHaveBeenCalledTimes(callsAfterMount);
+  });
+
+  describe('with multiple URL-syncing lists on the same history', () => {
+    let warnSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      warnSpy = jest.spyOn(globalThis.console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    it('hydrates only the primary (first-mounted) list and warns about the secondary', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/app?q=primary'] });
+
+      const primary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'dashboards' }),
+      });
+
+      await waitFor(() => {
+        expect(primary.result.current.state.queryText).toBe('primary');
+      });
+
+      const secondary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'visualizations' }),
+      });
+
+      // Give the secondary's effect a tick to run and decide it is non-primary.
+      await waitFor(() => {
+        expect(warnSpy).toHaveBeenCalled();
+      });
+
+      expect(secondary.result.current.state.queryText).toBe('');
+      expect(primary.result.current.state.queryText).toBe('primary');
+
+      const warnMessage = warnSpy.mock.calls[0][0] as string;
+      expect(warnMessage).toContain('"dashboards"');
+      expect(warnMessage).toContain('"visualizations"');
+      expect(warnMessage).toContain('features.urlSync: false');
+
+      primary.unmount();
+      secondary.unmount();
+    });
+
+    it('does not echo URL writes from the primary into the secondary state', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+
+      const primary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'dashboards' }),
+      });
+
+      await waitFor(() => {
+        expect(primary.result.current.state.queryText).toBe('');
+      });
+
+      const secondary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'visualizations' }),
+      });
+
+      await waitFor(() => {
+        expect(warnSpy).toHaveBeenCalled();
+      });
+
+      act(() => {
+        primary.result.current.dispatch({
+          type: CONTENT_LIST_ACTIONS.SET_QUERY,
+          payload: { queryText: 'primary' },
+        });
+      });
+
+      await waitFor(() => {
+        expect(history.location.search).toBe('?q=primary');
+      });
+
+      expect(secondary.result.current.state.queryText).toBe('');
+
+      primary.unmount();
+      secondary.unmount();
+    });
+
+    it('does not write to the URL from the secondary list', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+      const replaceSpy = jest.spyOn(history, 'replace');
+
+      const primary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'dashboards' }),
+      });
+
+      await waitFor(() => {
+        expect(primary.result.current.state.queryText).toBe('');
+      });
+
+      const secondary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'visualizations' }),
+      });
+
+      await waitFor(() => {
+        expect(warnSpy).toHaveBeenCalled();
+      });
+      replaceSpy.mockClear();
+
+      act(() => {
+        secondary.result.current.dispatch({
+          type: CONTENT_LIST_ACTIONS.SET_QUERY,
+          payload: { queryText: 'secondary-only' },
+        });
+      });
+
+      // The secondary updates its own internal state but does not touch the URL.
+      await waitFor(() => {
+        expect(secondary.result.current.state.queryText).toBe('secondary-only');
+      });
+
+      expect(history.location.search).toBe('');
+      expect(replaceSpy).not.toHaveBeenCalled();
+
+      primary.unmount();
+      secondary.unmount();
+    });
+
+    it('reclaims the primary slot when the original primary unmounts', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+
+      const primary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'dashboards' }),
+      });
+
+      await waitFor(() => {
+        expect(primary.result.current.state.queryText).toBe('');
+      });
+
+      primary.unmount();
+
+      const reclaimer = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'recents' }),
+      });
+
+      act(() => {
+        reclaimer.result.current.dispatch({
+          type: CONTENT_LIST_ACTIONS.SET_QUERY,
+          payload: { queryText: 'reclaimed' },
+        });
+      });
+
+      await waitFor(() => {
+        expect(history.location.search).toBe('?q=reclaimed');
+      });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+
+      reclaimer.unmount();
+    });
+
+    it('does not warn or claim a slot when the secondary opts out via features.urlSync: false', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/app?q=primary'] });
+
+      const primary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, id: 'dashboards' }),
+      });
+
+      await waitFor(() => {
+        expect(primary.result.current.state.queryText).toBe('primary');
+      });
+
+      const secondary = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({
+          history,
+          id: 'visualizations',
+          features: { urlSync: false },
+        }),
+      });
+
+      // Give the secondary a chance to render before asserting the warn never fires.
+      await waitFor(() => {
+        expect(secondary.result.current.state.queryText).toBe('');
+      });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+
+      // The primary still owns URL writes after the opt-out secondary mounts.
+      act(() => {
+        primary.result.current.dispatch({
+          type: CONTENT_LIST_ACTIONS.SET_QUERY,
+          payload: { queryText: 'still-primary' },
+        });
+      });
+
+      await waitFor(() => {
+        expect(history.location.search).toBe('?q=still-primary');
+      });
+
+      primary.unmount();
+      secondary.unmount();
+    });
   });
 });

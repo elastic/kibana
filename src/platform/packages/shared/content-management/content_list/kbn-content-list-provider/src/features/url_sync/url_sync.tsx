@@ -26,6 +26,7 @@ import {
 import type { HydratedUrlState, UrlStateSlices } from './types';
 import { decodeLegacyParams } from './legacy_decoder';
 import { useInRouterContext } from './router_context';
+import { claimUrlSyncSlot, type UrlSyncSlotClaim } from './coordinator';
 
 type ClientStateSlices = Pick<ContentListState, 'queryText' | 'sort'>;
 type Dispatch = React.Dispatch<ContentListAction>;
@@ -116,6 +117,53 @@ export const ContentListUrlSync = (): JSX.Element | null => {
   const inRouterContext = useInRouterContext();
 
   if (features.urlSync === false || !inRouterContext) {
+    return null;
+  }
+
+  return <ContentListUrlSyncSlot />;
+};
+
+/**
+ * Coordinates URL ownership when more than one URL-syncing list is mounted on
+ * the same `history`. The first to mount becomes the primary and renders
+ * {@link ContentListUrlSyncInner}; subsequent mounts log a one-shot dev warning
+ * and render nothing so they do not collide with the primary on the same
+ * `q`/`sort` keys. See [`coordinator.ts`](./coordinator.ts) for the long-term
+ * direction (per-instance URL key namespacing).
+ */
+const ContentListUrlSyncSlot = (): JSX.Element | null => {
+  const history = useHistory();
+  const { id, queryKeyScope } = useContentListConfig();
+  const [claim, setClaim] = useState<UrlSyncSlotClaim | null>(null);
+  const hasWarnedRef = useRef(false);
+  const label = id ?? queryKeyScope;
+
+  useEffect(() => {
+    const slot = claimUrlSyncSlot(history, label);
+    setClaim(slot);
+    return () => {
+      slot.release();
+      setClaim(null);
+    };
+  }, [history, label]);
+
+  if (!claim) {
+    return null;
+  }
+
+  if (!claim.isPrimary) {
+    if (!hasWarnedRef.current) {
+      hasWarnedRef.current = true;
+      if (process.env.NODE_ENV !== 'production') {
+        const primary = claim.primaryLabel ?? '<unknown>';
+        const secondary = label ?? '<unknown>';
+        globalThis.console.warn(
+          `[ContentListUrlSync] Multiple URL-syncing lists detected on this route. ` +
+            `Only the first ("${primary}") will sync with the URL; "${secondary}" is disabled. ` +
+            `Set features.urlSync: false on secondary lists to silence this warning.`
+        );
+      }
+    }
     return null;
   }
 
