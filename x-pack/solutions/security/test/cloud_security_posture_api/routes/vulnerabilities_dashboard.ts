@@ -134,108 +134,105 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('responds with a 200 status code and matching data mock', async () => {
-      // findings_stats_task can race by writing zero-value trend docs into the same daily bucket.
-      await retry.tryForTime(60_000, async () => {
-        const { body } = await supertest
-          .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          .expect(200);
+      const { body } = await supertest
+        .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .expect(200);
 
-        // @timestamp and event are real time calculated fields, we need to remove them in order to remove inconsistencies between mock and actual result
-        const cleanedBody = removeRealtimeCalculatedFields(body);
+      // @timestamp and event are real time calculated fields, we need to remove them in order to remove inconsistencies between mock and actual result
+      const cleanedBody = removeRealtimeCalculatedFields(body);
 
-        expect(cleanedBody).to.eql({
-          cnvmStatistics: {
-            criticalCount: 0,
-            highCount: 1,
-            mediumCount: 1,
-            resourcesScanned: 2,
-            cloudAccounts: 1,
+      expect(cleanedBody).to.eql({
+        cnvmStatistics: {
+          criticalCount: 0,
+          highCount: 1,
+          mediumCount: 1,
+          resourcesScanned: 2,
+          cloudAccounts: 1,
+        },
+        vulnTrends: [
+          {
+            high: 1,
+            policy_template: 'vuln_mgmt',
+            critical: 0,
+            low: 0,
+            vulnerabilities_stats_by_cloud_account: {
+              '704479110758': {
+                cloudAccountName: 'elastic-security-cloud-security-dev',
+                high: 1,
+                critical: 0,
+                low: 0,
+                cloudAccountId: '704479110758',
+                medium: 1,
+              },
+            },
+            medium: 1,
           },
-          vulnTrends: [
-            {
-              high: 1,
-              policy_template: 'vuln_mgmt',
-              critical: 0,
-              low: 0,
-              vulnerabilities_stats_by_cloud_account: {
-                '704479110758': {
-                  cloudAccountName: 'elastic-security-cloud-security-dev',
-                  high: 1,
-                  critical: 0,
-                  low: 0,
-                  cloudAccountId: '704479110758',
-                  medium: 1,
-                },
-              },
-              medium: 1,
+        ],
+        topVulnerableResources: [
+          {
+            resource: {
+              id: '02d62a7df23951b19',
+              name: 'name-ng-1-Node',
             },
-          ],
-          topVulnerableResources: [
-            {
-              resource: {
-                id: '02d62a7df23951b19',
-                name: 'name-ng-1-Node',
-              },
-              vulnerabilityCount: 1,
-              cloudRegion: 'eu-west-1',
+            vulnerabilityCount: 1,
+            cloudRegion: 'eu-west-1',
+          },
+          {
+            resource: {
+              id: '09d11277683ea41c5',
+              name: 'othername-june12-8-8-0-1',
             },
-            {
-              resource: {
-                id: '09d11277683ea41c5',
-                name: 'othername-june12-8-8-0-1',
-              },
-              vulnerabilityCount: 1,
-              cloudRegion: 'eu-west-1',
+            vulnerabilityCount: 1,
+            cloudRegion: 'eu-west-1',
+          },
+        ],
+        topPatchableVulnerabilities: [
+          {
+            cve: 'CVE-2015-8390',
+            cvss: {
+              score: 9.800000190734863,
+              version: '3.1',
             },
-          ],
-          topPatchableVulnerabilities: [
-            {
-              cve: 'CVE-2015-8390',
-              cvss: {
-                score: 9.800000190734863,
-                version: '3.1',
-              },
-              packageFixVersion: '2.56.1-9.amzn2.0.6',
-              vulnerabilityCount: 1,
+            packageFixVersion: '2.56.1-9.amzn2.0.6',
+            vulnerabilityCount: 1,
+          },
+          {
+            cve: 'CVE-2015-8394',
+            cvss: {
+              score: 9.800000190734863,
+              version: '3.1',
             },
-            {
-              cve: 'CVE-2015-8394',
-              cvss: {
-                score: 9.800000190734863,
-                version: '3.1',
-              },
-              packageFixVersion: '2.56.1-9.amzn2.0.6',
-              vulnerabilityCount: 1,
+            packageFixVersion: '2.56.1-9.amzn2.0.6',
+            vulnerabilityCount: 1,
+          },
+        ],
+        topVulnerabilities: [
+          {
+            cve: 'CVE-2015-8390',
+            packageFixVersion: '2.56.1-9.amzn2.0.6',
+            packageName: 'glib2',
+            packageVersion: '2.56.1-9.amzn2.0.5',
+            severity: 'MEDIUM',
+            vulnerabilityCount: 1,
+            cvss: {
+              score: 9.800000190734863,
+              version: '3.1',
             },
-          ],
-          topVulnerabilities: [
-            {
-              cve: 'CVE-2015-8390',
-              packageFixVersion: '2.56.1-9.amzn2.0.6',
-              packageName: 'glib2',
-              packageVersion: '2.56.1-9.amzn2.0.5',
-              severity: 'MEDIUM',
-              vulnerabilityCount: 1,
-              cvss: {
-                score: 9.800000190734863,
-                version: '3.1',
-              },
+          },
+          {
+            cve: 'CVE-2015-8394',
+            packageFixVersion: '2.56.1-9.amzn2.0.6',
+            packageName: 'glib2',
+            packageVersion: '2.56.1-9.amzn2.0.5',
+            severity: 'HIGH',
+            vulnerabilityCount: 1,
+            cvss: {
+              score: 9.800000190734863,
+              version: '3.1',
             },
-            {
-              cve: 'CVE-2015-8394',
-              packageFixVersion: '2.56.1-9.amzn2.0.6',
-              packageName: 'glib2',
-              packageVersion: '2.56.1-9.amzn2.0.5',
-              severity: 'HIGH',
-              vulnerabilityCount: 1,
-              cvss: {
-                score: 9.800000190734863,
-                version: '3.1',
-              },
-            },
-          ],
-        });
+          },
+        ],
       });
     });
 
