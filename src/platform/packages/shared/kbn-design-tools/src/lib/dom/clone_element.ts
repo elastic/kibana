@@ -120,7 +120,11 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
 
   // Copy backgrounds only when the element is not in an interactive
   // pseudo-class state, so we capture the resting appearance.
-  if (!target.matches(':hover, :focus, :active')) {
+  // Always copy for replaced/media elements — they don't change
+  // background on hover, and their background-color is often used as
+  // a fill behind semi-transparent content (e.g. SVG icons).
+  const isReplacedElement = /^(IMG|SVG|VIDEO|CANVAS|PICTURE)$/.test(target.tagName);
+  if (isReplacedElement || !target.matches(':hover, :focus, :active')) {
     for (const prop of BACKGROUND_PROPS) {
       clone.style.setProperty(prop, computed.getPropertyValue(prop));
     }
