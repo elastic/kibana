@@ -724,7 +724,6 @@ export const BuiltInStepTypes = [
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,
   DataSetStepSchema.shape.type.value,
-  WaitForInputStepSchema.shape.type.value,
   WaitStepSchema.shape.type.value,
   WaitForInputStepSchema.shape.type.value,
   WorkflowExecuteStepSchema.shape.type.value,
