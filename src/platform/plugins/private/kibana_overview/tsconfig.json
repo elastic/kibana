@@ -5,10 +5,12 @@
   },
   "include": [
     "public/**/*",
-    "common/**/*"
+    "common/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/scout",
     "@kbn/navigation-plugin",
     "@kbn/home-plugin",
     "@kbn/newsfeed-plugin",

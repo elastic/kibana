@@ -27,6 +27,7 @@ plugins:
     - index_management
     - infra
     - intercepts
+    - kibana_overview
     - lens
     - logstash
     - maps
