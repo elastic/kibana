@@ -32,7 +32,7 @@ export const registerInferenceFeatures = (
     featureName: 'Workflows AI',
     featureDescription: 'AI models used for Workflows AI steps',
     taskType: 'chat_completion',
-    recommendedEndpoints: WORKFLOWS_AI_RECOMMENDED_ENDPOINTS,
+    recommendedEndpoints: [],
   });
 
   searchInferenceEndpoints.features.register({
