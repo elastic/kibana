@@ -351,14 +351,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const openGraphPopoverCount = [
+    const isPopoverOpen = [
       nodeExpandPopover,
       labelExpandPopover,
       ipPopover,
       countryFlagsPopover,
       eventPopover,
-    ].filter(({ state: { isOpen } }) => isOpen).length;
-    const isPopoverOpen = openGraphPopoverCount > 0;
+    ].some(({ state: { isOpen } }) => isOpen);
 
     // Pane click on the ReactFlow canvas doesn't dismiss overlays because
     // d3-zoom (used by ReactFlow for pan/zoom) calls
@@ -379,16 +378,18 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     // Scope the gate to overlays that live *outside* the graph (search-bar
     // filter chips, date pickers, KQL autocomplete). Graph-internal popovers
     // (node expand, label expand, ips, country flags, event details) are
-    // owned by `useGraphPopovers` and have their own dismissal flow, so we
-    // shouldn't kick pane-click into closing them. We detect external
-    // popovers by counting `.euiPopover__panel` elements and subtracting the
-    // graph-owned popovers we know are open; `#kbnTypeahead__items` (not an
-    // EuiPopover) covers the KQL autocomplete separately.
+    // owned by `useGraphPopovers` and have their own dismissal flow, so
+    // pane-click shouldn't force them closed. Graph-internal and external
+    // popovers are mutually exclusive — opening one auto-closes the other on
+    // outside click — so when any graph popover is open, every
+    // `.euiPopover__panel` in the DOM belongs to us; otherwise any panel
+    // present must be external. `#kbnTypeahead__items` (not an EuiPopover)
+    // covers the KQL autocomplete separately.
     const isExternalOverlayOpen = useCallback(
       () =>
-        document.querySelectorAll('.euiPopover__panel').length > openGraphPopoverCount ||
+        (!isPopoverOpen && document.querySelector('.euiPopover__panel') !== null) ||
         document.querySelector('#kbnTypeahead__items') !== null,
-      [openGraphPopoverCount]
+      [isPopoverOpen]
     );
 
     const handlePointerDownCapture = useCallback(

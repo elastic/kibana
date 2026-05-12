@@ -494,10 +494,11 @@ describe('GraphInvestigation Component', () => {
     it('does not dispatch synthetic mouse events when only a graph-internal popover is open', async () => {
       // Graph-internal popovers (node expand, label expand, etc.) have their
       // own dismissal flow inside `useGraphPopovers`, so pane click should
-      // not synthesize an outside-click to close them. The gate subtracts
-      // the count of open graph popovers from the total number of
-      // `.euiPopover__panel` elements; if the difference is zero, the only
-      // overlays in the DOM are graph-owned and the handler is a no-op.
+      // not synthesize an outside-click to close them. The gate uses the
+      // fact that graph-internal and external popovers are mutually
+      // exclusive: when any graph popover is open, every panel in the DOM is
+      // graph-owned, so the handler treats `.euiPopover__panel` as "not
+      // external" and stays a no-op.
       const { container } = renderStory({ showToggleSearch: true });
       await expandNode(container, 'admin@example.com');
       // Marker that the node expand popover is open.
