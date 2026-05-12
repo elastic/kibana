@@ -6,9 +6,9 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { GetFieldsOf, MappingsDefinition, ToPrimitives } from '@kbn/es-mappings';
+import type { SigEvent } from '@kbn/streams-schema';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import type { Overwrite } from 'utility-types';
 
 export const EVENTS_DATA_STREAM = '.significant_events-events';
 
@@ -36,18 +36,7 @@ export const eventsMappings = {
 } satisfies MappingsDefinition;
 
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
-
-export type SigEvent = Overwrite<
-  ToPrimitives<{
-    type: 'object';
-    properties: (typeof eventsMappings)['properties'];
-  }>,
-  {
-    '@timestamp': string;
-    rule_names: string[];
-    stream_names: string[];
-  }
->;
+export type { SigEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
