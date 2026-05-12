@@ -82,7 +82,9 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
             <EuiIcon
               type="check"
               data-test-subj="editDownloadSourceTable.defaultIcon"
-              aria-hidden={true}
+              aria-label={i18n.translate('xpack.fleet.settings.downloadSourcesTable.defaultIconLabel', {
+    defaultMessage: 'Default download source',
+  })}
             />
           ) : null,
         width: '200px',
