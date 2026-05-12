@@ -106,13 +106,8 @@
       "name": "Security AI Rules",
       "slackChannel": "#security-detection-engine-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
-      "tags": [
-        "security",
-        "ai-rules"
-      ],
-      "ciLabels": [
-        "evals:security-ai-rules"
-      ]
+      "tags": ["security", "ai-rules"],
+      "ciLabels": ["evals:security-ai-rules"]
     },
     {
       "id": "endpoint",
@@ -171,13 +166,8 @@
       "id": "workflows",
       "name": "Workflows Authoring",
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
-      "tags": [
-        "platform",
-        "workflows"
-      ],
-      "ciLabels": [
-        "evals:workflows"
-      ],
+      "tags": ["platform", "workflows"],
+      "ciLabels": ["evals:workflows"],
       "serverConfigSet": "evals_workflows"
     },
     {
@@ -185,13 +175,8 @@
       "name": "PCI DSS v4.0.1 Compliance",
       "slackChannel": "#security-defend-workflows-tests",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/playwright.config.ts",
-      "tags": [
-        "security",
-        "pci-compliance"
-      ],
-      "ciLabels": [
-        "evals:pci-compliance"
-      ],
+      "tags": ["security", "pci-compliance"],
+      "ciLabels": ["evals:pci-compliance"],
       "serverConfigSet": "evals_pci_compliance"
     },
     {
@@ -199,26 +184,15 @@
       "name": "Security Automatic Migrations",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/playwright.config.ts",
-      "tags": [
-        "security",
-        "migrations"
-      ],
-      "ciLabels": [
-        "evals:security-automatic-migrations"
-      ]
+      "tags": ["security", "migrations"],
+      "ciLabels": ["evals:security-automatic-migrations"]
     },
     {
       "id": "esql-generation-regression",
       "name": "ES|QL Generation Regression",
-      "description": "Regression suite for ES|QL generation: 31 examples migrated from the LangSmith 'ES|QL Generation Regression Suite' dataset (id 261dcc59-fbe7-4397-a662-ff94042f666c), evaluated with the framework EsqlFunctionalEquivalence LLM-as-judge.",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/playwright.config.ts",
-      "tags": [
-        "security",
-        "esql-generation"
-      ],
-      "ciLabels": [
-        "evals:esql-generation-regression"
-      ]
+      "tags": ["security", "esql-generation"],
+      "ciLabels": ["evals:esql-generation-regression"]
     }
   ]
 }

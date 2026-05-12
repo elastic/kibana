@@ -98,7 +98,7 @@ export function createEvaluateEsqlGenerationDataset({
         dataset: {
           name: 'esql-generation: regression suite',
           description:
-            '31 examples from LangSmith "ES|QL Generation Regression Suite" (id: 261dcc59-fbe7-4397-a662-ff94042f666c)',
+            '31 ES|QL generation examples (natural-language question → ground-truth query)',
           examples: esqlGenerationDataset,
         },
         task: async ({ input }) => {

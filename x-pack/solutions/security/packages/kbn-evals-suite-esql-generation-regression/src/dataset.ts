@@ -8,13 +8,12 @@
 import type { Example } from '@kbn/evals';
 
 /**
- * 31 examples exported from LangSmith dataset "ES|QL Generation Regression Suite"
- * (id: 261dcc59-fbe7-4397-a662-ff94042f666c, exported 2026-05-07)
+ * Canonical regression dataset for ES|QL generation, 31 examples.
  *
- * LangSmith field mapping:
- *   inputs.input   → input.question
- *   outputs.reference → output.query
- *   metadata       → null (no metadata in source dataset)
+ * Each entry pairs a natural-language question (`input.question`) with the
+ * ground-truth ES|QL query (`output.query`). To extend the suite, add a new
+ * entry to this array; tests in `dataset.test.ts` pin the example count and
+ * basic shape so accidental drops are caught.
  */
 export const esqlGenerationDataset: Array<
   Example<{ question: string }, { query: string }, { query_intent?: string; criteria?: string[] }>

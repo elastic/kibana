@@ -1,6 +1,6 @@
 # ES|QL Generation Regression Suite (`esql-generation-regression`)
 
-Playwright-based regression suite for the ES|QL generation feature in Elastic Security, built on `@kbn/evals`.
+Playwright-based regression suite for the ES|QL generation feature in Elastic Security, built on `@kbn/evals` — the source of truth for eval framework primitives (fixtures, evaluators, dataset typing, reporting).
 
 ## Suite ID
 
@@ -14,86 +14,40 @@ Registered in `.buildkite/pipelines/evals/evals.suites.json`.
 
 The core task is: **generate a correct ES|QL query from a natural-language question**.
 
-A system prompt instructs the LLM to return only the raw ES|QL query text. The generated query is compared against a ground-truth reference query using:
+A system prompt instructs the LLM to return only the raw ES|QL query text. The generated query is scored by four evaluators:
 
-| Evaluator | Kind | Score | Description |
-|---|---|---|---|
-| **ES\|QL Equivalence** | `LLM` | 0 or 1 | Judges whether the generated query is *functionally equivalent* to the reference query — same results, not necessarily same syntax. Uses `createEsqlEquivalenceEvaluator` from `@kbn/evals`. |
-| **ES\|QL Validity** | `CODE` | 0–1 | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network. Suite-local — see `src/evaluators/esql_validity.ts`. |
-| **ES\|QL Execution** | `CODE` | 0–1 | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. Suite-local — see `src/evaluators/esql_execution.ts`. |
-| **ES\|QL Result Equivalence** | `CODE` | 0–1 | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. Suite-local — see `src/evaluators/esql_result_equivalence.ts`. |
+| Evaluator | Kind | Score | Source | Description |
+|---|---|---|---|---|
+| **ES\|QL Equivalence** | `LLM` | 0 or 1 | `@kbn/evals` (`createEsqlEquivalenceEvaluator`) | Judges whether the generated query is *functionally equivalent* to the reference query — same results, not necessarily same syntax. |
+| **ES\|QL Validity** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_validity.ts`) | Parses each generated query via `@kbn/esql-language` `validateQuery`; score is the fraction of queries with no AST errors. No LLM call, no network. |
+| **ES\|QL Execution** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_execution.ts`) | Runs each generated query against the live Elasticsearch cluster; three-tier composite of AST validity, execution success, and optional hit detection. |
+| **ES\|QL Result Equivalence** | `CODE` | 0–1 | suite-local (`src/evaluators/esql_result_equivalence.ts`) | Executes both gold and candidate queries and computes Jaccard similarity over their normalised row sets. Score 1 = identical rows, 0 = no overlap. |
 
 ---
 
 ## Dataset
 
-### Provenance
-
-The 31 examples are exported from the LangSmith dataset:
-
-- **Dataset name**: `ES|QL Generation Regression Suite`
-- **Dataset ID**: `261dcc59-fbe7-4397-a662-ff94042f666c`
-- **Export date / cutoff**: 2026-05-07
-
-The dataset is stored as an inline TypeScript array in `src/dataset.ts`. This choice locks the `input`/`expected` shape at compile time, makes dataset diffs human-readable, and avoids runtime JSON parsing.
+The canonical regression dataset is `src/dataset.ts` — an inline `Array<Example<{ question }, { query }, …>>` of 31 examples typed against the `@kbn/evals` `Example<>` generic. Storing the dataset as TypeScript locks the `input`/`output` shape at compile time, makes dataset diffs human-readable in PRs, and avoids runtime JSON parsing.
 
 ### Shape
 
-Each entry is an `EsqlGenerationExample`:
+Each entry is an `Example`:
 
 ```typescript
-interface EsqlGenerationExample {
-  input: string;           // natural-language question
-  expected: { query: string }; // ground-truth ES|QL
-  criteria?: string[];     // optional per-example judge hints (reserved)
+interface Example<TInput, TOutput, TMetadata> {
+  input: TInput;       // { question: string } — natural-language question
+  output: TOutput;     // { query: string }    — ground-truth ES|QL
+  metadata?: TMetadata; // { query_intent?, criteria? } — optional per-example hints
 }
 ```
 
-### Refreshing the dataset from LangSmith
+### Adding or updating examples
 
-To update `src/dataset.ts` with a new LangSmith export:
+Edit `src/dataset.ts` directly: append/replace entries in the array and update the count assertion in `src/dataset.test.ts`. There is no external dataset to sync from — this file IS the source of truth.
 
-1. **Export from LangSmith**
-
-   In the LangSmith UI, open the dataset `ES|QL Generation Regression Suite`
-   (id: `261dcc59-fbe7-4397-a662-ff94042f666c`), filter by date range if needed
-   (e.g. exclude examples added after the cutoff), remove duplicates
-   (deduplicate on `inputs.question` — keep the entry with the latest
-   `modified_at`), then export as JSON.
-
-2. **Field mapping**
-
-   | LangSmith JSON field | `dataset.ts` field |
-   |---|---|
-   | `inputs.question` or `inputs.input` | `input` |
-   | `outputs.query` or `outputs.expected_query` | `expected.query` |
-   | `metadata.criteria` (optional array) | `criteria` |
-
-3. **Convert to TypeScript**
-
-   Replace the array body in `src/dataset.ts`, update the comment at the top
-   with the new count and export date, and update the `description` string in
-   `evals/esql-generation-regression.spec.ts`.
-
-4. **Validate**
-
-   ```bash
-   node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/src/dataset.ts
-   node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/tsconfig.json
-   ```
-
----
-
-## Parity matrix: LangSmith vs `@kbn/evals`
-
-| LangSmith evaluator | `@kbn/evals` equivalent |
-|---|---|
-| ES\|QL Equivalence (LLM-as-judge) | ✅ `ES\|QL Equivalence` via `createEsqlEquivalenceEvaluator` (`@kbn/evals`) |
-| ES\|QL Syntax Validity (deterministic) | ✅ `ES\|QL Validity` via `createEsqlValidityEvaluator` (suite-local) |
-| ES\|QL Execution (live cluster) | ✅ `ES\|QL Execution` via `createEsqlExecutionEvaluator` (suite-local) |
-| Result-row equivalence | ✅ `ES\|QL Result Equivalence` via `createEsqlResultEquivalenceEvaluator` (suite-local) |
-
-All four LangSmith evaluator dimensions are covered. The three CODE-kind evaluators (`Validity`, `Execution`, `Result Equivalence`) are deterministic and require no LLM call; the LLM-kind `Equivalence` evaluator calls the inference API to judge functional equivalence.
+```bash
+node scripts/jest x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/src/dataset.test.ts
+```
 
 ---
 
