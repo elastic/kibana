@@ -1,13 +1,11 @@
 @babel/helper-plugin-utils@7.28.6
-@babel/plugin-syntax-numeric-separator@7.10.4
-@babel/plugin-transform-numeric-separator@7.24.7
+@babel/plugin-transform-numeric-separator@7.27.1
 @babel/runtime@7.28.4
-@jridgewell/gen-mapping@0.3.5
+@jridgewell/gen-mapping@0.3.13
 @jridgewell/resolve-uri@3.1.2
-@jridgewell/set-array@1.2.1
 @jridgewell/source-map@0.3.5
 @jridgewell/sourcemap-codec@1.5.5
-@jridgewell/trace-mapping@0.3.25
+@jridgewell/trace-mapping@0.3.31
 @types/eslint-scope@3.7.7
 @types/eslint@8.44.2
 @types/estree@0.0.50
@@ -40,7 +38,7 @@ ajv-keywords@3.5.2
 ajv-keywords@5.1.0
 ajv@6.14.0
 ajv@8.18.0
-babel-loader@9.2.1
+babel-loader@10.1.1
 baseline-browser-mapping@2.9.14
 browserslist@4.28.1
 buffer-from@1.1.1
@@ -48,7 +46,6 @@ caniuse-lite@1.0.30001781
 chroma-js@2.4.2
 chrome-trace-event@1.0.2
 commander@2.20.3
-common-path-prefix@3.0.0
 copy-to-clipboard@3.3.3
 css-in-js-utils@3.1.0
 css-loader@7.1.2
@@ -71,8 +68,7 @@ fast-json-stable-stringify@2.1.0
 fast-shallow-equal@1.0.0
 fast-uri@3.0.3
 fastest-stable-stringify@2.0.2
-find-cache-dir@4.0.0
-find-up@6.3.0
+find-up@5.0.0
 glob-to-regexp@0.4.1
 graceful-fs@4.2.11
 has-flag@4.0.0
@@ -86,7 +82,7 @@ json-schema-traverse@0.4.1
 json-schema-traverse@1.0.0
 jsonc-parser@3.2.0
 loader-runner@4.3.0
-locate-path@7.2.0
+locate-path@6.0.0
 mdn-data@2.0.14
 merge-stream@2.0.0
 mime-db@1.52.0
@@ -102,12 +98,11 @@ nano-css@5.6.2
 nanoid@3.3.11
 neo-async@2.6.2
 node-releases@2.0.27
-p-limit@4.0.0
-p-locate@6.0.0
+p-limit@3.1.0
+p-locate@5.0.0
 path-browserify@1.0.1
-path-exists@5.0.0
+path-exists@4.0.0
 picocolors@1.1.1
-pkg-dir@7.0.0
 postcss-modules-extract-imports@3.1.0
 postcss-modules-local-by-default@4.0.5
 postcss-modules-scope@3.2.0
@@ -158,4 +153,4 @@ watchpack@2.4.1
 webpack-sources@3.2.3
 webpack@5.96.1
 yaml@2.3.4
-yocto-queue@1.1.1
+yocto-queue@0.1.0
