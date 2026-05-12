@@ -149,6 +149,12 @@ const startDependencies = {
 const datasourceMap = mockDatasourceMap();
 const visualizationMap = mockVisualizationMap();
 
+const expectToBeEUIAriaDisabledButton = (element: HTMLElement) => {
+  expect(element).toHaveClass('euiButton');
+  expect(element).toHaveAttribute('type', 'button');
+  expect(element).toHaveAttribute('aria-disabled', 'true');
+};
+
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
@@ -364,7 +370,7 @@ describe('LensEditConfigurationFlyout', () => {
     // Set formBased to match the preloaded Redux state so no changes are detected
     newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {
@@ -385,7 +391,7 @@ describe('LensEditConfigurationFlyout', () => {
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
   it('should use correct activeVisualization', async () => {

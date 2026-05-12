@@ -22,10 +22,10 @@ export interface UseContentListSearchReturn {
   queryText: string;
   /**
    * Update query from an already-parsed EUI Query object (search bar typing).
-   * Stores `query.text` as the new queryText.
+   * Stores `query.text` as the new `queryText`.
    */
   setQueryFromEuiQuery: (euiQuery: Query) => void;
-  /** Update query from raw text (programmatic input, URL params). */
+  /** Update query from raw text (programmatic input). */
   setQueryFromText: (text: string) => void;
   /** Whether search is supported (enabled via features). */
   isSupported: boolean;
