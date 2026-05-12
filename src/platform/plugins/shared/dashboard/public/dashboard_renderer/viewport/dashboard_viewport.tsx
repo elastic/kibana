@@ -97,9 +97,9 @@ const dashboardViewportStyles = {
     display: 'flex',
     flexDirection: 'column' as 'column',
     width: '100%',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     '&.dshDashboardViewportWrapper--defaultBg': {
-      backgroundColor: euiTheme.colors.emptyShade,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
     '.dshDashboardViewport-controls': {
       margin: `0 ${euiTheme.size.s}`,
