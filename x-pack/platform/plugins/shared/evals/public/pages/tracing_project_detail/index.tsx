@@ -32,9 +32,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useParams } from 'react-router-dom';
+import { TraceWaterfall, type TraceSpan } from '@kbn/llm-trace-waterfall';
 import type { TraceSummary } from '@kbn/evals-common';
-import { useProjectTraces } from '../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../components/trace_waterfall';
+import { useProjectTraces, useTrace } from '../../hooks/use_evals_api';
 import { LastUpdatedAt } from '../../components/last_updated_at';
 import { formatLatency, formatTokens } from '../../utils/format_utils';
 import * as i18n from './translations';
@@ -50,6 +50,7 @@ export const TracingProjectDetailPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const { data: traceData, isLoading: traceLoading, error: traceError } = useTrace(selectedTraceId);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
@@ -341,7 +342,14 @@ export const TracingProjectDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} layout="horizontal" />
+              <TraceWaterfall
+                spans={(traceData?.spans ?? []) as TraceSpan[]}
+                traceId={selectedTraceId}
+                durationMs={traceData?.duration_ms}
+                isLoading={traceLoading}
+                error={traceError as Error | null}
+                layout="horizontal"
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>

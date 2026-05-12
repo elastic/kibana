@@ -32,9 +32,9 @@ import { css } from '@emotion/css';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
-import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
+import { TraceWaterfall, type TraceSpan } from '@kbn/llm-trace-waterfall';
+import { useEvaluationRun, useRunDatasetExamples, useTrace } from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
-import { TraceWaterfall } from '../../components/trace_waterfall';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
@@ -160,6 +160,7 @@ export const RunDetailPage: React.FC = () => {
   const openDatasetId = searchParams.get('dataset_id');
   const selectedExampleId = searchParams.get('example_id');
   const selectedTraceId = searchParams.get('trace_id');
+  const { data: traceData, isLoading: traceLoading, error: traceError } = useTrace(selectedTraceId);
   const prUrl = useMemo(() => {
     const pr = runDetail?.ci?.pull_request;
     return pr ? resolvePrUrl(pr) : null;
@@ -462,7 +463,13 @@ export const RunDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} />
+              <TraceWaterfall
+                spans={(traceData?.spans ?? []) as TraceSpan[]}
+                traceId={selectedTraceId}
+                durationMs={traceData?.duration_ms}
+                isLoading={traceLoading}
+                error={traceError as Error | null}
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>

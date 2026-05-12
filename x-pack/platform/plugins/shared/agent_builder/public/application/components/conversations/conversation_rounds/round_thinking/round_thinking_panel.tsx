@@ -18,6 +18,7 @@ import {
 import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
+import { useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
@@ -60,6 +61,7 @@ export const RoundThinkingPanel = ({
 }: RoundThinkingPanelProps) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
+  const { data } = services.plugins;
   const [showFlyout, setShowFlyout] = useState(false);
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
@@ -69,7 +71,9 @@ export const RoundThinkingPanel = ({
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
-  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
+  const traceSpansResult = useTraceSpans(traceId ?? null, {
+    search: data.search.search,
+  });
   const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
     ? services.plugins.evals.getAddToDatasetAction({
         initialExample: {
@@ -88,7 +92,7 @@ export const RoundThinkingPanel = ({
     : null;
   const isExperimentalEnabled = useExperimentalFeatures();
 
-  const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
+  const showTraceButton = isExperimentalEnabled && !!traceId;
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
 
   const shadowStyles = useEuiShadow('l');
@@ -180,11 +184,14 @@ export const RoundThinkingPanel = ({
         )}
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
-      {showTraceFlyout && TraceWaterfallComponent && traceId && (
+      {showTraceFlyout && traceId && (
         <TraceFlyout
           traceId={traceId}
           onClose={() => setShowTraceFlyout(false)}
-          TraceWaterfall={TraceWaterfallComponent}
+          spans={traceSpansResult.spans}
+          durationMs={traceSpansResult.durationMs}
+          isLoading={traceSpansResult.isLoading}
+          error={traceSpansResult.error}
         />
       )}
     </>

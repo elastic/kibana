@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { type ComponentType } from 'react';
+import React from 'react';
 import { EuiFlyoutResizable, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { TraceWaterfall, type TraceSpan } from '@kbn/llm-trace-waterfall';
 
 const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFlyout.title', {
   defaultMessage: 'Trace',
@@ -18,10 +19,20 @@ const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFl
 interface TraceFlyoutProps {
   traceId: string;
   onClose: () => void;
-  TraceWaterfall: ComponentType<{ traceId: string }>;
+  spans: TraceSpan[];
+  durationMs: number;
+  isLoading: boolean;
+  error: Error | null;
 }
 
-export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose, TraceWaterfall }) => {
+export const TraceFlyout: React.FC<TraceFlyoutProps> = ({
+  traceId,
+  onClose,
+  spans,
+  durationMs,
+  isLoading,
+  error,
+}) => {
   return (
     <EuiFlyoutResizable
       onClose={onClose}
@@ -50,7 +61,13 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose, Trac
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <div style={{ height: '100%', padding: 16 }}>
-          <TraceWaterfall traceId={traceId} />
+          <TraceWaterfall
+            spans={spans}
+            traceId={traceId}
+            durationMs={durationMs}
+            isLoading={isLoading}
+            error={error}
+          />
         </div>
       </EuiFlyoutBody>
     </EuiFlyoutResizable>
