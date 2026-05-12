@@ -1160,11 +1160,9 @@ describe('runExtractFieldsFlow', () => {
 
     expect(outcome.kind).toBe('unsupported');
     if (outcome.kind === 'unsupported') {
-      expect(outcome.result.steps).toEqual([]);
-      expect(outcome.result.warnings).toContainEqual(
+      expect(outcome.warning).toEqual(
         expect.stringContaining('extract_fields is only supported for ingest streams')
       );
-      expect(outcome.result.simulation.success_rate).toBeNull();
       // streamType is surfaced on every outcome so the outer `design_pipeline`
       // handler can emit telemetry without a second `getStream` round-trip.
       expect(outcome.streamType).toBe('query');

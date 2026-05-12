@@ -69,7 +69,7 @@ export function registerAgentBuilderTools({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  patternExtractionService?: IPatternExtractionService;
+  patternExtractionService: IPatternExtractionService;
 }): void {
   if (!agentBuilder) {
     return;

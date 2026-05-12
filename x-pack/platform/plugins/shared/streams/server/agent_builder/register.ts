@@ -30,7 +30,7 @@ export const registerStreamsAgentBuilder = async ({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  patternExtractionService?: IPatternExtractionService;
+  patternExtractionService: IPatternExtractionService;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({

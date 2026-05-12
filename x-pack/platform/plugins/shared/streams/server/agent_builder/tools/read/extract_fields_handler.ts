@@ -154,7 +154,7 @@ export type RunExtractFieldsOutcome =
        */
       extraHints?: string[];
     } & ExtractFieldsOutcomeMeta)
-  | ({ kind: 'unsupported'; result: NlToStreamlangResult } & ExtractFieldsOutcomeMeta)
+  | ({ kind: 'unsupported'; warning: string } & ExtractFieldsOutcomeMeta)
   | ({
       kind: 'success';
       result: NlToStreamlangResult;
@@ -169,8 +169,10 @@ export type RunExtractFieldsOutcome =
  *   handler should fall back to {@link nlToStreamlang} so the LLM can still
  *   attempt grok/dissect from first principles.
  * - `unsupported` — the stream is not an ingest stream, so suggestions cannot
- *   run. Returns a tool-shaped result with empty steps and a warning so the
- *   agent can surface the reason without falling back.
+ *   run. Carries only a `warning` string; the outer `design_pipeline`
+ *   handler renders a dedicated tool result (no empty `steps` /
+ *   `simulation` / `samples_info` are spread onto the wire) so the agent
+ *   can surface the reason without falling back.
  * - `success` — heuristic + reasoning agent produced a pipeline. The seed
  *   processor has been merged in; the result mirrors the
  *   {@link NlToStreamlangResult} shape so the tool returns a consistent
@@ -207,18 +209,8 @@ export const runExtractFieldsFlow = async (
     return {
       kind: 'unsupported',
       streamType,
-      result: {
-        steps: [],
-        existing_steps: [],
-        step_changes: [],
-        summary: '',
-        field_changes: [],
-        simulation: { success_rate: null, sample_count: 0, mode: 'complete' },
-        warnings: [
-          'extract_fields is only supported for ingest streams (wired or classic). The selected stream is not an ingest stream.',
-        ],
-        samples_info: { source: 'stream', count: 0 },
-      },
+      warning:
+        'extract_fields is only supported for ingest streams (wired or classic). The selected stream is not an ingest stream.',
     };
   }
 

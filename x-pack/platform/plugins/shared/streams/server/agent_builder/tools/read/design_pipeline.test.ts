@@ -66,7 +66,8 @@ describe('createDesignPipelineTool', () => {
     } as unknown as EbtTelemetryClient;
     const tool = createDesignPipelineTool({
       getScopedClients,
-      patternExtractionService: options.patternExtractionService,
+      patternExtractionService:
+        options.patternExtractionService ?? ({} as IPatternExtractionService),
       logger: loggerMock.create(),
       telemetry,
     });
@@ -183,10 +184,7 @@ describe('createDesignPipelineTool', () => {
       mockRunExtractFieldsFlow.mockResolvedValue({
         kind: 'unsupported',
         streamType: 'query',
-        result: buildNlToStreamlangResult({
-          steps: [],
-          warnings: ['extract_fields is only supported for ingest streams'],
-        }),
+        warning: 'extract_fields is only supported for ingest streams',
       });
 
       const result = await tool.handler(
@@ -202,13 +200,18 @@ describe('createDesignPipelineTool', () => {
       expect(mockNlToStreamlang).not.toHaveBeenCalled();
       if (!('results' in result)) throw new Error('Expected results return');
       const data = result.results[0].data as Record<string, unknown>;
-      expect(data.warnings).toEqual(
-        expect.arrayContaining([expect.stringContaining('only supported for ingest streams')])
-      );
+      expect(data.warnings).toEqual([expect.stringContaining('only supported for ingest streams')]);
       // The structured outcome is the source-of-truth for skill prompt
       // branching — not the warning prose.
       expect(data.extract_fields_outcome).toBe('unsupported');
       expect(data.extract_fields_reason).toBe('unsupported_stream_type');
+      // The unsupported branch carries no proposal, so none of the
+      // proposal-shaped fields should be present.
+      expect(data).not.toHaveProperty('steps');
+      expect(data).not.toHaveProperty('simulation');
+      expect(data).not.toHaveProperty('samples_info');
+      expect(data).not.toHaveProperty('status');
+      expect(data).not.toHaveProperty('note');
     });
 
     it('falls back to nlToStreamlang and surfaces structured outcome=fallback on `kind: "fallback"`', async () => {
@@ -315,33 +318,6 @@ describe('createDesignPipelineTool', () => {
         }),
         expect.any(Object)
       );
-    });
-
-    it('falls back to LLM-only with structured outcome=fallback when patternExtractionService is not available', async () => {
-      // Stateless / serverless environments may not have the heuristic
-      // worker pool. The tool must degrade gracefully instead of throwing,
-      // and surface (via the structured outcome field) that the heuristic
-      // path was unavailable.
-      const { tool, context } = setup(); // no patternExtractionService
-
-      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult({ hints: [] }));
-
-      const result = await tool.handler(
-        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
-        context
-      );
-
-      // Heuristic flow is never called when there's no service.
-      expect(mockRunExtractFieldsFlow).not.toHaveBeenCalled();
-      expect(mockNlToStreamlang).toHaveBeenCalledTimes(1);
-
-      if (!('results' in result)) throw new Error('Expected results return');
-      const data = result.results[0].data as {
-        extract_fields_outcome?: string;
-        extract_fields_reason?: string;
-      };
-      expect(data.extract_fields_outcome).toBe('fallback');
-      expect(data.extract_fields_reason).toBe('service_unavailable');
     });
   });
 
@@ -450,7 +426,7 @@ describe('createDesignPipelineTool', () => {
       mockRunExtractFieldsFlow.mockResolvedValue({
         kind: 'unsupported',
         streamType: 'query',
-        result: buildNlToStreamlangResult({ steps: [] }),
+        warning: 'extract_fields is only supported for ingest streams',
       });
 
       await tool.handler(
@@ -498,25 +474,6 @@ describe('createDesignPipelineTool', () => {
       );
     });
 
-    it('emits flow=nl_to_streamlang with fallback_reason=service_unavailable when patternExtractionService is missing', async () => {
-      const { tool, context, telemetry } = setup(); // no patternExtractionService
-      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
-
-      await tool.handler(
-        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
-        context
-      );
-
-      expect(mockRunExtractFieldsFlow).not.toHaveBeenCalled();
-      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
-        expect.objectContaining({
-          flow: 'nl_to_streamlang',
-          success: true,
-          extract_fields_fallback_reason: 'service_unavailable',
-        })
-      );
-    });
-
     it('emits success=false on the LLM-only path when nlToStreamlang throws', async () => {
       const { tool, context, telemetry } = setup();
       mockNlToStreamlang.mockRejectedValue(new Error('connector unavailable'));
@@ -543,6 +500,7 @@ describe('createDesignPipelineTool', () => {
       } as unknown as EbtTelemetryClient;
       const tool = createDesignPipelineTool({
         getScopedClients,
+        patternExtractionService: {} as IPatternExtractionService,
         logger: loggerMock.create(),
         telemetry,
       });

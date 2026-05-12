@@ -97,7 +97,7 @@ export const createDesignPipelineTool = ({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  patternExtractionService?: IPatternExtractionService;
+  patternExtractionService: IPatternExtractionService;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): BuiltinToolDefinition<typeof designPipelineSchema> => ({
@@ -179,62 +179,76 @@ export const createDesignPipelineTool = ({
 
       if (extractFields) {
         sourceFieldExplicitlySet = seedSourceField !== undefined;
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName,
+            samples: typedSamples,
+            seedSourceField,
+          },
+          {
+            streamsClient,
+            scopedClusterClient,
+            inferenceClient,
+            boundInferenceClient: model.inferenceClient,
+            connectorId: model.connector.connectorId,
+            fieldsMetadataClient,
+            patternExtractionService,
+            logger,
+            signal: abortSignalFromRequest(request),
+          }
+        );
 
-        if (!patternExtractionService) {
-          extractFieldsFallbackReason = 'service_unavailable';
-        } else {
-          const outcome = await runExtractFieldsFlow(
-            {
-              streamName,
-              samples: typedSamples,
-              seedSourceField,
-            },
-            {
-              streamsClient,
-              scopedClusterClient,
-              inferenceClient,
-              boundInferenceClient: model.inferenceClient,
-              connectorId: model.connector.connectorId,
-              fieldsMetadataClient,
-              patternExtractionService,
-              logger,
-              signal: abortSignalFromRequest(request),
-            }
-          );
+        streamType = outcome.streamType;
+        sourceFieldPicked = outcome.pickedSourceField;
+        sourceFieldConflictDetected = outcome.sourceFieldConflictDetected;
 
-          streamType = outcome.streamType;
-          sourceFieldPicked = outcome.pickedSourceField;
-          sourceFieldConflictDetected = outcome.sourceFieldConflictDetected;
-
-          if (outcome.kind === 'success' || outcome.kind === 'unsupported') {
-            flow = 'extract_fields';
-            success = true;
-            if (outcome.kind === 'success') stepsUsed = outcome.stepsUsed;
-            return {
-              results: [
-                {
-                  type: ToolResultType.other,
-                  data: {
-                    stream: streamName,
-                    ...outcome.result,
-                    extract_fields_outcome: outcome.kind,
-                    ...(outcome.kind === 'unsupported' && {
-                      extract_fields_reason: 'unsupported_stream_type',
-                    }),
-                    status: 'proposal_not_applied',
-                    note: 'This is a proposed pipeline change. Present the simulation results to the user for review before applying.',
-                  },
+        if (outcome.kind === 'unsupported') {
+          // The non-ingest case carries no proposal — return only the
+          // warning + structured outcome pair. No `status` /
+          // `proposal_not_applied` / empty `steps` / empty `simulation`
+          // are emitted because there is nothing for the user to apply.
+          flow = 'extract_fields';
+          success = true;
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  stream: streamName,
+                  warnings: [outcome.warning],
+                  extract_fields_outcome: 'unsupported' as const,
+                  extract_fields_reason: 'unsupported_stream_type',
                 },
-              ],
-            };
-          }
+              },
+            ],
+          };
+        }
 
-          // outcome.kind === 'fallback' — heuristics produced no usable seed.
-          // Fall through to nlToStreamlang so the LLM still gets a chance.
-          extractFieldsFallbackReason = outcome.reason;
-          if (outcome.extraHints && outcome.extraHints.length > 0) {
-            fallbackHints.push(...outcome.extraHints);
-          }
+        if (outcome.kind === 'success') {
+          flow = 'extract_fields';
+          success = true;
+          stepsUsed = outcome.stepsUsed;
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  stream: streamName,
+                  ...outcome.result,
+                  extract_fields_outcome: 'success' as const,
+                  status: 'proposal_not_applied',
+                  note: 'This is a proposed pipeline change. Present the simulation results to the user for review before applying.',
+                },
+              },
+            ],
+          };
+        }
+
+        // outcome.kind === 'fallback' — heuristics produced no usable seed.
+        // Fall through to nlToStreamlang so the LLM still gets a chance.
+        extractFieldsFallbackReason = outcome.reason;
+        if (outcome.extraHints && outcome.extraHints.length > 0) {
+          fallbackHints.push(...outcome.extraHints);
         }
       }
 
