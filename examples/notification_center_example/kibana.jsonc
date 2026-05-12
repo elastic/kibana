@@ -11,6 +11,9 @@
     "browser": true,
     "requiredPlugins": [
       "developerExamples"
+    ],
+    "optionalPlugins": [
+      "spaces"
     ]
   }
 }

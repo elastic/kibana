@@ -38,11 +38,11 @@ import {
 } from './event_types';
 import { notificationCenterAppId } from './notification_center_app';
 
-// Stable per-button ids so repeated publishes upsert (replace) the same entry.
-// On reload, the persisted read/pinned state hydrates the freshly-published event.
-const REPORT_EVENT_ID = `${reportTypeId}:demo-1`;
-const ALERT_EVENT_ID = `${alertTypeId}:demo-1`;
-const CLOUD_EVENT_ID = `${cloudTypeId}:demo-1`;
+// Random per-publish ids — namespaced by typeId so the id sorts nicely in
+// localStorage and stays readable in devtools. Each click creates a new event,
+// allowing the example to populate a high volume of notifications.
+const nextId = (typeId: string) =>
+  `${typeId}:${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function App() {
   const events = useNotificationEventsService();
@@ -55,7 +55,7 @@ export function App() {
     events.notify({
       ...reportType,
       typeId: reportTypeId,
-      id: REPORT_EVENT_ID,
+      id: nextId(reportTypeId),
       timestamp: Date.now(),
       title: '[Error Monitoring Report] is generated',
       message: 'The report was generated and is ready to download.',
@@ -67,7 +67,7 @@ export function App() {
     events.notify({
       ...alertType,
       typeId: alertTypeId,
-      id: ALERT_EVENT_ID,
+      id: nextId(alertTypeId),
       timestamp: Date.now(),
       title: 'High CPU on web-1',
       message: 'CPU exceeded 90% for the last 5 minutes.',
@@ -79,7 +79,7 @@ export function App() {
     events.notify({
       ...cloudType,
       typeId: cloudTypeId,
-      id: CLOUD_EVENT_ID,
+      id: nextId(cloudTypeId),
       timestamp: Date.now(),
       title: 'Deployment provisioning complete',
       message: 'us-east-1 deployment is ready for use.',
