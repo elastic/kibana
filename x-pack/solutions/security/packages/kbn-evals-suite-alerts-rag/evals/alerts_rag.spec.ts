@@ -13,6 +13,7 @@ import {
 } from '@kbn/security-evals-alerts-snapshot';
 import { evaluate } from '../src/evaluate';
 import { alertsRagDataset, filterByCategory, getDatasetCategories } from '../src/datasets';
+import { verifyAlertsRagSnapshot } from '../src/datasets/snapshot_invariants';
 
 const ALERTS_SNAPSHOT_ENV_PREFIX = 'ALERTS_RAG_ALERTS_SNAPSHOT';
 
@@ -31,6 +32,11 @@ evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
           `snapshot="${snapshotConfig.snapshotName ?? 'latest'}")`
       );
       await restoreAlertsSnapshot({ esClient, log, config: snapshotConfig });
+      // Verify the restored snapshot still matches the assumptions the dataset
+      // reference answers were authored against. Surfaces snapshot↔dataset
+      // drift as a single, actionable failure instead of a wall of
+      // mysteriously-low Factuality scores. See snapshot_invariants.ts.
+      await verifyAlertsRagSnapshot({ esClient, log });
     } else {
       log.warning(
         '[alerts-rag] skipping snapshot restore (missing GCS_CREDENTIALS or explicitly disabled). ' +
@@ -46,23 +52,24 @@ evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {
     );
   });
 
+  // One test per category, ALL examples batched into a single evaluateDataset
+  // call. Earlier the spec invoked evaluateDataset once per example with
+  // `examples: [example]`; because `DatasetClient.upsert` is a full-replace
+  // per dataset name, the 2nd spec sharing a category clobbered the 1st and
+  // only one example per category survived in the golden cluster (~33% data
+  // loss every run, undermining baseline tracking). Aligns with every other
+  // kbn-evals suite (pci-compliance, security-ai-rules, entity-analytics,
+  // dashboard-migration), which all batch examples per dataset.
   for (const category of getDatasetCategories()) {
     const examples = filterByCategory(category);
 
-    evaluate.describe(category, () => {
-      examples.forEach((example, idx) => {
-        evaluate(
-          `[${idx + 1}/${examples.length}] ${example.input}`,
-          async ({ evaluateDataset }) => {
-            await evaluateDataset({
-              dataset: {
-                name: `${DATASET_NAME} › ${category}`,
-                description: DATASET_DESCRIPTION,
-                examples: [example],
-              },
-            });
-          }
-        );
+    evaluate(`${category} (${examples.length} examples)`, async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: `${DATASET_NAME} › ${category}`,
+          description: DATASET_DESCRIPTION,
+          examples,
+        },
       });
     });
   }

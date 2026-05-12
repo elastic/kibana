@@ -90,4 +90,22 @@ export const alertsRagDataset: AlertsRagExample[] = [
     },
     metadata: { category: 'multi_alert_correlation', dataset_split: ['base'] },
   },
+  {
+    input: 'Have any new alerts been triggered in the last hour?',
+    expected: {
+      reference:
+        'Filter the open alerts to those with @timestamp within the last hour and summarise the result. The answer should either enumerate the recent alerts (rule name + host) or explicitly state that no alerts have fired in the last hour, without fabricating timestamps. If the snapshot was restored hours/days ago and contains no truly "last hour" data, the agent should say so rather than misrepresent older alerts as recent.',
+      tool_sequence: [SECURITY_ALERTS_TOOL],
+    },
+    metadata: { category: 'temporal_query', dataset_split: ['base'] },
+  },
+  {
+    input: "What's the lowest-severity alert I currently have open?",
+    expected: {
+      reference:
+        'Identify the open alert with the lowest severity (preferring low, then medium, then high). The answer should name the rule and host of the lowest-severity alert and may include the severity value. If only one severity tier is present (e.g. all critical), the answer should say so explicitly rather than invent a lower-tier alert.',
+      tool_sequence: [SECURITY_ALERTS_TOOL],
+    },
+    metadata: { category: 'single_alert_query', dataset_split: ['base'] },
+  },
 ];
