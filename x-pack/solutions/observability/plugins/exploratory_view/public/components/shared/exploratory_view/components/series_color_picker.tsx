@@ -42,7 +42,7 @@ export function SeriesColorPicker({ seriesId, series }: { seriesId: number; seri
         onClick={() => setIsOpen((prevState) => !prevState)}
         flush="both"
       >
-        <EuiIcon type="stopFill" size="l" color={color} />
+        <EuiIcon type="stopFill" size="l" color={color} aria-hidden={true} />
       </EuiButtonEmpty>
     </EuiToolTip>
   );
