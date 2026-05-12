@@ -183,10 +183,12 @@ export class CasesUiPlugin
 
     if (plugins.agentBuilder) {
       void import('./agent_builder').then(({ registerCasesAgentBuilderAttachments }) => {
-        registerCasesAgentBuilderAttachments({
-          attachments: plugins.agentBuilder!.attachments,
-          application: core.application,
-        });
+        if (plugins.agentBuilder) {
+          registerCasesAgentBuilderAttachments({
+            attachments: plugins.agentBuilder.attachments,
+            application: core.application,
+          });
+        }
       });
     }
 
