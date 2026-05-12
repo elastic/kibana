@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RESIZE_HANDLE_SIZE } from '../../lib/constants';
+import { FULL_HANDLE_DIM, MIN_HANDLE_DIM, RESIZE_HANDLE_SIZE } from '../../lib/constants';
 import type { ResizeHandle } from '../../lib/constants';
 import type { ElementSession } from './element_registry';
 import type { ResizeState } from './interaction_state';
@@ -61,16 +61,13 @@ export const startResize = (
   clientX: number,
   clientY: number
 ): ResizeState => {
-  const clone = session.clone!;
-  clone.style.pointerEvents = 'none';
-  // Ensure transform-origin is top-left so scale grows predictably
-  clone.style.transformOrigin = '0 0';
-  clone.style.willChange = 'transform';
+  session.el.style.pointerEvents = 'none';
+  session.el.style.transformOrigin = '0 0';
+  session.el.style.willChange = 'transform';
 
   return {
     type: 'resize',
-    el: session.el,
-    clone,
+    session,
     handle,
     startX: clientX,
     startY: clientY,
@@ -78,7 +75,6 @@ export const startResize = (
     baseHeight: session.originalRect.height + session.dh,
     baseDx: session.dx,
     baseDy: session.dy,
-    originalRect: session.originalRect,
   };
 };
 
@@ -106,8 +102,8 @@ export const getHandleMode = (rect: {
   height: number;
 }): 'all' | 'corners' | 'none' => {
   const minDim = Math.min(rect.width, rect.height);
-  if (minDim < 24) return 'none';
-  if (minDim < 64) return 'corners';
+  if (minDim < MIN_HANDLE_DIM) return 'none';
+  if (minDim < FULL_HANDLE_DIM) return 'corners';
   return 'all';
 };
 
@@ -121,7 +117,11 @@ export const getHandleMode = (rect: {
  *
  * Returns the handle name if hit, or `null`.
  */
-export const findNearHandle = (px: number, py: number, rect: DOMRect): ResizeHandle | null => {
+export const findNearHandle = (
+  pointerX: number,
+  pointerY: number,
+  rect: DOMRect
+): ResizeHandle | null => {
   const mode = getHandleMode(rect);
   if (mode === 'none') return null;
 
@@ -133,8 +133,8 @@ export const findNearHandle = (px: number, py: number, rect: DOMRect): ResizeHan
     if (mode === 'corners' && handle.length === 1) continue;
 
     const [cx, cy] = anchor(rect);
-    const dx = px - cx;
-    const dy = py - cy;
+    const dx = pointerX - cx;
+    const dy = pointerY - cy;
     const desiredRadius = handle.length === 1 ? half + 10 : half + 6;
     const radius = Math.min(desiredRadius, maxRadius);
     if (dx * dx + dy * dy <= radius * radius) {
@@ -156,17 +156,12 @@ export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: n
 };
 
 /**
- * Apply a resize frame: computes deltas, updates the clone transform, and
- * writes the new offsets back to the registry session.
+ * Apply a resize frame: computes deltas, updates the transform, and
+ * writes the new offsets back to the session.
  */
-export const applyResizeMove = (
-  state: ResizeState,
-  clientX: number,
-  clientY: number,
-  registry: { get(el: HTMLElement): ElementSession | undefined }
-): void => {
-  const { clone, handle, startX, startY, baseWidth, baseHeight, baseDx, baseDy, originalRect } =
-    state;
+export const applyResizeMove = (state: ResizeState, clientX: number, clientY: number): void => {
+  const { session, handle, startX, startY, baseWidth, baseHeight, baseDx, baseDy } = state;
+  const { originalRect, el } = session;
   const mouseDx = clientX - startX;
   const mouseDy = clientY - startY;
   const { dx, dy, width, height } = calcResizeDeltas(
@@ -181,15 +176,12 @@ export const applyResizeMove = (
 
   const scaleX = width / originalRect.width;
   const scaleY = height / originalRect.height;
-  clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+  el.style.transform = buildTransform(dx, dy, scaleX, scaleY);
 
-  const session = registry.get(state.el);
-  if (session) {
-    session.dx = dx;
-    session.dy = dy;
-    session.dw = width - session.originalRect.width;
-    session.dh = height - session.originalRect.height;
-  }
+  session.dx = dx;
+  session.dy = dy;
+  session.dw = width - originalRect.width;
+  session.dh = height - originalRect.height;
 };
 
 /**

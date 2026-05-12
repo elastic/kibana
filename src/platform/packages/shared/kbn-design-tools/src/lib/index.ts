@@ -13,7 +13,7 @@ export {
   LAYOUT_OVERLAY_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
   DEVELOPER_TOOLBAR_ID,
-  DEVTOOL_CLONE_ATTR,
+  DEVTOOL_MANAGED_ATTR,
   DEVTOOL_IGNORE_ATTR,
   DEVTOOL_RESIZE_HANDLE_ATTR,
   ENDPOINT_SIZE,
@@ -35,7 +35,7 @@ export {
   snapToGrid,
 } from './dom';
 
-export type { SpacingLine, ElementOffset, TrackedElement, SnapResult } from './dom';
+export type { SpacingLine, SnapResult } from './dom';
 
 export { getDefaultLayoutConfig, calculateColumnLayout, calculateRowLayout } from './layout';
 

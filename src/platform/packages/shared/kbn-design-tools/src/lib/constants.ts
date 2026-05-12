@@ -31,11 +31,11 @@ export const ENDPOINT_SIZE = 5;
 /** Padding (px) inside measurement value labels. */
 export const LABEL_PADDING = 4;
 
-/** Marks an element as a clone managed by the edit overlay. */
-export const DEVTOOL_CLONE_ATTR = 'data-devtool-clone';
+/** Marks a managed element owned by the edit overlay. */
+export const DEVTOOL_MANAGED_ATTR = 'data-devtool-managed';
 
-/** Marks an element as a duplicate managed by the edit overlay. */
-export const DEVTOOL_DUPLICATE_ATTR = 'data-devtool-duplicate';
+/** Marks an original element hidden by the edit overlay. Stores the original inline transform. */
+export const DEVTOOL_HIDDEN_ATTR = 'data-devtool-hidden';
 
 /** Marks an element that should be excluded from measurement/selection. */
 export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';
@@ -51,6 +51,12 @@ export const ALL_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw
 
 /** Width/height (px) of each resize handle hit-target. */
 export const RESIZE_HANDLE_SIZE = 8;
+
+/** Minimum element dimension (px) below which no resize handles are shown. */
+export const MIN_HANDLE_DIM = 24;
+
+/** Minimum element dimension (px) for showing all 8 resize handles. */
+export const FULL_HANDLE_DIM = 64;
 
 /** Cursor for each resize handle. */
 export const HANDLE_CURSORS: Record<ResizeHandle, string> = {

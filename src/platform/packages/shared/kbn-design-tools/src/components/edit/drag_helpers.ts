@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_CLONE_ATTR } from '../../lib/constants';
+import { DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../../lib/constants';
 import { cloneClean } from '../../lib/dom/clone_element';
 import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
@@ -16,33 +16,28 @@ import type { DragState } from './interaction_state';
 import { buildTransform } from './resize_helpers';
 
 /**
- * Begin dragging an existing clone (re-grab).
- * Disables pointer events on the clone so it doesn't interfere with hit-testing during drag.
+ * Begin dragging an existing managed element (re-grab).
  */
-export const startDragFromClone = (
+export const startDragFromSession = (
   session: ElementSession,
   clientX: number,
   clientY: number
 ): DragState => {
-  const clone = session.clone!;
-  clone.style.pointerEvents = 'none';
-  clone.style.willChange = 'transform';
+  session.el.style.pointerEvents = 'none';
+  session.el.style.willChange = 'transform';
 
   return {
     type: 'drag',
-    el: session.el,
-    clone,
+    session,
     startX: clientX,
     startY: clientY,
     baseOffsetX: session.dx,
     baseOffsetY: session.dy,
-    originalRect: session.originalRect,
   };
 };
 
 /**
  * Begin dragging a new element for the first time.
- * Creates a fixed-position clone, hides the original, and tracks it in the registry.
  */
 export const startDragFromElement = (
   target: HTMLElement,
@@ -51,88 +46,67 @@ export const startDragFromElement = (
   clientX: number,
   clientY: number
 ): DragState => {
-  let session = registry.get(target);
+  const { clone, rect } = cloneClean(target, cloneZIndex);
 
-  if (!session) {
-    const rect = target.getBoundingClientRect();
-    session = {
-      el: target,
-      clone: null,
-      dx: 0,
-      dy: 0,
-      dw: 0,
-      dh: 0,
-      originalTransform: target.style.transform || '',
-      originalRect: rect,
-      isDuplicate: false,
-    };
-    registry.set(session);
-  } else if (session.clone) {
-    session.clone.remove();
-    registry.setClone(session, null);
-  }
-
-  // Clone lives on document.body so it's above all stacking contexts.
-  // cloneClean handles saving/restoring transform, display, and visibility
-  // so we get base dimensions and clean computed styles.
-  const { clone } = cloneClean(target, cloneZIndex);
-
-  // Set transform-origin for consistent scale behavior during resize
   clone.style.transformOrigin = '0 0';
   document.body.appendChild(clone);
 
-  // Hide original so it doesn't trigger hover or hit-testing.
-  // Duplicates use display:none because their children may have
-  // visibility:visible baked in (from copyInheritedStylesDeep), which
-  // overrides the parent's visibility:hidden in CSS.
-  // Regular elements use visibility:hidden to preserve layout space.
-  if (session.isDuplicate) {
-    target.style.display = 'none';
-  } else {
-    target.style.visibility = 'hidden';
-    target.style.pointerEvents = 'none';
-  }
+  const originalTransform = target.style.transform || '';
+  target.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
+  target.style.visibility = 'hidden';
+  target.style.pointerEvents = 'none';
+
+  const session: ElementSession = {
+    el: clone,
+    dx: 0,
+    dy: 0,
+    dw: 0,
+    dh: 0,
+    originalRect: rect,
+    isDuplicate: false,
+  };
+  registry.set(session);
 
   return {
     type: 'drag',
-    el: target,
-    clone,
+    session,
     startX: clientX,
     startY: clientY,
-    baseOffsetX: session.dx,
-    baseOffsetY: session.dy,
-    originalRect: session.originalRect,
+    baseOffsetX: 0,
+    baseOffsetY: 0,
   };
 };
 
 /**
- * Check if the target is an existing clone and find its tracked session.
+ * Check if the target is a managed element and find its tracked session.
  */
-export const findExistingClone = (
+export const findManagedSession = (
   target: HTMLElement,
   registry: ElementRegistry
 ): ElementSession | null => {
-  if (!target.hasAttribute(DEVTOOL_CLONE_ATTR)) return null;
-  return registry.getByClone(target) ?? null;
+  if (!target.hasAttribute(DEVTOOL_MANAGED_ATTR)) {
+    return null;
+  }
+  return registry.get(target) ?? null;
 };
 
 /**
- * Apply a drag frame: computes translate (with optional snap-to-grid), updates
- * the clone transform, and writes the new offsets back to the registry session.
+ * Apply a drag frame: computes translate with optional snap-to-grid and
+ * writes the new offsets back to the session.
  */
 export const applyDragMove = (
   state: DragState,
   clientX: number,
   clientY: number,
   shiftKey: boolean,
-  registry: { get(el: HTMLElement): ElementSession | undefined },
   options: {
     isLayoutVisible: boolean;
     layoutConfig: LayoutConfig;
     toolbarHeight: number;
   }
 ): void => {
-  const { clone, startX, startY, baseOffsetX, baseOffsetY, originalRect } = state;
+  const { session, startX, startY, baseOffsetX, baseOffsetY } = state;
+  const { originalRect, el } = session;
   const mouseDx = clientX - startX;
   const mouseDy = clientY - startY;
   let dx = baseOffsetX + mouseDx;
@@ -152,15 +126,10 @@ export const applyDragMove = (
     dy = snapped.dy;
   }
 
-  const session = registry.get(state.el);
-  const origW = originalRect.width;
-  const origH = originalRect.height;
-  const scaleX = session ? (origW + session.dw) / origW : 1;
-  const scaleY = session ? (origH + session.dh) / origH : 1;
-  clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+  const scaleX = (originalRect.width + session.dw) / originalRect.width;
+  const scaleY = (originalRect.height + session.dh) / originalRect.height;
+  el.style.transform = buildTransform(dx, dy, scaleX, scaleY);
 
-  if (session) {
-    session.dx = dx;
-    session.dy = dy;
-  }
+  session.dx = dx;
+  session.dy = dy;
 };

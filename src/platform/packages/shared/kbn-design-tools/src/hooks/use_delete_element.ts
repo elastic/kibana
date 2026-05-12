@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { DEVELOPER_TOOLBAR_ID, NON_DELETABLE_TAGS } from '../lib/constants';
+import { DEVELOPER_TOOLBAR_ID, DEVTOOL_HIDDEN_ATTR, NON_DELETABLE_TAGS } from '../lib/constants';
 
 /**
  * Manages soft-deletion of elements: fades them out, hides them with
@@ -27,14 +27,15 @@ export const useDeleteElement = (onDelete?: () => void) => {
   const deleteElement = useCallback(
     (el: HTMLElement) => {
       if (!isDeletable(el)) return;
+      el.style.pointerEvents = 'none';
+      el.setAttribute(DEVTOOL_HIDDEN_ATTR, el.style.transform || '');
+      deletedElements.current.add(el);
       el.style.transition = 'opacity 120ms ease';
       el.style.opacity = '0';
       setTimeout(() => {
         el.style.visibility = 'hidden';
-        el.style.pointerEvents = 'none';
         el.style.transition = '';
         el.style.opacity = '';
-        deletedElements.current.add(el);
       }, 120);
       onDelete?.();
     },
@@ -43,6 +44,10 @@ export const useDeleteElement = (onDelete?: () => void) => {
 
   const restoreAll = useCallback(() => {
     for (const el of deletedElements.current) {
+      if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
+        el.style.transform = el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
+        el.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+      }
       el.style.visibility = '';
       el.style.pointerEvents = '';
     }

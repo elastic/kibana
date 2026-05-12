@@ -11,7 +11,7 @@ export { EditOverlay } from './edit_overlay';
 export { EditOutline, OutlineControls } from './outline';
 export { ElementRegistry } from './element_registry';
 export { IDLE } from './interaction_state';
-export { startDragFromClone, startDragFromElement, findExistingClone } from './drag_helpers';
+export { startDragFromElement, findManagedSession } from './drag_helpers';
 export {
   startResize,
   calcResizeDeltas,

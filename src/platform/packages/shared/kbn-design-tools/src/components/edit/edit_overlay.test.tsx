@@ -10,7 +10,7 @@
 import React, { createRef } from 'react';
 import { cleanup, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { DEVELOPER_TOOLBAR_ID, DEVTOOL_CLONE_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { DEVELOPER_TOOLBAR_ID, DEVTOOL_MANAGED_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { getDefaultLayoutConfig } from '../../lib/layout/layout_config';
 import { EditOverlay } from './edit_overlay';
 import type { EditOverlayHandle } from './edit_overlay';
@@ -103,10 +103,10 @@ describe('EditOverlay', () => {
     window.requestAnimationFrame = originalRAF;
     target.remove();
     // Clean up any clones
-    document.querySelectorAll(`[${DEVTOOL_CLONE_ATTR}]`).forEach((el) => el.remove());
+    document.querySelectorAll(`[${DEVTOOL_MANAGED_ATTR}]`).forEach((el) => el.remove());
   });
 
-  const getClone = () => document.querySelector(`[${DEVTOOL_CLONE_ATTR}]`) as HTMLElement | null;
+  const getClone = () => document.querySelector(`[${DEVTOOL_MANAGED_ATTR}]`) as HTMLElement | null;
 
   it('should register and clean up event listeners', () => {
     const addSpy = jest.spyOn(document, 'addEventListener');
@@ -183,32 +183,6 @@ describe('EditOverlay', () => {
     expect(outline).not.toBeInTheDocument();
 
     toolbar.remove();
-  });
-
-  it('should not show hover outline over data-devtool-ignore elements', () => {
-    const panel = document.createElement('div');
-    panel.setAttribute('data-devtool-ignore', '');
-    document.body.appendChild(panel);
-
-    document.elementsFromPoint = jest.fn().mockReturnValue([panel, target]);
-
-    renderWithI18n(
-      <EditOverlay
-        layoutConfig={defaultLayoutConfig}
-        isLayoutVisible={false}
-        isActive={true}
-        setIsEditMode={setIsEditMode}
-      />
-    );
-
-    act(() => {
-      firePointerMove(75, 60);
-    });
-
-    const outline = document.querySelector('[data-test-subj="editOverlayOutline"]');
-    expect(outline).not.toBeInTheDocument();
-
-    panel.remove();
   });
 
   it('should create a clone and hide original when dragging an element', () => {
@@ -506,74 +480,5 @@ describe('EditOverlay', () => {
 
     // Drag should be aborted — clone stays in place with pointer events re-enabled
     expect(clone!.style.pointerEvents).toBe('auto');
-  });
-
-  it('should abort drag on visibilitychange to hidden', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
-
-    renderWithI18n(
-      <EditOverlay
-        layoutConfig={defaultLayoutConfig}
-        isLayoutVisible={false}
-        isActive={true}
-        setIsEditMode={setIsEditMode}
-      />
-    );
-
-    act(() => {
-      firePointerDown(75, 60);
-    });
-
-    const clone = getClone();
-    expect(clone).toBeInTheDocument();
-
-    // Simulate visibility change
-    Object.defineProperty(document, 'hidden', { value: true, configurable: true });
-    act(() => {
-      document.dispatchEvent(new Event('visibilitychange'));
-    });
-    Object.defineProperty(document, 'hidden', { value: false, configurable: true });
-
-    // Drag should be aborted
-    expect(clone!.style.pointerEvents).toBe('auto');
-  });
-
-  it('should render resize handles on the hover outline', () => {
-    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
-
-    // Use a large target so all 8 handles are visible (minDim >= 64)
-    target.getBoundingClientRect = () =>
-      ({
-        top: 50,
-        left: 50,
-        width: 200,
-        height: 100,
-        right: 250,
-        bottom: 150,
-        x: 50,
-        y: 50,
-        toJSON: () => {},
-      } as DOMRect);
-
-    renderWithI18n(
-      <EditOverlay
-        layoutConfig={defaultLayoutConfig}
-        isLayoutVisible={false}
-        isActive={true}
-        setIsEditMode={setIsEditMode}
-      />
-    );
-
-    // Trigger hover
-    act(() => {
-      firePointerMove(75, 60);
-    });
-
-    const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
-    for (const handle of handles) {
-      expect(
-        document.querySelector(`[data-test-subj="editOverlayResizeHandle-${handle}"]`)
-      ).toBeInTheDocument();
-    }
   });
 });

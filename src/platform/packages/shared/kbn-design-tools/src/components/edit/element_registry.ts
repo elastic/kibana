@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEVTOOL_HIDDEN_ATTR } from '../../lib/constants';
+
 /**
- * Tracks the editing state of a single editable instance: its visual clone,
- * transform offsets, resize deltas, and original styles needed for reset.
- *
- * For regular elements, `el` is the original DOM node.
- * For duplicates, `el` is a real DOM element inserted into the page that
- * acts as an independent editable instance.
+ * Tracks the editing state of a single managed element.
  */
 export interface ElementSession {
-  /** The editable DOM element — original or duplicate. */
+  /** The visible, position-fixed element managed by the editor. */
   el: HTMLElement;
-  /** The fixed-position clone visible on screen, or null before first interaction. */
-  clone: HTMLElement | null;
   /** Horizontal translate offset (px). */
   dx: number;
   /** Vertical translate offset (px). */
@@ -28,123 +23,68 @@ export interface ElementSession {
   dw: number;
   /** Height delta from resize operations. */
   dh: number;
-  /** The element's original inline transform value, restored on reset. */
-  originalTransform: string;
   /** The element's bounding rect before any editing — used for snap calculations. */
   originalRect: DOMRect;
-  /** True when `el` is a duplicate inserted into the DOM (should be removed on reset). */
+  /** True when this is a duplicate (no hidden original to restore on reset). */
   isDuplicate: boolean;
 }
 
 /**
- * Registry for elements being edited. Keyed by original element with a
- * secondary index by clone, so lookups from either direction are fast.
+ * Registry for managed elements. Keyed by the visible element.
  */
 export class ElementRegistry {
-  private readonly byElement = new Map<HTMLElement, ElementSession>();
-  private readonly byClone = new Map<HTMLElement, ElementSession>();
+  private readonly sessions = new Map<HTMLElement, ElementSession>();
 
   public get size(): number {
-    return this.byElement.size;
+    return this.sessions.size;
   }
 
-  /** Get a session by the original element. */
+  /** Get a session by its visible element. */
   get(el: HTMLElement): ElementSession | undefined {
-    return this.byElement.get(el);
+    return this.sessions.get(el);
   }
 
-  /** Get a session by its clone element. */
-  getByClone(clone: HTMLElement): ElementSession | undefined {
-    return this.byClone.get(clone);
-  }
-
-  /** Find a session by either the original element or its clone. */
-  find(el: HTMLElement): ElementSession | undefined {
-    return this.byElement.get(el) ?? this.byClone.get(el);
-  }
-
-  /** Register or update a session. */
   set(session: ElementSession): void {
-    this.byElement.set(session.el, session);
-    if (session.clone) {
-      this.byClone.set(session.clone, session);
-    }
+    this.sessions.set(session.el, session);
   }
 
-  /** Update the clone reference for a session (maintains the clone index). */
-  setClone(session: ElementSession, clone: HTMLElement | null): void {
-    if (session.clone) {
-      this.byClone.delete(session.clone);
-    }
-    session.clone = clone;
-    if (clone) {
-      this.byClone.set(clone, session);
-    }
-  }
-
-  /** Iterate all sessions. */
   values(): IterableIterator<ElementSession> {
-    return this.byElement.values();
+    return this.sessions.values();
   }
 
-  /** Reset all sessions: restore original styles, remove clones/duplicates, clear registry. */
-  resetAll(): void {
-    for (const session of this.byElement.values()) {
-      session.clone?.remove();
-      if (session.isDuplicate) {
-        // Duplicate elements are owned by the editor — remove from DOM entirely
-        session.el.remove();
-      } else {
-        session.el.style.transform = session.originalTransform;
-        session.el.style.visibility = '';
-        session.el.style.pointerEvents = '';
-      }
-    }
-    this.byElement.clear();
-    this.byClone.clear();
-  }
-
-  /** Check if an element (original or clone) has been registered. */
   has(el: HTMLElement): boolean {
-    return this.byElement.has(el) || this.byClone.has(el);
+    return this.sessions.has(el);
   }
 
-  /** Remove a session from both indexes. */
+  /** Remove a session from the registry without touching the DOM. */
   delete(session: ElementSession): void {
-    this.byElement.delete(session.el);
-    if (session.clone) {
-      this.byClone.delete(session.clone);
-    }
+    this.sessions.delete(session.el);
   }
 
   /**
-   * Remove a session completely: detach clone from DOM, remove duplicate
-   * elements, and restore original element styles. Returns the original
-   * element for further cleanup (e.g. soft-delete).
+   * Reset all sessions: remove managed elements, restore hidden originals,
+   * and clear the registry.
    */
-  removeSession(session: ElementSession): HTMLElement {
-    session.clone?.remove();
-    this.delete(session);
-
-    if (session.isDuplicate) {
+  resetAll(): void {
+    for (const session of this.sessions.values()) {
       session.el.remove();
-    } else {
-      session.el.style.pointerEvents = '';
-      session.el.style.transform = session.originalTransform;
     }
+    this.sessions.clear();
 
-    return session.el;
+    const hidden = document.querySelectorAll<HTMLElement>(`[${DEVTOOL_HIDDEN_ATTR}]`);
+    for (const el of hidden) {
+      el.style.transform = el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
+      el.style.visibility = '';
+      el.style.pointerEvents = '';
+      el.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+    }
   }
 
   /**
-   * Return a lightweight array for APIs that expect a list of tracked elements
-   * (e.g. getElementUnder hit-testing).
+   * Remove a session and detach its element from the DOM.
    */
-  toOffsetArray(): Array<{ el: HTMLElement; clone: HTMLElement | null }> {
-    const result: Array<{ el: HTMLElement; clone: HTMLElement | null }> = [];
-    for (const session of this.byElement.values()) {
-      result.push({ el: session.el, clone: session.clone });
-    }
-    return result;
+  removeSession(session: ElementSession): void {
+    session.el.remove();
+    this.delete(session);
   }
 }

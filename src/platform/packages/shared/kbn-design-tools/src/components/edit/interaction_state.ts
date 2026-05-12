@@ -8,6 +8,7 @@
  */
 
 import type { ResizeHandle } from '../../lib/constants';
+import type { ElementSession } from './element_registry';
 
 /**
  * Discriminated union representing the current editor interaction.
@@ -21,7 +22,7 @@ export interface IdleState {
 
 export interface HoverState {
   readonly type: 'hover';
-  /** The element (original or clone) being hovered. */
+  /** The element being hovered. */
   readonly target: HTMLElement;
   /** The resize handle under the pointer, if any. */
   readonly handle: ResizeHandle | null;
@@ -29,10 +30,8 @@ export interface HoverState {
 
 export interface DragState {
   readonly type: 'drag';
-  /** The original DOM element being dragged. */
-  readonly el: HTMLElement;
-  /** The visible clone being repositioned. */
-  readonly clone: HTMLElement;
+  /** The session being dragged. */
+  readonly session: ElementSession;
   /** Pointer X at drag start. */
   readonly startX: number;
   /** Pointer Y at drag start. */
@@ -41,32 +40,26 @@ export interface DragState {
   readonly baseOffsetX: number;
   /** Accumulated dy from prior drag/resize before this gesture. */
   readonly baseOffsetY: number;
-  /** The original element's rect before any editing — used for snap calculations. */
-  readonly originalRect: DOMRect;
 }
 
 export interface ResizeState {
   readonly type: 'resize';
-  /** The original DOM element being resized. */
-  readonly el: HTMLElement;
-  /** The visible clone being resized. */
-  readonly clone: HTMLElement;
+  /** The session being resized. */
+  readonly session: ElementSession;
   /** Which handle is being dragged. */
   readonly handle: ResizeHandle;
   /** Pointer X at resize start. */
   readonly startX: number;
   /** Pointer Y at resize start. */
   readonly startY: number;
-  /** Clone width at resize start (includes any prior dw). */
+  /** Width at resize start (includes any prior dw). */
   readonly baseWidth: number;
-  /** Clone height at resize start (includes any prior dh). */
+  /** Height at resize start (includes any prior dh). */
   readonly baseHeight: number;
   /** Position offset at resize start (includes any prior dx). */
   readonly baseDx: number;
   /** Position offset at resize start (includes any prior dy). */
   readonly baseDy: number;
-  /** The original element's rect — used for snap calculations. */
-  readonly originalRect: DOMRect;
 }
 
 export const IDLE: IdleState = { type: 'idle' };
