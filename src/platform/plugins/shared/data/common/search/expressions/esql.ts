@@ -390,7 +390,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           appliedTimeRange,
                           params: {},
                           indexPattern,
-                          sourceField: name,
+                          sourceField: resolveRenamedSourceField(
+                            name,
+                            querySummary.renamedColumnsPairs
+                          ),
                         }
                       : {
                           indexPattern,
