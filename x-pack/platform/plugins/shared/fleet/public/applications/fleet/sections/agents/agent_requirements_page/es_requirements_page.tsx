@@ -38,9 +38,21 @@ export const RequirementItem: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         <EuiText>
           {isMissing ? (
-            <EuiIcon type="error" color="danger" aria-hidden={true} />
+            <EuiIcon
+              type="error"
+              color="danger"
+              aria-label={i18n.translate('xpack.fleet.setupPage.requirementMissingIconLabel', {
+                defaultMessage: 'Requirement missing',
+              })}
+            />
           ) : (
-            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
+            <EuiIcon
+              type="checkCircleFill"
+              color="success"
+              aria-label={i18n.translate('xpack.fleet.setupPage.requirementMetIconLabel', {
+                defaultMessage: 'Requirement met',
+              })}
+            />
           )}
         </EuiText>
       </EuiFlexItem>
