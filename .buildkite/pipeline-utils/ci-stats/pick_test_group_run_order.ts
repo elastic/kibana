@@ -129,8 +129,11 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : ['unit', 'integration', 'functional'];
 
-  const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
-    ? process.env.LIMIT_SOLUTIONS.split(',')
+  const limitSolutionsRaw =
+    process.env.LIMIT_SOLUTIONS || bk.getMetadata('limit_test_groups_by_solution');
+  const LIMIT_SOLUTIONS = limitSolutionsRaw
+    ? limitSolutionsRaw
+        .split(',')
         .map((t) => t.trim())
         .filter(Boolean)
     : undefined;
@@ -585,7 +588,11 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
   } = { enabled: [], defaultQueue: undefined };
   const uniqueQueues = new Set<string>();
 
-  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
+  const solutionNameMap: Record<string, string> = {
+    observability: 'oblt',
+    workplaceai: 'workplace_ai',
+  };
+  const mappedSolutions = solutions?.map((s) => solutionNameMap[s] ?? s);
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
     if (
       mappedSolutions &&

@@ -21,6 +21,7 @@ import { getEvalPipeline } from '../../../pipelines/evals/eval_pipeline';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
+  doAllChangesMatch,
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
@@ -77,6 +78,27 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       'build_api_docs',
       'verify_rspack_build',
     ]);
+
+    const allSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const platformPaths = new RegExp(`^(src/|x-pack/platform/|x-pack/solutions/)`);
+    const allChangesUnderPlatformOrSolutions = await doAllChangesMatch(platformPaths);
+
+    if (allChangesUnderPlatformOrSolutions) {
+      const modifiedSolutions = [];
+      for (const solution of allSolutions) {
+        if (await doAnyChangesMatch([new RegExp(`^x-pack/solutions/${solution}/`)])) {
+          modifiedSolutions.push(solution);
+        }
+      }
+      if (modifiedSolutions.length > 0 && modifiedSolutions.length < allSolutions.length) {
+        execFileSync('buildkite-agent', [
+          'meta-data',
+          'set',
+          'limit_test_groups_by_solution',
+          modifiedSolutions.join(','),
+        ]);
+      }
+    }
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
