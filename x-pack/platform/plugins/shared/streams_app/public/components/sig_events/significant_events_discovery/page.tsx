@@ -28,12 +28,13 @@ import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
+import { InsightsTab } from './components/insights/tab';
+
 const SignificantEventsList = dynamic(() =>
   import('./components/significant_events_list').then((mod) => ({
     default: mod.SignificantEventsList,
   }))
 );
-import { InsightsTab } from './components/insights/tab';
 
 const discoveryTabs = [
   'streams',

@@ -102,6 +102,9 @@ export const TRANSLATIONS = {
       defaultMessage: 'Failed to load lifecycle data',
     }),
   },
+  fetchError: i18n.translate('xpack.streams.sigEventsList.fetchError', {
+    defaultMessage: 'Failed to load significant events',
+  }),
   lifecycle: {
     detectionStep: i18n.translate('xpack.streams.lifecycle.detectionStep', {
       defaultMessage: 'Detection',

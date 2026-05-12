@@ -36,7 +36,7 @@ interface EventFlyoutProps {
   onClose: () => void;
 }
 
-const BadgeRow = React.memo(({ items, color }: { items: string[]; color?: string }) => (
+const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => (
   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
     {items.map((item) => (
       <EuiFlexItem grow={false} key={item}>
@@ -44,9 +44,9 @@ const BadgeRow = React.memo(({ items, color }: { items: string[]; color?: string
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>
-));
+);
 
-export const EventFlyout = React.memo(({ event, onClose }: EventFlyoutProps) => {
+export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sigEventFlyout' });
 
   const {
@@ -184,4 +184,4 @@ export const EventFlyout = React.memo(({ event, onClose }: EventFlyoutProps) => 
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
-});
+};

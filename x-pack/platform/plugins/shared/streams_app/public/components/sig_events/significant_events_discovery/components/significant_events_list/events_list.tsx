@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
@@ -49,6 +50,10 @@ interface FilterPopoverProps {
   onChange: (options: EuiSelectableOption[]) => void;
 }
 
+const popoverContentCss = css`
+  width: 200px;
+`;
+
 const FilterPopover = ({
   label,
   ariaLabel,
@@ -79,21 +84,17 @@ const FilterPopover = ({
       panelPaddingSize="none"
     >
       <EuiSelectable options={options} onChange={onChange}>
-        {(list) => (
-          <div
-            css={css`
-              width: 200px;
-            `}
-          >
-            {list}
-          </div>
-        )}
+        {(list) => <div css={popoverContentCss}>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );
 };
 
 const MAX_VISIBLE_STREAMS = 3;
+
+const clickableRowCss = css`
+  cursor: pointer;
+`;
 
 const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   {
@@ -171,20 +172,27 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   },
 ];
 
+const extractCheckedKeys = <T extends string>(options: EuiSelectableOption[]): T[] =>
+  options.filter((opt) => opt.checked === 'on').map((opt) => (opt.key ?? opt.label) as T);
+
 export const SignificantEventsList = () => {
-  const { events, total, loading, filters, pagination, sort, onTableChange, onFilterChange } =
-    useSigEventsList();
+  const {
+    events,
+    total,
+    loading,
+    error,
+    filters,
+    pagination,
+    sort,
+    onTableChange,
+    onFilterChange,
+  } = useSigEventsList();
   const { filteredStreams } = useKiGeneration();
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
   const { refresh: refreshTimefilter } = useTimefilter();
 
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | null>(null);
-
-  const onSearchChange = useCallback(
-    (value: string) => onFilterChange({ search: value }),
-    [onFilterChange]
-  );
 
   const verdictSelectableOptions: EuiSelectableOption[] = useMemo(
     () =>
@@ -222,42 +230,27 @@ export const SignificantEventsList = () => {
   );
 
   const onVerdictSelectionChange = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const selected = options
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as Verdict);
-      onFilterChange({ verdict: selected });
-    },
+    (options: EuiSelectableOption[]) =>
+      onFilterChange({ verdict: extractCheckedKeys<Verdict>(options) }),
     [onFilterChange]
   );
 
   const onImpactSelectionChange = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const selected = options
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key as Impact);
-      onFilterChange({ impact: selected });
-    },
+    (options: EuiSelectableOption[]) =>
+      onFilterChange({ impact: extractCheckedKeys<Impact>(options) }),
     [onFilterChange]
   );
 
   const onStreamSelectionChange = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const selected = options
-        .filter((opt) => opt.checked === 'on')
-        .map((opt) => opt.key ?? opt.label);
-      onFilterChange({ stream: selected });
-    },
+    (options: EuiSelectableOption[]) => onFilterChange({ stream: extractCheckedKeys(options) }),
     [onFilterChange]
   );
 
   const handleTableChange = useCallback(
-    (criteria: CriteriaWithPagination<SigEvent>) => {
+    ({ page: tablePage, sort: tableSort }: CriteriaWithPagination<SigEvent>) => {
       onTableChange({
-        page: criteria.page ? { index: criteria.page.index, size: criteria.page.size } : undefined,
-        sort: criteria.sort
-          ? { field: criteria.sort.field, direction: criteria.sort.direction }
-          : undefined,
+        page: tablePage ? { index: tablePage.index, size: tablePage.size } : undefined,
+        sort: tableSort ? { field: tableSort.field, direction: tableSort.direction } : undefined,
       });
     },
     [onTableChange]
@@ -283,16 +276,12 @@ export const SignificantEventsList = () => {
     [sort]
   );
 
-  const clickableRowCss = css`
-    cursor: pointer;
-  `;
-
   const rowProps = useCallback(
     (item: SigEvent) => ({
       onClick: () => setSelectedEvent(item),
       css: clickableRowCss,
     }),
-    [clickableRowCss]
+    []
   );
 
   return (
@@ -302,7 +291,7 @@ export const SignificantEventsList = () => {
           <EuiFieldSearch
             placeholder={TRANSLATIONS.searchPlaceholder}
             value={filters.search}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => onFilterChange({ search: e.target.value })}
             isClearable
             fullWidth
           />
@@ -346,6 +335,18 @@ export const SignificantEventsList = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {error && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={TRANSLATIONS.fetchError}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiBasicTable<SigEvent>
         tableCaption={TRANSLATIONS.tableCaption}
         items={events}

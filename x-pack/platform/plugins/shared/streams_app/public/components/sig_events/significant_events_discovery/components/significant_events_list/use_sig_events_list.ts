@@ -5,26 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { Verdict, Impact, SigEvent } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-interface SigEventsQueryParams {
-  page: number;
-  perPage: number;
-  sortField: string;
-  sortDirection: 'asc' | 'desc';
-  verdict?: Verdict[];
-  impact?: Impact[];
-  stream?: string[];
-  search?: string;
-  from?: string;
-  to?: string;
-}
 
 export interface SigEventsFilters {
   verdict: Verdict[];
@@ -73,35 +60,44 @@ export const useSigEventsList = () => {
   const [pagination, setPagination] = useState<SigEventsPagination>(DEFAULT_PAGINATION);
   const [sort, setSort] = useState<SigEventsSort>(DEFAULT_SORT);
 
+  const { verdict, impact, stream } = filters;
   const debouncedSearch = useDebouncedValue(filters.search, SEARCH_DEBOUNCE_MS);
-
-  const queryParams = useMemo((): SigEventsQueryParams => {
-    const params: SigEventsQueryParams = {
-      page: pagination.page,
-      perPage: pagination.perPage,
-      sortField: sort.field,
-      sortDirection: sort.direction,
-    };
-    if (filters.verdict.length > 0) params.verdict = filters.verdict;
-    if (filters.impact.length > 0) params.impact = filters.impact;
-    if (filters.stream.length > 0) params.stream = filters.stream;
-    if (debouncedSearch) params.search = debouncedSearch;
-    return params;
-  }, [filters.verdict, filters.impact, filters.stream, debouncedSearch, pagination, sort]);
+  const { page, perPage } = pagination;
+  const { field: sortField, direction: sortDirection } = sort;
 
   const fetchState = useStreamsAppFetch(
     async ({ signal, timeState }) => {
-      const query: SigEventsQueryParams = { ...queryParams };
-      if (timeState) {
-        query.from = timeState.asAbsoluteTimeRange.from;
-        query.to = timeState.asAbsoluteTimeRange.to;
-      }
       return streamsRepositoryClient.fetch('GET /internal/streams/sig_events/list', {
-        params: { query },
+        params: {
+          query: {
+            page,
+            perPage,
+            sortField,
+            sortDirection,
+            ...(verdict.length > 0 && { verdict }),
+            ...(impact.length > 0 && { impact }),
+            ...(stream.length > 0 && { stream }),
+            ...(debouncedSearch && { search: debouncedSearch }),
+            ...(timeState && {
+              from: timeState.asAbsoluteTimeRange.from,
+              to: timeState.asAbsoluteTimeRange.to,
+            }),
+          },
+        },
         signal,
       });
     },
-    [streamsRepositoryClient, queryParams],
+    [
+      streamsRepositoryClient,
+      page,
+      perPage,
+      sortField,
+      sortDirection,
+      verdict,
+      impact,
+      stream,
+      debouncedSearch,
+    ],
     { withTimeRange: true, withRefresh: true }
   );
 

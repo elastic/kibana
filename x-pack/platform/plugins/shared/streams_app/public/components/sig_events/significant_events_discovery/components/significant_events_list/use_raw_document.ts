@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef } from 'react';
+import { useCallback, useState } from 'react';
 import type { SigEventDocType } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
@@ -13,10 +13,9 @@ import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 interface UseRawDocumentParams {
   type: SigEventDocType;
   docId: string;
-  enabled: boolean;
 }
 
-export const useRawDocument = ({ type, docId, enabled }: UseRawDocumentParams) => {
+export const useRawDocument = ({ type, docId }: UseRawDocumentParams) => {
   const {
     dependencies: {
       start: {
@@ -25,23 +24,19 @@ export const useRawDocument = ({ type, docId, enabled }: UseRawDocumentParams) =
     },
   } = useKibana();
 
-  const hasFetchedRef = useRef(false);
+  const [shouldFetch, setShouldFetch] = useState(false);
+  const fetch = useCallback(() => setShouldFetch(true), []);
 
   const result = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!enabled || hasFetchedRef.current) return undefined;
-      const response = await streamsRepositoryClient.fetch(
-        'GET /internal/streams/sig_events/raw/{type}/{docId}',
-        {
-          params: { path: { type, docId } },
-          signal,
-        }
-      );
-      hasFetchedRef.current = true;
-      return response;
+      if (!shouldFetch) return undefined;
+      return streamsRepositoryClient.fetch('GET /internal/streams/sig_events/raw/{type}/{docId}', {
+        params: { path: { type, docId } },
+        signal,
+      });
     },
-    [streamsRepositoryClient, type, docId, enabled]
+    [streamsRepositoryClient, type, docId, shouldFetch]
   );
 
-  return result;
+  return { ...result, fetch };
 };

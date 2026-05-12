@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import {
   EuiTimeline,
@@ -143,19 +143,39 @@ const EvidencesList = React.memo(({ evidences }: { evidences: LifecycleEvidence[
   );
 });
 
+const CountedAccordion = ({
+  id,
+  label,
+  count,
+  children,
+}: {
+  id: string;
+  label: string;
+  count: number;
+  children: ReactNode;
+}) => (
+  <EuiAccordion
+    id={id}
+    buttonContent={`${label} (${count})`}
+    paddingSize="xs"
+    css={compactAccordionCss}
+  >
+    {children}
+  </EuiAccordion>
+);
+
 // ---------------------------------------------------------------------------
 // Raw document accordion (lazy-fetches full _source on expand)
 // ---------------------------------------------------------------------------
 
-const RawDocAccordion = React.memo(({ type, docId }: { type: SigEventDocType; docId: string }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { value, loading } = useRawDocument({ type, docId, enabled: isOpen });
+const RawDocAccordion = ({ type, docId }: { type: SigEventDocType; docId: string }) => {
+  const { value, loading, fetch: fetchDoc } = useRawDocument({ type, docId });
 
   return (
     <EuiAccordion
       id={`raw-${type}-${docId}`}
       buttonContent={TRANSLATIONS.lifecycle.rawDocument}
-      onToggle={setIsOpen}
+      onToggle={fetchDoc}
       paddingSize="xs"
       css={compactAccordionCss}
     >
@@ -168,7 +188,7 @@ const RawDocAccordion = React.memo(({ type, docId }: { type: SigEventDocType; do
       ) : null}
     </EuiAccordion>
   );
-});
+};
 
 // ---------------------------------------------------------------------------
 // Detection timeline item
@@ -336,44 +356,40 @@ const DiscoveryItem = React.memo(({ discovery }: { discovery: LifecycleDiscovery
         </EuiAccordion>
 
         {discovery.evidences.length > 0 && (
-          <EuiAccordion
+          <CountedAccordion
             id={`discovery-evidences-${discovery.id}`}
-            buttonContent={`${TRANSLATIONS.lifecycle.evidences} (${discovery.evidences.length})`}
-            paddingSize="xs"
-            css={compactAccordionCss}
+            label={TRANSLATIONS.lifecycle.evidences}
+            count={discovery.evidences.length}
           >
             <EvidencesList evidences={discovery.evidences} />
-          </EuiAccordion>
+          </CountedAccordion>
         )}
 
         {discovery.dependency_edges.length > 0 && (
-          <EuiAccordion
+          <CountedAccordion
             id={`discovery-deps-${discovery.id}`}
-            buttonContent={`${TRANSLATIONS.lifecycle.dependencies} (${discovery.dependency_edges.length})`}
-            paddingSize="xs"
-            css={compactAccordionCss}
+            label={TRANSLATIONS.lifecycle.dependencies}
+            count={discovery.dependency_edges.length}
           >
             <EuiDescriptionList compressed type="column" listItems={dependencyListItems} />
-          </EuiAccordion>
+          </CountedAccordion>
         )}
 
         {discovery.infra_components.length > 0 && (
-          <EuiAccordion
+          <CountedAccordion
             id={`discovery-infra-${discovery.id}`}
-            buttonContent={`${TRANSLATIONS.lifecycle.infraComponents} (${discovery.infra_components.length})`}
-            paddingSize="xs"
-            css={compactAccordionCss}
+            label={TRANSLATIONS.lifecycle.infraComponents}
+            count={discovery.infra_components.length}
           >
             <EuiDescriptionList compressed type="column" listItems={infraListItems} />
-          </EuiAccordion>
+          </CountedAccordion>
         )}
 
         {discovery.cause_kis.length > 0 && (
-          <EuiAccordion
+          <CountedAccordion
             id={`discovery-kis-${discovery.id}`}
-            buttonContent={`${TRANSLATIONS.lifecycle.causeKis} (${discovery.cause_kis.length})`}
-            paddingSize="xs"
-            css={compactAccordionCss}
+            label={TRANSLATIONS.lifecycle.causeKis}
+            count={discovery.cause_kis.length}
           >
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
               {discovery.cause_kis.map((ki, idx) => (
@@ -384,7 +400,7 @@ const DiscoveryItem = React.memo(({ discovery }: { discovery: LifecycleDiscovery
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-          </EuiAccordion>
+          </CountedAccordion>
         )}
 
         <RawDocAccordion type="discovery" docId={discovery.id} />
@@ -463,11 +479,10 @@ const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) =
       )}
 
       {v.recommendations.length > 0 && (
-        <EuiAccordion
+        <CountedAccordion
           id={`verdict-recs-${v.id}`}
-          buttonContent={`${TRANSLATIONS.lifecycle.recommendations} (${v.recommendations.length})`}
-          paddingSize="xs"
-          css={compactAccordionCss}
+          label={TRANSLATIONS.lifecycle.recommendations}
+          count={v.recommendations.length}
         >
           <EuiText size="xs">
             <ul>
@@ -476,18 +491,17 @@ const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) =
               ))}
             </ul>
           </EuiText>
-        </EuiAccordion>
+        </CountedAccordion>
       )}
 
       {v.evidences.length > 0 && (
-        <EuiAccordion
+        <CountedAccordion
           id={`verdict-evidences-${v.id}`}
-          buttonContent={`${TRANSLATIONS.lifecycle.evidences} (${v.evidences.length})`}
-          paddingSize="xs"
-          css={compactAccordionCss}
+          label={TRANSLATIONS.lifecycle.evidences}
+          count={v.evidences.length}
         >
           <EvidencesList evidences={v.evidences} />
-        </EuiAccordion>
+        </CountedAccordion>
       )}
 
       <RawDocAccordion type="verdict" docId={v.id} />

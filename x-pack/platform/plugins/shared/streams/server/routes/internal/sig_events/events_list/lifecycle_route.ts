@@ -186,17 +186,6 @@ const mapVerdict = (hit: { _id?: string; _source?: unknown }): LifecycleVerdict 
 // Route
 // ---------------------------------------------------------------------------
 
-const DETECTION_SOURCE_FIELDS = [
-  '@timestamp',
-  'detection_id',
-  'rule_name',
-  'stream',
-  'alert_count',
-  'superseded',
-  'detection_evidence.change_point_type',
-  'detection_evidence.p_value',
-];
-
 const getLifecycleRoute = createServerRoute({
   endpoint: 'GET /internal/streams/sig_events/{eventId}/lifecycle',
   params: z.object({
@@ -257,7 +246,6 @@ const getLifecycleRoute = createServerRoute({
         index: DETECTIONS_INDEX,
         size: 500,
         sort: [{ '@timestamp': 'asc' }],
-        _source: DETECTION_SOURCE_FIELDS,
         query: { bool: { filter: [{ terms: { detection_id: detectionIds } }] } },
       });
       detections = detectionsResult.hits.hits.map(mapDetection);
