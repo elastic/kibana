@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
 import type { ConstructorOptions } from '../rules_client';
 import { RulesClient } from '../rules_client';
 import { RuleChangeTrackingDisabledError } from '../methods/get_rule_history';
@@ -153,13 +154,39 @@ describe('getHistory()', () => {
   });
 
   test('returns result from the change tracking service', async () => {
+    const ruleSO = getRuleSavedObject();
+    const changeHistoryItem = generateChangeHistoryDocument({
+      object: {
+        id: ruleSO.id,
+        type: '',
+        hash: '',
+        fields: {
+          hashed: [],
+        },
+        snapshot: {
+          attributes: ruleSO.attributes,
+          references: ruleSO.references,
+        },
+      },
+    });
+
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
-    const items = [{ '@timestamp': '2026-01-01T00:00:00.000Z' }];
-    changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: items as never[] });
+    changeTrackingService.getHistory.mockResolvedValueOnce({
+      total: 1,
+      items: [changeHistoryItem],
+    });
 
     const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
 
-    expect(result).toEqual({ total: 1, items });
+    expect(result).toEqual({
+      total: 1,
+      items: [
+        {
+          ...changeHistoryItem,
+          rule: expect.any(Object),
+        },
+      ],
+    });
   });
 
   test('forwards default pagination to the change tracking service', async () => {
@@ -311,29 +338,31 @@ describe('getHistory()', () => {
       expect(result.items[0].rule.alertTypeId).toBe('siem.queryRule');
     });
 
-    test('passes items through without `rule` when the snapshot is malformed', async () => {
+    test('discards items without `rule` when the snapshot is malformed', async () => {
+      const ruleSO = getRuleSavedObject();
+      const changeHistoryItem = generateChangeHistoryDocument({
+        object: {
+          id: ruleSO.id,
+          type: '',
+          hash: '',
+          fields: {
+            hashed: [],
+          },
+          snapshot: {
+            references: ruleSO.references,
+          },
+        },
+      });
+
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
       changeTrackingService.getHistory.mockResolvedValueOnce({
         total: 1,
-        items: [
-          {
-            '@timestamp': '2026-05-01T10:00:00.000Z',
-            object: {
-              id: 'rule-1',
-              type: 'alert',
-              hash: 'h',
-              fields: { hashed: [] },
-              snapshot: { references: [] },
-            },
-          } as never,
-        ],
+        items: [changeHistoryItem],
       });
 
       const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
 
-      expect(result.items).toHaveLength(1);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result.items[0] as any).rule).toBeUndefined();
+      expect(result.items).toHaveLength(0);
     });
   });
 });

@@ -17,8 +17,7 @@ import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRule,
 } from '../../application/rule/transforms';
-import type { RuleSnapshot } from '../lib/change_tracking';
-import type { Rule } from '../../application/rule/types';
+import type { Rule, RuleParams } from '../../application/rule/types';
 import { getRuleSo } from '../../data/rule';
 
 /**
@@ -50,8 +49,9 @@ export interface GetRuleHistoryParams {
  * into a `SanitizedRule` shape so callers don't have to deal with the raw
  * stored `object.snapshot` directly.
  */
-export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
-  rule: Rule;
+export interface RuleChangeHistoryDocument<Params extends RuleParams = RuleParams>
+  extends ChangeHistoryDocument {
+  rule: Rule<Params>;
 }
 
 /**
@@ -72,15 +72,15 @@ export async function getRuleHistory(
     throw new RuleChangeTrackingDisabledError();
   }
 
-  const rule = await getRuleSo({
+  const currentRule = await getRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id: ruleId,
   });
 
   try {
     await context.authorization.ensureAuthorized({
-      ruleTypeId: rule.attributes.alertTypeId,
-      consumer: rule.attributes.consumer,
+      ruleTypeId: currentRule.attributes.alertTypeId,
+      consumer: currentRule.attributes.consumer,
       operation: ReadOperations.GetHistory,
       entity: AlertingAuthorizationEntity.Rule,
     });
@@ -88,7 +88,11 @@ export async function getRuleHistory(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_HISTORY,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: rule.attributes.name },
+        savedObject: {
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: ruleId,
+          name: currentRule.attributes.name,
+        },
         error,
       })
     );
@@ -98,7 +102,7 @@ export async function getRuleHistory(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_HISTORY,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: rule.attributes.name },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: currentRule.attributes.name },
     })
   );
 
@@ -108,30 +112,49 @@ export async function getRuleHistory(
     sort,
   });
 
+  const itemsRule: RuleChangeHistoryDocument[] = [];
+
+  for (const item of result.items) {
+    const ruleSnapshot = hydrateRuleSnapshot(item.object, context);
+
+    if (ruleSnapshot) {
+      itemsRule.push({ ...item, rule: ruleSnapshot });
+    }
+  }
+
   return {
     ...result,
-    items: result.items.map((item) => hydrateRuleHistoryItem(item, context)),
+    items: itemsRule,
   };
 }
 
 /**
- * Reconstruct the `SanitizedRule` for a single history entry from its
+ * Reconstructs the `SanitizedRule` for a single history entry from its
  * `object.snapshot` (a `RuleSnapshot` of `{ attributes: RawRule, references }`).
+ * In particular it leads to transforming date strings to Date.
+ *
  * If the snapshot is malformed or the rule type is no longer registered,
  * we fall back to the raw item — the caller may still surface it without a
  * fully-typed rule.
  */
-const hydrateRuleHistoryItem = (
-  item: ChangeHistoryDocument,
+function hydrateRuleSnapshot(
+  obj: ChangeHistoryDocument['object'],
   context: RulesClientContext
-): RuleChangeHistoryDocument => {
-  const snapshot = item.object?.snapshot as Partial<RuleSnapshot> | undefined;
+): Rule | undefined {
+  const snapshot = obj.snapshot;
   const rawRule = snapshot?.attributes;
-  const ruleTypeId = rawRule?.alertTypeId;
-  const ruleId = item.object?.id;
 
-  if (!rawRule || !ruleTypeId || !ruleId) {
-    return item as RuleChangeHistoryDocument;
+  if (typeof rawRule !== 'object' || rawRule === null) {
+    return;
+  }
+
+  const ruleTypeId =
+    'alertTypeId' in rawRule && typeof rawRule.alertTypeId === 'string'
+      ? rawRule.alertTypeId
+      : undefined;
+
+  if (!ruleTypeId) {
+    return;
   }
 
   try {
@@ -139,19 +162,21 @@ const hydrateRuleHistoryItem = (
     const ruleDomain = transformRuleAttributesToRuleDomain(
       rawRule as RawRule,
       {
-        id: ruleId,
+        id: obj.id,
         logger: context.logger,
         ruleType,
-        references: snapshot?.references ?? [],
+        references:
+          snapshot?.references && Array.isArray(snapshot.references) ? snapshot.references : [],
       },
       context.isSystemAction
     );
 
     // `transformRuleDomainToRule` returns a `Rule` shape that omits the
     // raw `apiKey` field, so the result is effectively a `SanitizedRule`.
-    return { ...item, rule: transformRuleDomainToRule(ruleDomain) };
+    return transformRuleDomainToRule(ruleDomain);
   } catch (error) {
-    context.logger.warn(`Unable to hydrate rule snapshot for [${ruleId}]: ${error}`);
-    return item as RuleChangeHistoryDocument;
+    context.logger.warn(`Unable to hydrate rule snapshot for [${obj.id}]: ${error}`);
+
+    return;
   }
-};
+}

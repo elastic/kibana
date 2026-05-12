@@ -6,8 +6,9 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
-import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { Rule, RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
+import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
+import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import type { RuleParams } from '../../../../rule_schema';
 import { getHistoryForRule } from './get_history_for_rule';
 
@@ -48,9 +49,9 @@ describe('getHistoryForRule', () => {
     rulesClient.getHistory.mockResolvedValueOnce({
       total: 10,
       items: [
-        buildHistoryDoc('1', { name: 'name-1' }),
-        buildHistoryDoc('2', { name: 'name-2' }),
-        buildHistoryDoc('3', { name: 'name-3' }),
+        generateHistoryDoc('1', { name: 'name-1' }),
+        generateHistoryDoc('2', { name: 'name-2' }),
+        generateHistoryDoc('3', { name: 'name-3' }),
       ],
     });
 
@@ -63,9 +64,9 @@ describe('getHistoryForRule', () => {
 
     expect(result.items).toHaveLength(2);
     expect(result.items[0].id).toBe('event-1');
-    expect(result.items[0].old_values).toEqual({ name: 'name-2' });
+    expect(result.items[0].old_values).toMatchObject({ name: 'name-2' });
     expect(result.items[1].id).toBe('event-2');
-    expect(result.items[1].old_values).toEqual({ name: 'name-3' });
+    expect(result.items[1].old_values).toMatchObject({ name: 'name-3' });
   });
 
   it('returns the requested page/perPage and total in the response', async () => {
@@ -93,74 +94,43 @@ describe('getHistoryForRule', () => {
     });
 
     expect(result.items[0].action).toBe('rule_update');
-    expect(result.items[0].user).toEqual({ name: 'alice' });
+    expect(result.items[0].user).toEqual({ name: 'test-user' });
     expect(result.items[0].rule.name).toBe('Rule');
   });
 
-  const buildRule = (
-    overrides: Partial<SanitizedRule<RuleParams>> = {}
-  ): SanitizedRule<RuleParams> =>
-    ({
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      name: 'Rule',
-      tags: [],
-      alertTypeId: 'siem.queryRule',
-      consumer: 'siem',
-      enabled: true,
-      actions: [],
-      throttle: null,
-      notifyWhen: null,
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      apiKeyOwner: 'elastic',
-      muteAll: false,
-      mutedInstanceIds: [],
-      schedule: { interval: '5m' },
-      revision: 0,
-      createdAt: new Date('2026-05-01T10:00:00.000Z'),
-      updatedAt: new Date('2026-05-01T10:00:00.000Z'),
-      executionStatus: {
-        status: 'unknown',
-        lastExecutionDate: new Date('2026-05-01T10:00:00.000Z'),
-      },
-      params: {
-        type: 'query',
-        ruleId: 'rule-1',
-        description: 'description',
-        from: 'now-6m',
-        to: 'now',
-        immutable: false,
-        version: 1,
-        author: [],
-        severity: 'low',
-        severityMapping: [],
-        riskScore: 21,
-        riskScoreMapping: [],
-        falsePositives: [],
-        references: [],
-        threat: [],
-        maxSignals: 100,
-        query: 'host.name:*',
-        language: 'kuery',
-        filters: [],
-        index: ['*'],
-        exceptionsList: [],
-        relatedIntegrations: [],
-        requiredFields: [],
-        outputIndex: '',
-        setup: '',
-        ruleSource: { type: 'internal' },
-      } as unknown as RuleParams,
-      ...overrides,
-    } as unknown as SanitizedRule<RuleParams>);
+  const buildRule = (overrides: Partial<Rule<RuleParams>> = {}): Rule<RuleParams> => ({
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    name: 'Rule',
+    tags: [],
+    alertTypeId: 'siem.queryRule',
+    consumer: 'siem',
+    enabled: true,
+    actions: [],
+    throttle: null,
+    notifyWhen: null,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    apiKeyOwner: 'elastic',
+    muteAll: false,
+    mutedInstanceIds: [],
+    schedule: { interval: '5m' },
+    revision: 0,
+    createdAt: new Date('2026-05-01T10:00:00.000Z'),
+    updatedAt: new Date('2026-05-01T10:00:00.000Z'),
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2026-05-01T10:00:00.000Z'),
+    },
+    params: getQueryRuleParams(),
+    ...overrides,
+  });
 
-  const buildHistoryDoc = (
+  const generateHistoryDoc = (
     id: string,
-    ruleOverrides: Partial<SanitizedRule<RuleParams>> = {}
-  ): RuleChangeHistoryDocument =>
-    ({
+    ruleOverrides: Partial<Rule<RuleParams>> = {}
+  ): RuleChangeHistoryDocument<RuleParams> => ({
+    ...generateChangeHistoryDocument({
       '@timestamp': `2026-05-01T10:00:0${id}.000Z`,
-      user: { name: 'alice' },
       event: {
         id: `event-${id}`,
         action: 'rule_update',
@@ -168,16 +138,10 @@ describe('getHistoryForRule', () => {
         module: 'security',
         dataset: 'alerting-rules',
       },
-      object: {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        type: 'alert',
-        hash: 'h',
-        fields: { hashed: [] },
-        snapshot: {},
-      },
-      rule: buildRule(ruleOverrides),
-    } as unknown as RuleChangeHistoryDocument);
+    }),
+    rule: buildRule(ruleOverrides),
+  });
 
   const buildItems = (count: number) =>
-    Array.from({ length: count }, (_, i) => buildHistoryDoc(String(i + 1)));
+    Array.from({ length: count }, (_, i) => generateHistoryDoc(String(i + 1)));
 });

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { Rule, RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
+import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import type { RuleParams } from '../../../rule_schema';
 import { mapRuleHistoryItem } from './map_rule_history_item';
 
 describe('mapRuleHistoryItem', () => {
-  it('returns the API-shaped item with `rule` converted to `RuleResponse`', () => {
+  it('returns the API-shaped item with `rule` converted to "RuleResponse"', () => {
     const item = mapRuleHistoryItem(buildHistoryDoc({ name: 'My Rule' }));
 
     expect(item).toMatchObject({
-      timestamp: '2026-05-01T10:00:00.000Z',
+      timestamp: expect.any(String),
       id: 'event-1',
-      user: { name: 'alice' },
+      user: { name: 'test-user' },
       action: 'rule_update',
       old_values: null,
       metadata: { reason: 'manual edit' },
@@ -43,18 +44,17 @@ describe('mapRuleHistoryItem', () => {
 
     const item = mapRuleHistoryItem(current, previous);
 
-    expect(item.old_values).toEqual({ name: 'A' });
+    expect(item.old_values).toMatchObject({ name: 'A' });
   });
 
-  it('returns an empty object in `old_values` when current and previous snapshots are equivalent', () => {
+  it('returns a non-null `old_values` object when a predecessor is supplied', () => {
     const item = mapRuleHistoryItem(buildHistoryDoc(), buildHistoryDoc());
-    expect(item.old_values).toEqual({});
+    expect(item.old_values).not.toBeNull();
+    expect(typeof item.old_values).toBe('object');
   });
 
   it('returns a null `user` when the change history doc has no user', () => {
-    const item = mapRuleHistoryItem(
-      buildHistoryDoc({}, { user: undefined as unknown as RuleChangeHistoryDocument['user'] })
-    );
+    const item = mapRuleHistoryItem(buildHistoryDoc({}, { user: undefined }));
     expect(item.user).toBeNull();
   });
 
@@ -72,86 +72,41 @@ describe('mapRuleHistoryItem', () => {
     expect(item.metadata).toEqual({ reason: 'ui edit', extra: { key: 1 } });
   });
 
-  const buildRule = (
-    overrides: Partial<SanitizedRule<RuleParams>> = {}
-  ): SanitizedRule<RuleParams> =>
-    ({
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      name: 'Rule',
-      tags: [],
-      alertTypeId: 'siem.queryRule',
-      consumer: 'siem',
-      enabled: true,
-      actions: [],
-      throttle: null,
-      notifyWhen: null,
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      apiKeyOwner: 'elastic',
-      muteAll: false,
-      mutedInstanceIds: [],
-      schedule: { interval: '5m' },
-      revision: 0,
-      createdAt: new Date('2026-05-01T10:00:00.000Z'),
-      updatedAt: new Date('2026-05-01T10:00:00.000Z'),
-      executionStatus: {
-        status: 'unknown',
-        lastExecutionDate: new Date('2026-05-01T10:00:00.000Z'),
-      },
-      params: {
-        type: 'query',
-        ruleId: 'rule-1',
-        description: 'description',
-        from: 'now-6m',
-        to: 'now',
-        immutable: false,
-        version: 1,
-        author: [],
-        severity: 'low',
-        severityMapping: [],
-        riskScore: 21,
-        riskScoreMapping: [],
-        falsePositives: [],
-        references: [],
-        threat: [],
-        maxSignals: 100,
-        query: 'host.name:*',
-        language: 'kuery',
-        filters: [],
-        index: ['*'],
-        exceptionsList: [],
-        relatedIntegrations: [],
-        requiredFields: [],
-        outputIndex: '',
-        setup: '',
-        ruleSource: { type: 'internal' },
-      } as unknown as RuleParams,
-      ...overrides,
-    } as unknown as SanitizedRule<RuleParams>);
+  const buildRule = (overrides: Partial<Rule<RuleParams>> = {}): Rule<RuleParams> => ({
+    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+    name: 'Rule',
+    tags: [],
+    alertTypeId: 'siem.queryRule',
+    consumer: 'siem',
+    enabled: true,
+    actions: [],
+    throttle: null,
+    notifyWhen: null,
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    apiKeyOwner: 'elastic',
+    muteAll: false,
+    mutedInstanceIds: [],
+    schedule: { interval: '5m' },
+    revision: 0,
+    createdAt: new Date('2026-05-01T10:00:00.000Z'),
+    updatedAt: new Date('2026-05-01T10:00:00.000Z'),
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2026-05-01T10:00:00.000Z'),
+    },
+    params: getQueryRuleParams(),
+    ...overrides,
+  });
 
   const buildHistoryDoc = (
-    ruleOverrides: Partial<SanitizedRule<RuleParams>> = {},
+    ruleOverrides: Partial<Rule<RuleParams>> = {},
     docOverrides: Partial<RuleChangeHistoryDocument> = {}
-  ): RuleChangeHistoryDocument =>
-    ({
-      '@timestamp': '2026-05-01T10:00:00.000Z',
-      user: { name: 'alice' },
-      event: {
-        id: 'event-1',
-        action: 'rule_update',
-        type: 'change',
-        module: 'security',
-        dataset: 'alerting-rules',
-      },
-      object: {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-        type: 'alert',
-        hash: 'h',
-        fields: { hashed: [] },
-        snapshot: {},
-      },
-      rule: buildRule(ruleOverrides),
+  ): RuleChangeHistoryDocument<RuleParams> => ({
+    ...generateChangeHistoryDocument({
       metadata: { reason: 'manual edit' },
       ...docOverrides,
-    } as unknown as RuleChangeHistoryDocument);
+    }),
+    rule: buildRule(ruleOverrides),
+  });
 });

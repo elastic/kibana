@@ -27,13 +27,16 @@ export default ({ getService }: FtrProviderContext): void => {
   describe.skip('@ess @serverless @serverlessQA rule history API', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await es.deleteByQuery({
-        index: CHANGE_HISTORY_DATA_STREAM,
-        query: { match_all: {} },
-        conflicts: 'proceed',
-        refresh: true,
-        ignore_unavailable: true,
-      });
+      try {
+        await es.deleteByQuery({
+          index: CHANGE_HISTORY_DATA_STREAM,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+          refresh: true,
+        });
+      } catch {
+        // Change history index may not exist
+      }
     });
 
     it('returns the rule_create record for a newly-created rule', async () => {
