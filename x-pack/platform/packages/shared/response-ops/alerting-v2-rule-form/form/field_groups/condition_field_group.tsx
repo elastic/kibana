@@ -37,7 +37,7 @@ export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroup
   const { control } = useFormContext<FormValues>();
 
   // Read the base query from form state (initialized via useFormDefaults)
-  const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
+  const baseQuery = useWatch({ control, name: 'query.breach' });
 
   return (
     <FieldGroup

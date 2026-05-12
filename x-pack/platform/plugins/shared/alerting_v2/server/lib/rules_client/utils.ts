@@ -69,15 +69,9 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       every: data.schedule.every,
       lookback: data.schedule.lookback,
     },
-    evaluation: {
-      query: {
-        base: data.evaluation.query.base,
-      },
-    },
-    recovery_policy: data.recovery_policy,
+    query: data.query,
     state_transition: data.state_transition,
     grouping: data.grouping,
-    no_data: data.no_data,
     artifacts: data.artifacts,
     ...serverFields,
   };
@@ -106,16 +100,10 @@ export function buildUpdateRuleAttributes(
     metadata: { ...existingAttrs.metadata, ...updateData.metadata },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
-    evaluation: updateData.evaluation
-      ? {
-          query: {
-            ...existingAttrs.evaluation.query,
-            ...updateData.evaluation.query,
-          },
-        }
-      : existingAttrs.evaluation,
-    // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
-    recovery_policy: nullToUndefined(updateData.recovery_policy, existingAttrs.recovery_policy),
+    // `query` is a discriminated union: callers must send a complete new
+    // shape (we can't merge across formats), so omitted = preserved, present
+    // = full replacement.
+    query: updateData.query ?? existingAttrs.query,
     // `null` → clear (null). SO schema uses `maybe(nullable())`.
     state_transition: applyNullableUpdate(
       updateData.state_transition,
@@ -123,7 +111,6 @@ export function buildUpdateRuleAttributes(
     ),
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
-    no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
@@ -154,15 +141,9 @@ export function transformRuleSoAttributesToRuleApiResponse(
       every: attrs.schedule.every,
       lookback: attrs.schedule.lookback,
     },
-    evaluation: {
-      query: {
-        base: attrs.evaluation.query.base,
-      },
-    },
-    recovery_policy: attrs.recovery_policy,
+    query: attrs.query,
     state_transition: attrs.state_transition,
     grouping: attrs.grouping,
-    no_data: attrs.no_data,
     artifacts: attrs.artifacts,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,

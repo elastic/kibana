@@ -23,6 +23,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
 import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { ruleKeys } from '../../hooks/query_key_factory';
@@ -101,7 +102,7 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
     );
   }
 
-  const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
+  const initialQuery = rule.query ? getBreachEsqlQuery(rule.query) : DEFAULT_QUERY;
   const initialValues = mapRuleResponseToFormValues(rule);
 
   if (isClone && initialValues.metadata) {

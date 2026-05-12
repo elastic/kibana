@@ -29,34 +29,24 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         lookback: { type: 'keyword' },
       },
     },
-    evaluation: {
+    query: {
       properties: {
-        query: {
+        format: { type: 'keyword' },
+        base: { type: 'text' },
+        blocks: {
           properties: {
-            base: { type: 'text' },
+            breach: { type: 'text' },
+            recover: { type: 'text' },
           },
         },
-      },
-    },
-    recovery_policy: {
-      properties: {
-        type: { type: 'keyword' },
-        query: {
-          properties: {
-            base: { type: 'text' },
-          },
-        },
+        no_data: { type: 'text' },
+        breach: { type: 'text' },
+        recover: { type: 'text' },
       },
     },
     grouping: {
       properties: {
         fields: { type: 'keyword' },
-      },
-    },
-    no_data: {
-      properties: {
-        behavior: { type: 'keyword' },
-        timeframe: { type: 'keyword' },
       },
     },
     enabled: { type: 'boolean' },

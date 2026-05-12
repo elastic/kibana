@@ -30,21 +30,22 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     every: schema.string(),
     lookback: schema.maybe(schema.string()),
   }),
-  evaluation: schema.object({
-    query: schema.object({
-      base: schema.string(),
-    }),
-  }),
-  recovery_policy: schema.maybe(
+  query: schema.oneOf([
     schema.object({
-      type: schema.oneOf([schema.literal('query'), schema.literal('no_breach')]),
-      query: schema.maybe(
-        schema.object({
-          base: schema.maybe(schema.string()),
-        })
-      ),
-    })
-  ),
+      format: schema.literal('composed'),
+      base: schema.string(),
+      blocks: schema.object({
+        breach: schema.string(),
+        recover: schema.maybe(schema.string()),
+      }),
+    }),
+    schema.object({
+      format: schema.literal('standalone'),
+      no_data: schema.maybe(schema.string()),
+      breach: schema.string(),
+      recover: schema.maybe(schema.string()),
+    }),
+  ]),
   state_transition: schema.maybe(
     schema.nullable(
       schema.object({
@@ -62,18 +63,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   grouping: schema.maybe(
     schema.object({
       fields: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
-    })
-  ),
-  no_data: schema.maybe(
-    schema.object({
-      behavior: schema.maybe(
-        schema.oneOf([
-          schema.literal('no_data'),
-          schema.literal('last_status'),
-          schema.literal('recover'),
-        ])
-      ),
-      timeframe: schema.maybe(schema.string()),
     })
   ),
 

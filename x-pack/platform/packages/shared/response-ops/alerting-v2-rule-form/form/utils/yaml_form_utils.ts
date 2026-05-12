@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
-import type { FormValues, RecoveryPolicy, StateTransition } from '../types';
+import type { FormValues, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
@@ -45,9 +45,9 @@ interface YamlStateTransition {
   recovering_timeframe?: string;
 }
 
-interface YamlRecoveryPolicy {
-  type: string;
-  query?: { base: string };
+interface YamlQuery {
+  format: 'standalone';
+  breach: string;
 }
 
 interface YamlRuleObject {
@@ -55,10 +55,9 @@ interface YamlRuleObject {
   metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
-  evaluation: { query: { base: string } };
+  query: YamlQuery;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
-  recovery_policy?: YamlRecoveryPolicy;
   artifacts?: Array<{ id: string; type: string; value: string }>;
 }
 
@@ -72,15 +71,6 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
   return Object.keys(out).length ? out : undefined;
 };
 
-const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | undefined => {
-  if (!rp) return undefined;
-  const out: YamlRecoveryPolicy = { type: rp.type };
-  if (rp.type === 'query' && rp.query?.base) {
-    out.query = { base: rp.query.base };
-  }
-  return out;
-};
-
 /**
  * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
  *
@@ -92,7 +82,6 @@ const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | unde
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition);
-  const rp = serializeRecoveryPolicy(values.recoveryPolicy);
 
   return {
     kind: values.kind,
@@ -107,14 +96,12 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       every: values.schedule.every,
       lookback: values.schedule.lookback,
     },
-    evaluation: {
-      query: {
-        base: values.evaluation.query.base,
-      },
+    query: {
+      format: 'standalone',
+      breach: values.query.breach,
     },
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
-    ...(rp && { recovery_policy: rp }),
     ...(values.artifacts?.length && { artifacts: values.artifacts }),
   };
 };
@@ -147,8 +134,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const obj = parsed as Record<string, unknown>;
   const metadata = obj.metadata as Record<string, unknown> | undefined;
   const schedule = obj.schedule as Record<string, unknown> | undefined;
-  const evaluation = obj.evaluation as Record<string, unknown> | undefined;
-  const evalQuery = evaluation?.query as Record<string, unknown> | undefined;
+  const queryObj = obj.query as Record<string, unknown> | undefined;
   const grouping = obj.grouping as Record<string, unknown> | undefined;
   const artifacts = parseArtifacts(obj.artifacts);
   const stateTransitionObj = obj.state_transition as Record<string, unknown> | undefined;
@@ -170,28 +156,6 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
           typeof stateTransitionObj.recovering_timeframe === 'string'
             ? stateTransitionObj.recovering_timeframe
             : null,
-      }
-    : undefined;
-
-  const recoveryPolicyObj = obj.recovery_policy as Record<string, unknown> | undefined;
-  const recoveryPolicy: RecoveryPolicy | undefined = recoveryPolicyObj
-    ? {
-        type:
-          recoveryPolicyObj.type === 'query' || recoveryPolicyObj.type === 'no_breach'
-            ? recoveryPolicyObj.type
-            : 'no_breach',
-        ...(recoveryPolicyObj.type === 'query' &&
-        recoveryPolicyObj.query &&
-        typeof recoveryPolicyObj.query === 'object'
-          ? {
-              query: {
-                base:
-                  typeof (recoveryPolicyObj.query as Record<string, unknown>).base === 'string'
-                    ? ((recoveryPolicyObj.query as Record<string, unknown>).base as string)
-                    : undefined,
-              },
-            }
-          : {}),
       }
     : undefined;
 
@@ -217,18 +181,18 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
     };
   }
 
-  const queryBase = evalQuery?.base;
-  if (typeof queryBase !== 'string' || !queryBase.trim()) {
+  const breachQuery = queryObj?.breach;
+  if (typeof breachQuery !== 'string' || !breachQuery.trim()) {
     return {
       values: null,
       error: i18n.translate('xpack.alertingV2.yamlRuleForm.queryRequiredError', {
-        defaultMessage: 'evaluation.query.base is required.',
+        defaultMessage: 'query.breach is required.',
       }),
     };
   }
 
   // Validate ES|QL query syntax
-  const queryValidationError = validateEsqlQuery(queryBase);
+  const queryValidationError = validateEsqlQuery(breachQuery);
   if (queryValidationError) {
     return {
       values: null,
@@ -251,16 +215,13 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         every: typeof schedule?.every === 'string' ? schedule.every : '5m',
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
-      evaluation: {
-        query: {
-          base: queryBase,
-        },
+      query: {
+        breach: breachQuery,
       },
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
-      recoveryPolicy: recoveryPolicy ?? { type: 'no_breach' },
       stateTransition,
       stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
       stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),

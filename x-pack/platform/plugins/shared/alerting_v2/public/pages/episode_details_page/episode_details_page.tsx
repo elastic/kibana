@@ -31,7 +31,7 @@ import {
 } from '@elastic/eui';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useQueryClient } from '@kbn/react-query';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertingEpisodeGroupingTags } from '@kbn/alerting-v2-episodes-ui/components/grouping/alerting_episode_grouping_tags';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
@@ -66,7 +66,7 @@ import { EpisodeAssigneeCell } from '../alert_episodes_list_page/components/epis
 import * as i18n from './translations';
 
 function formatRuleEvaluationEsql(rule: RuleResponse): string {
-  return rule.evaluation.query.base;
+  return getBreachEsqlQuery(rule.query);
 }
 
 interface EpisodeRouteParams {
@@ -172,7 +172,7 @@ export function EpisodeDetailsPage() {
             share: services.share,
             capabilities: services.application.capabilities,
             uiSettings: services.uiSettings,
-            ruleEsql: rule?.evaluation?.query?.base,
+            ruleEsql: rule ? getBreachEsqlQuery(rule.query) : undefined,
             episodeIsoTimestamp: ts,
           }),
       }),
@@ -720,7 +720,10 @@ export function EpisodeDetailsPage() {
               `}
             >
               {mainPanel === 'metadata' ? (
-                <EpisodeMetadataTab episodeId={episodeId} ruleQuery={rule?.evaluation.query.base} />
+                <EpisodeMetadataTab
+                  episodeId={episodeId}
+                  ruleQuery={rule ? getBreachEsqlQuery(rule.query) : undefined}
+                />
               ) : (
                 <EpisodeOverviewTab
                   episodeId={episodeId}

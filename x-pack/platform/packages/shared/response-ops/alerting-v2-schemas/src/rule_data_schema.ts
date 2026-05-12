@@ -79,44 +79,86 @@ export const scheduleSchema = z
   .strict()
   .describe('Execution schedule configuration.');
 
-/** Evaluation (required) */
+/** Query (required) */
 
-export const evaluationQuerySchema = z
+export const queryFormatSchema = z.enum(['composed', 'standalone']);
+export const queryFormat = queryFormatSchema.enum;
+export type QueryFormat = z.infer<typeof queryFormatSchema>;
+
+/**
+ * Appendable ES|QL fragment (e.g. `| WHERE …`). Not a complete program on its
+ * own, so we only enforce length bounds here — full parser validation is
+ * applied to the composed `base` it gets appended to.
+ */
+export const esqlQueryBlockSchema = z.string().min(1).max(10000);
+
+export const composedQuerySchema = z
   .object({
+    format: z.literal(queryFormat.composed),
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
-  })
-  .strict();
-
-const evaluationSchema = z
-  .object({
-    query: evaluationQuerySchema,
+    blocks: z
+      .object({
+        breach: esqlQueryBlockSchema.describe(
+          'Appendable ES|QL block for breach detection (required).'
+        ),
+        recover: esqlQueryBlockSchema
+          .optional()
+          .describe('Appendable ES|QL block for recovery detection.'),
+      })
+      .strict(),
   })
   .strict()
+  .describe('Composed query: a shared base with appendable breach/recover blocks.');
+
+export const standaloneQuerySchema = z
+  .object({
+    format: z.literal(queryFormat.standalone),
+    no_data: esqlQuerySchema.optional().describe('Full ES|QL query for no-data detection.'),
+    breach: esqlQuerySchema.describe('Full ES|QL query for breach detection (required).'),
+    recover: esqlQuerySchema.optional().describe('Full ES|QL query for recovery detection.'),
+  })
+  .strict()
+  .describe('Standalone queries: independent full queries for breach, recover, and no-data.');
+
+export const querySchema = z
+  .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
   .describe('Detection query configuration.');
 
-/** Recovery policy (optional) */
+export type Query = z.infer<typeof querySchema>;
 
-export const recoveryPolicyTypeSchema = z.enum(['query', 'no_breach']);
-export const recoveryPolicyType = recoveryPolicyTypeSchema.enum;
-export type RecoveryPolicyType = z.infer<typeof recoveryPolicyTypeSchema>;
+/**
+ * Returns the effective breach ES|QL query — what the executor actually runs
+ * to detect breaches. For composed queries this is `base` concatenated with
+ * `blocks.breach`; for standalone it's `breach` verbatim.
+ */
+export const getBreachEsqlQuery = (query: Query): string =>
+  query.format === 'composed'
+    ? query.base.trimEnd() + query.blocks.breach.trimEnd()
+    : query.breach.trimEnd();
 
-export const recoveryPolicySchema = z
-  .object({
-    type: recoveryPolicyTypeSchema.describe('Recovery detection type: "query" or "no_breach".'),
-    query: z
-      .object({
-        base: esqlQuerySchema
-          .optional()
-          .describe('Recovery ES|QL query. Required when type is "query".'),
-      })
-      .strict()
-      .optional()
-      .describe('Recovery query configuration; required when type is "query".'),
-  })
-  .strict()
-  .describe('Recovery detection configuration.');
+/**
+ * Returns the recovery ES|QL query if the rule has one configured, otherwise
+ * `undefined`. For composed queries this is `base` + `blocks.recover`; for
+ * standalone it's `recover` verbatim.
+ */
+export const getRecoverEsqlQuery = (query: Query): string | undefined => {
+  if (query.format === 'composed' && query.blocks.recover) {
+    return query.base.trimEnd() + query.blocks.recover.trimEnd();
+  } else if (query.format === 'standalone' && query.recover) {
+    return query.recover.trimEnd();
+  }
+  return undefined;
+};
+
+/**
+ * Returns the "root" ES|QL query — the one containing the `FROM` clause and
+ * therefore usable for index-pattern extraction. `base` for composed,
+ * `breach` for standalone.
+ */
+export const getRootEsqlQuery = (query: Query): string =>
+  query.format === 'composed' ? query.base : query.breach;
 
 /** State transition (optional, alert-only) */
 
@@ -170,21 +212,6 @@ export const groupingSchema = z
   .strict()
   .describe('Grouping configuration.');
 
-/** No data (optional) */
-
-const noDataSchema = z
-  .object({
-    behavior: z
-      .enum(['no_data', 'last_status', 'recover'])
-      .optional()
-      .describe('Behavior when no data is detected.'),
-    timeframe: durationSchema
-      .optional()
-      .describe('Time window after which no data is detected, e.g. 10m, 1h.'),
-  })
-  .strict()
-  .describe('No data handling configuration.');
-
 /** Artifacts (optional) */
 
 const artifactSchema = z
@@ -223,11 +250,9 @@ const createRuleDataBaseSchema = z
       .default('@timestamp')
       .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
-    evaluation: evaluationSchema,
-    recovery_policy: recoveryPolicySchema.optional(),
+    query: querySchema,
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
-    no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).optional(),
   })
   .strip();
@@ -239,20 +264,29 @@ export const isStateTransitionAllowed = (data: {
   state_transition?: unknown;
 }): boolean => data.kind === 'alert' || data.state_transition == null;
 
-export const isRecoveryPolicyQueryProvided = (data: {
-  recovery_policy?: { type?: string; query?: { base?: string } };
-}): boolean =>
-  data.recovery_policy?.type !== 'query' ||
-  (data.recovery_policy.query?.base != null && data.recovery_policy.query.base.length > 0);
+export const isSignalUsingStandaloneFormat = (data: {
+  kind?: string;
+  query?: { format?: string };
+}): boolean => data.kind !== 'signal' || data.query?.format === queryFormat.standalone;
+
+/** Signal rules only run a breach query — no recovery or no-data behaviour. */
+export const isSignalQueryBreachOnly = (data: { kind?: string; query?: Query }): boolean => {
+  if (data.kind !== 'signal' || data.query?.format !== queryFormat.standalone) return true;
+  return data.query.no_data == null && data.query.recover == null;
+};
 
 export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isStateTransitionAllowed, {
     message: 'state_transition is only allowed when kind is "alert".',
     path: ['state_transition'],
   })
-  .refine(isRecoveryPolicyQueryProvided, {
-    message: 'recovery_policy.query.base is required when recovery_policy.type is "query".',
-    path: ['recovery_policy', 'query', 'base'],
+  .refine(isSignalUsingStandaloneFormat, {
+    message: 'kind "signal" requires query.format "standalone".',
+    path: ['query', 'format'],
+  })
+  .refine(isSignalQueryBreachOnly, {
+    message: 'Signal rules cannot set recover or no_data queries.',
+    path: ['query'],
   });
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
@@ -264,21 +298,9 @@ export const updateRuleDataSchema = z
     metadata: metadataSchema.partial().optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
-    evaluation: z
-      .object({
-        query: z
-          .object({
-            base: esqlQuerySchema.optional(),
-          })
-          .strict()
-          .optional(),
-      })
-      .strict()
-      .optional(),
-    recovery_policy: recoveryPolicySchema.optional().nullable(),
+    query: querySchema.optional(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
-    no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })

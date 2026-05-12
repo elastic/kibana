@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import {
@@ -15,16 +16,6 @@ import {
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
 import { guardedExpandStep } from '../stream_utils';
-
-/**
- * Returns the query to execute for this rule.
- *
- * Uses `evaluation.query.base` which contains the full ES|QL query
- * including any trigger condition (e.g. a trailing WHERE clause).
- */
-function buildEffectiveQuery(evaluationQuery: { base: string }): string {
-  return evaluationQuery.base.trimEnd();
-}
 
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
@@ -41,7 +32,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     return guardedExpandStep(streamState, ['rule'], async function* (state) {
       const { input, rule } = state;
 
-      const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
+      const effectiveQuery = getBreachEsqlQuery(rule.query);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
       const timeField = rule.time_field;
 

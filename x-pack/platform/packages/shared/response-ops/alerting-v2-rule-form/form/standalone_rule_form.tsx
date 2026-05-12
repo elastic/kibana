@@ -89,17 +89,11 @@ export const StandaloneRuleForm = ({
         ...queryDefaults.schedule,
         ...initialValues?.schedule,
       },
-      evaluation: {
-        ...queryDefaults.evaluation,
-        query: {
-          ...queryDefaults.evaluation.query,
-          ...initialValues?.evaluation?.query,
-        },
+      query: {
+        ...queryDefaults.query,
+        ...initialValues?.query,
       },
       ...(initialValues?.grouping !== undefined ? { grouping: initialValues.grouping } : {}),
-      ...(initialValues?.recoveryPolicy !== undefined
-        ? { recoveryPolicy: initialValues.recoveryPolicy }
-        : {}),
       ...(initialValues?.stateTransition !== undefined
         ? { stateTransition: initialValues.stateTransition }
         : {}),

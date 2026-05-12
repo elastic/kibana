@@ -12,7 +12,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { alertingTools } from '../../common/constants';
 import {
   ruleOperationSchema,
@@ -44,10 +44,9 @@ Use operations[] to:
 1. set_metadata — set name, description, and tags
 2. set_kind — set rule kind (alert | signal)
 3. set_schedule — set execution interval and lookback window
-4. set_query — set the base ES|QL detection query
+4. set_query — set the rule's detection query (composed: shared base + appendable breach/recover blocks, or standalone: independent full queries for breach, recover, and no-data)
 5. set_grouping — set fields to group alerts by
-6. set_state_transition — set consecutive breaches threshold
-7. set_recovery_policy — set recovery detection type and optional query`,
+6. set_state_transition — set consecutive breaches threshold`,
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
@@ -101,7 +100,7 @@ Use operations[] to:
                 name: updatedData.metadata?.name,
                 kind: updatedData.kind,
                 schedule: updatedData.schedule,
-                query: updatedData.evaluation?.query?.base,
+                query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
               },
             },
           },

@@ -22,7 +22,7 @@ export const EvaluationQueryField = ({
 }: EvaluationQueryFieldProps) => {
   return (
     <EsqlEditorField
-      name="evaluation.query.base"
+      name="query.breach"
       height={height}
       dataTestSubj={DATA_TEST_SUBJ}
       rules={{

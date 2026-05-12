@@ -113,7 +113,7 @@ export interface BuildRecoveryAlertEventsOpts {
  * Creates `recovered` alert events for groups that were previously in a non-inactive
  * episode state but are no longer present in the current breached set.
  *
- * Used when `recovery_policy.type` is `no_breach` or unset.
+ * Used when no recover query is configured on the rule.
  */
 export function buildRecoveryAlertEvents({
   ruleId,
@@ -165,7 +165,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
  * Creates `recovered` alert events by running a custom recovery query.
  *
  * Active groups whose group hash matches a row in the recovery query results
- * are considered recovered. Used when `recovery_policy.type` is `query`.
+ * are considered recovered. Used when the rule has a recover query configured.
  */
 export function buildQueryRecoveryAlertEvents({
   ruleId,

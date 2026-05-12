@@ -12,12 +12,13 @@ import {
   metadataSchema,
   ruleKindSchema,
   scheduleSchema,
-  evaluationQuerySchema,
+  querySchema,
+  getRootEsqlQuery,
   groupingSchema,
   stateTransitionSchema,
-  recoveryPolicySchema,
   isStateTransitionAllowed,
-  isRecoveryPolicyQueryProvided,
+  isSignalUsingStandaloneFormat,
+  isSignalQueryBreachOnly,
 } from '@kbn/alerting-v2-schemas';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
@@ -39,8 +40,9 @@ export const setScheduleOperationSchema = scheduleSchema
   .partial()
   .extend({ operation: z.literal('set_schedule') });
 
-export const setQueryOperationSchema = evaluationQuerySchema.extend({
+export const setQueryOperationSchema = z.object({
   operation: z.literal('set_query'),
+  query: querySchema,
 });
 
 export const setGroupingOperationSchema = groupingSchema.extend({
@@ -53,10 +55,6 @@ export const setStateTransitionOperationSchema = stateTransitionSchema
   .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') });
 
-export const setRecoveryPolicyOperationSchema = recoveryPolicySchema.extend({
-  operation: z.literal('set_recovery_policy'),
-});
-
 // ─── Discriminated union ──────────────────────────────────────────────────────
 
 export const ruleOperationSchema = z.discriminatedUnion('operation', [
@@ -66,7 +64,6 @@ export const ruleOperationSchema = z.discriminatedUnion('operation', [
   setQueryOperationSchema,
   setGroupingOperationSchema,
   setStateTransitionOperationSchema,
-  setRecoveryPolicyOperationSchema,
 ]);
 
 export type RuleOperation = z.infer<typeof ruleOperationSchema>;
@@ -160,14 +157,13 @@ export const executeRuleOperations = async (
 
       case 'set_query':
         if (esClient) {
-          lastQueryColumns = await validateEsqlQuery(esClient, op.base);
+          // Validate the root query (the one with the FROM clause) so column
+          // metadata is available for downstream set_grouping validation.
+          lastQueryColumns = await validateEsqlQuery(esClient, getRootEsqlQuery(op.query));
         }
         next = {
           ...next,
-          evaluation: {
-            ...next.evaluation,
-            query: { base: op.base },
-          },
+          query: op.query,
         };
         break;
 
@@ -205,16 +201,6 @@ export const executeRuleOperations = async (
           },
         };
         break;
-
-      case 'set_recovery_policy':
-        next = {
-          ...next,
-          recovery_policy: {
-            type: op.type,
-            ...(op.query ? { query: op.query } : {}),
-          },
-        };
-        break;
     }
   }
 
@@ -230,10 +216,12 @@ export const executeRuleOperations = async (
     );
   }
 
-  if (!isRecoveryPolicyQueryProvided(next)) {
-    throw new RuleOperationValidationError(
-      'recovery_policy.query.base is required when recovery_policy.type is "query".'
-    );
+  if (!isSignalUsingStandaloneFormat(next)) {
+    throw new RuleOperationValidationError('kind "signal" requires query.format "standalone".');
+  }
+
+  if (!isSignalQueryBreachOnly(next)) {
+    throw new RuleOperationValidationError('Signal rules cannot set recover or no_data queries.');
   }
 
   return next;

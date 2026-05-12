@@ -11,6 +11,7 @@ import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,
   ruleAttachmentDataSchema,
+  getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -60,7 +61,7 @@ export const createRuleSmlType = ({
       const description = attrs?.metadata?.description ?? '';
       const tags = attrs?.metadata?.tags?.join(', ') ?? '';
       const kind = attrs?.kind ?? '';
-      const query = attrs?.evaluation?.query?.base ?? '';
+      const query = attrs?.query ? getBreachEsqlQuery(attrs.query) : '';
 
       const contentParts = [name, description, kind, tags, query].filter(Boolean);
 

@@ -59,10 +59,9 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
-## State Transition and Recovery
+## State Transition
 
 - \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
-- \`set_recovery_policy\` with \`type: "no_breach"\` recovers when a cycle produces no rows. Use \`type: "query"\` with a separate recovery query when the user needs explicit recovery detection.
 
 ## Persistence
 

@@ -17,7 +17,7 @@ export const GroupFieldSelect = () => {
   const { data } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
-  const query = useWatch({ name: 'evaluation.query.base', control });
+  const query = useWatch({ name: 'query.breach', control });
   const groupByRowId = 'ruleV2FormGroupByField';
 
   // When columns change, filter out any invalid selections
