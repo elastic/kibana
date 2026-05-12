@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { slice } from 'lodash';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { css } from '@emotion/react';
 import type { EuiContextMenuItemIcon, EuiPopoverProps } from '@elastic/eui';
 import {
@@ -29,6 +30,15 @@ import {
 import type { FlyoutActionItem } from './types';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
+
+const guardedOnClick = (action: FlyoutActionItem): FlyoutActionItem['onClick'] => {
+  return (e: React.MouseEvent) => {
+    if (action.href && hasActiveModifierKey(e)) return;
+    if (typeof action.onClick === 'function') {
+      (action.onClick as (e: React.MouseEvent) => void)(e);
+    }
+  };
+};
 
 export interface DiscoverGridFlyoutActionsProps {
   flyoutActions: FlyoutActionItem[];
@@ -133,7 +143,7 @@ function FlyoutActions({
                 data-test-subj={action.dataTestSubj}
                 aria-label={action.label}
                 href={action.href}
-                onClick={action.onClick}
+                onClick={guardedOnClick(action)}
               />
             </EuiToolTip>
           ) : (
@@ -146,7 +156,7 @@ function FlyoutActions({
                 iconType={action.iconType}
                 data-test-subj={action.dataTestSubj}
                 href={action.href}
-                onClick={action.onClick}
+                onClick={guardedOnClick(action)}
               >
                 {action.label}
               </EuiButtonEmpty>
@@ -216,7 +226,7 @@ function FlyoutActionsPopover({
             icon={action.iconType as EuiContextMenuItemIcon}
             data-test-subj={action.dataTestSubj}
             href={action.href}
-            onClick={action.onClick}
+            onClick={guardedOnClick(action)}
           >
             {action.label}
           </EuiContextMenuItem>
