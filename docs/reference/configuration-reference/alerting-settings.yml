@@ -1336,7 +1336,7 @@ groups:
           - "stack: ga 7.15, removed 9.0"
           - "ech: ga"
           - "self: ga"
-        deprecation_details: "Deprecated and ignored since 9.0. Ephemeral tasks were removed. Remove this setting."
+        deprecation_details: "Ignored since 9.0. Ephemeral tasks were removed. Remove this setting."
 
       - setting: xpack.alerting.defaultRuleTaskTimeout
         description: |
