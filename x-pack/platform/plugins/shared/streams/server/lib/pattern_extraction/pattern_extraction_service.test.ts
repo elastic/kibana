@@ -71,6 +71,56 @@ describe('PatternExtractionService', () => {
       );
     }, 30_000);
 
+    // Regression test: with the previous implementation, two
+    // concurrent tasks that both timed out would each independently call
+    // `createWorkerPool()` and `worker.destroy()`. The second of the two
+    // would destroy the freshly-created replacement pool (and leak a
+    // third one). With the captured-worker + identity-check fix, only
+    // the first timed-out task swaps the pool; the collateral timeout
+    // surfaces an error to its caller without touching the new pool.
+    it('does not double-destroy the worker pool when concurrent tasks time out', async () => {
+      service = new PatternExtractionService(
+        createTestConfig({
+          // Generous enough that we don't race the test runner itself, tight
+          // enough that the dangerously-slow grok extraction never finishes.
+          taskTimeout: moment.duration(50, 'millisecond'),
+          // Force both tasks to land on the SAME worker thread so a single
+          // CPU-bound loop blocks both of them, guaranteeing both timers fire.
+          minThreads: 1,
+          maxThreads: 1,
+          maxQueue: 4,
+        }),
+        logger
+      );
+      const createSpy = jest.spyOn(
+        service as unknown as { createWorkerPool: () => unknown },
+        'createWorkerPool'
+      );
+
+      const longMessages = Array.from(
+        { length: 500 },
+        (_, i) => `${i} ${'a'.repeat(200)} ${i} ${'b'.repeat(200)} ${i}`
+      );
+
+      const results = await Promise.allSettled([
+        service.extractGrokPatterns(longMessages),
+        service.extractGrokPatterns(longMessages),
+      ]);
+
+      for (const settled of results) {
+        expect(settled.status).toBe('rejected');
+        if (settled.status === 'rejected') {
+          expect((settled.reason as Error).message).toBe('Pattern extraction task timed out');
+        }
+      }
+
+      // Constructor-time call already happened before the spy was attached,
+      // so this counts ONLY recovery-time calls. The fix guarantees at
+      // most one (only the first timed-out task that observes its own
+      // captured worker still installed).
+      expect(createSpy.mock.calls.length).toBeLessThanOrEqual(1);
+    }, 30_000);
+
     it('runs extraction synchronously when worker is disabled', async () => {
       service = new PatternExtractionService(createTestConfig({ enabled: false }), logger);
       const worker = (service as unknown as { worker?: unknown }).worker;
