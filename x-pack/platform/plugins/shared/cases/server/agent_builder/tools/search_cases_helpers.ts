@@ -11,19 +11,8 @@ import type { CoreStart } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CasesClient } from '../../client';
-import type { Case, AttachmentV2, RelatedCase } from '../../../common/types/domain';
-import type { CasesFindRequest } from '../../../common/types/api';
+import type { Case, RelatedCase } from '../../../common/types/domain';
 import { getCaseViewPath } from '../../common/utils';
-import { isLegacyCommentAttachment } from '../../../common/utils/attachments/v1_type_guards';
-import { isUnifiedCommentAttachment } from '../../../common/utils/attachments/v2_type_guards';
-
-export interface CommentSummary {
-  id: string;
-  comment: string;
-  created_by: string | null;
-  created_at: string | null;
-}
 
 export interface CoreServices {
   coreStart: CoreStart;
@@ -33,8 +22,6 @@ export interface CoreServices {
 
 export interface EnhancedCaseData extends Case {
   url: string | null;
-  markdown_link: string;
-  comments_summary?: CommentSummary[];
 }
 
 /**
@@ -103,72 +90,10 @@ export const createResult = (
 });
 
 /**
- * Creates a summary object from a case attachment/comment.
- */
-export const createCommentSummary = (comment: AttachmentV2): CommentSummary => {
-  const commentText = isLegacyCommentAttachment(comment)
-    ? comment.comment
-    : isUnifiedCommentAttachment(comment)
-    ? comment.data.content
-    : '';
-
-  return {
-    id: comment.id,
-    comment: commentText?.substring(0, 200) || '',
-    created_by: comment.created_by.username ?? comment.created_by.email ?? null,
-    created_at: comment.created_at || null,
-  };
-};
-
-/**
- * Creates comment summaries from an array of attachments.
- * Filters to only user comments, limits to the first 5.
- */
-export const createCommentSummariesFromArray = (comments: AttachmentV2[]): CommentSummary[] => {
-  return comments
-    .filter((att) => att.type === 'user' || att.type === 'comment')
-    .slice(0, 5)
-    .map(createCommentSummary);
-};
-
-/**
- * Fetches all pages of cases from a search query.
- */
-export const fetchAllPages = async (
-  casesClient: CasesClient,
-  searchParams: CasesFindRequest,
-  maxPages: number = 10
-): Promise<Case[]> => {
-  const allCases: Case[] = [];
-  let currentPage = 1;
-  let hasMorePages = true;
-
-  while (hasMorePages && currentPage <= maxPages) {
-    searchParams.page = currentPage;
-    const searchResult = await casesClient.cases.find(searchParams);
-
-    if (searchResult.cases.length === 0) {
-      break;
-    }
-
-    allCases.push(...searchResult.cases);
-
-    if (searchResult.cases.length < (searchParams.perPage ?? 100)) {
-      hasMorePages = false;
-    }
-
-    currentPage++;
-  }
-
-  return allCases;
-};
-
-/**
  * Enhances a case object with URL and markdown link fields.
  */
 export const enhanceCaseData = (
   caseItem: Case,
-  comments: CommentSummary[] | undefined,
   request: KibanaRequest,
   coreServices: CoreServices,
   logger: Logger
@@ -187,13 +112,9 @@ export const enhanceCaseData = (
     );
   }
 
-  const markdownLink = caseUrl ? `[${caseItem.title}](${caseUrl})` : caseItem.title;
-
   return {
     ...caseItem,
     url: caseUrl,
-    markdown_link: markdownLink,
-    ...(comments && comments.length > 0 && { comments_summary: comments }),
   };
 };
 

@@ -14,6 +14,8 @@ import { manageCasesTool } from './tools/manage_cases';
 import { attachmentsTool } from './tools/attachment_tools';
 import { observablesTool } from './tools/observable_tools';
 import { casesSkill } from './skills/cases_skill';
+import { createCaseAttachmentType } from './attachments/case_attachment_type';
+import { createCasesAttachmentType } from './attachments/cases_attachment_type';
 
 /**
  * Registers all Cases agent builder tools:
@@ -33,4 +35,10 @@ export function registerCasesAgentBuilderTools(
   agentBuilder.tools.register(attachmentsTool(getCasesClient));
   agentBuilder.tools.register(observablesTool(getCasesClient));
   agentBuilder.skills.register(casesSkill);
+  agentBuilder.attachments.registerType(
+    createCaseAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
+  agentBuilder.attachments.registerType(
+    createCasesAttachmentType() as Parameters<typeof agentBuilder.attachments.registerType>[0]
+  );
 }

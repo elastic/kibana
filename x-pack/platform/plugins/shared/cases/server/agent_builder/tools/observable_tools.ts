@@ -16,6 +16,11 @@ import { updateObservableStepDefinition } from '../../workflows/steps/update_obs
 import { deleteObservableStepDefinition } from '../../workflows/steps/delete_observable';
 import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
+import {
+  CASES_TOOL_TEXT_INSTRUCTION,
+  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+} from '../utils/tool_instructions';
+import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
@@ -23,8 +28,8 @@ const observablesSchema = z.object({
   mode: z
     .enum(['add', 'update', 'delete'])
     .describe(
-      'Operation to perform. Required fields per mode:\n' +
-        '- add: case_id, observables (array of {typeKey, value, description?})\n' +
+      'Required fields per mode:\n' +
+        '- add: case_id, observables ({typeKey, value, description?}[])\n' +
         '- update: case_id, observable_id, value (description optional)\n' +
         '- delete: case_id, observable_id'
     ),
@@ -43,40 +48,49 @@ export const observablesTool = (
     id: platformCoreCasesTools.observables,
     type: ToolType.builtin,
     description:
-      'Manages case observables (IOCs and indicators): add new observables, update existing ones, or delete them. Use the `mode` field to specify the operation.',
+      'Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: `add`, `update`, `delete`. See `mode` field for required inputs.\n\n' +
+      CASES_SOLUTION_CONTEXT_INSTRUCTION +
+      CASES_TOOL_TEXT_INSTRUCTION,
     schema: observablesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {
       const { mode, case_id, ...rest } = args;
 
-      switch (mode) {
-        case 'add':
-          return invokeStepHandler(addObservablesStepDef, { case_id, ...rest }, toolContext);
-
-        case 'update': {
-          // Destructure to avoid passing unknown fields to the step
-          const { observable_id, value, description } = rest;
-          return invokeStepHandler(
-            updateObservableStepDef,
-            { case_id, observable_id, value, description },
-            toolContext
-          );
+      const runStep = async () => {
+        switch (mode) {
+          case 'add':
+            return invokeStepHandler(addObservablesStepDef, { case_id, ...rest }, toolContext);
+          case 'update': {
+            // Destructure to avoid passing unknown fields to the step
+            const { observable_id, value, description } = rest;
+            return invokeStepHandler(
+              updateObservableStepDef,
+              { case_id, observable_id, value, description },
+              toolContext
+            );
+          }
+          case 'delete': {
+            const { observable_id } = rest;
+            return invokeStepHandler(
+              deleteObservableStepDef,
+              { case_id, observable_id },
+              toolContext
+            );
+          }
+          default: {
+            const _exhaustive: never = mode;
+            throw new Error(`Unknown observables mode: ${_exhaustive}`);
+          }
         }
+      };
 
-        case 'delete': {
-          const { observable_id } = rest;
-          return invokeStepHandler(
-            deleteObservableStepDef,
-            { case_id, observable_id },
-            toolContext
-          );
-        }
-
-        default: {
-          const _exhaustive: never = mode;
-          throw new Error(`Unknown observables mode: ${_exhaustive}`);
-        }
+      const result = await runStep();
+      // delete returns { case_id, observable_id } — no full case to emit.
+      if (mode !== 'delete') {
+        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        return injectAttachmentIds(result, attachmentIds);
       }
+      return result;
     },
   };
 };

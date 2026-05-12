@@ -28,6 +28,11 @@ import { addTagsStepDefinition } from '../../workflows/steps/add_tags';
 import { setCustomFieldStepDefinition } from '../../workflows/steps/set_custom_field';
 import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
+import {
+  CASES_TOOL_TEXT_INSTRUCTION,
+  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+} from '../utils/tool_instructions';
+import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
@@ -45,15 +50,15 @@ const manageCasesSchema = z.object({
       'set_custom_field',
     ])
     .describe(
-      'Operation to perform. Required fields per mode:\n' +
-        '- create: title, owner (description, severity, tags, category, assignees optional; connector_id optional)\n' +
-        '- create_from_template: owner, case_template_id (overwrites optional)\n' +
-        '- update: case_id, updates (version optional — resolved automatically if omitted)\n' +
-        '- update_bulk: cases (array of {case_id, updates, version?})\n' +
-        '- delete: case_ids (array)\n' +
-        '- assign: case_id, assignees (ADDS the given users to the case)\n' +
-        '- unassign: case_id, assignees (REMOVES the given users; pass null/[] to remove all)\n' +
-        '- add_tags: case_id, tags_to_add (ADDS tags to the existing tag list)\n' +
+      'Required fields per mode:\n' +
+        '- create: title, owner (+ optional connector_id)\n' +
+        '- create_from_template: owner, case_template_id\n' +
+        '- update: case_id, updates (version auto-resolved)\n' +
+        '- update_bulk: cases (array of {case_id, updates, version?}) — use for ≥2 cases\n' +
+        '- delete: case_ids\n' +
+        '- assign: case_id, assignees (ADDS users)\n' +
+        '- unassign: case_id, assignees (REMOVES users; null/[] removes all)\n' +
+        '- add_tags: case_id, tags_to_add (APPENDS to existing tags)\n' +
         '- set_custom_field: case_id, owner, field_name, value'
     ),
   ...createCaseStepCommonDefinition.inputSchema.partial().shape,
@@ -95,55 +100,57 @@ export const manageCasesTool = (
     id: platformCoreCasesTools.manage,
     type: ToolType.builtin,
     description:
-      'Manages cases: create, update, delete, assign/unassign users, add tags, and set custom fields. Use the `mode` field to specify the operation.',
+      'Cases CRUD + assign/tags/custom fields. Modes: `create`, `create_from_template`, `update`, `update_bulk` (≥2 cases), `delete`, `assign`, `unassign`, `add_tags`, `set_custom_field`. See `mode` field for required inputs.\n\n' +
+      CASES_SOLUTION_CONTEXT_INSTRUCTION +
+      CASES_TOOL_TEXT_INSTRUCTION,
     schema: manageCasesSchema,
     tags: ['cases'],
     handler: async (args, toolContext) => {
       const { mode, connector_id, tags_to_add, case_id, assignees, ...rest } = args;
 
-      switch (mode) {
-        case 'create': {
-          const input: Record<string, unknown> = { ...rest };
-          if (case_id !== undefined) input.case_id = case_id;
-          if (assignees !== undefined) input.assignees = assignees;
-          const config: Record<string, unknown> = {};
-          if (connector_id) config['connector-id'] = connector_id;
-          return invokeStepHandler(createStepDef, input, toolContext, config);
+      const runStep = async () => {
+        switch (mode) {
+          case 'create': {
+            const input: Record<string, unknown> = { ...rest };
+            if (case_id !== undefined) input.case_id = case_id;
+            if (assignees !== undefined) input.assignees = assignees;
+            const config: Record<string, unknown> = {};
+            if (connector_id) config['connector-id'] = connector_id;
+            return invokeStepHandler(createStepDef, input, toolContext, config);
+          }
+          case 'create_from_template':
+            return invokeStepHandler(createFromTemplateStepDef, { ...rest }, toolContext);
+          case 'update':
+            return invokeStepHandler(updateCaseStepDef, { case_id, ...rest }, toolContext);
+          case 'update_bulk':
+            return invokeStepHandler(updateCasesStepDef, { ...rest }, toolContext);
+          case 'delete':
+            return invokeStepHandler(deleteCasesStepDef, { ...rest }, toolContext);
+          case 'assign':
+            return invokeStepHandler(assignStepDef, { case_id, assignees, ...rest }, toolContext);
+          case 'unassign':
+            return invokeStepHandler(unassignStepDef, { case_id, assignees, ...rest }, toolContext);
+          case 'add_tags':
+            return invokeStepHandler(
+              addTagsStepDef,
+              { case_id, tags: tags_to_add, ...rest },
+              toolContext
+            );
+          case 'set_custom_field':
+            return invokeStepHandler(setCustomFieldStepDef, { case_id, ...rest }, toolContext);
+          default: {
+            const _exhaustive: never = mode;
+            throw new Error(`Unknown manage_cases mode: ${_exhaustive}`);
+          }
         }
+      };
 
-        case 'create_from_template':
-          return invokeStepHandler(createFromTemplateStepDef, { ...rest }, toolContext);
-
-        case 'update':
-          return invokeStepHandler(updateCaseStepDef, { case_id, ...rest }, toolContext);
-
-        case 'update_bulk':
-          return invokeStepHandler(updateCasesStepDef, { ...rest }, toolContext);
-
-        case 'delete':
-          return invokeStepHandler(deleteCasesStepDef, { ...rest }, toolContext);
-
-        case 'assign':
-          return invokeStepHandler(assignStepDef, { case_id, assignees, ...rest }, toolContext);
-
-        case 'unassign':
-          return invokeStepHandler(unassignStepDef, { case_id, assignees, ...rest }, toolContext);
-
-        case 'add_tags':
-          return invokeStepHandler(
-            addTagsStepDef,
-            { case_id, tags: tags_to_add, ...rest },
-            toolContext
-          );
-
-        case 'set_custom_field':
-          return invokeStepHandler(setCustomFieldStepDef, { case_id, ...rest }, toolContext);
-
-        default: {
-          const _exhaustive: never = mode;
-          throw new Error(`Unknown manage_cases mode: ${_exhaustive}`);
-        }
+      const result = await runStep();
+      if (mode !== 'delete') {
+        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        return injectAttachmentIds(result, attachmentIds);
       }
+      return result;
     },
   };
 };

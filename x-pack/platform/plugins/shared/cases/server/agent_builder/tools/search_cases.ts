@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core/server';
@@ -19,18 +19,40 @@ import { findCasesStepCommonDefinition } from '../../../common/workflows/steps/f
 import type { CasesFindRequest } from '../../../common/types/api';
 import type { Case, RelatedCase } from '../../../common/types/domain';
 import {
-  createCommentSummariesFromArray,
   enhanceCaseData,
   createResult,
   createErrorResponse,
   deduplicateCases,
-  fetchAllPages,
   type CoreServices,
   type EnhancedCaseData,
 } from './search_cases_helpers';
+import {
+  emitCaseAttachment,
+  emitCasesAttachment,
+  injectAttachmentIds,
+  toCaseAttachmentData,
+} from '../attachments/emit_attachments';
+import { CASES_SOLUTION_CONTEXT_INSTRUCTION } from '../utils/tool_instructions';
+
+const emitSearchAttachments = async (
+  cases: EnhancedCaseData[],
+  attachments: ToolHandlerContext['attachments']
+): Promise<string[]> => {
+  if (cases.length === 0) return [];
+  if (cases.length === 1) {
+    const id = await emitCaseAttachment(attachments, toCaseAttachmentData(cases[0], cases[0].url));
+    return [id];
+  }
+  const id = await emitCasesAttachment(
+    attachments,
+    cases.map((c) => toCaseAttachmentData(c, c.url)),
+    cases.length
+  );
+  return [id];
+};
 
 const casesSchema = z.object({
-  ...getCaseStepCommonDefinition.inputSchema.partial().shape,
+  ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
   ...getCasesStepCommonDefinition.inputSchema.partial().shape,
   ...findCasesStepCommonDefinition.inputSchema.partial().shape,
   // Custom fields not in any step schema:
@@ -44,35 +66,28 @@ const casesSchema = z.object({
     .describe(
       'Array of alert IDs to find cases containing these alerts. Cases containing any of these alert IDs will be returned.'
     ),
-  // include_comments, owner, assignees, from, to, search: descriptions inherited from step schemas
+  // owner, assignees, from, to, search: descriptions inherited from step schemas
 });
 
 async function fetchCaseById(
   caseId: string,
   casesClient: CasesClient,
-  includeComments: boolean,
   request: KibanaRequest,
   coreServices: CoreServices,
   logger: Logger
 ): Promise<EnhancedCaseData> {
   const theCase = await casesClient.cases.get({
     id: caseId,
-    includeComments,
+    includeComments: false,
   });
 
-  const commentsSummary =
-    includeComments && theCase.comments
-      ? createCommentSummariesFromArray(theCase.comments)
-      : undefined;
-
-  return enhanceCaseData(theCase, commentsSummary, request, coreServices, logger);
+  return enhanceCaseData(theCase, request, coreServices, logger);
 }
 
 async function fetchCasesByAlertIds(
   alertIds: string[],
   casesClient: CasesClient,
   owner: string | undefined,
-  includeComments: boolean,
   logger: Logger
 ): Promise<Case[]> {
   const allRelatedCasesArrays = await Promise.all(
@@ -99,7 +114,7 @@ async function fetchCasesByAlertIds(
     relatedCases.map((relatedCase) =>
       casesClient.cases.get({
         id: relatedCase.id,
-        includeComments,
+        includeComments: false,
       })
     )
   );
@@ -117,19 +132,11 @@ async function fetchCasesByAlertIds(
 
 function enhanceCases(
   cases: Case[],
-  includeComments: boolean,
   request: KibanaRequest,
   coreServices: CoreServices,
   logger: Logger
 ): EnhancedCaseData[] {
-  return cases.map((theCase) => {
-    const commentsSummary =
-      includeComments && theCase.comments
-        ? createCommentSummariesFromArray(theCase.comments)
-        : undefined;
-
-    return enhanceCaseData(theCase, commentsSummary, request, coreServices, logger);
-  });
+  return cases.map((theCase) => enhanceCaseData(theCase, request, coreServices, logger));
 }
 
 export const searchCasesTool = (
@@ -139,27 +146,20 @@ export const searchCasesTool = (
   return {
     id: platformCoreTools.cases,
     type: ToolType.builtin,
-    description: `Retrieves cases from Elastic Security, Observability, or Stack Management. Supports five operation modes:
+    description: `Read-only retrieval of Elastic cases (Security / Observability / Stack Management). For writes use \`platform.core.cases.manage\` (CRUD), \`platform.core.cases.attachments\` (comments, alerts, events, get_all), or \`platform.core.cases.observables\` (IOCs).
 
-**Mode 1: Get case by ID**
-- Provide \`case_id\` to retrieve a specific case
-- Use \`include_comments\` to fetch comments (default: false)
+${CASES_SOLUTION_CONTEXT_INSTRUCTION}
 
-**Mode 2: Bulk get by IDs**
-- Provide \`case_ids\` (array) to retrieve multiple cases at once
+Modes (provide one):
+- \`case_id\` — get one case by ID.
+- \`case_ids\` — bulk get; keep ≤10 per call.
+- \`similar_to_case_id\` — find cases sharing observables (default \`perPage\` 20).
+- \`alert_ids\` — find cases containing any of these alert IDs.
+- search/filter — uses \`owner\` (required) plus \`search\`, \`severity\`, \`status\`, \`tags\`, \`assignees\`, \`reporters\`, \`category\`, \`from\`, \`to\`, \`searchFields\`. Returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
-**Mode 3: Find similar cases**
-- Provide \`similar_to_case_id\` to find cases with shared observables
-- Use \`page\`/\`perPage\` for pagination
+\`owner\` is required for search/filter (modes 1, 2, 4 use specific identifiers instead). Never call this tool multiple times with different \`owner\` values — that's always a bug.
 
-**Mode 4: Find cases by alert IDs**
-- Provide \`alert_ids\` (array) to find cases containing any of those alerts
-
-**Mode 5: Search / filter cases**
-- Use search and filter parameters: \`search\`, \`severity\`, \`status\`, \`tags\`, \`assignees\`, \`reporters\`, \`category\`, \`owner\`, \`from\`, \`to\`, \`searchFields\`
-- Set \`include_comments: true\` when the query is about case contents or discussions
-
-Returns case details with \`markdown_link\` (pre-formatted clickable link). **CRITICAL**: Always include the \`markdown_link\` in your response for each case. Format: "Brief summary. [View Case](url)"`,
+Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.attachments\` mode \`get_all\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
     schema: casesSchema,
     handler: async (
       {
@@ -180,18 +180,16 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
         assignees,
         reporters,
         category,
-        include_comments,
         page,
         perPage,
       },
-      { request, spaceId, logger }
+      { request, spaceId, logger, attachments }
     ) => {
       try {
         const [coreStart] = await coreSetup.getStartServices();
         const coreServices: CoreServices = { coreStart, spaceId };
 
         const casesClient = await getCasesClientFn(request);
-        const shouldIncludeComments = include_comments ?? false;
 
         // Mode 2: Bulk get by IDs
         if (case_ids && case_ids.length > 0) {
@@ -199,17 +197,20 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
           const bulkResult = await casesClient.cases.bulkGet({ ids: case_ids });
           const enrichedCases = enhanceCases(
             bulkResult.cases,
-            shouldIncludeComments,
             request,
             coreServices,
             logger
           );
-          return createResult(
-            enrichedCases,
-            null,
-            `Retrieved ${enrichedCases.length} case(s)${
-              bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''
-            }`
+          const bulkAttachmentIds = await emitSearchAttachments(enrichedCases, attachments);
+          return injectAttachmentIds(
+            createResult(
+              enrichedCases,
+              null,
+              `Retrieved ${enrichedCases.length} case(s)${
+                bulkResult.errors.length > 0 ? `, ${bulkResult.errors.length} error(s)` : ''
+              }`
+            ),
+            bulkAttachmentIds
           );
         }
 
@@ -220,14 +221,24 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
             page: page ?? 1,
             perPage: perPage ?? 20,
           });
-          return {
-            results: [
-              {
-                type: 'other' as const,
-                data: similarResult,
-              },
-            ],
-          };
+          const enrichedSimilar = enhanceCases(
+            similarResult.cases,
+            request,
+            coreServices,
+            logger
+          );
+          const similarAttachmentIds = await emitSearchAttachments(enrichedSimilar, attachments);
+          return injectAttachmentIds(
+            {
+              results: [
+                {
+                  type: 'other' as const,
+                  data: { ...similarResult, cases: enrichedSimilar },
+                },
+              ],
+            },
+            similarAttachmentIds
+          );
         }
 
         // Mode 4: Find by alert IDs
@@ -237,7 +248,6 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
             alert_ids,
             casesClient,
             owner as string | undefined,
-            shouldIncludeComments,
             logger
           );
 
@@ -249,19 +259,17 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
             );
           }
 
-          const casesData = enhanceCases(
-            cases,
-            shouldIncludeComments,
-            request,
-            coreServices,
-            logger
-          );
-          return createResult(
-            casesData,
-            null,
-            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(
-              ', '
-            )}`
+          const casesData = enhanceCases(cases, request, coreServices, logger);
+          const alertAttachmentIds = await emitSearchAttachments(casesData, attachments);
+          return injectAttachmentIds(
+            createResult(
+              casesData,
+              null,
+              `Found ${casesData.length} unique case(s) containing alert ID(s): ${alert_ids.join(
+                ', '
+              )}`
+            ),
+            alertAttachmentIds
           );
         }
 
@@ -271,20 +279,28 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
           const caseData = await fetchCaseById(
             case_id,
             casesClient,
-            shouldIncludeComments,
             request,
             coreServices,
             logger
           );
-          return createResult([caseData], null, `Retrieved case: ${caseData.title}`);
+          const singleAttachmentId = await emitCaseAttachment(
+            attachments,
+            toCaseAttachmentData(caseData, caseData.url)
+          );
+          return injectAttachmentIds(
+            createResult([caseData], null, `Retrieved case: ${caseData.title}`),
+            [singleAttachmentId]
+          );
         }
 
-        // Mode 5: Search / filter
+        // Mode 5: Search / filter — single page; agent paginates explicitly via `page` / `perPage`.
+        const requestedPerPage = Math.min(perPage ?? 10, 50);
+        const requestedPage = page ?? 1;
         const searchParams: CasesFindRequest = {
           sortField: (sortField as CasesFindRequest['sortField']) ?? 'updatedAt',
           sortOrder: sortOrder ?? 'desc',
-          perPage: 100,
-          page: 1,
+          perPage: requestedPerPage,
+          page: requestedPage,
           ...(owner && { owner }),
           ...(search && { search }),
           ...(searchFields && { searchFields: searchFields as CasesFindRequest['searchFields'] }),
@@ -298,15 +314,19 @@ Returns case details with \`markdown_link\` (pre-formatted clickable link). **CR
           ...(to && { to }),
         };
 
-        const allCases = await fetchAllPages(casesClient, searchParams);
-        const casesData = enhanceCases(
-          allCases,
-          shouldIncludeComments,
-          request,
-          coreServices,
-          logger
+        const findResult = await casesClient.cases.find(searchParams);
+        const casesData = enhanceCases(findResult.cases, request, coreServices, logger);
+        const searchAttachmentIds = await emitSearchAttachments(casesData, attachments);
+
+        const totalPages = Math.max(1, Math.ceil(findResult.total / requestedPerPage));
+        const message =
+          findResult.total > casesData.length
+            ? `Showing page ${requestedPage} of ${totalPages} (${casesData.length} of ${findResult.total} matches). Pass \`page\` to fetch additional pages.`
+            : undefined;
+        return injectAttachmentIds(
+          createResult(casesData, null, message),
+          searchAttachmentIds
         );
-        return createResult(casesData, null);
       } catch (error) {
         return createErrorResponse(
           error,

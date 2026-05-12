@@ -17,66 +17,89 @@ export const casesSkill = defineSkillType({
 
   content: `# Cases Management
 
-## Domain Model
+You have full read **and write** access to Elastic cases across Security, Observability, and Stack Management. If a user asks for any operation below, you can do it — never claim read-only access.
 
-A **Case** is an investigation or incident record. Core fields:
-- **status**: \`open\` → \`in-progress\` → \`closed\`
-- **severity**: \`low\` / \`medium\` / \`high\` / \`critical\`
-- **owner**: which Elastic solution owns it — \`securitySolution\`, \`observability\`, or \`cases\`
-- **assignees**: user profile UIDs (not usernames) responsible for the investigation
-- **tags**, **category**, **customFields**: optional classification
-- **Attachments**: user comments, linked alerts, linked log/event documents
-- **Observables**: indicators of compromise (IOCs) tracked within the case — IP addresses, domains, file hashes, URLs, email addresses, registry keys
+| Tool | Operations |
+|------|------------|
+| \`${platformCoreTools.cases}\` | get by ID, bulk get, search/filter, find similar, find by alert ID |
+| \`${platformCoreCasesTools.manage}\` | \`create\`, \`create_from_template\`, \`update\`, \`update_bulk\`, \`delete\`, \`assign\`, \`unassign\`, \`add_tags\`, \`set_custom_field\` |
+| \`${platformCoreCasesTools.attachments}\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`get_all\` |
+| \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |
 
-The \`owner\` field is the most important signal for how to handle a case.
+## Solution context — highest-priority rule
 
-## Solution Contexts
+Cases are partitioned across \`securitySolution\` (Security), \`observability\` (Observability), and \`cases\` (Stack Management). A user is in exactly one. Operating in the wrong solution — or fanning out across all three — is always a bug.
 
-### \`securitySolution\` — Elastic Security
+**Before any cases tool call**, \`solutionContext\` must be set, sourced ONLY from:
+- The user naming it in plain language ("in Security", "obs cases", etc.) in the current or an earlier message in this conversation.
 
-- **Purpose**: Threat investigation and security incident response
-- **Triggers**: SIEM detection rule alerts, threat hunts, manual triage
-- **Observables**: PRIMARY use case. When a user mentions an IP address, domain, file hash, URL, or email in the context of a security case, proactively suggest adding it as an observable via the observables tool.
-- **Alert attachments**: Attach SIEM/detection-rule alerts to link evidence to the case
-- **Severity**: Maps to threat impact — \`critical\` = active attack in progress
-- **Typical workflow**: Alert fires → create case → attach alerts → track observables → investigate → close
+Topic-keyword inference does not count. If unset, your only valid action is to ask, verbatim:
 
-### \`observability\` — Elastic Observability
+> "Which Elastic app is this in — Security, Observability, or Stack Management?"
 
-- **Purpose**: Service incident management and SRE workflows
-- **Triggers**: APM errors, metric threshold breaches, SLO violations, log anomalies
-- **Observables**: Rarely relevant. Do NOT proactively suggest observable tracking for observability cases unless the user explicitly asks.
-- **Alert attachments**: Attach APM errors, metric threshold alerts, SLO breach alerts, log anomaly alerts
-- **Severity**: Maps to service impact — \`critical\` = complete service outage
-- **Typical workflow**: SLO breach / metric alert → create case → attach relevant alerts or events → root cause analysis → remediation → close
+Once set: pass as \`owner\` on every search/filter, use as \`owner\` for \`create\`, treat as fixed unless the user explicitly switches.
 
-### \`cases\` — Stack Management
+Never:
+- ❌ Call any cases tool with multiple \`owner\` values to "cover all three" (most common failure).
+- ❌ Silently fall back to another owner on empty results — say "No matching cases in <Solution>" and ask.
+- ❌ Skip this for case-id operations — IDs resolve a record, but solution context confirms intent.
 
-- **Purpose**: General-purpose case management with no domain-specific assumptions
-- **Observables**: Rarely relevant
-- **Use when**: The user wants a case that doesn't belong to Security or Observability
+Examples:
+- "find the case about the failing payment service" → ask first.
+- "investigating a Suricata alert in Security — find related cases" → \`securitySolution\` (named directly).
+- (turn 2, Security established turn 1) "show me the open ones" → reuse, don't re-ask.
+- "update case abc-123 to high severity" with no context → ask first.
 
-## Solution Context
+## Solution profiles
 
-Before making any cases tool call, establish which Elastic solution the user is working in:
+| Solution | Triggers | Observables (IOCs) | \`critical\` severity means |
+|----------|----------|--------------------|---------------------------|
+| \`securitySolution\` | SIEM detection rules, threat hunts, manual triage | **Primary use case** — proactively suggest tracking IPs, domains, file hashes, URLs, emails, registry keys | active attack in progress |
+| \`observability\` | APM errors, SLO violations, metric thresholds, log anomalies | Rarely relevant — do not proactively suggest | complete service outage |
+| \`cases\` | General-purpose, no domain assumptions | Rarely relevant | — |
 
-1. **Infer from conversation**: SIEM alerts / detection rules / threat hunting / IOCs → \`securitySolution\`; APM errors / SLO violations / service latency / metric thresholds → \`observability\`; no domain signals → ask.
-2. **Ask at most once per session**: "Are you working in Elastic Security, Observability, or Stack Management?" Remember the answer for the rest of the conversation.
-3. **Always pass \`owner\`** on every search or filter call once the context is known. Never fan out across all three owners unless the user explicitly requests results from multiple solutions.
-4. **Update the context** if the user later references a different solution (e.g. switches from Security to Observability work).
+Domain note: \`assignees\` are user profile UIDs, not usernames. \`status\` flow: \`open\` → \`in-progress\` → \`closed\`.
 
-## Tool Routing
+## Bulk and batch
 
-| What the user wants | Tool to use |
-|---------------------|-------------|
-| Find, search, filter, or bulk-retrieve cases; find similar cases; find cases by alert ID | \`${platformCoreTools.cases}\` |
-| Create, update, delete cases; assign/unassign users; add tags; set custom fields; create from template | \`${platformCoreCasesTools.manage}\` |
-| Add comments; attach alerts or events to a case; retrieve all attachments | \`${platformCoreCasesTools.attachments}\` |
-| Track observables (IOCs): add, update, or delete indicators on a case | \`${platformCoreCasesTools.observables}\` |
+- Updating ≥2 cases in one user request → \`update_bulk\` (one round-trip, per-case version resolution). Never multiple \`update\` calls.
+- Changing only assignees → \`assign\`/\`unassign\`, not \`update\` (avoids version conflicts).
+- \`similar_to_case_id\` results — surface the shared observables to explain why.
 
-When updating **two or more cases in one request**, always use \`update_bulk\` mode — it accepts a \`cases\` array, resolves versions per case, and completes in a single round-trip. Only use \`update\` for single-case edits.
+## Pagination
 
-When \`similar_to_case_id\` returns results, surface the shared observables to explain why cases are considered similar. Prefer \`assign\`/\`unassign\` modes over \`update\` when only changing assignees — \`update\` requires a version token and can conflict if the case was modified concurrently.
+\`${platformCoreTools.cases}\` search/filter: default \`perPage\` **10**, max **50**. \`similar\` mode: default **20**. Bulk-get \`case_ids\`: keep ≤ **10**. Use \`page\` (1-indexed) for more. Don't preemptively page through every result.
+
+## Output: render attachments inline
+
+Every cases tool that touches a case emits a structured case attachment and returns its ID under \`attachment_ids\` in the tool result. **You MUST emit \`<render_attachment id="ID" />\` for each ID** to make the rich card render — without it the user sees only an "Attachment added" text label.
+
+The card already shows: title, ID, status, severity, alert/comment counts, assignees, tags, "Go to case" link, plus a "Show more" toggle for description, category, dates, observables count, and connector. **Do not restate any of this in text** — no "Here's Case X in detail" prose, no bulleted field lists, no duplicate links. Keep your text to ≤2 short sentences about what you did and what's next.
+
+❌ "Here's Case 33: Title: 33, Status: Open, Severity: Low, Created: May 4, …" + tag.
+✅ "Updated severity to high." + tag.
+
+### Which attachment to render, when
+
+- **Single-case operations** → render that single attachment.
+- **Multi-case results** (search, bulk-get, find-similar, find-by-alert, \`update_bulk\`) → render the **single multi-case attachment** the tool emitted — never each row separately.
+- **Chained operations in one response** (search → update → comment) → render only the **final** state, once.
+- **Pure factual Q&A** ("is case 33 closed?") → one-sentence answer, then render for context.
+- **Failure / no attachment emitted** → explain in text. Do not invent or reuse old tags.
+
+When in doubt, render — a missing render loses information, a redundant one is just visual noise.
+
+### Tools that don't emit a case attachment (no tag to emit)
+
+- \`${platformCoreCasesTools.attachments}\` mode \`get_all\` — returns the discriminated attachments array; summarize them.
+- \`${platformCoreCasesTools.manage}\` mode \`delete\` — case is gone.
+- \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.
+
+## Comments and discussion
+
+Cases tools return metadata only — comments and attachments are never included. To analyze discussion, call \`${platformCoreCasesTools.attachments}\` with \`mode: "get_all"\` and the case ID; filter to \`type === "user"\` for comments.
+
+Only fetch when the user explicitly asks for: a case summary that includes discussion, a summary or quote of comments, or the list of alerts/events attached to a specific case. Never preemptively fetch for cases in a list.
 `,
 
   getRegistryTools: () => [
