@@ -20,9 +20,9 @@ import {
 } from './test_ids';
 import {
   ANALYZER_PREVIEW_TEST_ID,
-  GRAPH_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
+import { GRAPH_PREVIEW_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';

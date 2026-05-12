@@ -16,12 +16,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../common/mock';
 import { GraphPreviewContainer } from './graph_preview_container';
-import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
+  GRAPH_PREVIEW_TEST_ID,
 } from '../../shared/components/test_ids';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
@@ -189,5 +189,25 @@ describe('<GraphPreviewContainer />', () => {
     renderContainer();
 
     expect(mockUseGraphPreview).toHaveBeenCalledWith({ hit: mockHit });
+  });
+
+  it('fetches graph data from the document event ids', async () => {
+    mockUseGraphPreview.mockReturnValue(previewAvailable);
+
+    renderContainer();
+
+    expect(mockUseFetchGraphData).toHaveBeenCalledWith({
+      req: {
+        query: {
+          originEventIds: [{ id: 'eventId', isAlert: true }],
+          start: `${previewAvailable.timestamp}||-30m`,
+          end: `${previewAvailable.timestamp}||+30m`,
+        },
+      },
+      options: {
+        enabled: true,
+        refetchOnWindowFocus: false,
+      },
+    });
   });
 });
