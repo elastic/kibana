@@ -124,9 +124,6 @@ export default function (providerContext: FtrProviderContext) {
       await vulnerabilitiesIndex.deleteAll();
       await scoresIndex.deleteAll();
       await waitForPluginInitialized({ retry, logger, supertest });
-      // Override the mock @timestamp to `now` so the score docs fall inside the
-      // `now-30d` range filter in getVulnTrendsQuery. Vulnerabilities index docs keep
-      // their fixed timestamps because the dashboard route reads `latest` (not time-ranged).
       await scoresIndex.addBulk(scoresVulnerabilitiesMock);
       await vulnerabilitiesIndex.addBulk(vulnerabilitiesLatestMock, false);
     });
@@ -137,9 +134,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('responds with a 200 status code and matching data mock', async () => {
-      // The findings_stats_task may concurrently write competing zero-value trend docs to
-      // the scores index. Retry the GET + assertion until our mock doc is the latest in its
-      // daily bucket (top_hits desc) so the dashboard reflects the expected mock data.
+      // findings_stats_task can race by writing zero-value trend docs into the same daily bucket.
       await retry.tryForTime(60_000, async () => {
         const { body } = await supertest
           .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
