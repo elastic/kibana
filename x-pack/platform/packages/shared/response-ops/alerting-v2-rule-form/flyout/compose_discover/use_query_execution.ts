@@ -52,13 +52,17 @@ function injectTimeFilter(query: string, timeField: string): string {
   const trimmed = query.trim();
   if (!trimmed) return trimmed;
 
-  const lines = trimmed.split('\n');
-  const fromIdx = lines.findIndex((line) => /^\s*FROM\s/i.test(line));
-  if (fromIdx === -1) return trimmed;
+  // Split on the first pipe rather than on newlines so that single-line queries
+  // like `FROM logs-* | STATS count() BY host` don't end up with the time filter
+  // after STATS (where @timestamp is no longer in scope).
+  const fromMatch = trimmed.match(/^(FROM\s[^|]+)/i);
+  if (!fromMatch) return trimmed;
 
+  const fromClause = fromMatch[1].trimEnd();
+  const rest = trimmed.slice(fromMatch[1].length).trimStart();
   const whereClause = `| WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`;
-  lines.splice(fromIdx + 1, 0, whereClause);
-  return lines.join('\n');
+
+  return rest ? `${fromClause}\n${whereClause}\n${rest}` : `${fromClause}\n${whereClause}`;
 }
 
 export const useQueryExecution = ({
