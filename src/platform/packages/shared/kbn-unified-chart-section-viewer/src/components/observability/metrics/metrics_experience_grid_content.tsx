@@ -30,6 +30,7 @@ import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -90,16 +91,18 @@ export const MetricsExperienceGridContent = ({
     []
   );
 
+  const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
+
   const getDescription = useCallback(
     (metricItem: ParsedMetricItem) =>
-      metricItem.isDuplicateMetricName
+      duplicateMetricNames.has(metricItem.metricName)
         ? i18n.translate('metricsExperience.grid.duplicateMetricDescription', {
             defaultMessage:
               'Data stream: This metric exists across multiple streams. This chart is filtered to show data from the {dataStream} stream only.',
             values: { dataStream: metricItem.dataStream },
           })
         : undefined,
-    []
+    [duplicateMetricNames]
   );
 
   return (

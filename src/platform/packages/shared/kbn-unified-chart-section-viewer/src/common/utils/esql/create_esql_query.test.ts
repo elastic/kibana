@@ -12,7 +12,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 const mockMetric: ParsedMetricItem = {
   metricName: 'cpu.usage',
-  isDuplicateMetricName: false,
   fieldTypes: [ES_FIELD_TYPES.DOUBLE],
   dataStream: 'metrics-*',
   units: ['ms'],
@@ -345,7 +344,6 @@ TS metrics-*
   describe('special character escaping', () => {
     const mockMetricWithSpecialChars: ParsedMetricItem = {
       metricName: 'cpu.usage',
-      isDuplicateMetricName: false,
       fieldTypes: [ES_FIELD_TYPES.LONG],
       dataStream: 'metrics-*',
       units: ['ms'],
@@ -395,7 +393,6 @@ TS metrics-*
     it('should escape field names with backticks by doubling them', () => {
       const mockMetricWithBackticks: ParsedMetricItem = {
         metricName: 'cpu.usage',
-        isDuplicateMetricName: false,
         fieldTypes: [ES_FIELD_TYPES.DOUBLE],
         dataStream: 'metrics-*',
         units: ['ms'],
@@ -419,7 +416,6 @@ TS metrics-*
   describe('conflicting field types (issue #5385)', () => {
     const mockMetricWithConflictingTypes: ParsedMetricItem = {
       metricName: 'http.request.duration',
-      isDuplicateMetricName: false,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.FLOAT],
       dataStream: 'timeseries-rich-metrics-primary',
       units: ['ms'],
@@ -455,7 +451,6 @@ TS timeseries-rich-metrics-primary
     it('should cast conflicting long+integer types to TO_LONG', () => {
       const mockMetricWithLongConflict: ParsedMetricItem = {
         metricName: 'requests.count',
-        isDuplicateMetricName: false,
         fieldTypes: [ES_FIELD_TYPES.LONG, ES_FIELD_TYPES.INTEGER],
         dataStream: 'metrics-*',
         units: ['count'],
@@ -477,7 +472,6 @@ TS metrics-*
     it('should cast mixed numeric types (double+long) to TO_DOUBLE', () => {
       const mockMetricMixedNumeric: ParsedMetricItem = {
         metricName: 'metric.value',
-        isDuplicateMetricName: false,
         fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
         dataStream: 'metrics-*',
         units: ['count'],
@@ -513,7 +507,6 @@ TS timeseries-rich-metrics-primary
     it('should not cast when all types are identical', () => {
       const mockMetricSingleType: ParsedMetricItem = {
         metricName: 'cpu.usage',
-        isDuplicateMetricName: false,
         fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.DOUBLE],
         dataStream: 'metrics-*',
         units: ['percent'],
@@ -535,7 +528,6 @@ TS metrics-*
     it('should pass incompatible histogram types through for Lens to handle', () => {
       const mockMetricWithConflictingHistogram: ParsedMetricItem = {
         metricName: 'request.duration',
-        isDuplicateMetricName: false,
         fieldTypes: [ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM, ES_FIELD_TYPES.TDIGEST],
         dataStream: 'metrics-*',
         units: ['ms'],

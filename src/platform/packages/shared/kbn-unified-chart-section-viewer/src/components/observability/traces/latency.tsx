@@ -32,7 +32,6 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
   const chartLayers = useChartLayers({
     metricItem: {
       metricName: 'duration_ms',
-      isDuplicateMetricName: false,
       metricTypes: ['histogram'],
       units: ['ms'],
       dataStream: indexes,

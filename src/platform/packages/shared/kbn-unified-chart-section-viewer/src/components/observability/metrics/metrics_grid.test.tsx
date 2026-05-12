@@ -68,7 +68,6 @@ describe('MetricsGrid', () => {
   const metricItems: MetricsGridProps['metricItems'] = [
     {
       metricName: 'system.cpu.utilization',
-      isDuplicateMetricName: false,
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
@@ -77,7 +76,6 @@ describe('MetricsGrid', () => {
     },
     {
       metricName: 'system.memory.utilization',
-      isDuplicateMetricName: false,
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
@@ -183,33 +181,21 @@ describe('MetricsGrid', () => {
   });
 
   it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
-    const duplicateMetricItems: MetricsGridProps['metricItems'] = [
-      {
-        ...metricItems[0],
-        isDuplicateMetricName: true,
-        dataStream: 'metrics-system.cpu-default',
-      },
-      {
-        ...metricItems[1],
-        isDuplicateMetricName: false,
-      },
-    ];
-
-    const descriptionForDuplicate = 'Data stream: metrics-system.cpu-default';
+    const descriptionForFirst = 'Data stream: metrics-system.cpu-default';
 
     const getDescription = jest.fn((metric: (typeof metricItems)[0]) =>
-      metric.isDuplicateMetricName ? descriptionForDuplicate : undefined
+      metric.metricName === 'system.cpu.utilization' ? descriptionForFirst : undefined
     );
 
-    renderMetricsGrid({ metricItems: duplicateMetricItems, getDescription });
+    renderMetricsGrid({ getDescription });
 
-    expect(getDescription).toHaveBeenCalledTimes(duplicateMetricItems.length);
-    expect(getDescription).toHaveBeenNthCalledWith(1, duplicateMetricItems[0]);
-    expect(getDescription).toHaveBeenNthCalledWith(2, duplicateMetricItems[1]);
+    expect(getDescription).toHaveBeenCalledTimes(metricItems.length);
+    expect(getDescription).toHaveBeenNthCalledWith(1, metricItems[0]);
+    expect(getDescription).toHaveBeenNthCalledWith(2, metricItems[1]);
 
     expect(Chart).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ description: descriptionForDuplicate }),
+      expect.objectContaining({ description: descriptionForFirst }),
       expect.anything()
     );
     expect(Chart).toHaveBeenNthCalledWith(
@@ -253,7 +239,6 @@ describe('MetricsGrid', () => {
     const heterogeneousMetrics: MetricsGridProps['metricItems'] = [
       {
         metricName: 'fieldsense.energy.battery.voltage',
-        isDuplicateMetricName: false,
         dataStream: 'fieldsense-station-metrics',
         units: [null],
         metricTypes: ['gauge'],
@@ -262,7 +247,6 @@ describe('MetricsGrid', () => {
       },
       {
         metricName: 'system.cpu.utilization',
-        isDuplicateMetricName: false,
         dataStream: 'metrics-hostmetricsreceiver.otel-default',
         units: [null],
         metricTypes: ['gauge'],
@@ -376,7 +360,6 @@ describe('MetricsGrid', () => {
         ...metricItems,
         {
           metricName: 'system.disk.utilization',
-          isDuplicateMetricName: false,
           dataStream: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],
@@ -385,7 +368,6 @@ describe('MetricsGrid', () => {
         },
         {
           metricName: 'system.network.utilization',
-          isDuplicateMetricName: false,
           dataStream: 'metrics-*',
           units: ['ms'],
           metricTypes: ['counter'],

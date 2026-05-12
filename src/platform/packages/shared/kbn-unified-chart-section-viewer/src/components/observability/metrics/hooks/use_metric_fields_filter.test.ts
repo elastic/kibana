@@ -18,7 +18,6 @@ describe('useMetricFieldsFilter', () => {
   const baseMetricItems: ParsedMetricItem[] = [
     {
       metricName: 'system.cpu.utilization',
-      isDuplicateMetricName: false,
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],
@@ -27,7 +26,6 @@ describe('useMetricFieldsFilter', () => {
     },
     {
       metricName: 'system.memory.utilization',
-      isDuplicateMetricName: false,
       dataStream: 'metrics-*',
       units: ['ms'],
       metricTypes: ['counter'],

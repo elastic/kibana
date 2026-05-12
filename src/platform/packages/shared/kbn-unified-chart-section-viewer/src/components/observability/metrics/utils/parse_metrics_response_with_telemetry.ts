@@ -16,7 +16,6 @@ import type {
 } from '../../../../types';
 
 import { toArray } from './to_array';
-import { getMetricNameOccurrences } from './get_metric_name_occurrences';
 import { ALLOWED_METRIC_TYPES } from '../../../../common/constants';
 import { accumulateMetricsRowTelemetry } from '../telemetry';
 
@@ -58,8 +57,6 @@ export const parseMetricsWithTelemetry = (
 
   const allDimensionsSet = new Set<string>();
 
-  const metricNameOccurrences = getMetricNameOccurrences(response);
-
   const toDimension = (name: string): Dimension => {
     const type = getFieldType?.(name);
     return { name, type };
@@ -97,7 +94,6 @@ export const parseMetricsWithTelemetry = (
     for (const stream of dataStreams) {
       parsedMetrics.push({
         metricName: metric.metric_name,
-        isDuplicateMetricName: metricNameOccurrences.get(metric.metric_name)! > 1,
         dataStream: stream,
         units,
         metricTypes,

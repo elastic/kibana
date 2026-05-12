@@ -40,7 +40,6 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
-          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -79,7 +78,6 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
-          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -118,7 +116,6 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'cpu.usage',
-          isDuplicateMetricName: true,
           dataStream: 'stream-a',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -127,7 +124,6 @@ describe('parseMetricsWithTelemetry', () => {
         },
         {
           metricName: 'cpu.usage',
-          isDuplicateMetricName: true,
           dataStream: 'stream-b',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -166,7 +162,6 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
-          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE],
@@ -205,7 +200,6 @@ describe('parseMetricsWithTelemetry', () => {
       metricItems: [
         {
           metricName: 'my.metric',
-          isDuplicateMetricName: false,
           dataStream: 'my-index',
           metricTypes: ['gauge', 'counter'],
           fieldTypes: [ES_FIELD_TYPES.DOUBLE, ES_FIELD_TYPES.LONG],
@@ -283,46 +277,6 @@ describe('parseMetricsWithTelemetry', () => {
     });
     const totalNumberOfMetrics = sum(Object.values(result.telemetry.metrics_by_type));
     expect(result.telemetry.total_number_of_metrics).toBe(totalNumberOfMetrics);
-  });
-
-  it('marks isDuplicateMetricName true when the same metric_name appears more than once', () => {
-    const response: MetricsESQLResponse[] = [
-      {
-        metric_name: 'cpu.usage',
-        data_stream: 'stream-a',
-        unit: ['percent'],
-        metric_type: 'gauge',
-        field_type: ES_FIELD_TYPES.DOUBLE,
-        dimension_fields: [],
-      },
-      {
-        metric_name: 'memory.usage',
-        data_stream: 'stream-a',
-        unit: ['bytes'],
-        metric_type: 'gauge',
-        field_type: ES_FIELD_TYPES.LONG,
-        dimension_fields: [],
-      },
-      {
-        metric_name: 'cpu.usage',
-        data_stream: 'stream-b',
-        unit: ['percent'],
-        metric_type: 'gauge',
-        field_type: ES_FIELD_TYPES.DOUBLE,
-        dimension_fields: [],
-      },
-    ];
-    const result = parseMetricsWithTelemetry(response);
-    expect(result.metricItems).toHaveLength(3);
-    expect(result.metricItems[0]).toEqual(
-      expect.objectContaining({ metricName: 'cpu.usage', isDuplicateMetricName: true })
-    );
-    expect(result.metricItems[1]).toEqual(
-      expect.objectContaining({ metricName: 'memory.usage', isDuplicateMetricName: false })
-    );
-    expect(result.metricItems[2]).toEqual(
-      expect.objectContaining({ metricName: 'cpu.usage', isDuplicateMetricName: true })
-    );
   });
 
   describe('internal dimension filtering', () => {
