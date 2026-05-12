@@ -6,6 +6,7 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { z } from '@kbn/zod/v4';
 import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
 import type {
   UnifiedAttachmentPayload,
@@ -49,11 +50,17 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
 
 export interface UnifiedAttachmentType
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {}
+    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {
+  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
+  schema?: z.ZodType;
+}
 
 export interface UnifiedAttachmentTypeSetup
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {}
+    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {
+  /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
+  schema?: z.ZodType;
+}
 
 export interface AttachmentFramework {
   registerExternalReference: (
