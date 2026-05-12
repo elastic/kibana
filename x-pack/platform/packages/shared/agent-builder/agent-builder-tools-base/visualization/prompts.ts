@@ -104,8 +104,7 @@ For that purpose, follow these guidelines:
 
 ## Human-readable column aliases
 
-Use human-readable aliases in STATS/EVAL (prefer \`Unique Visitors\` over \`unique_visitors\`).
-Rule: if an alias contains spaces, you MUST wrap the alias in backticks (e.g. STATS \`Unique Visitors\` = COUNT(*) NOT STATS unique_visitors = COUNT(*)).
+Use human-readable aliases in STATS/EVAL. For aliases with spaces, use ES|QL identifier backticks, never quotes: \`STATS \\\`Unique Visitors\\\` = COUNT(*)\`, not \`STATS 'Unique Visitors' = COUNT(*)\` or \`STATS unique_visitors = COUNT(*)\`.
 
 ## Time picker compatibility
 
@@ -116,7 +115,7 @@ Do not hardcode absolute times or now()-based ranges.
 
 ## Time Bucketing
 
-For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
+For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
 Omit \`LIMIT\`; the bucket range already bounds the results.
 
 e.g. with for a normal index with FROM and BUCKET:
@@ -128,6 +127,6 @@ FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 75, ?_tstart, ?_
 or for a time-series datastream with TS and TBUCKET:
 
 \`\`\`esql
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
+TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75)
 \`\`\`
 `;
