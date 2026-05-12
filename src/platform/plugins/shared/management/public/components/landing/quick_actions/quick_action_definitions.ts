@@ -8,25 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  INDEX_CREATE_LANDING_OVERLAY_ID,
-  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
-  API_KEYS_CREATE_LANDING_OVERLAY_ID,
-  CONNECTORS_LANDING_OVERLAY_ID,
-  DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
-  SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
-  USER_CREATE_LANDING_OVERLAY_ID,
-} from '../../../../common/landing_quick_action_overlay_ids';
-
-export {
-  INDEX_CREATE_LANDING_OVERLAY_ID,
-  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
-  API_KEYS_CREATE_LANDING_OVERLAY_ID,
-  CONNECTORS_LANDING_OVERLAY_ID,
-  DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
-  SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
-  USER_CREATE_LANDING_OVERLAY_ID,
-};
 
 export interface QuickActionDefinition {
   id: string;
@@ -37,8 +18,6 @@ export interface QuickActionDefinition {
   appId: string;
   path: string;
   capabilityPath: string;
-  /** When set, open this overlay on the landing page if a renderer was registered; else fall back to `path`. */
-  overlayId?: string;
 }
 
 export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
@@ -53,7 +32,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'data/index_management',
-    overlayId: INDEX_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.data.index_management',
   },
   {
@@ -67,7 +45,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'insightsAndAlerting/triggersActions',
-    overlayId: ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.insightsAndAlerting.triggersActions',
   },
   {
@@ -94,7 +71,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'security/api_keys/create',
-    overlayId: API_KEYS_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.security.api_keys',
   },
   {
@@ -107,7 +83,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'kibana/dataViews/create',
-    overlayId: DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.kibana.indexPatterns',
   },
   {
@@ -121,7 +96,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'insightsAndAlerting/triggersActionsConnectors/connectors',
-    overlayId: CONNECTORS_LANDING_OVERLAY_ID,
     capabilityPath: 'management.insightsAndAlerting.triggersActionsConnectors',
   },
   {
@@ -135,7 +109,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'kibana/objects',
-    overlayId: SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
     capabilityPath: 'management.kibana.objects',
   },
   {
@@ -148,7 +121,6 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'security/users/create',
-    overlayId: USER_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.security.users',
   },
 ];

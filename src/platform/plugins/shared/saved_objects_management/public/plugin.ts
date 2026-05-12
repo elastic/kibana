@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import { SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -29,7 +27,6 @@ import {
 import type { v1 } from '../common';
 
 import type { SavedObjectManagementTypeInfo } from './types';
-import { ManagementLandingSavedObjectsImportFlyout } from './management_section/management_landing_import_flyout';
 import {
   getAllowedTypes,
   getDefaultTitle,
@@ -132,24 +129,9 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(
-    coreStart: CoreStart,
-    { spaces: spacesApi, data, dataViews, management }: StartDependencies
-  ) {
+  public start(coreStart: CoreStart, { spaces: spacesApi }: StartDependencies) {
     this.actionServiceStart = this.actionService.start(spacesApi);
     this.columnServiceStart = this.columnService.start(spacesApi);
-
-    management.registerLandingQuickActionOverlay(
-      SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
-      ({ onClose }) =>
-        React.createElement(ManagementLandingSavedObjectsImportFlyout, {
-          onClose,
-          http: coreStart.http,
-          search: data.search,
-          dataViews,
-          applications: coreStart.application,
-        })
-    );
 
     return {
       getAllowedTypes: () => getAllowedTypes(coreStart.http),

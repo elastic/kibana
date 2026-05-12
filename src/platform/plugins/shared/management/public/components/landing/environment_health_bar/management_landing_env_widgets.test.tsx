@@ -131,6 +131,10 @@ describe('ManagementLandingHeader environment widgets', () => {
     expect(
       screen.queryByTestId('managementEnvHealthAttentionIssuesTrigger')
     ).not.toBeInTheDocument();
+    const statsPanel = screen.getByTestId('managementLandingStatsPanel');
+    expect(
+      within(statsPanel).getByTestId('managementEnvHealthHealthyReassurance')
+    ).toBeInTheDocument();
   });
 
   test('Attention issues stat shows summary and details inside popover for a single reason', () => {

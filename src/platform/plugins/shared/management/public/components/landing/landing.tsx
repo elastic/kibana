@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPageBody,
   EuiPageTemplate,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -30,7 +32,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { useAppContext } from '../management_app/management_context';
 import { SolutionEmptyPrompt } from './solution_empty_prompt';
 import {
-  ManagementLandingHealthyReassurance,
   ManagementLandingHeaderDescription,
   ManagementLandingHealthBadge,
 } from './environment_health_bar/management_landing_env_widgets';
@@ -111,8 +112,7 @@ function ManagementLandingClassicBody({
   envHealth,
 }: ManagementLandingClassicBodyProps) {
   const { euiTheme } = useEuiTheme();
-  const { coreStart, cloud, isAirGapped, getAutoOpsStatusHook, getLandingQuickActionOverlay } =
-    useAppContext();
+  const { coreStart, cloud, isAirGapped, getAutoOpsStatusHook } = useAppContext();
 
   const clusterNameTitle = useMemo(() => {
     if (envLoadState !== 'ready') {
@@ -140,16 +140,6 @@ function ManagementLandingClassicBody({
       coreStart.application.capabilities.cloudConnect?.configure
   );
 
-  const [landingOverlayId, setLandingOverlayId] = useState<string | null>(null);
-
-  const landingQuickActionOverlay = useMemo(() => {
-    if (!landingOverlayId || !getLandingQuickActionOverlay) {
-      return null;
-    }
-    const render = getLandingQuickActionOverlay(landingOverlayId);
-    return render ? render({ onClose: () => setLandingOverlayId(null) }) : null;
-  }, [landingOverlayId, getLandingQuickActionOverlay]);
-
   const twoColumnLandingGridCss = css`
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
@@ -160,14 +150,11 @@ function ManagementLandingClassicBody({
     }
   `;
 
-  const statsAndCalloutsRowGridCss = css`
+  const statsRowLayoutCss = css`
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: ${euiTheme.size.l};
     align-items: stretch;
-    @media (max-width: ${euiTheme.breakpoint.m}px) {
-      grid-template-columns: minmax(0, 1fr);
-    }
   `;
 
   const statsRowCellCss = css`
@@ -176,21 +163,6 @@ function ManagementLandingClassicBody({
     display: flex;
     flex-direction: column;
   `;
-
-  const showHealthyReassurance =
-    envLoadState === 'ready' &&
-    envHealth !== null &&
-    envHealth.attentionReasons.length === 0 &&
-    envHealth.healthStatus === 'green';
-
-  const statsRowLayoutCss = showHealthyReassurance
-    ? statsAndCalloutsRowGridCss
-    : css`
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        gap: ${euiTheme.size.l};
-        align-items: stretch;
-      `;
 
   return (
     <>
@@ -228,26 +200,43 @@ function ManagementLandingClassicBody({
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         {envLoadState === 'error' ? (
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="management.landing.envHealth.loadErrorTitle"
-                defaultMessage="Could not load environment health"
-              />
-            }
-            color="danger"
-            iconType="error"
-            announceOnMount
+          <EuiPanel
+            hasBorder
+            paddingSize="m"
             data-test-subj="managementEnvironmentHealthBarError"
+            role="alert"
             css={css`
               margin-top: ${euiTheme.size.m};
             `}
           >
-            <FormattedMessage
-              id="management.landing.envHealth.loadErrorBody"
-              defaultMessage="Try refreshing the page. If the problem persists, contact your administrator."
-            />
-          </EuiCallOut>
+            <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="errorFilled" color="danger" size="l" aria-hidden />
+              </EuiFlexItem>
+              <EuiFlexItem grow>
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  <EuiTitle size="xs">
+                    <h3
+                      css={css`
+                        margin-block: 0;
+                      `}
+                    >
+                      <FormattedMessage
+                        id="management.landing.envHealth.loadErrorTitle"
+                        defaultMessage="Could not load environment health"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="management.landing.envHealth.loadErrorBody"
+                      defaultMessage="Try refreshing the page. If the problem persists, contact your administrator."
+                    />
+                  </EuiText>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
         ) : null}
         <div
           css={css`
@@ -267,11 +256,6 @@ function ManagementLandingClassicBody({
                 navigateToApp={coreStart.application.navigateToApp}
               />
             </div>
-            {showHealthyReassurance ? (
-              <div css={statsRowCellCss}>
-                <ManagementLandingHealthyReassurance />
-              </div>
-            ) : null}
           </div>
           <UpgradeAssistantBanner
             http={coreStart.http}
@@ -289,8 +273,6 @@ function ManagementLandingClassicBody({
               <QuickActionsGrid
                 capabilities={coreStart.application.capabilities}
                 navigateToApp={coreStart.application.navigateToApp}
-                getLandingQuickActionOverlay={getLandingQuickActionOverlay}
-                onOpenLandingOverlay={setLandingOverlayId}
               />
             </div>
             <div
@@ -302,16 +284,12 @@ function ManagementLandingClassicBody({
                 capabilities={coreStart.application.capabilities}
                 navigateToApp={coreStart.application.navigateToApp}
                 uiSettings={coreStart.uiSettings}
-                getLandingQuickActionOverlay={getLandingQuickActionOverlay}
-                onOpenLandingOverlay={setLandingOverlayId}
               />
             </div>
           </div>
           <ManagementLandingWorkflowPaths
             capabilities={coreStart.application.capabilities}
             navigateToApp={coreStart.application.navigateToApp}
-            getLandingQuickActionOverlay={getLandingQuickActionOverlay}
-            onOpenLandingOverlay={setLandingOverlayId}
           />
           <EuiSpacer size="m" />
           <ManagementLandingDocsFooter docLinks={coreStart.docLinks} />
@@ -332,7 +310,6 @@ function ManagementLandingClassicBody({
           </div>
         ) : null}
       </EuiPageBody>
-      {landingQuickActionOverlay}
     </>
   );
 }
@@ -341,33 +318,14 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const {
-    appBasePath,
-    sections,
-    kibanaVersion,
-    cardsNavigationConfig,
-    chromeStyle,
-    coreStart,
-    getLandingQuickActionOverlay,
-  } = useAppContext();
+  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart } =
+    useAppContext();
   setBreadcrumbs();
-
-  const [nonClassicLandingOverlayId, setNonClassicLandingOverlayId] = useState<string | null>(null);
-
-  const nonClassicLandingQuickActionOverlay = useMemo(() => {
-    if (!nonClassicLandingOverlayId || !getLandingQuickActionOverlay) {
-      return null;
-    }
-    const render = getLandingQuickActionOverlay(nonClassicLandingOverlayId);
-    return render ? render({ onClose: () => setNonClassicLandingOverlayId(null) }) : null;
-  }, [nonClassicLandingOverlayId, getLandingQuickActionOverlay]);
 
   const managementQuickActionsGrid = (
     <QuickActionsGrid
       capabilities={coreStart.application.capabilities}
       navigateToApp={coreStart.application.navigateToApp}
-      getLandingQuickActionOverlay={getLandingQuickActionOverlay}
-      onOpenLandingOverlay={setNonClassicLandingOverlayId}
     />
   );
 
@@ -396,24 +354,21 @@ export const ManagementLandingPage = ({
   }, [coreStart.chrome.docTitle]);
 
   useEffect(() => {
-    onAppMounted('');
+    onAppMounted('home');
   }, [onAppMounted]);
 
   if (cardsNavigationConfig?.enabled) {
     return (
-      <>
-        <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
-          {managementQuickActionsGrid}
-          <EuiSpacer size="l" />
-          <CardsNavigation
-            sections={sections}
-            appBasePath={appBasePath}
-            hideLinksTo={cardsNavigationConfig?.hideLinksTo}
-            extendedCardNavigationDefinitions={cardsNavigationConfig?.extendCardNavDefinitions}
-          />
-        </EuiPageBody>
-        {nonClassicLandingQuickActionOverlay}
-      </>
+      <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
+        {managementQuickActionsGrid}
+        <EuiSpacer size="l" />
+        <CardsNavigation
+          sections={sections}
+          appBasePath={appBasePath}
+          hideLinksTo={cardsNavigationConfig?.hideLinksTo}
+          extendedCardNavigationDefinitions={cardsNavigationConfig?.extendCardNavDefinitions}
+        />
+      </EuiPageBody>
     );
   }
 
@@ -426,7 +381,6 @@ export const ManagementLandingPage = ({
         <EuiPageBody restrictWidth={true} paddingSize="l">
           {managementQuickActionsGrid}
         </EuiPageBody>
-        {nonClassicLandingQuickActionOverlay}
       </>
     );
   }

@@ -8,14 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { USER_CREATE_LANDING_OVERLAY_ID } from '../../../common/landing_quick_action_overlay_ids';
 
 export interface ManagementLandingWorkflowLinkDefinition {
   readonly id: string;
   readonly label: string;
   readonly managementPath: string;
-  /** If set and a renderer is registered on the landing page, the link opens this overlay instead of navigating. */
-  readonly landingQuickActionOverlayId?: string;
   /** If unset, the link is shown whenever the flow is shown (flows gate on their own capability lists). */
   readonly capabilityPath?: string;
 }
@@ -114,7 +111,6 @@ export const MANAGEMENT_LANDING_WORKFLOW_PATH_FLOWS: ManagementLandingWorkflowFl
         }),
         managementPath: 'security/users/create',
         capabilityPath: 'management.security.users',
-        landingQuickActionOverlayId: USER_CREATE_LANDING_OVERLAY_ID,
       },
       {
         id: 'users',

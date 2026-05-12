@@ -163,7 +163,7 @@ describe('Landing Page', () => {
   });
 
   describe('Classic header environment', () => {
-    test('Shows cluster title in header; stats and healthy callout align in two columns like quick actions when cards navigation is disabled', async () => {
+    test('Shows cluster title in header; environment overview panel includes stats and healthy state when cards navigation is disabled', async () => {
       const coreStart = coreMock.createStart();
       await renderLandingPage({ cardsNavigationConfig: { enabled: false }, coreStart });
       expect(
@@ -174,16 +174,20 @@ describe('Landing Page', () => {
       ).toBeInTheDocument();
       expect(screen.getByTestId('managementEnvHealthClusterStatus')).toHaveTextContent('green');
       const mainColumn = screen.getByTestId('managementLandingMainColumn');
-      const statsAndCalloutsRow = within(mainColumn).getByTestId('managementLandingStatsAndCalloutsRow');
-      expect(within(statsAndCalloutsRow).getByTestId('managementEnvHealthIndices')).toHaveTextContent(
-        '12'
+      const statsAndCalloutsRow = within(mainColumn).getByTestId(
+        'managementLandingStatsAndCalloutsRow'
       );
+      expect(
+        within(statsAndCalloutsRow).getByTestId('managementEnvHealthIndices')
+      ).toHaveTextContent('12');
       expect(
         within(statsAndCalloutsRow).getByTestId('managementEnvHealthPendingReports')
       ).toHaveTextContent('3');
       expect(screen.queryByText(/demo count/i)).not.toBeInTheDocument();
       expect(
-        within(statsAndCalloutsRow).getByTestId('managementEnvHealthHealthyReassurance')
+        within(screen.getByTestId('managementLandingStatsPanel')).getByTestId(
+          'managementEnvHealthHealthyReassurance'
+        )
       ).toBeInTheDocument();
       expect(screen.getByTestId('managementLandingDocsLinkGuide')).toHaveAttribute(
         'href',

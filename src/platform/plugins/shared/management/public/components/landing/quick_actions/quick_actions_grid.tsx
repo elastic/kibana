@@ -23,8 +23,7 @@ import {
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core/public';
-import type { LandingQuickActionOverlayRenderer } from '../../../types';
-import { QUICK_ACTION_DEFINITIONS } from './quick_action_definitions';
+import { QUICK_ACTION_DEFINITIONS, type QuickActionDefinition } from './quick_action_definitions';
 
 /** Management app link + Index Management feature (Elasticsearch) capabilities can diverge; show create-index card if either grants access. */
 export function hasIndexManagementQuickActionCapability(
@@ -48,13 +47,9 @@ export function hasIndexManagementQuickActionCapability(
 export const QuickActionsGrid = ({
   capabilities,
   navigateToApp,
-  getLandingQuickActionOverlay,
-  onOpenLandingOverlay,
 }: {
   capabilities: ApplicationStart['capabilities'];
   navigateToApp: ApplicationStart['navigateToApp'];
-  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
-  onOpenLandingOverlay: (overlayId: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const quickActionCardTitleFont = useEuiFontSize('s');
@@ -71,16 +66,9 @@ export const QuickActionsGrid = ({
 
   const handleClick = useCallback(
     (action: QuickActionDefinition) => {
-      if (action.overlayId) {
-        const render = getLandingQuickActionOverlay?.(action.overlayId);
-        if (render) {
-          onOpenLandingOverlay(action.overlayId);
-          return;
-        }
-      }
       navigateToApp(action.appId, { path: action.path });
     },
-    [getLandingQuickActionOverlay, navigateToApp, onOpenLandingOverlay]
+    [navigateToApp]
   );
 
   if (visibleActions.length === 0) {

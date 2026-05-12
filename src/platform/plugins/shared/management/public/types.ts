@@ -8,7 +8,6 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ReactElement } from 'react';
 import type {
   ScopedHistory,
   Capabilities,
@@ -56,29 +55,12 @@ export interface DefinedSections {
   clusterPerformance: ManagementSection;
 }
 
-/** Props passed to quick-action flyouts rendered on the Stack Management landing page. */
-export interface LandingQuickActionOverlayProps {
-  onClose: () => void;
-}
-
-export type LandingQuickActionOverlayRenderer = (
-  props: LandingQuickActionOverlayProps
-) => ReactElement;
-
 export interface ManagementStart {
   setupCardsNavigation: ({
     enabled,
     hideLinksTo,
     extendCardNavDefinitions,
   }: NavigationCardsSubject) => void;
-  /**
-   * Registers a flyout renderer for a Stack Management landing quick action (e.g. create connector).
-   * Called from plugins that own the flyout UI (e.g. triggers_actions_ui, saved_objects_management).
-   */
-  registerLandingQuickActionOverlay: (
-    id: string,
-    render: LandingQuickActionOverlayRenderer
-  ) => void;
 }
 
 export interface ManagementSectionsStartPrivate {
@@ -153,7 +135,6 @@ export interface AppDependencies {
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
   isAirGapped: boolean;
   getAutoOpsStatusHook: () => AutoOpsStatusHook;
-  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
 }
 
 export interface ConfigSchema {

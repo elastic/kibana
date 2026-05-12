@@ -24,7 +24,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import type { ApplicationStart } from '@kbn/core/public';
-import type { LandingQuickActionOverlayRenderer } from '../../types';
 import {
   MANAGEMENT_LANDING_WORKFLOW_PATH_FLOWS,
   type ManagementLandingWorkflowFlowDefinition,
@@ -46,13 +45,9 @@ function filterVisibleLinks(
 export function ManagementLandingWorkflowPaths({
   capabilities,
   navigateToApp,
-  getLandingQuickActionOverlay,
-  onOpenLandingOverlay,
 }: {
   capabilities: ApplicationStart['capabilities'];
   navigateToApp: ApplicationStart['navigateToApp'];
-  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
-  onOpenLandingOverlay?: (overlayId: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -65,14 +60,9 @@ export function ManagementLandingWorkflowPaths({
 
   const handleActivateLink = useCallback(
     (link: ManagementLandingWorkflowLinkDefinition) => {
-      const overlayId = link.landingQuickActionOverlayId;
-      if (overlayId && onOpenLandingOverlay && getLandingQuickActionOverlay?.(overlayId)) {
-        onOpenLandingOverlay(overlayId);
-        return;
-      }
       navigateToApp('management', { path: link.managementPath });
     },
-    [getLandingQuickActionOverlay, navigateToApp, onOpenLandingOverlay]
+    [navigateToApp]
   );
 
   const handleStartTourPlanned = useCallback((_flowId: string) => {

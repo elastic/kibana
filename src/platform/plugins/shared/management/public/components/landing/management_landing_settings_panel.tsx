@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { LandingQuickActionOverlayRenderer } from '../../types';
 import {
   MANAGEMENT_LANDING_SETTINGS_ROWS,
   type ManagementLandingSettingsRowDefinition,
@@ -40,14 +39,10 @@ export function ManagementLandingSettingsPanel({
   capabilities,
   navigateToApp,
   uiSettings,
-  getLandingQuickActionOverlay,
-  onOpenLandingOverlay,
 }: {
   capabilities: ApplicationStart['capabilities'];
   navigateToApp: ApplicationStart['navigateToApp'];
   uiSettings: IUiSettingsClient;
-  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
-  onOpenLandingOverlay?: (overlayId: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   /** Prototype: dismiss applies until navigation/refresh only; no localStorage. */
@@ -267,8 +262,6 @@ export function ManagementLandingSettingsPanel({
                             <ManagementLandingSettingsNavigateContent
                               row={row}
                               navigateToApp={navigateToApp}
-                              getLandingQuickActionOverlay={getLandingQuickActionOverlay}
-                              onOpenLandingOverlay={onOpenLandingOverlay}
                             />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>

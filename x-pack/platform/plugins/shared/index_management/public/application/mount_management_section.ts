@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type SemVer from 'semver/classes/semver';
 import type { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
-import { createMemoryHistory } from 'history';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ReindexService, ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -27,7 +26,7 @@ import { httpService } from './services/http';
 import type { ExtensionsService } from '../services/extensions_service';
 import type { StartDependencies } from '../types';
 
-/** Shared HTTP / notifications / metrics init for Index Management (full app mount or landing quick action). */
+/** Shared HTTP / notifications / metrics init for Index Management. */
 export function initIndexManagementClientServices({
   usageCollection,
   reindexService,
@@ -53,52 +52,6 @@ export function initIndexManagementClientServices({
   }
 
   return { uiMetricService, notificationService };
-}
-
-export function buildAppDependenciesForCreateIndexLandingModal({
-  core,
-  startDependencies,
-  extensionsService,
-  isFleetEnabled,
-  kibanaVersion,
-  config,
-  cloud,
-  canUseSyntheticSource,
-}: {
-  core: CoreStart;
-  startDependencies: StartDependencies;
-  extensionsService: ExtensionsService;
-  isFleetEnabled: boolean;
-  kibanaVersion: SemVer;
-  config: AppDependencies['config'];
-  cloud?: CloudSetup;
-  canUseSyntheticSource: boolean;
-}): AppDependencies {
-  const { uiMetricService, notificationService } = initIndexManagementClientServices({
-    core,
-    usageCollection: startDependencies.usageCollection,
-    reindexService: startDependencies.reindexService?.reindexService,
-  });
-
-  const history = createMemoryHistory({
-    initialEntries: ['/'],
-  }) as unknown as ScopedHistory<unknown>;
-
-  return getIndexManagementDependencies({
-    cloud,
-    config,
-    core,
-    extensionsService,
-    history,
-    isFleetEnabled,
-    kibanaVersion,
-    startDependencies,
-    uiMetricService,
-    usageCollection: startDependencies.usageCollection,
-    notificationService,
-    canUseSyntheticSource,
-    reindexService: startDependencies.reindexService,
-  });
 }
 
 export function getIndexManagementDependencies({

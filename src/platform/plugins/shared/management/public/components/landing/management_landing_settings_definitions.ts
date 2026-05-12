@@ -29,8 +29,6 @@ export interface ManagementLandingNavigateSettingsRowDefinition {
   readonly icon: IconType;
   readonly capabilityPath: string;
   readonly managementPath: string;
-  /** When set, **Go** opens this landing overlay if registered; otherwise navigates to `managementPath`. */
-  readonly landingQuickActionOverlayId?: string;
   readonly sectionBreakBefore?: boolean;
 }
 

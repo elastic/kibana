@@ -13,6 +13,7 @@ import { sortBy } from 'lodash';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { AppMountParameters } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { ManagementApp, ManagementSection } from '../../utils';
 
@@ -25,11 +26,23 @@ interface ManagementSidebarNavProps {
 }
 
 /** @internal **/
+export const MANAGEMENT_HOME_NAV_ITEM_ID = 'home';
+
+/** @internal **/
 export const managementSidebarNav = ({
   selectedId,
   sections,
   history,
 }: ManagementSidebarNavProps) => {
+  const homeNavItem: EuiSideNavItemType<unknown> = {
+    id: MANAGEMENT_HOME_NAV_ITEM_ID,
+    name: i18n.translate('management.nav.home', {
+      defaultMessage: 'Home',
+    }),
+    isSelected: selectedId === MANAGEMENT_HOME_NAV_ITEM_ID,
+    'data-test-subj': 'managementNavHome',
+    ...reactRouterNavigate(history, '/'),
+  };
   const sectionsToNavItems = (managementSections: ManagementSection[]) => {
     const sortedManagementSections = sortBy(managementSections, 'order');
 
@@ -91,5 +104,5 @@ export const managementSidebarNav = ({
     };
   };
 
-  return sectionsToNavItems(sections);
+  return [homeNavItem, ...sectionsToNavItems(sections)];
 };

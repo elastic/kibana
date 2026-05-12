@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -408,6 +407,11 @@ function ManagementLandingStatsPanel({
         />
       ),
     });
+  } else if (data.healthStatus === 'green') {
+    statEntries.push({
+      id: 'healthyReassurance',
+      content: <ManagementLandingHealthyReassurance />,
+    });
   }
 
   return (
@@ -442,10 +446,17 @@ function ManagementLandingStatsPanel({
             <React.Fragment key={entry.id}>
               <EuiFlexItem
                 grow
-                css={css`
-                  flex-basis: 0;
-                  min-width: 0;
-                `}
+                css={
+                  entry.id === 'healthyReassurance'
+                    ? css`
+                        flex: 1 1 auto;
+                        min-width: max-content;
+                      `
+                    : css`
+                        flex-basis: 0;
+                        min-width: 0;
+                      `
+                }
               >
                 {entry.content}
               </EuiFlexItem>
@@ -534,21 +545,37 @@ export function ManagementLandingHeaderDescription({
 
 export function ManagementLandingHealthyReassurance() {
   return (
-    <EuiCallOut
-      title={
-        <FormattedMessage
-          id="management.landing.envHealth.healthyTitle"
-          defaultMessage="Environment looks healthy"
-        />
-      }
-      color="success"
-      iconType="checkInCircleFilled"
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
       data-test-subj="managementEnvHealthHealthyReassurance"
     >
-      <FormattedMessage
-        id="management.landing.envHealth.healthyBody"
-        defaultMessage="No urgent cluster issues were detected. Continue monitoring alerts and data ingestion as your usage grows."
-      />
-    </EuiCallOut>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="checkInCircleFilled" size="m" color="success" aria-hidden />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="m">
+            <h3
+              css={css`
+                margin-block: 0;
+                white-space: nowrap;
+              `}
+            >
+              <FormattedMessage
+                id="management.landing.envHealth.healthyTitle"
+                defaultMessage="All clear"
+              />
+            </h3>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiText size="s" color="subdued">
+        <FormattedMessage
+          id="management.landing.envHealth.healthyBody"
+          defaultMessage="Continue monitoring alerts and data ingestion."
+        />
+      </EuiText>
+    </EuiFlexGroup>
   );
 }

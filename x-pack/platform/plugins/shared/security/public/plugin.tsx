@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { BuildFlavor } from '@kbn/config';
 import type {
@@ -22,10 +20,6 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import {
-  API_KEYS_CREATE_LANDING_OVERLAY_ID,
-  USER_CREATE_LANDING_OVERLAY_ID,
-} from '@kbn/management-plugin/public';
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
@@ -46,8 +40,6 @@ import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
-import { ManagementLandingApiKeyFlyout } from './management/api_keys/management_landing_api_key_flyout';
-import { ManagementLandingCreateUserFlyout } from './management/users/management_landing_create_user_flyout';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -198,10 +190,7 @@ export class SecurityPlugin
     };
   }
 
-  public start(
-    core: CoreStart,
-    { management, share }: PluginStartDependencies
-  ): SecurityPluginStart {
+  public start(core: CoreStart, { share }: PluginStartDependencies): SecurityPluginStart {
     const { application, http, notifications, overlays } = core;
     const { anonymousPaths } = http;
 
@@ -227,36 +216,6 @@ export class SecurityPlugin
       this.managementService.start({
         capabilities: application.capabilities,
       });
-    }
-
-    const registerManagementLandingOverlays = (mgmt: ManagementStart) => {
-      mgmt.registerLandingQuickActionOverlay(API_KEYS_CREATE_LANDING_OVERLAY_ID, ({ onClose }) =>
-        React.createElement(ManagementLandingApiKeyFlyout, {
-          onClose,
-          core,
-          authc: this.authc as AuthenticationServiceStart,
-        })
-      );
-
-      mgmt.registerLandingQuickActionOverlay(USER_CREATE_LANDING_OVERLAY_ID, ({ onClose }) =>
-        React.createElement(ManagementLandingCreateUserFlyout, {
-          onClose,
-          core,
-        })
-      );
-    };
-
-    if (management) {
-      registerManagementLandingOverlays(management);
-    } else if (this.managementIntegrationEnabled) {
-      // `management` may be missing from synchronous `start` deps when it runs later in plugin order.
-      void core.plugins
-        .onStart<{ management: ManagementStart }>('management')
-        .then(({ management: managementStart }) => {
-          if (managementStart.found) {
-            registerManagementLandingOverlays(managementStart.contract);
-          }
-        });
     }
 
     if (share) {

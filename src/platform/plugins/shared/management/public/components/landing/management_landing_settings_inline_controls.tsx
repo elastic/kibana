@@ -34,7 +34,6 @@ import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
-import type { LandingQuickActionOverlayRenderer } from '../../types';
 import type {
   ManagementLandingNavigateSettingsRowDefinition,
   ManagementLandingUiSettingRowDefinition,
@@ -130,28 +129,13 @@ async function validateAndSet(
 export function ManagementLandingSettingsNavigateContent({
   row,
   navigateToApp,
-  getLandingQuickActionOverlay,
-  onOpenLandingOverlay,
 }: {
   row: ManagementLandingNavigateSettingsRowDefinition;
   navigateToApp: ApplicationStart['navigateToApp'];
-  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
-  onOpenLandingOverlay?: (overlayId: string) => void;
 }) {
   const handleActivate = useCallback(() => {
-    const overlayId = row.landingQuickActionOverlayId;
-    if (overlayId && onOpenLandingOverlay && getLandingQuickActionOverlay?.(overlayId)) {
-      onOpenLandingOverlay(overlayId);
-      return;
-    }
     navigateToApp('management', { path: row.managementPath });
-  }, [
-    getLandingQuickActionOverlay,
-    navigateToApp,
-    onOpenLandingOverlay,
-    row.landingQuickActionOverlayId,
-    row.managementPath,
-  ]);
+  }, [navigateToApp, row.managementPath]);
 
   return (
     <EuiButtonEmpty

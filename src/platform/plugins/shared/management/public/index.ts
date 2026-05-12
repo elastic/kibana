@@ -24,17 +24,6 @@ export type {
   DefinedSections,
   AutoOpsStatusHook,
   AutoOpsStatusResult,
-  LandingQuickActionOverlayProps,
-  LandingQuickActionOverlayRenderer,
 } from './types';
 
 export { MANAGEMENT_APP_ID } from '../common/contants';
-export {
-  INDEX_CREATE_LANDING_OVERLAY_ID,
-  CONNECTORS_LANDING_OVERLAY_ID,
-  SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
-  DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
-  API_KEYS_CREATE_LANDING_OVERLAY_ID,
-  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
-  USER_CREATE_LANDING_OVERLAY_ID,
-} from '../common/landing_quick_action_overlay_ids';
