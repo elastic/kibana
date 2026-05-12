@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { FC, ReactElement, ReactNode } from 'react';
 import React from 'react';
 import type { History } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -14,6 +14,8 @@ import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
@@ -23,6 +25,15 @@ import { DiscoverInTimelineContextProvider } from '../../../common/components/di
 import { AssistantProvider } from '../../../assistant/provider';
 import { CaseProvider } from '../../../cases/components/provider/provider';
 import { ConsoleManager } from '../../../management/components/console/components/console_manager';
+
+// styled-components ThemeProvider providing `theme.eui` is set at the SecurityApp root,
+// but Flyout v2 portals out of that tree (into EuiFlyoutManager). Re-apply it here so
+// styled-components consumers rendered inside the flyout (e.g. the Respond PageOverlay
+// in ConsoleManager) can read `theme.eui`.
+const FlyoutEuiThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const darkMode = useDarkMode();
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+};
 
 export const flyoutProviders = ({
   services,
@@ -37,12 +48,26 @@ export const flyoutProviders = ({
 }): ReactElement => {
   // This is currently necessary because of Analyzer (which internally has the logic to open other flyouts)
   // TODO remove ExpandableFlyoutProvider when we're ready to drop the expandable flyout
+  // ConsoleManager and AssistantProvider must live inside the Router because the Respond
+  // PageOverlay they render calls `useLocation()` (for `hideOnUrlPathnameChange`).
   const flyoutContent = history ? (
     <Router history={history}>
-      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+      <FlyoutEuiThemeProvider>
+        <ConsoleManager>
+          <AssistantProvider>
+            <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+          </AssistantProvider>
+        </ConsoleManager>
+      </FlyoutEuiThemeProvider>
     </Router>
   ) : (
-    <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+    <FlyoutEuiThemeProvider>
+      <ConsoleManager>
+        <AssistantProvider>
+          <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+        </AssistantProvider>
+      </ConsoleManager>
+    </FlyoutEuiThemeProvider>
   );
 
   return (
@@ -56,11 +81,7 @@ export const flyoutProviders = ({
               <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
                 <UpsellingProvider upsellingService={services.upselling}>
                   <DiscoverInTimelineContextProvider>
-                    <CaseProvider>
-                      <ConsoleManager>
-                        <AssistantProvider>{flyoutContent}</AssistantProvider>
-                      </ConsoleManager>
-                    </CaseProvider>
+                    <CaseProvider>{flyoutContent}</CaseProvider>
                   </DiscoverInTimelineContextProvider>
                 </UpsellingProvider>
               </UserPrivilegesProvider>
