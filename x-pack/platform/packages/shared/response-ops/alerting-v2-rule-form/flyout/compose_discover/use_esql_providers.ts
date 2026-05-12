@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
+import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';

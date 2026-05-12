@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { suggest } from '@kbn/esql-language';
 import { getEsqlColumns } from '@kbn/esql-utils';
-import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
+import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
