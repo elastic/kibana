@@ -14,6 +14,16 @@ export interface MoreIntegrationTileDefinition {
   logo: SupportedLogo;
 }
 
+export const BROWSE_ALL_LOGOS: readonly SupportedLogo[] = [
+  'nginx',
+  'rabbitmq',
+  'apache',
+  'couchbase',
+  'logstash',
+  'redis',
+  'mysql',
+];
+
 export const MORE_INTEGRATION_TILES: readonly MoreIntegrationTileDefinition[] = [
   {
     id: 'confluence',

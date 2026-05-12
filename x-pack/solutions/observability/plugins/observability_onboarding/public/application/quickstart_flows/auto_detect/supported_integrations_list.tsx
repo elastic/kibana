@@ -61,8 +61,8 @@ export function SupportedIntegrationsList() {
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} css={{ flexWrap: 'wrap' }}>
       {FEATURED_INTEGRATIONS_LIST.map(({ title, icon }) => (
-        <EuiFlexItem grow={false}>
-          <EuiBadge iconType={icon} color="hollow" key={title}>
+        <EuiFlexItem key={title} grow={false}>
+          <EuiBadge iconType={icon} color="hollow">
             {title}
           </EuiBadge>
         </EuiFlexItem>

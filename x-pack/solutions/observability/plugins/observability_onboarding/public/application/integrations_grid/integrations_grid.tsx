@@ -27,7 +27,7 @@ import { MORE_INTEGRATION_TILES } from './more_integrations/tiles_config';
 
 export const IntegrationsGrid = () => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const shouldStackVertically = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   return (
     <section aria-labelledby={titleId}>
@@ -71,8 +71,8 @@ export const IntegrationsGrid = () => {
                 { defaultMessage: 'More integrations' }
               )}
             >
-              <EuiFlexGroup direction={isMediumBreakpoint ? 'column' : 'row'} gutterSize="m">
-                <EuiFlexItem grow={isMediumBreakpoint ? false : 5}>
+              <EuiFlexGroup direction={shouldStackVertically ? 'column' : 'row'} gutterSize="m">
+                <EuiFlexItem grow={shouldStackVertically ? false : 5}>
                   <EuiFlexGroup gutterSize="m">
                     {MORE_INTEGRATION_TILES.map((tile) => (
                       <EuiFlexItem key={tile.id} grow={1}>
@@ -81,7 +81,7 @@ export const IntegrationsGrid = () => {
                     ))}
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={isMediumBreakpoint ? false : 2}>
+                <EuiFlexItem grow={shouldStackVertically ? false : 2}>
                   <BrowseAllTile />
                 </EuiFlexItem>
               </EuiFlexGroup>

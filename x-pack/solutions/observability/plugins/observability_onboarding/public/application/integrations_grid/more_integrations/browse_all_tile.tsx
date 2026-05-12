@@ -11,21 +11,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../../..';
-import type { SupportedLogo } from '../../shared/logo_icon';
 import { LogoIcon } from '../../shared/logo_icon';
 import { addPathParamToUrl } from '../../package_list_search_form/use_card_url_rewrite';
+import { BROWSE_ALL_LOGOS } from './tiles_config';
 
-const STACK_OVERLAP = -8;
-
-export const BROWSE_ALL_LOGOS: readonly SupportedLogo[] = [
-  'nginx',
-  'rabbitmq',
-  'apache',
-  'couchbase',
-  'logstash',
-  'redis',
-  'mysql',
-] as const;
+const STACK_OVERLAP = '-8px';
 
 export const BrowseAllTile = () => {
   const { euiTheme } = useEuiTheme();
@@ -35,7 +25,7 @@ export const BrowseAllTile = () => {
 
   const handleClick = useCallback(() => {
     application.navigateToApp('integrations', {
-      path: addPathParamToUrl('/browse', {}),
+      path: addPathParamToUrl('/browse/observability', {}),
     });
   }, [application]);
 
@@ -58,7 +48,7 @@ export const BrowseAllTile = () => {
               grow={false}
               css={css`
                 z-index: ${BROWSE_ALL_LOGOS.length - index};
-                margin-left: ${index === 0 ? 0 : STACK_OVERLAP}px;
+                margin-left: ${index === 0 ? 0 : STACK_OVERLAP};
               `}
             >
               <LogoIcon
