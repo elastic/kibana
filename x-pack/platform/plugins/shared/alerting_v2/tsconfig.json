@@ -110,8 +110,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock",
-    "@kbn/monaco",
     "@kbn/workflows-yaml"
   ],
   "exclude": ["target/**/*"]
