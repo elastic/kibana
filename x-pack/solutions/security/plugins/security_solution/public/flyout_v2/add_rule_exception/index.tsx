@@ -28,19 +28,40 @@ import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { ADD_RULE_EXCEPTION_LOADING_TEST_ID } from './test_ids';
 
 export interface AddRuleExceptionProps {
+  /**
+   * Alert document used to prefill exception fields and derive rule metadata.
+   */
   hit: DataTableRecord;
+  /**
+   * Selected exception list type. `null` creates the default rule exception.
+   */
   exceptionListType: ExceptionListTypeEnum | null;
+  /**
+   * Callback invoked when the user cancels the form. Receives whether the rule changed.
+   */
   onCancel: (didRuleChange: boolean) => void;
+  /**
+   * Callback invoked after saving. Receives flags for rule changes and alert-closing choices.
+   */
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
 
+/**
+ * Renders the Add Rule / Endpoint exception form inside a Flyout v2 tools flyout.
+ * Adapts a `DataTableRecord` alert into the legacy exception form contract.
+ */
 export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
   ({ hit, exceptionListType, onCancel, onConfirm }) => {
     const { euiTheme } = useEuiTheme();
 
-    const ruleId = (getFieldValue(hit, ALERT_RULE_UUID) as string) ?? '';
+    const ruleId = useMemo(() => {
+      const value = getFieldValue(hit, ALERT_RULE_UUID);
+      return (Array.isArray(value) ? value[0] : value) as string | undefined;
+    }, [hit]);
     const { rule: maybeRule, loading: isRuleLoading } = useRuleWithFallback(ruleId);
     const rules = useMemo<Rule[] | null>(() => (maybeRule ? [maybeRule] : null), [maybeRule]);
+    // Without a ruleId, useRuleWithFallback skips; keep loading instead of rendering with rules=null.
+    const isLoading = !ruleId || isRuleLoading;
 
     const isEndpointItem = exceptionListType === ExceptionListTypeEnum.ENDPOINT;
     const title = isEndpointItem ? ADD_ENDPOINT_EXCEPTION : CREATE_RULE_EXCEPTION;
@@ -76,7 +97,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
         >
           <ToolsFlyoutHeader hit={hit} title={title} />
         </EuiFlyoutHeader>
-        {isRuleLoading ? (
+        {isLoading ? (
           <EuiFlyoutBody data-test-subj={ADD_RULE_EXCEPTION_LOADING_TEST_ID}>
             <EuiSkeletonText lines={4} />
           </EuiFlyoutBody>

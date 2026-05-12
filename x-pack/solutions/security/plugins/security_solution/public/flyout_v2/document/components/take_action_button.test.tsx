@@ -14,6 +14,7 @@ import { useAddToCaseActions } from '../../../detections/components/alerts_table
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { TakeActionButton } from './take_action_button';
@@ -28,11 +29,18 @@ jest.mock('../../../detections/components/alerts_table/timeline_actions/use_aler
 jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
+jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions');
 jest.mock('../../../common/hooks/is_in_security_app');
 
 const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
 jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
+}));
+
+const mockOpenAddRuleException = jest.fn();
+const mockUseOpenAddRuleException = jest.fn().mockReturnValue(mockOpenAddRuleException);
+jest.mock('../../add_rule_exception/hooks/use_open_add_rule_exception', () => ({
+  useOpenAddRuleException: (...args: unknown[]) => mockUseOpenAddRuleException(...args),
 }));
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
@@ -61,6 +69,7 @@ const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
 const mockUseAlertAssigneesActions = useAlertAssigneesActions as jest.Mock;
 const mockUseAlertTagsActions = useAlertTagsActions as jest.Mock;
+const mockUseAlertExceptionActions = useAlertExceptionActions as jest.Mock;
 
 const createMockHit = (
   flattened: Record<string, unknown> = {},
@@ -109,6 +118,7 @@ describe('<TakeActionButton />', () => {
       alertAssigneesPanels: [],
     });
     mockUseAlertTagsActions.mockReturnValue({ alertTagsItems: [], alertTagsPanels: [] });
+    mockUseAlertExceptionActions.mockReturnValue({ exceptionActionItems: [] });
     mockUseInvestigateInTimeline.mockReturnValue({ investigateInTimelineActionItems: [] });
     mockUseIsInSecurityApp.mockReturnValue(true);
     mockUseRunAlertWorkflowPanel.mockReturnValue({
@@ -262,6 +272,20 @@ describe('<TakeActionButton />', () => {
         ecsRowData: mockEcsData,
         refetch: mockOnAlertUpdated,
       })
+    );
+  });
+
+  it('should detect endpoint alerts from scalar or array original event values', () => {
+    const alertHit = createMockHit({
+      'event.kind': 'signal',
+      'kibana.alert.original_event.module': 'endpoint',
+      'kibana.alert.original_event.kind': ['alert'],
+    });
+
+    renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+    expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+      expect.objectContaining({ isEndpointAlert: true })
     );
   });
 

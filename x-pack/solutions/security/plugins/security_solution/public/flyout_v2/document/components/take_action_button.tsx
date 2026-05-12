@@ -14,7 +14,6 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { getOr } from 'lodash/fp';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -99,11 +98,19 @@ export const TakeActionButton = memo(
       return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
     }, [hit]);
     const isEndpointAlert = useMemo(() => {
-      const modules = getOr([], 'kibana.alert.original_event.module', hit.flattened) as string[];
-      const kinds = getOr([], 'kibana.alert.original_event.kind', hit.flattened) as string[];
-      const moduleList = Array.isArray(modules) ? modules : [modules];
-      const kindList = Array.isArray(kinds) ? kinds : [kinds];
-      return moduleList.includes('endpoint') && kindList.includes('alert');
+      const originalEventModules = getFieldValue(hit, 'kibana.alert.original_event.module');
+      const originalEventKinds = getFieldValue(hit, 'kibana.alert.original_event.kind');
+      const modules = Array.isArray(originalEventModules)
+        ? originalEventModules
+        : originalEventModules
+        ? [originalEventModules]
+        : [];
+      const kinds = Array.isArray(originalEventKinds)
+        ? originalEventKinds
+        : originalEventKinds
+        ? [originalEventKinds]
+        : [];
+      return modules.includes('endpoint') && kinds.includes('alert');
     }, [hit]);
 
     const { addToCaseActionItems } = useAddToCaseActions({
@@ -269,6 +276,7 @@ export const TakeActionButton = memo(
     return (
       <EuiPopover
         id="AlertTakeActionPanel"
+        aria-label={TAKE_ACTION}
         button={takeActionButton}
         isOpen={isPopoverOpen}
         closePopover={closePopoverHandler}

@@ -45,24 +45,28 @@ jest.mock('../shared/components/tools_flyout_header', () => ({
 const onCancel = jest.fn();
 const onConfirm = jest.fn();
 
-const createDiscoverHit = (): DataTableRecord =>
+const defaultFlattenedAlertFields = {
+  '@timestamp': ['2026-05-11T11:54:22.134Z'],
+  'agent.type': ['endpoint'],
+  'event.code': ['behavior'],
+  'event.kind': ['signal'],
+  'file.hash.sha256': ['abc123'],
+  'file.path': ['C:\\Windows\\System32\\example.exe'],
+  'host.os.name': ['Windows'],
+  'kibana.alert.rule.uuid': ['rule-uuid'],
+  'kibana.alert.workflow_status': ['open'],
+};
+
+const createDiscoverHit = (
+  flattened: DataTableRecord['flattened'] = defaultFlattenedAlertFields
+): DataTableRecord =>
   ({
     id: 'alert-id',
     raw: {
       _id: 'alert-id',
       _index: '.alerts-security.alerts-default',
     },
-    flattened: {
-      '@timestamp': ['2026-05-11T11:54:22.134Z'],
-      'agent.type': ['endpoint'],
-      'event.code': ['behavior'],
-      'event.kind': ['signal'],
-      'file.hash.sha256': ['abc123'],
-      'file.path': ['C:\\Windows\\System32\\example.exe'],
-      'host.os.name': ['Windows'],
-      'kibana.alert.rule.uuid': ['rule-uuid'],
-      'kibana.alert.workflow_status': ['open'],
-    },
+    flattened,
     isAnchor: false,
   } as DataTableRecord);
 
@@ -109,5 +113,25 @@ describe('<AddRuleException />', () => {
         }),
       })
     );
+  });
+
+  it('does not request an empty rule id when the alert rule uuid is missing', () => {
+    mockUseRuleWithFallback.mockReturnValue({
+      loading: false,
+      rule: null,
+    });
+
+    render(
+      <AddRuleException
+        hit={createDiscoverHit({ 'event.kind': ['signal'] })}
+        exceptionListType={ExceptionListTypeEnum.RULE_DEFAULT}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+      />
+    );
+
+    expect(mockUseRuleWithFallback).toHaveBeenCalledWith(undefined);
+    expect(screen.getByTestId(ADD_RULE_EXCEPTION_LOADING_TEST_ID)).toBeInTheDocument();
+    expect(mockAddExceptionFlyoutContent).not.toHaveBeenCalled();
   });
 });
