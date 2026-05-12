@@ -554,7 +554,7 @@ groups:
         default: "7d"
         applies_to:
           stack: ga 9.3
-          ech: unavailable
+          ech: ga
           self: ga
 
       - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions
