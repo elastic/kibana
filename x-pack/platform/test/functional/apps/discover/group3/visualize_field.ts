@@ -18,8 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const dataViews = getService('dataViews');
-  const { common, discover, timePicker, lens, header, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, timePicker, lens, header, unifiedFieldList } = getPageObjects([
     'discover',
     'timePicker',
     'lens',
