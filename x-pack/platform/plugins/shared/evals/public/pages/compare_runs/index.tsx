@@ -32,13 +32,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TraceWaterfall, type TraceSpan } from '@kbn/llm-trace-waterfall';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { PairedTTestResult } from '@kbn/evals-common';
 import {
   useCompareRuns,
+  useEvalsTraceFetcher,
   useEvaluationRun,
   useRunDatasetExamples,
-  useTrace,
 } from '../../hooks/use_evals_api';
 import * as i18n from './translations';
 
@@ -241,7 +241,13 @@ const ExampleDrilldownFlyout: React.FC<{
 }> = ({ runIdA, runIdB, datasetId, datasetName, evaluatorName, onClose }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
-  const { data: traceData, isLoading: traceLoading, error: traceError } = useTrace(selectedTraceId);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
   const { data: examplesA, isLoading: loadingA } = useRunDatasetExamples(runIdA, datasetId);
   const { data: examplesB, isLoading: loadingB } = useRunDatasetExamples(runIdB, datasetId);
 
@@ -489,11 +495,11 @@ const ExampleDrilldownFlyout: React.FC<{
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <TraceWaterfall
-              spans={(traceData?.spans ?? []) as TraceSpan[]}
+              spans={spans}
               traceId={selectedTraceId}
-              durationMs={traceData?.duration_ms}
+              durationMs={durationMs}
               isLoading={traceLoading}
-              error={traceError as Error | null}
+              error={traceError}
             />
           </EuiFlyoutBody>
         </EuiFlyout>

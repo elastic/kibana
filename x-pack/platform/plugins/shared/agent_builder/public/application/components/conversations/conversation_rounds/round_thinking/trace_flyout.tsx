@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlyoutResizable, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
+import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFlyout.title', {
@@ -25,8 +25,9 @@ interface TraceFlyoutProps {
 export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
+  const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
   const traceSpansResult = useTraceSpans(traceId, {
-    search: data.search.search,
+    fetchTrace,
   });
 
   return (

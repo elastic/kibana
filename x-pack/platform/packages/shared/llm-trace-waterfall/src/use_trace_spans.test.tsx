@@ -8,9 +8,8 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { of, throwError } from 'rxjs';
+import type { TraceFetcher } from './use_trace_spans';
 import { useTraceSpans } from './use_trace_spans';
 
 const createWrapper = () => {
@@ -37,84 +36,45 @@ describe('useTraceSpans', () => {
     jest.clearAllMocks();
   });
 
-  it('queries traces and maps spans with computed duration', async () => {
-    const search = jest.fn().mockReturnValue(
-      of({
-        rawResponse: {
-          hits: {
-            hits: [
-              {
-                _id: 'span-1',
-                _source: {
-                  trace_id: 'trace-1',
-                  name: 'root',
-                  '@timestamp': '2026-01-01T00:00:00.000Z',
-                  duration: 2_000_000,
-                },
-              },
-              {
-                _id: 'span-2',
-                _source: {
-                  trace_id: 'trace-1',
-                  name: 'child',
-                  '@timestamp': '2026-01-01T00:00:00.500Z',
-                  duration: 1_000_000,
-                },
-              },
-            ],
-          },
+  it('returns spans and duration from fetchTrace', async () => {
+    const fetchResult = {
+      spans: [
+        {
+          span_id: 'span-1',
+          trace_id: 'trace-1',
+          name: 'root',
+          start_time: '2026-01-01T00:00:00.000Z',
+          duration_ms: 500,
         },
-      })
-    );
+      ],
+      durationMs: 500,
+    };
+    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    fetchTrace.mockResolvedValue(fetchResult);
     const { queryClient, Wrapper } = createWrapper();
 
-    const { result } = renderHook(
-      () =>
-        useTraceSpans('trace-1', {
-          search: search as unknown as DataPublicPluginStart['search']['search'],
-        }),
-      { wrapper: Wrapper }
-    );
+    const { result } = renderHook(() => useTraceSpans('trace-1', { fetchTrace }), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(search).toHaveBeenCalledTimes(1);
-    expect(search).toHaveBeenCalledWith({
-      params: {
-        index: 'traces-*',
-        body: {
-          query: { term: { trace_id: 'trace-1' } },
-          sort: [{ '@timestamp': { order: 'asc' } }],
-          size: 10000,
-        },
-      },
-    });
+    expect(fetchTrace).toHaveBeenCalledTimes(1);
+    expect(fetchTrace).toHaveBeenCalledWith('trace-1');
     expect(result.current.error).toBeNull();
-    expect(result.current.spans).toHaveLength(2);
-    expect(result.current.spans[0]).toMatchObject({
-      span_id: 'span-1',
-      trace_id: 'trace-1',
-      name: 'root',
-      duration_ms: 2,
-    });
-    expect(result.current.durationMs).toBe(501);
+    expect(result.current.spans).toEqual(fetchResult.spans);
+    expect(result.current.durationMs).toBe(fetchResult.durationMs);
 
     queryClient.clear();
   });
 
-  it('returns empty state and does not execute search when traceId is null', async () => {
-    const search = jest.fn();
+  it('returns empty state and does not call fetchTrace when traceId is null', async () => {
+    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
     const { queryClient, Wrapper } = createWrapper();
 
-    const { result } = renderHook(
-      () =>
-        useTraceSpans(null, {
-          search: search as unknown as DataPublicPluginStart['search']['search'],
-        }),
-      { wrapper: Wrapper }
-    );
+    const { result } = renderHook(() => useTraceSpans(null, { fetchTrace }), { wrapper: Wrapper });
 
-    expect(search).not.toHaveBeenCalled();
+    expect(fetchTrace).not.toHaveBeenCalled();
     expect(result.current).toEqual({
       spans: [],
       durationMs: 0,
@@ -125,51 +85,39 @@ describe('useTraceSpans', () => {
     queryClient.clear();
   });
 
-  it('returns query error and no spans when search request fails', async () => {
+  it('returns query error and no spans when fetchTrace rejects', async () => {
     const error = new Error('boom');
-    const search = jest.fn().mockReturnValue(throwError(() => error));
+    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    fetchTrace.mockRejectedValue(error);
     const { queryClient, Wrapper } = createWrapper();
 
-    const { result } = renderHook(
-      () =>
-        useTraceSpans('trace-1', {
-          search: search as unknown as DataPublicPluginStart['search']['search'],
-        }),
-      { wrapper: Wrapper }
-    );
+    const { result } = renderHook(() => useTraceSpans('trace-1', { fetchTrace }), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.error).toBe(error));
 
-    expect(search).toHaveBeenCalledTimes(1);
+    expect(fetchTrace).toHaveBeenCalledTimes(1);
+    expect(fetchTrace).toHaveBeenCalledWith('trace-1');
     expect(result.current.spans).toEqual([]);
     expect(result.current.durationMs).toBe(0);
 
     queryClient.clear();
   });
 
-  it('returns empty spans and zero duration when search returns no hits', async () => {
-    const search = jest.fn().mockReturnValue(
-      of({
-        rawResponse: {
-          hits: {
-            hits: [],
-          },
-        },
-      })
-    );
+  it('returns empty spans and zero duration when fetchTrace resolves empty payload', async () => {
+    const fetchTrace: jest.MockedFunction<TraceFetcher> = jest.fn();
+    fetchTrace.mockResolvedValue({ spans: [], durationMs: 0 });
     const { queryClient, Wrapper } = createWrapper();
 
-    const { result } = renderHook(
-      () =>
-        useTraceSpans('trace-1', {
-          search: search as unknown as DataPublicPluginStart['search']['search'],
-        }),
-      { wrapper: Wrapper }
-    );
+    const { result } = renderHook(() => useTraceSpans('trace-1', { fetchTrace }), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(search).toHaveBeenCalledTimes(1);
+    expect(fetchTrace).toHaveBeenCalledTimes(1);
+    expect(fetchTrace).toHaveBeenCalledWith('trace-1');
     expect(result.current.spans).toEqual([]);
     expect(result.current.durationMs).toBe(0);
     expect(result.current.error).toBeNull();

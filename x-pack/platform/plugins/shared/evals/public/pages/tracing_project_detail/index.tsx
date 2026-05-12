@@ -32,9 +32,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useParams } from 'react-router-dom';
-import { TraceWaterfall, type TraceSpan } from '@kbn/llm-trace-waterfall';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { TraceSummary } from '@kbn/evals-common';
-import { useProjectTraces, useTrace } from '../../hooks/use_evals_api';
+import { useEvalsTraceFetcher, useProjectTraces } from '../../hooks/use_evals_api';
 import { LastUpdatedAt } from '../../components/last_updated_at';
 import { formatLatency, formatTokens } from '../../utils/format_utils';
 import * as i18n from './translations';
@@ -50,7 +50,13 @@ export const TracingProjectDetailPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
-  const { data: traceData, isLoading: traceLoading, error: traceError } = useTrace(selectedTraceId);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
@@ -343,11 +349,11 @@ export const TracingProjectDetailPage: React.FC = () => {
           >
             <div style={{ height: '100%', padding: 16 }}>
               <TraceWaterfall
-                spans={(traceData?.spans ?? []) as TraceSpan[]}
+                spans={spans}
                 traceId={selectedTraceId}
-                durationMs={traceData?.duration_ms}
+                durationMs={durationMs}
                 isLoading={traceLoading}
-                error={traceError as Error | null}
+                error={traceError}
                 layout="horizontal"
               />
             </div>
