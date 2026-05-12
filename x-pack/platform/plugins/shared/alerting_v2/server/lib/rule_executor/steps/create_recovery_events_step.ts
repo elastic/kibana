@@ -128,12 +128,23 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         })}`,
     });
 
+    // Telemetry for the recovery query is owned by the step, not QueryService
+    // (the service is a generic ES|QL client and must not depend on
+    // rule-executor concepts). We measure wall-clock around the call and
+    // prefer ES `took` for `es_search_duration_ms` when surfaced.
+    const queryMetrics = input.executionContext.metrics.query;
+    const startedAt = Date.now();
     const esqlResponse = await this.scopedQueryService.executeQuery({
       query: effectiveQuery,
       filter: queryPayload.filter,
       params: queryPayload.params,
       abortSignal: input.executionContext.signal,
-      metrics: input.executionContext.metrics.query,
+    });
+    const durationMs = Date.now() - startedAt;
+    queryMetrics.recordSearch({
+      esTookMs: typeof esqlResponse.took === 'number' ? esqlResponse.took : durationMs,
+      durationMs,
+      rowCount: esqlResponse.values?.length ?? 0,
     });
 
     return buildQueryRecoveryAlertEvents({

@@ -13,7 +13,7 @@ import { inject, injectable } from 'inversify';
 import { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
-import type { ExecutionContext, QueryMetricsRecorder } from '../../execution_context';
+import type { ExecutionContext } from '../../execution_context';
 import type { CancellationScope } from '../../execution_context/cancellation_scope';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
 
@@ -22,12 +22,6 @@ export interface ExecuteQueryParams {
   filter?: EsqlQueryRequest['filter'];
   params?: EsqlQueryRequest['params'];
   abortSignal?: AbortSignal;
-  /**
-   * Optional sink for per-search timings/row counts. When omitted no
-   * telemetry is emitted (the no-op default lives on the
-   * {@link ExecutionContext}).
-   */
-  metrics?: QueryMetricsRecorder;
 }
 
 export interface QueryServiceContract {
@@ -48,13 +42,10 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
-    metrics,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
       message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
     });
-
-    const startedAt = Date.now();
 
     try {
       const response = await this.esClient.esql.query(
@@ -66,14 +57,6 @@ export class QueryService implements QueryServiceContract {
         },
         { signal: abortSignal }
       );
-
-      const durationMs = Date.now() - startedAt;
-      const rowCount = response.values?.length ?? 0;
-      metrics?.recordSearch({
-        esTookMs: typeof response.took === 'number' ? response.took : 0,
-        durationMs,
-        rowCount,
-      });
 
       this.logger.debug({
         message: `QueryService: Query executed successfully, returned ${response.values.length} rows`,
@@ -101,16 +84,12 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
-    metrics,
   }: ExecuteQueryParams): AsyncIterable<T[]> {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
     this.logger.debug({
       message: () => `QueryService: Executing streaming query`,
     });
-
-    const startedAt = Date.now();
-    let rowCount = 0;
 
     try {
       context.throwIfAborted();
@@ -127,24 +106,12 @@ export class QueryService implements QueryServiceContract {
       );
 
       if (this.isReadable(response)) {
-        for await (const batch of this.parseArrowStream<T>(response, context)) {
-          rowCount += batch.length;
-          metrics?.recordBatch();
-          yield batch;
-        }
+        yield* this.parseArrowStream<T>(response, context);
       } else {
         // Fall back to object rows to keep the stream contract stable.
         context.throwIfAborted();
-        const rows = this.toRows<T>(response as EsqlQueryResponse);
-        rowCount += rows.length;
-        metrics?.recordBatch();
-        yield rows;
+        yield this.toRows<T>(response as EsqlQueryResponse);
       }
-
-      // ES `took` is not surfaced for arrow streams; report wall-clock as the
-      // best available proxy for the operator dashboard.
-      const durationMs = Date.now() - startedAt;
-      metrics?.recordSearch({ esTookMs: durationMs, durationMs, rowCount });
 
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully`,

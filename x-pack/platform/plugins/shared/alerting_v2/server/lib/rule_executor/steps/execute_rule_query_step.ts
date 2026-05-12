@@ -65,13 +65,22 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         filter: queryPayload.filter,
         params: queryPayload.params,
         abortSignal: input.executionContext.signal,
-        metrics: input.executionContext.metrics.query,
       });
 
+      // Telemetry is owned by the step, not the service: QueryService is a
+      // generic ES|QL client and must not depend on rule-executor concepts.
+      // We measure wall-clock around the stream and tally rows/batches as we
+      // iterate. ES `took` is not surfaced for arrow streams, so we report
+      // wall-clock as the proxy for `es_search_duration_ms`.
+      const queryMetrics = input.executionContext.metrics.query;
+      const startedAt = Date.now();
+      let rowCount = 0;
       let yielded = false;
 
       for await (const batch of esqlRowBatchStream) {
         yielded = true;
+        rowCount += batch.length;
+        queryMetrics.recordBatch();
         yield {
           type: 'continue',
           state: { ...state, queryPayload, esqlRowBatch: batch },
@@ -84,6 +93,9 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           state: { ...state, queryPayload, esqlRowBatch: [] },
         };
       }
+
+      const durationMs = Date.now() - startedAt;
+      queryMetrics.recordSearch({ esTookMs: durationMs, durationMs, rowCount });
     });
   }
 }
