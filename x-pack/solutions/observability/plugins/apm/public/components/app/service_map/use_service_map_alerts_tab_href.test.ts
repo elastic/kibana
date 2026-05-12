@@ -137,7 +137,9 @@ describe('useServiceMapAlertsTabHref', () => {
   describe('from the mobile service map (/mobile-services/{serviceName}/service-map)', () => {
     it('links to /mobile-services/{serviceName}/alerts and resets kuery', () => {
       mockedUseApmRoutePath.mockReturnValue(
-        '/mobile-services/{serviceName}/service-map' as unknown as ReturnType<typeof useApmRoutePath>
+        '/mobile-services/{serviceName}/service-map' as unknown as ReturnType<
+          typeof useApmRoutePath
+        >
       );
 
       const { result } = renderHook(() => useServiceMapAlertsTabHref('opbeans-rum'));

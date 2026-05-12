@@ -56,32 +56,30 @@ describe('buildKueryFromAlert', () => {
   });
 
   it('escapes double-quotes inside values', () => {
-    expect(
-      buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'weird"service' }))
-    ).toBe('service.name: "weird\\"service"');
+    expect(buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'weird"service' }))).toBe(
+      'service.name: "weird\\"service"'
+    );
   });
 
   it('escapes backslashes inside values (CodeQL fix: backslash-before-quote)', () => {
     // Before the fix the helper only replaced `"`, so a stray `\` slipped through
     // and a value like `back\slash"` would render as `back\slash\"` — the `\"`
     // boundary becomes ambiguous and the parser sees an unterminated string.
-    expect(
-      buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'back\\slash' }))
-    ).toBe('service.name: "back\\\\slash"');
+    expect(buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'back\\slash' }))).toBe(
+      'service.name: "back\\\\slash"'
+    );
 
     // Backslash directly in front of a double-quote is the failure mode CodeQL
     // flagged: both must be escaped, in order, so the closing quote stays unambiguous.
-    expect(
-      buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'back\\"slash' }))
-    ).toBe('service.name: "back\\\\\\"slash"');
+    expect(buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 'back\\"slash' }))).toBe(
+      'service.name: "back\\\\\\"slash"'
+    );
   });
 
   it('coerces non-string fields without throwing', () => {
-    expect(
-      buildKueryFromAlert(
-        makeAlert({ [SERVICE_NAME]: 123 as unknown as string })
-      )
-    ).toBe('service.name: "123"');
+    expect(buildKueryFromAlert(makeAlert({ [SERVICE_NAME]: 123 as unknown as string }))).toBe(
+      'service.name: "123"'
+    );
   });
 
   it('does not include service.environment in the kuery', () => {
