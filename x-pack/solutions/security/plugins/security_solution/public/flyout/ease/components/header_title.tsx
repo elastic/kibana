@@ -13,11 +13,11 @@ import { RELATED_INTEGRATION } from '../../../detections/constants';
 import { IntegrationIcon } from './integration_icon';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
-import { DocumentSeverity } from '../../../flyout_v2/document/components/severity';
-import { RiskScore } from '../../../flyout_v2/document/components/risk_score';
+import { DocumentSeverity } from '../../../flyout_v2/document/main/components/severity';
+import { RiskScore } from '../../../flyout_v2/document/main/components/risk_score';
 import { FlyoutHeaderBlock } from '../../../flyout_v2/shared/components/flyout_header_block';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { getAlertTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getAlertTitle } from '../../../flyout_v2/document/main/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
 import { useEaseDetailsContext } from '../context';
 
