@@ -79,8 +79,8 @@ import {
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { RiskScoreDocTooltip } from '../../../overview/components/common';
-import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
-import { VulnerabilitiesInsight } from '../../../flyout/document_details/shared/components/vulnerabilities_insight';
+import { MisconfigurationsInsight } from './misconfiguration_insight';
+import { VulnerabilitiesInsight } from './vulnerabilities_insight';
 import { AlertCountInsight } from './alert_count_insight';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
@@ -88,6 +88,9 @@ import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_select
 
 const HOST_ICON = 'storage';
 const HOST_ENTITY_OVERVIEW_ID = 'host-entity-overview';
+const CSP_INSIGHTS_TAB_ID = 'csp_insights';
+const MISCONFIGURATIONS_TAB_ID = 'misconfigurationTabId';
+const VULNERABILITIES_TAB_ID = 'vulnerabilitiesTabId';
 
 export interface HostEntityOverviewProps {
   /**
@@ -253,6 +256,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     isPreviewMode: true, // setting to true to always open a new host flyout
     contextID: 'HostEntityOverview',
   });
+  type HostDetailsPath = Parameters<typeof openDetailsPanel>[0];
 
   const hostOSFamilyValue = useMemo(() => {
     if (entityStoreV2Enabled && entityRecord != null) {
@@ -434,13 +438,29 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       />
       <MisconfigurationsInsight
         identityFields={hostIdentityFields}
-        openDetailsPanel={enableEntityLinks ? openDetailsPanel : undefined}
+        onShowMisconfigurationsDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: MISCONFIGURATIONS_TAB_ID,
+                } as HostDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW}
       />
       <VulnerabilitiesInsight
         identityFields={hostIdentityFields}
-        openDetailsPanel={enableEntityLinks ? openDetailsPanel : undefined}
+        onShowVulnerabilitiesDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: VULNERABILITIES_TAB_ID,
+                } as HostDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID}
         telemetryKey={VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW}
       />

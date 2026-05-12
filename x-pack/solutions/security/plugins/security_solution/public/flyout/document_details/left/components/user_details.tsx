@@ -72,7 +72,7 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/components/user_entity_overview';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { MisconfigurationsInsight } from '../../../../flyout_v2/document/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../../../flyout_v2/document/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
@@ -521,7 +521,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         <MisconfigurationsInsight
           identityFields={userIdentityFields ?? {}}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowMisconfigurationsDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            })
+          }
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
         />

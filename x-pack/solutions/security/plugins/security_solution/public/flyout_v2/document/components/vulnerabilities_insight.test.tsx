@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-import { TestProviders } from '../../../../common/mock';
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import { VulnerabilitiesInsight } from './vulnerabilities_insight';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { DocumentDetailsContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
 const hostName = 'test host';
 const identityFields = { 'host.name': hostName };
 const testId = 'test';
-const openDetailsPanel = jest.fn();
+const onShowVulnerabilitiesDetails = jest.fn();
 
 const renderVulnerabilitiesInsight = () => {
   return render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={mockContextValue}>
-        <VulnerabilitiesInsight
-          identityFields={identityFields}
-          data-test-subj={testId}
-          openDetailsPanel={openDetailsPanel}
-        />
-      </DocumentDetailsContext.Provider>
+      <VulnerabilitiesInsight
+        identityFields={identityFields}
+        data-test-subj={testId}
+        onShowVulnerabilitiesDetails={onShowVulnerabilitiesDetails}
+      />
     </TestProviders>
   );
 };
@@ -51,7 +47,7 @@ describe('VulnerabilitiesInsight', () => {
     });
     const { getByTestId } = renderVulnerabilitiesInsight();
     getByTestId(`${testId}-count`).click();
-    expect(openDetailsPanel).toHaveBeenCalled();
+    expect(onShowVulnerabilitiesDetails).toHaveBeenCalled();
   });
 
   it('renders null when data is not available', () => {

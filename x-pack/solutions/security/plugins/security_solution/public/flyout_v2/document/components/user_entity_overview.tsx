@@ -73,7 +73,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../overview/components/common';
-import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
+import { MisconfigurationsInsight } from './misconfiguration_insight';
 import { AlertCountInsight } from './alert_count_insight';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
@@ -81,6 +81,8 @@ import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_select
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
+const CSP_INSIGHTS_TAB_ID = 'csp_insights';
+const MISCONFIGURATIONS_TAB_ID = 'misconfigurationTabId';
 
 export interface UserEntityOverviewProps {
   userName: string;
@@ -238,6 +240,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     isPreviewMode: true, // setting to true to always open a new user flyout
     contextID: 'UserEntityOverview',
   });
+  type UserDetailsPath = Parameters<typeof openDetailsPanel>[0];
 
   const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
@@ -417,7 +420,15 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
       />
       <MisconfigurationsInsight
         identityFields={userIdentityFields}
-        openDetailsPanel={enableEntityLinks ? openDetailsPanel : undefined}
+        onShowMisconfigurationsDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: MISCONFIGURATIONS_TAB_ID,
+                } as UserDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}
       />

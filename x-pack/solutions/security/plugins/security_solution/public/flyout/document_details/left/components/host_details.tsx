@@ -81,8 +81,8 @@ import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/components/host_entity_overview';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
+import { MisconfigurationsInsight } from '../../../../flyout_v2/document/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../../../flyout_v2/document/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../../../flyout_v2/document/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
@@ -564,14 +564,24 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
         <MisconfigurationsInsight
           identityFields={hostInsightsIdentityFields}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowMisconfigurationsDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+            })
+          }
           data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
         />
         <VulnerabilitiesInsight
           identityFields={hostInsightsIdentityFields}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowVulnerabilitiesDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
+            })
+          }
           data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
           telemetryKey={VULNERABILITIES_INSIGHT_HOST_DETAILS}
         />

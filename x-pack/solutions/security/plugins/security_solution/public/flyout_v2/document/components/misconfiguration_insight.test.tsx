@@ -7,29 +7,25 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { MisconfigurationsInsight } from './misconfiguration_insight';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { DocumentDetailsContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
 
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 const hostName = 'test host';
 const testId = 'test';
 
-const openDetailsPanel = jest.fn();
+const onShowMisconfigurationsDetails = jest.fn();
 
 const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', value: string) => {
   return render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={mockContextValue}>
-        <MisconfigurationsInsight
-          identityFields={{ [fieldName]: value }}
-          data-test-subj={testId}
-          openDetailsPanel={openDetailsPanel}
-        />
-      </DocumentDetailsContext.Provider>
+      <MisconfigurationsInsight
+        identityFields={{ [fieldName]: value }}
+        data-test-subj={testId}
+        onShowMisconfigurationsDetails={onShowMisconfigurationsDetails}
+      />
     </TestProviders>
   );
 };
@@ -50,7 +46,7 @@ describe('MisconfigurationsInsight', () => {
     });
     const { getByTestId } = renderMisconfigurationsInsight('host.name', hostName);
     getByTestId(`${testId}-count`).click();
-    expect(openDetailsPanel).toHaveBeenCalled();
+    expect(onShowMisconfigurationsDetails).toHaveBeenCalled();
   });
 
   it('renders null if no misconfiguration data found', () => {
