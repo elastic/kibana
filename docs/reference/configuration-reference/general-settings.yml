@@ -1519,7 +1519,7 @@ groups:
           Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
         datatype: bool
         applies_to:
-          stack: ga
+          stack: removed 8.0
           ech: ga
           self: ga
 
