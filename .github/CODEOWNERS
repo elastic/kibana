@@ -3407,6 +3407,11 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /moon.yml @elastic/kibana-operations
 /.coderabbit.yml @elastic/kibana-operations
 
+# Scout Test Reviewer (gh-aw replacement for the retired Macroscope Scout review)
+/.github/agents/scout-reviewer.md @elastic/appex-qa
+/.github/workflows/reviewer-scout.md @elastic/appex-qa
+/.github/workflows/reviewer-scout.lock.yml @elastic/appex-qa
+
 # Kibana Localization
 /src/dev/i18n_tools/  @elastic/kibana-localization @elastic/kibana-core
 #CC# /x-pack/platform/plugins/private/translations/ @elastic/kibana-localization @elastic/kibana-core
