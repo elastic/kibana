@@ -41,8 +41,8 @@ export function PriorAssistantAdminRevert({ onContinue }: AnnouncementModalVaria
       margin: ${euiTheme.size.s} 0 0;
       margin-left: 0;
       margin-bottom: 0;
-      padding-left: 0;
-      list-style-position: inside;
+      padding-left: ${euiTheme.size.l};
+      list-style-position: outside;
     }
 
     && li + li {
