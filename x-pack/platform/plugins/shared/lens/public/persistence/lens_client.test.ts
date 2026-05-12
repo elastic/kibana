@@ -28,17 +28,17 @@ const mockAttributes: LooseLensAttributes = {
 
 describe('LensClient', () => {
   const httpMock = coreMock.createStart().http;
-  const client = new LensClient(httpMock);
+  let client: LensClient;
 
   beforeAll(() => {
+    client = new LensClient(httpMock);
+  });
+
+  beforeEach(() => {
     httpMock.get.mockResolvedValue(mockResponse);
     httpMock.post.mockResolvedValue(mockResponse);
     httpMock.put.mockResolvedValue(mockResponse);
     httpMock.delete.mockResolvedValue({ response: { ok: true } });
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
   });
 
   it.todo('get');
