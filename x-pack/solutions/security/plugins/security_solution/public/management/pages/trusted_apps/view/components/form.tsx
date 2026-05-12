@@ -31,6 +31,7 @@ import {
   ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   hasSimpleExecutableName,
@@ -43,6 +44,7 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 import {
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -331,6 +333,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       areValid: !!item.entries.length,
       hasDuplicateFields: false,
       hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard([item]),
+      hasUnnecessaryEscaping: hasEscaping([item]),
       hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry([item]),
     });
 
@@ -397,22 +400,31 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
         const shouldShowWildcardConfirmModal =
           updatedValidationResult.extraWarning || conditionsState.hasWildcardWithWrongOperator;
+        const shouldShowUnnecessaryEscapingConfirmModal = conditionsState.hasUnnecessaryEscaping;
 
         onChange({
           item: updatedItem,
           isValid: updatedValidationResult.isValid && conditionsState.areValid && hasFormChanged,
-          confirmModalLabels: shouldShowWildcardConfirmModal
+          confirmModalLabels:
+            shouldShowWildcardConfirmModal || shouldShowUnnecessaryEscapingConfirmModal
             ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
+                  i18n.translate(
+                    'xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name',
+                    {
                   defaultMessage: 'trusted application',
-                }),
-                { hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal }
+                    }
+                  ),
+                  {
+                    hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal,
+                    hasUnnecessaryEscaping: shouldShowUnnecessaryEscapingConfirmModal,
+                  }
               )
             : undefined,
         });
       },
       [
         conditionsState.areValid,
+        conditionsState.hasUnnecessaryEscaping,
         conditionsState.hasWildcardWithWrongOperator,
         hasFormChanged,
         item,
@@ -669,6 +681,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         setConditionsState((prev) => ({
           ...prev,
           hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard(arg.exceptionItems),
+          hasUnnecessaryEscaping: hasEscaping(arg.exceptionItems),
           hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry(arg.exceptionItems),
         }));
 
@@ -956,10 +969,15 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode ? (
             <>
               {exceptionBuilderComponentMemo}
-              {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-              {conditionsState.hasWildcardWithWrongOperator &&
-                conditionsState.hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
+
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {conditionsState.hasWildcardWithWrongOperator && (
+                  <WildCardWithWrongOperatorCallout />
+                )}
+                {conditionsState.hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
               {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+              </EuiFlexGroup>
+
               {conditionsState.hasDuplicateFields && (
                 <>
                   <EuiSpacer size="xs" />

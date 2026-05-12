@@ -868,6 +868,64 @@ describe('Trusted apps form', () => {
           });
           });
         });
+
+      describe('and escaping is used', () => {
+        beforeEach(() => {
+          formProps.item.entries = [
+            createEntry(ConditionEntryField.PATH, 'match', 'C:\\\\abc\\\\test.exe'),
+          ];
+
+          render();
+        });
+
+        it('shows warning callout and help text warning if the field is PATH', async () => {
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when unnecessary escaping warning exists', async () => {
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expect.stringContaining('escaping')],
+                }),
+              })
+            );
+          });
+        });
+      });
+
+      describe('and both wildcard and escaping are used', () => {
+        beforeEach(() => {
+          formProps.item.entries = [
+            createEntry(ConditionEntryField.PATH, 'match', 'C:\\\\abc*\\\\test.exe'),
+          ];
+          render();
+        });
+
+        it('shows both warnings when both warnings exist', async () => {
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when both warnings exist', async () => {
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [
+                    expect.stringContaining('wildcards'),
+                    expect.stringContaining('escaping'),
+                  ],
+                }),
+              })
+            );
+          });
+        });
+      });
     });
   });
 
