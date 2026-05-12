@@ -6,5 +6,5 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-06
-title: Quote phrase values in alert details preview KQL
-description: Fixes a bug where the Log threshold rule's alert details preview chart would fail to render with a KQL syntax error when a criterion used `matches phrase` or `does not match phrase` with a value containing characters such as `:`.
+title: "Fix a bug in the alert details preview chart for log threshold rules"
+description: "Fixes a bug where the Log threshold rule's alert details preview chart would fail to render with a KQL syntax error when a criterion used `matches phrase` or `does not match phrase` with a value containing characters such as `:`."

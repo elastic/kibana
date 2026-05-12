@@ -4,4 +4,4 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-06
-title: Enable attachments for all stream types by default, removing the `observability:streamsEnableAttachments` advanced setting
+title: 'Enable attachments for all stream types by default, removing the `observability:streamsEnableAttachments` advanced setting'

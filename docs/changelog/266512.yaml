@@ -9,5 +9,4 @@ products:
 areas:
 - Kibana platform
 - Discover and ES|QL
-title: Replace flaky tests & improve space handling
-description: Fixed a bug that caused long runs of whitespace in KQL to be parsed slowly.
+title: Fix a bug that caused long runs of whitespace in KQL to be parsed slowly

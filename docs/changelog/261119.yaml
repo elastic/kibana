@@ -6,4 +6,4 @@ products:
   target: 2026-05-06
 areas:
 - AI and machine Learning
-title: 'Trained models: Customize start/update actions for rerank models'
+title: 'Customize start and update actions for rerank models'
