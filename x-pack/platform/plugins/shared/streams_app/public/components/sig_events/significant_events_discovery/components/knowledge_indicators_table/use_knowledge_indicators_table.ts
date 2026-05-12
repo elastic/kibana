@@ -380,6 +380,7 @@ export function useKnowledgeIndicatorsTable() {
     selectedKnowledgeIndicator,
     selectedKnowledgeIndicatorId,
     selectedKnowledgeIndicators,
+    setSelectedKnowledgeIndicator,
     setSelectedKnowledgeIndicators,
     knowledgeIndicatorsToDelete,
     setKnowledgeIndicatorsToDelete,
