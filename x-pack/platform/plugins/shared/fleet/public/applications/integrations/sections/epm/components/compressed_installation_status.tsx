@@ -39,7 +39,9 @@ export const CompressedInstallationStatus: React.FC<{
           data-test-subj="compressed-active-icon"
           type="checkCircleFill"
           className={styles.compressedActiveStatusIcon}
-          aria-hidden={true}
+          aria-label={i18n.translate('xpack.fleet.integrations.compressedInstallationStatus.activeIconLabel', {
+    defaultMessage: 'Active',
+  })}
         />
       ) : (
         <EuiIconTip
