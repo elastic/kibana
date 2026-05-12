@@ -31,14 +31,21 @@ const baseLinkSchema = {
   ),
 };
 
-export const dashboardLinkSchema = schema.object({
-  ...baseLinkSchema,
-  type: schema.literal(DASHBOARD_LINK_TYPE),
-  destination: schema.string({
-    meta: { description: 'Linked dashboard saved object id' },
-  }),
-  options: dashboardNavigationOptionsSchema,
-});
+export const dashboardLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    type: schema.literal(DASHBOARD_LINK_TYPE),
+    destination: schema.string({
+      meta: { description: 'Linked dashboard saved object id' },
+    }),
+    options: dashboardNavigationOptionsSchema,
+  },
+  {
+    meta: {
+      id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
+    },
+  }
+);
 
 export const externalLinkOptionsSchema = schema.object(
   {
@@ -58,12 +65,19 @@ export const externalLinkOptionsSchema = schema.object(
   { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
 );
 
-export const externalLinkSchema = schema.object({
-  ...baseLinkSchema,
-  type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: externalLinkOptionsSchema,
-});
+export const externalLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    type: schema.literal(EXTERNAL_LINK_TYPE),
+    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+    options: externalLinkOptionsSchema,
+  },
+  {
+    meta: {
+      id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
+    },
+  }
+);
 
 export const linksArraySchema = schema.arrayOf(
   schema.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]),
