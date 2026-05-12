@@ -45,6 +45,8 @@ ruleTester.run('@kbn/eslint/no_conditional_saved_object_type_registration', rule
       `,
     },
     {
+      // NOTE: This is a known limitation of the rule. It shouldn't be allowed because it still conditionally registers the type.
+      // Not implemented because that would require to walk the siblings, which could be expensive.
       code: dedent`
         if (!shouldRegister) {
           return;
