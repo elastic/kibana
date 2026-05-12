@@ -21,8 +21,14 @@ import { encodePath } from './encode_path';
 import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { NotFoundRouteException } from './errors';
 
-function toReactRouterPath(path: string) {
-  return path.replace(/(?:{([^\/]+)})/g, ':$1');
+export const MAX_PATH_LENGTH = 100_000;
+
+export function toReactRouterPath(path: string) {
+  if (path?.length > MAX_PATH_LENGTH) {
+    throw new Error('Path is too long to process');
+  }
+
+  return path.replace(/(?:{([^\/{}]+)})/g, ':$1');
 }
 
 function extractFailingQueryKeys(errors: Errors): Set<string> {
