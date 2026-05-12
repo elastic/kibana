@@ -609,11 +609,6 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     });
   }
 
-  // Set a fake cloud.id so that the cloud plugin is activated (required by the mockIdpPlugin).
-  if (!_.has(rawConfig, 'xpack.cloud.id')) {
-    lodashSet(rawConfig, 'xpack.cloud.id', 'ftr_fake_cloud_id');
-  }
-
   if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
     lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
   }
