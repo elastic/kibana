@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
-export { WorkflowExecutionInvalidStatusError } from './workflow_execution_invalid_status_error';
-export { WorkflowDisabledError } from './workflow_disabled_error';
-export { WorkflowNotFoundError } from './workflow_not_found_error';
+export class WorkflowDisabledError extends Error {
+  readonly isUserError = true as const;
+
+  constructor(workflowId: string) {
+    super(`Workflow is disabled: ${workflowId}. Enable the workflow to run it.`);
+    this.name = 'WorkflowDisabledError';
+  }
+}
