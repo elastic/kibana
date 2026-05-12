@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiCallOut,
   EuiContextMenu,
   EuiFieldSearch,
@@ -172,10 +171,9 @@ export const RulesListPage = () => {
             </EuiSplitButton.ActionPrimary>
             <EuiSplitButton.ActionSecondary
               iconType="arrowDown"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.rulesList.createRuleMoreOptions',
-                { defaultMessage: 'More create options' }
-              )}
+              aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
+                defaultMessage: 'More create options',
+              })}
               onClick={toggleCreateMenu}
               data-test-subj="createRulePopoverButton"
               popoverProps={{
