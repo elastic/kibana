@@ -10,7 +10,7 @@
 import { BytesFormat } from './bytes';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import type { FieldFormatsGetConfigFn } from '../types';
-import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('BytesFormat', () => {
@@ -23,8 +23,7 @@ describe('BytesFormat', () => {
   test('default pattern', () => {
     const formatter = new BytesFormat({}, getConfig);
 
-    expect(formatter.convert(5150000)).toBe('4.911MB');
-    expect(formatter.convert(5150000, HTML_CONTEXT_TYPE)).toBe('4.911MB');
+    expect(formatter.convert(5150000, TEXT_CONTEXT_TYPE)).toBe('4.911MB');
     expect(formatter.reactConvert(5150000)).toBe('4.911MB');
   });
 
@@ -32,7 +31,6 @@ describe('BytesFormat', () => {
     const formatter = new BytesFormat({ pattern: '0,0b' }, getConfig);
 
     expect(formatter.convert('5150000', TEXT_CONTEXT_TYPE)).toBe('5MB');
-    expect(formatter.convert('5150000', HTML_CONTEXT_TYPE)).toBe('5MB');
     expect(formatter.reactConvert('5150000')).toBe('5MB');
   });
 
@@ -41,12 +39,6 @@ describe('BytesFormat', () => {
 
     expect(formatter.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(formatter.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
-    expect(formatter.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(formatter.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
     expectReactElementWithNull(formatter.reactConvert(null));
     expectReactElementWithNull(formatter.reactConvert(undefined));
   });
@@ -55,9 +47,6 @@ describe('BytesFormat', () => {
     const formatter = new BytesFormat({}, getConfig);
 
     expect(formatter.convert([1024, 2048], TEXT_CONTEXT_TYPE)).toBe('["1KB","2KB"]');
-    expect(formatter.convert([1024, 2048], HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffArray__highlight">[</span>1KB<span class="ffArray__highlight">,</span> 2KB<span class="ffArray__highlight">]</span>'
-    );
     expectReactElementAsArray(formatter.reactConvert([1024, 2048]), ['1KB', '2KB']);
   });
 
@@ -65,7 +54,6 @@ describe('BytesFormat', () => {
     const formatter = new BytesFormat({}, getConfig);
 
     expect(formatter.convert([1024], TEXT_CONTEXT_TYPE)).toBe('["1KB"]');
-    expect(formatter.convert([1024], HTML_CONTEXT_TYPE)).toBe('1KB');
     expect(formatter.reactConvert([1024])).toBe('1KB');
   });
 });
