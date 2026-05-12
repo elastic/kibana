@@ -331,15 +331,6 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
               <EuiSpacer size="m" />
 
-              <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-
               <EuiDataGrid
                 aria-label="Query results"
                 columns={gridColumns}
