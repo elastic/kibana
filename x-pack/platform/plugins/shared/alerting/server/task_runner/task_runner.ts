@@ -71,7 +71,7 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
-  evaluatePerAlertSnooze,
+  evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
 } from './lib';
 import {
@@ -281,7 +281,7 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
-    const { activeInstances } = evaluatePerAlertSnooze(rule.snoozedInstances, this.runDate);
+    const { activeInstances } = evaluatePerAlertSnoozeExpiry(rule.snoozedInstances, this.runDate);
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
