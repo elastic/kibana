@@ -68,7 +68,6 @@ export const ProjectPicker = ({
 
   const button = (
     <EuiToolTip
-      delay="long"
       content={strings.getProjectPickerButtonLabel(activeProjectsCount, totalProjectCount)}
       disableScreenReaderOutput
     >

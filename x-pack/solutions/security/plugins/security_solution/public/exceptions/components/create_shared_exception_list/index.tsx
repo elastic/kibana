@@ -86,9 +86,10 @@ export const CreateSharedListFlyout = memo(
         navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.exceptions,
           path: `/details/${createSharedExceptionListState.result.list_id}`,
+          state: { justCreated: newListDetails.name },
         });
       }
-    }, [createSharedExceptionListState, navigateToApp]);
+    }, [createSharedExceptionListState, navigateToApp, newListDetails.name]);
 
     const handleCreateSharedExceptionList = useCallback(() => {
       if (!createSharedExceptionListState.loading && newListDetails.name !== '') {

@@ -7,29 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
 
-const authSchema = z
-  .object({
-    tokenUrl: z.url().meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
-    clientId: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
-    scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
-    clientSecret: z
-      .string()
-      .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
-      .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
-    tokenEndpointAuthMethod: z
-      .enum(['client_secret_post', 'client_secret_basic'])
-      .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true })
-      .optional(),
-  })
-  .meta({ label: i18n.OAUTH_LABEL });
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      tokenUrl: z
+        .url()
+        .meta({ label: i18n.OAUTH_TOKEN_URL_LABEL, validate: { allowedHosts: true } }),
+      clientId: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_ID_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_ID_LABEL }),
+      scope: z.string().meta({ label: i18n.OAUTH_SCOPE_LABEL }).optional(),
+      clientSecret: z
+        .string()
+        .min(1, { message: i18n.OAUTH_CLIENT_SECRET_REQUIRED_MESSAGE })
+        .meta({ label: i18n.OAUTH_CLIENT_SECRET_LABEL, sensitive: true }),
+      tokenEndpointAuthMethod: z
+        .enum(['client_secret_post', 'client_secret_basic'])
+        .meta({ label: i18n.OAUTH_TOKEN_ENDPOINT_AUTH_METHOD_LABEL, hidden: true })
+        .optional(),
+    })
+    .meta({ label: i18n.OAUTH_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
