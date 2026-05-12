@@ -10,8 +10,18 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EsqlSource } from './esql_source';
 
-function makeColumn(name: string, type: string, esType?: string): DatatableColumn {
-  return { id: name, name, meta: { type: type as DatatableColumn['meta']['type'], esType } };
+function makeColumn(
+  name: string,
+  type: string,
+  esType?: string,
+  isComputedColumn?: boolean
+): DatatableColumn {
+  return {
+    id: name,
+    name,
+    meta: { type: type as DatatableColumn['meta']['type'], esType },
+    ...(isComputedColumn ? { isComputedColumn: true } : {}),
+  };
 }
 
 describe('EsqlSource', () => {
@@ -110,7 +120,7 @@ describe('EsqlSource', () => {
   });
 
   describe('getColumns / getColumn', () => {
-    it('maps DatatableColumn input to Column with source = "esql-result"', async () => {
+    it('maps index-sourced DatatableColumns to Column with source = "index"', async () => {
       const source = await EsqlSource.create({
         query: 'FROM logs-*',
         resultColumns: [
@@ -119,8 +129,18 @@ describe('EsqlSource', () => {
         ],
       });
       expect(source.getColumns()).toEqual([
-        { name: 'host.name', type: 'string', esType: 'keyword', source: 'esql-result' },
-        { name: 'bytes', type: 'number', esType: 'long', source: 'esql-result' },
+        { name: 'host.name', type: 'string', esType: 'keyword', source: 'index' },
+        { name: 'bytes', type: 'number', esType: 'long', source: 'index' },
+      ]);
+    });
+
+    it('maps computed DatatableColumns to Column with source = "esql-result"', async () => {
+      const source = await EsqlSource.create({
+        query: 'FROM logs-* | STATS avg_bytes = AVG(bytes)',
+        resultColumns: [makeColumn('avg_bytes', 'number', 'double', true)],
+      });
+      expect(source.getColumns()).toEqual([
+        { name: 'avg_bytes', type: 'number', esType: 'double', source: 'esql-result' },
       ]);
     });
 
@@ -133,7 +153,7 @@ describe('EsqlSource', () => {
         name: 'bytes',
         type: 'number',
         esType: 'long',
-        source: 'esql-result',
+        source: 'index',
       });
     });
 
