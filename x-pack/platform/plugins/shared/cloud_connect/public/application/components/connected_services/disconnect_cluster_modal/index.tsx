@@ -87,8 +87,14 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
                         copyToClipboard(clusterName);
                       }}
                       data-test-subj="disconnectClusterNameLink"
+                      aria-label={i18n.translate(
+                        'xpack.cloudConnect.connectedServices.disconnect.clusterNameLinkAriaLabel',
+                        {
+                          defaultMessage: 'Copy cluster name to clipboard',
+                        }
+                      )}
                     >
-                      {clusterName} <EuiIcon type="copy" />
+                      {clusterName} <EuiIcon type="copy" aria-hidden={true} />
                     </EuiLink>
                   ),
                 }}

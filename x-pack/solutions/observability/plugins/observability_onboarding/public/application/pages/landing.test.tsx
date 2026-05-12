@@ -13,7 +13,6 @@ import React from 'react';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { LandingPage } from './landing';
 
-// Temporary: `OnboardingFlowForm` is mocked until the V2 sections replace it.
 jest.mock('../onboarding_flow_form/onboarding_flow_form', () => ({
   OnboardingFlowForm: () => null,
 }));
