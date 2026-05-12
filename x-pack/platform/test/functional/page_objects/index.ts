@@ -26,7 +26,6 @@ import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { BannersPageObject } from './banners_page';
 import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
-import { AgentBuilderPageObject } from './agent_builder_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { ApiKeysPageProvider } from './api_keys_page';
@@ -64,7 +63,6 @@ export const pageObjects = {
   banners: BannersPageObject,
   navigationalSearch: NavigationalSearchPageObject,
   tagManagement: TagManagementPageObject,
-  agentBuilder: AgentBuilderPageObject,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   apiKeys: ApiKeysPageProvider,
