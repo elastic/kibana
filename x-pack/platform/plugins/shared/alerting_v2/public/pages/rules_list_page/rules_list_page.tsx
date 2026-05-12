@@ -9,12 +9,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
+  EuiContextMenu,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
   EuiSpacer,
+  EuiSplitButton,
+  useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -24,7 +27,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDebouncedValue } from '@kbn/react-hooks';
+import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../../services/rules_api';
@@ -64,6 +67,8 @@ export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
+  const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
   const [editRule, setEditRule] = useState<RuleApiResponse | null>(null);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
@@ -146,33 +151,66 @@ export const RulesListPage = () => {
           />
         }
         rightSideItems={[
-          <EuiFlexGroup key="create-rule-group" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {/* Primary create button — navigates to the full-page form (existing flow) */}
-              <EuiButton
-                fill
-                href={http.basePath.prepend('/app/management/alertingV2/rules/create')}
-                data-test-subj="createRuleButton"
-              >
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.createRuleButton"
-                  defaultMessage="Create rule"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {/* Flyout create — opens the new stepped flyout experience */}
-              <EuiButton
-                onClick={() => setFlyoutOpen(true)}
-                data-test-subj="createRuleFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.createRuleFlyoutButton"
-                  defaultMessage="Create in flyout"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
+          <EuiSplitButton
+            key="create-rule-split"
+            color="primary"
+            size="m"
+            data-test-subj="createRuleSplitButton"
+          >
+            <EuiSplitButton.ActionPrimary
+              onClick={() =>
+                application.navigateToUrl(
+                  http.basePath.prepend('/app/management/alertingV2/rules/create')
+                )
+              }
+              data-test-subj="createRuleButton"
+            >
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.createRuleButton"
+                defaultMessage="Create rule"
+              />
+            </EuiSplitButton.ActionPrimary>
+            <EuiSplitButton.ActionSecondary
+              iconType="arrowDown"
+              aria-label={i18n.translate(
+                'xpack.alertingV2.rulesList.createRuleMoreOptions',
+                { defaultMessage: 'More create options' }
+              )}
+              onClick={toggleCreateMenu}
+              data-test-subj="createRulePopoverButton"
+              popoverProps={{
+                id: createMenuId,
+                isOpen: isCreateMenuOpen,
+                closePopover: closeCreateMenu,
+                anchorPosition: 'downRight',
+                panelPaddingSize: 'none',
+                children: (
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={[
+                      {
+                        id: 0,
+                        items: [
+                          {
+                            name: i18n.translate(
+                              'xpack.alertingV2.rulesList.createRuleFlyoutButton',
+                              { defaultMessage: 'Create with flyout' }
+                            ),
+                            icon: 'popout',
+                            onClick: () => {
+                              closeCreateMenu();
+                              setFlyoutOpen(true);
+                            },
+                            'data-test-subj': 'createRuleFlyoutButton',
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                ),
+              }}
+            />
+          </EuiSplitButton>,
         ]}
       />
       <EuiSpacer size="m" />
