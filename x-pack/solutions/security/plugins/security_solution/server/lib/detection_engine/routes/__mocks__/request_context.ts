@@ -37,7 +37,6 @@ import type {
 
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
-import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
 import { entityStoreDataClientMock } from '../../../entity_analytics/entity_store/entity_store_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
@@ -80,7 +79,6 @@ export const createMockClients = () => {
 
     detectionEngineHealthClient: detectionEngineHealthClientMock.create(),
     ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
-    riskEngineDataClient: riskEngineDataClientMock.create(),
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
     entityStoreDataClient: entityStoreDataClientMock.create(),
@@ -193,7 +191,6 @@ const createSecuritySolutionRequestContextMock = (
     getInternalFleetServices: jest.fn(
       () => clients.internalFleetServices as unknown as EndpointInternalFleetServicesInterface
     ),
-    getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
     getAuditLogger: jest.fn(() => mockAuditLogger),

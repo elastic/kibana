@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -22,9 +23,16 @@ import {
 } from '../../../../../common/api/entity_analytics/entity_store/engine/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
+
+const TASK_MANAGER_UNAVAILABLE_ERROR = i18n.translate(
+  'xpack.securitySolution.api.entityStore.taskManagerUnavailable',
+  {
+    defaultMessage:
+      'Task Manager is unavailable, but is required by the entity store. Please enable the taskManager plugin and try again.',
+  }
+);
 
 export const deleteEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
