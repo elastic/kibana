@@ -24,6 +24,7 @@ const verdictsSearchQuery = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
   verdict: stringArrayFromQuery,
+  discovery_id: stringArrayFromQuery,
   prioritize_slug: stringArrayFromQuery,
   size: z.coerce.number().int().positive().optional(),
   sort: verdictSortFromQuery,

@@ -28,6 +28,7 @@ export type VerdictSort = '@timestamp:asc' | '@timestamp:desc';
 
 export interface VerdictsSearchOptions extends CommonSearchOptions {
   verdict?: string[];
+  discovery_id?: string[];
   /**
    * Soft ranking boost on `discovery_slug` — matching verdicts are returned
    * ahead of others, non-matching rows are still returned (used by the KB
@@ -45,6 +46,10 @@ const buildWhere = (options: VerdictsSearchOptions): LatestSourceWhereCondition 
 
   if (options.verdict?.length) {
     where = andWhere(where, inList('verdict', options.verdict));
+  }
+
+  if (options.discovery_id?.length) {
+    where = andWhere(where, inList('discovery_id', options.discovery_id));
   }
 
   return where;

@@ -20,7 +20,7 @@ export const sigEventSchema = z.object({
   '@timestamp': z.iso.datetime(),
   verdict: verdictEnum,
   event_id: z.string(),
-  previous_event_id: z.string().optional(),
+  previous_event_id: z.string().nullable().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
   criticality: z.number().int(),
