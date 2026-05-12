@@ -130,6 +130,8 @@ export function LensRenderer({
     }
   }, [lensApi, cleanedAttributes, props.overrides]);
 
+  // workaround: `description` is not currently exposed as an observable so we manually keep it in sync here
+  // Revisit if the Lens API aligns `description` with the observable pattern in the future.
   useEffect(() => {
     if (lensApi) {
       lensApi.setDescription(description);
