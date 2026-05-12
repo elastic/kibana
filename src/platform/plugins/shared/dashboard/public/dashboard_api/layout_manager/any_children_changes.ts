@@ -9,9 +9,7 @@
 
 import type { HasSerializableState, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiHasSerializableState } from '@kbn/presentation-publishing';
-import { debounceTime, map, merge, of, switchMap } from 'rxjs';
-
-export const DEBOUNCE_TIME = 100;
+import { map, merge, of, switchMap } from 'rxjs';
 
 /**
  *  Create an observable stream of any children changes
@@ -32,6 +30,5 @@ export function anyChildrenChanges$<Api extends unknown = unknown>(
         ? of()
         : merge(...childrenThatPublishChanges.map((child) => child.anyStateChange$));
     }),
-    debounceTime(DEBOUNCE_TIME)
   );
 }
