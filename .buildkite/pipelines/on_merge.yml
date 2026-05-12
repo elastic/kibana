@@ -183,19 +183,16 @@ steps:
   #        - exit_status: '-1'
   #          limit: 3
 
-  - command: .buildkite/scripts/steps/on_merge_api_docs.sh
-    label: Check Public API Docs
-    key: public-api-docs
+  - command: .buildkite/scripts/steps/report_package_metrics.sh
+    label: Report Package Metrics
+    key: report_package_metrics
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c4d-highmem-4
-      diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-a,us-central1-b,us-central1-c
+      machineType: n2-standard-2
       diskSizeGb: 105
-    timeout_in_minutes: 60
+    timeout_in_minutes: 15
     retry:
       automatic:
         - exit_status: '-1'
@@ -214,7 +211,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-      - public-api-docs
+      - report_package_metrics
     retry:
       automatic:
         - exit_status: '*'
