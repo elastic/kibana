@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type {
@@ -15,21 +15,13 @@ import type {
   VisualizationClient,
 } from '@kbn/visualizations-plugin/public';
 
-import { CONTENT_ID } from '../../common';
+import type { CONTENT_ID } from '../../common';
 import { LINKS_API_PATH, LINKS_API_VERSION, LINKS_SAVED_OBJECT_TYPE } from '../../common/constants';
-import type { LinksCrudTypes } from '../../common/content_management';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
+import type { LinksSearchRequestQuery, LinksSearchResponseBody } from '../../server/api/search';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from '../../server/api/update';
-import { contentManagement, coreServices } from '../services/kibana_services';
-
-const search = async (query: SearchQuery = {}, options?: LinksCrudTypes['SearchOptions']) => {
-  return contentManagement.client.search<LinksCrudTypes['SearchIn'], LinksCrudTypes['SearchOut']>({
-    contentTypeId: CONTENT_ID,
-    query,
-    options,
-  });
-};
+import { coreServices } from '../services/kibana_services';
 
 export const linksClient = {
   get: async (id: string): Promise<LinksReadResponseBody> => {
@@ -66,7 +58,16 @@ export const linksClient = {
       version: LINKS_API_VERSION,
     });
   },
-  search,
+  search: async (searchQuery: LinksSearchRequestQuery) => {
+    const { query, ...params } = searchQuery;
+    return await coreServices.http.get<LinksSearchResponseBody>(LINKS_API_PATH, {
+      version: LINKS_API_VERSION,
+      query: {
+        ...params,
+        ...(query ? { query: `${query}*` } : {}),
+      },
+    });
+  },
 };
 
 export function getLinksClient<
