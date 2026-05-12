@@ -17,7 +17,14 @@
 // Prereqs: Node 20+ (built-in fetch), Java 11+, ANTLR4 tool 4.13.2 on PATH.
 
 const { spawnSync } = require('node:child_process');
-const { readFileSync, writeFileSync, renameSync, rmSync, readdirSync } = require('node:fs');
+const {
+  readFileSync,
+  writeFileSync,
+  renameSync,
+  rmSync,
+  readdirSync,
+  mkdirSync,
+} = require('node:fs');
 const { basename, extname, join } = require('node:path');
 const { snakeCase } = require('lodash');
 
@@ -64,11 +71,10 @@ async function fetchGrammar(tag) {
 
 function runAntlr() {
   console.log('Running ANTLR4');
-  const result = spawnSync(
-    'antlr',
-    ['-Dlanguage=TypeScript', '-visitor', '-listener', TEMP_GRAMMAR_PATH],
-    { cwd: PACKAGE_ROOT, stdio: 'inherit' }
-  );
+  const result = spawnSync('antlr', ['-Dlanguage=TypeScript', '-visitor', '-listener', 'Eql.g4'], {
+    cwd: PARSER_DIR,
+    stdio: 'inherit',
+  });
   if (result.error?.code === 'ENOENT') {
     throw new Error(
       '`antlr` is not on PATH. Install the ANTLR4 tool 4.13.2 (e.g. `brew install antlr`) and retry. See README.md for details.'
@@ -118,8 +124,15 @@ function rewriteTsFiles(basenameMap) {
   }
 }
 
+function resetParserDir() {
+  console.log(`Wiping ${PARSER_DIR}`);
+  rmSync(PARSER_DIR, { recursive: true, force: true });
+  mkdirSync(PARSER_DIR, { recursive: true });
+}
+
 (async () => {
   try {
+    resetParserDir();
     const tag = await resolveLatestTag();
     console.log(`Resolved tag: ${tag}`);
     await fetchGrammar(tag);

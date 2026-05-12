@@ -31,7 +31,7 @@ The build script resolves the latest tagged release of `elastic/elastic-agent` v
 ## Regenerating the parser
 
 ```sh
-yarn build:antlr4
+yarn build:parser
 ```
 
 This runs `scripts/build_parser.js`, which:

@@ -4,7 +4,7 @@
   "private": true,
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "scripts": {
-    "build:antlr4": "node ./scripts/build_parser.js"
+    "build:parser": "node ./scripts/build_parser.js"
   },
   "sideEffects": false
 }
