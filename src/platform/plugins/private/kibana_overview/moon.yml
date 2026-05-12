@@ -50,6 +50,7 @@ fileGroups:
     - public/**/*
     - common/**/*
     - test/scout/**/*
+    - test/scout_kibana_overview_no_data/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

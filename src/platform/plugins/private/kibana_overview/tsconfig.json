@@ -6,7 +6,8 @@
   "include": [
     "public/**/*",
     "common/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_kibana_overview_no_data/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

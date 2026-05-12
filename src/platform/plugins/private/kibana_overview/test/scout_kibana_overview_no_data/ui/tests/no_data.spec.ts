@@ -9,19 +9,8 @@
 
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { KBN_ARCHIVE } from '../constants';
 
 test.describe('Kibana Overview - No Data', { tag: ['@local-stateful-classic'] }, () => {
-  test.beforeAll(async ({ esClient, kbnClient }) => {
-    const indices = await esClient.cat.indices({ index: 'logstash-*', format: 'json' });
-    if (indices.length > 0) {
-      const indexNames = indices.map((i) => i.index!);
-      await esClient.indices.delete({ index: indexNames });
-    }
-    await kbnClient.savedObjects.clean({ types: ['index-pattern'] });
-    await kbnClient.importExport.unload(KBN_ARCHIVE);
-  });
-
   test('displays no data page when no data exists', async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('kibana_overview');
