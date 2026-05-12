@@ -24,12 +24,12 @@ const buildContainer = () => {
     navigateToApp: action('application.navigateToApp'),
     currentAppId$: { subscribe: () => ({ unsubscribe: () => {} }) },
     capabilities: {},
-  });
+  } as any);
 
   container.bind(CoreStart('uiSettings')).toConstantValue({
     get: () => true,
     get$: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }),
-  });
+  } as any);
 
   container.bind(CoreStart('notifications')).toConstantValue({
     toasts: {
@@ -38,7 +38,7 @@ const buildContainer = () => {
       addWarning: action('notifications.toasts.addWarning'),
       addDanger: action('notifications.toasts.addDanger'),
     },
-  });
+  } as any);
 
   container.bind(CoreStart('http')).toConstantValue({
     get: async () => [],
@@ -46,7 +46,7 @@ const buildContainer = () => {
     patch: async () => ({}),
     delete: async () => ({}),
     basePath: { prepend: (p: string) => p, get: () => '' },
-  });
+  } as any);
 
   container.bind(ActionPoliciesApi).toSelf();
   container.bind(RulesApi).toSelf();
