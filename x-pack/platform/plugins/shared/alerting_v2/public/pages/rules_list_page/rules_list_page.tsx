@@ -149,7 +149,11 @@ export const RulesListPage = () => {
           <EuiFlexGroup key="create-rule-group" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               {/* Primary create button — navigates to the full-page form (existing flow) */}
-              <EuiButton fill href="/app/management/alertingV2/rules/create" data-test-subj="createRuleButton">
+              <EuiButton
+                fill
+                href="/app/management/alertingV2/rules/create"
+                data-test-subj="createRuleButton"
+              >
                 <FormattedMessage
                   id="xpack.alertingV2.rulesList.createRuleButton"
                   defaultMessage="Create rule"

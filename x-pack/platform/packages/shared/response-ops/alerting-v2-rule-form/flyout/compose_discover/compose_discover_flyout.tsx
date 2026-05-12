@@ -215,8 +215,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                           iconType="arrowRight"
                           iconSide="right"
                           isDisabled={
-                            uiState.childOpen ||
-                            (uiState.step === 0 && !uiState.queryCommitted)
+                            uiState.childOpen || (uiState.step === 0 && !uiState.queryCommitted)
                           }
                           onClick={handleNext}
                           data-test-subj="composeDiscoverNext"
