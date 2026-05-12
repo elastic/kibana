@@ -42,7 +42,6 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
