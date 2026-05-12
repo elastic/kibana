@@ -31,7 +31,6 @@ export interface ComposeDiscoverState {
   /** The live query in the Sandbox editor — committed to FormValues on "Apply changes". */
   fullQuery: string;
   activeTab: QueryTab;
-  yamlMode: boolean;
   childOpen: boolean;
   queryCommitted: boolean;
   /** Date range for the Discover Sandbox preview window — persists across open/close.
@@ -43,7 +42,6 @@ export interface ComposeDiscoverState {
 export type ComposeDiscoverAction =
   | { type: 'SET_FULL_QUERY'; query: string }
   | { type: 'SET_TAB'; tab: QueryTab }
-  | { type: 'SET_YAML_MODE'; enabled: boolean }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT' }
   | { type: 'GO_BACK' }

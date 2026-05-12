@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
   EuiCallOut,
@@ -191,64 +190,11 @@ function NotificationsStep() {
 
 // ── Main form component ───────────────────────────────────────────────────────
 
-function buildYaml(values: FormValues, fullQuery: string): string {
-  const indent = (s: string) => s.split('\n').join('\n      ');
-
-  return `kind: alert
-metadata:
-  name: "${values.metadata?.name ?? ''}"
-  tags: [${(values.metadata?.tags ?? []).map((t) => `"${t}"`).join(', ')}]
-  description: ""
-evaluation:
-  query:
-    base: |
-      ${indent(fullQuery)}
-grouping:
-  fields: [${(values.grouping?.fields ?? []).map((f) => `"${f}"`).join(', ')}]
-timeField: "${values.timeField ?? '@timestamp'}"
-schedule:
-  every: "${values.schedule?.every ?? '1m'}"
-  lookback: "${values.schedule?.lookback ?? '5m'}"
-stateTransition:
-  alertDelay: { type: "${values.stateTransitionAlertDelayMode ?? 'immediate'}" }
-  recoveryDelay: { type: "${values.stateTransitionRecoveryDelayMode ?? 'immediate'}" }
-`;
-}
-
 export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   state,
   dispatch,
   services,
 }) => {
-  const { watch } = useFormContext<FormValues>();
-  const formValues = watch();
-  const yamlValue = useMemo(
-    () => buildYaml(formValues, state.fullQuery),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(formValues), state.fullQuery]
-  );
-
-  if (state.yamlMode) {
-    return (
-      <CodeEditor
-        languageId="yaml"
-        value={yamlValue}
-        onChange={(val) => {
-          // TODO: Full YAML→form parsing wired in the YAML follow-up PR
-          void val;
-        }}
-        height={600}
-        options={{
-          minimap: { enabled: false },
-          automaticLayout: true,
-          scrollBeyondLastLine: false,
-          fontSize: 13,
-          wordWrap: 'on',
-        }}
-      />
-    );
-  }
-
   // Route by step index — avoids silent breakage if step titles change
   switch (state.step) {
     case 0:

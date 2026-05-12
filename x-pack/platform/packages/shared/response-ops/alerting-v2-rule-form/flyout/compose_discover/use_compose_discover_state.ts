@@ -18,7 +18,6 @@ const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => 
   step: 0,
   fullQuery: '',
   activeTab: 'alert',
-  yamlMode: false,
   childOpen: mode === 'create',
   queryCommitted: mode === 'edit',
   sandboxDateStart: 'now-15m',
@@ -47,12 +46,6 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
       return { ...state, fullQuery: action.query };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
-    case 'SET_YAML_MODE':
-      return {
-        ...state,
-        yamlMode: action.enabled,
-        childOpen: action.enabled ? true : state.childOpen,
-      };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
