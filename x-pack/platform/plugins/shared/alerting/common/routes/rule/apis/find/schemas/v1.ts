@@ -103,7 +103,7 @@ export const findRulesRequestQuerySchema = schema.object({
       })
     )
   ),
-}, { meta: { id: 'find_rules_request' } });
+});
 
 export const findRulesInternalRequestBodySchema = schema.object({
   per_page: schema.number({

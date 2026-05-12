@@ -55,10 +55,7 @@ const alertDeleteSettingsSchema = {
   ),
 };
 
-export const alertDeletePreviewQuerySchema = schema.object(
-  alertDeleteSettingsSchema,
-  { meta: { id: 'alert_delete_preview_request' } }
-);
+export const alertDeletePreviewQuerySchema = schema.object(alertDeleteSettingsSchema);
 
 export const alertDeletePreviewResponseSchema = schema.object({
   affected_alert_count: schema.number(),
