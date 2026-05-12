@@ -75,168 +75,94 @@ timeout-minutes: 20
 
 # Failed Test Investigator
 
-Investigate and triage a failed-test issue selected by the trigger. The end goal is to investigate the cause of the test failure, and suggest a change test when appropriate.
+Investigate a failed-test issue, classify the failure, and propose a fix when appropriate.
 
-## Target Issue Selection
+## Target issue
 
-- If triggered by `issues`, use the triggering issue. This path should only run for non-PR issues labeled `failed-test`.
-- If triggered by `workflow_dispatch`, use issue number `${{ github.event.inputs.issue_number }}` in the current repository as the target issue.
-- In manual mode, fetch that issue explicitly with GitHub tools before doing any analysis.
-- In manual mode, post the final comment back to that selected issue, not to the workflow run or any other issue.
+- **`issues` trigger**: use the triggering issue (non-PR, labeled `failed-test`).
+- **`workflow_dispatch`**: use issue `${{ github.event.inputs.issue_number }}`. Fetch it explicitly before analysis, and post the final comment there.
 
-Your job is to determine:
+## Where did the test run?
 
-- the most likely root cause
-- whether the flakiness is more likely in the test, in the underlying product code, due to an external cause, or inconclusive
-- the smallest credible fix to try next
-- whether a fix was identified for this test failure (the `fixability` field — see "Fixability classification" below). If yes, apply the `ai:auto-flaky-fix` label so a downstream agent picks it up.
+The test's **target** (e.g. `local-stateful-classic`, `cloud-serverless-security_complete`) tells you where it ran:
 
-## What to inspect
+- **`cloud-*`** — ran against a real Elastic Cloud project (serverless) or deployment (stateful). Pipeline names: `appex-qa-{serverless|stateful}-kibana-{ftr|scout}-tests`.
+- **`local-*`** — ran on the agent's local machine. `kibana-on-merge` and `kibana-pull-request` are local (no Elastic Cloud API calls), so the environment is more stable and less prone to network/env flakiness.
 
-1. Read the target issue title, body, labels, and all comments.
-2. Parse any hidden failed-test metadata from the issue body when present:
-   `test.class`, `test.name`, `test.type`, and `test.failCount`.
-3. Extract CI evidence from the issue body and comments, especially:
-   - Buildkite build and job URLs
-   - `ci-stats.kibana.dev` links
-   - Scout config paths, module IDs, locations, owners, targets, and attachments
-   - stack traces, failure snippets, and "New error message" blocks
-4. Inspect the relevant repository files.
-   - For Scout failures, start from the reported location, config path, module, and nearby fixtures or helpers.
-   - For FTR and other failures, infer the test file from the issue title and repository search results.
-5. Check recent git history and blame for the likely test file and any closely related product code that could explain the failure.
+## Investigate
 
-## Classification rules
+1. Read the issue title, body, labels, and all comments.
+2. Parse test metadata if present: location (test file path), config path, code owners, target)
+3. Look at all the failures reported in the issue. The very same test could have been failing with different error messages, for different reasons, on different pipelines, and on different branches.
+4. Inspect the relevant test file and nearby helpers/fixtures. For Scout, start from the reported location; otherwise infer from the title.
+5. Check recent git history and blame on the test file and related product code.
 
-- Classify as `test` when the evidence points to timing, waits, selectors, fixtures, retries, setup or teardown, test data coupling, cleanup, or isolation problems in the test harness.
-- Classify as `code` when the evidence is more consistent with a real product bug, broken contract, regression, or race in app, server, or shared code outside the test harness.
-- Classify as `external` when the failure appears to be caused by something outside the specific test and product code under investigation, such as CI instability, a downed dependency or service, environment provisioning failures, credentials, networking, storage, or other unrelated platform incidents.
-- Classify as `inconclusive` only when the available evidence does not support a defensible call.
-- Do not guess. Every classification must be tied to specific evidence.
+Every conclusion must cite specific evidence. Do not guess.
 
-## Fixability classification
+## Ways to fix a flaky test failure
 
-Set the `fixability` field to exactly one of:
+## Classify
 
-- `fixable`: a fix was identified for this test failure. **All** of these must hold:
+Set `classification` based on where the evidence points:
 
-  - `classification` is `test`
-  - `confidence` is `high` or `medium`
-  - You can identify a concrete test file path that currently exists on the default branch
-  - Failure happened on the `kibana-on-merge` Buildkite pipeline
-  - The fix lives in the test code (spec, fixtures, helpers, setup/teardown), or it's a narrowly scoped test-related app-code change such as adding a missing `data-test-subj` to make page-readiness checks reliable
-  - No open PR already targets the same test file with a `flaky-fix:` label (search PRs to verify)
-  - The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
+- **`test`**: timing, waits, selectors, fixtures, retries, setup/teardown, test data coupling, cleanup, or isolation issues in the test harness.
+- **`application`**: real product bug, broken contract, regression, or race in app/server/shared code.
+- **`external`**: CI instability, downed dependency, env/network/credentials, or unrelated platform incidents.
+- **`inconclusive`**: evidence does not support a defensible call.
 
-- `needs-human` — the failure looks test-side but the action requires human judgment:
+Set `fixability` to exactly one of:
 
-  - `classification` is `test` but `confidence` is `low`, OR
-  - Fix would require deleting a test, migrating layer, unskipping a test pending feature-validity check, OR
-  - Multiple plausible root causes with comparable confidence, OR
-  - A `flaky-fix:` PR already exists for this test and the new failure has the same stack trace
+- **`fixable`** — a concrete fix was identified.
+- **`needs-human`** — test-side failure that needs human judgment:
+- **`not-a-flake`** — real product bug. Ideally back ths with a recent commit, a feature-flag-exposed race, or a consistent reproducible failure.
+- **`env-issue`**
+- **`noop`** — no further action needed.
+- **`inconclusive`** — none of the above apply with enough confidence.
 
-- `not-a-flake` — this is a real product bug, not flakiness:
+## Action
 
-  - `classification` is `code` with `confidence` `high` or `medium`
-  - Evidence points to a recent product-code commit, a feature-flag-exposed race in app code, or a consistent reproducible failure
+Apply the `ai:auto-flaky-fix` label to the triggering issue **only if** `fixability` = `fixable` and if the failure happened on Scout tests on the `kibana-on-merge` pipeline. We may change these settings in the future. No other side-effects beyond posting the comment.
 
-- `env-issue` — external / infrastructure cause; Auto-Fix cannot help:
+## Fix proposal
 
-  - `classification` is `external`, OR
-  - Stale failure: no new failures in the last 2–3 weeks and no PR in flight
-
-- `inconclusive` — none of the above apply with enough confidence; evidence is missing.
-- `noop` — no further action (e.g., fixing) is necessary.
-
-## Fix proposal rules
-
-- Propose a fix only when you can point to the likely file or code area.
+- Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest plausible change.
-- If the likely fix is in the test, say which assertion, wait condition, fixture, setup, teardown, or helper should change.
-- If the likely fix is in product code, say which module, API, or behavior looks wrong and why.
+- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
+- For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
-## Attribution rules
+## Attribution
 
-- If the evidence strongly points to a commit or small set of commits from the past 3 months, mention that explicitly in the comment.
-- When possible, identify the author using their GitHub handle and mention them with `@username`.
-- Only mention a person when the attribution is evidence-based, such as blame, commit history, or a directly implicated change.
-- Do not mention people speculatively or as a fallback when the evidence is weak.
+- Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
+- Never speculate or use attribution as a fallback for weak evidence.
 
-## Reference formatting rules
+## References
 
-- When referencing a repository file, use a Markdown link to the file on GitHub, not a bare path.
-- Prefer blob links with line anchors, for example: `[x-pack/.../file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/x-pack/.../file.ts#L123-L140)`.
-- If the evidence depends on a specific historical revision, use a commit link instead of the default branch blob link.
-- When referencing a commit, use a GitHub commit link, not just a short SHA.
-- Bare paths like `file.ts:123` are allowed only as a supplement to a GitHub link, never as the only reference.
+- Link repository files with Markdown GitHub links — never bare paths.
+- Prefer blob links with line anchors: `[path/to/file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/path/to/file.ts#L123-L140)`.
+- For historical evidence, use a commit link instead of the default-branch blob link.
+- Always link commits — never bare SHAs.
+- Bare paths (`file.ts:123`) are allowed only as a supplement to a link.
 
 ## Comment format
 
-Post exactly one comment on the target issue. The comment has two parts: a short summary at the top that an engineer can read without clicking anything, and a single collapsed **More details** section that holds the long-form evidence.
+Post exactly one comment. Two parts: visible summary on top, collapsed `<details>` block for evidence.
 
-### Top of the comment (always visible)
+### Visible (top), in this order:
 
-Emit these elements in this order, with no other content between them:
+1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `fixability` but not templated. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
 
-1. **A one-line headline**, bold, that tells the reader at a glance what kind of result this is and one identifying detail (test name or one-phrase root cause). Phrase it however reads best for the situation — it should be obviously consistent with the `fixability` value below, but you do not need to follow a template. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
+2. **A 3–5 sentence prose paragraph** (no headings, no bullets) covering: what broke and where (name the test file/name), the most likely root cause, and any evidence-backed author attribution with `@username` so they get notified on first read. Hard ceiling: 5 sentences.
 
-2. **A 3–5 sentence narrative paragraph**, plain prose (no nested headings, no bullet lists), covering:
+3. **One-line action hint**: the proposed fix, recommended action, or missing evidence. Skip if the paragraph already covers it.
 
-   - what broke and where (name the test file or test name),
-   - the most likely root cause,
-   - any author attribution that follows the Attribution rules above (mention the implicated author with `@username` here so they get notified on first read, not after expanding the details).
+4. **Flakiness Finding bullets** — exactly these five, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
+   - `classification`: `test` | `code` | `external` | `inconclusive`
+   - `confidence`: `high` | `medium` | `low`
+   - `fixability`: `fixable` | `needs-human` | `not-a-flake` | `env-issue` | `inconclusive`
+   - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
+   - `test.file`: repo-relative path, or `unknown`
 
-   Hard ceiling: at most 5 sentences. If you have more to say, put it in the More details section.
+### Collapsed (`<details>`):
 
-3. **A one-line action hint** telling the reader what to do next — the proposed fix, the recommended action, what evidence is missing, etc. Phrase it however reads best for the situation. Skip the line entirely if everything that matters is already in the paragraph above.
-
-4. **The Flakiness Finding bullets**, so the structured metadata is visible without expanding the details. Emit exactly these five bullets, in this order, with one concrete value per bullet (no choice lists, no placeholders). Downstream tooling parses them directly, so keep the keys, casing, and `` - `key`: value `` shape exactly.
-
-- `classification`: one of `test`, `code`, `external`, `inconclusive`
-- `confidence`: one of `high`, `medium`, `low`
-- `fixability`: one of `fixable`, `needs-human`, `not-a-flake`, `env-issue`, `inconclusive`
-- `test.type`: one of `scout`, `ftr`, `jest`, `unknown`. Use `scout` if the issue carries the `scout-playwright` label; otherwise `ftr` for an FTR-style failure, `jest` for a Jest failure, or `unknown` if you cannot tell.
-- `test.file`: repo-relative path to the failing test, or `unknown`.
-
-If `fixability` is `fixable`, you must also apply the `ai:auto-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
-
-### More details (collapsed)
-
-Wrap everything below in a single `<details>` block so the comment stays compact by default. Use exactly this structure (note the blank lines after `</summary>` and before `</details>` — they are required for the inner markdown to render):
-
-```
-<details>
-<summary>More details</summary>
-
-#### Suspected Root Cause
-
-2 to 5 bullets tied to evidence. If a recent commit appears causal, include the commit link.
-
-#### Proposed Fix
-
-The expanded form of the one-line "Proposed fix" / "Recommended action" / "Missing evidence" line from the top. Skip this section entirely when the top action hint already says everything there is to say.
-
-- Provide one focused fix proposal when justified.
-- Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior that should change.
-- Include GitHub links to the most relevant files or commits.
-- Be specific enough that an engineer could begin implementing it without re-deriving the plan.
-- If you can justify a likely code change, include a small diff-style snippet showing the suggested edit.
-- Only include a diff when it is grounded in the evidence you collected.
-
-#### Evidence Used
-
-The key issue comments, file paths, commits, or links that drove the conclusion.
-
-</details>
-```
-
-Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure. Sections may be omitted when there is nothing meaningful to put in them — for example, drop `Proposed Fix` when `fixability` is `not-a-flake`, or `Suspected Root Cause` when `fixability` is `inconclusive`.
-
-## Constraints
-
-- Keep the comment actionable and specific.
-- Be explicit when evidence is missing or inaccessible.
-- Do not speculate beyond the evidence you collected.
-- Use GitHub links for repository files and commits wherever you cite concrete code evidence.
-- If manually dispatched, ensure the final safe-output comment targets issue `${{ github.event.inputs.issue_number }}` in the current repository.
+Use this exact structure (the blank lines around `</summary>` and `</details>` are required for inner markdown to render):
