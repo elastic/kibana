@@ -19,6 +19,8 @@ const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+// Safe upper bound for the JSON envelope (status, headers, key names, etc.)
+// that wraps the base64 content in step output. Actual envelope is a few hundred bytes.
 const ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES = 1024;
 
 interface GoogleDriveFileMetadata {
