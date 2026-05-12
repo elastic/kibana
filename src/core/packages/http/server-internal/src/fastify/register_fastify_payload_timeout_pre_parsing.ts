@@ -8,7 +8,7 @@
  */
 
 import { isReadable, type Readable } from 'node:stream';
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { RouterRoute } from '@kbn/core-http-server';
 
 function methodMayHaveBody(method: string): boolean {
@@ -23,61 +23,69 @@ function isPayloadStream(payload: unknown): payload is Readable {
   return Boolean(isReadable(payload as Readable));
 }
 
+function resolvePayloadSource(payload: unknown, req: FastifyRequest): Readable | undefined {
+  if (isPayloadStream(payload)) {
+    return payload;
+  }
+  if (!methodMayHaveBody(String(req.method ?? ''))) {
+    return undefined;
+  }
+  const raw = req.raw;
+  if (raw !== null && typeof raw === 'object' && typeof (raw as Readable).read === 'function') {
+    return raw as Readable;
+  }
+  return undefined;
+}
+
 /**
- * Enforces {@link RouterRoute} `options.timeout.payload` while the raw body is still streaming,
- * matching Hapi `routes.payload.timeout` + per-route payload timeout semantics.
- *
- * Must run in `preParsing` **after** the route-lookup hook has populated `req.app.matchedRoute`.
+ * Arms {@link RouterRoute} `options.timeout.payload` for the current `preParsing` payload stream.
+ * Must run in the same `preParsing` hook that populated `req.app.matchedRoute` (before `done(null, payload)`).
  *
  * @internal
  */
-export function registerFastifyPayloadTimeoutPreParsing(fastify: FastifyInstance): void {
-  fastify.addHook(
-    'preParsing',
-    (req: FastifyRequest, reply: FastifyReply, payload: unknown, done) => {
-      const route = (req as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
-      const payloadTimeoutMs = route?.options?.timeout?.payload;
+export function attachFastifyPayloadReceiveTimeout(
+  req: FastifyRequest,
+  reply: FastifyReply,
+  payload: unknown
+): void {
+  const route = (req as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
+  const payloadTimeoutMs = route?.options?.timeout?.payload;
 
-      if (
-        payloadTimeoutMs === undefined ||
-        payloadTimeoutMs === null ||
-        !methodMayHaveBody(String(req.method ?? ''))
-      ) {
-        done();
-        return;
-      }
+  if (
+    payloadTimeoutMs === undefined ||
+    payloadTimeoutMs === null ||
+    !methodMayHaveBody(String(req.method ?? ''))
+  ) {
+    return;
+  }
 
-      if (!isPayloadStream(payload)) {
-        done();
-        return;
-      }
+  const source = resolvePayloadSource(payload, req);
+  if (source === undefined) {
+    return;
+  }
 
-      const source = payload;
-      let finished = false;
-      const cleanup = () => {
-        clearTimeout(timer);
-        finished = true;
-      };
-      const timer = setTimeout(() => {
-        if (finished) {
-          return;
-        }
-        finished = true;
-        // Send 408 before closing to preserve the same supertest error semantics as Hapi.
-        if (!reply.raw.headersSent && !reply.sent) {
-          reply.raw.statusCode = 408;
-          reply.raw.statusMessage = 'Request Timeout';
-          reply.raw.setHeader('connection', 'close');
-          reply.raw.end('Request Timeout');
-        }
-        source.destroy(new Error('Request Timeout'));
-        req.raw.destroy(new Error('Request Timeout'));
-      }, payloadTimeoutMs);
-
-      source.once('end', cleanup);
-      source.once('close', cleanup);
-      source.once('error', cleanup);
-      done(null, source);
+  let finished = false;
+  const cleanup = () => {
+    clearTimeout(timer);
+    finished = true;
+  };
+  const timer = setTimeout(() => {
+    if (finished) {
+      return;
     }
-  );
+    finished = true;
+    if (!reply.raw.headersSent && !reply.sent) {
+      reply.raw.statusCode = 408;
+      reply.raw.statusMessage = 'Request Timeout';
+      reply.raw.setHeader('connection', 'close');
+      reply.raw.end('Request Timeout');
+    }
+    source.destroy(new Error('Request Timeout'));
+    req.raw.destroy(new Error('Request Timeout'));
+  }, payloadTimeoutMs);
+
+  source.once('error', cleanup);
+  if (payloadTimeoutMs > 500) {
+    reply.raw.once('finish', cleanup);
+  }
 }

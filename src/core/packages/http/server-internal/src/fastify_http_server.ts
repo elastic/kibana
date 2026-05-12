@@ -63,12 +63,13 @@ import { KIBANA_HAPI_COMPAT_REQUEST, registerFastifyAuthentication } from './fas
 import { installHapiCompatibleJsonBodyParser } from './fastify/install_hapi_compatible_json_body_parser';
 import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error_handler';
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
+import { registerFastifyFallbackStreamBodyParser } from './fastify/register_fastify_fallback_stream_body_parser';
 import {
   orderPrecompressedEncodings,
   resolvePrecompressedStaticPath,
 } from './fastify/precompressed_static_file';
-import { registerFastifyPayloadTimeoutPreParsing } from './fastify/register_fastify_payload_timeout_pre_parsing';
-import { isReplyCommitted } from './fastify/fastify_reply_utils';
+import { applyHapiCompatRequestTimeouts } from './fastify/apply_hapi_compat_request_timeouts';
+import { attachFastifyPayloadReceiveTimeout } from './fastify/register_fastify_payload_timeout_pre_parsing';
 
 /** Upper bound for Fastify's raw body limit — must cover saved_objects `_import` (see `savedObjects.maxImportPayloadBytes`). */
 const FASTIFY_BODY_LIMIT_CEILING_BYTES = 36 * 1024 * 1024;
@@ -316,8 +317,7 @@ export class FastifyHttpServer {
       },
     });
     this.installFastifyDispatcher(this.fastify, this.fmw);
-    this.installRouteLookupHook(this.fastify, this.fmw);
-    registerFastifyPayloadTimeoutPreParsing(this.fastify);
+    this.installRouteLookupHook(this.fastify, this.fmw, config.socketTimeout);
 
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     const staticAssets = new StaticAssets({
@@ -488,6 +488,7 @@ export class FastifyHttpServer {
       fastify,
       maxPayloadBytes: config.maxPayload.getValueInBytes(),
     });
+    registerFastifyFallbackStreamBodyParser(fastify);
   }
 
   private registerRouter(router: IRouter) {
@@ -661,12 +662,14 @@ export class FastifyHttpServer {
    */
   private installRouteLookupHook(
     fastify: FastifyInstance,
-    fmw: FmwInstance<FmwHTTPVersion.V1>
+    fmw: FmwInstance<FmwHTTPVersion.V1>,
+    defaultSocketTimeoutMs: number
   ): void {
-    fastify.addHook('preParsing', (req, _reply, _payload, done) => {
+    fastify.addHook('preParsing', (req, reply, _payload, done) => {
       const lookupPath = getFindMyWayLookupPath(req);
       const match = fmw.find(req.method as any, lookupPath);
       const app = ((req as any).app = (req as any).app ?? {});
+      let matchedKibanaRoute: RouterRoute | undefined;
       if (match) {
         const store = (match as any).store as
           | {
@@ -675,7 +678,10 @@ export class FastifyHttpServer {
               wildcardName?: string;
             }
           | undefined;
-        if (store?.kibanaRoute) app.matchedRoute = store.kibanaRoute;
+        if (store?.kibanaRoute) {
+          app.matchedRoute = store.kibanaRoute;
+          matchedKibanaRoute = store.kibanaRoute;
+        }
         if (store?.kibanaRouteOptions) {
           app.matchedKibanaRouteOptions = store.kibanaRouteOptions;
         } else {
@@ -714,6 +720,8 @@ export class FastifyHttpServer {
         // Fastify's `/*` params (`*` not renamed to `{path*}` names like `path`).
         (req as { params: unknown }).params = plainParams;
       }
+      applyHapiCompatRequestTimeouts(req, reply, matchedKibanaRoute, defaultSocketTimeoutMs);
+      attachFastifyPayloadReceiveTimeout(req, reply, _payload);
       done(null, _payload);
     });
   }
@@ -841,13 +849,10 @@ export class FastifyHttpServer {
             route.path
           }: ${error?.message ?? error}`
         );
-        if (!isReplyCommitted(reply)) {
-          reply.code(500).send({
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred. Check Kibana server logs for details.',
-          });
-        }
+        // Delegate to {@link installFastifyGlobalErrorHandler}: Fastify also attaches a rejection
+        // handler to the route promise; sending here after the global handler runs causes
+        // ERR_HTTP_HEADERS_SENT and can terminate the process (e.g. CCS FTR when a route throws).
+        throw error;
       }
     };
   }

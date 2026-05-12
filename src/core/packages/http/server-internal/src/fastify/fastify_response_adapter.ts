@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IncomingMessage } from 'http';
 import * as stream from 'stream';
 import typeDetect from 'type-detect';
 import type { FastifyReply } from 'fastify';
@@ -24,6 +25,44 @@ const statusHelpers = {
   isRedirect: (code: number) => code >= 300 && code < 400 && code !== 304,
   isError: (code: number) => code >= 400 && code < 600,
 };
+
+/** RFC 7230 Section 6.1 — must not be forwarded by proxies to the client response. */
+const HOP_BY_HOP_HEADER_NAMES = new Set([
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+]);
+
+function isIncomingMessagePayload(payload: unknown): payload is IncomingMessage {
+  if (payload === null || typeof payload !== 'object') {
+    return false;
+  }
+  const candidate = payload as IncomingMessage;
+  return (
+    typeof candidate.headers === 'object' &&
+    candidate.headers !== null &&
+    typeof candidate.statusCode === 'number'
+  );
+}
+
+/**
+ * Hapi copies {@link IncomingMessage} headers onto the outgoing response when the body is a proxied
+ * Node client response; Fastify only streams bytes unless we set headers explicitly.
+ */
+function applyIncomingMessageHeaders(reply: FastifyReply, incoming: IncomingMessage): void {
+  for (const [name, value] of Object.entries(incoming.headers)) {
+    if (value === undefined) continue;
+    const lower = name.toLowerCase();
+    if (HOP_BY_HOP_HEADER_NAMES.has(lower)) continue;
+    if (reply.hasHeader(name)) continue;
+    reply.header(name, value);
+  }
+}
 
 /**
  * Adapts a {@link KibanaResponse} produced by a route handler to a Fastify reply.
@@ -89,6 +128,9 @@ export class FastifyResponseAdapter {
     reply.code(kibanaResponse.status);
     this.applyHeaders(reply, kibanaResponse.options.headers);
     const payload = kibanaResponse.payload;
+    if (isIncomingMessagePayload(payload)) {
+      applyIncomingMessageHeaders(reply, payload);
+    }
     const hasExplicitContentType = Boolean(
       kibanaResponse.options.headers &&
         Object.keys(kibanaResponse.options.headers).some((k) => k.toLowerCase() === 'content-type')
@@ -125,6 +167,9 @@ export class FastifyResponseAdapter {
     if (Buffer.isBuffer(payload) || payload instanceof stream.Readable) {
       reply.code(kibanaResponse.status);
       this.applyHeaders(reply, kibanaResponse.options.headers);
+      if (isIncomingMessagePayload(payload)) {
+        applyIncomingMessageHeaders(reply, payload);
+      }
       this.applyDefaultCacheControl(reply, kibanaResponse);
       return reply.send(kibanaResponse.payload);
     }

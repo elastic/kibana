@@ -14,7 +14,7 @@ export class CorePluginRouteTimeoutsPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
     const { http } = core;
 
-    const router = http.createRouter();
+    const router = http.createRouter('');
 
     router.post(
       {

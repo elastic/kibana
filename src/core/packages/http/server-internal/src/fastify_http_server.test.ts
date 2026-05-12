@@ -13,6 +13,7 @@ import fs from 'fs';
 import os from 'os';
 import nodePath from 'path';
 import http from 'http';
+import type { Readable } from 'stream';
 import { gunzipSync } from 'zlib';
 import FormData from 'form-data';
 import { schema } from '@kbn/config-schema';
@@ -305,6 +306,167 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ body: {} });
     }, 15000);
 
+    it('keeps application/json as a Readable for routes with body output stream + parse false (Console proxy parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/json-stream-body',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.stream(),
+          },
+          options: {
+            body: {
+              output: 'stream',
+              parse: false,
+            },
+          },
+        },
+        async (_context, req, res) => {
+          expect(typeof (req.body as { pipe?: unknown })?.pipe).toBe('function');
+          const chunks: Buffer[] = [];
+          for await (const chunk of req.body as Readable) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          }
+          const text = Buffer.concat(chunks).toString('utf8');
+          return res.ok({ body: { raw: text } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const payload = JSON.stringify({ proxy: true });
+      const res = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/json-stream-body',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Content-Length': Buffer.byteLength(payload),
+            },
+          },
+          (incoming) => {
+            const chunks: Buffer[] = [];
+            incoming.on('data', (c) => chunks.push(Buffer.from(c)));
+            incoming.on('end', () =>
+              resolve({
+                statusCode: incoming.statusCode ?? 0,
+                body: Buffer.concat(chunks).toString('utf8'),
+              })
+            );
+          }
+        );
+        req.on('error', reject);
+        req.write(payload);
+        req.end();
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ raw: '{"proxy":true}' });
+    }, 15000);
+
+    it('accepts PUT image/png bodies for stream routes (Files upload / defaultImage parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.put(
+        {
+          path: '/binary-put',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.stream(),
+          },
+          options: {
+            body: {
+              output: 'stream',
+              parse: false,
+              accepts: ['image/png', 'image/jpeg'],
+              maxBytes: 1024 * 1024,
+            },
+          },
+        },
+        async (_context, req, res) => {
+          expect(typeof (req.body as { pipe?: unknown })?.pipe).toBe('function');
+          const chunks: Buffer[] = [];
+          for await (const chunk of req.body as Readable) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+          }
+          return res.ok({ body: { len: Buffer.concat(chunks).length } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+      expect(listenPort).toBeGreaterThan(0);
+
+      const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      const res = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/binary-put',
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'image/png',
+              'Content-Length': pngHeader.length,
+            },
+          },
+          (incoming) => {
+            const chunks: Buffer[] = [];
+            incoming.on('data', (c) => chunks.push(Buffer.from(c)));
+            incoming.on('end', () =>
+              resolve({
+                statusCode: incoming.statusCode ?? 0,
+                body: Buffer.concat(chunks).toString('utf8'),
+              })
+            );
+          }
+        );
+        req.on('error', reject);
+        req.write(pngHeader);
+        req.end();
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ len: pngHeader.length });
+    }, 15000);
+
     it('applies Hapi default Cache-Control to router JSON responses', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);
@@ -402,7 +564,9 @@ describe('FastifyHttpServer', () => {
         }, 20);
         req.on('error', (err) => {
           clearInterval(id);
-          expect(['Request Timeout', 'socket hang up', 'write EPIPE']).toContain(err.message);
+          expect(['Request Timeout', 'socket hang up', 'write EPIPE', 'read ECONNRESET']).toContain(
+            err.message
+          );
           reject(err);
         });
       });
