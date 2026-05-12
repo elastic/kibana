@@ -43,7 +43,7 @@ import {
   getAlertsByStatusQuery,
   parseAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { getFormattedAlertStats } from '../../../flyout_v2/document/components/alert_count_insight';
+import { getFormattedAlertStats } from '../../../flyout_v2/document/main/components/alert_count_insight';
 
 const QUERY_KEY_ENTITY_ALERTS_BY_STATUS = 'entity-analytics-alerts-by-status';
 

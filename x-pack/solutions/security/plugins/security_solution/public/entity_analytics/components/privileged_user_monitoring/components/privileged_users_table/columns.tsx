@@ -46,7 +46,7 @@ import {
 } from '../../../../../overview/components/detection_response/translations';
 import { FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../../../../../common/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import { getFormattedAlertStats } from '../../../../../flyout_v2/document/components/alert_count_insight';
+import { getFormattedAlertStats } from '../../../../../flyout_v2/document/main/components/alert_count_insight';
 import { SCOPE_ID } from '../../constants';
 
 const COLUMN_WIDTHS = { actions: '5%', '@timestamp': '20%', privileged_user: '15%' };

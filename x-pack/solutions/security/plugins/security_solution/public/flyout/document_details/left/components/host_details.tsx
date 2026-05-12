@@ -79,11 +79,11 @@ import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/main/components/host_entity_overview';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { MisconfigurationsInsight } from '../../../../flyout_v2/document/components/misconfiguration_insight';
-import { VulnerabilitiesInsight } from '../../../../flyout_v2/document/components/vulnerabilities_insight';
-import { AlertCountInsight } from '../../../../flyout_v2/document/components/alert_count_insight';
+import { MisconfigurationsInsight } from '../../../../flyout_v2/document/main/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../../../flyout_v2/document/main/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../../../flyout_v2/document/main/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
