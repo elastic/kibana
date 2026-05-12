@@ -11,7 +11,7 @@ export const COMMON_HEADERS = {
   'Content-Type': 'application/json;charset=UTF-8',
 };
 
-export const CAPABILITIES_API_PATH = 'api/core/capabilities';
+export const CAPABILITIES_API_PATH = '/api/core/capabilities';
 export const API_BASE_PATH = 'api/ingest_pipelines';
 export const DATABASES_API_BASE_PATH = `${API_BASE_PATH}/databases`;
 export const PARSE_CSV_API_PATH = `${API_BASE_PATH}/parse_csv`;

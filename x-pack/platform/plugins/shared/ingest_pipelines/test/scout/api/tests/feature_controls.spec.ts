@@ -28,7 +28,7 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
       const { cookieHeader } = await samlAuth.asInteractiveUser(adminWithoutIngest);
       const response = await apiClient.post(testData.CAPABILITIES_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-        body: {},
+        body: { applications: [] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -42,7 +42,7 @@ apiTest.describe('Ingest pipelines feature controls', { tag: tags.stateful.class
       const { cookieHeader } = await samlAuth.asInteractiveUser(dashboardReadWithIngest);
       const response = await apiClient.post(testData.CAPABILITIES_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...cookieHeader },
-        body: {},
+        body: { applications: [] },
       });
 
       expect(response).toHaveStatusCode(200);
