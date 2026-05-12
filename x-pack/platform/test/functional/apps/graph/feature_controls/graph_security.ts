@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('landing page shows "Create new graph" button', async () => {
         await common.navigateToApp('graph');
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('kibana-content-list-page-header', { timeout: 10000 });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
@@ -135,7 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('does not show a "Create new Workspace" button', async () => {
         await common.navigateToApp('graph');
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('kibana-content-list-page-header', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });
 

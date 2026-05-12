@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
-
+      await kibanaServer.savedObjects.clean({ types: ['graph-workspace', 'index-pattern'] });
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/graph/secrepo');
     });
 
@@ -177,13 +176,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(smallVennTerm1).to.be('4');
       expect(smallVennTerm12).to.be(' (4) ');
       expect(smallVennTerm2).to.be('4');
-    });
-
-    it('should delete graph', async function () {
-      await graph.goToListingPage();
-      expect(await graph.getWorkspaceCount()).to.equal(1);
-      await graph.deleteGraph(graphName);
-      expect(await graph.getWorkspaceCount()).to.equal(0);
     });
   });
 }

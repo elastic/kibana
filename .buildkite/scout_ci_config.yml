@@ -24,6 +24,7 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - graph
     - index_management
     - infra
     - intercepts

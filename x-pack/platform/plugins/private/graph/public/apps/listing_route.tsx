@@ -5,23 +5,32 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core/public';
+import { EuiButton } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
-import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
+import { KibanaContentListPage } from '@kbn/content-list-page';
+import { ContentListClientProvider } from '@kbn/content-list-provider-client';
+import type { TableListViewFindItemsFn } from '@kbn/content-list-provider-client';
+import type { ContentListItem } from '@kbn/content-list-provider';
+import { GraphContentList } from '../components/content_list';
+import { findSavedWorkspace, deleteSavedWorkspace } from '../helpers/saved_workspace_utils';
 import { getEditPath, getEditUrl, getNewPath, setBreadcrumbs } from '../services/url';
-import type { GraphWorkspaceSavedObject } from '../types';
 import type { GraphServices } from '../application';
-
-const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
-const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
+import type { GraphWorkspaceSavedObject } from '../types';
 
 type GraphUserContent = UserContentCommonSchema;
+
+const labels = {
+  entity: i18n.translate('xpack.graph.listing.table.entityName', {
+    defaultMessage: 'graph',
+  }),
+  entityPlural: i18n.translate('xpack.graph.listing.table.entityNamePlural', {
+    defaultMessage: 'graphs',
+  }),
+};
 
 const toTableListViewSavedObject = (savedObject: GraphWorkspaceSavedObject): GraphUserContent => {
   return {
@@ -35,7 +44,6 @@ const toTableListViewSavedObject = (savedObject: GraphWorkspaceSavedObject): Gra
     },
   };
 };
-
 export interface ListingRouteProps {
   deps: Omit<GraphServices, 'savedObjects'>;
 }
@@ -43,153 +51,111 @@ export interface ListingRouteProps {
 export function ListingRoute({
   deps: { chrome, contentClient, coreStart, capabilities, addBasePath, uiSettings },
 }: ListingRouteProps) {
-  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
-  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const history = useHistory();
   const query = new URLSearchParams(useLocation().search);
-  const initialFilter = query.get('filter') || '';
+  // `?filter=` is a legacy `TableListView` bookmark seed; the canonical key
+  // is now `q`, written by the provider's URL sync.
+  const initialFilter = query.get('filter') ?? '';
+  const canSave = capabilities.graph.save === true;
+  const canDelete = capabilities.graph.delete === true;
+  const basePath = coreStart.http.basePath;
 
   useEffect(() => {
     setBreadcrumbs({ chrome });
   }, [chrome]);
 
-  const createItem = useCallback(() => {
+  const onCreateGraph = useCallback(() => {
     history.push(getNewPath());
   }, [history]);
 
-  const findItems = useCallback(
-    (search: string) => {
-      return findSavedWorkspace(
-        { contentClient, basePath: coreStart.http.basePath },
-        search,
-        listingLimit
-      ).then(({ total, hits }) => ({
-        total,
-        hits: hits.map(toTableListViewSavedObject),
-      }));
+  const findItems: TableListViewFindItemsFn = useCallback(
+    async (searchQuery, options) => {
+      const { total, hits } = await findSavedWorkspace(
+        { contentClient, basePath },
+        searchQuery,
+        options?.listingLimit
+      );
+      return { total, hits: hits.map(toTableListViewSavedObject) };
     },
-    [coreStart.http.basePath, listingLimit, contentClient]
+    [contentClient, basePath]
   );
 
-  const editItem = useCallback(
-    (savedWorkspace: { id: string }) => {
-      history.push(getEditPath(savedWorkspace));
-    },
+  const sampleDataUrl = coreStart.application.getUrlForApp('home', {
+    path: '#/tutorial_directory/sampleData',
+  });
+
+  const createGraphButton = useMemo(
+    () => (
+      <EuiButton
+        fill
+        iconType="plusInCircle"
+        onClick={onCreateGraph}
+        data-test-subj="graphCreateGraphButton"
+      >
+        <FormattedMessage
+          id="xpack.graph.listing.createGraphButtonLabel"
+          defaultMessage="Create graph"
+        />
+      </EuiButton>
+    ),
+    [onCreateGraph]
+  );
+
+  const getHref = useCallback(
+    ({ id }: ContentListItem) => getEditUrl(addBasePath, { id }),
+    [addBasePath]
+  );
+
+  const handleEdit = useCallback(
+    ({ id }: ContentListItem) => history.push(getEditPath({ id })),
     [history]
   );
 
-  const deleteItems = useCallback(
-    async (savedWorkspaces: Array<{ id: string }>) => {
+  const handleDelete = useCallback(
+    async (items: ContentListItem[]) => {
       await deleteSavedWorkspace(
         contentClient,
-        savedWorkspaces.map((cur) => cur.id!)
+        items.map(({ id }) => id)
       );
     },
     [contentClient]
   );
 
-  return (
-    <TableListView<GraphUserContent>
-      id="graph"
-      headingId="graphListingHeading"
-      createItem={capabilities.graph.save ? createItem : undefined}
-      findItems={findItems}
-      deleteItems={capabilities.graph.delete ? deleteItems : undefined}
-      editItem={capabilities.graph.save ? editItem : undefined}
-      initialFilter={initialFilter}
-      initialPageSize={initialPageSize}
-      emptyPrompt={getNoItemsMessage(
-        capabilities.graph.save === false,
-        createItem,
-        coreStart.application
-      )}
-      entityName={i18n.translate('xpack.graph.listing.table.entityName', {
-        defaultMessage: 'graph',
-      })}
-      entityNamePlural={i18n.translate('xpack.graph.listing.table.entityNamePlural', {
-        defaultMessage: 'graphs',
-      })}
-      title={i18n.translate('xpack.graph.listing.graphsTitle', {
-        defaultMessage: 'Graphs',
-      })}
-      getDetailViewLink={({ id }) => getEditUrl(addBasePath, { id })}
-    />
+  const item = useMemo(
+    () => ({
+      getHref,
+      onEdit: canSave ? handleEdit : undefined,
+      onDelete: canDelete ? handleDelete : undefined,
+    }),
+    [canDelete, canSave, getHref, handleDelete, handleEdit]
   );
-}
-
-function getNoItemsMessage(
-  hideWriteControls: boolean,
-  createItem: () => void,
-  application: ApplicationStart
-) {
-  if (hideWriteControls) {
-    return (
-      <EuiEmptyPrompt
-        iconType="graphApp"
-        title={
-          <h1 id="graphListingHeading">
-            <FormattedMessage
-              id="xpack.graph.listing.noItemsMessage"
-              defaultMessage="Looks like you don't have any graphs."
-            />
-          </h1>
-        }
-      />
-    );
-  }
-
-  const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
 
   return (
-    <EuiEmptyPrompt
-      iconType="graphApp"
-      title={
-        <h1 id="graphListingHeading">
-          <FormattedMessage
-            id="xpack.graph.listing.createNewGraph.title"
-            defaultMessage="Create your first graph"
-          />
-        </h1>
-      }
-      body={
-        <Fragment>
-          <p>
-            <FormattedMessage
-              id="xpack.graph.listing.createNewGraph.combineDataViewFromKibanaAppDescription"
-              defaultMessage="Discover patterns and relationships in your Elasticsearch indices."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.graph.listing.createNewGraph.newToKibanaDescription"
-              defaultMessage="New to Kibana? Get started with {sampleDataInstallLink}."
-              values={{
-                sampleDataInstallLink: (
-                  <EuiLink href={sampleDataUrl}>
-                    <FormattedMessage
-                      id="xpack.graph.listing.createNewGraph.sampleDataInstallLinkText"
-                      defaultMessage="sample data"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </Fragment>
-      }
-      actions={
-        <EuiButton
-          onClick={createItem}
-          fill
-          iconType="plusCircle"
-          data-test-subj="graphCreateGraphPromptButton"
-        >
-          <FormattedMessage
-            id="xpack.graph.listing.createNewGraph.createButtonLabel"
-            defaultMessage="Create graph"
-          />
-        </EuiButton>
-      }
-    />
+    <KibanaContentListPage>
+      <KibanaContentListPage.Header
+        title={i18n.translate('xpack.graph.listing.graphsTitle', {
+          defaultMessage: 'Graphs',
+        })}
+        {...(canSave && {
+          actions: createGraphButton,
+        })}
+      />
+      <ContentListClientProvider
+        {...{ labels, findItems, item }}
+        id="graph-listing"
+        isReadOnly={!canSave}
+        services={{ uiSettings }}
+        features={{
+          sorting: { initialSort: { field: 'updatedAt', direction: 'desc' } },
+          pagination: true,
+          selection: canDelete,
+          search: initialFilter ? { initialSearch: initialFilter } : undefined,
+        }}
+      >
+        <KibanaContentListPage.Section>
+          <GraphContentList {...{ canSave, sampleDataUrl, onCreateGraph }} />
+        </KibanaContentListPage.Section>
+      </ContentListClientProvider>
+    </KibanaContentListPage>
   );
 }

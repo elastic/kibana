@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
+        await testSubjects.existOrFail('kibana-content-list-page-header', { timeout: 10000 });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
 
