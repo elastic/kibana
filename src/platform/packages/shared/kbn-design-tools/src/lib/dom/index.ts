@@ -10,7 +10,7 @@
 export { buildHighlightCss } from './build_highlight_css';
 export { calculateSpacingLines } from './calculate_spacing';
 export { clampToViewport } from './clamp_to_viewport';
-export { cloneElement } from './clone_element';
+export { cloneElement, setImportant } from './clone_element';
 export { getElementFromPoint } from './get_element_from_point';
 export { getElementUnder } from './get_element_under';
 export { handleEventPropagation } from './handle_event_propagation';

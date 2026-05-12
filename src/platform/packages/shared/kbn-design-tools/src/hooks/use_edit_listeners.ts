@@ -40,6 +40,7 @@ export const useEditListeners = (
     const handleVisibilityChange = () => {
       if (document.hidden) onAbort();
     };
+    const preventNativeDrag = (e: Event) => e.preventDefault();
 
     const currentRaf = raf;
 
@@ -49,6 +50,7 @@ export const useEditListeners = (
     document.addEventListener('pointercancel', onPointerUp, true);
     document.addEventListener('click', onClick, true);
     document.addEventListener('keydown', onKeydown, true);
+    document.addEventListener('dragstart', preventNativeDrag, true);
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
@@ -59,6 +61,7 @@ export const useEditListeners = (
       document.removeEventListener('pointercancel', onPointerUp, true);
       document.removeEventListener('click', onClick, true);
       document.removeEventListener('keydown', onKeydown, true);
+      document.removeEventListener('dragstart', preventNativeDrag, true);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };

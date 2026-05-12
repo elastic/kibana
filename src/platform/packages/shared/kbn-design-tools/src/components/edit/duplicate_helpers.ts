@@ -8,7 +8,7 @@
  */
 
 import { DUPLICATE_OFFSET } from '../../lib/constants';
-import { cloneClean } from '../../lib/dom/clone_element';
+import { cloneClean, setImportant } from '../../lib/dom/clone_element';
 import type { ElementSession, ElementRegistry } from './element_registry';
 import { buildTransform } from './resize_helpers';
 
@@ -32,14 +32,21 @@ export const createDuplicate = (
   duplicate.style.pointerEvents = 'auto';
   document.body.appendChild(duplicate);
 
+  // When duplicating a managed clone the visual position (sourceRect)
+  // differs from the untransformed position (rect) returned by cloneClean
+  // because cloneClean strips the transform before measuring.  Position
+  // the duplicate at the visual location and use a corrected rect so
+  // session.originalRect matches the actual left/top we set.
   const sourceRect = sourceEl.getBoundingClientRect();
   duplicate.style.left = `${sourceRect.left}px`;
   duplicate.style.top = `${sourceRect.top}px`;
 
+  const correctedRect = new DOMRect(sourceRect.left, sourceRect.top, rect.width, rect.height);
+
   const scaleX = (rect.width + sourceDw) / rect.width;
   const scaleY = (rect.height + sourceDh) / rect.height;
   const initialTransform = buildTransform(DUPLICATE_OFFSET, DUPLICATE_OFFSET, scaleX, scaleY);
-  duplicate.style.transform = initialTransform;
+  setImportant(duplicate, 'transform', initialTransform);
 
   const session: ElementSession = {
     el: duplicate,
@@ -47,7 +54,7 @@ export const createDuplicate = (
     dy: DUPLICATE_OFFSET,
     dw: sourceDw,
     dh: sourceDh,
-    originalRect: rect,
+    originalRect: correctedRect,
     isDuplicate: true,
   };
   registry.set(session);

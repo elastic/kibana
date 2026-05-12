@@ -9,6 +9,7 @@
 
 import { FULL_HANDLE_DIM, MIN_HANDLE_DIM, RESIZE_HANDLE_SIZE } from '../../lib/constants';
 import type { ResizeHandle } from '../../lib/constants';
+import { setImportant } from '../../lib/dom/clone_element';
 import type { ElementSession } from './element_registry';
 import type { ResizeState } from './interaction_state';
 
@@ -127,7 +128,7 @@ export const findNearHandle = (
 
   const half = RESIZE_HANDLE_SIZE / 2;
   const minDim = Math.min(rect.width, rect.height);
-  const maxRadius = minDim * 0.22;
+  const maxRadius = minDim * 0.35;
 
   for (const [handle, anchor] of HANDLE_ANCHORS) {
     if (mode === 'corners' && handle.length === 1) continue;
@@ -176,7 +177,7 @@ export const applyResizeMove = (state: ResizeState, clientX: number, clientY: nu
 
   const scaleX = width / originalRect.width;
   const scaleY = height / originalRect.height;
-  el.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+  setImportant(el, 'transform', buildTransform(dx, dy, scaleX, scaleY));
 
   session.dx = dx;
   session.dy = dy;

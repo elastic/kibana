@@ -189,6 +189,17 @@ export const EditOverlay = ({
 
             interaction.current = IDLE;
             const nextTarget = getElementUnder(event.clientX, event.clientY);
+
+            // When the cursor leaves a rounded element (e.g. border-radius: 50%)
+            // it exits the hit-testable shape before reaching the bounding-rect
+            // corners where resize handles live. Before switching targets, check
+            // if the cursor is still near a handle on the previous hover target.
+            if (hoverTarget && nextTarget !== hoverTarget) {
+              if (detectHandle(event.clientX, event.clientY, hoverTarget)) {
+                return;
+              }
+            }
+
             const nextCursor = nextTarget ? 'grab' : '';
             setHoverTarget((prev) => (prev === nextTarget ? prev : nextTarget));
             updateCursor(nextCursor);
@@ -216,6 +227,8 @@ export const EditOverlay = ({
         const corner = state.handle;
         event.preventDefault();
         event.stopPropagation();
+        // Prevent native drag from stealing the pointer (fires pointercancel)
+        (event.target as Element)?.setPointerCapture?.(event.pointerId);
 
         let session = registry.current.get(state.target);
         if (!session) {
@@ -242,6 +255,8 @@ export const EditOverlay = ({
 
       event.preventDefault();
       event.stopPropagation();
+      // Prevent native drag from stealing the pointer (fires pointercancel)
+      (event.target as Element)?.setPointerCapture?.(event.pointerId);
 
       const existingSession = findManagedSession(target, registry.current);
 
@@ -279,6 +294,7 @@ export const EditOverlay = ({
       if (state.type !== 'drag' && state.type !== 'resize') return;
       event.preventDefault();
       event.stopPropagation();
+      (event.target as Element)?.releasePointerCapture?.(event.pointerId);
       parkInteraction();
     },
     [parkInteraction]

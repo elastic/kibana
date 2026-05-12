@@ -8,7 +8,7 @@
  */
 
 import { DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../../lib/constants';
-import { cloneClean } from '../../lib/dom/clone_element';
+import { cloneClean, setImportant } from '../../lib/dom/clone_element';
 import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import type { ElementSession, ElementRegistry } from './element_registry';
@@ -128,7 +128,8 @@ export const applyDragMove = (
 
   const scaleX = (originalRect.width + session.dw) / originalRect.width;
   const scaleY = (originalRect.height + session.dh) / originalRect.height;
-  el.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+  const newTransform = buildTransform(dx, dy, scaleX, scaleY);
+  setImportant(el, 'transform', newTransform);
 
   session.dx = dx;
   session.dy = dy;

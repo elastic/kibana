@@ -10,6 +10,19 @@
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR, TRUNCATION_CLASSES } from '../constants';
 
 /**
+ * Set a CSS property with `!important` priority.
+ *
+ * Cloned elements retain their original CSS classes, which may include
+ * Emotion-generated rules that use `!important` (e.g. EUI's euiCard__icon
+ * sets a centering transform). Plain inline style assignments are silently
+ * overridden by those rules, so we must use `setProperty` with the
+ * `'important'` priority flag to guarantee our values win.
+ */
+export const setImportant = (el: HTMLElement, prop: string, value: string): void => {
+  el.style.setProperty(prop, value, 'important');
+};
+
+/**
  * Copy pixel data from all canvas elements in the original tree to their
  * corresponding clones. cloneNode does not preserve canvas content.
  */
@@ -218,16 +231,16 @@ export const cloneElement = (
     hidden.dataset.cloneHidden = '';
   }
 
-  clone.style.position = 'fixed';
-  clone.style.left = `${rect.left}px`;
-  clone.style.top = `${rect.top}px`;
-  clone.style.width = `${rect.width}px`;
-  clone.style.height = `${rect.height}px`;
-  clone.style.margin = '0';
+  setImportant(clone, 'position', 'fixed');
+  setImportant(clone, 'left', `${rect.left}px`);
+  setImportant(clone, 'top', `${rect.top}px`);
+  setImportant(clone, 'width', `${rect.width}px`);
+  setImportant(clone, 'height', `${rect.height}px`);
+  setImportant(clone, 'margin', '0');
   clone.style.zIndex = String(zIndex);
   clone.style.pointerEvents = 'none';
-  clone.style.transform = 'none';
-  clone.style.transition = 'none';
+  setImportant(clone, 'transform', 'none');
+  setImportant(clone, 'transition', 'none');
   clone.style.visibility = 'visible';
   clone.setAttribute(DEVTOOL_MANAGED_ATTR, '');
 
