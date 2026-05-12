@@ -6,13 +6,442 @@
 # in the parent required array. Each fix below uses remove + update because
 # the Bump overlay engine appends arrays on 'update' alone rather than replacing them.
 #
-# 1 schema(s) affected.
+# 47 schema(s) affected.
 
 overlay: 1.0.0
 info:
   title: Required-field fixes (auto-generated)
   version: 0.0.1
 actions:
+  - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.requestBody.content['application/json'].schema.properties.schedule.required"
+    description: "Remove x-oas-optional fields from required: custom"
+    remove: true
+  - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.requestBody.content['application/json'].schema.properties.schedule"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.responses.200.content['application/json'].schema.properties.body.properties.schedule.required"
+    description: "Remove x-oas-optional fields from required: custom"
+    remove: true
+  - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.responses.200.content['application/json'].schema.properties.body.properties.schedule"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "id"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-anomaly-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-anomaly-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-error-rate-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-error-rate-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-transaction-duration-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-transaction-duration-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-transaction-error-rate-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_apm-transaction-error-rate-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_es-query-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_es-query-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_geo-containment-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_geo-containment-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_index-threshold-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_index-threshold-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_logs-alert-document-count-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_logs-alert-document-count-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metrics-alert-inventory-threshold-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metrics-alert-inventory-threshold-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metrics-alert-threshold-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_metrics-alert-threshold-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-cpu-usage-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-cpu-usage-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-disk-usage-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-disk-usage-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-elasticsearch-version-mismatch-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-elasticsearch-version-mismatch-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-jvm-memory-usage-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-jvm-memory-usage-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-kibana-version-mismatch-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-kibana-version-mismatch-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-license-expiration-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-license-expiration-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-logstash-version-mismatch-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-logstash-version-mismatch-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-missing-monitoring-data-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-missing-monitoring-data-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-nodes-changed-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-nodes-changed-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-thread-pool-search-rejections-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-thread-pool-search-rejections-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-thread-pool-write-rejections-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-alert-thread-pool-write-rejections-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-ccr-read-exceptions-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-ccr-read-exceptions-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-shard-size-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_monitoring-shard-size-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule_action'].required"
+    description: "Remove x-oas-optional fields from required: frequency, alerts_filter"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule_action']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "id"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule_action_alerts_filter'].required"
+    description: "Remove x-oas-optional fields from required: query"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule_action_alerts_filter']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_observability-rules-custom-threshold-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_observability-rules-custom-threshold-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_action'].required"
+    description: "Remove x-oas-optional fields from required: frequency, alerts_filter"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_action']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "id"
+        - "connector_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_action_alerts_filter'].required"
+    description: "Remove x-oas-optional fields from required: query"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_action_alerts_filter']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_response'].required"
+    description: "Remove x-oas-optional fields from required: monitoring, alert_delay, artifacts"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_response']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "id"
+        - "enabled"
+        - "name"
+        - "tags"
+        - "rule_type_id"
+        - "consumer"
+        - "schedule"
+        - "actions"
+        - "params"
+        - "created_by"
+        - "updated_by"
+        - "created_at"
+        - "updated_at"
+        - "api_key_owner"
+        - "mute_all"
+        - "muted_alert_ids"
+        - "execution_status"
+        - "revision"
+
   - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body'].required"
     description: "Remove x-oas-optional fields from required: sort, filters"
     remove: true
@@ -20,4 +449,148 @@ actions:
     description: "Restore required array without x-oas-optional fields"
     update:
       required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_slo-rules-burnrate-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_slo-rules-burnrate-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_transform-health-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_transform-health-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "schedule"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule_action'].required"
+    description: "Remove x-oas-optional fields from required: frequency, alerts_filter"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule_action']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "id"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule_action_alerts_filter'].required"
+    description: "Remove x-oas-optional fields from required: query"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule_action_alerts_filter']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required: []
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-ml-anomaly-detection-alert-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-ml-anomaly-detection-alert-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-ml-anomaly-detection-jobs-health-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-ml-anomaly-detection-jobs-health-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-synthetics-alerts-monitorstatus-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-synthetics-alerts-monitorstatus-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-synthetics-alerts-tls-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-synthetics-alerts-tls-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-uptime-alerts-durationanomaly-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-uptime-alerts-durationanomaly-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-uptime-alerts-monitorstatus-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-uptime-alerts-monitorstatus-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
+
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-uptime-alerts-tlscertificate-create-rule-body-alerting'].required"
+    description: "Remove x-oas-optional fields from required: alert_delay"
+    remove: true
+  - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-uptime-alerts-tlscertificate-create-rule-body-alerting']"
+    description: "Restore required array without x-oas-optional fields"
+    update:
+      required:
+        - "name"
+        - "consumer"
+        - "schedule"
+        - "rule_type_id"
+        - "params"
 
