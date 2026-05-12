@@ -19,7 +19,8 @@ export type AlertingV2BreadcrumbPage =
   | 'rule_create_options'
   | 'episodes_list'
   | 'episode_details'
-  | 'rule_doctor';
+  | 'rule_doctor'
+  | 'execution_history_list';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -92,6 +93,12 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleDoctorTitle', {
           defaultMessage: 'Rule Doctor',
+        }),
+      };
+    case 'execution_history_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.executionHistoryListTitle', {
+          defaultMessage: 'Execution history',
         }),
       };
   }
