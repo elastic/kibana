@@ -1,0 +1,53 @@
+steps:
+  - description: Transaction log, Subscription System
+    action: grok
+    from: message
+    patterns:
+      - "%{WORD:event.action}\\s%{WORD:event.outcome}\\s%{GREEDYDATA:transactio\
+        n.amount}"
+      - "%{CUSTOM_EVENT_ACTION:event.action}\\s%{WORD:event.outcome}\\s%{GREEDY\
+        DATA:custom.amount}"
+    pattern_definitions:
+      CUSTOM_EVENT_ACTION: "%{WORD}-%{WORD}"
+  - description: Extract numeric value from transaction amount
+    action: grok
+    from: transaction.amount
+    patterns:
+      - \$%{NUMBER:transaction.amount_value}
+    ignore_missing: true
+  - description: Convert transaction amount to double
+    action: convert
+    from: transaction.amount_value
+    to: transaction.amount_value
+    type: double
+    ignore_missing: true
+  - description: Extract numeric value from custom amount
+    action: grok
+    from: custom.amount
+    patterns:
+      - \$%{NUMBER:custom.amount_value}
+    ignore_missing: true
+  - description: Convert custom amount to double
+    action: convert
+    from: custom.amount_value
+    to: custom.amount_value
+    type: double
+    ignore_missing: true
+  - description: Standardize on transaction.amount_value field
+    action: rename
+    from: custom.amount_value
+    to: transaction.amount_value
+    ignore_missing: true
+  - description: Remove original amount fields with $ prefix
+    action: remove
+    from: transaction.amount
+    ignore_missing: true
+  - description: Remove original custom amount fields with $ prefix
+    action: remove
+    from: custom.amount
+    ignore_missing: true
+  - description: Remove redundant labels.amount_usd field
+    action: remove
+    from: labels.amount_usd
+    ignore_missing: true
+

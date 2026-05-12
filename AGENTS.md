@@ -85,6 +85,25 @@ Follow existing patterns in the target area first; below are common defaults.
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
 
+## Streamlang
+
+Streamlang is a declarative DSL (`StreamlangDSL`) that transpiles to two Elasticsearch targets. This is a dedicated research branch.
+
+**Packages:**
+- `x-pack/platform/packages/shared/kbn-streamlang` — core DSL, transpilers, validation
+- `x-pack/platform/packages/shared/kbn-streamlang-yaml-editor` — Monaco YAML editor UI
+- `x-pack/platform/packages/shared/kbn-streamlang-tests` — cross-compatibility tests
+
+**Transpilation entry points:**
+- Ingest Pipeline: `kbn-streamlang/src/transpilers/ingest_pipeline/index.ts` → `transpile()` → `{ processors: IngestProcessorContainer[] }`
+- ES|QL: `kbn-streamlang/src/transpilers/esql/index.ts` → `transpile()` → `{ query: string, commands: string[] }`
+
+**Key design facts (non-obvious):**
+- Nested `where`/`else` blocks are flattened first (`shared/flatten_steps.ts`) before either transpiler runs; child conditions are AND-ed with parents
+- Conditions compile to Painless for ingest, ES|QL AST (via `@elastic/esql` Builder) for ES|QL
+- Field name remapping happens at ingest time: `from→field`, `to→target_field`, `where→if`
+- 20+ processor types; each has its own file under `processors/` in both transpiler directories
+
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).
