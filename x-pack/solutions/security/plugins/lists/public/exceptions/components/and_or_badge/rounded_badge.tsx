@@ -18,7 +18,6 @@ const RoundBadge = styled(EuiBadge)`
   border-radius: 100%;
   display: inline-flex;
   font-size: 9px;
-  height: 34px;
   justify-content: center;
   margin: 0 5px 0 5px;
   padding: 7px 6px 4px 6px;
