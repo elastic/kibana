@@ -57,7 +57,7 @@ describe('createVisualizationResolver', () => {
     });
 
     const result = await resolveVisualizationConfig({
-      operationType: 'create_visualization_panels',
+      operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
       index: 'logs-*',
