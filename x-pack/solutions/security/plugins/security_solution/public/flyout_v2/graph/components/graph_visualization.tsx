@@ -29,7 +29,7 @@ import {
   DOCUMENT_TYPE_ALERT,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
-import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
+import { useFlyoutBodyAvailableHeight } from '../../../flyout/shared/components/use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
