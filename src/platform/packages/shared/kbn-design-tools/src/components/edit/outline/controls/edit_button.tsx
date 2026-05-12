@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EditOutline } from './edit_outline';
-export {
-  OutlineControls,
-  EditModal,
-  EditButton,
-  DeleteButton,
-  DuplicateButton,
-  ElementTree,
-} from './controls';
+import React from 'react';
+import { EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+interface Props {
+  onClick: () => void;
+}
+
+export const EditButton = ({ onClick }: Props) => (
+  <EuiButtonIcon
+    iconType="pencil"
+    color="text"
+    size="xs"
+    aria-label={i18n.translate('kbnDesignTools.editOutline.editElement', {
+      defaultMessage: 'Edit element',
+    })}
+    onClick={onClick}
+    data-test-subj="editOutlineEditButton"
+  />
+);

@@ -13,13 +13,15 @@ import { useEuiTheme } from '@elastic/eui';
 import { DEVTOOL_IGNORE_ATTR } from '../../../../lib/constants';
 import { DeleteButton } from './delete_button';
 import { DuplicateButton } from './duplicate_button';
+import { EditButton } from './edit_button';
 
 interface Props {
   onDelete: () => void;
   onDuplicate: () => void;
+  onEdit: () => void;
 }
 
-export const OutlineControls = ({ onDelete, onDuplicate }: Props) => {
+export const OutlineControls = ({ onDelete, onDuplicate, onEdit }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const panelCss = useMemo(
@@ -43,6 +45,7 @@ export const OutlineControls = ({ onDelete, onDuplicate }: Props) => {
 
   return (
     <div className={panelCss} {...{ [DEVTOOL_IGNORE_ATTR]: '' }}>
+      <EditButton onClick={onEdit} />
       <DuplicateButton onClick={onDuplicate} />
       <DeleteButton onClick={onDelete} />
     </div>

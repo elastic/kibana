@@ -24,9 +24,10 @@ interface Props {
   target: HTMLElement;
   onDelete: () => void;
   onDuplicate: () => void;
+  onEdit: () => void;
 }
 
-export const EditOutline = ({ target, onDelete, onDuplicate }: Props) => {
+export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) => {
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
 
@@ -89,7 +90,7 @@ export const EditOutline = ({ target, onDelete, onDuplicate }: Props) => {
           data-test-subj={`editOverlayResizeHandle-${h}`}
         />
       ))}
-      <OutlineControls onDelete={onDelete} onDuplicate={onDuplicate} />
+      <OutlineControls onDelete={onDelete} onDuplicate={onDuplicate} onEdit={onEdit} />
     </div>
   );
 };

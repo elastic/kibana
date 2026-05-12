@@ -25,15 +25,28 @@ export {
   EditOverlay,
   EditOutline,
   OutlineControls,
+  EditModal,
+  EditButton,
+  DeleteButton,
+  DuplicateButton,
+  ElementTree,
   ElementRegistry,
   IDLE,
   startDragFromElement,
+  findManagedSession,
+  startDragFromSession,
+  applyDragMove,
+  createDuplicate,
   startResize,
   calcResizeDeltas,
   buildTransform,
   findNearHandle,
   getHandleMode,
+  applyResizeMove,
+  getHandlePositions,
 } from './edit';
+
+export { GlobalCursorOverride } from './global_cursor_override';
 
 export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';
 

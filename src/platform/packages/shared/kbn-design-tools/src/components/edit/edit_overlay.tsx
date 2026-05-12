@@ -34,6 +34,7 @@ import { findNearHandle, startResize, applyResizeMove } from './resize_helpers';
 import type { InteractionState } from './interaction_state';
 import { IDLE } from './interaction_state';
 import { EditOutline } from './outline';
+import { EditModal } from './outline/controls/edit_modal';
 
 /**
  * Derive the CSS cursor from the current interaction state and hover target.
@@ -80,10 +81,14 @@ export const EditOverlay = ({
   const zIndex = useOverlayZIndex();
   const [cursor, setCursor] = useState('');
   const [hoverTarget, setHoverTarget] = useState<HTMLElement | null>(null);
+  const [editModalTarget, setEditModalTarget] = useState<HTMLElement | null>(null);
 
   const interaction = useRef<InteractionState>(IDLE);
   const registry = useRef(new ElementRegistry());
   const rafId = useRef<number>(0);
+  const styleEdits = useRef<Array<{ element: HTMLElement; property: string; original: string }>>(
+    []
+  );
 
   const updateCursor = useCallback(
     (next: string) => setCursor((prev) => (prev === next ? prev : next)),
@@ -97,7 +102,7 @@ export const EditOverlay = ({
   const notifyCount = useCallback(() => {
     const hiddenOriginals = document.querySelectorAll(`[${DEVTOOL_HIDDEN_ATTR}]`).length;
     const duplicates = [...registry.current.values()].filter((s) => s.isDuplicate).length;
-    onChangeCount?.(hiddenOriginals + duplicates);
+    onChangeCount?.(hiddenOriginals + duplicates + styleEdits.current.length);
   }, [onChangeCount]);
 
   const deleteElement = useCallback(
@@ -125,6 +130,10 @@ export const EditOverlay = ({
     interaction.current = IDLE;
     registry.current.resetAll();
     restoreAll();
+    for (const { element, property, original } of styleEdits.current) {
+      element.style.setProperty(property, original);
+    }
+    styleEdits.current = [];
     onChangeCount?.(0);
   }, [onChangeCount, restoreAll]);
 
@@ -313,8 +322,10 @@ export const EditOverlay = ({
     }
   }, [isActive, abortDrag]);
 
+  const listenersActive = isActive && !editModalTarget;
+
   useEditListeners(
-    isActive,
+    listenersActive,
     {
       onPointerMove: handlePointerMove,
       onPointerDown: handlePointerDown,
@@ -336,6 +347,50 @@ export const EditOverlay = ({
     deleteElement(hoverTarget);
   }, [hoverTarget, deleteElement]);
 
+  const hideClones = useCallback(() => {
+    for (const session of registry.current.values()) {
+      session.el.dataset.savedZIndex = session.el.style.zIndex;
+      session.el.style.zIndex = '-1';
+    }
+  }, []);
+
+  const showClones = useCallback(() => {
+    for (const session of registry.current.values()) {
+      session.el.style.zIndex = session.el.dataset.savedZIndex ?? '';
+      delete session.el.dataset.savedZIndex;
+    }
+  }, []);
+
+  const handleEdit = useCallback(() => {
+    if (!hoverTarget) return;
+    setEditModalTarget(hoverTarget);
+    setCursor('');
+    setHoverTarget(null);
+    hideClones();
+  }, [hoverTarget, hideClones]);
+
+  const handleEditClose = useCallback(() => {
+    setEditModalTarget(null);
+    showClones();
+  }, [showClones]);
+
+  const handleEditSave = useCallback(
+    (changes: Array<{ element: Element; property: string; value: string }>) => {
+      for (const { element, property, value } of changes) {
+        if (element instanceof HTMLElement) {
+          const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
+          const original = element.style.getPropertyValue(cssProp);
+          styleEdits.current.push({ element, property: cssProp, original });
+          element.style.setProperty(cssProp, value);
+        }
+      }
+      setEditModalTarget(null);
+      showClones();
+      notifyCount();
+    },
+    [showClones, notifyCount]
+  );
+
   const handleDuplicate = useCallback(() => {
     if (!hoverTarget) return;
 
@@ -350,9 +405,17 @@ export const EditOverlay = ({
       {cursor && <GlobalCursorOverride cursor={cursor} allowButtons />}
       {showOutline ? (
         <EuiPortal>
-          <EditOutline target={hoverTarget} onDelete={handleDelete} onDuplicate={handleDuplicate} />
+          <EditOutline
+            target={hoverTarget}
+            onDelete={handleDelete}
+            onDuplicate={handleDuplicate}
+            onEdit={handleEdit}
+          />
         </EuiPortal>
       ) : null}
+      {editModalTarget && (
+        <EditModal target={editModalTarget} onClose={handleEditClose} onSave={handleEditSave} />
+      )}
     </>
   );
 };

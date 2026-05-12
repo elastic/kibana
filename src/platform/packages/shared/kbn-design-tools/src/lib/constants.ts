@@ -22,6 +22,9 @@ export const LAYOUT_SETTINGS_FLYOUT_ID = 'layoutSettingsFlyout';
 /** EUI context-menu popover attached to the layout button. */
 export const LAYOUT_POPOVER_ID = 'layoutPopover';
 
+/** The edit-element modal dialog. */
+export const EDIT_MODAL_ID = 'editModal';
+
 /** The fixed toolbar rendered at the bottom of the viewport. */
 export const DEVELOPER_TOOLBAR_ID = 'developerToolbar';
 

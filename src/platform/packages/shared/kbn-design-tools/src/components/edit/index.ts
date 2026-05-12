@@ -8,16 +8,32 @@
  */
 
 export { EditOverlay } from './edit_overlay';
-export { EditOutline, OutlineControls } from './outline';
+export {
+  EditOutline,
+  OutlineControls,
+  EditModal,
+  EditButton,
+  DeleteButton,
+  DuplicateButton,
+  ElementTree,
+} from './outline';
 export { ElementRegistry } from './element_registry';
 export { IDLE } from './interaction_state';
-export { startDragFromElement, findManagedSession } from './drag_helpers';
+export {
+  startDragFromElement,
+  findManagedSession,
+  startDragFromSession,
+  applyDragMove,
+} from './drag_helpers';
+export { createDuplicate } from './duplicate_helpers';
 export {
   startResize,
   calcResizeDeltas,
   buildTransform,
   findNearHandle,
   getHandleMode,
+  applyResizeMove,
+  getHandlePositions,
 } from './resize_helpers';
 
 export type { ElementSession } from './element_registry';

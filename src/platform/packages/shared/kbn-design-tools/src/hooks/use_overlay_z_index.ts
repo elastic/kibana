@@ -17,6 +17,7 @@ export interface OverlayZIndex {
   label: number;
   flyout: number;
   popover: number;
+  modal: number;
 }
 
 /**
@@ -35,6 +36,7 @@ export const useOverlayZIndex = (): OverlayZIndex => {
       label: base + 4,
       flyout: base + 5,
       popover: base + 6,
+      modal: base + 7,
     };
   }, [euiTheme.levels.toast]);
 };
