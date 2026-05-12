@@ -9,11 +9,11 @@
 
 export { registerRoutes } from './register_routes';
 
-export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './create';
+export type { DashboardCreateResponseBody } from './create';
 export type { DashboardSanitizeResponseBody } from './sanitize';
 export type { DashboardReadResponseBody } from './read';
 export type { DashboardSearchRequestParams, DashboardSearchResponseBody } from './search';
-export type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './update';
+export type { DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,
   DashboardPanel,
