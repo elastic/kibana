@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
 export const GROK_DEBUGGER_API_TAGS = [
-  '@local-stateful-classic',
-  '@local-serverless-observability_complete',
-  '@local-serverless-security_complete',
-] satisfies string[];
+  ...tags.stateful.classic,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

@@ -10,6 +10,7 @@
 import type { ScoutPage } from '@kbn/scout';
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { DEV_TOOLS_ALL_ROLE, DEV_TOOLS_READ_ROLE, NO_DEV_TOOLS_ROLE, DEV_TOOL_APPS } from '../fixtures/constants';
 
 const CUSTOM_SPACE = {
   id: 'custom_space',
@@ -22,58 +23,6 @@ const CUSTOM_SPACE_DEV_TOOLS_DISABLED = {
   name: 'custom_space_dev_tools_disabled',
   disabledFeatures: ['dev_tools'],
 };
-
-const DEV_TOOLS_ALL_ROLE = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        dev_tools: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
-const DEV_TOOLS_READ_ROLE = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        dev_tools: ['read'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
-const NO_DEV_TOOLS_ROLE = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        discover: ['all'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
-const devToolApps = [
-  { hash: 'console', readySubject: 'console' },
-  { hash: 'searchprofiler', readySubject: 'searchprofiler' },
-  { hash: 'grokdebugger', readySubject: 'grokDebuggerContainer' },
-  { hash: 'painless_lab', readySubject: 'painless_lab' },
-] as const;
 
 const expectDevToolsNavLink = async (page: ScoutPage, visible: boolean) => {
   const devToolsLink = page.getByRole('link', { name: 'Dev Tools' });
@@ -107,7 +56,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     await page.gotoApp('home');
     await expectDevToolsNavLink(page, true);
 
-    for (const { hash, readySubject } of devToolApps) {
+    for (const { hash, readySubject } of DEV_TOOL_APPS) {
       await page.gotoApp('dev_tools', { hash });
       await expect(page.testSubj.locator(readySubject)).toBeVisible();
       await expectReadOnlyBadge(page, false);
@@ -122,7 +71,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     await page.gotoApp('home');
     await expectDevToolsNavLink(page, true);
 
-    for (const { hash, readySubject } of devToolApps) {
+    for (const { hash, readySubject } of DEV_TOOL_APPS) {
       await page.gotoApp('dev_tools', { hash });
       await expect(page.testSubj.locator(readySubject)).toBeVisible();
       await expectReadOnlyBadge(page, true);
@@ -137,7 +86,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     await page.gotoApp('home');
     await expectDevToolsNavLink(page, false);
 
-    for (const { hash } of devToolApps) {
+    for (const { hash } of DEV_TOOL_APPS) {
       await page.gotoApp('dev_tools', { hash });
       await expect(page.getByText('Application Not Found')).toBeVisible();
     }
@@ -154,7 +103,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     await page.goto(kbnUrl.app('home', { space: CUSTOM_SPACE.id }));
     await expectDevToolsNavLink(page, true);
 
-    for (const { hash, readySubject } of devToolApps) {
+    for (const { hash, readySubject } of DEV_TOOL_APPS) {
       await page.goto(
         kbnUrl.app('dev_tools', {
           space: CUSTOM_SPACE.id,
@@ -176,7 +125,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     await page.goto(kbnUrl.app('home', { space: CUSTOM_SPACE_DEV_TOOLS_DISABLED.id }));
     await expectDevToolsNavLink(page, false);
 
-    for (const { hash } of devToolApps) {
+    for (const { hash } of DEV_TOOL_APPS) {
       await page.goto(
         kbnUrl.app('dev_tools', {
           space: CUSTOM_SPACE_DEV_TOOLS_DISABLED.id,

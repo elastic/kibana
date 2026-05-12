@@ -23,7 +23,7 @@ export class GrokDebuggerPage {
 
   async goto() {
     await this.page.gotoApp('dev_tools', { hash: 'grokdebugger' });
-    await expect(this.container).toBeVisible();
+    await this.container.waitFor();
   }
 
   async setEventInput(value: string) {
@@ -35,7 +35,7 @@ export class GrokDebuggerPage {
   }
 
   async setCustomPatternInput(value: string) {
-    await expect(this.customPatternsToggle).toBeVisible();
+    await this.customPatternsToggle.waitFor();
     await this.customPatternsToggle.click();
     await this.setEditorValue(2, value);
   }

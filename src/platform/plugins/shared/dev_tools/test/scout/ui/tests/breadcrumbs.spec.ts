@@ -9,35 +9,14 @@
 
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-
-const DEV_TOOLS_READ_ROLE = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: {
-        dev_tools: ['read'],
-      },
-      spaces: ['*'],
-    },
-  ],
-};
-
-const devToolApps = [
-  { hash: 'console', label: 'Console' },
-  { hash: 'grokdebugger', label: 'Grok Debugger' },
-  { hash: 'searchprofiler', label: 'Search Profiler' },
-  { hash: 'painless_lab', label: 'Painless Lab' },
-] as const;
+import { DEV_TOOLS_READ_ROLE, DEV_TOOL_APPS } from '../fixtures/constants';
 
 test.describe('Dev Tools breadcrumbs', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(DEV_TOOLS_READ_ROLE);
   });
 
-  for (const { hash, label } of devToolApps) {
+  for (const { hash, label } of DEV_TOOL_APPS) {
     test(`sets the last breadcrumb for ${label}`, async ({ page }) => {
       await page.gotoApp('dev_tools', { hash });
 

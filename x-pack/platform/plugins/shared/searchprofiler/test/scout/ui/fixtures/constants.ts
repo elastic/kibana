@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
 export const SEARCH_PROFILER_TAGS = [
-  '@local-stateful-classic',
-  '@local-serverless-search',
-  '@local-serverless-observability_complete',
-  '@local-serverless-security_complete',
-] satisfies string[];
+  ...tags.stateful.classic,
+  ...tags.serverless.search,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];
 
 export const SEARCH_PROFILER_SERVERLESS_TAGS = [
-  '@local-serverless-search',
-  '@local-serverless-observability_complete',
-  '@local-serverless-security_complete',
-] satisfies string[];
+  ...tags.serverless.search,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];
 
 export const SEARCH_PROFILER_USER_ROLE = {
   elasticsearch: {

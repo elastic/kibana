@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
 export const SEARCH_PROFILER_API_TAGS = [
-  '@local-serverless-search',
-  '@local-serverless-observability_complete',
-  '@local-serverless-security_complete',
-] satisfies string[];
+  ...tags.serverless.search,
+  ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
+];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

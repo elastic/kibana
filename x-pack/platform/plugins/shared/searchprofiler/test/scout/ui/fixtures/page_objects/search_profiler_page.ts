@@ -6,7 +6,6 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 import { compressToEncodedURIComponent } from 'lz-string';
 
 export class SearchProfilerPage {
@@ -39,11 +38,11 @@ export class SearchProfilerPage {
 
     const hash = query.size > 0 ? `searchprofiler?${query.toString()}` : 'searchprofiler';
     await this.page.gotoApp('dev_tools', { hash });
-    await expect(this.container).toBeVisible();
+    await this.container.waitFor();
   }
 
   async waitForEditorToLoad() {
-    await expect(this.editor).toBeVisible();
+    await this.editor.waitFor();
   }
 
   async setIndex(index: string) {
