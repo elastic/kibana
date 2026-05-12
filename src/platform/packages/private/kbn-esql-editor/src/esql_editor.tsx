@@ -27,7 +27,7 @@ import type { ESQLTelemetryCallbacks, ESQLRegistrySolutionId } from '@kbn/esql-t
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
+import { ESQL_LANG_ID, monaco } from '@kbn/code-editor';
 import { DataSourceBrowser } from '@kbn/esql-resource-browser';
 import { FieldsBrowser } from '@kbn/esql-resource-browser';
 import { useStableCallback } from '@kbn/react-hooks';
