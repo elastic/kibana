@@ -44,7 +44,7 @@ This covers the rule type ES|QL. Do not create a rule with a rule type other tha
 
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
-**You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every edit request requires you to actually call the tools (\`attachment_update\` or \`security.create_detection_rule\`) to persist the change in the attachment. Describing the change without applying it is not acceptable.
+**You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every create or edit request requires you to actually call the tools (\`security.create_detection_rule\` for creation, \`attachment_update\` for edits) to persist the result. Describing the change without applying it is not acceptable.
 
 ## Core Workflow
 
