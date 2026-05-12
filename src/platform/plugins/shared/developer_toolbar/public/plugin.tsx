@@ -14,8 +14,7 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 
 import { BehaviorSubject } from 'rxjs';
 import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
-import { DeveloperToolbarItem } from '@kbn/developer-toolbar';
-import { ChromeNextToggle } from '@kbn/core-chrome-feature-flags';
+import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -49,9 +48,6 @@ export class DeveloperToolbarPlugin
     (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
-        <DeveloperToolbarItem id="chromeNext">
-          <ChromeNextToggle featureFlags={core.featureFlags} />
-        </DeveloperToolbarItem>
       </Suspense>
     );
 
@@ -63,6 +59,16 @@ export class DeveloperToolbarPlugin
         </Suspense>
       ),
     });
+
+    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false)) {
+      import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
+        this.registerItem({
+          id: 'Chrome Next',
+          children: <ChromeNextToggle featureFlags={core.featureFlags} />,
+          priority: 1,
+        });
+      });
+    }
 
     return {
       registerItem: this.registerItem.bind(this),

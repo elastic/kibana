@@ -30,7 +30,7 @@ export const ChromeNextToggle: React.FC<ChromeNextToggleProps> = ({ featureFlags
 
   return (
     <EuiToolTip
-      content={`Click to ${isEnabled ? 'disable' : 'enable'} Vibranium chrome. Page will reload.`}
+      content={`Click to ${isEnabled ? 'disable' : 'enable'} Chrome Next. Page will reload.`}
     >
       <EuiBadge
         color={isEnabled ? 'success' : 'danger'}
@@ -38,9 +38,9 @@ export const ChromeNextToggle: React.FC<ChromeNextToggleProps> = ({ featureFlags
         iconType="beaker"
         iconSide="left"
         onClick={onClick}
-        onClickAriaLabel="Toggle Vibranium chrome"
+        onClickAriaLabel="Toggle Chrome Next"
       >
-        Vibranium: {isEnabled ? 'ON' : 'OFF'}
+        Chrome Next: {isEnabled ? 'ON' : 'OFF'}
       </EuiBadge>
     </EuiToolTip>
   );
