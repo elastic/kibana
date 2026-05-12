@@ -143,7 +143,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                 </EuiFlexItem>
                 {badges?.map((badge, index) => (
                   <EuiFlexItem grow={false} key={index}>
-                    <EuiBadge color={badge.color ?? 'hollow'} iconType={badge.iconType}>
+                    <EuiBadge color={badge.color} iconType={badge.iconType}>
                       {badge.label}
                     </EuiBadge>
                   </EuiFlexItem>

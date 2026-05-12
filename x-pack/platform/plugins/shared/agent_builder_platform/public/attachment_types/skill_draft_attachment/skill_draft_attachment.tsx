@@ -117,7 +117,7 @@ const SkillDraftReferences = ({
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
             {toolIds.map((toolId) => (
               <EuiFlexItem grow={false} key={toolId}>
-                <EuiBadge color="hollow">
+                <EuiBadge>
                   <FormattedMessage
                     id="xpack.agentBuilderPlatform.attachments.skillDraft.toolBadge"
                     defaultMessage="<bold>tool:</bold> {toolName}"
@@ -135,7 +135,7 @@ const SkillDraftReferences = ({
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
             {referencedContent!.map((file) => (
               <EuiFlexItem grow={false} key={file.relativePath}>
-                <EuiBadge color="hollow">
+                <EuiBadge>
                   <FormattedMessage
                     id="xpack.agentBuilderPlatform.attachments.skillDraft.fileBadge"
                     defaultMessage="<bold>file:</bold> {fileName}"
@@ -341,7 +341,6 @@ export const createSkillDraftAttachmentDefinition = ({
         label: i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge', {
           defaultMessage: 'Draft',
         }),
-        color: 'hollow',
       };
       headerBadges.push(draftBadge);
 
