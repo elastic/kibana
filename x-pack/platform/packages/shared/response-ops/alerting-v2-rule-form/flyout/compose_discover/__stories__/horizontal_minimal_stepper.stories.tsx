@@ -41,43 +41,45 @@ const RULE_STEPS_SHORT = ['Alert Condition', 'Details & Artifacts', 'Notificatio
 // ---------------------------------------------------------------------------
 // Interactive story — click through steps to see the animation
 // ---------------------------------------------------------------------------
-export const Interactive: Story = {
-  render: () => {
-    const [currentStep, setCurrentStep] = useState(0);
-    const steps = makeSteps(RULE_STEPS, currentStep);
+const InteractiveStory = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const steps = makeSteps(RULE_STEPS, currentStep);
 
-    return (
-      <div style={{ maxWidth: 480, border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
-        <HorizontalMinimalStepper steps={steps} animated />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              disabled={currentStep === 0}
-              onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
-            >
-              ← Back
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              disabled={currentStep === RULE_STEPS.length - 1}
-              onClick={() => setCurrentStep((s) => Math.min(RULE_STEPS.length - 1, s + 1))}
-            >
-              Next →
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          Click Next/Back to see the dot→pill animation on the indicators.
-        </EuiText>
-      </div>
-    );
-  },
+  return (
+    <div style={{ maxWidth: 480, border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
+      <HorizontalMinimalStepper steps={steps} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            disabled={currentStep === 0}
+            onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
+          >
+            ← Back
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            fill
+            disabled={currentStep === RULE_STEPS.length - 1}
+            onClick={() => setCurrentStep((s) => Math.min(RULE_STEPS.length - 1, s + 1))}
+          >
+            Next →
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        Click Next/Back to see the dot→pill animation on the indicators.
+      </EuiText>
+    </div>
+  );
+};
+
+export const Interactive: Story = {
+  render: () => <InteractiveStory />,
 };
 
 // ---------------------------------------------------------------------------
@@ -98,42 +100,44 @@ export const AllStates: Story = {
 // ---------------------------------------------------------------------------
 // Three-step variant (no Recovery Condition — tracking disabled)
 // ---------------------------------------------------------------------------
-export const ThreeSteps: Story = {
-  render: () => {
-    const [currentStep, setCurrentStep] = useState(0);
-    const steps = makeSteps(RULE_STEPS_SHORT, currentStep);
+const ThreeStepsStory = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const steps = makeSteps(RULE_STEPS_SHORT, currentStep);
 
-    return (
-      <div style={{ maxWidth: 480, border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
-        <HorizontalMinimalStepper steps={steps} animated />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              disabled={currentStep === 0}
-              onClick={() => setCurrentStep((s) => s - 1)}
-            >
-              ← Back
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              disabled={currentStep === RULE_STEPS_SHORT.length - 1}
-              onClick={() => setCurrentStep((s) => s + 1)}
-            >
-              Next →
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          Three-step variant shown when "Track active and recovered state" is disabled (no Recovery
-          Condition step).
-        </EuiText>
-      </div>
-    );
-  },
+  return (
+    <div style={{ maxWidth: 480, border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
+      <HorizontalMinimalStepper steps={steps} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            disabled={currentStep === 0}
+            onClick={() => setCurrentStep((s) => s - 1)}
+          >
+            ← Back
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            fill
+            disabled={currentStep === RULE_STEPS_SHORT.length - 1}
+            onClick={() => setCurrentStep((s) => s + 1)}
+          >
+            Next →
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="xs" color="subdued">
+        Three-step variant shown when &quot;Track active and recovered state&quot; is disabled (no
+        Recovery Condition step).
+      </EuiText>
+    </div>
+  );
+};
+
+export const ThreeSteps: Story = {
+  render: () => <ThreeStepsStory />,
 };
