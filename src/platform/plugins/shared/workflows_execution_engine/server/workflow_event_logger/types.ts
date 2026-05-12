@@ -8,6 +8,7 @@
  */
 
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { IWorkflowEventLogger as ICoreWorkflowEventLogger } from '@kbn/workflows-execution-engine-core';
 import type { LogSearchResult, WorkflowLogEvent } from '../repositories/logs_repository';
 
 /**
@@ -85,7 +86,12 @@ export interface WorkflowEventLoggerOptions {
   enableConsoleLogging?: boolean;
 }
 
-export interface IWorkflowEventLogger {
+// Local logger interface extends the structural shape published from
+// `@kbn/workflows-execution-engine-core`. The plugin adds richer methods
+// (timing, scoped sub-loggers) on top of the contract that the engine's
+// pure logic depends on. Subset compliance is enforced at compile time
+// by the `extends` clause.
+export interface IWorkflowEventLogger extends ICoreWorkflowEventLogger {
   logEvent(event: WorkflowLogEvent): void;
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;

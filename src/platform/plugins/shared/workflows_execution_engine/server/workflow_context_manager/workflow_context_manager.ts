@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { IWorkflowContextManager } from '@kbn/workflows-execution-engine-core';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
@@ -50,7 +51,7 @@ interface ScopeEntry {
 type ContextPathSegment = string | number;
 type ContextPath = ContextPathSegment[];
 
-export class WorkflowContextManager {
+export class WorkflowContextManager implements IWorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
   private esClient: ElasticsearchClient;

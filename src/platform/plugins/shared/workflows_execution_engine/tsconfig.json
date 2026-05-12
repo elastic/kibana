@@ -18,6 +18,7 @@
     "@kbn/config-schema",
     "@kbn/actions-plugin",
     "@kbn/workflows",
+    "@kbn/workflows-execution-engine-core",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
     "@kbn/eval-kql",

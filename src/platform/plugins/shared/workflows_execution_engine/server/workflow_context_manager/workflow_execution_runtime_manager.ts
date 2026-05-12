@@ -21,6 +21,7 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
@@ -61,7 +62,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  */
 const LOOP_STEP_TYPES = new Set(['foreach', 'while']);
 
-export class WorkflowExecutionRuntimeManager {
+export class WorkflowExecutionRuntimeManager implements IWorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;

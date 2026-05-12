@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Collaborator interfaces the plugin classes implement. Prefer the
-// `@kbn/workflows-execution-engine-core/collaborators` subpath in consumers
-// that only need types; importing from the barrel is fine in callers that
-// will also use other exports from this package.
+export type { WorkflowLogEvent } from './workflow_log_event';
+export type { IWorkflowEventLogger } from './workflow_event_logger';
+export type { IWorkflowContextManager } from './workflow_context_manager';
+export type { IStepExecutionRuntime } from './step_execution_runtime';
+export type { IWorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 export type {
-  WorkflowLogEvent,
-  IWorkflowEventLogger,
-  IWorkflowContextManager,
-  IStepExecutionRuntime,
-  IWorkflowExecutionRuntimeManager,
   INodeImplementation,
   INodeWithErrorCatching,
   IMonitorableNode,
   ICancellableNode,
-} from './src/collaborators';
-export { isCancellableNode } from './src/collaborators';
+} from './node_implementation';
+export { isCancellableNode } from './node_implementation';
