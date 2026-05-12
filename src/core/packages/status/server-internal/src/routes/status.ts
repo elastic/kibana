@@ -95,7 +95,9 @@ const resolveStatusDecision = async ({
     return hasAllRequested ? 'full' : 'no-monitor';
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    logger.warn(
+
+    // Downgrade to debug as this is on a high frequency endpoint
+    logger.debug(
       `Failed to check 'monitor' cluster privilege for /api/status, returning redacted response: ${message}`
     );
     return 'unauthenticated';

@@ -14,7 +14,7 @@ import { omit } from 'lodash';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { RequestHandlerContext } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';

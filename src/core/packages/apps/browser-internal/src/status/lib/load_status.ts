@@ -19,19 +19,17 @@ import type {
 } from '@kbn/core-status-common';
 import type { DataType } from './format_number';
 
-/**
- * Wire shape of the `/api/status` payload as actually returned by the server.
- * `core` and `plugins` are populated for full responses; the redacted body returned
- * to unauthenticated callers (or callers lacking the `monitor` cluster privilege)
- * only contains `status.overall.level`.
- */
-type StatusApiResponse = Omit<Partial<StatusResponse>, 'status'> & {
+interface RedactedStatusApiResponse {
   status: {
-    overall: { level: ServiceStatusLevelId; summary?: string };
-    core?: StatusResponse['status']['core'];
-    plugins?: StatusResponse['status']['plugins'];
+    overall: { level: ServiceStatusLevelId };
+    core?: never;
+    plugins?: never;
   };
-};
+}
+
+type FullStatusApiResponse = StatusResponse;
+
+type StatusApiResponse = RedactedStatusApiResponse | FullStatusApiResponse;
 
 interface MetricMeta {
   title: string;
@@ -212,8 +210,8 @@ export type ProcessedServerResponse =
       metrics: Metric[];
     };
 
-const isRedactedResponse = (response: StatusApiResponse): boolean =>
-  response.status.core === undefined || response.status.plugins === undefined;
+const isFullStatusApiResponse = (response: StatusApiResponse): response is FullStatusApiResponse =>
+  response.status.core !== undefined && response.status.plugins !== undefined;
 
 const buildServerState = (level: ServiceStatusLevelId, summary?: string): StatusState => {
   const { title, uiColor } = STATUS_LEVEL_UI_ATTRS[level];
@@ -265,22 +263,21 @@ export async function loadStatus({
     }
   }
 
-  if (isRedactedResponse(response)) {
+  if (!isFullStatusApiResponse(response)) {
     return { redacted: true, serverState: buildServerState(response.status.overall.level) };
   }
 
-  const fullResponse = response as StatusResponse;
   return {
     redacted: false,
-    name: fullResponse.name,
-    version: fullResponse.version,
-    coreStatus: Object.entries(fullResponse.status.core).map(([serviceName, status]) =>
+    name: response.name,
+    version: response.version,
+    coreStatus: Object.entries(response.status.core).map(([serviceName, status]) =>
       formatStatus(serviceName, status)
     ),
-    pluginStatus: Object.entries(fullResponse.status.plugins).map(([pluginName, status]) =>
+    pluginStatus: Object.entries(response.status.plugins).map(([pluginName, status]) =>
       formatStatus(pluginName, status)
     ),
-    serverState: formatStatus('overall', fullResponse.status.overall).state,
-    metrics: formatMetrics(fullResponse),
+    serverState: formatStatus('overall', response.status.overall).state,
+    metrics: formatMetrics(response),
   };
 }
