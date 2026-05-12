@@ -175,7 +175,7 @@ export const RuleActionsConnectorsBody = ({
         return false;
       }
 
-      if (actionTypeModel.getHideInUi?.(connectorTypes)) {
+      if (actionTypeModel.getHideInUi?.(connectorTypes) && !actionTypeModel.subtype?.length) {
         return false;
       }
 
