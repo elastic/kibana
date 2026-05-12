@@ -100,7 +100,9 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
             <EuiIcon
               type="check"
               data-test-subj="fleetServerHostTable.defaultIcon"
-              aria-hidden={true}
+              aria-label={i18n.translate('xpack.fleet.settings.fleetServerHostsTable.defaultIconLabel', {
+    defaultMessage: 'Default Fleet Server host',
+  })}
             />
           ) : null,
         width: '200px',
