@@ -17,7 +17,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import { type DashboardState, type DashboardLocatorParams } from '../../../../common';
+import { type DashboardLocatorParams } from '../../../../common';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { getDashboardBackupService } from '../../../services/dashboard_api_services';
 import { dataService, shareService } from '../../../services/kibana_services';
@@ -131,14 +131,9 @@ export function buildExportSharingData(
       id: DASHBOARD_APP_LOCATOR,
       params: locatorParams,
     },
-    exportJson: (): DashboardState => {
-      const accessControlState = dashboardApi.getAccessControlState();
+    exportJson: () => {
       const dashboardState = dashboardApi.getSerializedState().attributes;
-      return {
-        ...dashboardState,
-        ...(dashboardState.title.length ? { title: dashboardState.title } : { title }),
-        ...(accessControlState !== undefined && accessControlState),
-      };
+      return dashboardState.title.length ? dashboardState : { ...dashboardState, title };
     },
   };
 }

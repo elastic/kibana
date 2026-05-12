@@ -187,7 +187,6 @@ export type DashboardApi = CanExpandPanels &
       grid?: GridData;
       serializedState: object;
     };
-    getAccessControlState: () => Pick<DashboardState, 'access_control'>;
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;

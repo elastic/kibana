@@ -156,10 +156,12 @@ export function getDashboardApi({
     const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
+    const accessControlState = accessControlManager.internalApi.getState();
     return {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       ...projectRoutingState,
+      ...accessControlState,
       panels,
       pinned_panels,
     } satisfies DashboardState;
@@ -288,7 +290,6 @@ export function getDashboardApi({
     accessControl$: accessControlManager.api.accessControl$,
     changeAccessMode: accessControlManager.api.changeAccessMode,
     isAccessControlEnabled: Boolean(isAccessControlEnabled),
-    getAccessControlState: accessControlManager.internalApi.getState,
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
   const internalApi: DashboardInternalApi = {
