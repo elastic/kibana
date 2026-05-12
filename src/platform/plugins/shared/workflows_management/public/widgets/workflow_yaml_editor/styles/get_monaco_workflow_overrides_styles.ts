@@ -137,7 +137,8 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       color: ${euiTheme.colors.textParagraph} !important;
     }
 
-    /* Equal spacing on both sides of fold chevrons */
+    /* Equal spacing on both sides of fold chevrons, and override Monaco's slow 0.5s
+       opacity transition with EUI's fast token so hover feels responsive. */
     .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-collapsed,
     .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-expanded,
     .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-collapsed,
@@ -145,6 +146,18 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       padding-left: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.s};
       margin: 0;
+      transition: opacity ${euiTheme.animation.fast};
+    }
+
+    /* Honour prefers-reduced-motion (Monaco's reduce-motion opt-out lives on
+       .monaco-workbench, which we don't render). */
+    @media (prefers-reduced-motion: reduce) {
+      .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-collapsed,
+      .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-expanded,
+      .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-collapsed,
+      .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-expanded {
+        transition: none;
+      }
     }
 
     /* Keep collapsed chevrons always visible so folded regions are obvious at a glance,
