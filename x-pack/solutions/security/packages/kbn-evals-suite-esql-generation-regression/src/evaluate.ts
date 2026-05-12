@@ -16,8 +16,8 @@ export const evaluate = base.extend<
   }
 >({
   evaluateDataset: [
-    ({ executorClient, inferenceClient, log }, use) => {
-      use(createEvaluateEsqlGenerationDataset({ executorClient, inferenceClient, log }));
+    ({ executorClient, inferenceClient, esClient, log }, use) => {
+      use(createEvaluateEsqlGenerationDataset({ executorClient, inferenceClient, esClient, log }));
     },
     { scope: 'worker' },
   ],

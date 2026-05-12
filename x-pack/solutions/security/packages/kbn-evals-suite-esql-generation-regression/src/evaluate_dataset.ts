@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Evaluator, EvalsExecutorClient } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator, withEvaluatorSpan } from '@kbn/evals';
+import {
+  createEsqlEquivalenceEvaluator,
+  createEsqlExecutionEvaluator,
+  createEsqlResultEquivalenceEvaluator,
+  createEsqlValidityEvaluator,
+  withEvaluatorSpan,
+} from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -17,28 +24,75 @@ Given a natural language question about data stored in Elasticsearch, generate t
 Return ONLY the raw ES|QL query text with no markdown code fences, no explanation, and no surrounding text.
 If the request cannot be fulfilled with ES|QL (for example, pagination is not natively supported in ES|QL), briefly explain why instead of generating a query.`;
 
+const predictionExtractor = (output: unknown): string => (output as { esql: string }).esql ?? '';
+
+const groundTruthExtractor = (expected: unknown): string =>
+  (expected as { query: string }).query ?? '';
+
+const queryExtractor = (output: unknown): string[] => {
+  const query = predictionExtractor(output);
+  return query ? [query] : [];
+};
+
 export type EvaluateEsqlGenerationDataset = () => Promise<void>;
 
 export function createEvaluateEsqlGenerationDataset({
   executorClient,
   inferenceClient,
+  esClient,
   log,
 }: {
   executorClient: EvalsExecutorClient;
   inferenceClient: BoundInferenceClient;
+  esClient: EsClient;
   log: ToolingLog;
 }): EvaluateEsqlGenerationDataset {
-  const baseEvaluator = createEsqlEquivalenceEvaluator({
+  const baseEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
     inferenceClient,
     log,
-    predictionExtractor: (output) => (output as { esql: string }).esql ?? '',
-    groundTruthExtractor: (expected) => (expected as { query: string }).query ?? '',
+    predictionExtractor,
+    groundTruthExtractor,
   });
 
   const esqlEquivalenceEvaluator: Evaluator = {
-    ...baseEvaluator,
+    ...baseEquivalenceEvaluator,
     evaluate: (args) =>
-      withEvaluatorSpan('EsqlFunctionalEquivalence', {}, () => baseEvaluator.evaluate(args)),
+      withEvaluatorSpan('EsqlFunctionalEquivalence', {}, () =>
+        baseEquivalenceEvaluator.evaluate(args)
+      ),
+  };
+
+  const baseValidityEvaluator = createEsqlValidityEvaluator({ queryExtractor });
+
+  const esqlValidityEvaluator: Evaluator = {
+    ...baseValidityEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlValidity', {}, () => baseValidityEvaluator.evaluate(args)),
+  };
+
+  const baseExecutionEvaluator = createEsqlExecutionEvaluator({
+    esClient,
+    queryExtractor,
+  });
+
+  const esqlExecutionEvaluator: Evaluator = {
+    ...baseExecutionEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlExecution', {}, () => baseExecutionEvaluator.evaluate(args)),
+  };
+
+  const baseResultEquivalenceEvaluator = createEsqlResultEquivalenceEvaluator({
+    esClient,
+    predictionExtractor,
+    groundTruthExtractor,
+  });
+
+  const esqlResultEquivalenceEvaluator: Evaluator = {
+    ...baseResultEquivalenceEvaluator,
+    evaluate: (args) =>
+      withEvaluatorSpan('EsqlResultEquivalence', {}, () =>
+        baseResultEquivalenceEvaluator.evaluate(args)
+      ),
   };
 
   return async function evaluateEsqlGenerationDataset(): Promise<void> {
@@ -59,7 +113,12 @@ export function createEvaluateEsqlGenerationDataset({
           return { esql: response.content };
         },
       },
-      [esqlEquivalenceEvaluator]
+      [
+        esqlEquivalenceEvaluator,
+        esqlValidityEvaluator,
+        esqlExecutionEvaluator,
+        esqlResultEquivalenceEvaluator,
+      ]
     );
   };
 }
