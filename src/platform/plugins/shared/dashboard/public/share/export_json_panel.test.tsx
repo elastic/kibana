@@ -18,6 +18,7 @@ import type { ExportJsonSanitizedState } from './types';
 
 describe('ExportJsonPanel', () => {
   const dashboardState: DashboardState = {
+    query: { expression: '', language: 'kql' },
     title: 'my dashboard',
     panels: [],
     pinned_panels: [],

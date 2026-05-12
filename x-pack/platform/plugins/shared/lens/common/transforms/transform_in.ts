@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import {
+  isLensAPIFormat,
+  isLensLegacyFormat,
+  type LensConfigBuilder,
+} from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
@@ -17,6 +20,7 @@ import type {
 } from './types';
 import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
 import type { LensSerializedState } from '../../public';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
 
 /**
  * Transform from Lens API format to Lens Serialized State
@@ -53,22 +57,27 @@ export const getTransformIn = (
       } satisfies LensByValueTransformInResult;
     }
 
-    const chartType = builder.getType(config.attributes);
+    const lensConfig =
+      isFlattenedAPIConfig(storedConfig) && !isLensLegacyFormat(storedConfig)
+        ? unflattenAPIConfig(storedConfig)
+        : storedConfig;
+
+    if (!('attributes' in lensConfig)) {
+      // Not sure if this is possible
+      throw new Error('attributes are missing');
+    }
+
+    const chartType = builder.getType(lensConfig.attributes);
     // should be filtered out my unmapped panel check
     if (!builder.isSupported(chartType)) {
       throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
-    if (!config.attributes) {
-      // Not sure if this is possible
-      throw new Error('attributes are missing');
-    }
-
-    const attributes = isLensAPIFormat(config.attributes)
-      ? builder.fromAPIFormat(config.attributes)
-      : config.attributes;
+    const attributes = isLensAPIFormat(lensConfig.attributes)
+      ? builder.fromAPIFormat(lensConfig.attributes)
+      : lensConfig.attributes;
     const { state, references } = extractLensReferences({
-      ...storedConfig,
+      ...lensConfig,
       attributes,
     });
 

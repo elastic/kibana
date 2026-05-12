@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/babel-preset'
   - '@kbn/dot-text'
   - '@kbn/apm-utils'
+  - '@kbn/moon'
 tags:
   - shared-common
   - package

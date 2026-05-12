@@ -99,6 +99,21 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         size="m"
         maxWidth={true}
         maskProps={{ headerZindexLocation: 'below' }}
+        aria-label={
+          this.state.mode === 'create'
+            ? i18n.translate(
+                'xpack.security.management.editRole.spacePrivilegeForm.assignRoleFlyoutAriaLabel',
+                {
+                  defaultMessage: 'Assign role to spaces',
+                }
+              )
+            : i18n.translate(
+                'xpack.security.management.editRole.spacePrivilegeForm.editRoleFlyoutAriaLabel',
+                {
+                  defaultMessage: 'Edit role privileges for spaces',
+                }
+              )
+        }
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">

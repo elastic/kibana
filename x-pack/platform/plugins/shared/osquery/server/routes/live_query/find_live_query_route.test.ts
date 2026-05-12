@@ -17,6 +17,10 @@ jest.mock('../../lib/get_result_counts_for_actions', () => ({
   getResultCountsForActions: jest.fn(),
 }));
 
+jest.mock('../../utils/ccs_utils', () => ({
+  hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+}));
+
 describe('findLiveQueryRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
@@ -146,7 +150,12 @@ describe('findLiveQueryRoute', () => {
 
     await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
 
-    expect(getResultCountsForActions).toHaveBeenCalledWith(mockEsClient, ['query-1'], 'default');
+    expect(getResultCountsForActions).toHaveBeenCalledWith(
+      mockEsClient,
+      ['query-1'],
+      'default',
+      false
+    );
 
     const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
       data: { items: Array<{ _source: Record<string, unknown> }> };
@@ -304,7 +313,8 @@ describe('findLiveQueryRoute', () => {
     expect(getResultCountsForActions).toHaveBeenCalledWith(
       mockEsClient,
       ['query-1'],
-      'custom-space'
+      'custom-space',
+      false
     );
   });
 

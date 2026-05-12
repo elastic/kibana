@@ -100,8 +100,8 @@ export const getWorkflowToolType = ({
           - If the workflow wasn't completed, a workflow execution ID will be returned.
           - The ${platformCoreTools.getWorkflowExecutionStatus} tool can be used later to check the status of the workflow execution.
           - If the workflow returns with status "waiting_for_input", it is paused and requires human input to continue.
-            The response will include a "waiting_input" object with a "message" (what the workflow is asking for)
-            and an optional "schema" (JSON Schema describing the expected input fields).
+            The response will include a "waiting_input" object with "step_execution_id" (id of the paused step execution instance),
+            a "message" (what the workflow is asking for), and an optional "schema" (JSON Schema describing the expected input fields).
             Use the ${platformCoreTools.resumeWorkflowExecution} tool to provide the required input and resume the workflow.
 
           `);

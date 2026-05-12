@@ -55,6 +55,40 @@ describe('EqlQueryBar', () => {
     expect(wrapper.find('[data-test-subj="eqlFilterBar"]')).toHaveLength(1);
   });
 
+  it('re-validates when index pattern id or title changes', () => {
+    const validate = jest.fn();
+    mockField = useFormFieldMock({
+      value: mockQueryBar,
+      validate,
+    });
+
+    const { rerender } = render(
+      <TestProviders>
+        <EqlQueryBar
+          dataTestSubj="myQueryBar"
+          field={mockField}
+          isLoading={false}
+          indexPattern={mockIndexPattern}
+        />
+      </TestProviders>
+    );
+
+    expect(validate).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <TestProviders>
+        <EqlQueryBar
+          dataTestSubj="myQueryBar"
+          field={mockField}
+          isLoading={false}
+          indexPattern={{ ...mockIndexPattern, title: 'other-*' }}
+        />
+      </TestProviders>
+    );
+
+    expect(validate).toHaveBeenCalledTimes(2);
+  });
+
   it('should set the field value on input change', () => {
     render(
       <TestProviders>

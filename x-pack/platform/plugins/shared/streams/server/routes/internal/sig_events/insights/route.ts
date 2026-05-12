@@ -47,6 +47,12 @@ const insightsTaskRoute = createServerRoute({
         .array(z.string())
         .describe('List of stream names to generate insights for.')
         .optional(),
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID override. When omitted the server resolves the connector from the inference feature registry.'
+        ),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<InsightsTaskResult> => {
@@ -67,6 +73,7 @@ const insightsTaskRoute = createServerRoute({
               taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
               params: {
                 streamNames: body.streamNames,
+                connectorId: body.connectorId,
               },
               request,
             },

@@ -59,7 +59,7 @@ describe('showPublicUrlSwitch', () => {
 
 describe('ShowShareModal', () => {
   const dashboardBackupService = getDashboardBackupService();
-  const unsavedStateKeys = ['query', 'options', 'savedQuery', 'panels'] as Array<
+  const unsavedStateKeys = ['options', 'savedQuery', 'panels'] as Array<
     keyof DashboardLocatorParams
   >;
   const toggleShareMenuSpy = jest.spyOn(shareService!, 'toggleShareContextMenu');
@@ -118,7 +118,7 @@ describe('ShowShareModal', () => {
           },
         },
       ],
-      query: { query: 'bye', language: 'kuery' },
+      query: { expression: 'bye', language: 'kql' },
     };
     dashboardBackupService.getState = jest.fn().mockReturnValue(unsavedDashboardState);
     ShowShareModal(defaultShareModalProps);
@@ -133,6 +133,13 @@ describe('ShowShareModal', () => {
         (unsavedDashboardState as Partial<DashboardLocatorParams>)[key]
       );
     });
+    // Query in the locator params is in the storedQuery format
+    expect(shareLocatorParams.query).toMatchInlineSnapshot(`
+      Object {
+        "language": "kuery",
+        "query": "bye",
+      }
+    `);
     // Filters in the locator params are in the storedFilter format
     expect(shareLocatorParams.filters).toMatchInlineSnapshot(`
       Array [

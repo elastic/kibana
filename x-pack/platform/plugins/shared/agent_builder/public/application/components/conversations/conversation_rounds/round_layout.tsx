@@ -16,6 +16,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
@@ -24,6 +25,7 @@ import { useSendMessage } from '../../../context/send_message/send_message_conte
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
+import { TodosStepDisplay } from './round_thinking/steps/todos_step_display';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -78,24 +80,35 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
-  const { steps, response, input, status, pending_prompt: pendingPrompt } = rawRound;
+  const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
+  const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
+  const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
   const {
     isResponseLoading,
+    isStreaming,
     error,
     retry: retrySendMessage,
     resumeRound,
     isResuming,
   } = useSendMessage();
+  // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
+  // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
+  // Use `isStreaming` (not `isResponseLoading`) so the buttons stay disabled during the
+  // window where the send mutation has emitted `pending_prompt` (round is now
+  // `awaitingPrompt`) but `mutationFn` hasn't reached its `finally` yet — clicking
+  // Approve there would race the still-in-flight send mutation.
+  const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
-  // Don't show prompt if we're already resuming (user already clicked confirm/cancel)
-  // This prevents the prompt from reappearing when server data is refetched
+  // Don't show prompts if we're already resuming (user already clicked confirm/cancel)
+  // This prevents prompts from reappearing when server data is refetched
   const isAwaitingPrompt =
     isCurrentRound &&
     status === ConversationRoundStatus.awaitingPrompt &&
-    pendingPrompt &&
+    pendingPrompts &&
+    pendingPrompts.length > 0 &&
     !isResuming;
 
   const cumulativeAttachmentRefs = useMemo(() => {
@@ -103,13 +116,24 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     return computeCumulativeRefs(allRounds, roundIndex);
   }, [allRounds, roundIndex, response?.message]);
 
-  const handleConfirm = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: true });
-  }, [resumeRound, pendingPrompt]);
+  const confirmationPrompts = useMemo(
+    () => (pendingPrompts ?? []).filter(isConfirmationPrompt),
+    [pendingPrompts]
+  );
 
-  const handleCancel = useCallback(() => {
-    resumeRound({ promptId: pendingPrompt!.id, confirm: false });
-  }, [resumeRound, pendingPrompt]);
+  const handlePromptResponse = useCallback(
+    (promptId: string, allow: boolean) => {
+      setPromptResponses((prev) => {
+        const updated = { ...prev, [promptId]: { allow } };
+        const allAnswered = confirmationPrompts.every((p) => updated[p.id] !== undefined);
+        if (allAnswered) {
+          resumeRound({ prompts: updated });
+        }
+        return updated;
+      });
+    },
+    [confirmationPrompts, resumeRound]
+  );
 
   // Track if this round has ever been in a loading state during this session
   useEffect(() => {
@@ -144,7 +168,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="s"
       aria-label={labels.container}
       css={roundContainerStyles}
     >
@@ -171,17 +195,28 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
         )}
       </EuiFlexItem>
 
-      {/* Confirmation Prompt */}
-      {isAwaitingPrompt && isConfirmationPrompt(pendingPrompt) && (
+      {/* Todos */}
+      {todosStep && (
         <EuiFlexItem grow={false}>
-          <ConfirmationPrompt
-            prompt={pendingPrompt}
-            onConfirm={handleConfirm}
-            onCancel={handleCancel}
-            isLoading={isResuming}
-          />
+          <TodosStepDisplay step={todosStep} />
         </EuiFlexItem>
       )}
+
+      {/* Confirmation Prompts */}
+      {isAwaitingPrompt &&
+        confirmationPrompts.map((prompt) => (
+          <EuiFlexItem grow={false} key={prompt.id}>
+            <ConfirmationPrompt
+              prompt={prompt}
+              onConfirm={() => handlePromptResponse(prompt.id, true)}
+              onCancel={() => handlePromptResponse(prompt.id, false)}
+              isLoading={isResuming}
+              isDisabled={isHitlDisabled}
+              isAnswered={promptResponses[prompt.id] !== undefined}
+              answeredValue={promptResponses[prompt.id]?.allow}
+            />
+          </EuiFlexItem>
+        ))}
 
       {/* Response Message - hidden when awaiting confirmation */}
       {!isAwaitingPrompt && (

@@ -69,6 +69,7 @@
                 "lineNumber": 71,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "SamlSessionManagerOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -86,7 +87,7 @@
               "(role: string) => void"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 219,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -102,7 +103,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 219,
+                "lineNumber": 222,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -130,7 +131,7 @@
               " | undefined) => Promise<{ Cookie: string; }>"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 233,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -146,7 +147,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 233,
+                "lineNumber": 236,
                 "columnNumber": 34,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -170,9 +171,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 233,
+                "lineNumber": 236,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -198,7 +200,7 @@
               " | undefined) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 242,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -214,7 +216,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 242,
+                "lineNumber": 245,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -238,9 +240,10 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 242,
+                "lineNumber": 245,
                 "columnNumber": 68,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetCookieOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -258,7 +261,7 @@
               "(role: string) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 252,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -274,7 +277,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 252,
+                "lineNumber": 255,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -296,7 +299,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 257,
+            "lineNumber": 260,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -312,7 +315,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-                "lineNumber": 257,
+                "lineNumber": 260,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -332,7 +335,7 @@
               "() => string[]"
             ],
             "path": "src/platform/packages/shared/kbn-test-saml-auth/src/session_manager.ts",
-            "lineNumber": 263,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

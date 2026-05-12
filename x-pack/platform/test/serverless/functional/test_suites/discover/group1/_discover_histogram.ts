@@ -33,9 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
 
   describe('discover histogram', function describeIndexTests() {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/248077
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -77,16 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      // this is the number of renderings of the histogram needed when new data is fetched
-      let renderingCountInc = 3; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
-      const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await queryBar.submitQuery();
-      await retry.waitFor('chart rendering complete', async () => {
-        const actualCount = await elasticChart.getVisualizationRenderingCount();
-        const expectedCount = prevRenderingCount + renderingCountInc;
-        log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount <= expectedCount;
-      });
+      await elasticChart.waitForRenderComplete();
       let prevRowData = '';
       // to make sure the table is already rendered
       await retry.try(async () => {
@@ -96,13 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.brushHistogram();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      renderingCountInc = 4; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
-      await retry.waitFor('chart rendering complete after being brushed', async () => {
-        const actualCount = await elasticChart.getVisualizationRenderingCount();
-        const expectedCount = prevRenderingCount + renderingCountInc * 2;
-        log.debug(`renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount <= expectedCount;
-      });
+      await elasticChart.waitForRenderComplete();
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different duration.

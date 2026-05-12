@@ -31,7 +31,7 @@ paths:
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
                 integrationId:
                   description: The integration id
-                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+                  $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
                 title:
                   description: The title of the integration
                   $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
@@ -111,7 +111,7 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       requestBody:
         required: true
         content:
@@ -173,7 +173,7 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       responses:
         200:
           description: >-
@@ -214,7 +214,7 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       responses:
         200:
           description: The integration is deleted.
@@ -236,7 +236,13 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
+        - name: intent
+          in: query
+          required: false
+          description: The intent of the download request. When set to 'install', install telemetry is reported.
+          schema:
+            $ref: "#/components/schemas/DownloadIntent"
       responses:
         200:
           description: The integration zip package.
@@ -263,7 +269,7 @@ paths:
           required: true
           description: The integration identifier
           schema:
-            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/SafeIdentifier"
       requestBody:
         required: true
         additionalProperties: false
@@ -301,6 +307,12 @@ paths:
 components:
   x-codegen-enabled: true
   schemas:
+    DownloadIntent:
+      description: The intent of the download request.
+      type: string
+      enum:
+        - download
+        - install
     ApproveIntegrationRequest:
       type: object
       additionalProperties: false
@@ -310,7 +322,7 @@ components:
       properties:
         version:
           description: The version of the integration
-          $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+          $ref: "../../../model/primitive.schema.yaml#/components/schemas/SemVer"
         categories:
           description: The categories of the integration
           type: array

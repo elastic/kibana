@@ -93,7 +93,7 @@ export function buildAccessEsqlQuery(indexPattern: string, whereClause: string):
   const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
   const hostIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('host');
   const userEuidEval = euid.esql.getEuidEvaluation('user', { withTypeId: false });
-  const hostEuidEval = euid.esql.getEuidEvaluation('host', { withTypeId: false });
+  const hostEuidEval = euid.esql.getEuidEvaluation('host', { withTypeId: true });
 
   return `SET unmapped_fields="nullify";
 FROM ${indexPattern}
@@ -103,7 +103,7 @@ FROM ${indexPattern}
     AND (${hostIdFilter})
 ${userFieldEvalsLine}| EVAL actorUserId = ${userEuidEval}
 | WHERE actorUserId IS NOT NULL AND actorUserId != ""
-| EVAL targetEntityId = COALESCE(${hostEuidEval}, TO_STRING(host.ip), TO_STRING(host.mac))
+| EVAL targetEntityId = ${hostEuidEval}
 | MV_EXPAND targetEntityId
 | WHERE targetEntityId IS NOT NULL AND targetEntityId != ""
 | STATS access_count = COUNT(*) BY actorUserId, targetEntityId

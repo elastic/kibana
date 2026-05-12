@@ -1,0 +1,125 @@
+{
+  "id": "@kbn/as-code-shared-transforms",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/as-code-shared-transforms",
+        "id": "def-common.toAsCodeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "toAsCodeQuery",
+        "description": [],
+        "signature": [
+          "(storedQuery: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined) => Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-transforms/src/query_transforms.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-shared-transforms",
+            "id": "def-common.toAsCodeQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storedQuery",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/shared-transforms/src/query_transforms.ts",
+            "lineNumber": 13,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-shared-transforms",
+        "id": "def-common.toStoredQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "toStoredQuery",
+        "description": [],
+        "signature": [
+          "(asCodeQuery: Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined) => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-transforms/src/query_transforms.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/as-code-shared-transforms",
+            "id": "def-common.toStoredQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "asCodeQuery",
+            "description": [],
+            "signature": [
+              "Readonly<{} & { language: \"kql\" | \"lucene\"; expression: string; }> | undefined"
+            ],
+            "path": "src/platform/packages/shared/as-code/shared-transforms/src/query_transforms.ts",
+            "lineNumber": 23,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -36,9 +36,9 @@ export const ENTERPRISE_LICENSE_UPGRADE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ENTERPRISE_LICENSE_UPGRADE_BUTTON = i18n.translate(
-  'xpack.automaticImport.license.enterprise.upgradeButton',
+export const ENTERPRISE_LICENSE_MANAGE_BUTTON = i18n.translate(
+  'xpack.automaticImport.license.enterprise.manageButton',
   {
-    defaultMessage: 'Upgrade license',
+    defaultMessage: 'Manage license',
   }
 );

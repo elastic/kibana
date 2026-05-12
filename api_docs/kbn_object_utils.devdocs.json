@@ -53,6 +53,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBase",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -72,6 +73,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TCompare",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -115,6 +117,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TObj",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -177,6 +180,7 @@
             "lineNumber": 47,
             "columnNumber": 80,
             "deprecated": false,
+            "docsReferencedTypeName": "TObj",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -228,6 +232,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -245,6 +250,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }

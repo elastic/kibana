@@ -33,6 +33,7 @@ export const EPM_API_ROUTES = {
   BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
   BULK_ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback`,
   BULK_ROLLBACK_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback/{taskId}`,
+  BULK_NAMESPACE_CUSTOMIZATION_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_namespace_customization`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -54,6 +55,7 @@ export const EPM_API_ROUTES = {
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
+  DEPENDENCIES_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}/dependencies`,
   BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
   INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
   PACKAGES_DATASTREAM_ASSETS: `${EPM_API_ROOT}/packages/{pkgName}/{pkgVersion}/datastream_assets`,
@@ -212,6 +214,7 @@ export const ENROLLMENT_API_KEY_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/enrollment_api_keys`,
   INFO_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
   DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/{keyId}`,
+  BULK_DELETE_PATTERN: `${API_ROOT}/enrollment_api_keys/_bulk_delete`,
 };
 
 export const UNINSTALL_TOKEN_ROUTES = {

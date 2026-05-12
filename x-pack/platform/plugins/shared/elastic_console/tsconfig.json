@@ -22,7 +22,7 @@
     "@kbn/cloud-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/storage-adapter",
+    "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/core-feature-flags-server",
     "@kbn/logging"

@@ -39,7 +39,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
@@ -58,10 +58,9 @@ steps:
       machineType: n2-standard-4
     key: build_scout_tests
     timeout_in_minutes: 15
-    depends_on:
-      - build
     env:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -451,7 +450,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
       preemptible: true
     depends_on:
@@ -469,7 +468,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
       preemptible: true
     depends_on:
@@ -488,7 +487,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
     depends_on:
       - build
@@ -506,7 +505,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
       diskSizeGb: 120
     depends_on:
       - build

@@ -8,16 +8,16 @@
 import React, { useState } from 'react';
 import {
   type CommonProps,
+  EuiBeacon,
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiToolTip,
-  useEuiTheme,
   EuiNotificationBadge,
-  EuiButton,
+  EuiToolTip,
   EuiTourStep,
-  EuiBeacon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -54,7 +54,7 @@ const toggleSearchBarTooltip = i18n.translate(
 const investigateInTimelineTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.controls.investigateInTimeline.tooltip',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 

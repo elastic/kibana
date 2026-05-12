@@ -1,5 +1,10 @@
 post:
   summary: Save APM server schema
+  deprecated: true
+  description: >
+    DEPRECATED: This endpoint is intended for internal use by Fleet integrations to push the APM Server configuration schema.
+    Do not use for new integrations.
+    It stores the provided schema object as a Kibana saved object. If Fleet migration is not available on the current deployment, the API returns a 404.
   operationId: saveApmServerSchema
   tags:
     - APM server schema
@@ -19,6 +24,12 @@ post:
               additionalProperties: true
               example:
                 foo: "bar"
+        examples:
+          saveApmServerSchemaRequest:
+            description: An example request payload for `POST /api/apm/fleet/apm_server_schema`.
+            value:
+              schema:
+                foo: bar
   responses:
     '200':
       description: Successful response
@@ -27,27 +38,43 @@ post:
           schema:
             type: object
             additionalProperties: false
+            description: The response body is intentionally empty for this endpoint.
+          examples:
+            saveApmServerSchemaResponseExample1:
+              $ref: '../components/examples/fleet_apm_server_schema_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
     '403':
       description: Forbidden response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenResponse:
+              $ref: '../components/examples/error_403_response.yaml'
     '404':
       description: Not found response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+          examples:
+            notFoundResponse:
+              $ref: '../components/examples/error_404_response.yaml'

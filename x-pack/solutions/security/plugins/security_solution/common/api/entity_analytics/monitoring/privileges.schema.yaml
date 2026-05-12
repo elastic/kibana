@@ -18,10 +18,13 @@ paths:
             application/json:
               schema:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
-              example:
-                privileges:
-                  elasticsearch:
-                    index:
-                      '.entity_analytics.monitoring.user-default':
-                        read: true
-                has_all_required: true
+              examples:
+                PrivMonPrivilegesResponse:
+                  summary: Privileges check response
+                  value:
+                    privileges:
+                      elasticsearch:
+                        index:
+                          '.entity_analytics.monitoring.user-default':
+                            read: true
+                    has_all_required: true

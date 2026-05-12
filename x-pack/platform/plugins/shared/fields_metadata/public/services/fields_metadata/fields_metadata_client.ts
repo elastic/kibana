@@ -66,8 +66,9 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     )(response);
 
     // Apply proxy to support prefixed field access on the client side (reuses shared utility)
-    const proxiedData = {
+    const proxiedData: FindFieldsMetadataResponsePayload = {
       fields: createProxiedPlainFields(data.fields),
+      streamFields: data.streamFields,
     };
 
     // Store cached results for given request parameters

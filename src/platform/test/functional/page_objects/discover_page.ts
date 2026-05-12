@@ -25,6 +25,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly globalNav = this.ctx.getService('globalNav');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly config = this.ctx.getService('config');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
@@ -46,15 +47,14 @@ export class DiscoverPageObject extends FtrService {
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
-    await this.testSubjects.existOrFail('discoverNewButton');
-    await this.testSubjects.existOrFail('discoverOpenButton');
+    await this.retry.waitFor('discover app to be rendered', () =>
+      this.testSubjects.exists('discoverSavedSearchTitle', { allowHidden: true })
+    );
   }
 
   public async isOnDashboardsEditMode() {
-    const [newButton, openButton] = await Promise.all([
-      this.testSubjects.exists('discoverNewButton', { timeout: 1000 }),
-      this.testSubjects.exists('discoverOpenButton', { timeout: 1000 }),
-    ]);
+    const newButton = await this.appMenu.menuItemExists('discoverNewButton');
+    const openButton = await this.appMenu.menuItemExists('discoverOpenButton');
 
     return !newButton && !openButton;
   }
@@ -154,6 +154,54 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async saveSearchToDashboard(
+    searchName: string,
+    dashboardOption: 'new' | { existing: string },
+    { saveAsNew, storeTimeRange }: { saveAsNew?: boolean; storeTimeRange?: boolean } = {}
+  ) {
+    if (saveAsNew) {
+      await this.clickSaveAsSearchButton();
+    } else {
+      await this.clickSaveSearchButton();
+    }
+
+    await this.retry.waitFor(
+      `saved search title is set to ${searchName} and save button is clickable`,
+      async () => {
+        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
+        await this.testSubjects.setValue('savedObjectTitle', searchName);
+        return (await saveButton.getAttribute('disabled')) !== 'true';
+      }
+    );
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
+    }
+
+    if (dashboardOption === 'new') {
+      await this.find.clickByCssSelector('#new-dashboard-option');
+    } else {
+      await this.find.clickByCssSelector('#existing-dashboard-option');
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.setValue('dashboard-picker-search', dashboardOption.existing);
+      await this.testSubjects.click(
+        `dashboard-picker-option-${dashboardOption.existing.replaceAll(' ', '-')}`
+      );
+    }
+
+    await this.clickConfirmSavedSearch();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async clickSaveDiscoverTableToDashboard(title: string, existing?: string) {
     await this.testSubjects.click('saveDiscoverTableToDashboardButton');
     await this.retry.waitFor('Save Discover session table modal', () =>
@@ -169,6 +217,9 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
+    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -194,6 +245,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
+      timeout: this.defaultFindTimeout * 10,
+    });
+    // does not show "Cancel" button, so we can use it to determine that searching has finished
+    await this.testSubjects.missingOrFail('queryCancelButton', {
       timeout: this.defaultFindTimeout * 10,
     });
   }
@@ -243,14 +298,21 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
+        const currentName = await this.getCurrentQueryName();
+        return currentName === searchName;
+      });
+    }
   }
 
-  public async clickNewSearchButton() {
-    await this.testSubjects.click('discoverNewButton');
+  public async clickNewSearchButton({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
+    await this.appMenu.clickMenuItem('discoverNewButton', { isInOverflowMenu });
     await this.testSubjects.moveMouseTo('dscHideSidebarButton'); // cancel tooltips
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -281,8 +343,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickLoadSavedSearchButton() {
-    await this.testSubjects.moveMouseTo('discoverOpenButton');
-    await this.testSubjects.click('discoverOpenButton');
+    await this.appMenu.clickMenuItem('discoverOpenButton');
   }
 
   public async hasUnsavedChangesIndicator() {
@@ -1078,9 +1139,31 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async getCascadeLayoutRowIds() {
-    const rootRows = await this.find.allByCssSelector('[data-row-type="root"]');
-    return await Promise.all(rootRows.map(async (row) => (await row.getAttribute('id')) ?? ''));
+  public async getCascadeLayoutVisibleRowIds() {
+    const container = await this.testSubjects.find('dataCascadeScrollContainer');
+    const ids = await this.browser.execute(
+      `
+      const container = arguments[0];
+      const containerRect = container.getBoundingClientRect();
+      const rows = container.querySelectorAll('[data-row-type="root"]');
+      const visibleIds = [];
+      for (let i = 0; i < rows.length; i++) {
+        const rowRect = rows[i].getBoundingClientRect();
+        if (rowRect.top >= containerRect.bottom) break;
+        if (rowRect.bottom > containerRect.top) {
+          visibleIds.push(rows[i].id || '');
+        }
+      }
+      return visibleIds;
+      `,
+      container._webElement
+    );
+
+    if (!Array.isArray(ids)) {
+      throw new Error(`Expected cascade row ids to be an array but got ${typeof ids}`);
+    }
+
+    return ids as string[];
   }
 
   public async isCascadeLayoutRowExpanded(rowId: string) {

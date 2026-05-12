@@ -48,7 +48,8 @@ const buildSearchTermKql = (searchTerms: string[]): string => {
       .replace(/\s/gm, '*')
   );
   const clauses = escapedSearchTerms.map(
-    (term) => `(name:\*${term}\* OR updatedBy:\*${term}\* OR fileHash:\*${term}\*)`
+    (term) =>
+      `(name:\*${term}\* OR description:\*${term}\* OR createdBy:\*${term}\* OR updatedBy:\*${term}\* OR fileName:\*${term}\* OR fileHash:\*${term}\*)`
   );
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };

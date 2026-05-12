@@ -22,4 +22,16 @@ export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 export type { CaseAttachments, CaseAttachmentsWithoutOwner } from './types';
 
 export type { ICasesDeepLinkId } from './common/navigation';
-export { getCasesDeepLinks, CasesDeepLinkId, generateCaseViewPath } from './common/navigation';
+export {
+  getCasesDeepLinks,
+  CasesDeepLinkId,
+  generateCaseViewPath,
+  useCaseViewNavigation,
+  useCaseViewParams,
+} from './common/navigation';
+export type {
+  UnifiedReferenceAttachmentType,
+  CommonAttachmentTabViewProps,
+} from './client/attachment_framework/types';
+export { AttachmentActionType } from './client/attachment_framework/types';
+export { useCasesContext } from './components/cases_context/use_cases_context';

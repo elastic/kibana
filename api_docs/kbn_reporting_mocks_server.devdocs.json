@@ -76,6 +76,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DeepPartial",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -38,7 +38,7 @@ export function useWorkflowUrlState() {
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>) => {
-      const currentParams = parse(location.search);
+      const currentParams = parse(history.location.search);
 
       // Update the params with new values
       const newParams = {
@@ -57,13 +57,13 @@ export function useWorkflowUrlState() {
       // Update the URL without causing a full page reload
       const newSearch = stringify(cleanParams, { encode: false });
       const newLocation = {
-        ...location,
+        ...history.location,
         search: newSearch ? `?${newSearch}` : '',
       };
 
       history.replace(newLocation);
     },
-    [history, location]
+    [history]
   );
 
   const setActiveTab = useCallback(

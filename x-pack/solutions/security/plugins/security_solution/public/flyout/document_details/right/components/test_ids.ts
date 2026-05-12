@@ -55,14 +55,6 @@ const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
 export const ABOUT_SECTION_HEADER_TEST_ID = ABOUT_SECTION_TEST_ID + HEADER_TEST_ID;
 export const ABOUT_SECTION_CONTENT_TEST_ID = ABOUT_SECTION_TEST_ID + CONTENT_TEST_ID;
 
-export const EVENT_CATEGORY_DESCRIPTION_TEST_ID = `${PREFIX}EventCategoryDescription` as const;
-export const EVENT_KIND_DESCRIPTION_TEST_ID = `${PREFIX}EventKindDescription` as const;
-export const EVENT_KIND_DESCRIPTION_TEXT_TEST_ID = `${EVENT_KIND_DESCRIPTION_TEST_ID}Text` as const;
-export const EVENT_KIND_DESCRIPTION_CATEGORIES_TEST_ID =
-  `${EVENT_KIND_DESCRIPTION_TEST_ID}Categories` as const;
-
-export const EVENT_RENDERER_TEST_ID = `${PREFIX}EventRenderer` as const;
-
 export const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
 export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
 export const WORKFLOW_STATUS_DETAILS_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Details` as const;

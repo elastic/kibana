@@ -148,11 +148,24 @@ export interface DateRangePickerProps {
   /** Fires at the end of each auto-refresh interval while `settings.autoRefresh` exists, is enabled and timer is unpaused. */
   onRefresh?: () => void;
   /**
+   * Increment this value whenever an external timer (e.g. the Kibana timefilter) triggers a
+   * refresh, so the visual countdown resets to stay in sync with actual query cadence.
+   * `undefined` on first render is ignored.
+   */
+  refreshEpoch?: number;
+  /**
    * Prepends the Kibana server `basePath` to an internal URL path.
    * Typically provided as `core.http.basePath.prepend`.
    * When omitted, paths are used as-is.
    */
   prependBasePath?: (path: string) => string;
+  /**
+   * Whether the current user can access the Advanced Settings management page.
+   * When `false`, links to Advanced Settings are hidden in the settings panel.
+   * Typically derived from `capabilities.advancedSettings.save`.
+   * @default false
+   */
+  canAccessAdvancedSettings?: boolean;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {

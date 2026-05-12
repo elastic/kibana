@@ -97,16 +97,13 @@ export interface AutoRefreshSettings {
    * When `isEnabled` is true, whether the refresh interval timer is running (`false`) or paused (`true`).
    */
   isPaused: boolean;
-  /**
-   * Refresh interval in milliseconds.
-   * @default 10000
-   */
-  interval: number;
+  /** Refresh interval in milliseconds. */
+  intervalMs: number;
   /**
    * The unit used to display the interval count in the Settings panel.
-   * Auto-determined from `interval` when absent.
+   * Auto-determined from `intervalMs` when absent.
    */
-  intervalUnit?: AutoRefreshIntervalUnit;
+  intervalDisplayUnit: AutoRefreshIntervalUnit;
 }
 
 /** Controls sub-minute precision shown in absolute timestamps. */

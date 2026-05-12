@@ -20,7 +20,7 @@ export const AgentBuilderConnectors = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderConnectorsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.connectors.title}
+        pageTitle={labels.connectors.libraryTitle}
         description={labels.connectors.pageDescription}
         css={({ euiTheme }) => ({
           backgroundColor: euiTheme.colors.backgroundBasePlain,

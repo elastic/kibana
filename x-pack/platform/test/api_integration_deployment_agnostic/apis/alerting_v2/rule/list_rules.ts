@@ -67,10 +67,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should return created rules', async () => {
       const createResponse1 = await createRule(roleAuthc, 'rule-1');
-      expect(createResponse1.status).to.be(200);
+      expect(createResponse1.status).to.be(201);
 
       const createResponse2 = await createRule(roleAuthc, 'rule-2');
-      expect(createResponse2.status).to.be(200);
+      expect(createResponse2.status).to.be(201);
 
       const response = await supertestWithoutAuth
         .get(RULE_API_PATH)
@@ -134,10 +134,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should filter rules by kind', async () => {
         const alertResponse = await createRule(roleAuthc, 'alert-rule', { kind: 'alert' });
-        expect(alertResponse.status).to.be(200);
+        expect(alertResponse.status).to.be(201);
 
         const signalResponse = await createRule(roleAuthc, 'signal-rule', { kind: 'signal' });
-        expect(signalResponse.status).to.be(200);
+        expect(signalResponse.status).to.be(201);
 
         const response = await supertestWithoutAuth
           .get(RULE_API_PATH)
@@ -156,10 +156,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should filter rules by enabled status', async () => {
         const createResponse = await createRule(roleAuthc, 'enabled-rule');
-        expect(createResponse.status).to.be(200);
+        expect(createResponse.status).to.be(201);
 
         const createResponse2 = await createRule(roleAuthc, 'to-disable-rule');
-        expect(createResponse2.status).to.be(200);
+        expect(createResponse2.status).to.be(201);
 
         // Disable the second rule
         await supertestWithoutAuth
@@ -183,12 +183,133 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.items[0].enabled).to.be(false);
       });
 
+      it('should filter rules by metadata.name', async () => {
+        await createRule(roleAuthc, 'cpu-threshold');
+        await createRule(roleAuthc, 'disk-usage');
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ perPage: 1000, filter: 'metadata.name: "cpu-threshold"' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].metadata.name).to.be('cpu-threshold');
+      });
+
+      it('should filter rules by metadata.description', async () => {
+        await createRule(roleAuthc, 'rule-with-desc', {
+          metadata: {
+            name: 'rule-with-desc',
+            description: 'Monitors memory pressure',
+          },
+        });
+        await createRule(roleAuthc, 'rule-other-desc', {
+          metadata: {
+            name: 'rule-other-desc',
+            description: 'Tracks network latency',
+          },
+        });
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ perPage: 1000, filter: 'metadata.description: "memory"' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].metadata.name).to.be('rule-with-desc');
+      });
+
+      it('should filter rules by metadata.owner', async () => {
+        await createRule(roleAuthc, 'owned-rule', {
+          metadata: { name: 'owned-rule', owner: 'team-alpha' },
+        });
+        await createRule(roleAuthc, 'other-owned-rule', {
+          metadata: { name: 'other-owned-rule', owner: 'team-beta' },
+        });
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ perPage: 1000, filter: 'metadata.owner: "team-alpha"' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].metadata.name).to.be('owned-rule');
+      });
+
+      it('should filter rules by metadata.tags', async () => {
+        await createRule(roleAuthc, 'tagged-rule', {
+          metadata: { name: 'tagged-rule', tags: ['production', 'critical'] },
+        });
+        await createRule(roleAuthc, 'untagged-rule');
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ perPage: 1000, filter: 'metadata.tags: "critical"' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].metadata.name).to.be('tagged-rule');
+      });
+
+      it('should filter rules by grouping.fields', async () => {
+        await createRule(roleAuthc, 'grouped-rule', {
+          grouping: { fields: ['host.name'] },
+        });
+        await createRule(roleAuthc, 'ungrouped-rule');
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ perPage: 1000, filter: 'grouping.fields: "host.name"' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].metadata.name).to.be('grouped-rule');
+      });
+
+      it('should support compound filters', async () => {
+        await createRule(roleAuthc, 'alert-prod', {
+          kind: 'alert',
+          metadata: { name: 'alert-prod', tags: ['production'] },
+        });
+        await createRule(roleAuthc, 'signal-prod', {
+          kind: 'signal',
+          metadata: { name: 'signal-prod', tags: ['production'] },
+        });
+        await createRule(roleAuthc, 'alert-dev', {
+          kind: 'alert',
+          metadata: { name: 'alert-dev', tags: ['development'] },
+        });
+
+        const response = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({
+            perPage: 1000,
+            filter: 'kind: alert AND metadata.tags: "production"',
+          })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(response.status).to.be(200);
+        expect(response.body.items.length).to.be(1);
+        expect(response.body.items[0].metadata.name).to.be('alert-prod');
+      });
+
       it('should return all rules when no filter is provided', async () => {
         const r1 = await createRule(roleAuthc, 'no-filter-a');
-        expect(r1.status).to.be(200);
+        expect(r1.status).to.be(201);
 
         const r2 = await createRule(roleAuthc, 'no-filter-b');
-        expect(r2.status).to.be(200);
+        expect(r2.status).to.be(201);
 
         const response = await supertestWithoutAuth
           .get(RULE_API_PATH)
@@ -208,7 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should search rules by a name prefix', async () => {
         const prefixMatch = await createRule(roleAuthc, 'Limit120');
-        expect(prefixMatch.status).to.be(200);
+        expect(prefixMatch.status).to.be(201);
 
         const searchResponse = await supertestWithoutAuth
           .get(RULE_API_PATH)
@@ -221,14 +342,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(searchResponse.body.items[0].metadata.name).to.be('Limit120');
       });
 
-      it('should search rules by name and tags', async () => {
+      it('should search rules by name and description', async () => {
         const nameMatch = await createRule(roleAuthc, 'cpu threshold');
-        expect(nameMatch.status).to.be(200);
+        expect(nameMatch.status).to.be(201);
 
-        const tagMatch = await createRule(roleAuthc, 'network threshold', {
-          metadata: { name: 'network threshold', tags: ['prod'] },
+        const descMatch = await createRule(roleAuthc, 'network threshold', {
+          metadata: { name: 'network threshold', description: 'Monitors production latency' },
         });
-        expect(tagMatch.status).to.be(200);
+        expect(descMatch.status).to.be(201);
 
         const responseByName = await supertestWithoutAuth
           .get(RULE_API_PATH)
@@ -240,34 +361,61 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(responseByName.body.items.length).to.be(1);
         expect(responseByName.body.items[0].metadata.name).to.be('cpu threshold');
 
-        const responseByTag = await supertestWithoutAuth
+        const responseByDesc = await supertestWithoutAuth
           .get(RULE_API_PATH)
-          .query({ search: 'prod' })
+          .query({ search: 'production' })
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader());
 
-        expect(responseByTag.status).to.be(200);
-        expect(responseByTag.body.items.length).to.be(1);
+        expect(responseByDesc.status).to.be(200);
+        expect(responseByDesc.body.items.length).to.be(1);
         expect(
-          responseByTag.body.items.map((item: { metadata: { name: string } }) => item.metadata.name)
+          responseByDesc.body.items.map(
+            (item: { metadata: { name: string } }) => item.metadata.name
+          )
         ).to.contain('network threshold');
+      });
+
+      it('should search rules by description', async () => {
+        const descMatch = await createRule(roleAuthc, 'desc-match-rule', {
+          metadata: {
+            name: 'desc-match-rule',
+            description: 'Monitors memory pressure on production hosts',
+          },
+        });
+        expect(descMatch.status).to.be(201);
+
+        const noMatch = await createRule(roleAuthc, 'no-desc-match', {
+          metadata: { name: 'no-desc-match', description: 'Tracks network latency' },
+        });
+        expect(noMatch.status).to.be(201);
+
+        const responseByDesc = await supertestWithoutAuth
+          .get(RULE_API_PATH)
+          .query({ search: 'memory' })
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader());
+
+        expect(responseByDesc.status).to.be(200);
+        expect(responseByDesc.body.items.length).to.be(1);
+        expect(responseByDesc.body.items[0].metadata.name).to.be('desc-match-rule');
       });
 
       it('should compose search with pagination', async () => {
         const response1 = await createRule(roleAuthc, 'prod rule 1', {
           metadata: { name: 'prod rule 1', tags: ['prod'] },
         });
-        expect(response1.status).to.be(200);
+        expect(response1.status).to.be(201);
 
         const response2 = await createRule(roleAuthc, 'prod rule 2', {
           metadata: { name: 'prod rule 2', tags: ['prod'] },
         });
-        expect(response2.status).to.be(200);
+        expect(response2.status).to.be(201);
 
         const response3 = await createRule(roleAuthc, 'dev rule 1', {
           metadata: { name: 'dev rule 1', tags: ['dev'] },
         });
-        expect(response3.status).to.be(200);
+        expect(response3.status).to.be(201);
 
         const firstPage = await supertestWithoutAuth
           .get(RULE_API_PATH)

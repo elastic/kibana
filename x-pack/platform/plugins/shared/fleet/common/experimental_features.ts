@@ -29,8 +29,11 @@ const _allowedExperimentalValues = {
   enableVarGroups: false, // When enabled, var_groups from the package spec drive conditional variable visibility and input filtering.
   enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
   enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
-  enableOpAMP: false, // When enabled, OpAMP features will be available in the API and UI.
-  enableResolveDependencies: false, // When enabled, the resolve dependencies step will be available during package installation.
+  enableOpAMP: true, // When enabled, OpAMP features will be available in the API and UI.
+  enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
+  enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
+  enableOtelUI: false, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
+  enableIntegrationConditions: false, // When enabled, package policies accept user-defined `condition` (EQL) fields.
 };
 
 /**

@@ -6,6 +6,15 @@
  */
 
 import { tags } from '@kbn/scout-security';
+import {
+  ENTITY_LATEST,
+  ENTITY_UPDATES,
+  ENTITY_HISTORY,
+  getEntitiesAlias,
+  getLatestEntitiesIndexName,
+  getEntityIndexPattern,
+  ENTITY_SCHEMA_VERSION_V2,
+} from '../../../../common/domain/entity_index';
 
 const BASE_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -37,7 +46,6 @@ export const ENTITY_STORE_ROUTES = {
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,
-    CHECK_PRIVILEGES: `${PUBLIC_BASE}/check_privileges`,
     CRUD_CREATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_UPDATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_BULK_UPDATE: `${PUBLIC_BASE}/entities/bulk`,
@@ -48,6 +56,7 @@ export const ENTITY_STORE_ROUTES = {
     RESOLUTION_GROUP: `${PUBLIC_BASE}/resolution/group`,
   },
   internal: {
+    CHECK_PRIVILEGES: `${INTERNAL_BASE}/check_privileges`,
     FORCE_LOG_EXTRACTION: (entityType: string) =>
       `${INTERNAL_BASE}/${entityType}/force_log_extraction`,
     FORCE_CCS_EXTRACT_TO_UPDATES: (entityType: string) =>
@@ -63,6 +72,15 @@ export const ENTITY_STORE_ROUTES = {
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
-export const UPDATES_INDEX = '.entities.v2.updates.security_default';
-export const LATEST_INDEX = '.entities.v2.latest.security_default';
-export const HISTORY_INDEX_PATTERN = '.entities.v2.history.security_default*';
+export const UPDATES_INDEX = getEntityIndexPattern({
+  schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+  dataset: ENTITY_UPDATES,
+  namespace: 'default',
+});
+export const LATEST_ALIAS = getEntitiesAlias(ENTITY_LATEST, 'default');
+export const LATEST_INDEX = getLatestEntitiesIndexName('default');
+export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
+  schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+  dataset: ENTITY_HISTORY,
+  namespace: 'default',
+})}*`;

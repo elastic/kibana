@@ -123,5 +123,34 @@ spaceTest.describe(
         }
       );
     }
+
+    spaceTest(
+      'ES|QL mode - logs section shows only logs correlated to the opened trace',
+      async ({ pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('filter for minimal trace transaction', async () => {
+          await pageObjects.discover.writeAndSubmitEsqlQuery(
+            `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${MINIMAL_TRACE.TRANSACTION_NAME}"`
+          );
+        });
+
+        await spaceTest.step('open Overview tab', async () => {
+          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+        });
+
+        await spaceTest.step('expand the Logs section', async () => {
+          await flyout.logs.section.click();
+        });
+
+        await spaceTest.step(
+          'logs count reflects only this trace — not all logs in the index',
+          async () => {
+            await expect(flyout.logs.totalDocuments).toBeVisible();
+            await expect(flyout.logs.totalDocuments).toHaveText('2');
+          }
+        );
+      }
+    );
   }
 );

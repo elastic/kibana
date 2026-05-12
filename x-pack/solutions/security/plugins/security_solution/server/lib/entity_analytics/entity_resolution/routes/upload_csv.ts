@@ -57,6 +57,15 @@ export const entityResolutionCsvUploadRoute = ({
         const siemResponse = buildSiemResponse(response);
 
         try {
+          const { license } = await context.licensing;
+          if (!license.hasAtLeast('enterprise')) {
+            return response.forbidden({
+              body: {
+                message: 'Entity Resolution requires an Enterprise license',
+              },
+            });
+          }
+
           const [, startPlugins] = await getStartServices();
           const { entityStore: entityStoreStart } = startPlugins;
 

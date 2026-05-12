@@ -100,7 +100,7 @@ export function TileErrorsList(props: Props) {
         button={
           <EuiButtonEmpty
             flush="left"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);

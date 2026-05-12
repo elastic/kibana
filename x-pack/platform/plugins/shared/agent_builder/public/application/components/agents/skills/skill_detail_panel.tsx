@@ -11,30 +11,31 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
-import { DetailRow } from '../common/detail_row';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
-import { RenderSkillContentReadOnly } from '../common/render_skill_content_read_only';
+import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 import { ToolReadOnlyFlyout } from '../tools/tool_readonly_flyout';
+import { SkillTools } from './skill_tools';
 
 interface SkillDetailPanelProps {
   skillId: string;
   onEdit: () => void;
   onRemove: () => void;
-  isReadOnly?: boolean;
+  isAutoIncluded: boolean;
+  canEditAgent: boolean;
 }
 
 export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
   skillId,
   onEdit,
   onRemove,
-  isReadOnly = false,
+  isAutoIncluded = false,
+  canEditAgent,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { skill, isLoading } = useSkill({ skillId });
@@ -46,14 +47,14 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         isLoading={isLoading}
         isEmpty={!skill}
         title={skill?.name ?? skillId}
-        showAutoIcon={isReadOnly}
+        isReadOnly={skill?.readonly ?? false}
         headerContent={
           <>
             <EuiText
-              size="xs"
+              size="s"
               color="subdued"
               css={css`
-                margin-top: ${euiTheme.size.xs};
+                margin-top: ${euiTheme.size.s};
               `}
             >
               {skill?.id}
@@ -62,38 +63,24 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
               size="s"
               color="subdued"
               css={css`
-                margin-top: ${euiTheme.size.s};
+                margin-top: ${euiTheme.size.l};
               `}
             >
               {skill?.description}
             </EuiText>
           </>
         }
-        headerActions={(openConfirmRemove) =>
-          isReadOnly ? (
-            <EuiBadge color="hollow">{labels.agentSkills.autoIncludedBadgeLabel}</EuiBadge>
-          ) : (
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {!skill?.readonly && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
-                    {labels.skills.editSkillButtonLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  size="xs"
-                  color="danger"
-                  onClick={openConfirmRemove}
-                >
-                  {labels.agentSkills.removeSkillButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )
-        }
+        headerActions={(openConfirmRemove) => (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <SkillHeaderActions
+              openConfirmRemove={openConfirmRemove}
+              canEditAgent={canEditAgent}
+              isAutoIncluded={isAutoIncluded}
+              isReadOnly={skill?.readonly ?? false}
+              onEdit={onEdit}
+            />
+          </EuiFlexGroup>
+        )}
         confirmRemove={{
           title: labels.agentSkills.removeSkillConfirmTitle(skill?.name ?? skillId),
           body: labels.agentSkills.removeSkillConfirmBody,
@@ -102,34 +89,57 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
           onConfirm: onRemove,
         }}
       >
-        <div
-          css={css`
-            padding: ${euiTheme.size.m};
-          `}
-        >
-          <div
-            css={css`
-              padding: ${euiTheme.size.m};
-            `}
-          >
-            <RenderSkillContentReadOnly content={skill?.content ?? ''} />
-          </div>
-          {skill?.tool_ids && skill.tool_ids.length > 0 && (
-            <DetailRow label={labels.skills.toolsLabel} isLast>
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                {skill.tool_ids.map((toolId) => (
-                  <EuiFlexItem key={toolId} grow={false}>
-                    <EuiLink onClick={() => setSelectedToolId(toolId)}>{toolId}</EuiLink>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </DetailRow>
-          )}
-        </div>
+        <RenderMarkdownReadOnly
+          label={labels.agentSkills.skillDetailInstructionsLabel}
+          content={skill?.content ?? ''}
+        />
+        <SkillTools skillToolIds={skill?.tool_ids ?? []} onToolClick={setSelectedToolId} />
       </DetailPanelLayout>
       {selectedToolId && (
         <ToolReadOnlyFlyout toolId={selectedToolId} onClose={() => setSelectedToolId(null)} />
       )}
+    </>
+  );
+};
+
+const SkillHeaderActions = ({
+  openConfirmRemove,
+  canEditAgent,
+  isAutoIncluded,
+  isReadOnly,
+  onEdit,
+}: {
+  openConfirmRemove: () => void;
+  canEditAgent: boolean;
+  isAutoIncluded: boolean;
+  isReadOnly: boolean;
+  onEdit: () => void;
+}) => {
+  if (isAutoIncluded) {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{labels.agentSkills.autoIncludedBadgeLabel}</EuiBadge>
+      </EuiFlexItem>
+    );
+  }
+  if (!canEditAgent) {
+    return null;
+  }
+
+  return (
+    <>
+      {!isReadOnly && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
+            {labels.skills.editSkillButtonLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+          {labels.agentSkills.removeSkillButtonLabel}
+        </EuiButtonEmpty>
+      </EuiFlexItem>
     </>
   );
 };

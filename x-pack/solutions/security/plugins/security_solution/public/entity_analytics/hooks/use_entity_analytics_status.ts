@@ -23,24 +23,84 @@ interface UseEntityAnalyticsStatusParams {
   riskEngineStatus?: RiskEngineStatus | null;
   entityStoreStatus?: StoreStatus;
   isEntityStoreFeatureFlagDisabled: boolean;
+  isEntityStoreV2Enabled: boolean;
   isMutationLoading?: boolean;
 }
+
+const isRiskEngineInstalled = (status?: RiskEngineStatus | null): boolean =>
+  !!status && status !== RiskEngineStatusEnum.NOT_INSTALLED;
+
+const isRiskEngineEnabled = (status?: RiskEngineStatus | null): boolean =>
+  status === RiskEngineStatusEnum.ENABLED;
+
+const isStoreInstalled = (status?: StoreStatus): boolean => !!status && status !== 'not_installed';
+
+const deriveRiskEngineOnlyStatus = (
+  riskEngineStatus?: RiskEngineStatus | null
+): EntityAnalyticsStatus => {
+  if (!isRiskEngineInstalled(riskEngineStatus)) {
+    return 'not_installed';
+  }
+  return isRiskEngineEnabled(riskEngineStatus) ? 'enabled' : 'disabled';
+};
+
+const deriveEntityStoreOnlyStatus = (entityStoreStatus?: StoreStatus): EntityAnalyticsStatus => {
+  if (!isStoreInstalled(entityStoreStatus)) {
+    return 'not_installed';
+  }
+  if (entityStoreStatus === 'error') {
+    return 'error';
+  }
+  return entityStoreStatus === 'running' ? 'enabled' : 'disabled';
+};
+
+const deriveCombinedStatus = (
+  riskEngineStatus?: RiskEngineStatus | null,
+  entityStoreStatus?: StoreStatus
+): EntityAnalyticsStatus => {
+  const riskOn = isRiskEngineEnabled(riskEngineStatus);
+  const storeOn = entityStoreStatus === 'running';
+
+  if (riskOn && storeOn) {
+    return 'enabled';
+  }
+
+  const riskOff = !isRiskEngineInstalled(riskEngineStatus) || !riskOn;
+  const storeOff = !isStoreInstalled(entityStoreStatus) || entityStoreStatus === 'stopped';
+
+  if (riskOff && storeOff) {
+    return !isRiskEngineInstalled(riskEngineStatus) && !isStoreInstalled(entityStoreStatus)
+      ? 'not_installed'
+      : 'disabled';
+  }
+
+  return 'partially_enabled';
+};
 
 export const deriveEntityAnalyticsStatus = ({
   riskEngineStatus,
   entityStoreStatus,
   isEntityStoreFeatureFlagDisabled,
+  isEntityStoreV2Enabled,
   isMutationLoading,
 }: UseEntityAnalyticsStatusParams): EntityAnalyticsStatus => {
   if (isMutationLoading) {
     return 'enabling';
   }
 
-  if (isEntityStoreFeatureFlagDisabled) {
-    if (!riskEngineStatus || riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
-      return 'not_installed';
+  // V2 supersedes the V1 experimental feature flag — check it first
+  if (isEntityStoreV2Enabled) {
+    if (entityStoreStatus === 'installing') {
+      return 'enabling';
     }
-    return riskEngineStatus === RiskEngineStatusEnum.ENABLED ? 'enabled' : 'disabled';
+    if (entityStoreStatus === 'error') {
+      return 'error';
+    }
+    return deriveEntityStoreOnlyStatus(entityStoreStatus);
+  }
+
+  if (isEntityStoreFeatureFlagDisabled) {
+    return deriveRiskEngineOnlyStatus(riskEngineStatus);
   }
 
   if (entityStoreStatus === 'installing') {
@@ -51,28 +111,7 @@ export const deriveEntityAnalyticsStatus = ({
     return 'error';
   }
 
-  const riskOff =
-    !riskEngineStatus ||
-    riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED ||
-    riskEngineStatus === RiskEngineStatusEnum.DISABLED;
-  const storeOff =
-    !entityStoreStatus || entityStoreStatus === 'not_installed' || entityStoreStatus === 'stopped';
-
-  const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
-  const storeOn = entityStoreStatus === 'running';
-
-  if (riskOn && storeOn) {
-    return 'enabled';
-  }
-
-  if (riskOff && storeOff) {
-    const neitherInstalled =
-      (!riskEngineStatus || riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) &&
-      (!entityStoreStatus || entityStoreStatus === 'not_installed');
-    return neitherInstalled ? 'not_installed' : 'disabled';
-  }
-
-  return 'partially_enabled';
+  return deriveCombinedStatus(riskEngineStatus, entityStoreStatus);
 };
 
 export const useEntityAnalyticsStatus = (
@@ -82,6 +121,7 @@ export const useEntityAnalyticsStatus = (
     riskEngineStatus,
     entityStoreStatus,
     isEntityStoreFeatureFlagDisabled,
+    isEntityStoreV2Enabled,
     isMutationLoading,
   } = params;
 
@@ -91,8 +131,15 @@ export const useEntityAnalyticsStatus = (
         riskEngineStatus,
         entityStoreStatus,
         isEntityStoreFeatureFlagDisabled,
+        isEntityStoreV2Enabled,
         isMutationLoading,
       }),
-    [riskEngineStatus, entityStoreStatus, isEntityStoreFeatureFlagDisabled, isMutationLoading]
+    [
+      riskEngineStatus,
+      entityStoreStatus,
+      isEntityStoreFeatureFlagDisabled,
+      isEntityStoreV2Enabled,
+      isMutationLoading,
+    ]
   );
 };

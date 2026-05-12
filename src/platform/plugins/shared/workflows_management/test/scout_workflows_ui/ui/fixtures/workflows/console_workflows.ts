@@ -330,3 +330,36 @@ steps:
     type: console  # previously used {{ steps.old.output }}
     with:
       message: "{{ inputs.message }}"`;
+
+/**
+ * Long-running workflow (console + two wait steps) for cancellation Scout tests.
+ * Kept enabled so it can be run from the UI or API without an extra toggle step.
+ */
+export const getLongRunningCancellationWorkflowYaml = (name: string) => `
+name: ${name}
+enabled: true
+description: Long-running workflow for cancellation tests
+triggers:
+  - type: manual
+
+steps:
+  - name: first_step
+    type: console
+    with:
+      message: Hello World
+
+  - name: wait_1
+    type: wait
+    with:
+      duration: 4s
+
+  - name: wait_2
+    type: wait
+    with:
+      duration: 4s
+
+  - name: last_step
+    type: console
+    with:
+      message: Hello World
+`;

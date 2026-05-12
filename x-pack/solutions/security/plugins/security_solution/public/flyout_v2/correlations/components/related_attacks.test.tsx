@@ -7,11 +7,9 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TestProviders } from '../../../common/mock';
 import { DocumentDetailsContext } from '../../../flyout/document_details/shared/context';
 import { mockContextValue } from '../../../flyout/document_details/shared/mocks/mock_context';
-import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import {
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID,
@@ -22,16 +20,14 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../shared/components/test_ids';
-import { usePaginatedAlerts } from '../../../flyout/document_details/left/hooks/use_paginated_alerts';
+import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
-import { AttackDetailsPreviewPanelKey } from '../../../flyout/attack_details/constants/panel_keys';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../flyout/document_details/left/hooks/use_paginated_alerts');
+jest.mock('../hooks/use_paginated_alerts');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../common/hooks/is_in_security_app');
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
@@ -51,11 +47,16 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
   CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID
 );
 
-const renderRelatedAttacks = () =>
+const renderRelatedAttacks = (onShowAttack?: (id: string, indexName: string) => void) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
-        <RelatedAttacks attackIds={attackIds} scopeId={scopeId} eventId={eventId} />
+        <RelatedAttacks
+          attackIds={attackIds}
+          scopeId={scopeId}
+          eventId={eventId}
+          onShowAttack={onShowAttack}
+        />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -65,8 +66,6 @@ describe('<RelatedAttacks />', () => {
     useAlertsPrivilegesMock.mockReturnValue({
       hasAlertsRead: true,
     });
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    jest.mocked(mockFlyoutApi.openPreviewPanel).mockReset();
     jest.mocked(useIsInSecurityApp).mockReturnValue(true);
     jest.mocked(useDataView).mockReturnValue({
       dataView: getMockDataViewWithMatchedIndices([
@@ -77,6 +76,7 @@ describe('<RelatedAttacks />', () => {
   });
 
   it('should render related attacks correctly', () => {
+    const mockOnShowAttack = jest.fn();
     (usePaginatedAlerts as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -93,7 +93,7 @@ describe('<RelatedAttacks />', () => {
       ],
     });
 
-    const { getAllByTestId, getByTestId } = renderRelatedAttacks();
+    const { getAllByTestId, getByTestId } = renderRelatedAttacks(mockOnShowAttack);
     expect(getByTestId(TOGGLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_ICON)).toBeInTheDocument();
     expect(getByTestId(TITLE_TEXT)).toBeInTheDocument();
@@ -106,18 +106,7 @@ describe('<RelatedAttacks />', () => {
     getAllByTestId(
       `${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`
     )[0].click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: AttackDetailsPreviewPanelKey,
-      params: {
-        attackId: 'attack-id-1',
-        indexName: 'index',
-        banner: {
-          backgroundColor: 'warning',
-          textColor: 'warning',
-          title: 'Preview attack details',
-        },
-      },
-    });
+    expect(mockOnShowAttack).toHaveBeenCalledWith('attack-id-1', 'index');
     expect(
       getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
     ).toBeInTheDocument();
@@ -130,6 +119,27 @@ describe('<RelatedAttacks />', () => {
     expect(
       getByTestId(CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TABLE_TEST_ID)
     ).toHaveTextContent('2');
+  });
+
+  it('should not render preview button when onShowAttack is not provided', () => {
+    (usePaginatedAlerts as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          _id: 'attack-id-1',
+          _index: 'index',
+          fields: {
+            'kibana.alert.attack_discovery.title': ['Attack 1'],
+          },
+        },
+      ],
+    });
+
+    const { queryByTestId } = renderRelatedAttacks();
+    expect(
+      queryByTestId(`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`)
+    ).not.toBeInTheDocument();
   });
 
   it('should render no data message', () => {

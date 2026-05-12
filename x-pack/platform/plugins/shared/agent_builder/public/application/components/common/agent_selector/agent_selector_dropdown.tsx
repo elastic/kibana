@@ -17,6 +17,7 @@ import {
   EuiPopoverFooter,
   EuiSelectable,
   EuiText,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiPopoverProps } from '@elastic/eui';
@@ -168,7 +169,17 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
     >
-      {selectedAgent?.name ?? fallbackLabel}
+      <EuiText size="m">
+        <strong>
+          {
+            <EuiTextTruncate
+              text={selectedAgent?.name ?? fallbackLabel ?? ''}
+              truncation="end"
+              width={180}
+            />
+          }
+        </strong>
+      </EuiText>
     </EuiButtonEmpty>
   );
 
@@ -178,7 +189,6 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       panelProps={{
         css: css`
           ${selectorPopoverPanelStyles}
-          block-size: ${SELECTOR_POPOVER_HEIGHT}px;
         `,
       }}
       panelPaddingSize="none"

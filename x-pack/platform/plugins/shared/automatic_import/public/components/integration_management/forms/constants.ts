@@ -23,3 +23,5 @@ export const DEFAULT_INTEGRATION_VALUES = {
   logo: undefined,
   connectorId: '',
 };
+
+export const INTEGRATION_DETAILS_UNTRACKED_FIELDS = ['connectorId', 'integrationId'];

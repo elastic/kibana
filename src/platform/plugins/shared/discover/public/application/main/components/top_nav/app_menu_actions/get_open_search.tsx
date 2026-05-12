@@ -20,7 +20,7 @@ export const getOpenSearchAppMenuItem = ({
 }): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.open,
-    order: 2,
+    order: 3,
     label: i18n.translate('discover.localMenu.openDiscoverSessionTitle', {
       defaultMessage: 'Open',
     }),

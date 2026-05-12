@@ -13,7 +13,7 @@ export const createConversationListItemStyles = (euiTheme: EuiThemeComputed) => 
   padding: 6px ${euiTheme.size.s};
   border-radius: ${euiTheme.border.radius.small};
   color: ${euiTheme.colors.textParagraph};
-  font-size: ${euiTheme.font.scale.s}${euiTheme.font.defaultUnits};
+  font-size: ${euiTheme.font.scale.m}${euiTheme.font.defaultUnits};
   cursor: pointer;
   background: none;
   border: none;

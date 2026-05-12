@@ -34,7 +34,7 @@ export const setSeverityStepCommonDefinition: CommonStepDefinition<
   SetSeverityStepOutputSchema
 > = {
   id: SetSeverityStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.SET_SEVERITY_STEP_LABEL,
   description: i18n.SET_SEVERITY_STEP_DESCRIPTION,
   documentation: {

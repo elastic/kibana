@@ -40,7 +40,11 @@ describe('createInferenceEndpointExecutor', () => {
         querystring: { timeout: '3m' },
         body,
       },
-      { asStream: true, requestTimeout: 180_000 }
+      {
+        asStream: true,
+        requestTimeout: 180_000,
+        headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+      }
     );
   });
 

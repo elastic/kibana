@@ -199,15 +199,7 @@ export function getNormalizedDataStreams(
   }
 
   return policyTemplates.map((policyTemplate) => {
-    const isOtelDynamicSignalTypes = policyTemplate.dynamic_signal_types === true;
-    // Packages with dynamic_signal_types defer dataset routing to the ES exporter (via scope.name
-    // or explicit data_stream.* attrs). Use 'generic.otel' as the default so any fallback lands
-    // in the generic OTel data streams rather than a policy-template-named data stream.
-    const dataset =
-      datasetName ||
-      (isOtelDynamicSignalTypes
-        ? 'generic.otel'
-        : createDefaultDatasetName(packageInfo, policyTemplate));
+    const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
     if (

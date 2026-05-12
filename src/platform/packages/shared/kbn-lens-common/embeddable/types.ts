@@ -454,7 +454,7 @@ export interface StructuredDatasourceStates {
 
 /** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
-  Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
+  Omit<LensDocument, 'savedObjectId' | 'state' | 'visualizationType'> & {
     visualizationType: TVisType;
     state: Simplify<
       Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {

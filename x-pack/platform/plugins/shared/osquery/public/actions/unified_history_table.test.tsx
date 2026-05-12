@@ -249,6 +249,15 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('Rule')).toBeInTheDocument();
   });
 
+  it('run by column shows Elastic for rule row', () => {
+    const row = createMockRuleRow();
+    mockHistory({ data: [row] });
+
+    renderWithProviders(<UnifiedHistoryTable />);
+
+    expect(screen.getByText('Elastic')).toBeInTheDocument();
+  });
+
   it('details button has correct href for navigation', () => {
     const row = createMockLiveRow({ actionId: 'action-42' });
     mockHistory({ data: [row] });
@@ -374,14 +383,13 @@ describe('UnifiedHistoryTable', () => {
       expect(screen.getByText('20')).toBeInTheDocument();
     });
 
-    it('run by column shows em dash for scheduled row', () => {
+    it('run by column shows Elastic for scheduled row', () => {
       const row = createMockScheduledRow();
       mockHistory({ data: [row] });
 
       renderWithProviders(<UnifiedHistoryTable />);
 
-      const dashes = screen.getAllByText('\u2014');
-      expect(dashes.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText('Elastic')).toBeInTheDocument();
     });
 
     it('play button is not available for scheduled rows', () => {

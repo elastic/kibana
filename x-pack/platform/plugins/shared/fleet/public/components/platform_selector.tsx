@@ -170,6 +170,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
                   numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                    defaultMessage: 'More platforms',
+                  })}
                   css={css`
                     .euiFilterButton__text {
                       min-inline-size: 0;

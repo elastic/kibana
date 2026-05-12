@@ -24,9 +24,11 @@ apiTest.describe(
   },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('viewer');
     });
+
     apiTest('returns autocomplete definitions', async ({ apiClient }) => {
       const { body, statusCode } = await apiClient.get('api/console/api_server', {
         headers: {

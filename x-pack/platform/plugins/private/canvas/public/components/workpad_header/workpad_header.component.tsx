@@ -142,12 +142,12 @@ export const WorkpadHeader: FC<Props> = ({
 
   const quickButtons = [
     {
-      iconType: 'visText',
+      iconType: 'text',
       label: elementStrings.markdown.displayName,
       onClick: createElement('markdown'),
     },
     {
-      iconType: 'node',
+      iconType: 'vectorTriangle',
       label: elementStrings.shape.displayName,
       onClick: createElement('shape'),
     },
@@ -216,7 +216,7 @@ export const WorkpadHeader: FC<Props> = ({
               )}
               <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
                 <EuiButtonIcon
-                  iconType={isWriteable ? 'eyeClosed' : 'eye'}
+                  iconType={isWriteable ? 'eyeSlash' : 'eye'}
                   onClick={toggleWriteable}
                   size="s"
                   aria-label={getEditToggleToolTipText()}

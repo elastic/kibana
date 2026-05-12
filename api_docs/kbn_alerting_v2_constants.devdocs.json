@@ -24,6 +24,23 @@
     "misc": [
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_ACTION_POLICY_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_ACTION_POLICY_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/action_policies\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.ALERTING_V2_ALERT_API_PATH",
         "type": "string",
         "tags": [],
@@ -41,16 +58,33 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
-        "id": "def-common.ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
+        "id": "def-common.ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH",
         "type": "string",
         "tags": [],
-        "label": "ALERTING_V2_NOTIFICATION_POLICY_API_PATH",
+        "label": "ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH",
         "description": [],
         "signature": [
-          "\"/api/alerting/v2/notification_policies\""
+          "\"/api/alerting/v2/internal/user_profiles/_suggest\""
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/action_policies/suggestions/values\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -75,6 +109,23 @@
       },
       {
         "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/v2/rule_doctor/insights\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
         "id": "def-common.DEFAULT_ARTIFACT_VALUE_LIMIT",
         "type": "number",
         "tags": [],
@@ -87,23 +138,6 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
         "lineNumber": 12,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-v2-constants",
-        "id": "def-common.INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH",
-        "type": "string",
-        "tags": [],
-        "label": "INTERNAL_ALERTING_V2_SUGGESTIONS_API_PATH",
-        "description": [],
-        "signature": [
-          "\"/internal/notification_policies/suggestions/values\""
-        ],
-        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/index.ts",
-        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -139,6 +173,25 @@
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/labels.ts",
         "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.MAX_TAGS_PER_EPISODE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_TAGS_PER_EPISODE",
+        "description": [
+          "Maximum number of tags that can be saved on an alert episode"
+        ],
+        "signature": [
+          "25"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/labels.ts",
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -186,7 +239,9 @@
             "type": "number",
             "tags": [],
             "label": "[RUNBOOK_ARTIFACT_TYPE]",
-            "description": [],
+            "description": [
+              "\nType-specific artifact value length limits.\n\nTo raise or add a limit for a new artifact type, add an entry here.\nThe framework schema resolves: `ARTIFACT_VALUE_LIMITS[type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT`.\nNo framework code changes are needed — only this map."
+            ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/artifacts.ts",
             "lineNumber": 22,
             "columnNumber": 3,
@@ -194,6 +249,25 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-constants",
+        "id": "def-common.RESERVED_ESQL_PARAMS",
+        "type": "Object",
+        "tags": [],
+        "label": "RESERVED_ESQL_PARAMS",
+        "description": [
+          "\nLowercase parameter names that the alerting v2 rule executor binds at\nexecution time (see `get_query_payload.ts`)."
+        ],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-constants/src/esql_params.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

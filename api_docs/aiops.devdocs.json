@@ -369,7 +369,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -1497,6 +1497,7 @@
                 "lineNumber": 58,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRateAnalysisResultsData",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1622,7 +1623,7 @@
       "label": "AiopsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-      "lineNumber": 53,
+      "lineNumber": 54,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1646,7 +1647,7 @@
             ") => boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 54,
+          "lineNumber": 55,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1668,7 +1669,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 55,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1686,7 +1687,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 56,
+          "lineNumber": 57,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1706,6 +1707,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {
@@ -1741,7 +1743,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-      "lineNumber": 52,
+      "lineNumber": 53,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

@@ -11,24 +11,27 @@ import { useKibana } from './use_kibana';
 
 export const useGetLicenseInfo = () => {
   const {
-    services: { licensing },
+    services: { licensing, cloud },
   } = useKibana();
 
   const license = useObservable(licensing.license$, null);
 
-  const { isTrial, licenseType, hasEnterpriseLicense } = useMemo(
-    () => ({
-      isTrial: license && license.isAvailable && license.isActive && license.type === 'trial',
-      licenseType: license?.type,
+  const { isTrial, licenseType, hasEnterpriseLicense } = useMemo(() => {
+    const isInTrial =
+      cloud?.isCloudEnabled && cloud.isInTrial()
+        ? true
+        : license && license.isAvailable && license.isActive && license.type === 'trial';
+    return {
+      isTrial: isInTrial ?? false,
+      licenseType: isInTrial ? 'trial' : license?.type ?? 'basic',
       hasEnterpriseLicense: !!(
         license &&
         license.isAvailable &&
         license.isActive &&
         license.hasAtLeast('enterprise')
       ),
-    }),
-    [license]
-  );
+    };
+  }, [cloud, license]);
 
   return {
     isTrial,

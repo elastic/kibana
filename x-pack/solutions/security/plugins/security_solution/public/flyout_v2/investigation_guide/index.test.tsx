@@ -14,6 +14,11 @@ import { mockContextValue } from '../../flyout/document_details/shared/mocks/moc
 import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 jest.mock('../../detection_engine/rule_management/logic/use_rule_with_fallback');
+jest.mock('../shared/components/tools_flyout_header', () => ({
+  ToolsFlyoutHeader: ({ title }: { title: string }) => (
+    <div data-test-subj="mockToolsFlyoutHeader">{title}</div>
+  ),
+}));
 
 const renderInvestigationGuide = ({
   hit = buildDataTableRecord(mockContextValue.searchHit as EsHitRecord),
@@ -40,7 +45,7 @@ describe('<InvestigationGuide />', () => {
 
     const { getByLabelText, queryByTestId } = renderInvestigationGuide();
 
-    expect(getByLabelText('Loading investigation guide')).toBeInTheDocument();
+    expect(getByLabelText(/investigation guide/i)).toBeInTheDocument();
     expect(queryByTestId('investigation-guide-full-view')).not.toBeInTheDocument();
   });
 

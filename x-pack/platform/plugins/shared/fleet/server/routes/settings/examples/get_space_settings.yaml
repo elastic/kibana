@@ -1,0 +1,13 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getSpaceSettingsExample:
+            description: 'The Fleet settings for the current Kibana space'
+            value:
+              item:
+                allowed_namespace_prefixes:
+                  - 'team-a'
+                  - 'team-b'

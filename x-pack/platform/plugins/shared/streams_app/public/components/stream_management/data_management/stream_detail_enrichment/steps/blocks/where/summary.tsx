@@ -26,6 +26,7 @@ import type { StepConfigurationProps } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { StepContextMenu } from '../context_menu';
 import { DragHandle } from '../../draggable_step_wrapper';
+import { MAX_INTERACTIVE_NESTING_LEVEL } from '.';
 
 interface WhereBlockSummaryProps extends StepConfigurationProps {
   onClick?: () => void;
@@ -167,7 +168,11 @@ export const WhereBlockSummary = ({
           `}
         >
           <EuiFlexGroup gutterSize="none">
-            <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
+            <CreateStepButton
+              parentId={stepRef.id}
+              mode="inline"
+              nestingDisabled={level >= MAX_INTERACTIVE_NESTING_LEVEL}
+            />
             <StepContextMenu
               stepRef={stepRef}
               stepUnderEdit={stepUnderEdit}

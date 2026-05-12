@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/timelines-plugin'
   - '@kbn/es-query'
+  - '@kbn/as-code-shared-transforms'
   - '@kbn/utility-types'
   - '@kbn/securitysolution-list-utils'
   - '@kbn/securitysolution-io-ts-list-types'
@@ -142,6 +143,7 @@ dependsOn:
   - '@kbn/core-analytics-server'
   - '@kbn/security-solution-side-nav'
   - '@kbn/ml-anomaly-utils'
+  - '@kbn/ml-server-schemas'
   - '@kbn/discover-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/expressions-plugin'
@@ -192,8 +194,6 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-analytics-browser'
-  - '@kbn/core-i18n-browser'
-  - '@kbn/core-theme-browser'
   - '@kbn/automatic-import-plugin'
   - '@kbn/config'
   - '@kbn/openapi-common'
@@ -256,6 +256,7 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/object-utils'
+  - '@kbn/ml-common-types'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
@@ -280,17 +281,21 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/esql-language'
   - '@kbn/workflows-ui'
-  - '@kbn/workflows-management-plugin'
   - '@kbn/workflows'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-rendering-browser'
   - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
+  - '@kbn/workflows-extensions'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/controls-schemas'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/evals-plugin'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/core-overlays-browser'
+  - '@kbn/workflows-management-plugin'
+  - '@kbn/core-application-browser-mocks'
 tags:
   - plugin
   - prod
@@ -303,6 +308,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json

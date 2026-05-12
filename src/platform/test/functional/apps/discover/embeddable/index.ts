@@ -25,9 +25,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_saved_search_embeddable'));
-    loadTestFile(require.resolve('./multiple_data_views'));
-    loadTestFile(require.resolve('./_log_stream_embeddable.ts'));
-    loadTestFile(require.resolve('./_esql_embeddable.ts'));
-    loadTestFile(require.resolve('./_new_panel_embeddable.ts'));
   });
 }

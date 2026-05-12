@@ -13,6 +13,12 @@ import {
   CasesMetricsResponseRt,
   CaseMetricsFeature,
 } from './v1';
+import {
+  SingleCaseMetricsRequestSchema,
+  CasesMetricsRequestSchema,
+  SingleCaseMetricsResponseSchema,
+  CasesMetricsResponseSchema,
+} from '../../api_zod/metrics/v1';
 
 describe('Metrics case', () => {
   describe('SingleCaseMetricsRequestRt', () => {
@@ -39,6 +45,18 @@ describe('Metrics case', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = SingleCaseMetricsRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = SingleCaseMetricsRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
 
     describe('errors', () => {
@@ -98,6 +116,18 @@ describe('Metrics case', () => {
         },
       });
     });
+    it('zod: has expected attributes in request', () => {
+      const result = CasesMetricsRequestSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CasesMetricsRequestSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
     describe('errors', () => {
       it('has invalid feature in request', () => {
         expect(
@@ -289,6 +319,47 @@ describe('Metrics case', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      // Zod strips keys with undefined values, so omit name: undefined from host values
+      const zodRequest = {
+        ...defaultRequest,
+        alerts: {
+          ...defaultRequest.alerts,
+          hosts: {
+            ...defaultRequest.alerts.hosts,
+            values: [
+              { name: 'first-host', id: 'first-host-id', count: 3 },
+              { id: 'second-host-id', count: 2 },
+              { id: 'third-host-id', count: 3 },
+            ],
+          },
+        },
+      };
+      const result = SingleCaseMetricsResponseSchema.safeParse(zodRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(zodRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const zodRequest = {
+        ...defaultRequest,
+        alerts: {
+          ...defaultRequest.alerts,
+          hosts: {
+            ...defaultRequest.alerts.hosts,
+            values: [
+              { name: 'first-host', id: 'first-host-id', count: 3 },
+              { id: 'second-host-id', count: 2 },
+              { id: 'third-host-id', count: 3 },
+            ],
+          },
+        },
+      };
+      const result = SingleCaseMetricsResponseSchema.safeParse({ ...zodRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(zodRequest);
+    });
   });
 
   describe('CasesMetricsResponseRt', () => {
@@ -315,6 +386,18 @@ describe('Metrics case', () => {
           mttr: null,
         },
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = CasesMetricsResponseSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = CasesMetricsResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 });

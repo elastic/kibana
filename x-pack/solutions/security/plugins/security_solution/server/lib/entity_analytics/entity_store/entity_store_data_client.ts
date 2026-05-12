@@ -28,7 +28,7 @@ import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-sche
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
@@ -956,7 +956,7 @@ export class EntityStoreDataClient {
     pageSize?: number;
   }): Promise<Entity[]> {
     const { namespace, logger } = this.options;
-    const index = getLatestEntitiesIndexName(namespace);
+    const index = getEntitiesAlias(ENTITY_LATEST, namespace);
     const size = params?.pageSize ?? 1000;
     const results: Entity[] = [];
     let searchAfter: FieldValue[] | undefined;

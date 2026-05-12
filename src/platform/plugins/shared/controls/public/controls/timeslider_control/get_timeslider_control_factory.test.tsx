@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { DEFAULT_TIME_SLIDER_STATE } from '@kbn/controls-constants';
-import type { TimeSliderControlState } from '@kbn/controls-schemas';
+import { timeSliderControlSchema, type TimeSliderControlState } from '@kbn/controls-schemas';
 import dateMath from '@kbn/datemath';
 import type { TimeRange } from '@kbn/es-query';
 import { fireEvent, render as rtlRender } from '@testing-library/react';
@@ -278,5 +278,43 @@ describe('TimeSliderControlApi', () => {
     expect(new Date(api.appliedTimeslice$.value![1]).toISOString()).toEqual(
       '2024-06-09T12:00:00.000Z'
     );
+  });
+
+  describe('unsaved changes', () => {
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = timeSliderControlSchema.validate({});
+      const initialState = {
+        ...lastSavedState,
+        is_anchored: true,
+      };
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = timeSliderControlSchema.validate({});
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: jest.fn(),
+        initialState,
+        finalizeApi,
+        uuid,
+        parentApi: {
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
+    });
   });
 });

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiFieldText,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -24,58 +25,80 @@ import {
   WATCHLIST_DESCRIPTION_LABEL,
   WATCHLIST_NAME_LABEL,
   WATCHLIST_RISK_SCORE_WEIGHTING_LABEL,
+  WATCHLIST_RISK_SCORE_WEIGHTING_ERROR,
+  WATCHLIST_CSV_DATA_SOURCE_TITLE,
+  WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION,
 } from './translations';
 import { RuleBasedSourceInput } from './rule_based_source_input';
+import { WatchlistCsvUpload } from './csv_upload';
+import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
+import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from './constants';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
+  watchlistId?: string;
   isEditMode: boolean;
-  isNameInvalid: boolean;
+  isNameTooLong: boolean;
+  isDescriptionTooLong: boolean;
+  isRiskModifierInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  onSourceValidationChange: (valid: boolean) => void;
 }
+
+const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
+  isTooLong
+    ? [
+        i18n.translate(fieldId, {
+          defaultMessage: 'Must be {maxLength} characters or fewer',
+          values: { maxLength },
+        }),
+      ]
+    : undefined;
 
 export const WatchlistForm = ({
   watchlist,
+  watchlistId,
   isEditMode,
-  isNameInvalid,
+  isNameTooLong,
+  isDescriptionTooLong,
+  isRiskModifierInvalid,
   onFieldChange,
+  onSourceValidationChange,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
   const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
   const isDescriptionDisabled = isEditMode && !canUpdateWatchlistField('description', isManaged);
 
   return (
-    <EuiForm component="form" fullWidth>
+    <EuiForm component="form" fullWidth onSubmit={(e) => e.preventDefault()}>
       <EuiFormRow
         label={WATCHLIST_NAME_LABEL}
-        isInvalid={isNameInvalid}
-        error={
-          isNameInvalid
-            ? [
-                i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid',
-                  {
-                    defaultMessage:
-                      'Use lowercase letters, numbers, ".", "_" or "-" and start with a letter or number.',
-                  }
-                ),
-              ]
-            : undefined
-        }
+        isInvalid={isNameTooLong}
+        error={getTooLongError(
+          isNameTooLong,
+          MAX_WATCHLIST_NAME_LENGTH,
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid'
+        )}
       >
         <EuiFieldText
+          isInvalid={isNameTooLong}
           name="WatchlistName"
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
-          isInvalid={isNameInvalid}
           disabled={isNameDisabled}
         />
       </EuiFormRow>
       <EuiFormRow
         label={WATCHLIST_DESCRIPTION_LABEL}
+        isInvalid={isDescriptionTooLong}
+        error={getTooLongError(
+          isDescriptionTooLong,
+          MAX_WATCHLIST_DESCRIPTION_LENGTH,
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.descriptionInvalid'
+        )}
         labelAppend={
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -86,52 +109,61 @@ export const WatchlistForm = ({
         }
       >
         <EuiFieldText
+          isInvalid={isDescriptionTooLong}
           name="WatchlistDescription"
           value={watchlist.description}
           onChange={(e) => onFieldChange('description', e.target.value)}
           disabled={isDescriptionDisabled}
         />
       </EuiFormRow>
-      <EuiFormRow label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}>
+      <EuiFormRow
+        label={WATCHLIST_RISK_SCORE_WEIGHTING_LABEL}
+        isInvalid={isRiskModifierInvalid}
+        error={isRiskModifierInvalid ? [WATCHLIST_RISK_SCORE_WEIGHTING_ERROR] : undefined}
+      >
         <EuiRange
           min={0}
           max={2}
           step={0.5}
           showTicks
           showInput
-          value={watchlist.riskModifier}
+          isInvalid={isRiskModifierInvalid}
+          value={Number.isFinite(watchlist.riskModifier) ? watchlist.riskModifier : ''}
           onChange={(e) => onFieldChange('riskModifier', Number(e.currentTarget.value))}
         />
       </EuiFormRow>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.ruleBasedDataSourcesTitle"
-                defaultMessage="Rule Based Data Sources"
-              />
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.watchlists.flyout.ruleBasedDataSourcesDescription"
-                defaultMessage="Create Watchlist by filtering on existing entities in the store or filtering on entities from an indexPattern"
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isEditMode && watchlistId && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{WATCHLIST_CSV_DATA_SOURCE_TITLE}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                <p>{WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION}</p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <WatchlistCsvUpload watchlistId={watchlistId} />
+        </>
+      )}
       <EuiSpacer size="m" />
+      {watchlist.managed && (
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <ManagedWatchlistSourceInput watchlist={watchlist} />
+        </Suspense>
+      )}
       <RuleBasedSourceInput
         watchlistName={watchlist.name}
         isEditMode={isEditMode}
+        isManaged={watchlist.managed}
         onFieldChange={onFieldChange}
-        initialEntitySource={watchlist.entitySources?.[0]}
+        initialEntitySources={watchlist.entitySources}
+        onSourceValidationChange={onSourceValidationChange}
       />
     </EuiForm>
   );

@@ -169,6 +169,7 @@
                 "lineNumber": 44,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -205,6 +206,7 @@
                 "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "FetchInputOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -480,6 +482,7 @@
             "lineNumber": 22,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaClient",
             "trackAdoption": false,
             "isRequired": true
           }

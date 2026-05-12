@@ -11,8 +11,15 @@ value:
         username: elastic
         email: null
         full_name: null
+        profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+      pushed_at: null
+      pushed_by: null
+      updated_at: null
+      updated_by: null
+  observables: []
   totalAlerts: 0
   totalEvents: 0
+  total_observables: 0
   id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
   version: WzIzMzgsMV0=
   totalComment: 1

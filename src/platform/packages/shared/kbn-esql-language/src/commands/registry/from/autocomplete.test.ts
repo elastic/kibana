@@ -15,8 +15,7 @@ import {
 } from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -80,12 +79,8 @@ describe('FROM Autocomplete', () => {
       };
 
       const suggest = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
-
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
 
@@ -120,12 +115,8 @@ describe('FROM Autocomplete', () => {
 
     test('suggests comma or pipe after complete index name', async () => {
       const suggest = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
-
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
       const suggestions = (await suggest('from index')).map((s) => s.text);
@@ -176,15 +167,46 @@ describe('FROM Autocomplete', () => {
       );
       // View names appear when typing (fragment "my_")
       const getSuggestions = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, contextWithViews, cursorPosition);
       };
       const suggestions = (await getSuggestions('FROM my_')).map((s) => s.text);
       expect(suggestions).toContain('my_saved_view');
       expect(suggestions).toContain('my-view');
+    });
+
+    test('suggests datasets from context.datasets alongside sources and views', async () => {
+      const contextWithDatasets = {
+        ...mockContext,
+        views: [{ name: 'my_saved_view', query: 'FROM logs | LIMIT 10' }],
+        datasets: [
+          {
+            name: 'my_dataset',
+            data_source: 'prod_s3_logs',
+            resource: 's3://logs-bucket/access/**/*.parquet',
+          },
+        ],
+      };
+      const expectedFromSources = visibleIndices;
+
+      await fromExpectSuggestions(
+        'from ',
+        [...expectedFromSources, 'my_saved_view', 'my_dataset', '(FROM $0)'],
+        mockCallbacks,
+        contextWithDatasets
+      );
+
+      const getSuggestions = async (query: string) => {
+        const cursorPosition = query.length;
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
+        return autocomplete(query, command!, mockCallbacks, contextWithDatasets, cursorPosition);
+      };
+      const suggestions = await getSuggestions('FROM my_d');
+      const datasetSuggestion = suggestions.find((suggestion) => suggestion.text === 'my_dataset');
+
+      expect(datasetSuggestion).toBeDefined();
+      expect(datasetSuggestion?.detail).toBe('Dataset');
     });
   });
 

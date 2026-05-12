@@ -17,6 +17,7 @@ export const RuleExecutionFieldGroup = () => {
       title={i18n.translate('xpack.alertingV2.ruleForm.ruleExecution', {
         defaultMessage: 'Rule execution',
       })}
+      defaultOpen
     >
       <ScheduleField />
       <LookbackWindowField />

@@ -14,7 +14,6 @@ export {
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
-  pushItUpInTheList,
 } from './autocomplete/helpers';
 export {
   suggestForExpression,

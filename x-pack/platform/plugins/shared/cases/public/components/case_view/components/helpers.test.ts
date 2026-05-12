@@ -192,5 +192,30 @@ describe('Case view helpers', () => {
         });
       });
     });
+
+    it('does not apply event-id filtering to non-event unified reference attachments', () => {
+      const nonEventUnifiedReferenceComment = {
+        id: 'non-event-unified-ref',
+        type: 'lens',
+        attachmentId: ['ref-1', 'ref-2'],
+        owner: basicCase.owner,
+        createdAt: basicCase.createdAt,
+        createdBy: basicCase.createdBy,
+        pushedAt: null,
+        pushedBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        version: 'WzQ3LDFc',
+      };
+      const caseData = {
+        ...basicCase,
+        comments: [nonEventUnifiedReferenceComment],
+      };
+
+      const result = filterCaseAttachmentsBySearchTerm(caseData, 'missing-id');
+
+      expect(result.comments).toHaveLength(1);
+      expect(result.comments[0]).toEqual(nonEventUnifiedReferenceComment);
+    });
   });
 });

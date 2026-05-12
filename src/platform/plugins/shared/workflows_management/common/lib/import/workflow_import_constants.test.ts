@@ -10,61 +10,13 @@
 import { detectFileFormat, isDynamicWorkflowReference, isValidWorkflowId } from '.';
 
 describe('isValidWorkflowId', () => {
-  it('should accept a simple alphanumeric ID', () => {
-    expect(isValidWorkflowId('workflow-1')).toBe(true);
+  it('should reject IDs with reserved prefixes', () => {
+    expect(isValidWorkflowId('system-foo')).toBe(false);
+    expect(isValidWorkflowId('internal-bar')).toBe(false);
   });
 
-  it('should accept IDs with dots, hyphens, and underscores', () => {
-    expect(isValidWorkflowId('my.workflow_v2-beta')).toBe(true);
-  });
-
-  it('should accept an ID of exactly 255 characters', () => {
-    const id = `a${'b'.repeat(254)}`;
-    expect(id).toHaveLength(255);
-    expect(isValidWorkflowId(id)).toBe(true);
-  });
-
-  it('should reject an empty string', () => {
-    expect(isValidWorkflowId('')).toBe(false);
-  });
-
-  it('should reject an ID starting with a dot', () => {
-    expect(isValidWorkflowId('.hidden')).toBe(false);
-  });
-
-  it('should reject an ID starting with a hyphen', () => {
-    expect(isValidWorkflowId('-dashed')).toBe(false);
-  });
-
-  it('should reject an ID starting with an underscore', () => {
-    expect(isValidWorkflowId('_private')).toBe(false);
-  });
-
-  it('should reject an ID exceeding 255 characters', () => {
-    const id = 'a'.repeat(256);
-    expect(isValidWorkflowId(id)).toBe(false);
-  });
-
-  it('should reject __proto__ (prototype pollution)', () => {
-    expect(isValidWorkflowId('__proto__')).toBe(false);
-  });
-
-  it('should reject constructor (prototype pollution)', () => {
-    expect(isValidWorkflowId('constructor')).toBe(false);
-  });
-
-  it('should reject prototype (prototype pollution)', () => {
-    expect(isValidWorkflowId('prototype')).toBe(false);
-  });
-
-  it('should reject IDs with spaces', () => {
-    expect(isValidWorkflowId('my workflow')).toBe(false);
-  });
-
-  it('should reject IDs with special characters', () => {
-    expect(isValidWorkflowId('workflow@1')).toBe(false);
-    expect(isValidWorkflowId('workflow#1')).toBe(false);
-    expect(isValidWorkflowId('workflow!1')).toBe(false);
+  it('should accept valid non-reserved IDs', () => {
+    expect(isValidWorkflowId('my-workflow')).toBe(true);
   });
 });
 

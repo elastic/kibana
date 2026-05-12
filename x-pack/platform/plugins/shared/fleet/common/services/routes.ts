@@ -65,6 +65,13 @@ export const epmRouteService = {
     return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 
+  getDependenciesPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.DEPENDENCIES_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
+
   getFilePath: (filePath: string) => {
     return `${EPM_API_ROOT}${filePath.replace('/package', '/packages')}`;
   },
@@ -420,6 +427,7 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+  getBulkDeletePath: () => ENROLLMENT_API_KEY_ROUTES.BULK_DELETE_PATTERN,
 };
 
 export const uninstallTokensRouteService = {

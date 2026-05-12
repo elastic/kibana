@@ -171,7 +171,33 @@ describe('EndpointScriptEditForm', () => {
         expect.objectContaining({
           script: expect.objectContaining({
             fileType: 'archive',
-            pathToExecutable: '',
+            pathToExecutable: ' ',
+          }),
+          hasFormChanged: true,
+          isValid: false,
+        })
+      );
+    });
+
+    it('should allow adding spaces in `Path to executable` field for archive file type and not trim the value on blur', async () => {
+      const { getByTestId } = renderResult;
+
+      const fileTypeSelect = getByTestId('test-file-type-select') as HTMLSelectElement;
+      fireEvent.change(fileTypeSelect, { target: { value: 'archive' } });
+
+      const pathToExecutableInput = getByTestId('test-path-to-executable-input');
+      await userEvent.type(pathToExecutableInput, '   /test/executable file.sh   ');
+      await userEvent.tab();
+
+      expect(pathToExecutableInput).not.toHaveAttribute('aria-invalid', 'true');
+      const pathToExecutableRow = getByTestId('test-path-to-executable-row');
+      const euiFormErrorText = pathToExecutableRow.querySelector('.euiFormErrorText');
+      expect(euiFormErrorText).not.toBeInTheDocument();
+      expect(onChangeMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          script: expect.objectContaining({
+            fileType: 'archive',
+            pathToExecutable: '   /test/executable file.sh   ',
           }),
           hasFormChanged: true,
           isValid: false,

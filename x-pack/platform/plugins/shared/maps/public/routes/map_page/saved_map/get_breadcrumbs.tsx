@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ScopedHistory } from '@kbn/core/public';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
 import { APP_NAME } from '../../../../common/constants';
 
@@ -26,6 +27,7 @@ export function getBreadcrumbs({
   isByValue,
   getHasUnsavedChanges,
   originatingApp,
+  incomingBreadcrumbs,
   getAppNameFromId,
   history,
 }: {
@@ -33,21 +35,24 @@ export function getBreadcrumbs({
   isByValue: boolean;
   getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   getAppNameFromId?: (id: string) => string | undefined;
   history: ScopedHistory;
 }) {
   const breadcrumbs = [];
 
-  if (originatingApp && getAppNameFromId) {
+  if (incomingBreadcrumbs?.length) {
+    breadcrumbs.push(...incomingBreadcrumbs);
+  } else if (originatingApp && getAppNameFromId) {
     breadcrumbs.push({
       onClick: () => {
         getNavigateToApp()(originatingApp);
       },
-      text: getAppNameFromId(originatingApp),
+      text: getAppNameFromId(originatingApp) ?? originatingApp,
     });
   }
 
-  if (!isByValue) {
+  if (!isByValue && !incomingBreadcrumbs?.length) {
     breadcrumbs.push({
       text: APP_NAME,
       onClick: async () => {

@@ -13,6 +13,8 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -39,8 +41,6 @@ import { KnowledgeIndicatorsStatusFilter } from './knowledge_indicators_status_f
 import { KnowledgeIndicatorsTypeFilter } from './knowledge_indicators_type_filter';
 import { RulesTable } from './rules_table';
 import { LoadingPanel } from '../../loading_panel';
-import { PromotionCallout } from './promotion_callout/promotion_callout';
-import { SuggestedRulesFlyout } from './suggested_rules_flyout/suggested_rules_flyout';
 import { getKnowledgeIndicatorItemId } from './utils/get_knowledge_indicator_item_id';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -57,7 +57,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useKibana();
   const queryClient = useQueryClient();
   const [tableSearchValue, setTableSearchValue] = useState('');
-  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS);
+  const debouncedTableSearchValue = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
+    .trim()
+    .toLowerCase();
   const [knowledgeIndicatorStatusFilter, setKnowledgeIndicatorStatusFilter] = useState<
     'active' | 'excluded'
   >('active');
@@ -88,14 +90,19 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     (
       completedTaskState: Extract<TaskResult<OnboardingResult>, { status: TaskStatus.Completed }>
     ) => {
-      const queriesTaskResult = completedTaskState.queriesTaskResult;
-      const featuresTaskResult = completedTaskState.featuresTaskResult;
+      const { queriesTaskResult, featuresTaskResult } = completedTaskState;
+      const featuresSkipped = !featuresTaskResult;
       const generatedFeaturesCount =
         featuresTaskResult?.status === TaskStatus.Completed
-          ? featuresTaskResult.features.length
+          ? (featuresTaskResult.iterations ?? []).reduce(
+              (sum, iteration) => sum + iteration.newFeatures.length,
+              0
+            )
           : 0;
       const generatedQueriesCount =
         queriesTaskResult?.status === TaskStatus.Completed ? queriesTaskResult.queries.length : 0;
+
+      const count = generatedFeaturesCount + generatedQueriesCount;
 
       toasts.addSuccess({
         title: i18n.translate(
@@ -103,11 +110,14 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           {
             defaultMessage:
               '{count, plural, one {Generated # knowledge indicator} other {Generated # knowledge indicators}}',
-            values: {
-              count: generatedFeaturesCount + generatedQueriesCount,
-            },
+            values: { count },
           }
         ),
+        text: featuresSkipped
+          ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
+              defaultMessage: 'Feature identification was skipped.',
+            })
+          : undefined,
       });
 
       void Promise.all([
@@ -155,10 +165,13 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
       ),
     [knowledgeIndicators]
   );
-  const [isSuggestedRulesFlyoutOpen, setIsSuggestedRulesFlyoutOpen] = useState(false);
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
     ? getKnowledgeIndicatorItemId(selectedKnowledgeIndicator)
     : undefined;
+
+  const closeFlyout = useCallback(() => {
+    setSelectedKnowledgeIndicator(null);
+  }, []);
 
   const toggleSelectedKnowledgeIndicator = useCallback((knowledgeIndicator: KnowledgeIndicator) => {
     setSelectedKnowledgeIndicator((currentKnowledgeIndicator) => {
@@ -202,13 +215,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
-          <PromotionCallout
-            streamName={definition.stream.name}
-            onReviewClick={() => setIsSuggestedRulesFlyoutOpen(true)}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={true}>
             <EuiFlexGroup
               gutterSize="s"
@@ -230,8 +236,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
                   fullWidth
                   value={tableSearchValue}
                   onChange={(event) => setTableSearchValue(event.target.value)}
-                  placeholder={SIGNIFICANT_EVENTS_SEARCH_PLACEHOLDER}
-                  aria-label={SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL}
+                  placeholder={
+                    isRulesSelected
+                      ? RULES_SEARCH_PLACEHOLDER
+                      : KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER
+                  }
+                  aria-label={
+                    isRulesSelected
+                      ? RULES_SEARCH_ARIA_LABEL
+                      : KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL
+                  }
                 />
               </EuiFlexItem>
               {!isRulesSelected ? (
@@ -271,7 +285,6 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             <EuiSpacer size="m" />
             {isRulesSelected ? (
               <RulesTable
-                definition={definition.stream}
                 rules={ruleKnowledgeIndicators}
                 occurrencesByQueryId={occurrencesByQueryId}
                 searchTerm={debouncedTableSearchValue}
@@ -297,16 +310,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         <KnowledgeIndicatorDetailsFlyout
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
-          onClose={() => setSelectedKnowledgeIndicator(null)}
+          onClose={closeFlyout}
         />
       ) : null}
-
-      {isSuggestedRulesFlyoutOpen && (
-        <SuggestedRulesFlyout
-          streamName={definition.stream.name}
-          onClose={() => setIsSuggestedRulesFlyoutOpen(false)}
-        />
-      )}
     </>
   );
 }
@@ -324,16 +330,35 @@ function KnowledgeIndicatorsGenerationControls({
   onGenerateSuggestionsClick: () => void;
   onCancelGenerationClick: () => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {isGenerating ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
-            iconType="stop"
-            onClick={onCancelGenerationClick}
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={CANCEL_GENERATION_BUTTON_TOOLTIP}>
+              <EuiButtonIcon
+                size="m"
+                aria-label={CANCEL_GENERATION_BUTTON_ARIA_LABEL}
+                iconType="stop"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.currentTarget.blur();
+                  onCancelGenerationClick();
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              width: 1px;
+              align-self: stretch;
+              background-color: currentColor;
+              opacity: 0.15;
+              margin: 0 ${euiTheme.size.s};
+            `}
           />
-        </EuiFlexItem>
+        </>
       ) : null}
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -367,17 +392,31 @@ const RULES_FILTER_LABEL = i18n.translate(
   }
 );
 
-const SIGNIFICANT_EVENTS_SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.streams.significantEventsTable.searchPlaceholder',
+const KNOWLEDGE_INDICATORS_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchPlaceholder',
   {
-    defaultMessage: 'Search significant events',
+    defaultMessage: 'Search knowledge indicators',
   }
 );
 
-const SIGNIFICANT_EVENTS_SEARCH_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.searchAriaLabel',
+const KNOWLEDGE_INDICATORS_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorsSearchAriaLabel',
   {
-    defaultMessage: 'Search significant events',
+    defaultMessage: 'Search knowledge indicators',
+  }
+);
+
+const RULES_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchPlaceholder',
+  {
+    defaultMessage: 'Search rules',
+  }
+);
+
+const RULES_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.rulesSearchAriaLabel',
+  {
+    defaultMessage: 'Search rules',
   }
 );
 
@@ -406,6 +445,13 @@ const CANCEL_GENERATION_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.significantEventsTable.cancelGenerationButtonAriaLabel',
   {
     defaultMessage: 'Cancel generation',
+  }
+);
+
+const CANCEL_GENERATION_BUTTON_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsTable.cancelGenerationButtonTooltip',
+  {
+    defaultMessage: 'Stop this process',
   }
 );
 

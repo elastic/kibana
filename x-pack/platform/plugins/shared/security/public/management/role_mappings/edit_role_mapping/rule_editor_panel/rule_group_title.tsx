@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RuleGroup } from '../../model';
@@ -81,7 +82,17 @@ export const RuleGroupTitle = (props: Props) => {
   );
 
   const ruleTypeSelector = (
-    <EuiPopover button={ruleButton} isOpen={isMenuOpen} closePopover={() => setIsMenuOpen(false)}>
+    <EuiPopover
+      button={ruleButton}
+      isOpen={isMenuOpen}
+      closePopover={() => setIsMenuOpen(false)}
+      aria-label={i18n.translate(
+        'xpack.security.management.editRoleMapping.ruleGroupTitlePopoverAriaLabel',
+        {
+          defaultMessage: 'Change rule group type',
+        }
+      )}
+    >
       <EuiContextMenuPanel
         items={availableRuleTypes.map((rt, index) => {
           const isSelected = rt.getDisplayTitle() === props.rule.getDisplayTitle();

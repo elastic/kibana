@@ -12,6 +12,12 @@ import type { RoleCredentials } from '../../../services';
 const RULE_API_PATH = '/api/alerting/v2/rules';
 const RULE_SO_TYPE = 'alerting_rule';
 
+/** Bulk ops only include `truncated` / `totalMatched` when a filter matches more than BULK_FILTER_MAX_RULES (see @kbn/alerting-v2-schemas). */
+function expectNoBulkTruncationMetadata(body: Record<string, unknown>) {
+  expect(body).to.not.have.property('truncated');
+  expect(body).to.not.have.property('totalMatched');
+}
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const samlAuth = getService('samlAuth');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -35,7 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...overrides,
       });
 
-    expect(response.status).to.be(200);
+    expect(response.status).to.be(201);
     return response.body;
   }
 
@@ -71,6 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.errors).to.be.an('array');
       expect(response.body.errors.length).to.be(0);
+      expectNoBulkTruncationMetadata(response.body);
 
       // Verify rules no longer exist
       const getResponse1 = await supertestWithoutAuth
@@ -100,6 +107,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.errors).to.be.an('array');
       expect(response.body.errors.length).to.be(0);
+      expectNoBulkTruncationMetadata(response.body);
 
       // Verify the rule no longer exists
       const getResponse = await supertestWithoutAuth
@@ -122,6 +130,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.status).to.be(200);
       expect(response.body.errors).to.be.an('array');
       expect(response.body.errors.length).to.be(1);
+      expectNoBulkTruncationMetadata(response.body);
       expect(response.body.errors[0].id).to.be('non-existent-id');
       expect(response.body.errors[0].error).to.be.an('object');
       expect(response.body.errors[0].error.statusCode).to.be.a('number');
@@ -157,6 +166,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(200);
       expect(response.body.errors.length).to.be(0);
+      expectNoBulkTruncationMetadata(response.body);
 
       // Deleted rule should not exist
       const deletedResponse = await supertestWithoutAuth
@@ -192,6 +202,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errors).to.be.an('array');
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
 
         // Verify signal rules are deleted
         const getResponse1 = await supertestWithoutAuth
@@ -230,6 +241,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(200);
         expect(response.body.errors).to.be.an('array');
         expect(response.body.errors.length).to.be(0);
+        expectNoBulkTruncationMetadata(response.body);
       });
 
       it('should return 400 when both ids and filter are provided', async () => {
@@ -242,7 +254,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.status).to.be(400);
       });
 
-      it('should return 400 when neither ids nor filter is provided', async () => {
+      it('should return 400 when neither ids nor filter nor match_all is provided', async () => {
         const response = await supertestWithoutAuth
           .post(`${RULE_API_PATH}/_bulk_delete`)
           .set(roleAuthc.apiKeyHeader)
@@ -250,6 +262,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .send({});
 
         expect(response.status).to.be(400);
+      });
+
+      it('should treat match_all as targeting all rules', async () => {
+        const response = await supertestWithoutAuth
+          .post(`${RULE_API_PATH}/_bulk_delete`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send({ match_all: true });
+
+        expect(response.status).to.be(200);
       });
     });
   });

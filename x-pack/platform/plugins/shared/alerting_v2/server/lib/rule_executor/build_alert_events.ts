@@ -89,6 +89,7 @@ export function createAlertEventsBatchBuilder({
         status: 'breached',
         source,
         type: 'signal',
+        space_id: spaceId,
       };
 
       index++;
@@ -102,6 +103,7 @@ export function createAlertEventsBatchBuilder({
 export interface BuildRecoveryAlertEventsOpts {
   ruleId: string;
   ruleVersion: number;
+  spaceId: string;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: Set<string>;
   scheduledTimestamp: string;
@@ -116,6 +118,7 @@ export interface BuildRecoveryAlertEventsOpts {
 export function buildRecoveryAlertEvents({
   ruleId,
   ruleVersion,
+  spaceId,
   activeGroupHashes,
   breachedGroupHashes,
   scheduledTimestamp,
@@ -133,6 +136,7 @@ export function buildRecoveryAlertEvents({
       status: 'recovered' as const,
       source: 'internal',
       type: 'signal' as const,
+      space_id: spaceId,
     }));
 }
 
@@ -215,5 +219,6 @@ export function buildQueryRecoveryAlertEvents({
     status: 'recovered' as const,
     source: 'internal',
     type: 'signal' as const,
+    space_id: spaceId,
   }));
 }

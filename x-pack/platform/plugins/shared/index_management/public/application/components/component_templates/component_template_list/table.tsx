@@ -10,7 +10,12 @@ import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiInMemoryTableProps, EuiSelectableOption } from '@elastic/eui';
+import type {
+  EuiInMemoryTableProps,
+  EuiSelectableOption,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -31,6 +36,7 @@ import { reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
+import { useAppContext } from '../../../app_context';
 
 const inUseFilterLabel = i18n.translate(
   'xpack.idxMgmt.componentTemplatesList.table.inUseFilterLabel',
@@ -73,6 +79,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   history,
 }) => {
   const { trackMetric } = useComponentTemplatesContext();
+  const { privs } = useAppContext();
 
   // By default, we want to show all the component templates that are not deprecated.
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
@@ -139,6 +146,113 @@ export const ComponentTable: FunctionComponent<Props> = ({
     </EuiFilterButton>
   );
 
+  const actions: EuiBasicTableColumn<ComponentTemplateListItem> = {
+    name: (
+      <FormattedMessage
+        id="xpack.idxMgmt.componentTemplatesList.table.actionColumnTitle"
+        defaultMessage="Actions"
+      />
+    ),
+    actions: [
+      {
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionEditText', {
+          defaultMessage: 'Edit',
+        }),
+        description: i18n.translate(
+          'xpack.idxMgmt.componentTemplatesList.table.actionEditDecription',
+          {
+            defaultMessage: 'Edit this component template',
+          }
+        ),
+        onClick: ({ name }: ComponentTemplateListItem) => onEditClick(name),
+        isPrimary: true,
+        icon: 'pencil',
+        type: 'icon',
+        'data-test-subj': 'editComponentTemplateButton',
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionCloneText', {
+          defaultMessage: 'Clone',
+        }),
+        description: i18n.translate(
+          'xpack.idxMgmt.componentTemplatesList.table.actionCloneDecription',
+          {
+            defaultMessage: 'Clone this component template',
+          }
+        ),
+        onClick: ({ name }: ComponentTemplateListItem) => onCloneClick(name),
+        icon: 'copy',
+        type: 'icon',
+        'data-test-subj': 'cloneComponentTemplateButton',
+      },
+      {
+        name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.deleteActionLabel', {
+          defaultMessage: 'Delete',
+        }),
+        description: i18n.translate(
+          'xpack.idxMgmt.componentTemplatesList.table.deleteActionDescription',
+          { defaultMessage: 'Delete this component template' }
+        ),
+        onClick: ({ name }) => onDeleteClick([name]),
+        enabled: ({ usedBy }) => usedBy.length === 0,
+        isPrimary: true,
+        type: 'icon',
+        icon: 'trash',
+        color: 'danger',
+        'data-test-subj': 'deleteComponentTemplateButton',
+      },
+    ],
+  };
+
+  const selectionConfig: EuiTableSelectionType<ComponentTemplateListItem> = {
+    onSelectionChange: setSelection,
+    selectable: ({ usedBy }) => usedBy.length === 0,
+    selectableMessage: (selectable, { name }) =>
+      selectable
+        ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
+            defaultMessage: 'Select "{name}" component template',
+            values: {
+              name,
+            },
+          })
+        : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
+            defaultMessage: 'Component template "{name}" is in use and cannot be deleted',
+            values: {
+              name,
+            },
+          }),
+  };
+
+  const toolsRight = [
+    <EuiButton
+      key="reloadButton"
+      iconType="refresh"
+      color="success"
+      data-test-subj="reloadButton"
+      onClick={onReloadClick}
+    >
+      {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.reloadButtonLabel', {
+        defaultMessage: 'Reload',
+      })}
+    </EuiButton>,
+  ];
+
+  if (privs.manageIndexTemplates) {
+    toolsRight.push(
+      <EuiButton
+        fill
+        iconType="plusCircle"
+        data-test-subj="createComponentTemplateButton"
+        key="createComponentTemplateButton"
+        {...reactRouterNavigate(history, '/create_component_template')}
+      >
+        {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {
+          defaultMessage: 'Create component template',
+        })}
+      </EuiButton>
+    );
+  }
+
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
     tableCaption: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.tableCaption', {
@@ -147,24 +261,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
     itemId: 'name',
     'data-test-subj': 'componentTemplatesTable',
     sorting,
-    selection: {
-      onSelectionChange: setSelection,
-      selectable: ({ usedBy }) => usedBy.length === 0,
-      selectableMessage: (selectable, { name }) =>
-        selectable
-          ? i18n.translate('xpack.idxMgmt.componentTemplatesList.table.selectionLabel', {
-              defaultMessage: 'Select "{name}" component template',
-              values: {
-                name,
-              },
-            })
-          : i18n.translate('xpack.idxMgmt.componentTemplatesList.table.disabledSelectionLabel', {
-              defaultMessage: 'Component template "{name}" is in use and cannot be deleted',
-              values: {
-                name,
-              },
-            }),
-    },
+    selection: privs.manageIndexTemplates ? selectionConfig : undefined,
     rowProps: () => ({
       'data-test-subj': 'componentTemplateTableRow',
     }),
@@ -183,30 +280,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             />
           </EuiButton>
         ) : undefined,
-      toolsRight: [
-        <EuiButton
-          key="reloadButton"
-          iconType="refresh"
-          color="success"
-          data-test-subj="reloadButton"
-          onClick={onReloadClick}
-        >
-          {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.reloadButtonLabel', {
-            defaultMessage: 'Reload',
-          })}
-        </EuiButton>,
-        <EuiButton
-          fill
-          iconType="plusCircle"
-          data-test-subj="createComponentTemplateButton"
-          key="createComponentTemplateButton"
-          {...reactRouterNavigate(history, '/create_component_template')}
-        >
-          {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.createButtonLabel', {
-            defaultMessage: 'Create component template',
-          })}
-        </EuiButton>,
-      ],
+      toolsRight,
       box: {
         incremental: true,
         'data-test-subj': 'componentTemplatesSearch',
@@ -322,7 +396,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         truncateText: true,
         align: 'center',
         sortable: true,
-        render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
+        render: (hasMappings: boolean) =>
+          hasMappings ? <EuiIcon type="check" aria-hidden={true} /> : null,
       },
       {
         field: 'hasSettings',
@@ -332,7 +407,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         truncateText: true,
         align: 'center',
         sortable: true,
-        render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
+        render: (hasSettings: boolean) =>
+          hasSettings ? <EuiIcon type="check" aria-hidden={true} /> : null,
       },
       {
         field: 'hasAliases',
@@ -342,65 +418,10 @@ export const ComponentTable: FunctionComponent<Props> = ({
         truncateText: true,
         align: 'center',
         sortable: true,
-        render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
+        render: (hasAliases: boolean) =>
+          hasAliases ? <EuiIcon type="check" aria-hidden={true} /> : null,
       },
-      {
-        name: (
-          <FormattedMessage
-            id="xpack.idxMgmt.componentTemplatesList.table.actionColumnTitle"
-            defaultMessage="Actions"
-          />
-        ),
-        actions: [
-          {
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionEditText', {
-              defaultMessage: 'Edit',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.actionEditDecription',
-              {
-                defaultMessage: 'Edit this component template',
-              }
-            ),
-            onClick: ({ name }: ComponentTemplateListItem) => onEditClick(name),
-            isPrimary: true,
-            icon: 'pencil',
-            type: 'icon',
-            'data-test-subj': 'editComponentTemplateButton',
-          },
-          {
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.actionCloneText', {
-              defaultMessage: 'Clone',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.actionCloneDecription',
-              {
-                defaultMessage: 'Clone this component template',
-              }
-            ),
-            onClick: ({ name }: ComponentTemplateListItem) => onCloneClick(name),
-            icon: 'copy',
-            type: 'icon',
-            'data-test-subj': 'cloneComponentTemplateButton',
-          },
-          {
-            name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.deleteActionLabel', {
-              defaultMessage: 'Delete',
-            }),
-            description: i18n.translate(
-              'xpack.idxMgmt.componentTemplatesList.table.deleteActionDescription',
-              { defaultMessage: 'Delete this component template' }
-            ),
-            onClick: ({ name }) => onDeleteClick([name]),
-            enabled: ({ usedBy }) => usedBy.length === 0,
-            isPrimary: true,
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            'data-test-subj': 'deleteComponentTemplateButton',
-          },
-        ],
-      },
+      ...(privs.manageIndexTemplates ? [actions] : []),
     ],
     items: filteredComponentTemplates,
   };

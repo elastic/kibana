@@ -84,18 +84,16 @@
     "snoozeSchedule.duration",
     "snoozeSchedule.id",
     "snoozeSchedule.skipRecurrences",
+    "snoozedInstances",
+    "snoozedInstances.instanceId",
+    "snoozedInstances.snoozeSnapshot",
     "tags",
     "throttle",
     "uiamApiKey",
     "updatedAt",
     "updatedBy"
   ],
-  "alerting_api_key_pending_invalidation": [
-    "apiKeyId",
-    "createdAt",
-    "uiamApiKey"
-  ],
-  "alerting_notification_policy": [
+  "alerting_action_policy": [
     "auth",
     "auth.apiKey",
     "auth.createdByUser",
@@ -119,6 +117,11 @@
     "updatedBy",
     "updatedByUsername"
   ],
+  "alerting_api_key_pending_invalidation": [
+    "apiKeyId",
+    "createdAt",
+    "uiamApiKey"
+  ],
   "alerting_rule": [
     "createdAt",
     "createdBy",
@@ -126,7 +129,6 @@
     "evaluation",
     "evaluation.query",
     "evaluation.query.base",
-    "evaluation.query.condition",
     "grouping",
     "grouping.fields",
     "kind",
@@ -141,7 +143,6 @@
     "recovery_policy",
     "recovery_policy.query",
     "recovery_policy.query.base",
-    "recovery_policy.query.condition",
     "recovery_policy.type",
     "schedule",
     "schedule.every",
@@ -389,13 +390,6 @@
     "title",
     "version"
   ],
-  "data_connector": [
-    "kscIds",
-    "name",
-    "toolIds",
-    "type",
-    "workflowIds"
-  ],
   "data_stream-config": [
     "created_by",
     "data_stream_id",
@@ -485,6 +479,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-ccs-state": [],
   "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
@@ -518,6 +513,7 @@
     "name",
     "package_assets",
     "pending_upgrade_review",
+    "previous_dependency_versions",
     "previous_version",
     "verification_key_id",
     "verification_status",
@@ -664,6 +660,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "min_agent_version",
     "monitoring_enabled",
@@ -689,7 +686,10 @@
     "namespace",
     "packagePolicyCount",
     "updated_at",
-    "vars"
+    "vars",
+    "verification_failed_at",
+    "verification_started_at",
+    "verification_status"
   ],
   "fleet-fleet-server-host": [
     "host_urls",
@@ -806,6 +806,7 @@
     "is_managed",
     "is_preconfigured",
     "is_protected",
+    "is_verifier",
     "keep_monitoring_alive",
     "min_agent_version",
     "monitoring_diagnostics",
@@ -861,6 +862,8 @@
     "is_preconfigured",
     "key",
     "name",
+    "otel_disable_beatsauth",
+    "otel_exporter_config_yaml",
     "output_id",
     "partition",
     "password",
@@ -945,6 +948,7 @@
     "use_space_awareness_migration_status"
   ],
   "integration-config": [
+    "connector_id",
     "created_by",
     "created_by_profile_uid",
     "data_stream_count",
@@ -961,6 +965,11 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
+  "lead-generation-config": [
+    "connectorId",
+    "lastError",
+    "lastExecutionUuid"
+  ],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
@@ -1188,6 +1197,26 @@
     "sourceIndex",
     "updated",
     "version"
+  ],
+  "security:endpoint-scripts-library": [
+    "created_at",
+    "created_by",
+    "description",
+    "example",
+    "file_hash_sha256",
+    "file_id",
+    "file_name",
+    "file_size",
+    "file_type",
+    "id",
+    "instructions",
+    "name",
+    "path_to_executable",
+    "platform",
+    "requires_input",
+    "tags",
+    "updated_at",
+    "updated_by"
   ],
   "security:reference-data": [
     "id",
@@ -1424,7 +1453,8 @@
     "status",
     "taskType",
     "userScope",
-    "userScope.apiKeyId"
+    "userScope.apiKeyId",
+    "userScope.uiamApiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
@@ -1439,6 +1469,7 @@
     "@timestamp",
     "entityId",
     "entityType",
+    "errorCode",
     "message",
     "status"
   ],
@@ -1468,6 +1499,12 @@
   "usage-counters": [
     "domainId"
   ],
+  "user-storage": [
+    "userId"
+  ],
+  "user-storage-global": [
+    "userId"
+  ],
   "user_connector_token": [
     "connectorId",
     "credentialType",
@@ -1489,6 +1526,9 @@
     "enabled",
     "managed",
     "name",
+    "range",
+    "range.end",
+    "range.start",
     "type"
   ],
   "workplace_search_telemetry": []

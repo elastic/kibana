@@ -58,3 +58,44 @@ export async function deleteActionConnector(
     .set(roleAuthc.apiKeyHeader)
     .set(internalReqHeader);
 }
+
+export async function configureInferenceSettings(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  { featureId, connectorId }: { featureId: string; connectorId: string }
+) {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const samlAuth = getService('samlAuth');
+
+  const internalReqHeader = samlAuth.getInternalRequestHeader();
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
+  await supertestWithoutAuth
+    .put('/internal/search_inference_endpoints/settings')
+    .send({
+      features: [{ feature_id: featureId, endpoints: [{ id: connectorId }] }],
+    })
+    .set(roleAuthc.apiKeyHeader)
+    .set(internalReqHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('elastic-api-version', '1')
+    .expect(200);
+}
+
+export async function clearInferenceSettings(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const samlAuth = getService('samlAuth');
+
+  const internalReqHeader = samlAuth.getInternalRequestHeader();
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
+  await supertestWithoutAuth
+    .put('/internal/search_inference_endpoints/settings')
+    .send({ features: [] })
+    .set(roleAuthc.apiKeyHeader)
+    .set(internalReqHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('elastic-api-version', '1')
+    .expect(200);
+}

@@ -7,11 +7,11 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
 import { useIntervalForHeatmap } from '../anomaly_heatmap_interval';
 import type { AnomalyBand } from '../anomaly_bands';
 import { getHiddenBandsFilters } from '../hidden_bands_filter';
-import { getLatestEntitiesIndexName } from '../../home/constants';
 
 export type ViewByMode = 'entity' | 'jobId';
 
@@ -48,13 +48,18 @@ const getEuidEvaluationBlock = (euidApi: EntityStoreEuid) => {
     `| EVAL entity_id = COALESCE(${ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
   );
 
-  const entityTypeCases = ANOMALY_ENTITY_TYPES.map((t) => `${t}_euid IS NOT NULL, "${t}"`).join(
+  // `*_euid IS NOT NULL` was sometimes reporting false even when `*_euid` was a non-empty string;
+  // So using `LENGTH(...) > 0` instead.
+  const typedEuidNonEmpty = (t: (typeof ANOMALY_ENTITY_TYPES)[number]) =>
+    `LENGTH(TO_STRING(${t}_euid)) > 0`;
+
+  const entityTypeCases = ANOMALY_ENTITY_TYPES.map((t) => `${typedEuidNonEmpty(t)}, "${t}"`).join(
     ', '
   );
   parts.push(`| EVAL entity_type = CASE(${entityTypeCases}, NULL)`);
 
   const entityNameCases = ANOMALY_ENTITY_TYPES.map(
-    (t) => `${t}_euid IS NOT NULL, ${ENTITY_NAME_FIELD[t]}`
+    (t) => `${typedEuidNonEmpty(t)}, ${ENTITY_NAME_FIELD[t]}`
   ).join(', ');
   parts.push(`| EVAL entity_name = CASE(${entityNameCases}, NULL)`);
 
@@ -135,9 +140,10 @@ export const useRecentAnomaliesDataEsqlSource = ({
   viewBy,
   watchlistId,
   spaceId,
-}: EsqlSourceParams & { rowLabels?: string[] }) => {
+  timeRange,
+}: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
-  const interval = useIntervalForHeatmap();
+  const interval = useIntervalForHeatmap(timeRange);
 
   if (!euidApi || !spaceId || !rowLabels) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');

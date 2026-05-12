@@ -22,6 +22,7 @@ import {
   addDataStreamToZip,
   addFieldsToZip,
   addIngestPipelineToZip,
+  addLogoToZip,
   addManifestToZip,
   addReadmeToZip,
 } from './util';
@@ -128,7 +129,7 @@ const createManifest = (
         ]
       : [];
 
-  return {
+  const manifest: IntegrationManifest = {
     format_version: FORMAT_VERSION,
     name,
     title,
@@ -147,6 +148,19 @@ const createManifest = (
       type: 'community',
     },
   };
+
+  if (integration.metadata?.logo) {
+    manifest.icons = [
+      {
+        src: '/img/logo.svg',
+        title: `${title} logo`,
+        size: '32x32',
+        type: 'image/svg+xml',
+      },
+    ];
+  }
+
+  return manifest;
 };
 
 export const buildIntegrationPackage = async (
@@ -204,6 +218,10 @@ export const buildIntegrationPackage = async (
 
   const readmeContent = buildReadme(integration, dataStreams, fieldMappingsPerStream);
   addReadmeToZip(zip, packageName, readmeContent);
+
+  if (integration.metadata?.logo) {
+    addLogoToZip(zip, packageName, integration.metadata.logo);
+  }
 
   const buffer = await zip.toBufferPromise();
   return { buffer, packageName };

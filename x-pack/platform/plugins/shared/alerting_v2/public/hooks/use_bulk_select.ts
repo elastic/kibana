@@ -6,6 +6,7 @@
  */
 
 import { useReducer, useMemo, useCallback } from 'react';
+import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { escapeQuotes } from '@kbn/es-query';
 import type { BulkOperationParams } from '../services/rules_api';
 
@@ -73,9 +74,13 @@ interface UseBulkSelectProps {
   totalItemCount: number;
   /** The visible page of items. */
   items: Array<{ id: string }>;
+  /** Facet filter KQL, same as list-rules `filter` query param. */
+  filter?: string;
+  /** Debounced search string, same as list-rules `search` query param. */
+  search?: string;
 }
 
-export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => {
+export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulkSelectProps) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     selectedIds: new Set<string>(),
@@ -88,8 +93,11 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
       return 0;
     }
     if (state.isAllSelected) {
-      // All selected minus the exclusion set
-      return totalItemCount - state.selectedIds.size;
+      const logical = totalItemCount - state.selectedIds.size;
+      if (totalItemCount > BULK_FILTER_MAX_RULES) {
+        return Math.min(logical, BULK_FILTER_MAX_RULES);
+      }
+      return logical;
     }
     // Only IDs that are actually on the current page count
     return itemIds.filter((id) => state.selectedIds.has(id)).length;
@@ -167,7 +175,7 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
   /**
    * Returns the appropriate `BulkOperationParams` for the current selection state.
    *
-   * When `isAllSelected` is true, sends a filter (or empty filter for "match all")
+   * When `isAllSelected` is true, sends `filter` and/or `search` params
    * with an exclusion clause for deselected IDs. When false, sends explicit IDs.
    *
    * Filters use clean API field names (e.g. `id`), which the server
@@ -176,16 +184,28 @@ export const useBulkSelect = ({ totalItemCount, items }: UseBulkSelectProps) => 
   const getBulkParams = useCallback((): BulkOperationParams => {
     if (state.isAllSelected) {
       const excludedIds = [...state.selectedIds];
-      if (excludedIds.length === 0) {
-        // Select all, no exclusions → match-all filter
-        return { filter: '' };
-      }
-      const exclusionClauses = excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ');
-      return { filter: `NOT (${exclusionClauses})` };
+      const exclusionClauses =
+        excludedIds.length > 0
+          ? excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ')
+          : undefined;
+
+      const wrappedFilter = filter ? `(${filter})` : undefined;
+      const combinedFilter = [
+        wrappedFilter,
+        exclusionClauses ? `NOT (${exclusionClauses})` : undefined,
+      ]
+        .filter(Boolean)
+        .join(' AND ');
+
+      return {
+        ...(combinedFilter ? { filter: combinedFilter } : {}),
+        ...(search ? { search } : {}),
+        ...(!combinedFilter && !search ? { match_all: true as const } : {}),
+      };
     }
 
     return { ids: [...state.selectedIds] };
-  }, [state]);
+  }, [state, filter, search]);
 
   return useMemo(
     () => ({

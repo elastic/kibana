@@ -21,7 +21,7 @@ const { dataViews } = dataPluginMock.createStartContract();
 
 const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
 
-jest.mock('../utils/build_episodes_esql_query', () => ({
+jest.mock('../queries/episodes_query', () => ({
   buildEpisodesBaseQuery: jest.fn().mockReturnValue({
     print: jest.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
   }),
@@ -112,7 +112,7 @@ describe('useAlertingEpisodesDataView', () => {
         },
       },
     });
-    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(1);
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(2);
   });
 
   it('should return undefined when data view is not loaded yet', () => {

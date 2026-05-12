@@ -17,9 +17,9 @@ export const SLO_ERROR_BUDGET_ID = 'slo_error_budget';
 export const SLO_BURN_RATE_EMBEDDABLE_ID = 'slo_burn_rate';
 export const SLO_ALERTS_EMBEDDABLE_ID = 'slo_alerts';
 
-/** Common headers for Dashboard API requests (internal API version 1) */
+/** Common headers for Dashboard API requests */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
+  'elastic-api-version': '2023-10-31',
 } as const;

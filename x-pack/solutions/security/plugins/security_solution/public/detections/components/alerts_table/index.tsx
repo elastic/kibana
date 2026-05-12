@@ -23,6 +23,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
@@ -467,6 +468,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
               ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
               consumers={ALERT_TABLE_CONSUMERS}
+              projectRouting={PROJECT_ROUTING.ORIGIN}
               query={finalBoolQuery}
               sort={sort}
               casesConfiguration={casesConfiguration}

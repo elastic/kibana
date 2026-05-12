@@ -26,10 +26,13 @@ export enum SuggestionCategory {
   FUNCTION_AGG = 'function_agg',
   FUNCTION_SCALAR = 'function_scalar',
 
+  COMMAND = 'command', // Source commands (FROM, etc.)
+
   RECOMMENDED_QUERY_WITH_PRIORITY = 'recommended_query_with_priority', // Search query (highest priority recommended query)
   RECOMMENDED_QUERY = 'recommended_query',
 
   VALUE = 'value', // METADATA, settings, special keywords
+  SUBQUERY = 'subquery', // (FROM ...) subquery
   PIPE = 'pipe',
   COMMA = 'comma',
   UNKNOWN = 'unknown',

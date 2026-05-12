@@ -24,6 +24,8 @@ import {
 } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RuleDeprecationEventTypes } from '../../../../common/lib/telemetry/events/rule_deprecation/types';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { DeleteDeprecatedRulesConfirmModal } from './delete_deprecated_rules_confirm_modal';
@@ -44,24 +46,35 @@ export const DeprecatedRulesModal: React.FC<DeprecatedRulesModalProps> = ({
 }) => {
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [isConfirmVisible, showConfirm, hideConfirm] = useBoolState();
+  const { telemetry } = useKibana().services;
   const { executeBulkAction } = useExecuteBulkAction();
 
   const handleDeleteAll = useCallback(async () => {
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesDeleteAllClicked, {
+      count: rules.length,
+    });
     hideConfirm();
     await executeBulkAction({
       type: BulkActionTypeEnum.delete,
       ids: rules.map((rule) => rule.id),
     });
     onClose();
-  }, [executeBulkAction, rules, onClose, hideConfirm]);
+  }, [executeBulkAction, rules, onClose, hideConfirm, telemetry]);
+
+  const handleRuleLinkClick = useCallback(() => {
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesModalRuleLinkClicked, {
+      count: 1,
+    });
+  }, [telemetry]);
 
   const deprecatedRules: EuiListGroupItemProps[] = useMemo(
     () =>
       rules.map((rule) => ({
         label: <RuleLink name={rule.name} id={rule.id} />,
         color: 'primary',
+        onClick: handleRuleLinkClick,
       })),
-    [rules]
+    [rules, handleRuleLinkClick]
   );
 
   return (

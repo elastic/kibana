@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -90,42 +90,45 @@ export const AlertReason: FC<AlertReasonProps> = ({ hit, onShowFullReason }) => 
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem data-test-subj={REASON_TITLE_TEST_ID}>
-        <EuiTitle size="xxs">
-          <h5>
-            {isAlert ? (
-              <EuiFlexGroup
-                justifyContent="spaceBetween"
-                alignItems="center"
-                gutterSize="none"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.document.about.reason.alertReasonTitle"
-                      defaultMessage="Alert reason"
-                    />
-                  </h5>
-                </EuiFlexItem>
-                {viewPreview}
-              </EuiFlexGroup>
-            ) : (
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.document.about.reason.documentReasonTitle"
-                  defaultMessage="Document reason"
-                />
-              </p>
-            )}
-          </h5>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>
-        {isAlert ? alertReasonText : '-'}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem data-test-subj={REASON_TITLE_TEST_ID}>
+          <EuiTitle size="xxs">
+            <h5>
+              {isAlert ? (
+                <EuiFlexGroup
+                  justifyContent="spaceBetween"
+                  alignItems="center"
+                  gutterSize="none"
+                  responsive={false}
+                >
+                  <EuiFlexItem grow={false}>
+                    <h5>
+                      <FormattedMessage
+                        id="xpack.securitySolution.flyout.document.about.reason.alertReasonTitle"
+                        defaultMessage="Alert reason"
+                      />
+                    </h5>
+                  </EuiFlexItem>
+                  {viewPreview}
+                </EuiFlexGroup>
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.document.about.reason.documentReasonTitle"
+                    defaultMessage="Document reason"
+                  />
+                </p>
+              )}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={REASON_DETAILS_TEST_ID}>
+          {isAlert ? alertReasonText : '-'}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

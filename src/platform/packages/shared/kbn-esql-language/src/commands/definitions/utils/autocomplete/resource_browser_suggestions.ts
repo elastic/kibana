@@ -15,11 +15,9 @@ import { isRestartingExpression } from '../shared';
 export async function getIndicesBrowserSuggestion({
   callbacks,
   context,
-  innerText,
 }: {
   callbacks?: ICommandCallbacks;
   context?: ICommandContext;
-  innerText?: string;
 }): Promise<ISuggestionItem | undefined> {
   const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
   if (!canSuggestResourceBrowser || context?.isCursorInSubquery) {
@@ -32,7 +30,7 @@ export async function getIndicesBrowserSuggestion({
     timeSeriesSources: context?.timeSeriesSources,
   });
 
-  return createIndicesBrowserSuggestion(commandArgs, innerText);
+  return createIndicesBrowserSuggestion(commandArgs);
 }
 
 export function shouldSuggestIndicesBrowserAfterComma(commandText: string): boolean {

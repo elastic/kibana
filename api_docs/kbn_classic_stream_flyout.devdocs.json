@@ -49,6 +49,7 @@
             "lineNumber": 94,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateClassicStreamFlyoutProps",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -210,13 +210,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
                 ? () => setIsConnectorModalVisible(true)
                 : undefined
             }
-            onManageConnectorsClick={
-              assistantAvailability.hasConnectorsReadPrivilege
-                ? () =>
-                    navigateToApp('management', {
-                      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-                    })
-                : undefined
+            onManageConnectorsClick={() =>
+              navigateToApp('management', {
+                path: '/modelManagement/model_settings',
+              })
             }
             preConfiguredConnectors={preConfiguredConnectors}
             customConnectors={customConnectors}

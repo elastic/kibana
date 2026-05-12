@@ -7,50 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync } from 'fs';
-import * as Fsp from 'fs/promises';
-import Os from 'os';
 import Path from 'path';
-
-import { makeRe } from 'minimatch';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { ProcRunner } from '@kbn/dev-proc-runner';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import {
   buildValidationCliArgs,
   describeValidationNoTargetsScope,
   formatReproductionCommand,
   hasValidationRunFlags,
   readValidationRunFlags,
-  resolveValidationAffectedProjects,
   resolveValidationBaseContext,
   type ValidationBaseContext,
   VALIDATION_RUN_HELP,
   VALIDATION_RUN_STRING_FLAGS,
 } from '@kbn/dev-validation-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog, type Message, type Writer } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { testMatch } from '../../jest-preset';
-import { findConfigInDirectoryTree, runJest } from './run';
+import { runJest } from './run';
+import { runJestViaMoon, type MoonJestTaskResult } from './run_jest_via_moon';
 
 export const JEST_LABEL = 'jest';
 export const JEST_LOG_PREFIX = `[${JEST_LABEL}]`;
-const JEST_CONFIG_NAMES = [
-  'jest.config.dev.js',
-  'jest.config.js',
-  'jest.config.cjs',
-  'jest.config.mjs',
-  'jest.config.ts',
-  'jest.config.json',
-] as const;
-const testMatchers = (testMatch as string[]).flatMap((pattern) => {
-  const re = makeRe(pattern);
-  return re ? [re] : [];
-});
 
-type ProcRunnerLike = Pick<ProcRunner, 'run'>;
 type JestContractTestMode = 'related' | 'affected';
 
 interface JestConfigSelectionState {
@@ -91,16 +72,8 @@ export interface ExecuteJestValidationOptions {
   baseContext: ValidationBaseContext;
   log: ToolingLog;
   passthroughArgs?: string[];
-  procRunner: ProcRunnerLike;
+  procRunner: Pick<ProcRunner, 'run'>;
   onConfigResult?: (result: JestConfigResult) => void;
-}
-
-export interface ParsedJestRunOutput {
-  excerpt: string[];
-  failedTestFiles: string[];
-  snapshots?: string;
-  suites?: string;
-  tests?: string;
 }
 
 const hasArgFlag = (args: string[], flag: string) => {
@@ -126,160 +99,6 @@ const stripValidationArgs = (args: string[]) => {
   }
 
   return passthroughArgs;
-};
-
-const createProcLogFilter = (writer: Writer): Writer => ({
-  write(message: Message) {
-    if (message.source === 'ProcRunner') {
-      return false;
-    }
-
-    return writer.write(message);
-  },
-});
-
-const createQuietProcRunner = (log: ToolingLog) => {
-  const quietLog = new ToolingLog();
-  quietLog.setWriters(log.getWriters().map(createProcLogFilter));
-  return new ProcRunner(quietLog);
-};
-
-const createJestOutputPath = (configRepoRel: string) =>
-  Path.join(
-    Os.tmpdir(),
-    `kbn-jest-${configRepoRel.replace(/[\\/]/g, '_')}-${process.pid}-${Date.now()}.log`
-  );
-
-const wait = async (durationMs: number) => {
-  await new Promise((resolve) => setTimeout(resolve, durationMs));
-};
-
-const findSummaryLine = (lines: string[], prefix: string) =>
-  lines.find((line) => line.startsWith(`${prefix}:`));
-
-/** Parses Jest stdout/stderr into a compact summary for logging and failures. */
-export const parseJestRunOutput = (output: string): ParsedJestRunOutput => {
-  const lines = output
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  return {
-    excerpt: lines.filter((line) => !line.startsWith('info yarn jest')).slice(-8),
-    failedTestFiles: lines
-      .filter((line) => line.startsWith('FAIL '))
-      .map((line) => line.slice('FAIL '.length).trim()),
-    snapshots: findSummaryLine(lines, 'Snapshots'),
-    suites: findSummaryLine(lines, 'Test Suites'),
-    tests: findSummaryLine(lines, 'Tests'),
-  };
-};
-
-/**
- * Reads Jest output from a log file, retrying until two consecutive reads
- * return identical content. This is a heuristic to wait for the ProcRunner
- * to finish flushing — there is no explicit "write complete" signal.
- */
-const readParsedJestRunOutput = async (outputPath: string) => {
-  let previousOutput = '';
-
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    try {
-      const output = await Fsp.readFile(outputPath, 'utf8');
-      if (output && output === previousOutput) {
-        return parseJestRunOutput(output);
-      }
-
-      previousOutput = output;
-    } catch {
-      previousOutput = '';
-    }
-
-    await wait(50);
-  }
-
-  return parseJestRunOutput(previousOutput);
-};
-
-const formatSummaryValue = (summaryLine: string | undefined, label: string) => {
-  if (!summaryLine) {
-    return undefined;
-  }
-
-  return `${label} ${summaryLine.replace(/^[^:]+:\s*/u, '')}`;
-};
-
-const formatJestRunSummary = (parsedOutput: ParsedJestRunOutput) =>
-  [
-    formatSummaryValue(parsedOutput.suites, 'suites'),
-    formatSummaryValue(parsedOutput.tests, 'tests'),
-    formatSummaryValue(parsedOutput.snapshots, 'snapshots'),
-  ]
-    .filter((value): value is string => value !== undefined)
-    .join('; ');
-
-const extractTestCount = (parsedOutput: ParsedJestRunOutput): number => {
-  const match = parsedOutput.tests?.match(/(\d+) total/);
-  return match ? parseInt(match[1], 10) : 0;
-};
-
-const buildJestFailureMessage = ({
-  commandForLog,
-  configRepoRel,
-  parsedOutput,
-}: {
-  commandForLog: string;
-  configRepoRel: string;
-  parsedOutput: ParsedJestRunOutput;
-}) => {
-  const lines = [`${JEST_LABEL} failed for ${configRepoRel}.`];
-  const summary = formatJestRunSummary(parsedOutput);
-
-  if (summary) {
-    lines.push(`Summary: ${summary}`);
-  }
-
-  if (parsedOutput.failedTestFiles.length > 0) {
-    lines.push('Failed test file(s):');
-    for (const failedTestFile of parsedOutput.failedTestFiles.slice(0, 5)) {
-      lines.push(`  ${failedTestFile}`);
-    }
-
-    if (parsedOutput.failedTestFiles.length > 5) {
-      lines.push(`  ... and ${parsedOutput.failedTestFiles.length - 5} more`);
-    }
-  }
-
-  if (!summary && parsedOutput.excerpt.length > 0) {
-    lines.push('Error excerpt:');
-    for (const line of parsedOutput.excerpt) {
-      lines.push(`  ${line}`);
-    }
-  }
-
-  lines.push('Re-run directly with:');
-  lines.push(`  ${commandForLog}`);
-
-  if (parsedOutput.snapshots?.includes('failed')) {
-    lines.push('Update snapshots with:');
-    lines.push(`  ${commandForLog} -u`);
-  }
-
-  return lines.join('\n');
-};
-
-const isUnitJestConfigFile = (repoRelPath: string) => {
-  const basename = Path.basename(repoRelPath);
-  return JEST_CONFIG_NAMES.includes(basename as (typeof JEST_CONFIG_NAMES)[number]);
-};
-
-const isTestFile = (repoRelPath: string) => {
-  return testMatchers.some((matcher) => matcher.test(repoRelPath));
-};
-
-const resolveOwningConfig = (repoRelPath: string) => {
-  const absolutePath = Path.resolve(REPO_ROOT, repoRelPath);
-  return findConfigInDirectoryTree(Path.dirname(absolutePath), [...JEST_CONFIG_NAMES]);
 };
 
 const isFullJestRun = (baseContext: ValidationBaseContext) => {
@@ -365,64 +184,11 @@ export const planJestContractRuns = ({
     });
 };
 
-const runJestForConfig = async ({
-  log,
-  procRunner,
-  configPath,
-  passthroughArgs,
-  relatedFiles,
-}: {
-  log: ToolingLog;
-  procRunner: ProcRunnerLike;
-  configPath: string;
-  passthroughArgs: string[];
-  relatedFiles?: string[];
-}): Promise<ParsedJestRunOutput> => {
-  const configRepoRel = Path.relative(REPO_ROOT, configPath);
-  const args = ['scripts/jest', '--config', configRepoRel];
-  const outputPath = createJestOutputPath(configRepoRel);
-
-  if (relatedFiles && relatedFiles.length > 0) {
-    args.push('--findRelatedTests', ...relatedFiles);
-  }
-
-  args.push('--passWithNoTests');
-  args.push(...passthroughArgs);
-
-  const commandForLog = `node ${args.join(' ')}`;
-
-  try {
-    await procRunner.run('jest', {
-      cmd: process.execPath,
-      args,
-      cwd: REPO_ROOT,
-      wait: true,
-      writeLogsToPath: outputPath,
-    });
-
-    const parsedOutput = await readParsedJestRunOutput(outputPath);
-    const summary = formatJestRunSummary(parsedOutput);
-    log.success(`${JEST_LOG_PREFIX} passed ${configRepoRel}${summary ? ` (${summary})` : ''}`);
-    return parsedOutput;
-  } catch {
-    const parsedOutput = await readParsedJestRunOutput(outputPath);
-    throw createFailError(
-      buildJestFailureMessage({
-        commandForLog,
-        configRepoRel,
-        parsedOutput,
-      })
-    );
-  } finally {
-    await Fsp.unlink(outputPath).catch(() => undefined);
-  }
-};
-
 const runJestAllConfigs = async ({
   procRunner,
   passthroughArgs,
 }: {
-  procRunner: ProcRunnerLike;
+  procRunner: Pick<ProcRunner, 'run'>;
   passthroughArgs: string[];
 }) => {
   const args = ['scripts/jest_all', ...passthroughArgs];
@@ -442,16 +208,59 @@ const runJestAllConfigs = async ({
   }
 };
 
+const stripAnsiCodes = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+
+const formatMoonFailure = (task: MoonJestTaskResult): string => {
+  const lines: string[] = [];
+
+  // Group failures by file
+  const byFile = new Map<string, typeof task.failures>();
+  for (const f of task.failures) {
+    const list = byFile.get(f.file) ?? [];
+    list.push(f);
+    byFile.set(f.file, list);
+  }
+
+  for (const [file, failures] of byFile) {
+    const firstLine = failures[0]?.line;
+    const fileRef = firstLine ? `${file}:${firstLine}` : file;
+    lines.push(`FAIL ${fileRef}`);
+    for (const f of failures) {
+      lines.push(`  ● ${f.name}`);
+      lines.push('');
+      const msgLines = stripAnsiCodes(f.message).split('\n');
+      let pastFirstStackFrame = false;
+      for (const msgLine of msgLines) {
+        const trimmedLine = msgLine.trim();
+        if (trimmedLine.startsWith('at ') && pastFirstStackFrame) {
+          continue;
+        }
+        if (trimmedLine.startsWith('at ')) {
+          pastFirstStackFrame = true;
+        }
+        lines.push(`    ${msgLine}`);
+      }
+      lines.push('');
+    }
+  }
+
+  const rerunCmd = task.configPath
+    ? `node scripts/jest --config ${task.configPath}`
+    : `node scripts/jest`;
+  lines.push(`Re-run with: ${rerunCmd}`);
+
+  return lines.join('\n');
+};
+
 /**
  * Resolves scoped Jest targets from the validation contract and executes the
- * required config runs, including downstream expansion when requested.
+ * required config runs via Moon, including downstream expansion when requested.
  */
 export const executeJestValidation = async ({
   baseContext,
   log,
   passthroughArgs = [],
   procRunner,
-  onConfigResult,
 }: ExecuteJestValidationOptions): Promise<JestValidationResult | null> => {
   if (baseContext.mode === 'direct_target') {
     throw createFailError(
@@ -496,117 +305,62 @@ export const executeJestValidation = async ({
     return null;
   }
 
-  const testMode = baseContext.contract.testMode;
-  if (testMode === 'all') {
-    throw new Error(
-      'Unexpected Jest contract state: testMode=all should have been handled earlier.'
-    );
-  }
+  const { downstream } = baseContext.contract;
 
-  const plans = planJestContractRuns({
-    entries: changedFiles.map((repoRelPath) => {
-      const owningConfigPath = isUnitJestConfigFile(repoRelPath)
-        ? undefined
-        : resolveOwningConfig(repoRelPath) ?? undefined;
+  log.info(`${JEST_LOG_PREFIX} running affected configs via Moon...`);
 
-      return {
-        repoRelPath,
-        owningConfigPath,
-        isConfigFile: isUnitJestConfigFile(repoRelPath),
-        isTestFile: isTestFile(repoRelPath),
-      };
-    }),
-    testMode,
+  const result = await runJestViaMoon({
+    changedFiles,
+    downstream,
   });
 
-  // When downstream expansion is requested (e.g. --profile pr), discover jest
-  // configs in downstream-affected Moon projects that aren't already covered.
-  const { downstream } = baseContext.contract;
-  if (downstream !== 'none' && changedFiles.length > 0) {
-    const changedFilesJson = JSON.stringify({ files: changedFiles });
-    const affected = await resolveValidationAffectedProjects({
-      changedFilesJson,
-      downstream,
-    });
-
-    const coveredConfigs = new Set(plans.map((p) => p.configPath));
-    for (const sourceRoot of affected.affectedSourceRoots) {
-      const absRoot = Path.resolve(REPO_ROOT, sourceRoot);
-      for (const configName of JEST_CONFIG_NAMES) {
-        const configPath = Path.join(absRoot, configName);
-        if (!coveredConfigs.has(configPath) && existsSync(configPath)) {
-          plans.push({ configPath, mode: 'full' });
-          coveredConfigs.add(configPath);
-        }
-      }
+  if (result.warnings) {
+    for (const warning of result.warnings) {
+      log.warning(warning);
     }
   }
 
-  if (plans.length === 0) {
-    const noTargetsLabel =
-      baseContext.contract.testMode === 'related'
-        ? 'No related Jest targets found'
-        : 'No affected Jest targets found';
-    log.info(`${noTargetsLabel} ${describeValidationNoTargetsScope(baseContext)}; skipping jest.`);
+  if (result.taskCount === 0 && result.exitCode !== 0) {
+    const excerptLines = result.failureExcerpt ?? [];
+    const message = [
+      `${JEST_LABEL} failed (Moon exited with code ${result.exitCode}).`,
+      ...excerptLines.map((l) => `  ${l}`),
+      'Re-run with: node scripts/jest --profile quick',
+    ].join('\n');
+    throw createFailError(message);
+  }
+
+  if (result.taskCount === 0) {
+    log.info(
+      `No affected Jest configs found ${describeValidationNoTargetsScope(
+        baseContext
+      )}; skipping jest.`
+    );
     return null;
   }
 
-  log.info(`${JEST_LOG_PREFIX} planned ${plans.length} config run(s).`);
-  let totalTests = 0;
+  const { cachedCount } = result;
+  const ranCount = result.taskCount - cachedCount;
 
-  for (const [index, plan] of plans.entries()) {
-    const configRepoRel = Path.relative(REPO_ROOT, plan.configPath);
-    const relatedFiles = plan.mode === 'related' ? plan.relatedFiles ?? [] : undefined;
-    const commandForLog = `node scripts/jest --config ${configRepoRel}${
-      relatedFiles ? ` --findRelatedTests ${relatedFiles.join(' ')}` : ''
-    }`;
-
-    if (plan.mode === 'full') {
-      log.info(`${JEST_LOG_PREFIX} ${index + 1}/${plans.length} full ${configRepoRel}`);
-    } else {
-      log.info(
-        `${JEST_LOG_PREFIX} ${index + 1}/${plans.length} related ${configRepoRel} (${
-          (relatedFiles ?? []).length
-        } file(s))`
-      );
+  if (result.failed.length > 0) {
+    for (const task of result.failed) {
+      log.write('');
+      log.error(formatMoonFailure(task));
     }
 
-    try {
-      const parsedOutput = await runJestForConfig({
-        log,
-        procRunner,
-        configPath: plan.configPath,
-        passthroughArgs,
-        relatedFiles,
-      });
-
-      const testCount = extractTestCount(parsedOutput);
-      totalTests += testCount;
-
-      onConfigResult?.({
-        index: index + 1,
-        total: plans.length,
-        config: configRepoRel,
-        passed: true,
-        testCount,
-        command: commandForLog,
-      });
-    } catch (error) {
-      onConfigResult?.({
-        index: index + 1,
-        total: plans.length,
-        config: configRepoRel,
-        passed: false,
-        testCount: 0,
-        failureOutput: error instanceof Error ? error.message : String(error),
-        command: commandForLog,
-      });
-      throw error;
-    }
+    log.write('');
+    throw createFailError(
+      `${JEST_LABEL} failed for ${result.failed.length} config(s) (${ranCount} ran, ${cachedCount} cached; ${result.totalTests} tests).`
+    );
   }
 
-  log.success(`${JEST_LABEL} contract run passed (${plans.length} config run(s)).`);
-  return { configCount: plans.length, testCount: totalTests };
+  const parts: string[] = [];
+  if (ranCount > 0) parts.push(`${ranCount} ran`);
+  if (cachedCount > 0) parts.push(`${cachedCount} cached`);
+  parts.push(`${result.totalTests} tests`);
+
+  log.success(`${JEST_LOG_PREFIX} passed (${parts.join(', ')})`);
+  return { configCount: result.taskCount, testCount: result.totalTests };
 };
 
 /** Runs the validation-contract-aware `scripts/jest` CLI entrypoint. */
@@ -641,21 +395,12 @@ export const runJestContract = () => {
         onWarning: (message) => log.warning(message),
       });
 
-      const shouldUseQuietProcRunner =
-        baseContext.mode !== 'contract' ||
-        (baseContext.runContext.kind !== 'full' && baseContext.contract.testMode !== 'all');
-      const quietProcRunner = shouldUseQuietProcRunner ? createQuietProcRunner(log) : undefined;
-
-      try {
-        await executeJestValidation({
-          baseContext,
-          log,
-          passthroughArgs,
-          procRunner: quietProcRunner ?? procRunner,
-        });
-      } finally {
-        await quietProcRunner?.teardown();
-      }
+      await executeJestValidation({
+        baseContext,
+        log,
+        passthroughArgs,
+        procRunner,
+      });
     },
     {
       description: `
@@ -677,9 +422,7 @@ export const runJestContract = () => {
       flags: {
         string: [...VALIDATION_RUN_STRING_FLAGS],
         allowUnexpected: true,
-        help: `
-${VALIDATION_RUN_HELP}
-        `,
+        help: [...VALIDATION_RUN_HELP],
       },
     }
   );

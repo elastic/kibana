@@ -762,6 +762,13 @@ export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
   }
 );
 
+export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunPermissionsTooltip',
+  {
+    defaultMessage: 'You need access to the "Manual rule run" privilege',
+  }
+);
+
 export const COLUMN_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.ruleTitle',
   {
@@ -871,20 +878,6 @@ export const COLUMN_QUERY_TIMES_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.queryTimesTooltip',
   {
     defaultMessage: 'Total time spent querying source indices during last Rule execution',
-  }
-);
-
-export const COLUMN_GAP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
-  {
-    defaultMessage: 'Last Gap (if any)',
-  }
-);
-
-export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
-  {
-    defaultMessage: 'see documentation',
   }
 );
 

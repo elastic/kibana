@@ -6,15 +6,12 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
 import { type ModelProvider, type ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import {
-  fromEmbeddablePanel,
-  type AttachmentPanel,
-  type VisualizationContent,
-} from '@kbn/dashboard-agent-common';
+import { type AttachmentPanel } from '@kbn/dashboard-agent-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { VisualizationFailure } from './utils';
 import { getErrorMessage } from './utils';
 
@@ -25,15 +22,20 @@ const DASHBOARD_CHART_CONFIG_INSTRUCTIONS = `XY AXIS TITLE RULES:
 export type VisualizationAttempt =
   | {
       type: 'success';
-      visContent: VisualizationContent;
+      visContent: Pick<AttachmentPanel, 'type' | 'config'>;
     }
   | {
       type: 'failure';
       failure: VisualizationFailure;
     };
 
+export type InlineVisualizationOperationType =
+  | 'add_section'
+  | 'create_visualization_panels'
+  | 'edit_visualization_panels';
+
 interface ResolveVisualizationConfigParams {
-  operationType: 'add_section' | 'create_visualization_panels' | 'edit_visualization_panels';
+  operationType: InlineVisualizationOperationType;
   identifier: string;
   nlQuery: string;
   index?: string;
@@ -75,7 +77,7 @@ export const createVisualizationResolver = ({
 }): ResolveVisualizationConfig => {
   return async ({ operationType, identifier, nlQuery, index, chartType, esql, existingPanel }) => {
     try {
-      if (existingPanel && existingPanel.type !== 'lens') {
+      if (existingPanel && existingPanel.type !== LENS_EMBEDDABLE_TYPE) {
         return createVisualizationFailureResult(
           operationType,
           identifier,
@@ -84,8 +86,8 @@ export const createVisualizationResolver = ({
       }
 
       const existingConfig =
-        existingPanel?.type === 'lens'
-          ? (fromEmbeddablePanel(existingPanel).config as VisualizationConfig)
+        existingPanel?.type === LENS_EMBEDDABLE_TYPE
+          ? (existingPanel?.config as VisualizationConfig)
           : undefined;
 
       const result = await buildVisualizationConfig({
@@ -106,7 +108,7 @@ export const createVisualizationResolver = ({
       return {
         type: 'success',
         visContent: {
-          type: 'lens',
+          type: LENS_EMBEDDABLE_TYPE,
           config: result.validatedConfig,
         },
       };

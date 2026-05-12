@@ -52,11 +52,16 @@ const mockUseStartServices = useStartServices as jest.Mock;
 
 const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
-function renderFlyout(output?: Output) {
+function renderFlyout(output?: Output, defaultOutput?: Output) {
   const renderer = createFleetTestRendererMock();
 
   const utils = renderer.render(
-    <EditOutputFlyout proxies={[]} output={output} onClose={() => {}} />
+    <EditOutputFlyout
+      proxies={[]}
+      output={output}
+      defaultOutput={defaultOutput}
+      onClose={() => {}}
+    />
   );
 
   return { utils };
@@ -480,21 +485,283 @@ describe('EditOutputFlyout', () => {
       );
     });
   });
-
-  it('should not display remote ES output in type lists if serverless', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
-    mockUseStartServices.mockReset();
+  it('should not disable hosts input for remote ES output in serverless', async () => {
     mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
     const { utils } = renderFlyout({
-      type: 'elasticsearch',
-      name: 'dummy',
-      id: 'output',
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
       is_default: false,
       is_default_monitoring: false,
+      hosts: ['https://remote-host:9200'],
     });
 
-    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).not.toContain(
-      'Remote Elasticsearch'
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://remote-host:9200')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://remote-host:9200')).not.toBeDisabled();
+  });
+
+  it('should disable hosts input for ES output in serverless', async () => {
+    mockStartServices(true);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['https://es-host:9200'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://es-host:9200')).toBeDisabled();
+  });
+
+  it('should show default host when creating new ES output in serverless', async () => {
+    mockStartServices(true);
+
+    const { utils } = renderFlyout(undefined, {
+      type: 'elasticsearch',
+      name: 'default output',
+      id: 'default-output',
+      is_default: true,
+      is_default_monitoring: true,
+      hosts: ['https://default-es-host:443'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://default-es-host:443')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://default-es-host:443')).toBeDisabled();
+  });
+
+  it('should show default ES hosts when switching from remote ES to ES in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout(
+      {
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://remote-host:9200'],
+      },
+      {
+        type: 'elasticsearch',
+        name: 'default output',
+        id: 'default-output',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://default-es-host:443'],
+      }
     );
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://remote-host:9200')).not.toBeNull();
+    });
+
+    // Switch type from remote ES to ES
+    const typeSelect = utils.getByTestId('settingsOutputsFlyout.typeInput');
+    fireEvent.change(typeSelect, { target: { value: 'elasticsearch' } });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://default-es-host:443')).not.toBeNull();
+    });
+  });
+
+  it('should show empty hosts when switching from ES to remote ES in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout(
+      {
+        type: 'elasticsearch',
+        name: 'es output',
+        id: 'output1',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://es-host:9200'],
+      },
+      {
+        type: 'elasticsearch',
+        name: 'default output',
+        id: 'default-output',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://default-es-host:443'],
+      }
+    );
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).not.toBeNull();
+    });
+
+    // Switch type from ES to remote ES
+    const typeSelect = utils.getByTestId('settingsOutputsFlyout.typeInput');
+    fireEvent.change(typeSelect, { target: { value: 'remote_elasticsearch' } });
+
+    // The old ES host should be gone — hosts should be empty for fresh remote ES entry
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).toBeNull();
+    });
+  });
+
+  describe('OpenTelemetry Exporter section', () => {
+    it('should show the OTel exporter configuration section for ES output', async () => {
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      // Expand the accordion to reveal the YAML editor
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
+    });
+
+    it('should not show the OTel exporter section for logstash output', async () => {
+      const { utils } = renderFlyout({
+        type: 'logstash',
+        name: 'logstash output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should not show the OTel exporter section for kafka output', async () => {
+      const { utils } = renderFlyout({
+        type: 'kafka',
+        name: 'kafka output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should not show the OTel exporter section for remote ES output', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+
+      const { utils } = renderFlyout({
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+      });
+
+      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
+      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+    });
+
+    it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://localhost:9200'],
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+        target: { value: 'updated output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'output123',
+          expect.objectContaining({
+            otel_exporter_config_yaml: 'flush_interval: 10s',
+          })
+        );
+      });
+    });
+
+    it('should send null otel_exporter_config_yaml when the field is empty', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'elasticsearch',
+        name: 'elasticsearch output',
+        id: 'output123',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['http://localhost:9200'],
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+        target: { value: 'updated output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'output123',
+          expect.objectContaining({
+            otel_exporter_config_yaml: null,
+          })
+        );
+      });
+    });
   });
 });

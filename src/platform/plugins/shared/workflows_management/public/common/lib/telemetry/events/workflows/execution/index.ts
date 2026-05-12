@@ -9,6 +9,7 @@
 
 import type { RootSchema } from '@kbn/core/public';
 import type {
+  ReportWorkflowExecutionsCancelledActionParams,
   ReportWorkflowRunCancelledActionParams,
   ReportWorkflowRunInitiatedActionParams,
   ReportWorkflowRunResumedActionParams,
@@ -23,6 +24,7 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: 'Workflow step test run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: 'Workflow run initiated',
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: 'Workflow run cancelled',
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: 'Workflow executions cancelled',
   [WorkflowExecutionEventTypes.WorkflowRunResumed]: 'Workflow run resumed',
 };
 
@@ -212,6 +214,20 @@ const workflowRunCancelledSchema: RootSchema<ReportWorkflowRunCancelledActionPar
   },
 };
 
+const workflowExecutionsCancelledSchema: RootSchema<ReportWorkflowExecutionsCancelledActionParams> =
+  {
+    ...baseResultActionSchema,
+    ...eventNameSchema,
+    workflowId: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The workflow whose non-terminal executions were requested to be cancelled in bulk (current space).',
+        optional: false,
+      },
+    },
+  };
+
 const workflowRunResumedSchema: RootSchema<ReportWorkflowRunResumedActionParams> = {
   ...baseResultActionSchema,
   ...eventNameSchema,
@@ -243,5 +259,6 @@ export const workflowExecutionEventSchemas = {
   [WorkflowExecutionEventTypes.WorkflowStepTestRunInitiated]: workflowStepTestRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunInitiated]: workflowRunInitiatedSchema,
   [WorkflowExecutionEventTypes.WorkflowRunCancelled]: workflowRunCancelledSchema,
+  [WorkflowExecutionEventTypes.WorkflowExecutionsCancelled]: workflowExecutionsCancelledSchema,
   [WorkflowExecutionEventTypes.WorkflowRunResumed]: workflowRunResumedSchema,
 };

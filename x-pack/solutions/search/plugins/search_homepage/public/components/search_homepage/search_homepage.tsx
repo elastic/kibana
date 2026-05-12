@@ -12,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
-import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
+import { CloudLinks } from './cloud_links';
+import { VerticalSeparatorStyle } from './cloud_links_styles';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { LicenseBadge } from './license_badge';
 import { SearchHomepageBody } from './search_homepage_body';
@@ -25,7 +26,6 @@ export const SearchHomepagePage = () => {
     services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
 
-  const { isTrial } = useGetLicenseInfo();
   const { user } = useAuthenticatedUser();
 
   useEffect(() => {
@@ -74,7 +74,13 @@ export const SearchHomepagePage = () => {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {(isTrial || (!cloud?.isServerlessEnabled && !cloud?.isCloudEnabled)) && (
+              <EuiFlexItem grow={false}>
+                <span css={VerticalSeparatorStyle} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <CloudLinks />
+              </EuiFlexItem>
+              {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
                 <EuiFlexItem grow={false}>
                   <LicenseBadge />
                 </EuiFlexItem>
@@ -82,11 +88,7 @@ export const SearchHomepagePage = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <ConnectToElasticsearch />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ConnectToElasticsearch />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -98,7 +100,9 @@ export const SearchHomepagePage = () => {
               docLink={
                 cloud?.isServerlessEnabled
                   ? docLinks.serverlessReleaseNotes
-                  : docLinks.hostedCloudReleaseNotes
+                  : cloud?.isCloudEnabled
+                  ? docLinks.hostedCloudReleaseNotes
+                  : docLinks.releaseNotes
               }
               kibanaVersion={
                 !cloud?.isServerlessEnabled

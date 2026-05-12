@@ -196,6 +196,7 @@ export function createAlertEvent(overrides: Partial<AlertEvent> = {}): AlertEven
     status: 'breached',
     source: 'internal',
     type: 'signal',
+    space_id: 'default',
     ...overrides,
   };
 }

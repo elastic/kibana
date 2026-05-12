@@ -60,31 +60,50 @@ Define Zod schemas and inferred types in a separate `types.ts` file alongside th
 
 See [connector-patterns.md](connector-patterns.md) for the full OAuth configuration pattern.
 
-## Create Workflows
+## Write LLM-Quality Descriptions and Skill Content
 
-Create YAML workflow files in a `workflows/` directory alongside the spec. For the full YAML schema, invoke the `workflows-yaml-reference` skill (use the Skill tool with `skill: "workflows-yaml-reference"`).
+LLMs discover and invoke connector actions entirely through the text you provide. Invest in descriptions at every level.
 
-Standard workflows:
-1. **search.yaml** — Primary search. Focus on high-level metadata and matched text.
-2. **get_{item}.yaml** — Retrieve specific items by ID. Include all metadata.
-3. **list_{items}.yaml** — List available items/spaces/projects. Focus on high-level metadata.
+### Action `description`
 
-Remember:
-- Tag with `['agent-builder-tool']` to expose as AI tool
-- Use `<%= {connector-type-without-dot}-stack-connector-id %>` for `connector-id`
-- Use `${{ inputs.param_name }}` for input references
+Every action in the connector spec **must** have a `description` field. Write it from the perspective of an LLM deciding which tool to call: what does this action do, when should it be used, and what does it return?
 
-Import all workflow YAMLs in the connector spec and add them to `agentBuilderWorkflows`:
+### Zod param `.describe()`
+
+Every Zod parameter schema **must** call `.describe()`. Include:
+- What the value represents
+- Valid formats or constraints (e.g., ISO 8601 dates, max length)
+- A concrete example
 
 ```typescript
-import searchWorkflow from './workflows/search.yaml';
-import getItemWorkflow from './workflows/get_item.yaml';
+const SearchInputSchema = z.object({
+  query: z.string().describe('Full-text search query. Example: "Q4 budget report"'),
+  maxResults: z
+    .number()
+    .int()
+    .min(1)
+    .max(50)
+    .optional()
+    .describe('Maximum number of results to return (1–50). Defaults to 10.'),
+});
+```
 
+### `skill` property
+
+Add an optional `skill` property to the connector spec to provide multi-step usage patterns and gotchas for agents. Use the `[...].join('\n')` pattern to keep each point on its own line:
+
+```typescript
 export const YourConnector: ConnectorSpec = {
   // ...
-  agentBuilderWorkflows: [searchWorkflow, getItemWorkflow],
+  skill: [
+    'Use search to find items by keyword, then get_item to retrieve full details by ID.',
+    'Always pass the ID returned by search — do not guess or construct IDs manually.',
+    'If a search returns no results, try broader terms before concluding the item does not exist.',
+  ].join('\n'),
 };
 ```
+
+The `skill` text surfaces as-is to agents, so write it as concise, actionable guidance.
 
 ## Complete the Documentation
 

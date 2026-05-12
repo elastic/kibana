@@ -30,6 +30,8 @@ interface ResumeExecutionButtonProps {
   resumeSchema?: JsonModelSchemaType;
   /** When true, opens the input modal immediately on mount */
   autoOpen?: boolean;
+  /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
+  waitingStepExecutionId?: string;
 }
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
@@ -38,6 +40,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   resumeMessage,
   resumeSchema,
   autoOpen = false,
+  waitingStepExecutionId,
 }) => {
   const { notifications } = useKibana().services;
   const workflowsApi = useWorkflowsApi();
@@ -56,6 +59,10 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       setIsModalOpen(true);
     }
   }, [autoOpen]);
+
+  useEffect(() => {
+    setIsSubmitted(false);
+  }, [waitingStepExecutionId]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema) return undefined;

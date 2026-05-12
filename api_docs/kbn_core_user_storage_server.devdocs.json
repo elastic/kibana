@@ -1,0 +1,153 @@
+{
+  "id": "@kbn/core-user-storage-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-storage-server",
+        "id": "def-server.UserStorageServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserStorageServiceSetup",
+        "description": [],
+        "path": "src/core/packages/user-storage/server/src/contracts.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-storage-server",
+            "id": "def-server.UserStorageServiceSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister user storage keys with their schemas, defaults, and scopes.\nEach key can only be registered once. Duplicate registrations throw.\n"
+            ],
+            "signature": [
+              "(definitions: ",
+              "UserStorageRegistrations",
+              ") => void"
+            ],
+            "path": "src/core/packages/user-storage/server/src/contracts.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-storage-server",
+                "id": "def-server.UserStorageServiceSetup.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "definitions",
+                "description": [],
+                "signature": [
+                  "UserStorageRegistrations"
+                ],
+                "path": "src/core/packages/user-storage/server/src/contracts.ts",
+                "lineNumber": 32,
+                "columnNumber": 12,
+                "deprecated": false,
+                "docsReferencedTypeName": "UserStorageRegistrations",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-storage-server",
+        "id": "def-server.UserStorageServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserStorageServiceStart",
+        "description": [],
+        "path": "src/core/packages/user-storage/server/src/contracts.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-storage-server",
+            "id": "def-server.UserStorageServiceStart.asScoped",
+            "type": "Function",
+            "tags": [],
+            "label": "asScoped",
+            "description": [
+              "\nCreate a ",
+              {
+                "pluginId": "@kbn/core-user-storage-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUserStorageServerPluginApi",
+                "section": "def-server.IUserStorageClient",
+                "text": "IUserStorageClient"
+              },
+              " scoped to the authenticated user\nbehind the given request. Returns `null` when the user has no\n`profile_uid` (e.g. anonymous authentication).\n"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => ",
+              "IUserStorageClient",
+              " | null"
+            ],
+            "path": "src/core/packages/user-storage/server/src/contracts.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-storage-server",
+                "id": "def-server.UserStorageServiceStart.asScoped.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/user-storage/server/src/contracts.ts",
+                "lineNumber": 52,
+                "columnNumber": 12,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "cancel_reindex": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "wait_for_completion": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_reindex/{task_id}/_cancel"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch#TODO",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

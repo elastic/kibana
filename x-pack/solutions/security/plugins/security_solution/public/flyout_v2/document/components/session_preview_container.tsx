@@ -70,7 +70,7 @@ export const SessionPreviewContainer = ({
             tooltip: (
               <FormattedMessage
                 id="xpack.securitySolution.flyout.document.visualizations.sessionPreview.sessionPreviewTooltip"
-                defaultMessage="Investigate in timeline"
+                defaultMessage="Investigate in Timeline"
               />
             ),
           },

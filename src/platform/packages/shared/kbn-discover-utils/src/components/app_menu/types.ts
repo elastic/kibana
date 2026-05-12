@@ -12,7 +12,6 @@ import type {
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
-  AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
 import type { ReactElement, ReactNode } from 'react';
 
@@ -33,7 +32,6 @@ export enum AppMenuActionId {
  */
 export interface DiscoverAppMenuContext extends Record<string, unknown> {
   onFinishAction: () => void;
-  parentTestId?: string;
 }
 
 /**
@@ -77,17 +75,9 @@ export type DiscoverAppMenuPrimaryActionItem = Omit<AppMenuPrimaryActionItem, 'r
 };
 
 /**
- * Discover-specific secondary action item with typed run action
- */
-export type DiscoverAppMenuSecondaryActionItem = Omit<AppMenuSecondaryActionItem, 'run'> & {
-  run?: DiscoverAppMenuRunAction;
-};
-
-/**
  * Discover-specific app menu config with typed menu items
  */
 export interface DiscoverAppMenuConfig {
   items?: DiscoverAppMenuItemType[];
   primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
-  secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 }

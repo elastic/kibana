@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { APP_ID } from '../../../../../common';
 import { enableLeadGenerationRoute } from './enable_lead_generation';
 import { ENABLE_LEAD_GENERATION_URL } from '../../../../../common/entity_analytics/lead_generation/constants';
 import {
@@ -42,11 +43,19 @@ describe('enableLeadGenerationRoute', () => {
     enableLeadGenerationRoute(server.router, logger, getStartServicesMock);
   });
 
+  describe('route security config', () => {
+    it('declares the required Kibana privileges so users without Security Solution access are rejected', () => {
+      const [routeConfig] = server.router.versioned.post.mock.calls[0];
+      const authz = routeConfig.security?.authz as { requiredPrivileges?: unknown } | undefined;
+      expect(authz?.requiredPrivileges).toEqual(['securitySolution', `${APP_ID}-entity-analytics`]);
+    });
+  });
+
   it('returns 200, creates indices, and starts the task', async () => {
     const request = requestMock.create({
       method: 'post',
       path: ENABLE_LEAD_GENERATION_URL,
-      body: {},
+      body: { connectorId: 'test-connector-id' },
     });
 
     const response = await server.inject(request, context);
@@ -70,7 +79,7 @@ describe('enableLeadGenerationRoute', () => {
     const request = requestMock.create({
       method: 'post',
       path: ENABLE_LEAD_GENERATION_URL,
-      body: {},
+      body: { connectorId: 'test-connector-id' },
     });
 
     const response = await server.inject(request, context);

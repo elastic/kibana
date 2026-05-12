@@ -18,6 +18,8 @@ export function registerStartMaintainer(router: EntityStorePluginRouter) {
     .put({
       path: `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START}`,
       access: 'internal',
+      summary: 'Start entity maintainer',
+      description: 'Start a registered entity maintainer task by its identifier.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

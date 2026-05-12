@@ -16,8 +16,11 @@ import { WatchlistsFlyoutHeader } from './watchlists_flyout_header';
 export interface WatchlistsFlyoutContentProps {
   title: string;
   watchlist: CreateWatchlistRequestBodyInput;
+  watchlistId?: string;
   isEditMode: boolean;
-  isNameInvalid: boolean;
+  isNameTooLong: boolean;
+  isDescriptionTooLong: boolean;
+  isRiskModifierInvalid: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
@@ -25,17 +28,22 @@ export interface WatchlistsFlyoutContentProps {
   onSave: () => void;
   isLoading: boolean;
   isDisabled: boolean;
+  onSourceValidationChange: (valid: boolean) => void;
 }
 
 export const WatchlistsFlyoutContent = ({
   title,
   watchlist,
+  watchlistId,
   isEditMode,
-  isNameInvalid,
+  isNameTooLong,
+  isDescriptionTooLong,
+  isRiskModifierInvalid,
   onFieldChange,
   onSave,
   isLoading,
   isDisabled,
+  onSourceValidationChange,
 }: WatchlistsFlyoutContentProps) => {
   return (
     <>
@@ -44,9 +52,13 @@ export const WatchlistsFlyoutContent = ({
       <FlyoutBody>
         <WatchlistForm
           watchlist={watchlist}
+          watchlistId={watchlistId}
           isEditMode={isEditMode}
           onFieldChange={onFieldChange}
-          isNameInvalid={isNameInvalid}
+          isNameTooLong={isNameTooLong}
+          isDescriptionTooLong={isDescriptionTooLong}
+          isRiskModifierInvalid={isRiskModifierInvalid}
+          onSourceValidationChange={onSourceValidationChange}
         />
       </FlyoutBody>
       <WatchlistsFlyoutFooter onSave={onSave} isLoading={isLoading} isDisabled={isDisabled} />

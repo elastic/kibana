@@ -7,14 +7,7 @@
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import { getStatusLabel } from '../../../common/hooks/status_labels';
@@ -59,14 +52,13 @@ export const UnhealthyTooltip = ({ configId }: { configId: string }) => {
   }
 
   return (
-    <EuiToolTip content={tooltipContent}>
-      <EuiIcon
-        type="warning"
-        color="warning"
-        data-test-subj="syntheticsUnhealthyTooltipBadge"
-        aria-label={UNHEALTHY_TOOLTIP_BADGE}
-      />
-    </EuiToolTip>
+    <EuiIconTip
+      content={tooltipContent}
+      type="warning"
+      color="warning"
+      data-test-subj="syntheticsUnhealthyTooltipBadge"
+      aria-label={UNHEALTHY_TOOLTIP_BADGE}
+    />
   );
 };
 

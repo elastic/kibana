@@ -64,6 +64,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -81,6 +82,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -137,6 +139,7 @@
             "lineNumber": 12,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -374,6 +377,7 @@
             "lineNumber": 18,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequestParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -502,6 +506,7 @@
                 "lineNumber": 264,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEndpoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -529,6 +534,7 @@
                 "lineNumber": 265,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MaybeOptionalArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -587,6 +593,7 @@
                 "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEndpoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -614,6 +621,7 @@
                 "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MaybeOptionalArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }

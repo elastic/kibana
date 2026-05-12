@@ -7,9 +7,10 @@
 
 import {
   waitForPluginInitialized,
-  cleanupEntityStore,
   dataViewRouteHelpersFactory,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from '../../../../../cloud_security_posture_api/utils';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../../services';
@@ -62,43 +63,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await waitForPluginInitialized({ retry, supertest: adminSupertest, logger });
 
-      // Enable asset inventory setting (required for entity store with 'generic' type)
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(adminSupertest);
       await dataView.create('security-solution');
 
-      // Initialize entity engine (required for graph visualization)
-      await initEntityEnginesWithRetry({
-        supertest: adminSupertest,
-        retry,
-        logger,
-        entityTypes: ['generic'],
-      });
-
-      // Create v2 lookup index so the graph ESQL query can use LOOKUP JOIN for entity enrichment.
-      await es.indices.create({
-        index: '.entities.v2.latest.security_default',
-        settings: { index: { mode: 'lookup' } },
-        mappings: {
-          properties: {
-            'entity.id': { type: 'keyword' },
-            'entity.name': { type: 'keyword' },
-            'entity.type': { type: 'keyword' },
-            'entity.sub_type': { type: 'keyword' },
-            'host.ip': { type: 'ip' },
-          },
-        },
-      });
+      // Install Entity Store V2 (required for graph visualization)
+      await installEntityStoreV2({ supertest: adminSupertest, logger });
+      await waitForEntityStoreV2Running({ supertest: adminSupertest, retry, logger });
     });
 
     after(async () => {
-      await cleanupEntityStore({ supertest: adminSupertest, logger });
-      await es.indices.delete({
-        index: '.entities.v2.latest.security_default',
-        ignore_unavailable: true,
-      });
+      await uninstallEntityStoreV2({ supertest: adminSupertest, logger });
       // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
       // Instead we delete all alerts from the index
       await es.deleteByQuery({

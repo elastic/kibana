@@ -10,7 +10,14 @@
         "tags": [],
         "label": "LazyOptInExampleFlyout",
         "description": [
-          "\nLazy-loaded {@link OptInExampleFlyout}"
+          "\nLazy-loaded ",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.OptInExampleFlyout",
+            "text": "OptInExampleFlyout"
+          }
         ],
         "signature": [
           "React.LazyExoticComponent<React.ComponentType<",
@@ -44,6 +51,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

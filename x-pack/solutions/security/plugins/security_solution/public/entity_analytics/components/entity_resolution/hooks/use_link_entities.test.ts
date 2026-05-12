@@ -50,8 +50,8 @@ describe('useLinkEntities', () => {
     });
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/internal/security/entity_store/resolution/link', {
-        version: '2',
+      expect(mockFetch).toHaveBeenCalledWith('/api/security/entity_store/resolution/link', {
+        version: '2023-10-31',
         method: 'POST',
         body: JSON.stringify({ target_id: 'target-1', entity_ids: ['alias-1'] }),
       });

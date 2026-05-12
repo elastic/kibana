@@ -64,5 +64,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./_grouping_selection'));
     loadTestFile(require.resolve('./_data_fetching'));
     loadTestFile(require.resolve('./_state_restoration'));
+    loadTestFile(require.resolve('./_fullscreen'));
   });
 }

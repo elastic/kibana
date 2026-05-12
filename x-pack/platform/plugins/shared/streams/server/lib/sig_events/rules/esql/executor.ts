@@ -15,7 +15,8 @@ import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
-import { MAX_ALERTS_PER_EXECUTION } from './common';
+import { hasStatsCommand } from '@kbn/streams-schema';
+import { MAX_ALERTS_PER_EXECUTION, MAX_DEDUP_IDS, MATCH_LOOKBACK_MINUTES } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
@@ -35,6 +36,17 @@ export async function getRuleExecutor(
   const { services, params, logger, state, startedAt, spaceId, rule } = options;
   const { scopedClusterClient, alertWithPersistence } = services;
 
+  // The executor cannot self-heal (no rulesClient access); cleanup is
+  // handled by syncQueries / the demotedToStats path in QueryClient.
+  // This guard prevents wasted ES queries until the next sync cycle runs.
+  if (hasStatsCommand(params.query)) {
+    logger.error(
+      `Rule "${rule.id}" contains a STATS query that cannot produce document-level alerts. ` +
+        `This is a transient state — the rule will be uninstalled on the next syncQueries cycle. Skipping execution.`
+    );
+    return { state: { previousOriginalDocumentIds: [] } };
+  }
+
   const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];
 
   const now = moment(startedAt);
@@ -42,7 +54,7 @@ export async function getRuleExecutor(
   const esqlRequest = buildEsqlSearchRequest({
     query: params.query,
     timestampField: params.timestampField,
-    from: now.clone().subtract(2, 'minutes').toISOString(),
+    from: now.clone().subtract(MATCH_LOOKBACK_MINUTES, 'minutes').toISOString(),
     to: now.clone().toISOString(),
     previousOriginalDocumentIds,
   });
@@ -56,7 +68,7 @@ export async function getRuleExecutor(
   if (results.length === 0) {
     return {
       state: {
-        previousOriginalDocumentIds: [],
+        previousOriginalDocumentIds,
       },
     };
   }
@@ -77,24 +89,40 @@ export async function getRuleExecutor(
     };
   });
 
+  const refreshOnIndexingAlerts = false;
   const { createdAlerts, errors } = await alertWithPersistence(
     alerts,
-    // keep refresh false to optimize performance as we don't need to read these alerts back immediately
-    false,
+    refreshOnIndexingAlerts,
     MAX_ALERTS_PER_EXECUTION
   );
 
   if (!isEmpty(errors)) {
-    logger.debug(() => `Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    logger.error(
+      `alertWithPersistence completed with ${errors.length} error(s) (${
+        createdAlerts.length
+      } alerts created): ${JSON.stringify(errors)}`
+    );
   }
 
-  const originalDocumentIds = createdAlerts.map(
-    (alert) => alertDocIdToDocumentIdMap.get(alert._id)!
-  );
+  const originalDocumentIds: string[] = [];
+  for (const alert of createdAlerts) {
+    const docId = alertDocIdToDocumentIdMap.get(alert._id);
+    if (docId) {
+      originalDocumentIds.push(docId);
+    } else {
+      logger.warn(
+        `Alert "${alert._id}" has no mapped original document ID; skipping dedup entry — this may cause duplicate alerts on the next run`
+      );
+    }
+  }
+
+  // Previous IDs come first, new IDs are appended — slice(-N) keeps the most recent ones.
+  const mergedIds = [...new Set([...previousOriginalDocumentIds, ...originalDocumentIds])];
 
   return {
     state: {
-      previousOriginalDocumentIds: originalDocumentIds,
+      previousOriginalDocumentIds:
+        mergedIds.length > MAX_DEDUP_IDS ? mergedIds.slice(-MAX_DEDUP_IDS) : mergedIds,
     },
   };
 }

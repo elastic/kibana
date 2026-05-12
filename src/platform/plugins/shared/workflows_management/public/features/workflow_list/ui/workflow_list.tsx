@@ -46,7 +46,14 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
-  const { canCreateWorkflow } = useWorkflowsCapabilities();
+  const {
+    canCreateWorkflow,
+    canReadWorkflow,
+    canReadWorkflowExecution,
+    canExecuteWorkflow,
+    canUpdateWorkflow,
+    canDeleteWorkflow,
+  } = useWorkflowsCapabilities();
 
   const searchParams = useMemo(() => {
     if (search.enabled != null) {
@@ -324,6 +331,12 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onExportWorkflow={handleExportWorkflow}
         onRequestRun={setExecuteWorkflow}
         getEditHref={getEditHref}
+        canCreateWorkflow={!!canCreateWorkflow}
+        canReadWorkflow={!!canReadWorkflow}
+        canReadWorkflowExecution={!!canReadWorkflowExecution}
+        canUpdateWorkflow={!!canUpdateWorkflow}
+        canDeleteWorkflow={!!canDeleteWorkflow}
+        canExecuteWorkflow={!!canExecuteWorkflow}
       />
       {executeWorkflow?.definition && (
         <WorkflowExecuteModal

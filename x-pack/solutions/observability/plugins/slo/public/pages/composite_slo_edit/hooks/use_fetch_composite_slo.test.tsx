@@ -23,8 +23,23 @@ const compositeSloResponse = {
   name: 'My Composite SLO',
   description: 'desc',
   members: [
-    { sloId: 'slo-1', instanceId: 'FEMALE', weight: 2 },
-    { sloId: 'slo-2', weight: 1 },
+    {
+      id: 'slo-1',
+      name: 'Availability SLO',
+      instanceId: 'FEMALE',
+      weight: 2,
+      normalisedWeight: 0.67,
+      sliValue: 0.99,
+      contribution: 0.66,
+    },
+    {
+      id: 'slo-2',
+      name: 'Latency SLO',
+      weight: 1,
+      normalisedWeight: 0.33,
+      sliValue: 0.98,
+      contribution: 0.32,
+    },
   ],
   timeWindow: { duration: '30d', type: 'rolling' },
   objective: { target: 0.99 },
@@ -192,8 +207,24 @@ describe('useFetchCompositeSlo', () => {
     const responseWithDuplicateSlo = {
       ...compositeSloResponse,
       members: [
-        { sloId: 'slo-1', instanceId: 'FEMALE', weight: 1 },
-        { sloId: 'slo-1', instanceId: 'MALE', weight: 1 },
+        {
+          id: 'slo-1',
+          name: 'Availability SLO',
+          instanceId: 'FEMALE',
+          weight: 1,
+          normalisedWeight: 0.5,
+          sliValue: 0.99,
+          contribution: 0.5,
+        },
+        {
+          id: 'slo-1',
+          name: 'Availability SLO',
+          instanceId: 'MALE',
+          weight: 1,
+          normalisedWeight: 0.5,
+          sliValue: 0.99,
+          contribution: 0.5,
+        },
       ],
     };
 

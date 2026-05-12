@@ -46,8 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await runCascadeQuery();
       await discover.scrollCascadeLayoutBy(2000);
       await expectScrollToBeRoughly(2000);
-      // wait for scroll restoration to be persisted
-      await common.sleep(1000);
+      // wait for  scroll restoration to be persisted
+      await common.sleep(500);
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.selectTab(0);
@@ -58,21 +58,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('restores expanded state and nested scroll when switching tabs', async () => {
       await runCascadeQuery();
       await discover.scrollCascadeLayoutBy(2000);
-      await expectScrollToBeRoughly(2000);
-      const [firstRowId] = await discover.getCascadeLayoutRowIds();
-      const initialRootScrollTop = await discover.getCascadeLayoutScrollTop();
-      await discover.toggleCascadeLayoutRow(firstRowId);
-      await discover.scrollCascadeLayoutBy(200);
-      await expectScrollToBeRoughly(initialRootScrollTop + 200, 800);
-      const scrollTopBeforeTabSwitch = await discover.getCascadeLayoutScrollTop();
       // wait for scroll restoration to be persisted
-      await common.sleep(1000);
+      await common.sleep(500);
+      await expectScrollToBeRoughly(2000);
+      const [targetRowId] = await discover.getCascadeLayoutVisibleRowIds();
+      await discover.toggleCascadeLayoutRow(targetRowId);
+      await discover.scrollCascadeLayoutBy(200);
+      // wait for scroll restoration to be persisted
+      await common.sleep(500);
+      const scrollTopBeforeTabSwitch = await discover.getCascadeLayoutScrollTop();
       await unifiedTabs.createNewTab();
       await discover.waitUntilTabIsLoaded();
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).to.be(true);
-      await expectScrollToBeRoughly(scrollTopBeforeTabSwitch, 400);
+      // wait for scroll restoration to settle
+      await common.sleep(500);
+      expect(await discover.isCascadeLayoutRowExpanded(targetRowId)).to.be(true);
+      await expectScrollToBeRoughly(scrollTopBeforeTabSwitch);
     });
   });
 }

@@ -40,7 +40,7 @@ jest.mock('../../dashboard_client', () => {
   };
 });
 
-const lastSavedQuery = { query: 'memory:>220000', language: 'kuery' };
+const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
@@ -102,7 +102,7 @@ describe('loadDashboardApi', () => {
 
     // dashboard app passes URL state as override state
     test('should overwrite saved object state and unsaved state with override state', async () => {
-      const queryFromUrl = { query: 'memory:>5000', language: 'kuery' };
+      const queryFromUrl = { expression: 'memory:>5000', language: 'kql' as const };
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: true,

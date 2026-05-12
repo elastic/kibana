@@ -28,36 +28,43 @@ import {
 /**
  * Schema for range values used in numeric and date filters
  */
-const rangeSchema = schema.object({
-  gte: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Greater than or equal to' },
-    })
-  ),
-  lte: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Less than or equal to' },
-    })
-  ),
-  gt: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Greater than' },
-    })
-  ),
-  lt: schema.maybe(
-    schema.oneOf([schema.number(), schema.string()], {
-      meta: { description: 'Less than' },
-    })
-  ),
-  format: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Date format (e.g., strict_date_optional_time, strict_date_optional_time_nanos)',
-      },
-    })
-  ),
-});
+const rangeSchema = schema.object(
+  {
+    gte: schema.maybe(
+      schema.oneOf([schema.number(), schema.string()], {
+        meta: { description: 'Greater than or equal to.' },
+      })
+    ),
+    lte: schema.maybe(
+      schema.oneOf([schema.number(), schema.string()], {
+        meta: { description: 'Less than or equal to.' },
+      })
+    ),
+    gt: schema.maybe(
+      schema.oneOf([schema.number(), schema.string()], {
+        meta: { description: 'Greater than.' },
+      })
+    ),
+    lt: schema.maybe(
+      schema.oneOf([schema.number(), schema.string()], {
+        meta: { description: 'Less than.' },
+      })
+    ),
+    format: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Elasticsearch [date format](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-date-format) string applied when parsing date boundary values. For example, `strict_date_optional_time` or `epoch_millis`.',
+        },
+      })
+    ),
+  },
+  {
+    meta: {
+      description: 'Boundary values for a range comparison.',
+    },
+  }
+);
 
 // ====================================================================
 // BASE PROPERTIES (SHARED BY ALL FILTERS)
@@ -68,7 +75,10 @@ const rangeSchema = schema.object({
  */
 const negatePropertySchema = schema.maybe(
   schema.boolean({
-    meta: { description: 'Whether to negate the filter.' },
+    meta: {
+      description:
+        'When `true`, the filter is negated and matches documents that do NOT satisfy the condition. Defaults to `false`.',
+    },
   })
 );
 
@@ -78,30 +88,39 @@ const negatePropertySchema = schema.maybe(
 const commonBasePropertiesSchema = schema.object({
   disabled: schema.maybe(
     schema.boolean({
-      meta: { description: 'Whether the filter is disabled' },
+      meta: {
+        description:
+          'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
+      },
     })
   ),
   negate: negatePropertySchema,
   controlled_by: schema.maybe(
     schema.string({
       meta: {
-        description: 'Optional identifier for the component/plugin managing this filter',
+        description:
+          'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
       },
     })
   ),
   data_view_id: schema.maybe(
     schema.string({
-      meta: { description: 'Data view ID that this filter applies to' },
+      meta: {
+        description: 'Identifier of the data view used as context for this filter.',
+      },
     })
   ),
   label: schema.maybe(
     schema.string({
-      meta: { description: 'Human-readable label for the filter' },
+      meta: { description: 'Human-readable label for the filter, used for display purposes.' },
     })
   ),
   is_multi_index: schema.maybe(
     schema.boolean({
-      meta: { description: 'Whether this filter can be applied to multiple indices' },
+      meta: {
+        description:
+          'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
+      },
     })
   ),
 });
@@ -114,7 +133,9 @@ const commonBasePropertiesSchema = schema.object({
  * Common field property for all filter conditions
  */
 const baseConditionSchema = schema.object({
-  field: schema.string({ meta: { description: 'Field the filter applies to' } }),
+  field: schema.string({
+    meta: { description: 'Name of the document field the condition evaluates.' },
+  }),
   negate: negatePropertySchema,
 });
 
@@ -143,13 +164,13 @@ const singleConditionSchema = baseConditionSchema.extends(
         }),
       ],
       {
-        meta: { description: 'Single value for comparison' },
+        meta: { description: 'Single value to compare against the field.' },
       }
     ),
   },
   {
     meta: {
-      description: 'Condition: is',
+      description: 'Matches documents where `field` equals a single specified value.',
       title: ASCODE_FILTER_OPERATOR.IS,
       id: 'kbn-as-code-filters-schema_condition_is',
     },
@@ -168,12 +189,16 @@ const oneOfConditionSchema = baseConditionSchema.extends(
         schema.arrayOf(schema.number(), { maxSize: 10000 }),
         schema.arrayOf(schema.boolean(), { maxSize: 10000 }),
       ],
-      { meta: { description: 'Homogeneous array of values' } }
+      {
+        meta: {
+          description: 'Homogeneous array of values to match against the field.',
+        },
+      }
     ),
   },
   {
     meta: {
-      description: 'Condition: is one of',
+      description: 'Matches documents where `field` equals any value in a provided list.',
       title: ASCODE_FILTER_OPERATOR.IS_ONE_OF,
       id: 'kbn-as-code-filters-schema_condition_is_one_of',
     },
@@ -190,7 +215,8 @@ const rangeConditionSchema = baseConditionSchema.extends(
   },
   {
     meta: {
-      description: 'Condition: range',
+      description:
+        'Matches documents where `field` falls within a specified numeric or date range.',
       title: ASCODE_FILTER_OPERATOR.RANGE,
       id: 'kbn-as-code-filters-schema_condition_range',
     },
@@ -207,7 +233,7 @@ const existsConditionSchema = baseConditionSchema.extends(
   },
   {
     meta: {
-      description: 'Condition: exists',
+      description: 'Matches documents where `field` exists and contains a non-null value.',
       title: ASCODE_FILTER_OPERATOR.EXISTS,
       id: 'kbn-as-code-filters-schema_condition_exists',
     },
@@ -222,7 +248,7 @@ const conditionSchema = schema.discriminatedUnion(
   [singleConditionSchema, oneOfConditionSchema, rangeConditionSchema, existsConditionSchema],
   {
     meta: {
-      description: 'A filter condition with strict operator/value type matching',
+      description: 'A filter condition with strict operator/value type matching.',
       id: 'kbn-as-code-filters-schema_conditionSchema',
     },
   }
@@ -233,10 +259,8 @@ const conditionSchema = schema.discriminatedUnion(
 // ====================================================================
 
 export interface AsCodeGroupFilterRecursive {
-  group: {
-    operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
-    conditions: Array<TypeOf<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
-  };
+  operator: typeof ASCODE_GROUPED_CONDITION_TYPE.AND | typeof ASCODE_GROUPED_CONDITION_TYPE.OR;
+  conditions: Array<TypeOf<typeof conditionSchema> | AsCodeGroupFilterRecursive>;
 }
 
 /**
@@ -249,7 +273,8 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
   },
   {
     meta: {
-      description: 'Condition filter',
+      description:
+        'A filter that evaluates a single field condition such as equality, range, or existence.',
       title: ASCODE_FILTER_TYPE.CONDITION,
       id: 'kbn-as-code-filters-schema_asCodeConditionFilterSchema',
     },
@@ -266,20 +291,34 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
     type: schema.literal(ASCODE_FILTER_TYPE.GROUP),
     group: schema.object(
       {
-        operator: schema.oneOf([
-          schema.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
-          schema.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
-        ]),
+        operator: schema.oneOf(
+          [
+            schema.literal(ASCODE_GROUPED_CONDITION_TYPE.AND),
+            schema.literal(ASCODE_GROUPED_CONDITION_TYPE.OR),
+          ],
+          {
+            meta: {
+              description:
+                'Logical operator applied across all entries in `conditions`. Use `and` to require all conditions, or `or` to require at least one.',
+            },
+          }
+        ),
         conditions: schema.arrayOf(
           schema.oneOf([
             conditionSchema,
             schema.lazy<AsCodeGroupFilterRecursive>(GROUP_FILTER_ID), // Recursive reference for nested groups
-          ])
+          ]),
+          {
+            meta: {
+              description:
+                'Ordered list of conditions or nested groups combined by the group `operator`.',
+            },
+          }
         ),
       },
       {
         meta: {
-          description: 'Condition or nested group filter',
+          description: 'Logical group that combines one or more conditions or nested groups.',
           id: GROUP_FILTER_ID,
         },
       }
@@ -287,7 +326,8 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   },
   {
     meta: {
-      description: 'Grouped condition filter',
+      description:
+        'A filter that combines multiple conditions or nested groups using a logical `and` or `or` operator.',
       title: ASCODE_FILTER_TYPE.GROUP,
       id: 'kbn-as-code-filters-schema_asCodeGroupFilterSchema',
     },
@@ -302,13 +342,13 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends(
   {
     type: schema.literal(ASCODE_FILTER_TYPE.DSL),
     dsl: schema.recordOf(schema.string(), schema.any(), {
-      meta: { description: 'Elasticsearch Query DSL object' },
+      meta: { description: 'Elasticsearch Query DSL object passed directly to the query.' },
     }),
     field: schema.maybe(
       schema.string({
         meta: {
           description:
-            'Field name for scripted filters where field cannot be extracted from query.',
+            'Field name for scripted filters where the field cannot be extracted from the DSL query.',
         },
       })
     ),
@@ -323,7 +363,8 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends(
   },
   {
     meta: {
-      description: 'DSL filter',
+      description:
+        'A filter expressed as a raw [Elasticsearch Query DSL](https://www.elastic.co/docs/reference/query-languages/querydsl) object, used for queries that cannot be represented by condition or group filters.',
       title: ASCODE_FILTER_TYPE.DSL,
       id: 'kbn-as-code-filters-schema_asCodeDSLFilterSchema',
     },
@@ -338,12 +379,13 @@ export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends(
   {
     type: schema.literal(ASCODE_FILTER_TYPE.SPATIAL),
     dsl: schema.recordOf(schema.string(), schema.any(), {
-      meta: { description: 'Elasticsearch geo query DSL object' },
+      meta: { description: 'Elasticsearch geo query DSL object.' },
     }),
   },
   {
     meta: {
-      description: 'Spatial filter',
+      description:
+        'A filter that applies an Elasticsearch geo query, used for geographic boundary and shape matching.',
       title: ASCODE_FILTER_TYPE.SPATIAL,
       id: 'kbn-as-code-filters-schema_asCodeSpatialFilterSchema',
     },
@@ -364,7 +406,8 @@ export const asCodeFilterSchema = schema.discriminatedUnion(
   ],
   {
     meta: {
-      description: 'A filter which can be a condition, group, DSL, or spatial',
+      description:
+        'A filter applied to query results. Can be a field condition (`condition`), a logical group of conditions (`group`), a raw Elasticsearch DSL query (`dsl`), or a geo spatial query (`spatial`).',
       id: 'kbn-as-code-filters-schema_asCodeFilterSchema',
     },
   }

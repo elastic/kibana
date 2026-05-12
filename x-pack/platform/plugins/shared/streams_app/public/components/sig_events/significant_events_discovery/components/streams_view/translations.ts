@@ -14,21 +14,28 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
 export const SIGNIFICANT_EVENTS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnName',
   {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Events',
+  }
+);
+
+export const SIGNIFICANT_EVENTS_COLUMN_TOOLTIP = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsTree.significantEventsColumnTooltip',
+  {
+    defaultMessage: 'Number of results produced by created rules.',
   }
 );
 
 export const QUERIES_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.queriesColumnName',
   {
-    defaultMessage: 'Queries',
+    defaultMessage: 'KI Queries',
   }
 );
 
 export const KNOWLEDGE_INDICATORS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.knowledgeIndicatorsColumnName',
   {
-    defaultMessage: 'Knowledge Indicators',
+    defaultMessage: 'KI Features',
   }
 );
 
@@ -65,13 +72,6 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsTree.runBulkStreamOnboardingButtonEmptyLabel',
-  {
-    defaultMessage: 'Onboard Streams',
-  }
-);
-
 export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsTree.runStreamOnboardingButtonEmptyLabel',
   {
@@ -97,13 +97,6 @@ export const ONBOARDING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.onboardingErrorTitle',
   {
     defaultMessage: 'Could not onboard stream',
-  }
-);
-
-export const ONBOARDING_SCHEDULING_FAILURE_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.schedulingErrorTitle',
-  {
-    defaultMessage: 'Could not schedule a task to onboard stream',
   }
 );
 
@@ -143,5 +136,12 @@ export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.noInsightsToastTitle',
   {
     defaultMessage: 'No Significant Events found',
+  }
+);
+
+export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsConfigAriaLabel',
+  {
+    defaultMessage: 'Configure discovery model',
   }
 );

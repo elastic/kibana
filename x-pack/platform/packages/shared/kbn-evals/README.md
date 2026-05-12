@@ -207,7 +207,7 @@ See [CLI.md](./CLI.md) for the full command reference with all flags and example
 The CLI uses suite metadata from:
 
 ```
-x-pack/platform/packages/shared/kbn-evals/evals.suites.json
+.buildkite/pipelines/evals/evals.suites.json
 ```
 
 ### CI labels
@@ -225,12 +225,12 @@ Evals support optional PR labels for selecting which connector projects to run a
   - `models:<model-group>` to select one or more model groups
     - LiteLLM model groups typically look like `llm-gateway/<model>`
     - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
-  - `models:weekly-eis-models` — curated alias that expands to the same EIS model set used by the weekly evals pipeline
+  - `models:weekly-eis-models` — per-suite EIS model alias. Resolves to each suite's `weeklyEisModelGroups` in `evals.suites.json`, falling back to `DEFAULT_WEEKLY_EIS_MODELS`.
 - **Judge override**:
   - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
     This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
 
-Model group aliases (like `models:weekly-eis-models`) are defined in `MODEL_GROUP_ALIASES` in `.buildkite/pipelines/evals/eval_pipeline.ts`.
+Other model group aliases are defined in `MODEL_GROUP_ALIASES`.
 
 #### Automated label sync
 

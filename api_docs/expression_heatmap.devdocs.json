@@ -687,6 +687,7 @@
             "lineNumber": 39,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedFieldFormat",
             "trackAdoption": false
           }
         ],

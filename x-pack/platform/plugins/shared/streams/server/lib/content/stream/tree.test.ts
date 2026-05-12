@@ -57,6 +57,7 @@ describe('content pack tree helpers', () => {
         queries: [
           {
             id: 'keep',
+            type: 'match',
             title: 'keep query',
             description: '',
             esql: { query: 'FROM logs | LIMIT 1' },
@@ -89,6 +90,7 @@ describe('content pack tree helpers', () => {
       expect(tree.children[0].children[0].request.queries).toEqual([
         {
           id: 'keep',
+          type: 'match',
           title: 'keep query',
           description: '',
           esql: { query: 'FROM logs | LIMIT 1' },
@@ -102,12 +104,14 @@ describe('content pack tree helpers', () => {
         queries: [
           {
             id: 'keep',
+            type: 'match',
             title: 'keep query',
             description: '',
             esql: { query: 'FROM logs | LIMIT 1' },
           },
           {
             id: 'drop',
+            type: 'match',
             title: 'drop query',
             description: '',
             esql: { query: 'FROM logs | LIMIT 10' },
@@ -130,6 +134,7 @@ describe('content pack tree helpers', () => {
       expect(tree.request.queries).toEqual([
         {
           id: 'keep',
+          type: 'match',
           title: 'keep query',
           description: '',
           esql: { query: 'FROM logs | LIMIT 1' },
@@ -275,6 +280,7 @@ describe('content pack tree helpers', () => {
             queries: [
               {
                 id: 'one',
+                type: 'match',
                 title: 'title',
                 description: '',
                 esql: { query: 'FROM logs | WHERE qty == "one"' },
@@ -293,6 +299,7 @@ describe('content pack tree helpers', () => {
             queries: [
               {
                 id: 'one',
+                type: 'match',
                 title: 'title',
                 description: '',
                 esql: { query: 'FROM logs | WHERE qty == "two"' },

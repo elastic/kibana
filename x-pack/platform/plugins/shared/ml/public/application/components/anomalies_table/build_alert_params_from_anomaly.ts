@@ -8,7 +8,7 @@
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { ML_ANOMALY_RESULT_TYPE, getEntityFieldList } from '@kbn/ml-anomaly-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { MlAnomalyDetectionAlertParams } from '../../../../common/types/alerts';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
 const SEVERITY_THRESHOLD_ADJUSTMENT = 5;

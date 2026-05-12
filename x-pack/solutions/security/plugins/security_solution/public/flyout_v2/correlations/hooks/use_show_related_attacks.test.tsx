@@ -52,11 +52,11 @@ describe('useShowRelatedAttacks', () => {
     });
   });
 
-  it('should return false if hit has no attack ids and setting is enabled', () => {
+  it('should return true when setting is enabled even if hit has no attack ids', () => {
     const hit = { flattened: {} } as unknown as DataTableRecord;
     hookResult = renderHook(() => useShowRelatedAttacks({ hit }));
 
-    expect(hookResult.result.current).toEqual({ show: false, attackIds: [] });
+    expect(hookResult.result.current).toEqual({ show: true, attackIds: [] });
   });
 
   it('should return false if setting is disabled, even when attack ids exist', () => {
@@ -91,12 +91,12 @@ describe('useShowRelatedAttacks', () => {
     });
   });
 
-  it('should return false if setting is enabled and attack ids are empty', () => {
+  it('should return true when setting is enabled even if attack ids are empty', () => {
     const hit = { flattened: { [ALERT_ATTACK_IDS]: [] } } as unknown as DataTableRecord;
     hookResult = renderHook(() => useShowRelatedAttacks({ hit }));
 
     expect(hookResult.result.current).toEqual({
-      show: false,
+      show: true,
       attackIds: [],
     });
   });

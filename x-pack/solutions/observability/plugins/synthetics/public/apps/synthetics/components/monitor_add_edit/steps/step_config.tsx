@@ -55,7 +55,7 @@ const SCRIPT_RECORDER_BTNS = (
       <EuiButton
         data-test-subj="syntheticsLaunchSyntheticsRecorderButton"
         href={`elastic-synthetics-recorder://`}
-        iconType="popout"
+        iconType="external"
         iconSide="right"
       >
         {i18n.translate('xpack.synthetics.monitorConfig.monitorScriptStep.scriptRecorder.launch', {

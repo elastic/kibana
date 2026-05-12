@@ -39,7 +39,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/features-plugin",
-    "@kbn/lens-plugin",
     "@kbn/maps-plugin",
     "@kbn/reporting-plugin",
     "@kbn/spaces-plugin",

@@ -6,14 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser } from '@elastic/esql';
+import { isAssignment, Parser } from '@elastic/esql';
 import type { SupportedDataType } from '../types';
 import { FunctionDefinitionTypes } from '../types';
 import type { ESQLColumnData } from '../../registry/types';
 import { Location } from '../../registry/types';
-import { buildPartialMatcher, getExpressionType } from './expressions';
+import { buildPartialMatcher, getAssignmentExpressionRoot, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
 import { TIME_SYSTEM_PARAMS } from './literals';
+import { getAutocompleteCursorContext } from '../../../language/shared/parse_for_autocomplete_query';
 
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
@@ -456,5 +457,43 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
+  });
+});
+
+describe('getAssignmentExpressionRoot', () => {
+  it('returns undefined for an incomplete assignment after autocomplete parsing cleanup', () => {
+    const query = 'FROM employees | EVAL total = ';
+    const { astContext } = getAutocompleteCursorContext(query, query.length);
+
+    if (astContext.type !== 'expression') {
+      throw new Error(`Expected expression context for query: ${query}`);
+    }
+
+    const assignment = astContext.command.args[astContext.command.args.length - 1];
+
+    if (!assignment || !isAssignment(assignment)) {
+      throw new Error(`Expected assignment expression for query: ${query}`);
+    }
+
+    expect(getAssignmentExpressionRoot(assignment)).toBeUndefined();
+  });
+
+  it('returns the RHS root for a complete assignment after autocomplete parsing cleanup', () => {
+    const query = 'FROM employees | EVAL total = salary';
+    const { astContext } = getAutocompleteCursorContext(query, query.length);
+
+    if (astContext.type !== 'expression') {
+      throw new Error(`Expected expression context for query: ${query}`);
+    }
+
+    const assignment = astContext.command.args[astContext.command.args.length - 1];
+
+    if (!assignment || !isAssignment(assignment)) {
+      throw new Error(`Expected assignment expression for query: ${query}`);
+    }
+
+    const root = getAssignmentExpressionRoot(assignment);
+
+    expect(root).toMatchObject({ type: 'column', name: 'salary' });
   });
 });

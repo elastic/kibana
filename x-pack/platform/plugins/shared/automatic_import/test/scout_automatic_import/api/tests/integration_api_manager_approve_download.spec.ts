@@ -34,9 +34,8 @@ apiTest.describe(
     });
 
     apiTest(
-      'POST /integrations/{id}/approve: returns 500 when integration has no data streams',
+      'POST /integrations/{id}/approve: returns 400 when integration has no data streams',
       async ({ apiClient }) => {
-        // Contract today: server surfaces this as 500 + message. Prefer 4xx if the API is revised.
         const response = await apiClient.post(
           `${INTEGRATION_API_BASE_PATH}/${SHARED_INTEGRATION_ID}/approve`,
           {
@@ -45,7 +44,7 @@ apiTest.describe(
             responseType: 'json',
           }
         );
-        expect(response).toHaveStatusCode(500);
+        expect(response).toHaveStatusCode(400);
         expect(scoutApiErrorText(response.body)).toContain('no data streams');
       }
     );

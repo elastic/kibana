@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   RULES_FEATURE_LATEST,
@@ -60,7 +59,8 @@ export const DEFAULT_SIGNALS_INDEX = '.siem-signals' as const;
 export const DEFAULT_PREVIEW_INDEX = '.preview.alerts-security.alerts' as const;
 export const DEFAULT_LISTS_INDEX = '.lists' as const;
 export const DEFAULT_ITEMS_INDEX = '.items' as const;
-export const DEFAULT_RISK_SCORE_PAGE_SIZE = 1000 as const;
+export const DEFAULT_RISK_SCORE_PAGE_SIZE = 10_000 as const;
+export const MAX_RISK_SCORE_PAGE_SIZE = 10_000 as const;
 // The DEFAULT_MAX_SIGNALS value exists also in `x-pack/platform/plugins/shared/cases/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100 as const;
@@ -115,6 +115,7 @@ export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ATTACK_DETAILS_REDIRECT_PATH = `${ATTACKS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
@@ -172,6 +173,7 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
 export const APP_SCRIPT_LIBRARY_PATH = `${APP_PATH}${SCRIPT_LIBRARY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_MANAGE_PATH = `${SIEM_MIGRATIONS_PATH}/manage` as const;
 export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
@@ -489,7 +491,6 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
-  AGENT_BUILDER_TOUR: 'elasticAssistant.agentBuilderTour.v9.3.default',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -541,8 +542,12 @@ export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
  * Cases attachment IDs
+ *
+ * The endpoint attachment type id now lives in the cases plugin as
+ * `SECURITY_ENDPOINT_ATTACHMENT_TYPE` (see `@kbn/cases-plugin/common`).
+ * Import it from there directly so all unified attachment type ids stay in a
+ * single source of truth.
  */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
 export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
@@ -718,9 +723,12 @@ export const ESSENTIAL_ALERT_FIELDS: string[] = [
 export enum SecurityAgentBuilderAttachments {
   alert = 'security.alert',
   entity = 'security.entity',
+  entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   rule = 'security.rule',
 }
 
 export const SECURITY_RULE_ATTACHMENT_ID = 'ai-rule-creation';
 
-export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+export const REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG =
+  'securitySolution.registerAlertValidationStepsEnabled' as const;
+export const REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT = false as const;

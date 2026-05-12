@@ -18,6 +18,11 @@ export const markdownAttributesSchema = schema.object(
     content: schema.string({
       meta: { description: 'Markdown enriched text content' },
     }),
+    settings: schema.maybe(
+      schema.object({
+        open_links_in_new_tab: schema.boolean(),
+      })
+    ),
   },
   { unknowns: 'forbid' }
 );

@@ -7,14 +7,17 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { defaultToolsFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { FlyoutLoading } from '../../flyout/shared/components/flyout_loading';
+import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
@@ -23,6 +26,21 @@ import { OverviewTab } from './tabs/overview_tab';
 import { NotesDetails } from '../notes';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
+import { RemoteDocumentCallout } from './components/remote_document_callout';
+
+const footerStyles = css`
+  @media (max-width: 767px) {
+    overflow: auto;
+  }
+`;
+
+const headerStyles = css`
+  @media (max-width: 767px) {
+    overflow: auto;
+  }
+`;
 
 export interface DocumentFlyoutProps {
   /**
@@ -45,18 +63,20 @@ export interface DocumentFlyoutProps {
 export const DocumentFlyout = memo(
   ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
     const { services } = useKibana();
+    const { overlays } = services;
     const store = useStore();
     const history = useHistory();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
-
+    const isSecurityApp = useIsInSecurityApp();
+    const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     const onShowNotes = useCallback(() => {
-      services.overlays?.openSystemFlyout(
+      overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
@@ -64,17 +84,12 @@ export const DocumentFlyout = memo(
           children: <NotesDetails hit={hit} />,
         }),
         {
-          ownFocus: false,
-          resizable: true,
-          size: 'm',
-          type: 'overlay',
+          ...defaultToolsFlyoutProperties,
+          historyKey,
         }
       );
-    }, [history, hit, services, store]);
+    }, [history, historyKey, hit, overlays, services, store]);
 
-    if (isAlert && loading) {
-      return <FlyoutLoading data-test-subj="document-overview-loading" />;
-    }
     if (isAlert && loading) {
       return <FlyoutLoading data-test-subj="document-overview-loading" />;
     }
@@ -85,7 +100,8 @@ export const DocumentFlyout = memo(
 
     return (
       <>
-        <EuiFlyoutHeader>
+        <RemoteDocumentCallout hit={hit} />
+        <EuiFlyoutHeader css={headerStyles}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}
@@ -100,8 +116,8 @@ export const DocumentFlyout = memo(
             onAlertUpdated={onAlertUpdated}
           />
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <Footer hit={hit} />
+        <EuiFlyoutFooter css={footerStyles}>
+          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
         </EuiFlyoutFooter>
       </>
     );

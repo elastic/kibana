@@ -115,7 +115,6 @@ export const GrokPatternAISuggestions = ({
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
-                iconType="refresh"
                 size="s"
                 onClick={(connectorId) => {
                   refreshSuggestions({

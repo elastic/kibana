@@ -1,0 +1,358 @@
+---
+# This file is used to generate "Logging settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Logging settings in Kibana
+id: logging-settings
+page_description: |
+  You do not need to configure any additional settings to use the logging features in {{kib}}. Logging is enabled by default and will log at `info` level using the `pattern` layout, which outputs logs to `stdout`.
+
+  However, if you are planning to ingest your logs using Elasticsearch or another tool, we recommend using the `json` layout, which produces logs in ECS format. In general, `pattern` layout is recommended when raw logs will be read by a human, and `json` layout when logs will be read by a machine.
+
+  ::::{note}
+  The logging configuration is validated against the predefined schema and if there are any issues with it, {{kib}} will fail to start with the detailed error message.
+  ::::
+
+  {{kib}} relies on three high-level entities to set the logging service: appenders, loggers, and root. These can be configured in the `logging` namespace in `kibana.yml`.
+
+  * Appenders define where log messages are displayed (stdout or console) and their layout (`pattern` or `json`). They also allow you to specify if you want the logs stored and, if so, where (file on the disk), or shipped to an OpenTelemetry (OTLP) endpoint.
+  * Loggers define what logging settings, such as the level of verbosity and the appenders, to apply to a particular context. Each log entry context provides information about the service or plugin that emits it and any of its sub-parts, for example, `metrics.ops` or `elasticsearch.query`.
+  * Root is a logger that applies to all the log entries in {{kib}}.
+
+  For details on audit logging settings, refer to the [{{kib}} security settings](./security-settings.md#audit-logging-settings).
+
+groups:
+  - group: Logging settings
+    id: logging-settings
+    description: |
+      The following list serves as a quick reference for different logging configuration keys. Note that these are not stand-alone settings and may require additional logging configuration. See the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide and complete [examples](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md) for common configuration use cases.
+
+    settings:
+
+      - setting: logging.appenders[].<appender-name>
+        description: |
+          Unique appender identifier.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].console
+        description: |
+          Appender to use for logging records to **stdout**. By default, uses the `[%date][%level][%logger] %message %error` **pattern** layout. To use a **json**, set the [layout type to `json`](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#log-in-json-ecs-example).
+
+          {applies_to}`stack: ga 9.1` `%error` is present since Stack version 9.1.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].file
+        description: |
+          Allows you to specify a fileName to write log records to disk. To write [all log records to file](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#log-to-file-example), add the file appender to `root.appenders`. If configured, you also need to specify [`logging.appenders.file.pathName`](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#log-to-file-example).
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].rolling-file
+        description: |
+          Similar to [Log4j's](https://logging.apache.org/log4j/2.x/) `RollingFileAppender`, this appender will log to a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: [`size-limit`](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#size-limit-triggering-policy) and [`time-interval`](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#time-interval-triggering-policy).
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].otel
+        description: |
+          Ships log records to an OpenTelemetry-compatible (OTLP) endpoint over HTTP, Protobuf, or gRPC. Records are buffered by the OpenTelemetry SDK's `BatchLogRecordProcessor` and flushed periodically or on shutdown.
+
+          To forward all logs to an OTLP endpoint, add the appender to `logging.root.appenders`:
+
+          ```yaml
+          logging:
+            appenders:
+              otlp:
+                type: otel
+                protocol: proto
+                url: https://collector:4318/v1/logs
+                headers:
+                  Authorization: 'Bearer <token>'
+                attributes:
+                  '[deployment.environment]': production
+            root:
+              appenders: [default, otlp]
+          ```
+        datatype: string
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.type
+        description: |
+          The appender type determines where the log messages are sent. Required.
+        datatype: enum
+        options:
+          - option: console
+          - option: file
+          - option: otel
+          - option: rewrite
+          - option: rolling-file
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.fileName
+        description: |
+          Determines the filepath where the log messages are written to for file and rolling-file appender types. Required for appenders that write to file.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.policy.type
+        description: |
+          Specify the triggering policy for when a rollover should occur for the `rolling-file` type appender.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.policy.interval
+        description: |
+          Specify the time interval for rotating a log file for a `time-interval` type `rolling-file` appender.
+        datatype: string
+        default: 24h
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.policy.size
+        description: |
+          Specify the size limit at which the policy should trigger a rollover for a `size-limit` type `rolling-file` appender.
+        datatype: string
+        default: 100mb
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.policy.modulate
+        description: |
+          Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.strategy.type
+        description: |
+          Rolling file strategy type. Only `numeric` is currently supported.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.strategy.pattern
+        description: |
+          The suffix to append to the file path when rolling. Must include `%i`.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.strategy.max
+        description: |
+          The maximum number of files to keep. The maximum is `100`.
+        datatype: int
+        default: 7
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.url
+        description: |
+          The OTLP endpoint URL to which log records are shipped. Required for the `otel` appender type.
+
+          The expected path depends on the chosen protocol:
+          * HTTP/Protobuf (`http` or `proto`): typically ends in `/v1/logs`. For example, `https://collector:4318/v1/logs`.
+          * gRPC (`grpc`): a bare host and port without a path. For example, `https://collector:4317`.
+        datatype: string
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.protocol
+        description: |
+          The transport protocol used to send log records to the OTLP endpoint. Applies to the `otel` appender type only.
+
+          * `proto` (default): OTLP over HTTP using Protobuf encoding. More compact than `http` (JSON) and more broadly compatible than `grpc`, which requires HTTP/2.
+          * `http`: OTLP over HTTP using JSON encoding.
+          * `grpc`: OTLP over gRPC. Headers must be provided as gRPC metadata key-value pairs.
+        datatype: enum
+        default: proto
+        options:
+          - option: proto
+          - option: http
+          - option: grpc
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.headers
+        description: |
+          Optional map of HTTP headers sent with every request to the OTLP endpoint. Applies to the `otel` appender type only. Commonly used for authentication. For example, `Authorization: 'Bearer <token>'` or `Authorization: 'ApiKey <base64>'`.
+
+          For the `grpc` protocol the key-value pairs are sent as gRPC metadata instead of HTTP headers.
+
+          ::::{warning}
+          Header values are stored in plain text in `kibana.yml`. Use a secrets management solution or environment-variable substitution to avoid exposing credentials.
+          ::::
+        datatype: object
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.attributes
+        description: |
+          Optional map of additional OpenTelemetry resource attributes merged on top of the auto-detected host, process, OS, and service attributes. Applies to the `otel` appender type only. Can be used to set or override attributes such as `service.name` or `deployment.environment`.
+
+          Because Kibana expands dotted YAML keys into nested objects, wrap dotted attribute names in square brackets:
+
+          ```yaml
+          attributes:
+            '[service.name]': my-kibana
+            '[deployment.environment]': production
+          ```
+        datatype: object
+        applies_to:
+          stack: ga 9.5
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.layout.type
+        description: |
+          Determines how the log messages are displayed. Required.
+        datatype: enum
+        options:
+          - option: pattern
+            description: "Provides human-readable output."
+          - option: json
+            description: "Provides ECS-compliant output."
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.layout.highlight
+        description: |
+          Optional boolean to highlight log messages in color. Applies to `pattern` layout only.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.appenders[].<appender-name>.layout.pattern
+        description: |
+          Optional [string pattern](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#pattern-layout) for placeholders that will be replaced with data from the actual log message. Applicable to pattern type layout only.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.root.appenders[]
+        description: |
+          List of specific appenders to apply to `root`. Defaults to `console` with `pattern` layout.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.root.level
+        description: |
+          Specify default verbosity for all log messages to fall back to if not specifically configured at the individual logger level. The `all` and `off` levels can be used only in configuration and are just handy shortcuts that allow you to log every log record or disable logging entirely or for a specific logger.
+        datatype: enum
+        default: info
+        options:
+          - option: all
+          - option: fatal
+          - option: error
+          - option: warn
+          - option: info
+          - option: debug
+          - option: trace
+          - option: off
+        applies_to:
+          stack: ga
+          self: ga
+          ech: ga
+
+      - setting: logging.loggers[].<logger>.name
+        description: |
+          Specific logger instance.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.loggers[].<logger>.level
+        description: |
+          Specify verbosity of log messages for a logger context. Optional and inherits the verbosity of any ancestor logger, up to the `root` logger `level`.
+        datatype: enum
+        options:
+          - option: all
+          - option: fatal
+          - option: error
+          - option: warn
+          - option: info
+          - option: debug
+          - option: trace
+          - option: off
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: logging.loggers[].<logger>.appenders
+        description: |
+          Determines the appender to apply to a specific logger context as an array. Optional and falls back to the appender(s) of the `root` logger if not specified.
+        datatype: string
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable
+
+      - setting: deprecation.enable_http_debug_logs
+        id: enable-http-debug-logs
+        description: |
+          Optional boolean to log debug messages when a deprecated API is called.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          self: ga
+          ech: unavailable

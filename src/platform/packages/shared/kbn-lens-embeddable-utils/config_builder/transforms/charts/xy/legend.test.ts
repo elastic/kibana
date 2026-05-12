@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYState } from '../../../schema';
+import type { XYConfig } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
-import { LegendLayout } from '@kbn/chart-expressions-common';
 import type { XYVisualizationState } from '@kbn/lens-common';
 
 describe('XY Legend Transforms', () => {
-  type ApiLegend = NonNullable<XYState['legend']>;
+  type ApiLegend = NonNullable<XYConfig['legend']>;
   type StateLegend = XYVisualizationState['legend'];
 
   const roundTripLegend = (stateLegend: StateLegend) => {
@@ -34,23 +33,6 @@ describe('XY Legend Transforms', () => {
 
   const cases: readonly LegendCase[] = [
     {
-      title: 'outside bottom list legend persists truncate.max_pixels',
-      state: {
-        isVisible: true,
-        shouldTruncate: true,
-        position: 'bottom',
-        layout: LegendLayout.List,
-        maxPixels: 320,
-      },
-      api: {
-        visibility: 'visible',
-        placement: 'outside',
-        position: 'bottom',
-        layout: { type: 'list', truncate: { max_pixels: 320 } },
-      },
-      forbiddenApiPaths: ['layout.truncate.max_lines'],
-    },
-    {
       title: 'inside grid legend persists truncate.max_lines',
       state: {
         isVisible: true,
@@ -70,22 +52,6 @@ describe('XY Legend Transforms', () => {
         layout: { type: 'grid', truncate: { max_lines: 2 } },
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
-    },
-    {
-      title: 'outside top list legend persists default truncate.max_pixels = 250',
-      state: {
-        isVisible: true,
-        shouldTruncate: true,
-        position: 'top',
-        layout: LegendLayout.List,
-      },
-      api: {
-        visibility: 'visible',
-        placement: 'outside',
-        position: 'top',
-        layout: { type: 'list', truncate: { max_pixels: 250 } },
-      },
-      forbiddenApiPaths: ['layout.truncate.max_lines'],
     },
     {
       title: 'outside right grid legend persists truncate.max_lines',
@@ -115,6 +81,62 @@ describe('XY Legend Transforms', () => {
         placement: 'outside',
         position: 'left',
         layout: { type: 'grid', truncate: { max_lines: 1 } },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header auto (visible, no custom title)',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: true,
+        title: undefined,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: true },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header custom title',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: true,
+        title: 'My series',
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: true, text: 'My series' },
+      },
+      forbiddenApiPaths: ['layout.truncate.max_pixels'],
+    },
+    {
+      title: 'series header none',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        shouldTruncate: true,
+        maxLines: 2,
+        isTitleVisible: false,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+        series_header: { visible: false },
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },

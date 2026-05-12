@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from './deprecated_step_metadata';
 import type { StepStabilityLevel } from '../types/v1';
 
 export enum StepCategory {
@@ -15,6 +16,7 @@ export enum StepCategory {
   External = 'external',
   Ai = 'ai',
   Kibana = 'kibana',
+  KibanaCases = 'kibana.cases',
   Data = 'data',
   FlowControl = 'flowControl',
 }
@@ -112,4 +114,11 @@ export interface BaseStepDefinition<
    * Omit for stable/GA steps.
    */
   stability?: StepStabilityLevel;
+
+  /**
+   * Deprecation metadata for this step type.
+   * Deprecated steps remain valid for existing workflows, but should not be
+   * suggested for new workflows.
+   */
+  deprecation?: StepDeprecationInfo;
 }

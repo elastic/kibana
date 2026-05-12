@@ -14,6 +14,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import type { ElasticsearchSettingsDefinition } from '../src/commands/definitions/types';
 import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
+import { clearDocumentationDirectives } from './utils/docs';
 
 // We exlude the time_zone setting as we decided that we won't support it in Kibana
 const SETTINGS_TO_EXCLUDE = new Set(['time_zone', 'project_routing']);
@@ -41,6 +42,7 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
       const settingName = setting.name;
       const modifiedSetting = {
         ...setting,
+        description: clearDocumentationDirectives(setting.description),
         ignoreAsSuggestion: setting.snapshotOnly || SETTINGS_TO_EXCLUDE.has(settingName),
       };
       return `const ${camelCase(settingName)} = ${JSON.stringify(modifiedSetting, null, 2).replace(

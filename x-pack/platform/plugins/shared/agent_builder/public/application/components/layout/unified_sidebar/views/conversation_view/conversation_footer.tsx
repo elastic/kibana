@@ -35,6 +35,7 @@ export const ConversationFooter: React.FC = () => {
             defaultMessage: 'Manage components',
           })}
           href={appPaths.manage.agents}
+          hideIcon={true}
           onClick={(e) => {
             e.preventDefault();
             navigateToAgentBuilderUrl(appPaths.manage.agents);

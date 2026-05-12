@@ -51,7 +51,7 @@ const OPERATOR_SUGGESTIONS = {
 // Helper to add placeholder to operator labels for test expectations
 const addPlaceholder = (operators: string[]) => operators.map((op) => `${op} $0`);
 
-const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0].text;
+const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '')[0].text;
 const NEXT_ACTIONS = [
   withCompleteItem.text,
   commaCompleteItem.text.endsWith(' ') ? commaCompleteItem.text : `${commaCompleteItem.text} `,
@@ -179,6 +179,19 @@ describe('RERANK Autocomplete', () => {
 
     test('suggests field columns after ON keyword', async () => {
       const query = buildRerankQuery({ query: '"search query"' }) + ' ON ';
+
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
+    });
+
+    test('suggests text and keyword fields after an incomplete assignment in ON clause', async () => {
+      const query = `${buildRerankQuery({ query: '"search query"', onClause: 'col0 =' })} `;
 
       await expectRerankSuggestions(
         query,

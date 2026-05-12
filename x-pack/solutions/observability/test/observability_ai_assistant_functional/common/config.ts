@@ -107,6 +107,8 @@ async function getTestConfig({
       ...testConfig.get('kbnTestServer'),
       serverArgs: [
         ...testConfig.get('kbnTestServer.serverArgs'),
+        // Contextual insights UI is hidden when chat experience is Agent (see insight.tsx).
+        '--uiSettings.overrides.aiAssistant:preferredChatExperience=classic',
         ...(kibanaConfig
           ? Object.entries(kibanaConfig).map(([key, value]) =>
               Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`

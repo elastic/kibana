@@ -273,10 +273,18 @@ export function generateEsqlQuery(
       filterClause = ` WHERE ${cmd}(${esql.str(filteredQueryString)})`;
     }
 
-    // metricESQL is the full expression (template + optional filter); same value is used as map key and in STATS
-    const metricESQL = rawResult.template + filterClause;
+    const fullStatsMetricExpression = rawResult.template + filterClause;
 
-    esAggsIdMap[metricESQL] = createEsAggsIdMapEntry({
+    const statsColumnAlias = columnRoles?.[colId];
+    const statsMetricFragment = statsColumnAlias
+      ? `${statsColumnAlias} = ${fullStatsMetricExpression}`
+      : fullStatsMetricExpression;
+
+    // Key must match the STATS output column name: alias if set, else the bare expression.
+    // Use the same truthy check as statsMetricFragment so empty string roles map to the bare expression.
+    const esAggsIdMapKey = statsColumnAlias ? statsColumnAlias : fullStatsMetricExpression;
+
+    esAggsIdMap[esAggsIdMapKey] = createEsAggsIdMapEntry({
       col,
       colId,
       format,
@@ -286,7 +294,7 @@ export function generateEsqlQuery(
       dateRange,
     });
 
-    return { esql: metricESQL } satisfies EsqlConversionResult;
+    return { esql: statsMetricFragment } satisfies EsqlConversionResult;
   });
 
   // Check for metric conversion errors with a type guard

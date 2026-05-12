@@ -6,14 +6,31 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/document/header';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { NotesDetails } from '../../flyout_v2/notes';
-import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { DiscoverCellActions } from '../cell_actions';
+
+export const MISSING_METADATA_CALLOUT = i18n.translate(
+  'xpack.securitySolution.flyout.document.header.missingMetadataCallout',
+  {
+    defaultMessage:
+      'Some of the content below might not be loading correctly. To ensure the best experience, please add `METADATA _id,_index` to your query.',
+  }
+);
 
 export interface AlertFlyoutHeaderProps {
   /**
@@ -32,6 +49,22 @@ export interface AlertFlyoutHeaderProps {
    * Callback invoked after alert mutations to refresh the Discover table.
    */
   onAlertUpdated: () => void;
+  /**
+   * Current Discover columns shown in the doc viewer.
+   */
+  columns?: DocViewRenderProps['columns'];
+  /**
+   * Discover filter callback used by flyout cell actions.
+   */
+  filter?: DocViewRenderProps['filter'];
+  /**
+   * Callback used to add a column to the Discover table.
+   */
+  onAddColumn?: DocViewRenderProps['onAddColumn'];
+  /**
+   * Callback used to remove a column from the Discover table.
+   */
+  onRemoveColumn?: DocViewRenderProps['onRemoveColumn'];
 }
 
 export const AlertFlyoutHeader = ({
@@ -39,10 +72,29 @@ export const AlertFlyoutHeader = ({
   servicesPromise,
   storePromise,
   onAlertUpdated,
+  columns,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
 }: AlertFlyoutHeaderProps) => {
   const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const isSecurityApp = useIsInSecurityApp();
+  const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const renderCellActions = useCallback<CellActionRenderer>(
+    (props) => (
+      <DiscoverCellActions
+        {...props}
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      />
+    ),
+    [columns, filter, onAddColumn, onRemoveColumn]
+  );
+
   const openNotesFlyout = useCallback(() => {
     if (!services || !store) {
       return;
@@ -56,13 +108,11 @@ export const AlertFlyoutHeader = ({
         children: <NotesDetails hit={hit} />,
       }),
       {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
+        ...defaultToolsFlyoutProperties,
+        historyKey,
       }
     );
-  }, [history, hit, services, store]);
+  }, [history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -92,16 +142,33 @@ export const AlertFlyoutHeader = ({
     return null;
   }
 
-  return flyoutProviders({
-    services,
-    store,
-    children: (
-      <Header
-        hit={hit}
-        renderCellActions={noopCellActionRenderer}
-        onAlertUpdated={onAlertUpdated}
-        onShowNotes={openNotesFlyout}
-      />
-    ),
-  });
+  const isMissingMetadata = !hit.raw._id || !hit.raw._index;
+
+  return (
+    <>
+      {isMissingMetadata ? (
+        <>
+          <EuiCallOut announceOnMount size="s" title={MISSING_METADATA_CALLOUT} />
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      {flyoutProviders({
+        services,
+        store,
+        children: (
+          <>
+            <RemoteDocumentCallout hit={hit}>
+              <EuiSpacer size="s" />
+            </RemoteDocumentCallout>
+            <Header
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+              onShowNotes={openNotesFlyout}
+            />
+          </>
+        ),
+      })}
+    </>
+  );
 };

@@ -106,7 +106,7 @@ describe('PagerdutyConnector', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'list_incidents',
-        arguments: { query_model: { status: ['triggered'] } },
+        arguments: { query_model: { status: ['triggered'], limit: 25 } },
       });
     });
   });

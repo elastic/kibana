@@ -11,7 +11,15 @@
         "tags": [],
         "label": "IUiSettingsClient",
         "description": [
-          "\nClient-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n{@link IUiSettingsClient}\n"
+          "\nClient-side client that provides access to the advanced settings stored in elasticsearch.\nThe settings provide control over the behavior of the Kibana application.\nFor example, a user can specify how to display numeric or date fields.\nUsers can adjust the settings via Management UI.\n",
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-public.IUiSettingsClient",
+            "text": "IUiSettingsClient"
+          },
+          "\n"
         ],
         "path": "src/core/packages/ui-settings/browser/src/types.ts",
         "lineNumber": 26,
@@ -68,6 +76,7 @@
                 "lineNumber": 42,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -125,6 +134,7 @@
                 "lineNumber": 48,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": false
               }
