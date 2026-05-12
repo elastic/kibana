@@ -33,6 +33,7 @@ import type {
   LifecycleEvidence,
   LifecycleDetection,
 } from '@kbn/streams-plugin/common';
+import { useKibana } from '../../../../../hooks/use_kibana';
 import { TRANSLATIONS } from './translations';
 import { useRawDocument } from './use_raw_document';
 
@@ -63,17 +64,28 @@ const compactAccordionCss = css`
   }
 `;
 
+// TODO: Replace with an agent_builder locator that accepts conversationId once available
 const AGENT_BUILDER_CONVERSATION_PATH = '/app/agent_builder/conversations/';
 
 // ---------------------------------------------------------------------------
 // Reusable small components
 // ---------------------------------------------------------------------------
 
-const ConversationLink = React.memo(({ conversationId }: { conversationId: string }) => (
-  <EuiLink href={`${AGENT_BUILDER_CONVERSATION_PATH}${conversationId}`} target="_blank" external>
-    {TRANSLATIONS.lifecycle.viewConversation}
-  </EuiLink>
-));
+const ConversationLink = React.memo(({ conversationId }: { conversationId: string }) => {
+  const {
+    core: {
+      http: { basePath },
+    },
+  } = useKibana();
+
+  const href = basePath.prepend(`${AGENT_BUILDER_CONVERSATION_PATH}${conversationId}`);
+
+  return (
+    <EuiLink href={href} target="_blank" external>
+      {TRANSLATIONS.lifecycle.viewConversation}
+    </EuiLink>
+  );
+});
 
 const EvidencesList = React.memo(({ evidences }: { evidences: LifecycleEvidence[] }) => {
   if (!evidences.length) return null;

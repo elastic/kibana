@@ -21,6 +21,7 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getVerdictColor, getImpactColor } from '@kbn/streams-plugin/common';
@@ -35,7 +36,17 @@ interface EventFlyoutProps {
   onClose: () => void;
 }
 
-export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
+const BadgeRow = React.memo(({ items, color }: { items: string[]; color?: string }) => (
+  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+    {items.map((item) => (
+      <EuiFlexItem grow={false} key={item}>
+        <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+));
+
+export const EventFlyout = React.memo(({ event, onClose }: EventFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'sigEventFlyout' });
 
   const {
@@ -46,7 +57,11 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
     },
   } = useKibana();
 
-  const lifecycleFetch = useStreamsAppFetch(
+  const {
+    value: lifecycle,
+    loading,
+    error,
+  } = useStreamsAppFetch(
     async ({ signal }) =>
       streamsRepositoryClient.fetch('GET /internal/streams/sig_events/{eventId}/lifecycle', {
         params: { path: { eventId: event.id } },
@@ -55,7 +70,8 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
     [streamsRepositoryClient, event.id]
   );
 
-  const lifecycle = lifecycleFetch.value;
+  const streamNames = event.stream_names ?? [];
+  const { rule_names: ruleNames = [], recommendations = [] } = event;
 
   return (
     <EuiFlyout onClose={onClose} size="m" ownFocus aria-labelledby={flyoutTitleId}>
@@ -94,7 +110,7 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
           </>
         )}
 
-        {event.recommendations && event.recommendations.length > 0 && (
+        {recommendations.length > 0 && (
           <>
             <EuiSpacer size="m" />
             <EuiTitle size="xs">
@@ -104,7 +120,7 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
             <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
               <EuiText size="s">
                 <ol>
-                  {event.recommendations.map((rec, idx) => (
+                  {recommendations.map((rec, idx) => (
                     <li key={idx}>{rec}</li>
                   ))}
                 </ol>
@@ -115,36 +131,20 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
 
         <EuiHorizontalRule margin="m" />
 
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>{TRANSLATIONS.flyout.streams}</h4>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle size="xxs">
+          <h4>{TRANSLATIONS.flyout.streams}</h4>
+        </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {(event.stream_names ?? []).map((name) => (
-            <EuiFlexItem grow={false} key={name}>
-              <EuiBadge color="hollow">{name}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <BadgeRow items={streamNames} color="hollow" />
 
-        {event.rule_names && event.rule_names.length > 0 && (
+        {ruleNames.length > 0 && (
           <>
             <EuiSpacer size="m" />
             <EuiTitle size="xxs">
               <h4>{TRANSLATIONS.flyout.rules}</h4>
             </EuiTitle>
             <EuiSpacer size="xs" />
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {event.rule_names.map((rule) => (
-                <EuiFlexItem grow={false} key={rule}>
-                  <EuiBadge>{rule}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <BadgeRow items={ruleNames} />
           </>
         )}
 
@@ -154,8 +154,16 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
           <h3>{TRANSLATIONS.flyout.lifecycle}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {lifecycleFetch.loading ? (
+        {loading ? (
           <EuiLoadingSpinner size="m" />
+        ) : error ? (
+          <EuiCallOut
+            announceOnMount
+            title={TRANSLATIONS.flyout.lifecycleError}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
         ) : lifecycle ? (
           <LifecycleTimeline
             detections={lifecycle.detections}
@@ -176,4 +184,4 @@ export const EventFlyout = ({ event, onClose }: EventFlyoutProps) => {
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
-};
+});

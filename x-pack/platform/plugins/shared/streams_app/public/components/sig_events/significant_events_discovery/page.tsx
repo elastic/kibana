@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
@@ -27,7 +28,11 @@ import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
-import { SignificantEventsList } from './components/significant_events_list';
+const SignificantEventsList = dynamic(() =>
+  import('./components/significant_events_list').then((mod) => ({
+    default: mod.SignificantEventsList,
+  }))
+);
 import { InsightsTab } from './components/insights/tab';
 
 const discoveryTabs = [

@@ -98,6 +98,9 @@ export const TRANSLATIONS = {
     close: i18n.translate('xpack.streams.eventFlyout.closeButton', {
       defaultMessage: 'Close',
     }),
+    lifecycleError: i18n.translate('xpack.streams.eventFlyout.lifecycleError', {
+      defaultMessage: 'Failed to load lifecycle data',
+    }),
   },
   lifecycle: {
     detectionStep: i18n.translate('xpack.streams.lifecycle.detectionStep', {
