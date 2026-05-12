@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { BehaviorSubject, debounceTime, first, map, merge, pairwise } from 'rxjs';
+import { BehaviorSubject, debounceTime, first, map, merge, pairwise, skip } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -236,7 +236,10 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
         serializeState,
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
-          isAnchored$.pipe(map(() => undefined))
+          isAnchored$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {

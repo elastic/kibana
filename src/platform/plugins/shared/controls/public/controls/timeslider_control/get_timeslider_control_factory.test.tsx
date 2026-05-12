@@ -317,4 +317,46 @@ describe('TimeSliderControlApi', () => {
       expect(hasUnsavedChanges).toBe(false);
     });
   });
+
+  describe('anyStateChange$', () => {
+    let embeddableApi: TimeSliderControlApi;
+    beforeEach((done) => {
+      factory
+        .buildEmbeddable({
+          initializeDrilldownsManager: jest.fn(),
+          initialState: timeSliderControlSchema.validate({
+            start_percentage_of_time_range: 0.15,
+            end_percentage_of_time_range: 0.25,
+          }),
+          finalizeApi,
+          uuid,
+          parentApi: {},
+        })
+        .then(({ api }) => {
+          embeddableApi = api;
+          done();
+        })
+        .catch(done);
+    });
+
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      let emitCount = 0;
+      embeddableApi.anyStateChange$.subscribe(() => {
+        emitCount++;
+        if (emitCount === 1) {
+          try {
+            const { start_percentage_of_time_range } = embeddableApi.serializeState();
+            expect(start_percentage_of_time_range).toBe(0);
+          } catch (error) {
+            // start_percentage_of_time_range assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        }
+      });
+      embeddableApi.clearSelections();
+    });
+  });
 });
