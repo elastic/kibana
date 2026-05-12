@@ -108,7 +108,11 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-context-layer-plugin",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
+    "@kbn/monaco",
+    "@kbn/workflows-yaml"
   ],
   "exclude": ["target/**/*"]
 }
