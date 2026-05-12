@@ -70,4 +70,52 @@ describe('function parameters autocomplete from hints', () => {
 
     expect(suggestions).toEqual(suggestionsForHint);
   });
+
+  it('hint.kind === "aggregation" suggests only aggregation and time-series-aggregation functions', async () => {
+    const functionName = 'test_hint_kind_aggregation';
+
+    setTestFunctions([
+      {
+        type: FunctionDefinitionTypes.AGG,
+        name: functionName,
+        description: '',
+        signatures: [
+          {
+            params: [
+              {
+                name: 'aggregation',
+                type: 'double',
+                optional: false,
+                hint: { kind: 'aggregation' },
+              },
+            ],
+            returnType: 'double',
+          },
+        ],
+        locationsAvailable: [Location.STATS],
+      },
+    ]);
+
+    const { suggest } = await setup();
+    const suggestionLabels = (await suggest(`FROM index | STATS ${functionName}(/`)).map(
+      (s) => s.label
+    );
+
+    const aggNames = new Set(
+      getAllFunctions({
+        type: [FunctionDefinitionTypes.AGG, FunctionDefinitionTypes.TIME_SERIES_AGG],
+      }).map((fn) => fn.name.toUpperCase())
+    );
+
+    // Every suggestion must be an aggregation / time-series-agg function — no fields, scalar functions, literals, operators
+    for (const label of suggestionLabels) {
+      expect(aggNames.has(label)).toBe(true);
+    }
+    // Sanity-check: a few well-known agg functions appear (gives us coverage that the path is wired up)
+    for (const expected of ['MAX', 'MIN', 'AVG', 'SUM']) {
+      expect(suggestionLabels).toContain(expected);
+    }
+    // And the parent function is excluded from its own suggestions
+    expect(suggestionLabels).not.toContain(functionName.toUpperCase());
+  });
 });

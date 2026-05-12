@@ -416,14 +416,29 @@ function buildCustomFilteringContext(
 
   if (!isInBy) {
     statsSpecificFunctionsToIgnore.push(
-      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
-        ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
-        : []),
-      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
-        ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
-        : [])
+      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex)
     );
+
+    // The "no nested aggregations" rule does not apply when the current parameter
+    // explicitly expects an aggregation function (hint.kind === 'aggregation').
+    const expectsAggregation = basicContext.paramDefinitions.some(
+      (p) => p.hint?.kind === 'aggregation'
+    );
+
+    if (!expectsAggregation) {
+      if (isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
+        statsSpecificFunctionsToIgnore.push(
+          ...getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+        );
+      }
+      if (isTimeseriesAggUsedAlready(command, finalCommandArgIndex)) {
+        statsSpecificFunctionsToIgnore.push(
+          ...getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+            ({ name }) => name
+          )
+        );
+      }
+    }
   }
 
   return {
