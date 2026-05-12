@@ -609,10 +609,6 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     });
   }
 
-  if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
-    lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
-  }
-
   // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
   if (opts.basePath !== false && !opts.runExamples && !_.has(rawConfig, 'server.basePath')) {
     lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
