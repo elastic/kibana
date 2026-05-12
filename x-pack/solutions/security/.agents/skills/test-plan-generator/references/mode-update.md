@@ -29,14 +29,8 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    - Known Limitations that have been resolved or new ones that have emerged
    - New test files that should be reflected in automation coverage lines
 
-6. Apply only the identified changes. Do not rewrite accurate sections. If new scenarios must be written, first read both reference files sequentially:
-   - `references/optional-scenarios.md` — Gherkin rules, tags, priority levels, and optional section templates
-   - `references/output-formats.md` — scenario structure and automation coverage format
+6. Apply only the identified changes. Do not rewrite accurate sections. If new scenarios must be written, follow the [Writing scenarios](../SKILL.md#writing-scenarios) and [Saving the draft](../SKILL.md#saving-the-draft) procedures from Step 3 of SKILL.md — skip the Sources Summary sub-step there (the update-mode version with PR re-read info is emitted in step 8 below).
 
-   When all new scenarios are written, run the Gherkin self-review from `references/output-formats.md`.
+7. Replace Step 3's generic "Draft saved…" message: tell the user exactly what changed and what was left unchanged.
 
-7. Before saving, review [`references/common-mistakes.md`](references/common-mistakes.md) and fix any issues found. Save to `.agents/tmp/test-plan-#<issue_number>.md`.
-
-8. Tell the user exactly what changed and what was left unchanged.
-
-9. Output the Sources Summary as defined in `references/output-formats.md`. Include one row per linked PR showing whether it was re-read or skipped.
+8. Output the Sources Summary as defined in `references/output-formats.md`. Include one row per linked PR showing whether it was re-read or skipped.
