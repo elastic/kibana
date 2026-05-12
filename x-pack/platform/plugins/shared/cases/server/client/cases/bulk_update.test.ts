@@ -76,6 +76,53 @@ describe('update', () => {
       ]);
     });
 
+    it('emits caseUpdated events for updated cases', async () => {
+      await bulkUpdate(cases, clientArgs, casesClientMock);
+
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          updatedFields: ['assignees'],
+        },
+        expect.anything()
+      );
+    });
+
+    it('emits caseUpdated events with only fields that actually changed', async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0], attributes: { status: CaseStatuses.closed } }],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              title: mockCases[0].attributes.title, // unchanged — must not appear in updatedFields
+              status: CaseStatuses.closed, // actually changed
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: mockCases[0].id,
+          owner: mockCases[0].attributes.owner,
+          updatedFields: ['status'],
+        },
+        expect.anything()
+      );
+    });
+
     it('does not notify if the case does not exist', async () => {
       expect.assertions(2);
 

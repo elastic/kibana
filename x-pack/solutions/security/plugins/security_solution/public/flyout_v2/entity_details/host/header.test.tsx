@@ -78,6 +78,16 @@ describe('Header', () => {
     expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 
+  it('does not render lastSeen element when isEntityInStore is true', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <Header {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('host-panel-header-lastSeen')).not.toBeInTheDocument();
+  });
+
   it('renders entity store badge when isEntityInStore is true', () => {
     const { getByTestId } = render(
       <TestProviders>

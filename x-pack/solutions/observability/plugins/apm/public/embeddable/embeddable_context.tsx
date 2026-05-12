@@ -8,6 +8,11 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import {
+  UNSAFE_LocationContext as ReactRouterLocationContext,
+  UNSAFE_NavigationContext as ReactRouterNavigationContext,
+  UNSAFE_RouteContext as ReactRouterRouteContext,
+} from 'react-router-dom-v5-compat';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
@@ -20,6 +25,31 @@ import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
+
+/**
+ * Resets the React Router v6 context so that nested `<Router>` components
+ * (via `CompatRouter` inside `@kbn/shared-ux-router`) do not trigger the
+ * v6 invariant "You cannot render a <Router> inside another <Router>".
+ *
+ * This is necessary because embeddables may be rendered inside pages that
+ * already have a v6 router context (e.g. APM alert details via `CompatRouter`),
+ * while the embeddable needs its own isolated in-memory router for URL state.
+ */
+function ScopedRouterProvider({ children }: { children: React.ReactElement }) {
+  return (
+    <ReactRouterRouteContext.Provider value={{ outlet: null, matches: [], isDataRoute: false }}>
+      <ReactRouterNavigationContext.Provider
+        value={null as unknown as React.ContextType<typeof ReactRouterNavigationContext>}
+      >
+        <ReactRouterLocationContext.Provider
+          value={null as unknown as React.ContextType<typeof ReactRouterLocationContext>}
+        >
+          {children}
+        </ReactRouterLocationContext.Provider>
+      </ReactRouterNavigationContext.Provider>
+    </ReactRouterRouteContext.Provider>
+  );
+}
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -100,21 +130,23 @@ export function ApmEmbeddableContext({
             telemetry: deps.telemetry,
           }}
         >
-          <RouterProvider router={apmRouter as any} history={history.current}>
-            <TimeRangeMetadataContextProvider
-              uiSettings={deps.coreStart.uiSettings}
-              start={resolvedStart ?? rangeFrom}
-              end={resolvedEnd ?? rangeTo}
-              kuery={kuery}
-              useSpanName={false}
-            >
-              <LicenseProvider>
-                <ApmIndexSettingsContextProvider>
-                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-                </ApmIndexSettingsContextProvider>
-              </LicenseProvider>
-            </TimeRangeMetadataContextProvider>
-          </RouterProvider>
+          <ScopedRouterProvider>
+            <RouterProvider router={apmRouter as any} history={history.current}>
+              <TimeRangeMetadataContextProvider
+                uiSettings={deps.coreStart.uiSettings}
+                start={resolvedStart ?? rangeFrom}
+                end={resolvedEnd ?? rangeTo}
+                kuery={kuery}
+                useSpanName={false}
+              >
+                <LicenseProvider>
+                  <ApmIndexSettingsContextProvider>
+                    <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                  </ApmIndexSettingsContextProvider>
+                </LicenseProvider>
+              </TimeRangeMetadataContextProvider>
+            </RouterProvider>
+          </ScopedRouterProvider>
         </KibanaContextProvider>
       </ApmPluginContext.Provider>
     </I18nProvider>

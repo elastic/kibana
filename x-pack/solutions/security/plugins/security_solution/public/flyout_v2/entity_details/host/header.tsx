@@ -42,7 +42,6 @@ export interface HeaderProps {
 }
 
 const linkTitleCSS = { width: 'fit-content' };
-
 const urlParamOverride = { timeline: { isOpen: false } };
 
 /**
@@ -65,20 +64,22 @@ export const Header = ({
   return (
     <div data-test-subj="host-panel-header">
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" data-test-subj={'host-panel-header-lastSeen'}>
-            {isLoading ? (
-              <EuiSkeletonText
-                lines={1}
-                size="xs"
-                data-test-subj="host-panel-header-lastSeen-loading"
-              />
-            ) : (
-              lastSeenDateFormatted && <PreferenceFormattedDate value={lastSeenDateFormatted} />
-            )}
-            <EuiSpacer size="xs" />
-          </EuiText>
-        </EuiFlexItem>
+        {!isEntityInStore && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" data-test-subj={'host-panel-header-lastSeen'}>
+              {isLoading ? (
+                <EuiSkeletonText
+                  lines={1}
+                  size="xs"
+                  data-test-subj="host-panel-header-lastSeen-loading"
+                />
+              ) : (
+                lastSeenDateFormatted && <PreferenceFormattedDate value={lastSeenDateFormatted} />
+              )}
+              <EuiSpacer size="xs" />
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             gutterSize="xs"
@@ -121,7 +122,7 @@ export const Header = ({
           </EuiFlexItem>
         ) : (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiBadge data-test-subj="host-panel-header-entity-type-badge" color="hollow">
                   <FormattedMessage

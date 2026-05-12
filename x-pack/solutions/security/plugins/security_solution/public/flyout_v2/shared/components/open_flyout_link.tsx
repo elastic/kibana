@@ -18,7 +18,7 @@ import {
 } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey } from '../../document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { OPEN_FLYOUT_LINK_TEST_ID } from './test_ids';
 import { buildFlyoutContent } from '../utils/build_flyout_content';
 
@@ -66,7 +66,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   const history = useHistory();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value), [field, value]);
 

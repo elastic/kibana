@@ -20,7 +20,7 @@ import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } fro
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import type { ObservedEntityData } from '../../../flyout/entity_details/shared/components/observed_entity/types';
-import type { HostItem } from '../../../../common/search_strategy';
+import type { EntityRiskScore, HostItem } from '../../../../common/search_strategy';
 import { VisualizationsSection } from '../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
 
@@ -51,6 +51,8 @@ export interface ContentProps {
   skipRiskAndCriticality?: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
+  /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
+  prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
 }
 
 /**
@@ -69,6 +71,7 @@ export const Content = ({
   entityRecord,
   skipRiskAndCriticality = false,
   entityStoreEntityId,
+  prefetchedResolutionRisk,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -97,6 +100,7 @@ export const Content = ({
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               entityId={entityRecord?.entity.id}
+              prefetchedResolutionRisk={prefetchedResolutionRisk}
             />
             <EuiHorizontalRule />
           </>
