@@ -12,7 +12,7 @@ We have detected that
 - using the placeholder "[indexPattern]": makes the LLM get confused because it is not the syntax it expects
 - using the wildcard "*": makes it harder for the LLM to understand that it is the index pattern
 */
-export const TRANSLATION_INDEX_PATTERN = 'logs*';
+export const TRANSLATION_INDEX_PATTERN = 'logs-*';
 
 export const RETRY_POLICY: RetryPolicy = {
   initialInterval: 1000,
