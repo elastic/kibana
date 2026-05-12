@@ -2,21 +2,48 @@
 
 ## Setup
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
+- Run Kibana in development mode: `yarn start` (or `node scripts/kibana.js`)
 
 ## Overview
-- Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
+
+### Repository layout
+- `src/` — Open source code (SSPL/AGPLv3). Platform core and shared plugins.
+- `x-pack/` — Elastic License 2.0 code. Enterprise plugins and solutions (security, observability, search, etc.).
+- `packages/` — Root-level utility packages (build tools, test helpers, CLI tools).
+- `scripts/` — Development scripts (`node scripts/generate.js`, `node scripts/jest.js`, etc.).
+
+Code for new features goes in `src/` if open-source or `x-pack/` if enterprise. Never import `x-pack/` code from `src/`.
+
+### Module system
+- Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages.
 - Packages are reusable units with explicit boundaries and a single public entry point (no subpath imports), usually with a focused purpose.
 - Plugins are a package type (`type: "plugin"`) that include a plugin class with setup/start/stop lifecycles, utilized by the core platform to enable applications.
 - **Server plugin entry (`server/index.ts`)** should not load `./plugin` until the plugin may run. Use `import type` (and `export type`) for types from `./plugin`, keep shared config in `config.ts` / `../common/config` (not re-exported runtime values from `./plugin` at the entry), and instantiate the implementation with `await import('./plugin')` inside the async `plugin` initializer. Static value imports, `export { … }` / `export *` of values, `import './plugin'`, and `require('./plugin')` in that entry force Node to parse and execute `plugin.ts` even when the plugin is disabled. `@kbn/eslint/no_sync_import_from_plugin` in `@kbn/eslint-config` enforces this on plugin `server/index.ts` files (see [PR #170856](https://github.com/elastic/kibana/pull/170856) and [issue #171080](https://github.com/elastic/kibana/issues/171080)).
 - Plugins that depend on other plugins rely on the contracts returned by those lifecycles, so circular dependencies must be avoided.
 - Module IDs (typically `@kbn/...`) live in `kibana.jsonc`; `package.json` names are derived where present.
 - Plugin IDs are additional camelCase IDs under `plugin.id` in `kibana.jsonc`, used by core platform and other plugins.
-- Modules are grouped by domain (platform vs solutions) with visibility rules (`shared` vs `private`) that limit cross-group access.
+- Modules are grouped by domain (platform vs solutions) with visibility rules: `shared` modules expose a public API to other groups; `private` modules are only accessible within their own group.
+
+### Plugin structure
+Each plugin follows this layout:
+```
+my-plugin/
+├── kibana.jsonc          # manifest (id, type, requiredPlugins, visibility)
+├── public/
+│   ├── index.ts          # exports SetupContract, StartContract types
+│   └── plugin.ts         # implements Plugin<Setup, Start, PluginsDeps>
+└── server/
+    ├── index.ts
+    └── plugin.ts
+```
+- `setup()` receives `core` + contracts from `requiredPlugins`; returns the plugin's own setup contract.
+- `start()` similarly returns the start contract. Circular plugin dependencies are not allowed.
+
 - Utility scripts live in `scripts/` (e.g., `node scripts/generate.js`).
 - If a user correction contradicts this doc or any skills you followed, or missing guidance caused avoidable work, submit DevEx feedback: `echo "..." | scripts/devex_feedback.sh` (include the gap and suggested fix).
 
 ## Testing
-Always run `node scripts/check_changes.ts` to validate your changes
+Always run `node scripts/check_changes.ts` to validate your changes — this runs the precommit hook (ESLint, type-check, and relevant tests) scoped to files you've modified, as a fast local gate before CI.
 
 ### Jest unit
 `node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
