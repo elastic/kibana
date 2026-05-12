@@ -18,7 +18,6 @@ export class ESQLService extends FtrService {
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly findService = this.ctx.getService('find');
 
   /** Ensures that the ES|QL code editor is loaded with a given statement */
@@ -166,8 +165,14 @@ export class ESQLService extends FtrService {
   public async openEsqlControlFlyout(query: string) {
     await this.retry.waitFor('control flyout to open', async () => {
       await this.typeEsqlEditorQuery(query);
-      // Wait until suggestions are loaded
-      await this.common.sleep(1000);
+      // Wait until the suggestion widget actually has rows rendered
+      // (replaces a fixed 1s sleep that races with Monaco on slow CI agents).
+      await this.retry.try(async () => {
+        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
+        expect(await suggestionWidget.isDisplayed()).to.be(true);
+        const rows = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
+        expect(rows.length).to.be.greaterThan(0);
+      });
       await this.selectEsqlSuggestionByLabel('Create control');
 
       return await this.testSubjects.exists('create_esql_control_flyout');
@@ -178,9 +183,21 @@ export class ESQLService extends FtrService {
     await this.waitESQLEditorLoaded();
     await this.openEsqlControlFlyout(query);
 
-    // create the control
-    await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
-    await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+    // Save the control. waitForEnabled is the lower bound (the button is
+    // gated on the async values-fetch populating controlState in the parent),
+    // but it is not sufficient on its own: the click can race with the React
+    // commit that wires the latest onClick handler, and a click during that
+    // window is silently dropped (the form's onCreateControl early-returns on
+    // an empty controlState). Use the flyout closing as the positive signal
+    // that the save handler actually ran, and retry the click if it didn't.
+    await this.retry.waitFor('ES|QL control flyout to close after save', async () => {
+      await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
+      await this.testSubjects.click('saveEsqlControlsFlyoutButton');
+      return !(await this.testSubjects.exists('create_esql_control_flyout', {
+        timeout: 2000,
+      }));
+    });
+
     await this.waitESQLEditorLoaded();
   }
 
