@@ -10,10 +10,8 @@
 import React from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiNotificationBadge,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
@@ -24,10 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useSidebarApp } from '@kbn/core-chrome-sidebar-components';
-import {
-  useNotificationEventsService,
-  useUnreadNotificationCount,
-} from '@kbn/core-notifications-browser-hooks';
+import { useNotificationEventsService } from '@kbn/core-notifications-browser-hooks';
 import {
   alertType,
   alertTypeId,
@@ -46,7 +41,6 @@ const nextId = (typeId: string) =>
 
 export function App() {
   const events = useNotificationEventsService();
-  const unreadCount = useUnreadNotificationCount();
   const center = useSidebarApp(notificationCenterAppId);
 
   const openCenter = () => center.open();
@@ -98,24 +92,6 @@ export function App() {
       <EuiPageBody>
         <EuiPageHeader
           pageTitle="Notification Center Example"
-          rightSideItems={[
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="bell"
-                  aria-label={`Open notification center (${unreadCount} unread)`}
-                  display="base"
-                  size="m"
-                  onClick={openCenter}
-                />
-              </EuiFlexItem>
-              {unreadCount > 0 && (
-                <EuiFlexItem grow={false}>
-                  <EuiNotificationBadge color="accent">{unreadCount}</EuiNotificationBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>,
-          ]}
           description="Publish persistent notification events through core.notifications.events and review them in the notification center sidebar."
         />
 

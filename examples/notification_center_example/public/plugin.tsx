@@ -18,6 +18,7 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/pu
 import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hooks';
 import { registerDemoTypes } from './event_types';
 import { notificationCenterAppId } from './notification_center_app';
+import { HeaderNotificationButton } from './header_notification_button';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -90,7 +91,16 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
     });
   }
 
-  public start(_core: CoreStart) {
+  public start(core: CoreStart) {
+    core.chrome.navControls.registerRight({
+      order: 1000,
+      content: (
+        <NotificationEventsProvider value={core.notifications.events}>
+          <HeaderNotificationButton />
+        </NotificationEventsProvider>
+      ),
+    });
+
     return {};
   }
 
