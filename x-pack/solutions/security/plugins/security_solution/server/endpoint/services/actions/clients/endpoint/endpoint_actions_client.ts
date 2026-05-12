@@ -10,7 +10,7 @@
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
 import type { Mutable } from 'utility-types';
-import { getActionDetailsById } from '../../..';
+import { getActionDetailsById } from '../../action_details_by_id';
 import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { MemoryDumpActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/memory_dump';
 import type { CancelActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/cancel';
@@ -194,8 +194,17 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
         if (actionToCancel.agentType !== 'endpoint') {
           throw new ResponseActionsClientError(
-            `Action ID [${actionRequest.parameters.id} / ${actionToCancel.command} / ${actionToCancel.agentType}] agent type is not 'endpoint'`
+            `Action [${actionRequest.parameters.id} / ${actionToCancel.command} / ${actionToCancel.agentType}] agent type is not 'endpoint'`
           );
+        }
+
+        for (const endpointId of actionRequest.endpoint_ids) {
+          if (!actionToCancel.agents.includes(endpointId)) {
+            throw new ResponseActionsClientError(
+              `Endpoint [${endpointId}] is not associated with action [${actionToCancel.id}]`,
+              400
+            );
+          }
         }
 
         if (actionToCancel.isCompleted) {

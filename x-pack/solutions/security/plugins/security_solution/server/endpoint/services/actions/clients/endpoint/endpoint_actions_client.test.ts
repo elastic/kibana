@@ -27,6 +27,7 @@ import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
 import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
+import type { ActionDetails } from '../../../../../../common/endpoint/types';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -60,6 +61,13 @@ describe('EndpointActionsClient', () => {
       classConstructorOptions.endpointService.getInternalFleetServices()
         .ensureInCurrentSpace as jest.Mock
     ).mockResolvedValue(undefined);
+
+    getActionDetailsByIdMock.mockResolvedValue(
+      new EndpointActionGenerator('seed').generateActionDetails({
+        agents: ['1-2-3'],
+        isCompleted: false,
+      })
+    );
 
     // @ts-expect-error mocking this for testing purposes
     classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
@@ -378,29 +386,31 @@ describe('EndpointActionsClient', () => {
 
     // NOTE: checking only the keys in order to avoid confusion - because the use of Mocks would
     // have returned a action details that would not match the request sent in this test.
-    expect(Object.keys(actionResponse)).toEqual([
-      'action',
-      'id',
-      'agentType',
-      'agents',
-      'hosts',
-      'command',
-      'startedAt',
-      'isCompleted',
-      'completedAt',
-      'wasSuccessful',
-      'errors',
-      'isExpired',
-      'status',
-      'outputs',
-      'agentState',
-      'createdBy',
-      'comment',
-      'parameters',
-      'alertIds',
-      'ruleId',
-      'ruleName',
-    ]);
+    expect(Object.keys(actionResponse).sort()).toEqual(
+      [
+        'action',
+        'id',
+        'agentType',
+        'agents',
+        'hosts',
+        'command',
+        'startedAt',
+        'isCompleted',
+        'completedAt',
+        'wasSuccessful',
+        'errors',
+        'isExpired',
+        'status',
+        'outputs',
+        'agentState',
+        'createdBy',
+        'comment',
+        'parameters',
+        'alertIds',
+        'ruleId',
+        'ruleName',
+      ].sort()
+    );
   });
 
   type ResponseActionsMethodsOnly = keyof Omit<
@@ -646,6 +656,19 @@ describe('EndpointActionsClient', () => {
   });
 
   describe('#cancel()', () => {
+    let actionToBeCanceledDetails: ActionDetails;
+
+    beforeEach(() => {
+      actionToBeCanceledDetails = new EndpointActionGenerator('seed').generateActionDetails({
+        id: 'action-123',
+        agents: ['1-2-3'],
+        agentType: 'endpoint',
+        isCompleted: false,
+      });
+
+      getActionDetailsByIdMock.mockResolvedValue(actionToBeCanceledDetails);
+    });
+
     it('should error when feature flag is false', async () => {
       // @ts-expect-error mocking this for testing purposes
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointCancel =
@@ -667,10 +690,7 @@ describe('EndpointActionsClient', () => {
     });
 
     it('should throw error if action is already complete', async () => {
-      getActionDetailsByIdMock.mockResolvedValue({
-        isCompleted: true,
-        agentType: 'endpoint',
-      });
+      actionToBeCanceledDetails.isCompleted = true;
 
       await expect(
         endpointActionsClient.cancel(
@@ -683,11 +703,8 @@ describe('EndpointActionsClient', () => {
     });
 
     it('should throw error if action to cancel does not have an agentType of endpoint', async () => {
-      getActionDetailsByIdMock.mockResolvedValue({
-        isCompleted: true,
-        agentType: 'sentinel_one',
-        command: 'runscript',
-      });
+      actionToBeCanceledDetails.agentType = 'sentinel_one';
+      actionToBeCanceledDetails.command = 'runscript';
 
       await expect(
         endpointActionsClient.cancel(
@@ -697,8 +714,21 @@ describe('EndpointActionsClient', () => {
           })
         )
       ).rejects.toThrow(
-        "Action ID [action-123 / runscript / sentinel_one] agent type is not 'endpoint'"
+        "Action [action-123 / runscript / sentinel_one] agent type is not 'endpoint'"
       );
+    });
+
+    it('should throw error if agent ID is not part of action to be canceled', async () => {
+      actionToBeCanceledDetails.agents = ['some-other-id'];
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow('Endpoint [1-2-3] is not associated with action [action-123]');
     });
   });
 
@@ -904,6 +934,7 @@ describe('EndpointActionsClient', () => {
           isCompleted: false,
           agentType: 'endpoint',
           command: 'runscript',
+          agents: ['1-2-3'],
         });
         const options = responseActionsClientMock.getOptionsForResponseActionMethod(methodName);
 
