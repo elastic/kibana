@@ -18,10 +18,11 @@ import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 import { FailureStoreNotEnabledError } from '../../../../lib/streams/errors/failure_store_not_enabled_error';
-import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess, getFailureStore } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
+import { assertMlTierAccess } from '../../../utils/assert_ml_tier_access';
 import type { ProcessingSimulationParams } from './simulation_handler';
 import { simulateProcessing } from './simulation_handler';
 import {
@@ -118,10 +119,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
     logger,
   }): Promise<GrokSuggestionResponse> => {
     const log = logger.get('suggestGrokProcessor');
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
-    if (!isAvailableForTier) {
-      throw new SecurityError('Cannot access API on the current pricing tier');
-    }
+    assertMlTierAccess({ server });
 
     const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
       await getScopedClients({
@@ -185,10 +183,7 @@ export const processingDissectSuggestionRoute = createServerRoute({
     logger,
   }): Promise<DissectSuggestionResponse> => {
     const log = logger.get('suggestDissectProcessor');
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
-    if (!isAvailableForTier) {
-      throw new SecurityError('Cannot access API on the current pricing tier');
-    }
+    assertMlTierAccess({ server });
 
     const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
       await getScopedClients({
@@ -237,10 +232,7 @@ export const processingDateSuggestionsRoute = createServerRoute({
   },
   params: processingDateSuggestionsSchema,
   handler: async ({ params, request, getScopedClients, server }) => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
-    if (!isAvailableForTier) {
-      throw new SecurityError('Cannot access API on the current pricing tier');
-    }
+    assertMlTierAccess({ server });
 
     const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,

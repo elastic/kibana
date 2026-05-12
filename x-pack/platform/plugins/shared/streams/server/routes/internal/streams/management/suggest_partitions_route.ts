@@ -12,12 +12,11 @@ import { conditionSchema } from '@kbn/streamlang';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { assertMlTierAccess } from '../../../utils/assert_ml_tier_access';
 
 export interface SuggestPartitionsParams {
   path: {
@@ -74,10 +73,7 @@ export const suggestPartitionsRoute = createServerRoute({
     server,
     logger,
   }): Promise<SuggestPartitionsResponse> => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
-    if (!isAvailableForTier) {
-      throw new SecurityError('Cannot access API on the current pricing tier');
-    }
+    assertMlTierAccess({ server });
 
     const { inferenceClient, scopedClusterClient, streamsClient, getFeatureClient } =
       await getScopedClients({

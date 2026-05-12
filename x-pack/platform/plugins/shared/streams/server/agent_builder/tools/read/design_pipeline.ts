@@ -20,6 +20,8 @@ import type { GetScopedClients } from '../../../routes/types';
 import type { IPatternExtractionService } from '../../../lib/pattern_extraction/pattern_extraction_service';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { simulateProcessing } from '../../../routes/internal/streams/processing/simulation_handler';
+import { isMlTierAvailable } from '../../../routes/utils/assert_ml_tier_access';
+import type { StreamsServer } from '../../../types';
 import { STREAMS_DESIGN_PIPELINE_TOOL_ID as DESIGN_PIPELINE } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 import { abortSignalFromRequest } from '../../utils/write_queue';
@@ -93,11 +95,13 @@ const designPipelineSchema = z.object({
 export const createDesignPipelineTool = ({
   getScopedClients,
   patternExtractionService,
+  server,
   logger,
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
   patternExtractionService: IPatternExtractionService;
+  server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): BuiltinToolDefinition<typeof designPipelineSchema> => ({
@@ -144,6 +148,28 @@ export const createDesignPipelineTool = ({
     },
     { request, modelProvider }
   ) => {
+    // Pricing-tier entitlement gate. Mirrors the check that the equivalent
+    // HTTP routes enforce (`_suggest_processing_pipeline`, `processing/_suggestions/grok`,
+    // `processing/_suggestions/dissect`) — without it, the agent surface would
+    // bypass an entitlement the UI honors. We `return` instead of `throw` so the
+    // chat renders a structured tool-error instead of a stack trace, and we run
+    // the check BEFORE the telemetry-emitting `try`/`finally` so environment-
+    // gated invocations don't pollute the `processing_pipeline_suggested` event
+    // stream with `success=false` noise.
+    if (!isMlTierAvailable({ server })) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message:
+                'Designing processing pipelines via the Streams agent is not available on the current pricing tier.',
+            },
+          },
+        ],
+      };
+    }
+
     // Telemetry is emitted exactly once at the end of the handler so that
     // every `design_pipeline` invocation produces a single event regardless
     // of which engine ran (or whether either ran at all). The fields below

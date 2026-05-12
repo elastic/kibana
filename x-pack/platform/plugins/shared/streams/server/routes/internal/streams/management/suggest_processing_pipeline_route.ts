@@ -33,11 +33,10 @@ import {
   getDefaultTextField,
   extractMessagesFromField,
 } from '../../../../../common/pattern_extraction_helpers';
-import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
+import { assertMlTierAccess } from '../../../utils/assert_ml_tier_access';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
@@ -99,12 +98,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     // Wrap entire logic in Observable so errors can be sent as SSE events
     return from(
       (async () => {
-        const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-          STREAMS_TIERED_ML_FEATURE.id
-        );
-        if (!isAvailableForTier) {
-          throw new SecurityError('Cannot access API on the current pricing tier');
-        }
+        assertMlTierAccess({ server });
 
         const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
           await getScopedClients({ request });

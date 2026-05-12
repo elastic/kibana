@@ -89,6 +89,7 @@ export function registerAgentBuilderTools({
     createDesignPipelineTool({
       getScopedClients,
       patternExtractionService,
+      server,
       logger: logger.get('design_pipeline'),
       telemetry,
     }),
@@ -100,6 +101,7 @@ export function registerAgentBuilderTools({
     }),
     createSuggestPartitionsTool({
       getScopedClients,
+      server,
       logger: logger.get('suggest_partitions'),
     }),
 

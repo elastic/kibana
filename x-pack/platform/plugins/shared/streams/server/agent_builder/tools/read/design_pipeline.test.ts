@@ -47,7 +47,21 @@ const buildNlToStreamlangResult = (
 });
 
 describe('createDesignPipelineTool', () => {
-  const setup = (options: { patternExtractionService?: IPatternExtractionService } = {}) => {
+  const createMockServer = (mlTierAvailable: boolean = true) =>
+    ({
+      core: {
+        pricing: {
+          isFeatureAvailable: jest.fn().mockReturnValue(mlTierAvailable),
+        },
+      },
+    } as never);
+
+  const setup = (
+    options: {
+      patternExtractionService?: IPatternExtractionService;
+      mlTierAvailable?: boolean;
+    } = {}
+  ) => {
     const { getScopedClients, streamsClient } = createMockGetScopedClients();
     streamsClient.getStream.mockResolvedValue({
       type: 'wired',
@@ -68,6 +82,7 @@ describe('createDesignPipelineTool', () => {
       getScopedClients,
       patternExtractionService:
         options.patternExtractionService ?? ({} as IPatternExtractionService),
+      server: createMockServer(options.mlTierAvailable ?? true),
       logger: loggerMock.create(),
       telemetry,
     });
@@ -78,6 +93,36 @@ describe('createDesignPipelineTool', () => {
   beforeEach(() => {
     mockNlToStreamlang.mockReset();
     mockRunExtractFieldsFlow.mockReset();
+  });
+
+  describe('pricing-tier gate', () => {
+    it('returns a structured tool error and skips telemetry when ml tier is gated', async () => {
+      // Mirrors the HTTP-route gates at `_suggest_processing_pipeline`,
+      // `processing/_suggestions/grok`, and `processing/_suggestions/dissect`.
+      // Without this, the agent surface would bypass an entitlement the UI
+      // honors. Critical side assertions: (a) NO downstream engine runs
+      // (`nlToStreamlang` / `runExtractFieldsFlow`), (b) NO telemetry event
+      // fires — gate failures are an environmental constraint, not a usage
+      // signal, so they must NOT pollute `processing_pipeline_suggested`
+      // dashboards with `success=false` noise.
+      const { tool, context, streamsClient, telemetry } = setup({ mlTierAvailable: false });
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect((result.results[0].data as { message: string }).message).toEqual(
+        expect.stringContaining('not available on the current pricing tier')
+      );
+
+      expect(streamsClient.getStream).not.toHaveBeenCalled();
+      expect(mockNlToStreamlang).not.toHaveBeenCalled();
+      expect(mockRunExtractFieldsFlow).not.toHaveBeenCalled();
+      expect(telemetry.trackProcessingPipelineSuggested).not.toHaveBeenCalled();
+    });
   });
 
   describe('extract_fields: false (or omitted) — LLM-only path', () => {
@@ -501,6 +546,7 @@ describe('createDesignPipelineTool', () => {
       const tool = createDesignPipelineTool({
         getScopedClients,
         patternExtractionService: {} as IPatternExtractionService,
+        server: createMockServer(true),
         logger: loggerMock.create(),
         telemetry,
       });

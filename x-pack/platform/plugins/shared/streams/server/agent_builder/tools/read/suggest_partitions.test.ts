@@ -15,8 +15,18 @@ jest.mock('@kbn/streams-ai', () => ({
 }));
 
 import { partitionStream } from '@kbn/streams-ai';
+import type { StreamsServer } from '../../../types';
 import { createSuggestPartitionsTool } from './suggest_partitions';
 import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
+
+const createMockServer = (mlTierAvailable: boolean = true): StreamsServer =>
+  ({
+    core: {
+      pricing: {
+        isFeatureAvailable: jest.fn().mockReturnValue(mlTierAvailable),
+      },
+    },
+  } as unknown as StreamsServer);
 
 const mockPartitionStream = partitionStream as jest.MockedFunction<typeof partitionStream>;
 
@@ -133,7 +143,7 @@ describe('createSuggestPartitionsTool', () => {
     }
   });
 
-  const setup = () => {
+  const setup = ({ mlTierAvailable = true }: { mlTierAvailable?: boolean } = {}) => {
     const { getScopedClients, streamsClient, esClient } = createMockGetScopedClients();
 
     // The tool retrieves features through `getFeatureClient` to enrich the
@@ -146,13 +156,40 @@ describe('createSuggestPartitionsTool', () => {
       getFeatureClient: jest.fn().mockResolvedValue(featureClient),
     } as never);
 
-    const tool = createSuggestPartitionsTool({ getScopedClients, logger: loggerMock.create() });
+    const server = createMockServer(mlTierAvailable);
+    const tool = createSuggestPartitionsTool({
+      getScopedClients,
+      server,
+      logger: loggerMock.create(),
+    });
     const context = createMockToolContext();
-    return { tool, context, streamsClient, esClient, featureClient };
+    return { tool, context, streamsClient, esClient, featureClient, server };
   };
 
   beforeEach(() => {
     mockPartitionStream.mockReset();
+  });
+
+  it('returns a `pricing_tier_unavailable` error and skips all clients when ml tier is gated', async () => {
+    // Mirrors the HTTP-route gate at `_suggest_partitions`. Without this the
+    // agent surface would happily run partition suggestions on tiers where
+    // the UI route returns 403, creating an entitlement bypass. Crucial side
+    // assertions: NO stream fetch, NO ES query, NO LLM call — the gate must
+    // be the very first thing the handler does so we never spend tokens or
+    // touch backing stores on tier-blocked invocations.
+    const { tool, context, streamsClient, esClient } = setup({ mlTierAvailable: false });
+
+    const result = await tool.handler({ stream_name: 'logs.anything' }, context);
+
+    expect(firstResult(result).type).toBe(ToolResultType.error);
+    expect(firstResult(result).data).toMatchObject({
+      operation: 'suggest_partitions',
+      likely_cause: 'pricing_tier_unavailable',
+      stream: 'logs.anything',
+    });
+    expect(streamsClient.getStream).not.toHaveBeenCalled();
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(mockPartitionStream).not.toHaveBeenCalled();
   });
 
   it('returns an `unsupported_stream_type` error for non-wired streams', async () => {

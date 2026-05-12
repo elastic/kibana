@@ -15,6 +15,8 @@ import { Streams } from '@kbn/streams-schema';
 import { type Condition, conditionSchema, conditionToQueryDsl } from '@kbn/streamlang';
 import { partitionStream } from '@kbn/streams-ai';
 import type { GetScopedClients } from '../../../routes/types';
+import { isMlTierAvailable } from '../../../routes/utils/assert_ml_tier_access';
+import type { StreamsServer } from '../../../types';
 import { STREAMS_SUGGEST_PARTITIONS_TOOL_ID } from '../tool_ids';
 import { classifyError } from '../../utils/error_utils';
 import { abortSignalFromRequest } from '../../utils/write_queue';
@@ -61,11 +63,13 @@ const suggestPartitionsSchema = z.object({
 
 interface SuggestPartitionsToolArgs {
   getScopedClients: GetScopedClients;
+  server: StreamsServer;
   logger: Logger;
 }
 
 export const createSuggestPartitionsTool = ({
   getScopedClients,
+  server,
   logger,
 }: SuggestPartitionsToolArgs): BuiltinToolDefinition<typeof suggestPartitionsSchema> => ({
   id: STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
@@ -102,6 +106,28 @@ export const createSuggestPartitionsTool = ({
     { request, modelProvider }
   ) => {
     const log = logger.get('suggest_partitions');
+    // Pricing-tier entitlement gate. Mirrors the check that the equivalent
+    // HTTP route (`POST /internal/streams/{name}/_suggest_partitions`)
+    // enforces — without it, the agent surface would bypass an entitlement the
+    // UI honors. We `return` instead of `throw` so the chat renders a clean
+    // tool-error result instead of a stack trace.
+    if (!isMlTierAvailable({ server })) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message:
+                'Partition suggestions via the Streams agent are not available on the current pricing tier.',
+              stream: streamName,
+              operation: 'suggest_partitions',
+              likely_cause: 'pricing_tier_unavailable',
+            },
+          },
+        ],
+      };
+    }
+
     try {
       const { streamsClient, scopedClusterClient, getFeatureClient } = await getScopedClients({
         request,
