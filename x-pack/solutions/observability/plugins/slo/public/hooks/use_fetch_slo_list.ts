@@ -29,6 +29,7 @@ export interface SLOListParams {
   lastRefresh?: number;
   tagsFilter?: SearchState['tagsFilter'];
   statusFilter?: SearchState['statusFilter'];
+  hideStale?: boolean;
   disabled?: boolean;
 }
 
@@ -51,6 +52,7 @@ export function useFetchSloList({
   lastRefresh,
   tagsFilter,
   statusFilter,
+  hideStale = false,
   disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
@@ -93,6 +95,7 @@ export function useFetchSloList({
       sortDirection,
       filters,
       lastRefresh,
+      hideStale,
     }),
     queryFn: async ({ signal }) => {
       return await sloClient.fetch('GET /api/observability/slos 2023-10-31', {
@@ -104,7 +107,7 @@ export function useFetchSloList({
             ...(page !== undefined && { page: String(page) }),
             ...(perPage !== undefined && { perPage: String(perPage) }),
             ...(filters && { filters }),
-            hideStale: true,
+            hideStale,
           },
         },
         signal,

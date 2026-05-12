@@ -15,6 +15,7 @@ interface SloListFilter {
   sortDirection: string;
   filters: string;
   lastRefresh?: number;
+  hideStale?: boolean;
 }
 
 interface SloGroupListFilter {

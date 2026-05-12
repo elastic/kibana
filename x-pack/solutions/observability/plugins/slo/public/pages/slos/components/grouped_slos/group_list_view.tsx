@@ -28,6 +28,7 @@ import React, { memo, useState } from 'react';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import type { GroupByField, SortDirection, SortField, ViewType } from '../../types';
 import { SlosView } from '../slos_view';
 import { useGroupName } from './hooks/use_group_name';
@@ -53,6 +54,7 @@ export function GroupListView({
   summary,
   filters,
 }: Props) {
+  const { state: searchState } = useUrlSearchState();
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
   const groupName = useGroupName(groupBy, group, summary);
@@ -82,6 +84,7 @@ export function GroupListView({
     perPage: itemsPerPage,
     page: page + 1,
     filters,
+    hideStale: !searchState.showStale,
     disabled: !isAccordionOpen,
   });
   const { results = [], total = 0 } = sloList ?? {};

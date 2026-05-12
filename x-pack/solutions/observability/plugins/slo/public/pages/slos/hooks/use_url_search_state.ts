@@ -34,6 +34,7 @@ export interface SearchState {
   lastRefresh?: number;
   tagsFilter?: Filter;
   statusFilter?: Filter;
+  showStale: boolean;
 }
 
 export const DEFAULT_STATE: SearchState = {
@@ -45,6 +46,7 @@ export const DEFAULT_STATE: SearchState = {
   groupBy: 'ungrouped',
   filters: [],
   lastRefresh: 0,
+  showStale: true,
 };
 
 export function useUrlSearchState(): {
@@ -93,7 +95,7 @@ export function useUrlSearchState(): {
       // Discard search itself from session storage. Keep only view preferences
       sessionStorage.current?.set(
         SLO_LIST_SEARCH_SESSION_STORAGE_KEY,
-        pick(updatedState, 'sort', 'view', 'groupBy')
+        pick(updatedState, 'sort', 'view', 'groupBy', 'showStale')
       );
     },
     [state]

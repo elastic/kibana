@@ -22,7 +22,8 @@ import { UngroupedView } from './ungrouped_slos/ungrouped_view';
 export function SloList() {
   const { observabilityAIAssistant } = useKibana().services;
   const { state, onStateChange } = useUrlSearchState();
-  const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
+  const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy, showStale } =
+    state;
 
   const {
     isLoading,
@@ -39,6 +40,7 @@ export function SloList() {
     sortBy: state.sort.by,
     sortDirection: state.sort.direction,
     lastRefresh: state.lastRefresh,
+    hideStale: !showStale,
   });
 
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
