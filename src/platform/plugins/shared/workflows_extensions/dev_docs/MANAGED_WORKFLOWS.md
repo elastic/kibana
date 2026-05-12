@@ -438,7 +438,28 @@ Global workflows (`spaceId: '*'`) are visible from any space, but each execution
 - the execution document is stamped with the `spaceId` you pass in `options` — pass the requesting user's space, not `'*'`.
 - consequence: results of a global workflow run are visible only inside the space that triggered the run.
 
-## 10) Rollout checklist
+## 10) Global workflows: user-facing behavior
+
+Global managed workflows (`spaceId: '*'`) are stored **once** but have important cross-space implications that affect both end-users and plugin authors:
+
+### Execution visibility is space-scoped
+
+Although a global workflow is visible from every space, each execution is stamped with the space that triggered it. From the UI a user sees **only their own space's executions** — runs triggered from other spaces are invisible to them. This is by design: one workflow definition, per-space execution isolation.
+
+### Edits and disabling are global
+
+Because there is a **single persisted document** for a global workflow, any edit (YAML, name, tags, description) or enable/disable toggle **affects all spaces immediately**. There is no per-space override mechanism today. Plugin authors should be aware of this when choosing global vs space-scoped installs:
+
+| Action | Scope |
+|---|---|
+| Edit YAML / name / tags | All spaces (single document) |
+| Enable / disable | All spaces (single document) |
+| Execute | Space that triggered the run |
+| View execution results | Only the triggering space |
+
+> **Future consideration:** Per-space overrides (e.g., enabling a global workflow only in certain spaces) are not yet supported. If your workflow needs per-space enablement control, use space-scoped installs with one document per space instead.
+
+## 11) Rollout checklist
 
 1. Add the definition in `@kbn/workflows/managed` with the correct `pluginId` and a `system-` id; export the id as a const.
 2. Add the definition to `managedWorkflowDefinitions` in `managed/index.ts`, and re-export the id from the package barrel.
