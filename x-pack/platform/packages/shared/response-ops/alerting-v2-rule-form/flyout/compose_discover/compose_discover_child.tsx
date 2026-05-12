@@ -279,7 +279,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         </div>
 
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
-        <EuiPanel hasBorder paddingSize="none" style={{ margin: '0 16px', ...editorPanelStyles }}>
+        <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
           {isSplit ? (
             <ComposeDiscoverTabs state={state} dispatch={dispatch} tabConfig={tabConfig} />
           ) : (
