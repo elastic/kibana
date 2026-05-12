@@ -10,7 +10,9 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { AttackDetailsProps } from '../types';
 import { AttackDetailsPreviewPanelKey } from '../constants/panel_keys';
 import type { AttackDetailsPanelTabType } from '../tabs';
-import { useTabs } from '../hooks/use_tabs';
+import { allTabs as tabsDisplayed } from '../tabs';
+import { useTabs } from '../../../flyout_v2/shared/hooks/use_tabs';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { ATTACK_PREVIEW_BANNER, useAttackDetailsContext } from '../context';
 import { PanelHeader } from '../header';
 import { PanelContent } from '../content';
@@ -22,7 +24,11 @@ import { PanelFooter } from '../footer';
 export const AttackDetailsPreviewPanel: React.FC<Partial<AttackDetailsProps>> = memo(({ path }) => {
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
-  const { tabsDisplayed, selectedTabId } = useTabs({ path });
+  const { selectedTabId } = useTabs({
+    validTabIds: tabsDisplayed.map((t) => t.id),
+    storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+    initialTabId: path?.tab,
+  });
 
   const setSelectedTabId = useCallback(
     (tabId: AttackDetailsPanelTabType['id']) => {
