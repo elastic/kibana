@@ -25,7 +25,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
  * Uses z.any() for the array items to avoid over-specifying the response structure.
@@ -37,20 +37,12 @@ const GraphCollectionOutputSchema = lazySchema(() =>
   })
 );
 
-/**
- * Auth types that use Microsoft Entra app-only flows (as opposed to
- * delegated/per-user). App-only tokens go to different Graph endpoints
- * (e.g. /sites/getAllSites) than delegated tokens, so this branch guards
- * endpoint selection inside each action handler.
- *
- * Currently only the certificate-based client-credentials flow is exposed;
- * if another app-only flow is added later (e.g. federated-credentials /
- * workload identity), extend this set.
- */
 const APP_ONLY_AUTH_TYPES = new Set(['oauth_entra_client_certificate']);
 
-const isAppOnlyAuth = (authType?: unknown): boolean =>
-  typeof authType === 'string' && APP_ONLY_AUTH_TYPES.has(authType);
+const isAppOnlyAuth = (ctx: ActionContext): boolean => {
+  const authType = ctx.secrets?.authType;
+  return typeof authType === 'string' && APP_ONLY_AUTH_TYPES.has(authType);
+};
 
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
@@ -68,35 +60,6 @@ export const SharepointOnline: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'oauth_authorization_code',
-        defaults: {
-          scope: 'Sites.Selected Files.Read.All offline_access',
-        },
-        overrides: {
-          meta: {
-            authorizationUrl: {
-              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
-                {
-                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
-                }
-              ),
-            },
-            tokenUrl: {
-              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
-                {
-                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
-                }
-              ),
-            },
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
         type: 'oauth_entra_client_certificate',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
@@ -111,7 +74,8 @@ export const SharepointOnline: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace '{tenant-id}' with your Microsoft Entra tenant ID. Before using this auth method, register an application in Microsoft Entra ID, grant it Microsoft Graph application permissions (Sites.Read.All, Files.Read.All), and upload a self-signed or CA-issued X.509 certificate under Certificates & secrets > Certificates.",
+                    "Replace '{tenantId}' with your Microsoft Entra tenant ID. Before using this auth method, register an application in Microsoft Entra ID, grant it Microsoft Graph application permissions (Sites.Selected, Files.Read.All), and upload a self-signed or CA-issued X.509 certificate under Certificates & secrets > Certificates.",
+                  values: { tenantId: '{tenant-id}' },
                 }
               ),
             },
@@ -155,6 +119,36 @@ export const SharepointOnline: ConnectorSpec = {
         },
       },
       {
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'Sites.Selected Files.Read.All offline_access',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
+                {
+                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
+                }
+              ),
+            },
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
+                {
+                  defaultMessage: "Replace '{tenantId}' with your Azure AD tenant ID.",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
+      {
         type: 'ears',
         overrides: {
           meta: { scope: { disabled: true } },
@@ -185,9 +179,8 @@ export const SharepointOnline: ConnectorSpec = {
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { search?: string } | undefined;
-        const isAppOnly = isAppOnlyAuth(ctx.secrets?.authType);
 
-        if (isAppOnly) {
+        if (isAppOnlyAuth(ctx)) {
           ctx.log.debug('SharePoint listing all sites (app-only auth)');
           const response = await ctx.client.get(
             'https://graph.microsoft.com/v1.0/sites/getAllSites/',
@@ -722,10 +715,8 @@ export const SharepointOnline: ConnectorSpec = {
           );
         }
 
-        // region is only required for app-only auth. Sending region with
-        // delegated auth can cause a 400 error.
-        const isAppOnly = isAppOnlyAuth(ctx.secrets?.authType);
-
+        // region is only required for app-only auth.
+        // Sending region with delegated auth can cause a 400 error.
         const searchRequest = {
           requests: [
             {
@@ -733,7 +724,7 @@ export const SharepointOnline: ConnectorSpec = {
               query: {
                 queryString: typedInput.query,
               },
-              ...(isAppOnly && { region: typedInput.region ?? 'NAM' }),
+              ...(isAppOnlyAuth(ctx) && { region: typedInput.region ?? 'NAM' }),
               ...(typedInput.from !== undefined && { from: typedInput.from }),
               ...(typedInput.size !== undefined && { size: typedInput.size }),
             },

@@ -6,11 +6,7 @@
  */
 
 import { constants, createPrivateKey, createVerify } from 'crypto';
-import {
-  buildClientAssertion,
-  computeCertificateThumbprint,
-  CLIENT_ASSERTION_TYPE,
-} from './build_client_assertion';
+import { buildClientAssertion, computeCertificateThumbprint } from './build_client_assertion';
 
 // Self-signed test certificate and key (RSA 2048-bit, CN=test)
 const TEST_CERT = `-----BEGIN CERTIFICATE-----
@@ -77,12 +73,6 @@ const TEST_KEY_ENCRYPTED = createPrivateKey({ key: TEST_KEY, format: 'pem' })
   .toString();
 
 describe('buildClientAssertion', () => {
-  describe('CLIENT_ASSERTION_TYPE', () => {
-    it('should be the JWT bearer assertion type', () => {
-      expect(CLIENT_ASSERTION_TYPE).toBe('urn:ietf:params:oauth:client-assertion-type:jwt-bearer');
-    });
-  });
-
   describe('computeCertificateThumbprint', () => {
     it('should compute a base64url-encoded SHA-256 thumbprint from a PEM certificate', () => {
       const thumbprint = computeCertificateThumbprint(TEST_CERT);

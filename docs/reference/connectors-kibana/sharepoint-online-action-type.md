@@ -34,7 +34,7 @@ OAuth 2.0 authorization code
     - **Client ID**: the Application (client) ID from your Entra app registration
     - **Client Secret**: a client secret generated for the app registration
 
-    Replace `{tenant-id}` with your Microsoft Entra tenant ID. The connector uses the default scope `Sites.Read.All Files.Read.All offline_access`. See [Get API credentials](#sharepoint-online-api-credentials) for the Entra app-registration steps.
+    Replace `{tenant-id}` with your Microsoft Entra tenant ID. The connector uses the default scope `Sites.Selected Files.Read.All offline_access`. See [Get API credentials](#sharepoint-online-api-credentials) for the Entra app-registration steps.
 
 OAuth Client Certificate (Microsoft Entra)
 :   App-only flow using a signed JWT client assertion. In {{kib}} you provide:

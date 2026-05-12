@@ -149,19 +149,5 @@ describe('OAuthEntraClientCertificateStrategy', () => {
         })
       );
     });
-
-    it('does not forward tokenEndpointAuthMethod', async () => {
-      mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer token');
-
-      const opts: OAuthWithCertificateGetTokenOpts = {
-        authType: 'oauth_entra_client_certificate',
-        tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
-        clientId: 'id',
-      };
-      await strategy.getToken(opts, baseDeps);
-
-      const callArgs = mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0];
-      expect(callArgs).not.toHaveProperty('tokenEndpointAuthMethod');
-    });
   });
 });

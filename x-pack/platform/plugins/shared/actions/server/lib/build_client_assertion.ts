@@ -36,7 +36,6 @@
  */
 import { constants, createHash, createSign, randomUUID } from 'crypto';
 import type { BuildClientAssertionOpts } from '@kbn/connector-specs';
-import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
 
 const JWT_LIFETIME_SEC = 600; // 10 minutes
 
@@ -131,5 +130,3 @@ export function buildClientAssertion({
 
   return `${signingInput}.${encodedSignature}`;
 }
-
-export { CLIENT_ASSERTION_TYPE };
