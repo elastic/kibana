@@ -69,6 +69,9 @@ const taskSchema = schema.object({
     cost: schema.maybe(
       schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
     ),
+    priority: schema.maybe(
+      schema.oneOf([schema.literal(1), schema.literal(40), schema.literal(50)])
+    ),
   }),
 });
 
