@@ -247,7 +247,7 @@ groups:
         default: "'self'"
         applies_to:
           - "stack: ga 9.5"
-          - "ech: unavailable"
+          - "ech: ga"
           - "self: ga"
 
       - setting: csp.report_only.form_action
@@ -256,7 +256,7 @@ groups:
         datatype: string
         applies_to:
           - "stack: ga, deprecated 9.5"
-          - "ech: unavailable"
+          - "ech: ga"
           - "self: ga"
         deprecation_details: "Use `csp.form_action` instead."
 
