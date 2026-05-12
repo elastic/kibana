@@ -94,13 +94,9 @@ function ImportCard() {
   return (
     <EuiCard
       icon={<EuiIcon size="xxl" type="upload" aria-hidden={true} />}
-<<<<<<< HEAD
       title={i18n.translate('xpack.apm.importCard.euiCard.importDiagnosticsReportLabel', {
         defaultMessage: 'Import diagnostics report',
       })}
-=======
-      title="Import diagnostics report"
->>>>>>> 9a4d6de908f6f9d2d98fa532fe95c2a05b5a2eac
       description={
         isImported
           ? 'Diagnostics report was imported'
