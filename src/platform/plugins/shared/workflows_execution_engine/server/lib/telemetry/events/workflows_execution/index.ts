@@ -18,6 +18,25 @@ import {
   WorkflowExecutionTelemetryEventTypes,
 } from './types';
 
+/** Shared schema fragment for output size telemetry fields. */
+const outputSizeTelemetrySchema = {
+  totalOutputSizeBytes: {
+    type: 'long' as const,
+    _meta: {
+      description:
+        'Total output size in bytes across all steps with recorded sizes (atomic steps measured by Layer 2 enforcement)',
+      optional: true as const,
+    },
+  },
+  averageOutputSizeBytes: {
+    type: 'long' as const,
+    _meta: {
+      description: 'Average output size per step in bytes (only steps with recorded sizes)',
+      optional: true as const,
+    },
+  },
+};
+
 export const workflowExecutionEventNames = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]: 'Workflow execution completed',
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed]: 'Workflow execution failed',
@@ -372,6 +391,7 @@ const workflowExecutionCompletedSchema: RootSchema<WorkflowExecutionCompletedPar
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> = {
@@ -624,6 +644,7 @@ const workflowExecutionFailedSchema: RootSchema<WorkflowExecutionFailedParams> =
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledParams> = {
@@ -854,6 +875,7 @@ const workflowExecutionCancelledSchema: RootSchema<WorkflowExecutionCancelledPar
       optional: true,
     },
   },
+  ...outputSizeTelemetrySchema,
 };
 
 const eventDrivenExecutionSuppressedSchema: RootSchema<EventDrivenExecutionSuppressedParams> = {
@@ -959,6 +981,22 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
     type: 'integer',
     _meta: {
       description: 'Number of matched workflows skipped by max event chain depth',
+      optional: false,
+    },
+  },
+  workflowEventsIgnoreSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Number of matched workflows skipped because on.workflowEvents is ignore and the emit was workflow-attributed',
+      optional: false,
+    },
+  },
+  workflowEventsCycleSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Number of matched workflows skipped by the event-chain cycle guard (avoid-loop default)',
       optional: false,
     },
   },

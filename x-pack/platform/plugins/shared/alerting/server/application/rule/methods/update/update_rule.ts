@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -45,6 +46,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
@@ -321,6 +323,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     username,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
 
   const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
@@ -364,6 +367,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   const { id, version } = originalRuleSavedObject;
 
   try {
+    const updateRuleTimestamp = Date.now();
+
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       ruleAttributes: updatedRuleAttributes,
@@ -372,6 +377,15 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         version,
         overwrite: true,
         references: extractedReferences,
+      },
+    });
+
+    await logBulkRuleChanges({
+      ruleSOs: [updatedRuleSavedObject],
+      rulesClientContext: context,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: updateRuleTimestamp,
       },
     });
   } catch (e) {

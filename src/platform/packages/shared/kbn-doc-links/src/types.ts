@@ -707,6 +707,8 @@ export interface DocLinks {
   };
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
+    readonly featureSettings: string;
+    readonly externalInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
@@ -741,6 +743,7 @@ export interface DocLinks {
   readonly subscriptions: string;
   readonly cases: {
     readonly casesPermissions: string;
+    readonly configureCaseSettings: string;
   };
 }
 

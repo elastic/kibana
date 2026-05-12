@@ -113,11 +113,13 @@ function getRegisteredStepDefinitions(): BaseConnectorContract[] {
       };
 
       if (stepSchemas.isPublicStepDefinition(stepDefinition)) {
-        // Only public step definitions have documentation and examples
+        // Only public step definitions have documentation and examples.
+        // Match the convention used by every other connector source: summary
+        // is the short label, description is the longer behavioral explanation.
         return {
           ...definition,
-          description: stepDefinition.label, // Short title-like text
-          summary: stepDefinition.description ?? null, // Explanation of the step behavior
+          summary: stepDefinition.label,
+          description: stepDefinition.description ?? null,
           documentation: stepDefinition.documentation?.url,
           examples: stepDefinition.documentation?.examples
             ? { snippet: stepDefinition.documentation?.examples.join('\n') }

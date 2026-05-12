@@ -11,7 +11,7 @@ import React, { useContext } from 'react';
 import '@testing-library/jest-dom';
 import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
+import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -197,7 +197,7 @@ describe('LensWrapper', () => {
       );
     });
 
-    it('wraps EmbeddableComponent in PresentationPanelQuickActionContext', () => {
+    it('wraps EmbeddableComponent in EmbeddableRendererContext', () => {
       const { getByTestId } = render(
         <EuiThemeProvider>
           <LensWrapper {...defaultProps} titleHighlight="test" />
@@ -213,8 +213,8 @@ describe('LensWrapper', () => {
     function renderAndCaptureViewList(props: Partial<LensWrapperProps>): string[] | undefined {
       let captured: string[] | undefined;
       function ContextSnoop() {
-        const value = useContext(PresentationPanelQuickActionContext);
-        captured = value?.view as string[] | undefined;
+        const value = useContext(EmbeddableRendererContext);
+        captured = value?.quickActions?.view as string[] | undefined;
         return null;
       }
 

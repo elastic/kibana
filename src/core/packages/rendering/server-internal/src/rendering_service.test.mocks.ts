@@ -11,9 +11,12 @@ export const bootstrapRendererMock = jest.fn();
 export const registerBootstrapRouteMock = jest.fn();
 export const bootstrapRendererFactoryMock = jest.fn(() => bootstrapRendererMock);
 
+export const isRspackModeEnabledMock = jest.fn(() => false);
+
 jest.doMock('./bootstrap', () => ({
   registerBootstrapRoute: registerBootstrapRouteMock,
   bootstrapRendererFactory: bootstrapRendererFactoryMock,
+  isRspackModeEnabled: isRspackModeEnabledMock,
 }));
 
 export const getSettingValueMock = jest.fn();
@@ -22,8 +25,11 @@ export const getThemeStylesheetPathsMock = jest.fn();
 export const getScriptPathsMock = jest.fn();
 export const getBrowserLoggingConfigMock = jest.fn();
 
+export const getBundlesHrefMock = jest.fn((baseHref: string) => `${baseHref}/bundles`);
+
 jest.doMock('./render_utils', () => ({
   getSettingValue: getSettingValueMock,
+  getBundlesHref: getBundlesHrefMock,
   getCommonStylesheetPaths: getCommonStylesheetPathsMock,
   getThemeStylesheetPaths: getThemeStylesheetPathsMock,
   getScriptPaths: getScriptPathsMock,

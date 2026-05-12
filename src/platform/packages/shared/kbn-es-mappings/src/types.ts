@@ -34,9 +34,10 @@ export type FlattenedMapping = Strict<api.MappingFlattenedProperty>;
 
 export type ObjectMapping<T = Record<string, AnyMapping>> = Omit<
   Strict<api.MappingObjectProperty>,
-  'properties'
+  'dynamic' | 'properties'
 > & {
   type: 'object';
+  dynamic?: StrictDynamic;
   properties: T extends Record<string, AnyMapping> ? T : never;
 };
 

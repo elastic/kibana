@@ -363,7 +363,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local"), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 
@@ -376,7 +376,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: false }
     );
     expect(fragment).toBe(
-      '| EVAL entity.name = CASE((`entity.namespace` == "local"), TO_STRING(user.name), entity.name)'
+      '| EVAL entity.name = CASE((COALESCE(`entity.namespace` == "local", FALSE)), TO_STRING(user.name), entity.name)'
     );
   });
 
@@ -394,7 +394,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local" AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE) AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 });
@@ -434,6 +434,25 @@ describe('buildPaginationSection', () => {
     );
     expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-01-10T00:00:00.000Z")');
     expect(parts[1]).toContain('recent.id > "recovery-entity-id"');
+  });
+
+  it('should escape double quotes and backslashes in idCursor to prevent ESQL injection', () => {
+    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
+      timestampCursor: '2024-06-01T00:00:00.000Z',
+      idCursor: 'evil"id\\with"chars',
+    });
+    expect(parts[1]).toContain('recent.id > "evil\\"id\\\\with\\"chars"');
+  });
+
+  it('should escape double quotes and backslashes in recoveryId', () => {
+    const parts = buildPaginationSection(
+      '2024-01-10T00:00:00.000Z',
+      10,
+      paginationFields,
+      { timestampCursor: 'ignored-ts', idCursor: 'ignored-id' },
+      'evil"recovery\\id'
+    );
+    expect(parts[1]).toContain('recent.id > "evil\\"recovery\\\\id"');
   });
 });
 

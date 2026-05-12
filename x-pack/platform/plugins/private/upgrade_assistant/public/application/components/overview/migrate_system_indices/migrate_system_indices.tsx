@@ -186,7 +186,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="noMigrationNeededSection">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="check" color="success" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="success">

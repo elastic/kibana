@@ -9,13 +9,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
-import type { ExampleRequestHandlerContext } from '../request_context';
+import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
 import { EMIT_LOOP_ROUTE_PATH } from '../../common/constants';
 import { LOOP_TRIGGER_ID } from '../../common/triggers/loop_trigger';
 
 export { EMIT_LOOP_ROUTE_PATH };
 
-export function registerEmitLoopRoute(router: IRouter<ExampleRequestHandlerContext>): void {
+export function registerEmitLoopRoute(
+  router: IRouter<WorkflowsExtensionsRequestHandlerContext>
+): void {
   router.post(
     {
       path: EMIT_LOOP_ROUTE_PATH,

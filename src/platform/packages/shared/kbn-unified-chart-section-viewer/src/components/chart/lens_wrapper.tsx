@@ -9,7 +9,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
+import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
@@ -116,23 +116,14 @@ export function LensWrapper({
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
   // Inspect demotion + dividers are blocked on a Lens API change; see PR #236787.
-  const quickActionView = useMemo(() => {
-    const ids = quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW;
-    return ids as unknown as [
-      string?,
-      string?,
-      string?,
-      string?,
-      string?,
-      string?,
-      string?,
-      string?
-    ];
-  }, [quickActionIds]);
+  const quickActionView = useMemo(
+    () => (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as string[],
+    [quickActionIds]
+  );
 
   return (
     <div css={chartCss}>
-      <PresentationPanelQuickActionContext.Provider value={{ view: quickActionView }}>
+      <EmbeddableRendererContext.Provider value={{ quickActions: { view: quickActionView } }}>
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}
@@ -146,7 +137,7 @@ export function LensWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
         />
-      </PresentationPanelQuickActionContext.Provider>
+      </EmbeddableRendererContext.Provider>
     </div>
   );
 }
