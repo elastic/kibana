@@ -27,9 +27,13 @@ BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn $1
 status=$?
 yarn junit:merge || :
 
-if [[ -n "${PARENT_TRIGGER_JOB_ID:-}" ]] && [[ "$status" -eq 101 ]]; then
+echo "--- BUILDKITE_JOB_ID: ${BUILDKITE_JOB_ID}"
+echo "--- BUILDKITE_TRIGGERED_FROM_BUILD_ID: ${BUILDKITE_TRIGGERED_FROM_BUILD_ID}"
+echo "--- $status"
+
+if [[ -n "${BUILDKITE_TRIGGERED_FROM_BUILD_ID:-}" ]] && [[ "$status" -eq 101 ]]; then
   buildkite-agent meta-data set "mki_project_init_timeout_occurred" "true" \
-    --job "$PARENT_TRIGGER_JOB_ID" || true
+    --job "$BUILDKITE_TRIGGERED_FROM_BUILD_ID" || true
 fi
 
 exit "$status"
