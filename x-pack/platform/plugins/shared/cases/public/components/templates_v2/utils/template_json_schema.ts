@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import * as i18n from '../translations';
 
 /**
  * URI identifier for the template JSON Schema.
@@ -26,6 +27,7 @@ function applySchemaOverrides(ctx: OverrideCtx) {
   removeAdditionalPropertiesFromAllOfItems(ctx);
   addDiscriminatorEnumHints(ctx);
   addUniqueItemsToOptionsArrays(ctx);
+  addTitlesToOneOfBranches(ctx);
 }
 
 /**
@@ -118,6 +120,43 @@ function addUniqueItemsToOptionsArrays(ctx: OverrideCtx) {
   ) {
     const schema = ctx.jsonSchema as Record<string, unknown>;
     schema.uniqueItems = true;
+  }
+}
+
+const FIELD_TYPE_TITLES: Record<string, string> = {
+  INPUT_TEXT: i18n.FIELD_TYPE_TITLE_INPUT_TEXT,
+  INPUT_NUMBER: i18n.FIELD_TYPE_TITLE_INPUT_NUMBER,
+  SELECT_BASIC: i18n.FIELD_TYPE_TITLE_SELECT_BASIC,
+  TEXTAREA: i18n.FIELD_TYPE_TITLE_TEXTAREA,
+  DATE_PICKER: i18n.FIELD_TYPE_TITLE_DATE_PICKER,
+  CHECKBOX_GROUP: i18n.FIELD_TYPE_TITLE_CHECKBOX_GROUP,
+  RADIO_GROUP: i18n.FIELD_TYPE_TITLE_RADIO_GROUP,
+  USER_PICKER: i18n.FIELD_TYPE_TITLE_USER_PICKER,
+};
+
+/**
+ * Sets a human-readable `title` on each oneOf branch that has a `control`
+ * discriminator with a const value. Without titles, monaco-yaml's
+ * autocomplete shows every field variant as "object".
+ */
+function addTitlesToOneOfBranches(ctx: OverrideCtx) {
+  const { oneOf } = ctx.jsonSchema;
+  if (!oneOf || !Array.isArray(oneOf) || oneOf.length === 0) {
+    return;
+  }
+
+  for (const branch of oneOf as Array<Record<string, unknown>>) {
+    const props = getPropertiesFromBranch(branch);
+    if (props) {
+      const controlProp = props.control;
+      if (controlProp && typeof controlProp === 'object' && 'const' in controlProp) {
+        const controlValue = (controlProp as { const: string }).const;
+        const title = FIELD_TYPE_TITLES[controlValue];
+        if (title) {
+          branch.title = title;
+        }
+      }
+    }
   }
 }
 
