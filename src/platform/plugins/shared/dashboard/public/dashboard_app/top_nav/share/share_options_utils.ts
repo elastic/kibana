@@ -133,8 +133,10 @@ export function buildExportSharingData(
     },
     exportJson: (): DashboardState => {
       const accessControlState = dashboardApi.getAccessControlState();
+      const dashboardState = dashboardApi.getSerializedState().attributes;
       return {
-        ...dashboardApi.getSerializedState().attributes,
+        ...dashboardState,
+        ...(dashboardState.title.length ? { title: dashboardState.title } : { title }),
         ...(accessControlState !== undefined && accessControlState),
       };
     },

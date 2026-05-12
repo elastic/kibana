@@ -455,7 +455,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       </EuiTitle>
       <EuiSpacer size="s" />
       <AnomalyTableProvider
-        criteriaFields={hostToCriteria(effectiveUserDetails)}
+        criteriaFields={hostToCriteria({ hostItem: effectiveUserDetails })}
         startDate={from}
         endDate={to}
         skip={isInitializing}

@@ -24,7 +24,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_prefe
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { asExactTransactionRate } from '../../../../../common/utils/formatters';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 const INITIAL_STATE = {
@@ -53,7 +53,7 @@ export function ThroughputChart({
   ruleTypeId,
 }: {
   alert: TopAlert;
-  transactionType: string;
+  transactionType?: string;
   transactionTypes?: string[];
   setTransactionType?: (transactionType: string) => void;
   transactionName?: string;
@@ -89,7 +89,7 @@ export function ThroughputChart({
 
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } = useFetcher(
     (callApmApi) => {
-      if (serviceName && transactionType && start && end && preferred) {
+      if (serviceName && start && end && preferred) {
         return callApmApi('GET /internal/apm/services/{serviceName}/throughput', {
           params: {
             path: {
@@ -155,7 +155,7 @@ export function ThroughputChart({
       : []),
   ];
 
-  const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const showTransactionTypeSelect = transactionType && transactionTypes && setTransactionType;
 
   return (
     <EuiFlexItem>
@@ -201,6 +201,7 @@ export function ThroughputChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={RED_METRICS_CHART_ELEMENT.THROUGHPUT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

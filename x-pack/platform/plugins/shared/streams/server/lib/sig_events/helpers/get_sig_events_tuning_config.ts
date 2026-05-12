@@ -39,6 +39,17 @@ export async function getSigEventsTuningConfig(
 
   const merged = { ...DEFAULT_SIG_EVENTS_TUNING_CONFIG, ...stored };
 
+  // semantic_min_score changed from a raw model-specific scale (0-100) to a
+  // minmax-normalized scale (0-1). Override any persisted out-of-range value.
+  if (merged.semantic_min_score < 0 || merged.semantic_min_score > 1) {
+    logger.warn(
+      `semantic_min_score=${merged.semantic_min_score} is outside the valid [0, 1] range ` +
+        `(likely a pre-upgrade value on the old 0-100 scale). Resetting to default ` +
+        `${DEFAULT_SIG_EVENTS_TUNING_CONFIG.semantic_min_score}.`
+    );
+    merged.semantic_min_score = DEFAULT_SIG_EVENTS_TUNING_CONFIG.semantic_min_score;
+  }
+
   // Detect corruption -- don't fix, log and fall back to full defaults
   if (merged.entity_filtered_ratio + merged.diverse_ratio > 1.0) {
     logger.warn(

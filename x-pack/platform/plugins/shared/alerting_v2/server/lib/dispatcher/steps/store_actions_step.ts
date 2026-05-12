@@ -12,13 +12,13 @@ import {
 } from '../../../resources/datastreams/alert_actions';
 import type {
   AlertEpisode,
-  ActionGroup,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
+import { getUnmatchedEpisodes } from './unmatched_episodes';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -122,23 +122,6 @@ export class StoreActionsStep implements DispatcherStep {
 
     return { type: 'continue' };
   }
-}
-
-function getUnmatchedEpisodes(
-  dispatchable: readonly AlertEpisode[],
-  dispatch: readonly ActionGroup[],
-  throttled: readonly ActionGroup[]
-): AlertEpisode[] {
-  const handledEpisodeKeys = new Set<string>();
-  for (const group of [...dispatch, ...throttled]) {
-    for (const episode of group.episodes) {
-      handledEpisodeKeys.add(`${episode.rule_id}:${episode.group_hash}:${episode.episode_id}`);
-    }
-  }
-
-  return dispatchable.filter(
-    (ep) => !handledEpisodeKeys.has(`${ep.rule_id}:${ep.group_hash}:${ep.episode_id}`)
-  );
 }
 
 function toAction({

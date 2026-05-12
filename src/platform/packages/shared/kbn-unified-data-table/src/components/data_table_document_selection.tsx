@@ -192,21 +192,26 @@ export function DataTableDocumentToolbarBtn({
     return [
       // Custom bulk actions
       ...(customBulkActions
-        ? customBulkActions.map((bulkAction) => {
-            return (
-              <EuiContextMenuItem
-                data-test-subj={bulkAction['data-test-subj']}
-                key={bulkAction.key}
-                icon={bulkAction.icon}
-                onClick={() => {
-                  closePopover();
-                  bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
-                }}
-              >
-                {bulkAction.label}
-              </EuiContextMenuItem>
-            );
-          })
+        ? customBulkActions
+            .filter(
+              (bulkAction) =>
+                bulkAction.isAvailable?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
+            )
+            .map((bulkAction) => {
+              return (
+                <EuiContextMenuItem
+                  data-test-subj={bulkAction['data-test-subj']}
+                  key={bulkAction.key}
+                  icon={bulkAction.icon}
+                  onClick={() => {
+                    closePopover();
+                    bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
+                  }}
+                >
+                  {bulkAction.label}
+                </EuiContextMenuItem>
+              );
+            })
         : []),
       // Compare selected documents
       ...(enableComparisonMode && selectedDocsCount > 1

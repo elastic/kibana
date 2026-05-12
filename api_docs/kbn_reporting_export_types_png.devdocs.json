@@ -218,6 +218,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConstructorParameters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -292,6 +293,7 @@
                 "lineNumber": 57,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobParamsPNGV2",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -365,6 +367,7 @@
                 "lineNumber": 75,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunTaskOpts",
                 "trackAdoption": false,
                 "isRequired": true
               }

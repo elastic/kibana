@@ -6,10 +6,8 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import type {
-  WorkflowsExtensionsServerPluginSetup,
-  ServerStepDefinition,
-} from '@kbn/workflows-extensions/server';
+import type { ServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
@@ -20,11 +18,7 @@ import {
 
 type StepLoader = () => Promise<ServerStepDefinition | undefined>;
 
-const createWorkflowsExtensionsMock = (): jest.Mocked<WorkflowsExtensionsServerPluginSetup> => ({
-  registerStepDefinition: jest.fn(),
-  registerTriggerDefinition: jest.fn(),
-  registerTriggerEventHandler: jest.fn(),
-});
+const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (server)', () => {
   const buildCoreMock = (featureFlagEnabled: boolean) => {

@@ -5,6 +5,47 @@
     "functions": [
       {
         "parentPluginId": "@kbn/security-form-components",
+        "id": "def-public.betaBadgeStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "betaBadgeStyle",
+        "description": [],
+        "signature": [
+          "({ euiTheme }: ",
+          "Theme",
+          ") => ",
+          "SerializedStyles"
+        ],
+        "path": "x-pack/platform/packages/shared/security/form_components/src/beta_badge_style.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-form-components",
+            "id": "def-public.betaBadgeStyle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ euiTheme }",
+            "description": [],
+            "signature": [
+              "Theme"
+            ],
+            "path": "x-pack/platform/packages/shared/security/form_components/src/beta_badge_style.ts",
+            "lineNumber": 11,
+            "columnNumber": 32,
+            "deprecated": false,
+            "docsReferencedTypeName": "Theme",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-form-components",
         "id": "def-public.ContrastKeyPadMenu",
         "type": "Function",
         "tags": [],
@@ -22,7 +63,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
-        "lineNumber": 44,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +85,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
-            "lineNumber": 44,
+            "lineNumber": 37,
             "columnNumber": 80,
             "deprecated": false,
             "trackAdoption": false,
@@ -99,6 +140,7 @@
             "lineNumber": 94,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidateOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -145,6 +187,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -491,7 +534,7 @@
         "label": "ContrastKeyPadMenuProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
-        "lineNumber": 27,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -504,7 +547,7 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
-            "lineNumber": 28,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -520,7 +563,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/security/form_components/src/contrast_keypad_menu.tsx",
-            "lineNumber": 29,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

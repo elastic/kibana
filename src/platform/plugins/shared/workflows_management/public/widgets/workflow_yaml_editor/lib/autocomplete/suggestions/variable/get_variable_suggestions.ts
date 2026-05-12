@@ -9,8 +9,8 @@
 
 import type { monaco } from '@kbn/monaco';
 import { getShape } from '@kbn/workflows/common/utils/zod';
+import { getDetailedTypeDescription } from '@kbn/workflows-yaml';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
-import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
 import { getValueFromValueNode } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 import { isVariableLineParseResult } from '../../context/parse_line_for_completion';

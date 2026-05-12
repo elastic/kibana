@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactText } from 'react';
+import type { ReactNode, ReactText } from 'react';
 
 export type SampleInput = ReactText | ReactText[] | Record<string, ReactText[]> | object;
 
 export interface Sample {
   input: SampleInput;
-  output: string;
+  output: ReactNode;
 }

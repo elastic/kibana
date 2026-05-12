@@ -8,18 +8,39 @@
 import { Subject, ReplaySubject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
+import { EffortLevels } from '@kbn/agent-builder-common/model_provider';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { agentBuilderMocks } from '../../../../mocks';
+import type { ModelProviderMock } from '../../../../test_utils';
 import { createSubagentTool } from './run_subagent';
 
-// Mock context with events emitter for tool handler calls.
-const mockContext = {
-  events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
-} as any;
+const createMockContext = (selectedConnectorId = 'selected-connector') => {
+  const modelProvider: ModelProviderMock = agentBuilderMocks.createModelProvider();
+  modelProvider.selectModel.mockResolvedValue({
+    connector: { connectorId: selectedConnectorId },
+    chatModel: {},
+    inferenceClient: {},
+  } as never);
+
+  return {
+    context: {
+      events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+      modelProvider,
+    } as any,
+    modelProvider,
+  };
+};
 
 const callHandler = async (
   tool: ReturnType<typeof createSubagentTool>,
-  params: { description: string; prompt: string; run_in_background?: boolean }
-) => tool.handler(params, mockContext) as Promise<{ results: any[] }>;
+  params: {
+    description: string;
+    prompt: string;
+    run_in_background?: boolean;
+    effort?: EffortLevels;
+  },
+  context: ReturnType<typeof createMockContext>['context']
+) => tool.handler(params, context) as Promise<{ results: any[] }>;
 
 describe('createSubagentTool', () => {
   const mockRound = {
@@ -46,7 +67,6 @@ describe('createSubagentTool', () => {
     const tool = createSubagentTool({
       agentId: 'test-agent',
       executionId: 'parent-exec-id',
-      connectorId: 'connector-1',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockResolvedValue({
           executionId: 'sub-exec-id',
@@ -57,7 +77,12 @@ describe('createSubagentTool', () => {
       abortSignal: new AbortController().signal,
     });
 
-    const result = await callHandler(tool, { description: 'test task', prompt: 'Do something' });
+    const { context } = createMockContext();
+    const result = await callHandler(
+      tool,
+      { description: 'test task', prompt: 'Do something' },
+      context
+    );
     expect(result.results).toHaveLength(1);
     expect(result.results![0].type).toBe(ToolResultType.other);
     expect(result.results![0].data).toEqual({
@@ -72,7 +97,6 @@ describe('createSubagentTool', () => {
     const tool = createSubagentTool({
       agentId: 'test-agent',
       executionId: 'parent-exec-id',
-      connectorId: 'connector-1',
       subAgentExecutor: {
         executeSubAgent: jest.fn().mockRejectedValue(new Error('LLM timeout')),
         getExecution: jest.fn(),
@@ -80,7 +104,12 @@ describe('createSubagentTool', () => {
       abortSignal: new AbortController().signal,
     });
 
-    const result = await callHandler(tool, { description: 'test', prompt: 'Do something' });
+    const { context } = createMockContext();
+    const result = await callHandler(
+      tool,
+      { description: 'test', prompt: 'Do something' },
+      context
+    );
     expect(result.results).toHaveLength(1);
     expect(result.results![0].type).toBe(ToolResultType.error);
     expect(result.results![0].data).toEqual(
@@ -103,7 +132,12 @@ describe('createSubagentTool', () => {
       },
     });
 
-    const resultPromise = callHandler(tool, { description: 'test', prompt: 'Do something' });
+    const { context } = createMockContext();
+    const resultPromise = callHandler(
+      tool,
+      { description: 'test', prompt: 'Do something' },
+      context
+    );
 
     // Complete without emitting roundComplete
     events$.complete();
@@ -135,24 +169,57 @@ describe('createSubagentTool', () => {
     const tool = createSubagentTool({
       agentId: 'test-agent',
       executionId: 'parent-exec-id',
-      connectorId: 'connector-1',
       subAgentExecutor: { executeSubAgent, getExecution: jest.fn() },
       abortSignal,
     });
 
-    await callHandler(tool, {
-      description: 'Summarize data',
-      prompt: 'Summarize the following data...',
-    });
+    const { context, modelProvider } = createMockContext('selected-connector');
+    await callHandler(
+      tool,
+      {
+        description: 'Summarize data',
+        prompt: 'Summarize the following data...',
+        effort: EffortLevels.high,
+      },
+      context
+    );
 
+    expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'high' });
     expect(executeSubAgent).toHaveBeenCalledWith({
       agentId: 'test-agent',
-      connectorId: 'connector-1',
+      connectorId: 'selected-connector',
       capabilities: undefined,
       parentExecutionId: 'parent-exec-id',
       prompt: 'Summarize data\n\nSummarize the following data...',
       abortSignal,
     });
+  });
+
+  it('defaults effort to medium when not provided', async () => {
+    const events$ = new ReplaySubject<ChatEvent>();
+    events$.next({
+      type: ChatEventType.roundComplete,
+      data: { round: mockRound },
+    } as ChatEvent);
+    events$.complete();
+
+    const tool = createSubagentTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec-id',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn().mockResolvedValue({
+          executionId: 'sub-exec-id',
+          events$: events$.asObservable(),
+        }),
+        getExecution: jest.fn(),
+      },
+      abortSignal: new AbortController().signal,
+    });
+
+    const { context, modelProvider } = createMockContext();
+    await callHandler(tool, { description: 'test', prompt: 'Do something' }, context);
+
+    expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'medium' });
   });
 
   it('returns execution_id immediately when run_in_background is true', async () => {
@@ -177,11 +244,16 @@ describe('createSubagentTool', () => {
       } as any,
     });
 
-    const result = await callHandler(tool, {
-      description: 'background task',
-      prompt: 'Do something in background',
-      run_in_background: true,
-    });
+    const { context } = createMockContext();
+    const result = await callHandler(
+      tool,
+      {
+        description: 'background task',
+        prompt: 'Do something in background',
+        run_in_background: true,
+      },
+      context
+    );
 
     expect(result.results).toHaveLength(1);
     expect(result.results[0].data).toEqual({

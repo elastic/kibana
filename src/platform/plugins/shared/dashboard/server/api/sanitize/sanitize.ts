@@ -9,15 +9,16 @@
 
 import type { DashboardState, Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
-import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function sanitize(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
+
   /**
    * Temporary escape hatch for lens as code
    * TODO remove transforms when lens as code transforms are ready for production

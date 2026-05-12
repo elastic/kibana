@@ -51,3 +51,6 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            getAllDataViewsBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

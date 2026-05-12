@@ -11,7 +11,7 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ModuleJob } from '@kbn/ml-plugin/common/types/modules';
+import type { ModuleJob } from '@kbn/ml-common-types/modules';
 import { isJobStarted } from '../../../../../../common/machine_learning/helpers';
 import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../../../../../../common/constants';
 import { DEFAULT_ANOMALY_SCORE, ML_GROUP_IDS } from '../../../../../../common/constants';

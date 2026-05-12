@@ -9,9 +9,7 @@ paths:
       operationId: EndpointScriptLibraryDownloadScript
       description: Download a script file
       x-codegen-enabled: false
-      x-labels: []
-      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-      #      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       parameters:
         - name: script_id
           in: path

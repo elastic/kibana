@@ -23,6 +23,7 @@ import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
 } from '../../definitions/utils/autocomplete/resource_browser_suggestions';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -68,7 +69,11 @@ export async function autocomplete(
     return sourceSuggestions;
   }
   // TS something /
-  else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
+  else if (
+    indexes.length > 0 &&
+    endsWithWhitespace(innerText) &&
+    !isRestartingExpression(innerText)
+  ) {
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
