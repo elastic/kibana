@@ -8,6 +8,7 @@
 import {
   EuiBadge,
   EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,9 +22,12 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ActionBlockProps } from '.';
-import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import {
+  useInteractiveModeSelector,
+  useStreamEnrichmentSelector,
+} from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
 import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
@@ -51,8 +55,27 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const hasValidationErrors = validationErrors.length > 0;
 
+  const canEdit = useInteractiveModeSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
   // For the inner description we once again invert the colours
   const descriptionPanelColour = getStepPanelColour(level + 1);
+
+  useEffect(() => {
+    if (isEditingDescription && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditingDescription]);
+
+  const saveDescription = useCallback(() => {
+    if (!isActionBlock(step)) return;
+    const trimmed = editValue.trim();
+    stepRef.send({ type: 'step.changeDescription', description: trimmed });
+    setIsEditingDescription(false);
+  }, [editValue, step, stepRef]);
 
   if (!isActionBlock(step)) return null;
 
@@ -61,6 +84,27 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
 
   const handleTitleClick = () => {
     stepRef.send({ type: 'step.edit' });
+  };
+
+  const handleDescriptionClick = () => {
+    if (!readOnly && canEdit) {
+      const initialValue =
+        step.description && step.description.trim().length > 0
+          ? step.description
+          : getStepDescription({ ...step, description: undefined });
+      setEditValue(initialValue);
+      setIsEditingDescription(true);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveDescription();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsEditingDescription(false);
+    }
   };
 
   return (
@@ -232,16 +276,44 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                   }
                 )}
               />
+            ) : isEditingDescription ? (
+              <EuiFieldText
+                inputRef={inputRef}
+                fullWidth
+                compressed
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={saveDescription}
+                onKeyDown={handleKeyDown}
+                data-test-subj="streamsAppProcessorDescriptionInlineEdit"
+                aria-label={i18n.translate(
+                  'xpack.streams.actionBlockListItem.descriptionInlineEdit.ariaLabel',
+                  { defaultMessage: 'Edit processor description' }
+                )}
+                css={css`
+                  font-family: ${euiTheme.font.familyCode};
+                  font-size: ${euiTheme.size.m};
+                `}
+              />
             ) : (
               <EuiToolTip content={stepDescription} display="block">
                 <EuiText
                   size="xs"
                   color="subdued"
                   tabIndex={0}
+                  role={!readOnly && canEdit ? 'button' : undefined}
+                  onClick={handleDescriptionClick}
                   data-test-subj="streamsAppProcessorDescription"
                   css={css`
                     font-family: ${euiTheme.font.familyCode};
+                    font-style: italic;
                     ${euiTextTruncate()}
+                    ${!readOnly && canEdit
+                      ? `cursor: pointer;
+                      &:hover {
+                        text-decoration: underline;
+                      }`
+                      : ''}
                   `}
                 >
                   {stepDescription}
