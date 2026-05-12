@@ -195,6 +195,7 @@ export const importRulesRoute = (
             allowMissingConnectorSecrets: !!actionConnectors.length,
             ruleSourceImporter,
             detectionRulesClient,
+            bulkCreate: config.experimentalFeatures.bulkCreateRulesEnabled,
           });
 
           const parseErrors = parsedRuleErrors.map((error) =>

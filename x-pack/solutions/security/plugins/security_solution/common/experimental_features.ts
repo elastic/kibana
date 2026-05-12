@@ -23,6 +23,19 @@ export const allowedExperimentalValues = Object.freeze({
   previewTelemetryUrlEnabled: false,
 
   /**
+   * When enabled, prebuilt rule installation (POST .../prebuilt_rules/installation/_perform)
+   * and rule import (POST .../rules/_import) use the new alerting `rulesClient.bulkCreateRules`
+   * path (one `savedObjectsClient.bulkCreate` per chunk) instead of the per-rule create loop.
+   *
+   * For rules whose payload requests `enabled: true`, the bulk-create call is followed by a
+   * single `rulesClient.bulkEnableRules` call (alerting `bulkCreateRules` is disabled-only).
+   * Imports of existing rules with `overwrite=true` continue to use the per-rule update path.
+   *
+   * Default off; opt in via `xpack.securitySolution.enableExperimental: ['bulkCreateRulesEnabled']`.
+   */
+  bulkCreateRulesEnabled: false,
+
+  /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
    * - Rules write their console error, info, debug, and trace messages to Event Log,
    *   in addition to other events they log there (status changes and execution metrics).

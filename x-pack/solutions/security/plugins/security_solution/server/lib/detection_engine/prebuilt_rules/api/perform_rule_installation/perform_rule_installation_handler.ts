@@ -43,6 +43,7 @@ export const performRuleInstallationHandler = async (
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const exceptionsListClient = ctx.securitySolution.getExceptionListClient();
     const mlAuthz = ctx.securitySolution.getMlAuthz();
+    const { experimentalFeatures } = ctx.securitySolution.getConfig();
 
     const { mode } = request.body;
 
@@ -115,17 +116,16 @@ export const performRuleInstallationHandler = async (
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
       const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
-      const { results, errors } = await createPrebuiltRules(
-        detectionRulesClient,
-        ruleAssets,
-        logger
-      );
+      const { results, errors } = experimentalFeatures.bulkCreateRulesEnabled
+        ? await detectionRulesClient.bulkCreatePrebuiltRules({ rules: ruleAssets })
+        : await createPrebuiltRules(detectionRulesClient, ruleAssets, logger);
 
-      const batchInstalledRules = results.map(({ result: rule }) =>
-        pick(rule, ['id', 'rule_id', 'version'])
+      logger.debug(
+        `performRuleInstallation: installing batch of prebuilt rules - done. Rules created: ${results.length}. Rules failed to create: ${errors.length}`
       );
-
-      installedRules.push(...batchInstalledRules);
+      installedRules.push(
+        ...results.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
+      );
       ruleErrors.push(...errors);
     }
 
