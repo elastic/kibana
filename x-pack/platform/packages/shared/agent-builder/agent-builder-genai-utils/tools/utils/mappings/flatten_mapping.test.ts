@@ -210,6 +210,61 @@ describe('flattenMapping', () => {
     ]);
   });
 
+  it('captures inference_id on dense_vector fields', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        embedding: {
+          type: 'dense_vector',
+          index: true,
+          inference_id: '.jina-embeddings-v5-text-small',
+        } as any,
+        content: {
+          type: 'text',
+        },
+      },
+    };
+
+    const flattened = flattenMapping(mapping).sort((a, b) => a.path.localeCompare(b.path));
+
+    expect(flattened).toEqual([
+      {
+        meta: {},
+        searchable: true,
+        path: 'content',
+        type: 'text',
+      },
+      {
+        meta: {},
+        searchable: true,
+        path: 'embedding',
+        type: 'dense_vector',
+        inferenceId: '.jina-embeddings-v5-text-small',
+      },
+    ]);
+  });
+
+  it('does not set inferenceId when inference_id is absent', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        embedding: {
+          type: 'dense_vector',
+          index: true,
+        } as any,
+      },
+    };
+
+    const flattened = flattenMapping(mapping);
+
+    expect(flattened).toEqual([
+      {
+        meta: {},
+        searchable: true,
+        path: 'embedding',
+        type: 'dense_vector',
+      },
+    ]);
+  });
+
   it('keeps internal fields', () => {
     const mapping: MappingTypeMapping = {
       properties: {

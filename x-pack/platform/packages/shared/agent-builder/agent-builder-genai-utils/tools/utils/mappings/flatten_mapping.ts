@@ -15,6 +15,7 @@ interface MappingProperties {
     properties?: MappingProperties; // Nested object fields
     fields?: MappingProperties; // Multi-fields (alternative analyzers/types)
     meta?: Record<string, string>; // meta
+    inference_id?: string; // Inference endpoint associated with the field (e.g. dense_vector)
   };
 }
 
@@ -32,12 +33,16 @@ export const flattenMapping = (mapping: MappingTypeMapping): MappingField[] => {
 
       if (value.type) {
         // If it's a leaf field, add it
-        fields.push({
+        const field: MappingField = {
           type: value.type,
           path: fieldPath,
           meta: value.meta ?? {},
           searchable: value.index !== false,
-        });
+        };
+        if (value.inference_id) {
+          field.inferenceId = value.inference_id;
+        }
+        fields.push(field);
       }
       if (value.properties) {
         fields = fields.concat(extractFields(value.properties, fieldPath));

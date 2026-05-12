@@ -17,4 +17,6 @@ export interface MappingField {
   meta: Record<string, string>;
   /** whether the field is searchable (defaults to true when not set) */
   searchable?: boolean;
+  /** inference ID attached to the field (e.g. for dense_vector fields) */
+  inferenceId?: string;
 }

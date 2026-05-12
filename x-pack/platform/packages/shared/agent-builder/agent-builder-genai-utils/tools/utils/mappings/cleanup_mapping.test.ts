@@ -80,6 +80,31 @@ describe('cleanupMapping', () => {
     });
   });
 
+  it('preserves inference_id on dense_vector fields', () => {
+    const mapping: MappingTypeMapping = {
+      properties: {
+        embedding: {
+          type: 'dense_vector',
+          index: true,
+          similarity: 'cosine',
+          dims: 1024,
+          inference_id: '.jina-embeddings-v5-text-small',
+          index_options: { type: 'bbq_disk' },
+        } as any,
+      },
+    };
+
+    const cleaned = cleanupMapping(mapping);
+
+    expect(cleaned.properties).toEqual({
+      embedding: {
+        type: 'dense_vector',
+        index: true,
+        inference_id: '.jina-embeddings-v5-text-small',
+      },
+    });
+  });
+
   it('handles nested fields', () => {
     const mapping: MappingTypeMapping = {
       properties: {

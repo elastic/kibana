@@ -33,6 +33,12 @@ const createMockLogger = () =>
 
 const textField = (path: string): MappingField => ({ path, type: 'text', meta: {} });
 const keywordField = (path: string): MappingField => ({ path, type: 'keyword', meta: {} });
+const denseVectorField = (path: string, inferenceId: string): MappingField => ({
+  path,
+  type: 'dense_vector',
+  meta: {},
+  inferenceId,
+});
 
 describe('performMatchSearch', () => {
   beforeEach(() => {
@@ -100,7 +106,7 @@ describe('performMatchSearch', () => {
   });
 
   describe('local targets (RRF path)', () => {
-    it('uses the RRF retriever with all fields', async () => {
+    it('uses the RRF retriever with text fields as a nested rrf sub-retriever', async () => {
       const esClient = createMockEsClient();
       const logger = createMockLogger();
 
@@ -114,10 +120,97 @@ describe('performMatchSearch', () => {
       });
 
       const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
-      expect(searchCall.retriever.rrf.fields).toEqual(['title', 'body']);
+      const outerRrf = searchCall.retriever.rrf;
+      expect(outerRrf.rank_window_size).toBe(20);
+      expect(outerRrf.retrievers).toHaveLength(1);
+      expect(outerRrf.retrievers[0].rrf.fields).toEqual(['title', 'body']);
+      expect(outerRrf.retrievers[0].rrf.query).toBe('test query');
       expect(Object.keys(searchCall.highlight.fields)).toEqual(
         expect.arrayContaining(['title', 'body'])
       );
+    });
+
+    it('adds knn sub-retrievers for dense_vector fields with inferenceId', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'my-local-index',
+        fields: [textField('title')],
+        denseVectorFields: [denseVectorField('embedding', '.jina-embeddings-v5-text-small')],
+        size: 10,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const outerRrf = searchCall.retriever.rrf;
+      expect(outerRrf.retrievers).toHaveLength(2);
+
+      // knn retriever comes first
+      expect(outerRrf.retrievers[0]).toEqual({
+        knn: {
+          field: 'embedding',
+          query_vector_builder: {
+            text_embedding: {
+              model_id: '.jina-embeddings-v5-text-small',
+              model_text: 'test query',
+            },
+          },
+          k: 10,
+          num_candidates: 100,
+        },
+      });
+
+      // text fields rrf retriever comes second
+      expect(outerRrf.retrievers[1].rrf.fields).toEqual(['title']);
+    });
+
+    it('works with only dense_vector fields and no text fields', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'my-local-index',
+        fields: [],
+        denseVectorFields: [denseVectorField('embedding', '.my-model')],
+        size: 5,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const outerRrf = searchCall.retriever.rrf;
+      expect(outerRrf.retrievers).toHaveLength(1);
+      expect(outerRrf.retrievers[0].knn).toBeDefined();
+      // No highlight config when there are no text fields
+      expect(searchCall.highlight).toBeUndefined();
+    });
+
+    it('includes multiple knn sub-retrievers for multiple dense_vector fields', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+
+      await performMatchSearch({
+        term: 'test query',
+        index: 'my-local-index',
+        fields: [],
+        denseVectorFields: [
+          denseVectorField('embedding_a', '.model-a'),
+          denseVectorField('embedding_b', '.model-b'),
+        ],
+        size: 10,
+        esClient,
+        logger,
+      });
+
+      const searchCall = (esClient.search as jest.Mock).mock.calls[0][0];
+      const outerRrf = searchCall.retriever.rrf;
+      expect(outerRrf.retrievers).toHaveLength(2);
+      expect(outerRrf.retrievers[0].knn.field).toBe('embedding_a');
+      expect(outerRrf.retrievers[1].knn.field).toBe('embedding_b');
     });
   });
 
