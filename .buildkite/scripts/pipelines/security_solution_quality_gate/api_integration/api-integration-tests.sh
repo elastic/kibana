@@ -25,7 +25,7 @@ cmd_status=$?
 echo "--- BUILDKITE_JOB_ID: ${BUILDKITE_JOB_ID}"
 echo "--- PARENT_TRIGGER_JOB_ID: ${PARENT_TRIGGER_JOB_ID}"
 echo "--- BUILDKITE_TRIGGERED_FROM_BUILD_ID: ${BUILDKITE_TRIGGERED_FROM_BUILD_ID}"
-echo "--- $status"
+echo "--- $cmd_status"
 
 if [[ -n "${PARENT_TRIGGER_JOB_ID:-}" ]] && [[ "$cmd_status" -eq 101 ]]; then
   echo "--- TIMEOUT CAPTURED"
