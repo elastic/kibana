@@ -245,7 +245,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
             aria-label={i18n.translate(
               'xpack.ml.datePicker.fullTimeRangeSelector.timeRangeOptionsAriaLabel',
               {
-                defaultMessage: 'Time range options',
+                defaultMessage: 'Frozen data tier options',
               }
             )}
             button={
