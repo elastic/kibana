@@ -236,9 +236,6 @@ This will backport the following commits from `<source branch>` to `<target bran
 >
 > Workflow run: <workflow run URL>
 
-### Questions ?
-Please refer to the [Backport tool documentation](https://github.com/sorenlouv/backport)
-
 <!--BACKPORT [{"sourcePullRequest":{"number":<source PR number>,"url":"<source PR URL>","title":"<source PR title>"},"sourceBranch":"<source branch>","suggestedTargetBranches":["<target branch>"],"sourceCommit":{"sha":"<source merge commit SHA>"}}] BACKPORT-->
 ```
 
