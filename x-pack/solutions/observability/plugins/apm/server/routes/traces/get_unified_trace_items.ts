@@ -201,7 +201,7 @@ export async function getUnifiedTraceItems({
     return item;
   });
 
-  const traceItemById = new Map(traceItems.map((item) => [item.id, item]));
+  const traceItemById = new Map<string, TraceItem>(traceItems.map((item) => [item.id, item]));
   for (const item of traceItems) {
     if (item.docType === 'transaction' && item.parentId) {
       const parent = traceItemById.get(item.parentId);
