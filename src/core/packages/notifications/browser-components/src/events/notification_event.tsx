@@ -185,12 +185,7 @@ export const NotificationEvent: FunctionComponent<NotificationEventProps> = ({
       {typeof isRead === 'boolean' && (
         <div className={readButtonClassname}>
           {!!onRead ? (
-            <NotificationEventReadButton
-              isRead={isRead}
-              onClick={() => onRead(id, isRead)}
-              eventName={title}
-              id={id}
-            />
+            <NotificationEventReadButton isRead={isRead} eventName={title} id={id} />
           ) : (
             <NotificationEventReadIcon id={id} isRead={isRead} eventName={title} />
           )}

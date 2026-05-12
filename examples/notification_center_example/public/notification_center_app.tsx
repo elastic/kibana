@@ -56,7 +56,7 @@ export function NotificationCenterApp({ onClose }: SidebarComponentProps) {
   return (
     <>
       <SidebarHeader
-        title="Notification Center"
+        title="Notifications"
         onClose={onClose}
         actions={
           <EuiButtonIcon
