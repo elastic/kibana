@@ -15,7 +15,7 @@ export const getDetectionRuleEditSkill = () =>
     name: 'detection-rule-edit',
     basePath: 'skills/security/rules',
     description:
-      'Guide to creating and editing security detection rules via the rule attachment. Use when a user asks to create, edit, modify, or update a detection rule or its fields (tags, severity, MITRE ATT&CK, schedule, query, etc.).',
+      'Creates and edits ES|QL security detection rules as persistent rule attachments, including query logic, MITRE ATT&CK mappings, severity, and schedule. Use when the user wants to author or modify a detection rule explicitly ("create a rule that...", "update the severity", "add MITRE mappings") or with implied authoring intent ("how would I detect this?", "can we catch lateral movement?", "I want an alert for privilege escalation"). Not for alert triage or investigation (use alert analysis skill), proactive threat hunting without a rule-creation goal (use threat hunting skill), or general security questions with no authoring intent.',
     content: SKILL_CONTENT,
     getRegistryTools: () => [
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -33,6 +33,12 @@ Use this skill when the user asks to:
 - Create a detection rule (e.g., "create a rule that detects ...", "build a SIEM rule for ...", "create a security detection rule to find ...", "create a security detection rule that ...")
 - Edit an existing rule's fields (e.g., "change the severity to high", "update the query", "set the interval to 10m", "add tags to the rule")
 - Modify rule logic or metadata (e.g., "add MITRE ATT&CK mappings", "change the index patterns", "update the description", "add new terms to the query")
+
+Do NOT use this skill when the user:
+- Asks about alerts or alert triage (use the alert analysis skill instead)
+- Asks about threat hunting without any intent to create or edit a rule
+- Asks a general security question that doesn't imply building or changing a detection (e.g., "what is lateral movement?", "explain MITRE ATT&CK")
+- Asks to enable, disable, or delete an existing rule (no tool support for this yet)
 
 This covers the rule type ES|QL. Do not create a rule with a rule type other than ES|QL. Only create ES|QL rules.
 
