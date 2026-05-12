@@ -169,4 +169,23 @@ describe('DataIngestStatus polling gate', () => {
 
     expect(refetch).not.toHaveBeenCalled();
   });
+
+  it('stops polling and notifies when hasPreExistingData is true even without required data', () => {
+    const refetch = jest.fn();
+    const onDataReceived = jest.fn();
+    mockUseFetcher.mockReturnValue({
+      data: { hasData: false, hasLogs: false, hasMetrics: false, hasPreExistingData: true },
+      status: FETCH_STATUS.SUCCESS,
+      refetch,
+    });
+
+    renderStatus({ onDataReceived });
+
+    act(() => {
+      jest.advanceTimersByTime(FETCH_INTERVAL_MS * 3);
+    });
+
+    expect(refetch).not.toHaveBeenCalled();
+    expect(onDataReceived).toHaveBeenCalledTimes(1);
+  });
 });
