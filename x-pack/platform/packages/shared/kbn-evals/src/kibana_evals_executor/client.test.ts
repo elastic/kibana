@@ -334,6 +334,62 @@ describe('KibanaEvalsClient', () => {
     expect(Object.values(ranExperiment.runs)).toHaveLength(1);
   });
 
+  describe('EVALUATION_DRY_RUN', () => {
+    afterEach(() => {
+      delete process.env.EVALUATION_DRY_RUN;
+    });
+
+    it('slices dataset to the first example when EVALUATION_DRY_RUN=true', async () => {
+      process.env.EVALUATION_DRY_RUN = 'true';
+      const client = createClient({ repetitions: 3 });
+
+      const dataset: EvaluationDataset = {
+        name: 'dry-run-ds',
+        description: 'desc',
+        examples: [
+          { input: { q: 1 }, output: { expected: 1 } },
+          { input: { q: 2 }, output: { expected: 2 } },
+          { input: { q: 3 }, output: { expected: 3 } },
+        ],
+      };
+
+      let taskCalls = 0;
+      const task = async () => {
+        taskCalls++;
+        return { ok: true };
+      };
+
+      await client.runExperiment({ dataset, task }, []);
+
+      // Only 1 example × 3 repetitions — not 3 × 3
+      expect(taskCalls).toBe(3);
+    });
+
+    it('runs all examples when EVALUATION_DRY_RUN is not set', async () => {
+      const client = createClient({ repetitions: 1 });
+
+      const dataset: EvaluationDataset = {
+        name: 'ds',
+        description: 'desc',
+        examples: [
+          { input: { q: 1 } },
+          { input: { q: 2 } },
+          { input: { q: 3 } },
+        ],
+      };
+
+      let taskCalls = 0;
+      const task = async () => {
+        taskCalls++;
+        return { ok: true };
+      };
+
+      await client.runExperiment({ dataset, task }, []);
+
+      expect(taskCalls).toBe(3);
+    });
+  });
+
   it('throws when trustUpstreamDataset=true without getDatasetByName', async () => {
     const client = createClient();
 
