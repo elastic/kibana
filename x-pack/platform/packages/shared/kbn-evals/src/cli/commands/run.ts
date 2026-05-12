@@ -251,7 +251,9 @@ export const runSuiteCmd: Command<void> = {
     log.info(`Running: ${commandPreview}`);
 
     if (flagsReader.boolean('dry-run')) {
-      return;
+      envOverrides.EVALUATION_REPETITIONS = '1';
+      envOverrides.EVALUATION_DRY_RUN = 'true';
+      log.info('[DRY-RUN] sampling 1 example per dataset, repetitions=1');
     }
 
     await new Promise<void>((resolve, reject) => {
