@@ -8,36 +8,49 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowInput } from '@kbn/workflows/spec/schema/triggers/manual_trigger_schema';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+
+jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
+  getInputsFromDefinition: jest.fn(),
+}));
+
+const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+  typeof getInputsFromDefinition
+>;
 
 describe('validateWorkflowInputs', () => {
   const executionId = 'exec-123';
   let mockRepository: jest.Mocked<Pick<WorkflowExecutionRepository, 'updateWorkflowExecution'>>;
   let mockLogger: jest.Mocked<Pick<Logger, 'error'>>;
 
-  const makeWorkflow = (inputs?: WorkflowInput): WorkflowExecutionEngineModel => {
-    const triggers: WorkflowYaml['triggers'] =
-      inputs !== undefined ? ([{ type: 'manual', inputs }] as WorkflowYaml['triggers']) : [];
-    return {
-      id: 'workflow-1',
+  // Format-shape coverage (legacy array vs JSON Schema, root-level vs trigger-level
+  // inputs, multiple manual triggers) is owned by the `getInputsFromDefinition` unit
+  // tests in `field_conversion.test.ts`. Tests here mock that helper and only verify
+  // the validator's own logic against whatever schema it returns.
+  const stubWorkflow: WorkflowExecutionEngineModel = {
+    id: 'workflow-1',
+    name: 'Test Workflow',
+    enabled: true,
+    definition: {
       name: 'Test Workflow',
       enabled: true,
-      definition: {
-        name: 'Test Workflow',
-        enabled: true,
-        version: '1',
-        triggers,
-        steps: [],
-      },
-      yaml: '',
-    };
+      version: '1',
+      triggers: [],
+      steps: [],
+    },
+    yaml: '',
   };
 
-  const callValidate = (workflow: WorkflowExecutionEngineModel, context: Record<string, unknown>) =>
+  const callValidate = (
+    workflow: WorkflowExecutionEngineModel,
+    context: Record<string, unknown>
+  ) =>
     validateWorkflowInputs(
       workflow,
       context,
@@ -46,6 +59,10 @@ describe('validateWorkflowInputs', () => {
       mockLogger as unknown as Logger
     );
 
+  const setInputsSchema = (schema: JsonModelSchemaType | undefined) => {
+    mockGetInputsFromDefinition.mockReturnValue(schema);
+  };
+
   beforeEach(() => {
     mockRepository = {
       updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
@@ -53,160 +70,28 @@ describe('validateWorkflowInputs', () => {
     mockLogger = {
       error: jest.fn(),
     };
+    mockGetInputsFromDefinition.mockReset();
+    mockGetInputsFromDefinition.mockReturnValue(undefined);
   });
 
   it('should return true when workflow has no input definition', async () => {
-    const result = await callValidate(makeWorkflow(), { inputs: {} });
+    const result = await callValidate(stubWorkflow, { inputs: {} });
 
     expect(result).toBe(true);
     expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
   });
 
-  describe('manual trigger inputs: empty {} vs { properties: {} }', () => {
-    it('should return true when manual trigger inputs are an empty object {}', async () => {
-      const workflow = makeWorkflow({} as WorkflowInput);
-      const result = await callValidate(workflow, { inputs: { ignored: 'value' } });
-
-      expect(result).toBe(true);
-      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('should return true when manual trigger inputs have empty properties object', async () => {
-      const workflow = makeWorkflow({ properties: {} } as WorkflowInput);
-      const result = await callValidate(workflow, { inputs: {} });
-
-      expect(result).toBe(true);
-      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('should return true when manual trigger inputs have empty properties but required lists a field without property schemas', async () => {
-      const workflow = makeWorkflow({
-        type: 'object',
-        properties: {},
-        required: ['name'],
-      } as WorkflowInput);
-
-      const result = await callValidate(workflow, { inputs: {} });
-
-      expect(result).toBe(true);
-      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('legacy array manual inputs', () => {
-    it('should return true when legacy array inputs match schema', async () => {
-      const workflow = makeWorkflow([
-        { name: 'title', type: 'string', required: true },
-      ] as WorkflowInput);
-
-      const result = await callValidate(workflow, { inputs: { title: 'ok' } });
-
-      expect(result).toBe(true);
-      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('should return false when legacy array inputs omit a required field', async () => {
-      const workflow = makeWorkflow([
-        { name: 'title', type: 'string', required: true },
-      ] as WorkflowInput);
-
-      const result = await callValidate(workflow, { inputs: {} });
-
-      expect(result).toBe(false);
-      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
-        id: executionId,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'InputValidationError',
-          message: expect.stringContaining('Workflow input validation failed'),
-        },
-      });
-    });
-
-    it('should return false on type mismatch for legacy array-defined field', async () => {
-      const workflow = makeWorkflow([
-        { name: 'count', type: 'number', required: true },
-      ] as WorkflowInput);
-
-      const result = await callValidate(workflow, { inputs: { count: 'not-a-number' } });
-
-      expect(result).toBe(false);
-      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: executionId,
-          status: ExecutionStatus.FAILED,
-          error: expect.objectContaining({ type: 'InputValidationError' }),
-        })
-      );
-    });
-  });
-
-  describe('multiple manual triggers', () => {
-    const workflowWithTwoManualTriggers: WorkflowExecutionEngineModel = {
-      id: 'workflow-1',
-      name: 'Test Workflow',
-      enabled: true,
-      definition: {
-        name: 'Test Workflow',
-        enabled: true,
-        version: '1',
-        triggers: [
-          {
-            type: 'manual',
-            inputs: {
-              properties: {
-                first: { type: 'string' },
-              },
-              required: ['first'],
-            },
-          },
-          {
-            type: 'manual',
-            inputs: {
-              properties: {
-                second: { type: 'string' },
-              },
-              required: ['second'],
-            },
-          },
-        ] as WorkflowYaml['triggers'],
-        steps: [],
-      },
-      yaml: '',
-    };
-
-    it('should succeed when only the first manual trigger inputs are satisfied', async () => {
-      const result = await callValidate(workflowWithTwoManualTriggers, { inputs: { first: 'ok' } });
-
-      expect(result).toBe(true);
-      expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
-    });
-
-    it('should fail when the first manual trigger is not satisfied even if the second would be', async () => {
-      const result = await callValidate(workflowWithTwoManualTriggers, {
-        inputs: { second: 'only-second' },
-      });
-
-      expect(result).toBe(false);
-      expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: executionId,
-          status: ExecutionStatus.FAILED,
-          error: expect.objectContaining({ type: 'InputValidationError' }),
-        })
-      );
-    });
-  });
-
   it('should return true when input definition has no properties', async () => {
-    const result = await callValidate(makeWorkflow({ required: ['name'] }), { inputs: {} });
+    setInputsSchema({ required: ['name'] } as JsonModelSchemaType);
+
+    const result = await callValidate(stubWorkflow, { inputs: {} });
 
     expect(result).toBe(true);
     expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
   });
 
   it('should return true when all required inputs are provided', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         name: { type: 'string' },
         count: { type: 'number' },
@@ -214,14 +99,14 @@ describe('validateWorkflowInputs', () => {
       required: ['name'],
     });
 
-    const result = await callValidate(workflow, { inputs: { name: 'hello', count: 5 } });
+    const result = await callValidate(stubWorkflow, { inputs: { name: 'hello', count: 5 } });
 
     expect(result).toBe(true);
     expect(mockRepository.updateWorkflowExecution).not.toHaveBeenCalled();
   });
 
   it('should return true when optional inputs are omitted', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         name: { type: 'string' },
         optionalField: { type: 'string' },
@@ -229,33 +114,33 @@ describe('validateWorkflowInputs', () => {
       required: ['name'],
     });
 
-    const result = await callValidate(workflow, { inputs: { name: 'hello' } });
+    const result = await callValidate(stubWorkflow, { inputs: { name: 'hello' } });
 
     expect(result).toBe(true);
   });
 
   it('should return true when a required input has a default and is not provided', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         name: { type: 'string', default: 'default-name' },
       },
       required: ['name'],
     });
 
-    const result = await callValidate(workflow, { inputs: {} });
+    const result = await callValidate(stubWorkflow, { inputs: {} });
 
     expect(result).toBe(true);
   });
 
   it('should return false and mark execution as FAILED when a required input is missing', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         name: { type: 'string' },
       },
       required: ['name'],
     });
 
-    const result = await callValidate(workflow, { inputs: {} });
+    const result = await callValidate(stubWorkflow, { inputs: {} });
 
     expect(result).toBe(false);
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith({
@@ -269,14 +154,14 @@ describe('validateWorkflowInputs', () => {
   });
 
   it('should return false and mark execution as FAILED on type mismatch', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         count: { type: 'number' },
       },
       required: ['count'],
     });
 
-    const result = await callValidate(workflow, { inputs: { count: 'not-a-number' } });
+    const result = await callValidate(stubWorkflow, { inputs: { count: 'not-a-number' } });
 
     expect(result).toBe(false);
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -288,14 +173,14 @@ describe('validateWorkflowInputs', () => {
   });
 
   it('should return false on invalid enum value', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         severity: { type: 'string', enum: ['low', 'medium', 'high'] },
       },
       required: ['severity'],
     });
 
-    const result = await callValidate(workflow, { inputs: { severity: 'critical' } });
+    const result = await callValidate(stubWorkflow, { inputs: { severity: 'critical' } });
 
     expect(result).toBe(false);
     expect(mockRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -307,20 +192,20 @@ describe('validateWorkflowInputs', () => {
   });
 
   it('should return true with valid enum value', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         severity: { type: 'string', enum: ['low', 'medium', 'high'] },
       },
       required: ['severity'],
     });
 
-    const result = await callValidate(workflow, { inputs: { severity: 'medium' } });
+    const result = await callValidate(stubWorkflow, { inputs: { severity: 'medium' } });
 
     expect(result).toBe(true);
   });
 
   it('should apply defaults before validation', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         name: { type: 'string' },
         greeting: { type: 'string', default: 'hello' },
@@ -328,7 +213,7 @@ describe('validateWorkflowInputs', () => {
       required: ['name', 'greeting'],
     });
 
-    const result = await callValidate(workflow, { inputs: { name: 'test' } });
+    const result = await callValidate(stubWorkflow, { inputs: { name: 'test' } });
 
     expect(result).toBe(true);
   });
@@ -336,14 +221,14 @@ describe('validateWorkflowInputs', () => {
   it('should return false and log error when updateWorkflowExecution fails', async () => {
     mockRepository.updateWorkflowExecution.mockRejectedValueOnce(new Error('ES unavailable'));
 
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         name: { type: 'string' },
       },
       required: ['name'],
     });
 
-    const result = await callValidate(workflow, { inputs: {} });
+    const result = await callValidate(stubWorkflow, { inputs: {} });
 
     expect(result).toBe(false);
     expect(mockLogger.error).toHaveBeenCalledWith(
@@ -352,13 +237,13 @@ describe('validateWorkflowInputs', () => {
   });
 
   it('should return true when context.inputs is missing', async () => {
-    const workflow = makeWorkflow({
+    setInputsSchema({
       properties: {
         optionalField: { type: 'string' },
       },
     });
 
-    const result = await callValidate(workflow, {});
+    const result = await callValidate(stubWorkflow, {});
 
     expect(result).toBe(true);
   });
