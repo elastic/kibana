@@ -384,5 +384,19 @@ describe('ServiceMapEmbeddable', () => {
       renderEmbeddable({ onEmptyStateChange });
       expect(onEmptyStateChange).toHaveBeenCalledWith(false);
     });
+
+    it('suppresses the in-card EmptyPrompt when a host owns the empty UI (no flash before the host unmounts us)', () => {
+      // Regression guard: without this, the embeddable would commit "No services
+      // available" to the DOM for one paint before the host's `setHasNoServices(true)`
+      // re-render unmounted us — useEffect runs after commit.
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      const { container } = renderEmbeddable({ onEmptyStateChange: jest.fn() });
+      expect(screen.queryByText(/No services available/)).not.toBeInTheDocument();
+      // Nothing visible at all — the host is in charge of what to render in place.
+      expect(container.firstChild).toBeNull();
+    });
   });
 });

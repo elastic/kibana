@@ -195,6 +195,15 @@ export function ServiceMapEmbeddable({
 
   const isEmpty = data.nodes.length === 0;
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
+    // A host subscribed via `onEmptyStateChange` has taken ownership of the empty
+    // UI (alert details preview hides the whole panel). Rendering the built-in
+    // EmptyPrompt here would flash on screen for one paint before the parent's
+    // state update unmounts us — `useEffect` runs *after* commit, so the prompt
+    // hits the DOM first. Return null to suppress that flash. Dashboard /
+    // standalone callers that don't pass the callback keep the in-card prompt.
+    if (onEmptyStateChange) {
+      return null;
+    }
     return (
       <div data-test-subj="apmServiceMapEmbeddable">
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
