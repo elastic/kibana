@@ -34,7 +34,7 @@ engine:
 # - Manual runs always activate.
 # - Reviewer label events activate, including labels added while creating a PR.
 # - Synchronize/reopened PR events activate when the reviewer label is already present.
-# - Comment follow-up runs are dispatched by Reviewer Command Dispatcher after fork-safe validation.
+# - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
   (
@@ -131,4 +131,4 @@ safe-outputs:
 
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
-- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Command Dispatcher.
+- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.

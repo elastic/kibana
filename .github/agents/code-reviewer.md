@@ -66,7 +66,7 @@ On subsequent review mode runs, skip unchanged lines already covered by earlier 
 
 ## Follow-up response mode output
 
-Use follow-up response mode when the importing workflow is triggered by `workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission fork events only run the Reviewer Command Router. The elevated permission Reviewer Command Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches the selected reviewer workflow with `pr_number` and `comment_id`.
+Use follow-up response mode when the importing workflow is triggered by `workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission fork events only run the Reviewer Comment Router. The elevated permission Reviewer Comment Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches the selected reviewer workflow with `pr_number` and `comment_id`.
 
 For dispatched follow-up runs, the importing workflow exposes:
 - Pull request number: `PR_NUMBER`

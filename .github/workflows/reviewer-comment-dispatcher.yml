@@ -1,8 +1,8 @@
-name: Reviewer Command Dispatcher
+name: Reviewer Comment Dispatcher
 
 on:
   workflow_run:
-    workflows: [Reviewer Command Router]
+    workflows: [Reviewer Comment Router]
     types: [completed]
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   dispatch:
-    name: Dispatch reviewer command
+    name: Dispatch reviewer comment
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-slim
     steps:
@@ -22,8 +22,8 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Find reviewer command
-        id: find-command
+      - name: Find reviewer comment
+        id: find-comment
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
@@ -33,23 +33,23 @@ jobs:
               run_id: context.payload.workflow_run.id,
               per_page: 100,
             });
-            const found = artifacts.some((artifact) => artifact.name === 'reviewer-command' && !artifact.expired);
+            const found = artifacts.some((artifact) => artifact.name === 'reviewer-comment' && !artifact.expired);
             core.setOutput('found', `${found}`);
 
-      - name: Download reviewer command
-        id: download-command
-        if: steps.find-command.outputs.found == 'true'
+      - name: Download reviewer comment
+        id: download-comment
+        if: steps.find-comment.outputs.found == 'true'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: reviewer-command
+          name: reviewer-comment
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
-          path: reviewer-command
+          path: reviewer-comment
 
       - name: Dispatch selected reviewer
-        if: steps.find-command.outputs.found == 'true'
+        if: steps.find-comment.outputs.found == 'true'
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
-            const { dispatchReviewerCommand } = require('./.github/scripts/reviewer_command');
-            await dispatchReviewerCommand({ github, context, core });
+            const { dispatchReviewerComment } = require('./.github/scripts/reviewer_comment');
+            await dispatchReviewerComment({ github, context, core });

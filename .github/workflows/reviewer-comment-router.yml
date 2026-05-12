@@ -1,4 +1,4 @@
-name: Reviewer Command Router
+name: Reviewer Comment Router
 
 on:
   issue_comment:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   route:
-    name: Route reviewer command
+    name: Route reviewer comment
     if: |
       github.event.sender.type != 'Bot'
       && (
@@ -54,18 +54,18 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate reviewer command
+      - name: Validate reviewer comment
         id: route
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553 # v9
         with:
           script: |
-            const { routeReviewerCommand } = require('./.github/scripts/reviewer_command');
-            await routeReviewerCommand({ context, core });
+            const { routeReviewerComment } = require('./.github/scripts/reviewer_comment');
+            await routeReviewerComment({ context, core });
 
-      - name: Upload reviewer command
+      - name: Upload reviewer comment
         if: steps.route.outputs.matched == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: reviewer-command
-          path: reviewer-command/command.json
+          name: reviewer-comment
+          path: reviewer-comment/comment.json
           retention-days: 1

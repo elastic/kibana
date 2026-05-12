@@ -3,8 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const ARTIFACT_DIR = 'reviewer-command';
-const ARTIFACT_PATH = path.join(ARTIFACT_DIR, 'command.json');
+const ARTIFACT_DIR = 'reviewer-comment';
+const ARTIFACT_PATH = path.join(ARTIFACT_DIR, 'comment.json');
 const SKIP_LABEL = 'reviewer:skip-ai';
 
 const REVIEWERS = Object.freeze({
@@ -109,7 +109,7 @@ const validateReviewerAccess = async ({ github, core, owner, repo, actor }) => {
   }
 
   if (!isAllowedPermission(permission)) {
-    core.info(`${actor} does not have reviewer command permission.`);
+    core.info(`${actor} does not have reviewer comment permission.`);
     return false;
   }
 
@@ -136,7 +136,7 @@ const validatePullRequest = ({ core, pullRequest, reviewer }) => {
   return true;
 };
 
-const routeReviewerCommand = async ({ context, core }) => {
+const routeReviewerComment = async ({ context, core }) => {
   const issueOrPr = context.payload.issue ?? context.payload.pull_request;
   const pullNumber = issueOrPr.number;
   const commentId = context.payload.comment.id;
@@ -167,7 +167,7 @@ const routeReviewerCommand = async ({ context, core }) => {
   core.setOutput('matched', 'true');
 };
 
-const readCommandArtifact = () => {
+const readCommentArtifact = () => {
   if (!fs.existsSync(ARTIFACT_PATH)) {
     return undefined;
   }
@@ -175,16 +175,16 @@ const readCommandArtifact = () => {
   return JSON.parse(fs.readFileSync(ARTIFACT_PATH, 'utf8'));
 };
 
-const dispatchReviewerCommand = async ({ github, context, core }) => {
-  const artifact = readCommandArtifact();
+const dispatchReviewerComment = async ({ github, context, core }) => {
+  const artifact = readCommentArtifact();
   if (!artifact) {
-    core.info('No reviewer command artifact found.');
+    core.info('No reviewer comment artifact found.');
     return;
   }
 
   const reviewer = REVIEWERS[artifact.reviewer_id];
   if (!reviewer) {
-    core.setFailed(`Reviewer command artifact contained unknown reviewer id: ${artifact.reviewer_id}.`);
+    core.setFailed(`Reviewer comment artifact contained unknown reviewer id: ${artifact.reviewer_id}.`);
     return;
   }
 
@@ -192,7 +192,7 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
   const pullNumber = Number.parseInt(artifact.pr_number, 10);
   const commentId = Number.parseInt(artifact.comment_id, 10);
   if (!Number.isInteger(pullNumber) || !Number.isInteger(commentId)) {
-    core.setFailed('Reviewer command artifact did not contain valid PR/comment ids.');
+    core.setFailed('Reviewer comment artifact did not contain valid PR/comment ids.');
     return;
   }
 
@@ -239,8 +239,8 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
 
 module.exports = {
   REVIEWERS,
-  dispatchReviewerCommand,
+  dispatchReviewerComment,
   findMentionedReviewers,
-  routeReviewerCommand,
+  routeReviewerComment,
   selectActionableReviewer,
 };
