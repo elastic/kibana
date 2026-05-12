@@ -36,7 +36,6 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
 import { useQueryExecution } from './use_query_execution';
-import { useEsqlAutocomplete } from './use_esql_providers';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 
 interface ComposeDiscoverChildProps {
@@ -61,8 +60,6 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   services,
   onClose,
 }) => {
-  useEsqlAutocomplete(services);
-
   const [localQuery, setLocalQuery] = useState(state.fullQuery);
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a

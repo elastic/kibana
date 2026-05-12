@@ -30,6 +30,7 @@ import type { ComposeDiscoverMode } from './types';
 import { useComposeDiscoverState, getStepTitles } from './use_compose_discover_state';
 import { ComposeDiscoverForm } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
+import { useEsqlAutocomplete } from './use_esql_providers';
 
 // These hooks live in the plugin, not the package — imported via the plugin's hook layer
 // when this flyout is rendered in the rules list page.
@@ -80,6 +81,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 }) => {
   // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
   const [uiState, dispatch] = useComposeDiscoverState(mode);
+
+  // Registered once here so providers persist across Sandbox open/close cycles.
+  useEsqlAutocomplete(services);
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<FormValues>(() => {
