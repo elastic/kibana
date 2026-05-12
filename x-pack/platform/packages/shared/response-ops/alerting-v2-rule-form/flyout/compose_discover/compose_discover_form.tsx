@@ -79,7 +79,10 @@ function AlertConditionStep({
   const { data: outputColumns = [] } = useQuery({
     queryKey: ['composeDiscoverOutputColumns', committedQuery],
     queryFn: async () => {
-      const cols = await getEsqlColumns({ esqlQuery: committedQuery, search: services.data.search.search });
+      const cols = await getEsqlColumns({
+        esqlQuery: committedQuery,
+        search: services.data.search.search,
+      });
       return cols.map((c) => c.name);
     },
     enabled: Boolean(committedQuery),
@@ -97,7 +100,11 @@ function AlertConditionStep({
     try {
       const { root } = Parser.parse(state.sandbox.query);
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
-      type AstNode = { type: string; name: string; args?: unknown[] };
+      interface AstNode {
+        type: string;
+        name: string;
+        args?: unknown[];
+      }
       const byOption = (statsCmd?.args as AstNode[] | undefined)?.find(
         (a) => a.type === 'option' && a.name === 'by'
       );
