@@ -9890,6 +9890,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflows-execution-engine-core@link:src/platform/packages/shared/kbn-workflows-execution-engine-core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workflows-execution-engine-utils@link:src/platform/packages/shared/kbn-workflows-execution-engine-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
   version "0.0.0"
   uid ""
