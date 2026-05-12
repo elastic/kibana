@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { css } from '@emotion/react';
+import styled, { css } from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 
 import {
@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -70,6 +69,12 @@ import * as headerI18n from '../flyout_components/header/translations';
 import { isSubmitDisabled, prepareNewItemsForSubmission, prepareToCloseAlerts } from './helpers';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
+const SectionHeader = styled(EuiTitle)`
+  ${() => css`
+    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
+  `}
+`;
+
 export interface AddExceptionFlyoutProps {
   rules: Rule[] | null;
   isBulkAction: boolean;
@@ -89,7 +94,15 @@ export interface AddExceptionFlyoutProps {
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
 
-export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent({
+const FlyoutBodySection = styled(EuiFlyoutBody)`
+  ${() => css`
+    &.builder-section {
+      overflow-y: scroll;
+    }
+  `}
+`;
+
+export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   rules,
   isBulkAction,
   isEndpointItem,
@@ -101,7 +114,6 @@ export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
-  const { euiTheme } = useEuiTheme();
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
@@ -480,6 +492,16 @@ export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent
     onCancel(false);
   }, [onCancel]);
 
+  const exceptionFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'exceptionFlyoutTitle',
+  });
+
+  const flyoutAriaLabel = useMemo(() => {
+    return listType === ExceptionListTypeEnum.ENDPOINT
+      ? headerI18n.ADD_ENDPOINT_EXCEPTION
+      : headerI18n.CREATE_RULE_EXCEPTION;
+  }, [listType]);
+
   const confirmModal = useMemo(() => {
     const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
@@ -499,12 +521,18 @@ export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent
   }, [listType, submitException]);
 
   return (
-    <>
-      <EuiFlyoutBody
-        css={css`
-          overflow-y: scroll;
-        `}
-      >
+    <EuiFlyout
+      size="l"
+      onClose={handleCloseFlyout}
+      data-test-subj="addExceptionFlyout"
+      aria-label={flyoutAriaLabel}
+    >
+      <ExceptionFlyoutHeader
+        listType={listType}
+        titleId={exceptionFlyoutTitleId}
+        dataTestSubjId={'exceptionFlyoutTitle'}
+      />
+      <FlyoutBodySection className="builder-section">
         {
           // TODO: This is a quick fix to make sure that we do not lose conditions state on refetching index patterns via `useFetchIndexPatterns`
           // which happens due to data being stale after 5 minutes (in `useFetchJobsSummaryQuery`, `useFetchModulesQuery` and `useFetchRecognizerQuery`)
@@ -574,14 +602,9 @@ export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent
         <EuiHorizontalRule />
         <ExceptionItemComments
           accordionTitle={
-            <EuiTitle
-              size="xs"
-              css={css`
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `}
-            >
+            <SectionHeader size="xs">
               <h3>{i18n.COMMENTS_SECTION_TITLE(newComment ? 1 : 0)}</h3>
-            </EuiTitle>
+            </SectionHeader>
           }
           initialIsOpen={!!newComment}
           newCommentValue={newComment}
@@ -617,7 +640,7 @@ export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent
             />
           </>
         )}
-      </EuiFlyoutBody>
+      </FlyoutBodySection>
       <ExceptionFlyoutFooter
         listType={listType}
         isSubmitButtonDisabled={isSubmitButtonDisabled}
@@ -627,41 +650,6 @@ export const AddExceptionFlyoutContent = memo(function AddExceptionFlyoutContent
         handleCloseFlyout={handleCloseFlyout}
       />
       {showConfirmModal && confirmModal}
-    </>
+    </EuiFlyout>
   );
 });
-
-export const AddExceptionFlyout: React.FC<AddExceptionFlyoutProps> = memo(
-  function AddExceptionFlyout(props) {
-    const exceptionFlyoutTitleId = useGeneratedHtmlId({ prefix: 'exceptionFlyoutTitle' });
-
-    const listType: ExceptionListTypeEnum = props.isEndpointItem
-      ? ExceptionListTypeEnum.ENDPOINT
-      : props.sharedListToAddTo
-      ? ExceptionListTypeEnum.DETECTION
-      : ExceptionListTypeEnum.RULE_DEFAULT;
-
-    const flyoutAriaLabel =
-      listType === ExceptionListTypeEnum.ENDPOINT
-        ? headerI18n.ADD_ENDPOINT_EXCEPTION
-        : headerI18n.CREATE_RULE_EXCEPTION;
-
-    const handleCloseFlyout = useCallback(() => props.onCancel(false), [props]);
-
-    return (
-      <EuiFlyout
-        size="l"
-        onClose={handleCloseFlyout}
-        data-test-subj="addExceptionFlyout"
-        aria-label={flyoutAriaLabel}
-      >
-        <ExceptionFlyoutHeader
-          listType={listType}
-          titleId={exceptionFlyoutTitleId}
-          dataTestSubjId={'exceptionFlyoutTitle'}
-        />
-        <AddExceptionFlyoutContent {...props} />
-      </EuiFlyout>
-    );
-  }
-);

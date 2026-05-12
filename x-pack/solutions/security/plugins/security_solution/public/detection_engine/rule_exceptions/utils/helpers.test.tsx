@@ -56,8 +56,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const createUnsafeAlertData = (alertData: object): AlertData => alertData as unknown as AlertData;
-
 describe('Exception helpers', () => {
   beforeEach(() => {
     moment.tz.setDefault('UTC');
@@ -241,42 +239,6 @@ describe('Exception helpers', () => {
       };
       const result = retrieveAlertOsTypes(alertDataMock);
       const expected = ['windows'];
-      expect(result).toEqual(expected);
-    });
-
-    test('it should retrieve endpoint os type from single-value arrays', () => {
-      const alertDataMock = createUnsafeAlertData({
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        agent: { type: ['endpoint'] },
-        host: { os: { name: ['Windows'] } },
-      });
-      const result = retrieveAlertOsTypes(alertDataMock);
-      const expected = ['windows'];
-      expect(result).toEqual(expected);
-    });
-
-    test('it should retrieve non-endpoint os family from single-value arrays', () => {
-      const alertDataMock = createUnsafeAlertData({
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        agent: { type: ['filebeat'] },
-        host: { os: { family: ['macos'] } },
-      });
-      const result = retrieveAlertOsTypes(alertDataMock);
-      const expected = ['macos'];
-      expect(result).toEqual(expected);
-    });
-
-    test('it should return default os types if the os value is not a string', () => {
-      const alertDataMock = createUnsafeAlertData({
-        '@timestamp': '1234567890',
-        _id: 'test-id',
-        agent: { type: ['endpoint'] },
-        host: { os: { name: [{} as string] } },
-      });
-      const result = retrieveAlertOsTypes(alertDataMock);
-      const expected = ['windows', 'macos'];
       expect(result).toEqual(expected);
     });
 

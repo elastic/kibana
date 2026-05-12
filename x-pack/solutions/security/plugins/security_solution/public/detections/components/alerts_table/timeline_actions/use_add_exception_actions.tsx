@@ -9,10 +9,10 @@ import { useCallback, useMemo } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
+import { useUserData } from '../../user_info';
 import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 
 export interface UseExceptionActionProps {
   isEndpointAlert: boolean;
@@ -24,7 +24,7 @@ export const useAlertExceptionActions = ({
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
   const canEditExceptions = useUserPrivileges().rulesPrivileges.exceptions.edit;
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const [{ hasIndexWrite }] = useUserData();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const handleDetectionExceptionModal = useCallback(() => {
