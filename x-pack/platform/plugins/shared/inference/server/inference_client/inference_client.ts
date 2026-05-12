@@ -14,7 +14,7 @@ import type {
   InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { ActionsClientProvider } from '../types';
+import type { ActionsClientProvider, InvokeHookFn } from '../types';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -27,6 +27,7 @@ import { createCallbackManager } from './callback_manager';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
+import type { InferenceConfig } from '../config';
 
 export function createInferenceClient({
   request,
@@ -42,6 +43,8 @@ export function createInferenceClient({
   anonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  anonymizationHookInvoker,
+  config,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -56,6 +59,8 @@ export function createInferenceClient({
   anonymization?: InferenceAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  anonymizationHookInvoker?: InvokeHookFn | null;
+  config?: InferenceConfig;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -78,6 +83,8 @@ export function createInferenceClient({
     },
     tokenUsageLogger,
     isTokenUsageTrackingEnabled,
+    anonymizationHookInvoker,
+    config,
   });
 
   const chatComplete = createChatCompleteApi({

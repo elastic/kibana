@@ -65,6 +65,12 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   signal?: AbortSignal;
   timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  /**
+   * Optional session identifier for cross-turn anonymization determinism.
+   * When set, `metadata.anonymization.sessionId` is forwarded to every `chatComplete` call
+   * made by this model instance, enabling stable PII tokens within a conversation.
+   */
+  anonymizationSessionId?: string;
 }
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
@@ -98,6 +104,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   // @ts-ignore unused for now
   private readonly logger: Logger;
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
+  private readonly anonymizationSessionId?: string;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -111,6 +118,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
     this.telemetryMetadata = args.telemetryMetadata;
+    this.anonymizationSessionId = args.anonymizationSessionId;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
@@ -202,7 +210,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
       maxRetries: this.maxRetries,
-      metadata: { connectorTelemetry: this.telemetryMetadata },
+      metadata: {
+        connectorTelemetry: this.telemetryMetadata,
+        ...(this.anonymizationSessionId
+          ? { anonymization: { sessionId: this.anonymizationSessionId } }
+          : {}),
+      },
       timeout: options.timeout ?? this.timeout,
     };
   }

@@ -6,7 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
+import type {
+  ChatCompleteOptions,
+  AnonymizationRule,
+  Model,
+  ChatCompletionEvent,
+} from '@kbn/inference-common';
 import {
   createInferenceRequestError,
   InferenceTaskErrorCode,
@@ -18,12 +23,12 @@ import {
   MessageRole,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import type { Observable } from 'rxjs';
+import type { Observable, OperatorFunction } from 'rxjs';
 import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
-import type { ActionsClientProvider } from '../types';
+import type { ActionsClientProvider, InvokeHookFn } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
   InferenceConnectorAdapterChatCompleteEvent,
@@ -50,6 +55,9 @@ import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cac
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
+import type { InferenceConfig } from '../config';
+import { invokeBeforePromptSend } from './invoke_before_prompt_send';
+import { applyAfterCompletionHook } from './apply_after_completion_hook';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -64,6 +72,8 @@ interface CreateChatCompleteApiOptions {
   callbackManager?: InferenceCallbackManager;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  anonymizationHookInvoker?: InvokeHookFn | null;
+  config?: InferenceConfig;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -119,6 +129,8 @@ export function createChatCompleteCallbackApi({
   callbackManager,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  anonymizationHookInvoker,
+  config,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -147,6 +159,8 @@ export function createChatCompleteCallbackApi({
         anonymization,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
+        anonymizationHookInvoker,
+        config,
       })
     ).pipe(
       retryWithExponentialBackoff({
@@ -181,6 +195,8 @@ function createChatCompletePipeline({
   connectorId,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  anonymizationHookInvoker,
+  config,
 }: {
   resolve: () => Promise<ResolvedPipelineContext>;
   esClient: ElasticsearchClient;
@@ -195,7 +211,18 @@ function createChatCompletePipeline({
   connectorId: string;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  anonymizationHookInvoker?: InvokeHookFn | null;
+  config?: InferenceConfig;
 }) {
+  const hookPathEnabled =
+    config?.anonymization?.enabled === true && anonymizationHookInvoker != null;
+
+  if (config?.anonymization?.enabled === true && anonymizationHookInvoker == null) {
+    logger.warn(
+      'Anonymization hook path is enabled but workflowsExtensions invoker is unavailable; falling back to legacy anonymization path'
+    );
+  }
+
   return forkJoin({
     context: from(resolve()),
     anonymizationRules: from(anonymizationRulesPromise),
@@ -216,6 +243,67 @@ function createChatCompletePipeline({
       } = callback(callbackContext);
 
       const messages = sanitizeMessages(givenMessages);
+
+      if (hookPathEnabled) {
+        return from(
+          invokeBeforePromptSend({
+            anonymizationHookInvoker: anonymizationHookInvoker!,
+            config: config!,
+            logger,
+            metadata,
+            system,
+            messages,
+            anonymization,
+          })
+        ).pipe(
+          switchMap(({ hookSystem, hookMessages, sessionId, anonymizationContext }) => {
+            const spanModel = getSpanModel(modelName);
+
+            return withChatCompleteSpan(
+              {
+                system: hookSystem,
+                messages: hookMessages,
+                tools,
+                toolChoice,
+                ...(spanModel ? { model: spanModel } : {}),
+                ...metadata?.attributes,
+              },
+              () =>
+                chatComplete({
+                  system: hookSystem,
+                  messages: hookMessages,
+                  toolChoice,
+                  tools,
+                  temperature,
+                  logger,
+                  functionCalling,
+                  modelName,
+                  abortSignal,
+                  metadata,
+                  timeout,
+                  stream,
+                }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
+            ).pipe(
+              applyAfterCompletionHook({
+                anonymizationHookInvoker: anonymizationHookInvoker!,
+                config: config!,
+                logger,
+                sessionId,
+                anonymizationContext,
+              })
+            );
+          }),
+          buildTokenUsagePipe({
+            tokenUsageLogger,
+            isTokenUsageTrackingEnabled,
+            connectorId,
+            callbackContext,
+            modelName,
+            metadata,
+            logger,
+          })
+        );
+      }
 
       return from(
         prepareAnonymization({
@@ -255,8 +343,8 @@ function createChatCompletePipeline({
               ...(spanModel ? { model: spanModel } : {}),
               ...metadata?.attributes,
             },
-            () => {
-              return chatComplete({
+            () =>
+              chatComplete({
                 system: systemWithAnonymizationInstructions,
                 messages: preparedAnonymization.messages,
                 toolChoice,
@@ -269,28 +357,54 @@ function createChatCompletePipeline({
                 metadata,
                 timeout,
                 stream,
-              }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
-            }
+              }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
           ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
         }),
-        tokenUsageLogger
-          ? handleTokenUsageLogging({
-              tokenUsageLogger,
-              getContext: () =>
-                buildTokenUsageContext({
-                  connectorId,
-                  model: callbackContext.model,
-                  modelName,
-                  featureId: metadata?.connectorTelemetry?.pluginId,
-                  parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
-                }),
-              logger,
-              isEnabled: isTokenUsageTrackingEnabled,
-            })
-          : identity
+        buildTokenUsagePipe({
+          tokenUsageLogger,
+          isTokenUsageTrackingEnabled,
+          connectorId,
+          callbackContext,
+          modelName,
+          metadata,
+          logger,
+        })
       );
     })
   );
+}
+
+function buildTokenUsagePipe({
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
+  connectorId,
+  callbackContext,
+  modelName,
+  metadata,
+  logger,
+}: {
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  connectorId: string;
+  callbackContext: ChatCompleteCallbackContext;
+  modelName?: string;
+  metadata?: ChatCompleteOptions['metadata'];
+  logger: Logger;
+}): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> {
+  if (!tokenUsageLogger) return identity;
+  return handleTokenUsageLogging({
+    tokenUsageLogger,
+    getContext: () =>
+      buildTokenUsageContext({
+        connectorId,
+        model: callbackContext.model,
+        modelName,
+        featureId: metadata?.connectorTelemetry?.pluginId,
+        parentFeatureId: metadata?.connectorTelemetry?.aggregateBy,
+      }),
+    logger,
+    isEnabled: isTokenUsageTrackingEnabled,
+  });
 }
 
 function resolveAndCreatePipeline({
@@ -309,6 +423,8 @@ function resolveAndCreatePipeline({
   anonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  anonymizationHookInvoker,
+  config,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -325,6 +441,8 @@ function resolveAndCreatePipeline({
   anonymization?: InferenceAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  anonymizationHookInvoker?: InvokeHookFn | null;
+  config?: InferenceConfig;
 }) {
   return from(endpointIdCache.has(connectorId)).pipe(
     switchMap((isInferenceEndpoint) => {
@@ -436,6 +554,8 @@ function resolveAndCreatePipeline({
         connectorId,
         tokenUsageLogger,
         isTokenUsageTrackingEnabled,
+        anonymizationHookInvoker,
+        config,
       }).pipe(
         catchError((error) => {
           const is404 = error?.meta?.status === 404 || error?.statusCode === 404;

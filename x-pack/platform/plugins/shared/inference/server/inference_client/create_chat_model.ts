@@ -10,13 +10,14 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationRule, InferenceCallbacks } from '@kbn/inference-common';
-import type { ActionsClientProvider } from '../types';
+import type { ActionsClientProvider, InvokeHookFn } from '../types';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
+import type { InferenceConfig } from '../config';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
@@ -33,6 +34,8 @@ export interface CreateChatModelOptions {
   anonymization?: InferenceAnonymizationOptions;
   tokenUsageLogger?: TokenUsageLogger;
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
+  anonymizationHookInvoker?: InvokeHookFn | null;
+  config?: InferenceConfig;
 }
 
 export const createChatModel = async ({
@@ -50,6 +53,8 @@ export const createChatModel = async ({
   anonymization,
   tokenUsageLogger,
   isTokenUsageTrackingEnabled,
+  anonymizationHookInvoker,
+  config,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -64,6 +69,8 @@ export const createChatModel = async ({
     anonymization,
     tokenUsageLogger,
     isTokenUsageTrackingEnabled,
+    anonymizationHookInvoker,
+    config,
   });
   const connector = await getConnectorById({ connectorId, actions, request, esClient, logger });
   return new InferenceChatModel({

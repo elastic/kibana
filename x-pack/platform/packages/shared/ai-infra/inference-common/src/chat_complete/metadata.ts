@@ -39,4 +39,10 @@ export interface ChatCompleteAnonymizationMetadata {
   profileId?: string;
   replacementsId?: string;
   target?: ChatCompleteAnonymizationTarget;
+  /**
+   * Session identifier for cross-turn determinism in the workflow-driven
+   * anonymization path. When provided, all PII tokens in the same session
+   * are stable across turns (e.g. conversationId from Agent Builder).
+   */
+  sessionId?: string;
 }

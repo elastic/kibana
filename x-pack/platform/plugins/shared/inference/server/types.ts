@@ -35,9 +35,21 @@ import type {
   AnonymizationPluginStart,
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
+import type { HookResult } from '@kbn/workflows/server/types';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
+
+/**
+ * Function signature for invoking a synchronous workflow lifecycle hook.
+ * `capabilities` carries call-scoped objects (e.g. `{ anonymizationContext }`) that must
+ * not appear in the YAML workflow event payload.
+ */
+export type InvokeHookFn = (
+  triggerId: string,
+  payload: Record<string, unknown>,
+  capabilities?: Record<string, unknown>
+) => Promise<HookResult>;
 
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
@@ -47,6 +59,7 @@ export interface InferenceSetupDependencies {
 export interface InferenceStartDependencies {
   actions: ActionsPluginStart;
   anonymization?: AnonymizationPluginStart;
+  workflowsExtensions?: { invokeHook: InvokeHookFn };
 }
 
 /**
