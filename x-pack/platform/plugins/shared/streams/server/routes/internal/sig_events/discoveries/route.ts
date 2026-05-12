@@ -29,7 +29,7 @@ const discoverySortFromQuery = z
 const discoveriesSearchQuery = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
-  status: z.string().optional(),
+  kind: z.enum(['finding', 'clearance']).optional(),
   discovery_id: stringArrayFromQuery,
   exclude_discovery_id: stringArrayFromQuery,
   exclude_grouped: BooleanFromString.optional(),

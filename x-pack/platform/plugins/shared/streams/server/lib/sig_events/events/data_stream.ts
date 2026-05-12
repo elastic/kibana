@@ -33,7 +33,6 @@ export const eventsMappings = {
     }),
     summary: mappings.text(),
     root_cause: mappings.text(),
-    recommendations: mappings.text(),
   },
 } satisfies MappingsDefinition;
 

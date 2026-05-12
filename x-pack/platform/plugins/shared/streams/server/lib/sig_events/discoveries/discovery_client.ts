@@ -29,7 +29,7 @@ export type DiscoverySort =
   | 'criticality:desc';
 
 export interface DiscoveriesSearchOptions extends CommonSearchOptions {
-  status?: string;
+  kind?: string;
   discovery_id?: string[];
   exclude_discovery_id?: string[];
   exclude_grouped?: boolean;
@@ -40,8 +40,8 @@ export interface DiscoveriesSearchOptions extends CommonSearchOptions {
 const buildWhere = (options: DiscoveriesSearchOptions): LatestSourceWhereCondition | undefined => {
   let where: LatestSourceWhereCondition | undefined;
 
-  if (options.status) {
-    where = andWhere(where, esql.exp`${esql.col('status')} == ${esql.str(options.status)}`);
+  if (options.kind) {
+    where = andWhere(where, esql.exp`${esql.col('kind')} == ${esql.str(options.kind)}`);
   }
 
   if (options.discovery_id?.length) {

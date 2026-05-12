@@ -33,7 +33,6 @@ export const verdictsMappings = {
     root_cause: mappings.text(),
     verdict_summary: mappings.text(),
     assessment_note: mappings.text(),
-    recommendations: mappings.text(),
   },
 } satisfies MappingsDefinition;
 
