@@ -43,10 +43,6 @@ env:
   PR_NUMBER: &pr_number ${{ github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.issue.number || github.event.inputs.pr_number }}
 
-checkout:
-  - fetch-depth: 0
-    fetch: ["*"]
-
 runs-on: kibana
 timeout-minutes: 120
 
@@ -118,6 +114,18 @@ steps:
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
+  - name: Fetch backport refs
+    run: |
+      set -euo pipefail
+
+      source_sha="$(jq -r '.mergeCommit.oid // .mergeCommit // empty' /tmp/gh-aw/agent/pr-metadata.json)"
+      if [ -n "${source_sha}" ]; then
+        git fetch --no-tags --depth=2 origin "${source_sha}"
+      fi
+
+      jq -r '.versions[].branch' versions.json | while read -r branch; do
+        git fetch --no-tags --depth=1 origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+      done
 ---
 
 # Failed Backport Resolver
