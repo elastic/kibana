@@ -28,7 +28,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -50,7 +50,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-                "lineNumber": 24,
+                "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "Logger",
@@ -103,7 +103,7 @@
               "<Input, Output, Config>) => void"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -122,7 +122,7 @@
                   "<Input, Output, Config>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-                "lineNumber": 35,
+                "lineNumber": 36,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "PublicStepDefinitionOrLoader",
@@ -145,7 +145,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-            "lineNumber": 73,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -187,7 +187,7 @@
               "$strip>> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-            "lineNumber": 83,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -205,7 +205,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-                "lineNumber": 88,
+                "lineNumber": 94,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -229,7 +229,7 @@
               "(stepTypeId: string) => boolean"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-            "lineNumber": 92,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -247,7 +247,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-                "lineNumber": 97,
+                "lineNumber": 103,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -293,7 +293,7 @@
               "$strip>>[]"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/step_registry/step_registry.ts",
-            "lineNumber": 101,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -345,7 +345,7 @@
               "<EventSchema>) => void"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -364,7 +364,7 @@
                   "<EventSchema>"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-                "lineNumber": 28,
+                "lineNumber": 29,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "PublicTriggerDefinitionOrLoader",
@@ -419,7 +419,7 @@
               "$ZodTypeInternals<unknown, unknown>>> | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-            "lineNumber": 71,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -437,7 +437,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-                "lineNumber": 76,
+                "lineNumber": 83,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -461,7 +461,7 @@
               "(triggerId: string) => boolean"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-            "lineNumber": 80,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -479,7 +479,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-                "lineNumber": 85,
+                "lineNumber": 92,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -515,7 +515,7 @@
               "$ZodTypeInternals<unknown, unknown>>>[]"
             ],
             "path": "src/platform/plugins/shared/workflows_extensions/public/trigger_registry/trigger_registry.ts",
-            "lineNumber": 89,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

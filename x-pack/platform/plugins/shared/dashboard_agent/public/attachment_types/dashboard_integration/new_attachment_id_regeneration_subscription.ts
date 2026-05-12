@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, type Subscription } from 'rxjs';
+import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { IdGenerator } from '..';
@@ -21,8 +21,15 @@ export const createNewAttachmentIdRegenerationSubscription = ({
   agentBuilder,
   draftAttachmentId,
 }: NewAttachmentIdRegenerationSubscriptionParams): Subscription =>
-  agentBuilder.events.chat$.pipe(filter(isRoundCompleteEvent)).subscribe((event) => {
-    if (event.data.attachments?.some(({ id }) => id === draftAttachmentId.current)) {
-      draftAttachmentId.next();
-    }
-  });
+  agentBuilder.events.ui.activeConversation$
+    .pipe(
+      switchMap((conversation) =>
+        conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+      ),
+      filter(isRoundCompleteEvent)
+    )
+    .subscribe((event) => {
+      if (event.data.attachments?.some(({ id }) => id === draftAttachmentId.current)) {
+        draftAttachmentId.next();
+      }
+    });
