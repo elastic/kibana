@@ -48,7 +48,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await assertAlertsPageState({
         kuery: 'kibana.alert.evaluation.threshold > 75',
         // workflowStatus: 'Closed',
-        timeRange: '~ a month ago - ~ 10 days ago',
+        // Legacy picker humanises to "~ a month ago - ~ 10 days ago"; new
+        // picker formats each bound separately as "30 days ago → 10 days ago"
+        // (relative-to-relative ranges don't collapse to a "Last N …" label).
+        timeRange: /^~ a month ago - ~ 10 days ago$|^30 days ago → 10 days ago$/,
       });
     });
 
@@ -69,6 +72,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await assertAlertsPageState({
         kuery: '',
         // workflowStatus: 'Open',
+        // "Last 24 hours" is a preset in both pickers, so the label is identical.
         timeRange: 'Last 24 hours',
       });
     });
@@ -84,7 +88,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'alerts'
       );
 
-      expect(await observability.alerts.common.getTimeRange()).to.be('Last 10 days');
+      // Legacy shows "Last 10 days" (a built-in label); new picker prettifies to "-10d"
+      // since 10 days is not a registered preset.
+      expect(await observability.alerts.common.getTimeRange()).to.match(/^Last 10 days$|^-10d$/);
     });
 
     it('should set the shared time range', async () => {
@@ -96,13 +102,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const observabilityPageDateRange = await pageObjects.observability.getDatePickerRangeText();
 
-      expect(observabilityPageDateRange).to.be('Last 100 days');
+      // Overview still renders the legacy picker; new picker on alerts writes
+      // `now-100d/d` via roundRelativeTime, and EUI's prettyDuration on the
+      // legacy picker appends the "rounded to the day" suffix when /d is present.
+      expect(observabilityPageDateRange).to.match(/^Last 100 days( rounded to the day)?$/);
     });
 
     async function assertAlertsPageState(expected: {
       kuery: string;
       // workflowStatus: string;
-      timeRange: string;
+      timeRange: string | RegExp;
     }) {
       expect(await (await observability.alerts.common.getQueryBar()).getVisibleText()).to.be(
         expected.kuery
@@ -111,7 +120,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       //   expected.workflowStatus
       // );
       const timeRange = await observability.alerts.common.getTimeRange();
-      expect(timeRange).to.be(expected.timeRange);
+      if (expected.timeRange instanceof RegExp) {
+        expect(timeRange).to.match(expected.timeRange);
+      } else {
+        expect(timeRange).to.be(expected.timeRange);
+      }
     }
 
     async function setTimeRangeToXDaysAgo(numberOfDays: number) {
