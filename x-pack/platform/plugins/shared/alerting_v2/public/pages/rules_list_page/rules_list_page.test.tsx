@@ -35,7 +35,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    throw new Error(`Unexpected service token in test: ${String(token)}`);
+    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
 }));

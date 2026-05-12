@@ -34,7 +34,7 @@ import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_po
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
-import { CreateRulePanel } from '../../components/rule_create_options/create_rule_panel';
+import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -126,7 +126,7 @@ export const RulesListPage = () => {
                   key="create-rule"
                   fill
                   iconType="plusInCircle"
-                  href={basePath.prepend(paths.ruleSelector)}
+                  href={basePath.prepend(paths.ruleCreateOptions)}
                   data-test-subj="createRuleButton"
                 >
                   <FormattedMessage
@@ -164,7 +164,7 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {showEmptyState ? <CreateRulePanel /> : null}
+      {showEmptyState ? <RuleCreateOptionsPanel /> : null}
       {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">

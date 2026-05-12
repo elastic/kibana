@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CreateRulePanel } from './create_rule_panel';
+import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -23,11 +23,11 @@ jest.mock('@kbn/core-di-browser', () => ({
 const renderPanel = () =>
   render(
     <I18nProvider>
-      <CreateRulePanel />
+      <RuleCreateOptionsPanel />
     </I18nProvider>
   );
 
-describe('CreateRulePanel', () => {
+describe('RuleCreateOptionsPanel', () => {
   it('renders the welcome title', () => {
     renderPanel();
 

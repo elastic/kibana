@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
@@ -24,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { paths } from '../../constants';
 
-export const CreateRulePanel: React.FC = () => {
+export const RuleCreateOptionsPanel: React.FC = () => {
   const basePath = useService(CoreStart('http')).basePath;
   const { euiTheme } = useEuiTheme();
 
@@ -39,7 +38,7 @@ export const CreateRulePanel: React.FC = () => {
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              id="xpack.alertingV2.createRulePanel.welcomeTitle"
+              id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeTitle"
               defaultMessage="Welcome to the new Alerting experience"
             />
           </h2>
@@ -47,7 +46,7 @@ export const CreateRulePanel: React.FC = () => {
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued" textAlign="center">
           <FormattedMessage
-            id="xpack.alertingV2.createRulePanel.welcomeDescription"
+            id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeDescription"
             defaultMessage="Powerful ES|QL-driven rules and support for external alerts, it delivers consistent, high-quality alert data into a unified experience."
           />
         </EuiText>
@@ -60,11 +59,11 @@ export const CreateRulePanel: React.FC = () => {
               titleElement="h3"
               titleSize="xs"
               hasBorder={true}
-              title={i18n.translate('xpack.alertingV2.createRulePanel.createEsqlRuleTitle', {
+              title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.createEsqlRuleTitle', {
                 defaultMessage: 'Create ES|QL rule',
               })}
               description={i18n.translate(
-                'xpack.alertingV2.createRulePanel.createWithEsqlDescription',
+                'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
                 {
                   defaultMessage:
                     'Create as an ES|QL query with live preview. YAML editor available.',
@@ -77,7 +76,7 @@ export const CreateRulePanel: React.FC = () => {
           <EuiFlexItem>
             <EuiCard
               betaBadgeProps={{
-                label: i18n.translate('xpack.alertingV2.createRulePanel.comingSoonLabel', {
+                label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
                   defaultMessage: 'Coming soon',
                 }),
                 color: 'hollow',
@@ -86,11 +85,14 @@ export const CreateRulePanel: React.FC = () => {
               layout="horizontal"
               titleElement="h3"
               titleSize="xs"
-              title={i18n.translate('xpack.alertingV2.createRulePanel.createWithAiAgentTitle', {
-                defaultMessage: 'Create with AI Agent',
-              })}
+              title={i18n.translate(
+                'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
+                {
+                  defaultMessage: 'Create with AI Agent',
+                }
+              )}
               description={i18n.translate(
-                'xpack.alertingV2.createRulePanel.createWithAiAgentDescription',
+                'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
                 { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
               )}
               aria-disabled={true}
@@ -111,7 +113,7 @@ export const CreateRulePanel: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.alertingV2.createRulePanel.orDividerLabel"
+                id="xpack.alertingV2.ruleCreateOptionsPanel.orDividerLabel"
                 defaultMessage="or"
               />
             </EuiText>
@@ -124,18 +126,18 @@ export const CreateRulePanel: React.FC = () => {
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.alertingV2.createRulePanel.ruleBuilderSectionTitle"
+              id="xpack.alertingV2.ruleCreateOptionsPanel.ruleBuilderSectionTitle"
               defaultMessage="Start from a rule builder"
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiFlexGroup>
-          {/* TODO: Add the other rule builders here and change to the correct link */}
+          {/* TODO: Add the other rule builders here */}
           <EuiFlexItem>
             <EuiCard
               betaBadgeProps={{
-                label: i18n.translate('xpack.alertingV2.createRulePanel.comingSoonLabel', {
+                label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
                   defaultMessage: 'Coming soon',
                 }),
                 color: 'hollow',
@@ -144,11 +146,11 @@ export const CreateRulePanel: React.FC = () => {
               layout="horizontal"
               titleElement="h3"
               titleSize="xs"
-              title={i18n.translate('xpack.alertingV2.createRulePanel.thresholdAlertTitle', {
+              title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
                 defaultMessage: 'Threshold Alert',
               })}
               description={i18n.translate(
-                'xpack.alertingV2.createRulePanel.thresholdAlertDescription',
+                'xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertDescription',
                 {
                   defaultMessage:
                     'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',

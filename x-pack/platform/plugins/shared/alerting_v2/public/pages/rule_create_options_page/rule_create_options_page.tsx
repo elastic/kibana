@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { CreateRulePanel } from '../../components/rule_create_options/create_rule_panel';
+import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 
 export const RuleCreateOptionsPage = () => {
   useBreadcrumbs('rule_create_options');
@@ -19,13 +19,13 @@ export const RuleCreateOptionsPage = () => {
       <EuiPageHeader
         pageTitle={
           <FormattedMessage
-            id="xpack.alertingV2.ruleMethodSelector.pageTitle"
+            id="xpack.alertingV2.ruleCreateOptions.pageTitle"
             defaultMessage="Rules"
           />
         }
       />
       <EuiSpacer size="m" />
-      <CreateRulePanel />
+      <RuleCreateOptionsPanel />
     </div>
   );
 };
