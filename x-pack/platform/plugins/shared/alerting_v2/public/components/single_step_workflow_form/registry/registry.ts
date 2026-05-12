@@ -24,7 +24,7 @@ export const SINGLE_STEP_WORKFLOW_TYPES: readonly SingleStepWorkflowType[] = [
       defaultMessage: 'Email',
     }),
     description: i18n.translate('xpack.alertingV2.singleStepWorkflow.type.email.description', {
-      defaultMessage: 'Send an email when this policy dispatches.',
+      defaultMessage: 'Send an email when this policy dispatches an active alert episode.',
     }),
     iconType: 'email',
     connectorTypeId: '.email',
@@ -36,7 +36,7 @@ export const SINGLE_STEP_WORKFLOW_TYPES: readonly SingleStepWorkflowType[] = [
       defaultMessage: 'Slack',
     }),
     description: i18n.translate('xpack.alertingV2.singleStepWorkflow.type.slack.description', {
-      defaultMessage: 'Post a Slack message when this policy dispatches.',
+      defaultMessage: 'Post a Slack message when this policy dispatches an active alert episode.',
     }),
     iconType: 'logoSlack',
     connectorTypeId: '.slack',
