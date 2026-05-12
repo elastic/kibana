@@ -88,23 +88,28 @@ import { NotificationTypeFilter } from '@kbn/core-notifications-browser-componen
 | `labels` | `Record<string, string>` | Optional. Missing entries render the typeId itself. |
 | `onChange` | `(next: ReadonlySet<string>) => void` | Required. Called on each chip toggle and on Clear all. |
 
-#### `NotificationReadStateFilter`
+#### `NotificationStateFilter`
 
-Single-select filter group for read state. Replaces the older All/Unread/Read
-tabs above the event list.
+Single-select filter group for the events list. Options:
+
+- **All** — no constraint
+- **Unread** — events where `isRead` is `false`
+- **Pinned** — events where `isPinned` is `true`
+
+Replaces the older All/Unread/Read tabs above the event list.
 
 ```tsx
 import {
-  NotificationReadStateFilter,
-  type NotificationReadState,
+  NotificationStateFilter,
+  type NotificationStateFilterValue,
 } from '@kbn/core-notifications-browser-components';
 
-<NotificationReadStateFilter value={readFilter} onChange={setReadFilter} />
+<NotificationStateFilter value={stateFilter} onChange={setStateFilter} />
 ```
 
 | Prop | Type | Notes |
 | :--- | :--- | :--- |
-| `value` | `'all' \| 'unread' \| 'read'` | Required. Currently selected option. |
+| `value` | `'all' \| 'unread' \| 'pinned'` | Required. Currently selected option. |
 | `onChange` | `(next) => void` | Required. |
 
 #### `NotificationSpacesFilter`
@@ -134,7 +139,7 @@ Browse to **Notifications →**:
 
 - **Event** — base, `Pinned`, `PinnedAndRead`.
 - **TypeFilter** — `Empty`, `OneSelected`, `AllSelected`, `NoLabelsKnown`.
-- **ReadStateFilter** — `All`, `Unread`, `Read`.
+- **StateFilter** — `All`, `Unread`, `Pinned`.
 - **SpacesFilter** — `Off`, `On`.
 
 ## Internationalization
@@ -144,4 +149,4 @@ All strings use `i18n.translate` from `@kbn/i18n`:
 - Event UI: `core.notifications.event*` (`eventMeta.*`, `eventMessages.*`,
   `eventReadButton.*`, `eventReadIcon.*`, `eventPinButton.*`).
 - Filter UI: `core.notifications.filters.*` (`filters.types.*`,
-  `filters.readState.*`, `filters.spaces.*`).
+  `filters.state.*`, `filters.spaces.*`).

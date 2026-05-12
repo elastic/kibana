@@ -25,9 +25,9 @@ import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
 import {
   NotificationEvent,
-  NotificationReadStateFilter,
-  type NotificationReadState,
   NotificationSpacesFilter,
+  NotificationStateFilter,
+  type NotificationStateFilterValue,
   NotificationTypeFilter,
 } from '@kbn/core-notifications-browser-components';
 import {
@@ -98,7 +98,7 @@ export function NotificationCenterApp({
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<ReadonlySet<string>>(new Set());
-  const [readFilter, setReadFilter] = useState<NotificationReadState>('all');
+  const [stateFilter, setStateFilter] = useState<NotificationStateFilterValue>('all');
   const [currentSpaceOnly, setCurrentSpaceOnly] = useState(false);
 
   const { typeIds, labels } = useMemo(() => deriveTypeIdMeta(all), [all]);
@@ -108,14 +108,14 @@ export function NotificationCenterApp({
       if (selectedTypes.size > 0 && (!event.typeId || !selectedTypes.has(event.typeId))) {
         return false;
       }
-      if (readFilter === 'unread' && event.isRead) return false;
-      if (readFilter === 'read' && !event.isRead) return false;
+      if (stateFilter === 'unread' && event.isRead) return false;
+      if (stateFilter === 'pinned' && !event.isPinned) return false;
       if (currentSpaceOnly && activeSpaceId && event.spaceId !== activeSpaceId) {
         return false;
       }
       return true;
     });
-  }, [all, selectedTypes, readFilter, currentSpaceOnly, activeSpaceId]);
+  }, [all, selectedTypes, stateFilter, currentSpaceOnly, activeSpaceId]);
 
   const markAllAsRead = () => {
     unread.forEach((e) => events.markAsRead(e.id, true));
@@ -170,7 +170,7 @@ export function NotificationCenterApp({
             onChange={setSelectedTypes}
           />
           <EuiSpacer size="m" />
-          <NotificationReadStateFilter value={readFilter} onChange={setReadFilter} />
+          <NotificationStateFilter value={stateFilter} onChange={setStateFilter} />
           {spacesEnabled && (
             <>
               <EuiHorizontalRule margin="m" />

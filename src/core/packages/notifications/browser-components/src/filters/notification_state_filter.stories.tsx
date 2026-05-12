@@ -11,31 +11,31 @@ import React, { useState } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { EuiPanel } from '@elastic/eui';
 import {
-  NotificationReadStateFilter,
-  type NotificationReadState,
-} from './notification_read_state_filter';
+  NotificationStateFilter,
+  type NotificationStateFilterValue,
+} from './notification_state_filter';
 
 const meta: Meta = {
-  title: 'Notifications/ReadStateFilter',
-  component: NotificationReadStateFilter,
+  title: 'Notifications/StateFilter',
+  component: NotificationStateFilter,
 };
 
 export default meta;
 
-const Template: StoryFn<{ initial: NotificationReadState }> = ({ initial }) => {
-  const [value, setValue] = useState<NotificationReadState>(initial);
+const Template: StoryFn<{ initial: NotificationStateFilterValue }> = ({ initial }) => {
+  const [value, setValue] = useState<NotificationStateFilterValue>(initial);
   return (
     <EuiPanel paddingSize="m" hasShadow style={{ maxWidth: 540 }}>
-      <NotificationReadStateFilter value={value} onChange={setValue} />
+      <NotificationStateFilter value={value} onChange={setValue} />
     </EuiPanel>
   );
 };
 
-export const All: StoryFn<{ initial: NotificationReadState }> = Template.bind({});
+export const All: StoryFn<{ initial: NotificationStateFilterValue }> = Template.bind({});
 All.args = { initial: 'all' };
 
-export const Unread: StoryFn<{ initial: NotificationReadState }> = Template.bind({});
+export const Unread: StoryFn<{ initial: NotificationStateFilterValue }> = Template.bind({});
 Unread.args = { initial: 'unread' };
 
-export const Read: StoryFn<{ initial: NotificationReadState }> = Template.bind({});
-Read.args = { initial: 'read' };
+export const Pinned: StoryFn<{ initial: NotificationStateFilterValue }> = Template.bind({});
+Pinned.args = { initial: 'pinned' };
