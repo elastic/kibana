@@ -10,14 +10,11 @@
  *
  * Part of the `pci-compliance-autonomous` skill's tool bundle. Registered under a distinct
  * ID (`core.security.pci_autonomous_scope_discovery`) so the autonomous skill never sees the
- * hand-written variant's tool surface — full skill+tool isolation per the autonomous
- * architect blueprint.
+ * hand-written variant's tool surface.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5, v6 deep autonomy): scope-rule heuristics
- * (`SCOPE_RULES`, `ALL_FIELD_HINTS`, `detectCategories`, `calculateCoverage`,
- * `fetchFieldsByIndex`) are authored locally in this file rather than imported from the
- * hand-written variant; the PCI requirement catalog is the autonomously-authored
- * `pci_autonomous_requirements.ts`. The CI test
+ * Scope-rule heuristics (`SCOPE_RULES`, `ALL_FIELD_HINTS`, `detectCategories`,
+ * `calculateCoverage`, `fetchFieldsByIndex`) are authored locally in this file rather than
+ * imported from the hand-written variant. The CI test
  * `pci_autonomous_modules_no_handwritten_imports.test.ts` enforces zero imports from
  * `pci_compliance_*` across the whole `pci_autonomous_tools/` tree.
  */
@@ -32,7 +29,7 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import { securityTool } from '../constants';
 import {
   pciAutonomousIndexPatternSchema,
-  buildAutonomousScopeClaim,
+  buildAutonomousDiscoveryClaim,
 } from './pci_autonomous_schemas';
 
 const pciScopeType = z.enum([
@@ -115,6 +112,32 @@ const ALL_FIELD_HINTS = Array.from(
 
 const MAX_INDICES_INSPECTED = 200;
 
+/**
+ * Structured warning surfaced in the tool's `dataGaps` payload when a
+ * downstream cluster call fails or returns an unexpected shape. Lets the
+ * agent (and the auditor reading the trace) distinguish "no indices match"
+ * from "the inventory was incomplete because Elasticsearch rejected our
+ * call". Earlier versions silently swallowed those errors.
+ */
+interface DiscoveryDataGap {
+  kind: 'cat_indices_failed' | 'field_caps_failed' | 'cat_indices_unexpected_shape';
+  message: string;
+  details?: string[];
+}
+
+/**
+ * Runtime guard for `cat.indices` responses. The Elasticsearch client typings
+ * are wide (`CatIndicesIndicesRecord[]`) and tolerate undefined fields, so a
+ * downstream protocol break would otherwise blow up with an opaque
+ * `TypeError`. Narrowing here turns "shape changed upstream" into a
+ * surfaced dataGap.
+ */
+const CAT_INDICES_RESPONSE_SCHEMA = z.array(
+  z.object({
+    index: z.string().min(1).optional(),
+  })
+);
+
 const detectCategories = (index: string, fields: Set<string>): ScopeCategory[] => {
   const lowerIndex = index.toLowerCase();
   return (Object.keys(SCOPE_RULES) as Array<Exclude<ScopeCategory, 'all'>>).filter((category) => {
@@ -131,13 +154,18 @@ const calculateCoverage = (fields: Set<string>): number => {
   return Math.round((present / ALL_FIELD_HINTS.length) * 100);
 };
 
+interface FieldsByIndexResult {
+  byIndex: Map<string, Set<string>>;
+  dataGap?: DiscoveryDataGap;
+}
+
 const fetchFieldsByIndex = async (
   indices: string[],
   esClient: ElasticsearchClient
-): Promise<Map<string, Set<string>>> => {
+): Promise<FieldsByIndexResult> => {
   const byIndex = new Map<string, Set<string>>();
   for (const idx of indices) byIndex.set(idx, new Set<string>());
-  if (indices.length === 0) return byIndex;
+  if (indices.length === 0) return { byIndex };
   try {
     const response = await esClient.fieldCaps({
       index: indices,
@@ -163,10 +191,65 @@ const fetchFieldsByIndex = async (
         }
       }
     }
-  } catch {
-    // best-effort
+  } catch (error) {
+    return {
+      byIndex,
+      dataGap: {
+        kind: 'field_caps_failed',
+        message: 'Elasticsearch field_caps call failed; ECS coverage estimates may be incomplete.',
+        details: [error instanceof Error ? error.message : String(error)],
+      },
+    };
   }
-  return byIndex;
+  return { byIndex };
+};
+
+interface CatIndicesResult {
+  indices: string[];
+  dataGap?: DiscoveryDataGap;
+}
+
+/**
+ * Wrap `cat.indices` so a network/parse/shape failure becomes a structured
+ * dataGap on the tool payload instead of an uncaught exception or a silent
+ * empty list. Returns whatever indices the call did manage to surface.
+ */
+const fetchIndices = async (
+  esClient: ElasticsearchClient,
+  catArgs: Parameters<ElasticsearchClient['cat']['indices']>[0]
+): Promise<CatIndicesResult> => {
+  try {
+    const raw = await esClient.cat.indices({
+      ...catArgs,
+      format: 'json',
+      h: ['index'],
+    });
+    const parsed = CAT_INDICES_RESPONSE_SCHEMA.safeParse(raw);
+    if (!parsed.success) {
+      return {
+        indices: [],
+        dataGap: {
+          kind: 'cat_indices_unexpected_shape',
+          message: 'cat.indices returned a payload that did not match the expected shape.',
+          details: parsed.error.issues.slice(0, 5).map((i) => `${i.path.join('.')}: ${i.message}`),
+        },
+      };
+    }
+    const indices: string[] = [];
+    for (const row of parsed.data) {
+      if (row.index) indices.push(row.index);
+    }
+    return { indices };
+  } catch (error) {
+    return {
+      indices: [],
+      dataGap: {
+        kind: 'cat_indices_failed',
+        message: 'Elasticsearch cat.indices call failed; index inventory is incomplete.',
+        details: [error instanceof Error ? error.message : String(error)],
+      },
+    };
+  }
 };
 
 export const pciAutonomousScopeDiscoveryTool = (
@@ -179,8 +262,9 @@ export const pciAutonomousScopeDiscoveryTool = (
     description:
       'Autonomous-variant PCI scope discovery. Inventory PCI-relevant indices and classify them ' +
       'by scope area (network, identity, endpoint, cloud, application, vulnerability). Returns a ' +
-      'scopeClaim payload that is the provenance record for every check that follows. Call this ' +
-      'tool first in the autonomous PCI workflow before any compliance check or report.',
+      'discoveryClaim payload (point-in-time inventory snapshot) plus a dataGaps array surfacing ' +
+      'any cluster errors that limited inventory completeness. Call this tool first in the ' +
+      'autonomous PCI workflow before any compliance check or report.',
     schema: pciAutonomousScopeDiscoverySchema,
     availability: {
       cacheMode: 'space',
@@ -189,27 +273,22 @@ export const pciAutonomousScopeDiscoveryTool = (
       },
     },
     handler: async ({ scopeType = 'all', customIndices }, { esClient }) => {
-      const indicesResponse = (await esClient.asCurrentUser.cat.indices({
-        format: 'json',
-        h: ['index'],
-        expand_wildcards: 'all',
-      })) as Array<{ index: string }>;
+      const dataGaps: DiscoveryDataGap[] = [];
 
-      const indexSet = new Set<string>();
-      for (const { index } of indicesResponse) {
-        if (index) indexSet.add(index);
-      }
+      const baseInventory = await fetchIndices(esClient.asCurrentUser, {
+        expand_wildcards: 'all',
+      });
+      if (baseInventory.dataGap) dataGaps.push(baseInventory.dataGap);
+
+      const indexSet = new Set<string>(baseInventory.indices);
       for (const customIndex of customIndices ?? []) {
         if (customIndex.includes('*') || customIndex.includes('?')) {
-          const resolved = (await esClient.asCurrentUser.cat.indices({
+          const resolved = await fetchIndices(esClient.asCurrentUser, {
             index: customIndex,
-            format: 'json',
-            h: ['index'],
             expand_wildcards: 'all',
-          })) as Array<{ index?: string }>;
-          for (const { index } of resolved) {
-            if (index) indexSet.add(index);
-          }
+          });
+          if (resolved.dataGap) dataGaps.push(resolved.dataGap);
+          for (const idx of resolved.indices) indexSet.add(idx);
         } else {
           indexSet.add(customIndex);
         }
@@ -218,7 +297,11 @@ export const pciAutonomousScopeDiscoveryTool = (
       const indices = Array.from(indexSet).slice(0, MAX_INDICES_INSPECTED);
       const truncated = indexSet.size > MAX_INDICES_INSPECTED;
 
-      const fieldsByIndex = await fetchFieldsByIndex(indices, esClient.asCurrentUser);
+      const { byIndex: fieldsByIndex, dataGap: fieldCapsGap } = await fetchFieldsByIndex(
+        indices,
+        esClient.asCurrentUser
+      );
+      if (fieldCapsGap) dataGaps.push(fieldCapsGap);
 
       const discovered: DiscoveredIndex[] = [];
       for (const index of indices) {
@@ -236,12 +319,10 @@ export const pciAutonomousScopeDiscoveryTool = (
         }
       }
 
-      const scopeClaim = buildAutonomousScopeClaim({
+      const discoveryClaim = buildAutonomousDiscoveryClaim({
         indices: discovered.map((d) => d.index),
-        from: new Date(0).toISOString(),
-        to: new Date().toISOString(),
-        requirementsEvaluated: [],
-        requiredFieldsChecked: ALL_FIELD_HINTS,
+        discoveredAt: new Date().toISOString(),
+        fieldHintsInspected: ALL_FIELD_HINTS,
       });
 
       return {
@@ -254,7 +335,8 @@ export const pciAutonomousScopeDiscoveryTool = (
               indicesTruncated: truncated,
               matchedIndices: discovered.length,
               discovered,
-              scopeClaim,
+              dataGaps,
+              discoveryClaim,
             },
           },
         ],

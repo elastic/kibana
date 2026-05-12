@@ -9,11 +9,11 @@
  * CI lockdown for the autonomous PCI tool tree.
  *
  * Asserts that **no source file under `pci_autonomous_tools/`** imports from
- * any of the hand-written sibling's surfaces. The deep-autonomy guarantee
- * documented in `comparison.html` §1.5 is that the autonomous variant
- * authors BOTH the agent-facing surface (tools + skill content) AND the
- * underlying domain engine independently — so the deny-list spans the full
- * hand-written PCI tree, not just the three engine modules:
+ * any of the hand-written sibling's surfaces. The deep-autonomy guarantee is
+ * that the autonomous variant authors BOTH the agent-facing surface (tools +
+ * skill content) AND the underlying domain engine independently — so the
+ * deny-list spans the full hand-written PCI tree, not just the three engine
+ * modules:
  *
  *   Hand-written tools (sibling of `pci_autonomous_tools/`):
  *     - pci_compliance_tool.ts            (the orchestrator tool)

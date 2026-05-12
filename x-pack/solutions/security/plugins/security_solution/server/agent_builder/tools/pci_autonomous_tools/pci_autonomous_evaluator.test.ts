@@ -164,7 +164,7 @@ describe('evaluateAutonomousRequirement — pipeline branches', () => {
     ]);
   });
 
-  it('verify_presence: returns GREEN when the coverage query yields rows', async () => {
+  it('verify_presence (no violation query): returns GREEN + MEDIUM via the coverage stage', async () => {
     mockExecuteEsql.mockResolvedValue({
       columns: [{ name: 'observed_events', type: 'long' }],
       values: [[42]],
@@ -176,9 +176,16 @@ describe('evaluateAutonomousRequirement — pipeline branches', () => {
       esClient: createEsClient(),
     });
 
+    // 8.3.6 is `verify_presence` and ships **no** dedicated violation query.
+    // Stage 1 (violation) skips on the missing query, Stage 2 (coverage)
+    // sees count > 0, and the lookup at the coverage stage downgrades the
+    // confidence to MEDIUM because no violation query exists to corroborate
+    // the telemetry-observed signal. Pinning the assertion to MEDIUM (not a
+    // ['HIGH','MEDIUM'] union) makes the test fail if a regression ever
+    // unifies the verify_presence path and erases the corroboration
+    // distinction.
     expect(result.status).toBe('GREEN');
-    // 8.3.6 has no `violation` query → MEDIUM confidence per the evaluator's lookup
-    expect(['HIGH', 'MEDIUM']).toContain(result.confidence);
+    expect(result.confidence).toBe('MEDIUM');
     expect(result.score).toBeGreaterThan(0);
   });
 

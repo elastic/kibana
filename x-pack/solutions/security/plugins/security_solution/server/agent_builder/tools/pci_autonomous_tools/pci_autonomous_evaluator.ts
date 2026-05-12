@@ -8,40 +8,31 @@
 /**
  * Autonomously-authored PCI compliance evaluator.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5):
- *   This module is authored from scratch — it has zero imports from the hand-
- *   written sibling `pci_compliance_evaluator.ts` and only depends on the
- *   autonomous-side schemas + requirement catalog. The CI test
- *   `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in.
+ * Zero imports from the hand-written sibling `pci_compliance_evaluator.ts`;
+ * depends only on the autonomous-side schemas + requirement catalog. The CI
+ * test `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in.
  *
- * Independent design choices vs the hand-written sibling:
+ * Notable shape choices:
  *
- *   1. Composable pipeline, not nested try/catch — the hand-written sibling
- *      runs a 3-layer pyramid (violation try → coverage try → preflight try)
- *      where each layer mutates shared state. This module exposes the same
- *      logical pipeline as a sequence of small, pure-ish functions that each
- *      return a discriminated `EvaluationStep` result. The orchestrator just
- *      walks them and returns the first conclusive verdict.
+ *   1. Composable pipeline. The evaluator exposes its logical pipeline
+ *      (violation → coverage → field-caps preflight) as a sequence of small
+ *      functions that each return a discriminated `EvaluationStep` result.
+ *      The orchestrator walks them and returns the first conclusive verdict.
  *
- *   2. Explicit lookup table for status → score, not multiplication. The
- *      hand-written sibling multiplies a `baseScore` by a `confidenceWeight`,
- *      which collapses (GREEN, LOW) and (AMBER, HIGH) to the same number (50).
- *      This module uses a 5×4 lookup table so every (status, confidence) pair
- *      has an individually-tunable score and no two pairs collide unless that
- *      is intentional.
+ *   2. Explicit lookup table for (status, confidence) → score. Every pair has
+ *      an individually-tunable cell so no two pairs collide unless that is
+ *      intentional.
  *
- *   3. Field-caps preflight returns a discriminated union covering all three
- *      cases (`fully_covered`, `partially_covered`, `unmappable`) explicitly
- *      rather than encoding cases via confidence-level strings.
+ *   3. Field-caps preflight returns a discriminated union over the three
+ *      cases (`fully_covered`, `partially_covered`, `unmappable`) plus an
+ *      explicit `lookup_failed` for cluster errors.
  *
- *   4. Concurrency runner preserves order via index keying and uses a manual
- *      ring rather than the `Promise.race(new Set())` pattern the hand-written
- *      sibling uses. Equivalent semantics; different implementation.
+ *   4. Concurrency runner preserves order via index keying using a manual
+ *      ring rather than the `Promise.race(new Set())` pattern.
  *
- *   5. Different error swallowing — coverage / violation query failures are
- *      surfaced as structured `dataGap` entries with the underlying error
- *      message rather than `caveats` strings. Auditors can then route on the
- *      gap type instead of grepping caveat text.
+ *   5. Errors are surfaced as structured `dataGap` entries with the underlying
+ *      error message rather than `caveats` strings. Auditors can route on the
+ *      gap kind instead of grepping caveat text.
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -54,6 +45,7 @@ import type {
 import {
   AUTONOMOUS_PCI_REQUIREMENTS,
   buildAutonomousTimeWindowParams,
+  getAutonomousTimeRangeForCheck,
 } from './pci_autonomous_requirements';
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -125,7 +117,6 @@ const SCORE_TABLE: Record<
   GREEN: { HIGH: 100, MEDIUM: 80, LOW: 60, NOT_ASSESSABLE: 50 },
   AMBER: { HIGH: 55, MEDIUM: 45, LOW: 35, NOT_ASSESSABLE: 30 },
   RED: { HIGH: 0, MEDIUM: 10, LOW: 20, NOT_ASSESSABLE: 25 },
-  NOT_APPLICABLE: { HIGH: 100, MEDIUM: 100, LOW: 100, NOT_ASSESSABLE: 100 },
   NOT_ASSESSABLE: { HIGH: 25, MEDIUM: 25, LOW: 25, NOT_ASSESSABLE: 25 },
 };
 
@@ -471,6 +462,16 @@ function preflightToVerdict(
 // Result composition
 // ──────────────────────────────────────────────────────────────────────────
 
+// Helper for exhaustive `switch` checks. Throws at runtime if a new
+// AutonomousComplianceStatus value is added to the union but the switch is
+// not updated. The `value: never` parameter makes the compiler reject any
+// reachable call site, locking the exhaustiveness check in at compile time;
+// the runtime fallback is a defensive backstop for callers that defeat the
+// type system (e.g. JSON-shaped inputs).
+const assertNever = (value: never): never => {
+  throw new Error(`Unhandled AutonomousComplianceStatus value: ${String(value)}`);
+};
+
 const statusToHumanLabel = (status: AutonomousComplianceStatus): string => {
   switch (status) {
     case 'GREEN':
@@ -481,10 +482,8 @@ const statusToHumanLabel = (status: AutonomousComplianceStatus): string => {
       return 'partially assessable';
     case 'NOT_ASSESSABLE':
       return 'not assessable';
-    case 'NOT_APPLICABLE':
-      return 'not applicable';
     default:
-      return 'unknown';
+      return assertNever(status);
   }
 };
 
@@ -656,3 +655,113 @@ export async function runAutonomousWithConcurrency<T>(
   if (firstError !== undefined) throw firstError;
   return results;
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Shared orchestration helpers
+// ──────────────────────────────────────────────────────────────────────────
+//
+// Both PCI tools (`pci_autonomous_compliance_check`, `pci_autonomous_scorecard_report`)
+// follow the same pattern: build a task list of single-requirement evaluations,
+// run them with bounded concurrency, then derive a `requiredFieldsChecked` set
+// and a `resolvedTimeRange` for the resulting ScopeClaim. The helpers below
+// keep that orchestration in one place so the two tools stay aligned and a
+// future autonomous-tool author does not need to re-derive any of it.
+
+export interface AutonomousEvaluationPackArgs {
+  requirementIds: string[];
+  indexPattern: string;
+  timeRange?: { from: string; to: string };
+  includeEvidence: boolean;
+  esClient: ElasticsearchClient;
+}
+
+export interface AutonomousEvaluationPack {
+  rows: AutonomousEvaluatedRequirement[];
+  requiredFieldsChecked: string[];
+  resolvedTimeRange: { from: string; to: string };
+}
+
+/**
+ * Run every requirement in `requirementIds` through the autonomous evaluator
+ * under the configured concurrency cap and return the rows plus the supporting
+ * payload pieces (deduped `requiredFieldsChecked`, an envelope time range that
+ * covers every per-requirement default lookback when no user range was given).
+ */
+export const runAutonomousPciEvaluationPack = async ({
+  requirementIds,
+  indexPattern,
+  timeRange,
+  includeEvidence,
+  esClient,
+}: AutonomousEvaluationPackArgs): Promise<AutonomousEvaluationPack> => {
+  const tasks = requirementIds.map((reqId) => async () => {
+    const { from, to } = getAutonomousTimeRangeForCheck(reqId, timeRange);
+    return evaluateAutonomousRequirement({
+      requirementId: reqId,
+      indexPattern,
+      from,
+      to,
+      includeEvidence,
+      esClient,
+    });
+  });
+
+  const rows = await runAutonomousWithConcurrency(tasks, AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY);
+
+  const requiredFieldsChecked = Array.from(
+    new Set(requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? []))
+  );
+
+  const resolvedTimeRange =
+    timeRange ??
+    (() => {
+      const ranges = requirementIds.map((id) => getAutonomousTimeRangeForCheck(id));
+      const from = ranges.reduce(
+        (earliest, r) => (r.from < earliest ? r.from : earliest),
+        ranges[0].from
+      );
+      const to = ranges.reduce((latest, r) => (r.to > latest ? r.to : latest), ranges[0].to);
+      return { from, to };
+    })();
+
+  return { rows, requiredFieldsChecked, resolvedTimeRange };
+};
+
+/**
+ * Status-count rollup. Severity-based: any RED ⇒ RED; any AMBER or
+ * NOT_ASSESSABLE ⇒ AMBER; else GREEN. Both the check tool and the scorecard
+ * tool use this so a single posture verdict is reported regardless of which
+ * tool the agent calls.
+ */
+export const rollupAutonomousOverallStatus = (
+  rows: AutonomousEvaluatedRequirement[]
+): AutonomousComplianceStatus => {
+  const counts = rows.reduce<Partial<Record<AutonomousComplianceStatus, number>>>((acc, r) => {
+    acc[r.status] = (acc[r.status] ?? 0) + 1;
+    return acc;
+  }, {});
+  if ((counts.RED ?? 0) > 0) return 'RED';
+  if ((counts.AMBER ?? 0) > 0 || (counts.NOT_ASSESSABLE ?? 0) > 0) return 'AMBER';
+  return 'GREEN';
+};
+
+/**
+ * Majority-class confidence rollup. Both tools use this so the same input
+ * rows produce the same confidence label.
+ */
+export const rollupAutonomousConfidence = (
+  rows: AutonomousEvaluatedRequirement[]
+): AutonomousComplianceConfidence => {
+  if (rows.length === 0) return 'NOT_ASSESSABLE';
+  const counts = rows.reduce<Partial<Record<AutonomousComplianceConfidence, number>>>(
+    (acc, r) => {
+      acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
+  if ((counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'NOT_ASSESSABLE';
+  if ((counts.LOW ?? 0) + (counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'LOW';
+  if ((counts.HIGH ?? 0) >= rows.length / 2) return 'HIGH';
+  return 'MEDIUM';
+};

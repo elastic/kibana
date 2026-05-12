@@ -8,34 +8,28 @@
 /**
  * Autonomously-architected PCI DSS scorecard report tool.
  *
- * Sibling of `pci_autonomous_compliance_check`. The autonomous architect's blueprint kept
- * "produce a per-requirement scorecard / executive roll-up" as a tool distinct from
- * "produce per-requirement findings with evidence" — the argument being that scorecard
- * production has different defaults (format depth, recommendations, no per-finding ES|QL
- * evidence) and the LLM routes more reliably between two narrow tools than one mode-
- * parameterised one.
+ * Sibling of `pci_autonomous_compliance_check`. This tool returns an executive roll-up
+ * across all 12 requirements (numeric score plus status counts); the check tool returns
+ * per-requirement findings with ES|QL evidence. Both share the underlying evaluator
+ * orchestration via {@link runAutonomousPciEvaluationPack} so the two surfaces stay
+ * aligned and report the same severity-based posture.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5): this tool now imports only from the
- * autonomously-authored engine modules (`pci_autonomous_requirements`,
- * `pci_autonomous_evaluator`, `pci_autonomous_schemas`). It has ZERO imports from the
- * hand-written sibling's `pci_compliance_*` modules.
+ * Imports only from the autonomously-authored engine modules
+ * (`pci_autonomous_requirements`, `pci_autonomous_evaluator`,
+ * `pci_autonomous_schemas`). Zero imports from the hand-written sibling's
+ * `pci_compliance_*` modules.
  */
 
 import { z } from '@kbn/zod';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
 import {
-  type AutonomousComplianceStatus,
-  type AutonomousComplianceConfidence,
-  AUTONOMOUS_PCI_REQUIREMENTS,
   getAutonomousIndexList,
   getAutonomousIndexPattern,
-  getAutonomousTimeRangeForCheck,
   resolveAutonomousRequirementIds,
 } from './pci_autonomous_requirements';
 import {
@@ -44,10 +38,9 @@ import {
   buildAutonomousScopeClaim,
 } from './pci_autonomous_schemas';
 import {
-  type AutonomousEvaluatedRequirement,
-  evaluateAutonomousRequirement,
-  runAutonomousWithConcurrency,
-  AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY,
+  rollupAutonomousConfidence,
+  rollupAutonomousOverallStatus,
+  runAutonomousPciEvaluationPack,
 } from './pci_autonomous_evaluator';
 
 const REPORT_FORMATS = ['summary', 'detailed', 'executive'] as const;
@@ -90,24 +83,6 @@ export const PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID = securityTool(
   'pci_autonomous_scorecard_report'
 );
 
-const scoreToStatus = (score: number): AutonomousComplianceStatus => {
-  if (score >= 85) return 'GREEN';
-  if (score >= 60) return 'AMBER';
-  return 'RED';
-};
-
-const rollupConfidence = (rows: AutonomousEvaluatedRequirement[]): AutonomousComplianceConfidence => {
-  if (rows.length === 0) return 'NOT_ASSESSABLE';
-  const counts = rows.reduce((acc, r) => {
-    acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  if ((counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'NOT_ASSESSABLE';
-  if ((counts.LOW ?? 0) + (counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'LOW';
-  if ((counts.HIGH ?? 0) >= rows.length / 2) return 'HIGH';
-  return 'MEDIUM';
-};
-
 export const pciAutonomousScorecardReportTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
@@ -119,9 +94,8 @@ export const pciAutonomousScorecardReportTool = (
       'Autonomous-variant PCI DSS v4.0.1 scorecard REPORT. Roll up RED/AMBER/GREEN/' +
       'NOT_ASSESSABLE verdicts across all 12 requirements with a confidence-weighted overall ' +
       'score (0-100), per-requirement findings table, and recommendations. Use this for an ' +
-      'executive posture snapshot. For actionable per-requirement evidence use the sibling ' +
-      'pci_autonomous_compliance_check tool — the autonomous architect split scorecard ' +
-      'generation and requirement-specific checks into two specialised tools.',
+      'executive posture snapshot — then drill down with the sibling ' +
+      'pci_autonomous_compliance_check tool on any RED/AMBER rows that need ES|QL evidence.',
     schema: pciAutonomousScorecardReportSchema,
     availability: {
       cacheMode: 'space',
@@ -138,35 +112,14 @@ export const pciAutonomousScorecardReportTool = (
       const indexList = getAutonomousIndexList(indices);
       const indexPattern = getAutonomousIndexPattern(indices);
 
-      const tasks = requirementIds.map((reqId) => async () => {
-        const { from, to } = getAutonomousTimeRangeForCheck(reqId, timeRange);
-        return evaluateAutonomousRequirement({
-          requirementId: reqId,
+      const { rows, requiredFieldsChecked, resolvedTimeRange } =
+        await runAutonomousPciEvaluationPack({
+          requirementIds,
           indexPattern,
-          from,
-          to,
+          timeRange,
           includeEvidence: false,
           esClient: esClient.asCurrentUser,
         });
-      });
-
-      const rows = await runAutonomousWithConcurrency(tasks, AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY);
-
-      const requiredFieldsChecked = Array.from(
-        new Set(requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? []))
-      );
-
-      const resolvedTimeRange =
-        timeRange ??
-        (() => {
-          const ranges = requirementIds.map((id) => getAutonomousTimeRangeForCheck(id));
-          const from = ranges.reduce(
-            (earliest, r) => (r.from < earliest ? r.from : earliest),
-            ranges[0].from
-          );
-          const to = ranges.reduce((latest, r) => (r.to > latest ? r.to : latest), ranges[0].to);
-          return { from, to };
-        })();
 
       const scopeClaim = buildAutonomousScopeClaim({
         indices: indexList,
@@ -176,50 +129,21 @@ export const pciAutonomousScorecardReportTool = (
         requiredFieldsChecked,
       });
 
+      // `overallScore` is the numeric metric for executive display (0-100,
+      // averaged across rows). `overallStatus` is derived from STATUS COUNTS
+      // — the same severity-based rollup the compliance-check tool uses — so
+      // the two tools cannot disagree on posture for the same input data.
+      // Prior versions derived `overallStatus` from `scoreToStatus(overallScore)`,
+      // which could yield GREEN even when one requirement was RED.
       const overallScore =
         rows.length === 0 ? 0 : Math.round(rows.reduce((sum, r) => sum + r.score, 0) / rows.length);
-      const overallStatus = scoreToStatus(overallScore);
-      const overallConfidence = rollupConfidence(rows);
+      const overallStatus = rollupAutonomousOverallStatus(rows);
+      const overallConfidence = rollupAutonomousConfidence(rows);
 
       const greenCount = rows.filter((r) => r.status === 'GREEN').length;
       const amberCount = rows.filter((r) => r.status === 'AMBER').length;
       const redCount = rows.filter((r) => r.status === 'RED').length;
       const notAssessableCount = rows.filter((r) => r.status === 'NOT_ASSESSABLE').length;
-
-      const scorecardColumns = [
-        { name: 'Requirement', type: 'keyword' },
-        { name: 'Check', type: 'keyword' },
-        { name: 'Status', type: 'keyword' },
-        { name: 'Confidence', type: 'keyword' },
-        { name: 'Score', type: 'long' },
-        { name: 'Findings', type: 'long' },
-      ];
-      const scorecardValues = rows.map((r) => [
-        r.requirement,
-        r.name,
-        r.status,
-        r.confidence,
-        r.score,
-        r.evidenceCount,
-      ]);
-
-      const scorecardQuery = `ROW overall_score = ${overallScore}, status = "${overallStatus}", green = ${greenCount}, amber = ${amberCount}, red = ${redCount}, not_assessable = ${notAssessableCount}`;
-
-      const results: Array<{
-        type: ToolResultType;
-        data: Record<string, unknown>;
-        tool_result_id?: string;
-      }> = [
-        {
-          tool_result_id: getToolResultId(),
-          type: ToolResultType.esqlResults,
-          data: {
-            query: scorecardQuery,
-            columns: scorecardColumns,
-            values: scorecardValues,
-          },
-        },
-      ];
 
       const requirementRows = rows.map((row) => ({
         id: row.requirement,
@@ -233,40 +157,70 @@ export const pciAutonomousScorecardReportTool = (
         recommendations: includeRecommendations ? row.recommendations : [],
       }));
 
-      results.push({
-        type: ToolResultType.other,
-        data: {
-          tool: 'pci_autonomous_scorecard_report',
-          format,
-          generatedAt: new Date().toISOString(),
-          overallScore,
-          overallStatus,
-          overallConfidence,
-          summary: `PCI DSS v4.0.1 posture is ${overallStatus} with score ${overallScore}/100. Requirements: ${greenCount} GREEN, ${amberCount} AMBER, ${redCount} RED, ${notAssessableCount} NOT ASSESSABLE.`,
-          requirements:
-            format === 'executive'
-              ? requirementRows.map(({ id, name, status, confidence, score, evidenceCount }) => ({
-                  id,
-                  name,
-                  status,
-                  confidence,
-                  score,
-                  evidenceCount,
-                }))
-              : requirementRows,
-          dataCoverage: {
-            indexPattern,
-            totalRequirements: requirementRows.length,
-            greenCount,
-            amberCount,
-            redCount,
-            notAssessableCount,
-          },
-          scopeClaim,
-        },
-      });
+      // The scorecard table is a synthesised executive summary — it is NOT
+      // the output of an ES|QL `ROW` query against the cluster. Earlier
+      // versions wrapped this payload in `ToolResultType.esqlResults`, which
+      // misled downstream UX/telemetry that special-cases that result type.
+      // Return it under `ToolResultType.other` and let consumers render it
+      // as a tabular summary.
+      const scorecardTable = {
+        columns: [
+          { name: 'Requirement', type: 'keyword' },
+          { name: 'Check', type: 'keyword' },
+          { name: 'Status', type: 'keyword' },
+          { name: 'Confidence', type: 'keyword' },
+          { name: 'Score', type: 'long' },
+          { name: 'Findings', type: 'long' },
+        ],
+        values: rows.map((r) => [
+          r.requirement,
+          r.name,
+          r.status,
+          r.confidence,
+          r.score,
+          r.evidenceCount,
+        ]),
+      };
 
-      return { results };
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              tool: 'pci_autonomous_scorecard_report',
+              format,
+              generatedAt: new Date().toISOString(),
+              overallScore,
+              overallStatus,
+              overallConfidence,
+              summary: `PCI DSS v4.0.1 posture is ${overallStatus} with score ${overallScore}/100. Requirements: ${greenCount} GREEN, ${amberCount} AMBER, ${redCount} RED, ${notAssessableCount} NOT ASSESSABLE.`,
+              scorecardTable,
+              requirements:
+                format === 'executive'
+                  ? requirementRows.map(
+                      ({ id, name, status, confidence, score, evidenceCount }) => ({
+                        id,
+                        name,
+                        status,
+                        confidence,
+                        score,
+                        evidenceCount,
+                      })
+                    )
+                  : requirementRows,
+              dataCoverage: {
+                indexPattern,
+                totalRequirements: requirementRows.length,
+                greenCount,
+                amberCount,
+                redCount,
+                notAssessableCount,
+              },
+              scopeClaim,
+            },
+          },
+        ],
+      };
     },
     tags: ['security', 'compliance', 'pci', 'audit', 'autonomous', 'report'],
   };

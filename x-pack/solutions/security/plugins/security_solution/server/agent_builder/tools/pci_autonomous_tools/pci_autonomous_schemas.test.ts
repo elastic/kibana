@@ -20,6 +20,7 @@ import {
   AUTONOMOUS_PCI_DSS_VERSION,
   AUTONOMOUS_PCI_QSA_DISCLAIMER,
   AUTONOMOUS_SCOPE_PROVENANCE,
+  buildAutonomousDiscoveryClaim,
   buildAutonomousScopeClaim,
   pciAutonomousIndexPatternSchema,
   pciAutonomousRequirementIdSchema,
@@ -187,6 +188,48 @@ describe('buildAutonomousScopeClaim', () => {
       requiredFieldsChecked: ['@timestamp', 'user.name'],
     });
     const original = buildAutonomousScopeClaim(baseArgs);
+    expect(shuffled).toEqual(original);
+  });
+});
+
+describe('buildAutonomousDiscoveryClaim', () => {
+  const baseArgs = {
+    indices: ['logs-*', 'logs-*', 'endgame-*'],
+    discoveredAt: '2024-06-15T12:30:00Z',
+    fieldHintsInspected: ['user.name', '@timestamp', 'user.name'],
+  };
+
+  it('dedupes and sorts indices + fieldHintsInspected', () => {
+    const claim = buildAutonomousDiscoveryClaim(baseArgs);
+    expect(claim.indices).toEqual(['endgame-*', 'logs-*']);
+    expect(claim.fieldHintsInspected).toEqual(['@timestamp', 'user.name']);
+  });
+
+  it('pins DSS version, provenance, and disclaimer onto every claim', () => {
+    const claim = buildAutonomousDiscoveryClaim(baseArgs);
+    expect(claim.pciDssVersion).toBe(AUTONOMOUS_PCI_DSS_VERSION);
+    expect(claim.provenance).toBe(AUTONOMOUS_SCOPE_PROVENANCE);
+    expect(claim.disclaimer).toBe(AUTONOMOUS_PCI_QSA_DISCLAIMER);
+  });
+
+  it('preserves the point-in-time `discoveredAt` instant verbatim (no window semantics)', () => {
+    const claim = buildAutonomousDiscoveryClaim(baseArgs);
+    expect(claim.discoveredAt).toBe('2024-06-15T12:30:00Z');
+    // Discovery is a point-in-time snapshot, not a time-bounded scope. The
+    // payload deliberately does not carry a `timeRange` or
+    // `requirementsEvaluated` field — those belong on the requirement-level
+    // ScopeClaim returned by the check / scorecard tools.
+    expect((claim as { timeRange?: unknown }).timeRange).toBeUndefined();
+    expect((claim as { requirementsEvaluated?: unknown }).requirementsEvaluated).toBeUndefined();
+  });
+
+  it('produces a stable shape across repeat calls with shuffled inputs', () => {
+    const shuffled = buildAutonomousDiscoveryClaim({
+      ...baseArgs,
+      indices: ['endgame-*', 'logs-*', 'logs-*'],
+      fieldHintsInspected: ['@timestamp', 'user.name'],
+    });
+    const original = buildAutonomousDiscoveryClaim(baseArgs);
     expect(shuffled).toEqual(original);
   });
 });

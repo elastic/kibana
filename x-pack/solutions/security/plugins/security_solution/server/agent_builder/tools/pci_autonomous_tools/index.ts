@@ -6,32 +6,30 @@
  */
 
 /**
- * Autonomous PCI compliance tool bundle — fully-autonomous v6.
+ * Autonomous PCI compliance tool bundle.
  *
- * Per the autonomous architect's blueprint, the `pci-compliance-autonomous` skill
- * operates over an independent set of 4 tools (vs the hand-written variant's 3-tool
- * consolidated layout):
+ * The `pci-compliance-autonomous` skill operates over an independent set of 4
+ * tools:
  *
  *   1. pci_autonomous_scope_discovery
  *   2. pci_autonomous_compliance_check
  *   3. pci_autonomous_scorecard_report
  *   4. pci_autonomous_field_mapper
  *
- * v6 update: the agent-facing surface AND the underlying domain engine are now
+ * Both the agent-facing surface and the underlying domain engine are
  * independently authored. The engine modules
  *
  *   - pci_autonomous_requirements.ts   (PCI DSS v4.0.1 catalog, ESQL templates, helpers)
  *   - pci_autonomous_evaluator.ts      (composable pipeline, lookup-table scoring)
- *   - pci_autonomous_schemas.ts        (zod schemas, ScopeClaim with provenance block)
+ *   - pci_autonomous_schemas.ts        (zod schemas, Scope/DiscoveryClaim builders)
  *
- * have zero imports from the hand-written sibling's `pci_compliance_*` modules. The CI
- * test `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in. See
- * comparison.html §1.5 for the per-layer autonomy ladder.
+ * have zero imports from the hand-written sibling's `pci_compliance_*` modules.
+ * The CI test `pci_autonomous_modules_no_handwritten_imports.test.ts` locks
+ * this in.
  *
  * Registration is gated separately from the hand-written variant — see
- * agent_builder/tools/register_tools.ts. The autonomous skill never sees the hand-
- * written tool IDs, so the validation is a true skill+tool+engine autonomous-stack
- * experiment.
+ * `agent_builder/tools/register_tools.ts`. The autonomous skill never sees the
+ * hand-written tool IDs, so the bundle is a true skill+tool+engine isolation.
  */
 
 export {

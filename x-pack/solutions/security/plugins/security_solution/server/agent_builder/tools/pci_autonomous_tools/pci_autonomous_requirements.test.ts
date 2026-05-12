@@ -28,7 +28,6 @@ import {
   getAutonomousIndexPattern,
   getAutonomousTimeRangeForCheck,
   normalizeAutonomousRequirementId,
-  requirementCategory,
   resolveAutonomousRequirementIds,
 } from './pci_autonomous_requirements';
 import { pciAutonomousRequirementIdSchema } from './pci_autonomous_schemas';
@@ -113,33 +112,6 @@ describe('AUTONOMOUS_DEFAULT_INDEX_PATTERNS', () => {
 
   it('deliberately omits metrics-* (assessments are event-driven, not metric-driven)', () => {
     expect(AUTONOMOUS_DEFAULT_INDEX_PATTERNS).not.toContain('metrics-*');
-  });
-});
-
-describe('requirementCategory', () => {
-  it.each([
-    ['1', 'network'],
-    ['1.2.1', 'network'],
-    ['2', 'identity'],
-    ['3', 'data'],
-    ['4', 'crypto'],
-    ['5', 'malware'],
-    ['6', 'vulnerability'],
-    ['7', 'access'],
-    ['8', 'authentication'],
-    ['8.3.4', 'authentication'],
-    ['9', 'physical'],
-    ['10', 'logging'],
-    ['10.5', 'logging'],
-    ['11', 'testing'],
-    ['12', 'governance'],
-  ])('maps "%s" to category "%s"', (id, expected) => {
-    expect(requirementCategory(id)).toBe(expected);
-  });
-
-  it('falls back to "governance" for unknown ids', () => {
-    expect(requirementCategory('99')).toBe('governance');
-    expect(requirementCategory('')).toBe('governance');
   });
 });
 

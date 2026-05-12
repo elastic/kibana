@@ -9,28 +9,26 @@
  * Autonomously-authored input validation and provenance schemas for the
  * PCI compliance autonomous skill.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5):
- *   This module is authored from the public PCI DSS v4.0.1 spec (published June
- *   2024 by the PCI Security Standards Council) and Elasticsearch's ES|QL
- *   parameter-binding contract — NOT from the hand-written sibling
- *   `pci_compliance_schemas.ts`. There are zero imports from `pci_compliance_*`
- *   anywhere in this file. The CI test
- *   `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in.
+ * Authored from the public PCI DSS v4.0.1 spec (published June 2024 by the
+ * PCI Security Standards Council) and Elasticsearch's ES|QL parameter-binding
+ * contract. Zero imports from `pci_compliance_*` anywhere in this file; the
+ * CI test `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this
+ * in.
  *
- * Design choices that differ from the hand-written sibling on purpose:
- *   1. Index-pattern regex is anchored differently (explicit start/end classes
- *      with a separate length cap) — same security property (no whitespace, no
- *      controls, no FROM-injection metacharacters) but a different encoding.
- *   2. Time-range refinement uses an inclusive `from <= to` guard but rejects
- *      future-dated `to` (>2 days ahead of now) — the hand-written sibling does
- *      not. Auditor guidance documents this as a common QSA-report error: a
- *      future `to` makes no sense for telemetry windows and almost always
- *      indicates a clock-skew bug or a fabricated value.
- *   3. ScopeClaim carries an explicit `provenance` block recording that the
- *      autonomous skill produced this claim. This makes the autonomy auditable
- *      in any trace that captures tool output (e.g. LangSmith).
- *   4. Constants live as named exports rather than being implicitly re-exported
- *      via the catalog module.
+ * Notable choices:
+ *   1. Index-pattern regex: anchored ASCII character classes with a separate
+ *      length cap. No whitespace, no controls, no FROM-injection
+ *      metacharacters.
+ *   2. Time-range refinement: inclusive `from <= to` guard plus rejection of
+ *      future-dated `to` (more than 48 hours ahead). A future `to` makes no
+ *      sense for telemetry windows and almost always indicates a clock-skew
+ *      bug or a fabricated value.
+ *   3. ScopeClaim and DiscoveryClaim both carry an explicit `provenance`
+ *      block recording that the autonomous skill produced the claim. This
+ *      makes the autonomy auditable in any trace that captures tool output.
+ *      ScopeClaim covers requirement-evaluation runs (time-range bounded,
+ *      requirements list); DiscoveryClaim covers index-inventory snapshots
+ *      (point-in-time, no requirements).
  */
 
 import { z } from '@kbn/zod';
@@ -143,8 +141,8 @@ export const pciAutonomousRequirementIdSchema = z
 export type PciAutonomousRequirementIdInput = z.infer<typeof pciAutonomousRequirementIdSchema>;
 
 /**
- * ScopeClaim — the audit-trail payload returned by every autonomous PCI tool.
- * Carries:
+ * ScopeClaim — the audit-trail payload returned by every autonomous PCI
+ * compliance evaluation. Carries:
  *   - which DSS version was used
  *   - which indices and time range were inspected
  *   - which requirement IDs were evaluated
@@ -152,9 +150,10 @@ export type PciAutonomousRequirementIdInput = z.infer<typeof pciAutonomousRequir
  *   - a provenance signature flagging this as autonomous-skill output
  *   - the QSA disclaimer
  *
- * Adding `provenance` is a deliberate divergence from the hand-written sibling
- * — it lets a reviewer tell which skill produced a given ScopeClaim purely
- * from the payload, without having to inspect the tool-call ID.
+ * `requirementsEvaluated` is non-empty for compliance-check / scorecard runs.
+ * Use {@link buildAutonomousDiscoveryClaim} for point-in-time discovery
+ * payloads instead of fabricating a ScopeClaim with empty requirements and a
+ * synthetic time range.
  */
 export interface PciAutonomousScopeClaim {
   pciDssVersion: typeof AUTONOMOUS_PCI_DSS_VERSION;
@@ -191,6 +190,55 @@ export const buildAutonomousScopeClaim = ({
   timeRange: { from, to },
   requirementsEvaluated: Array.from(new Set(requirementsEvaluated)).sort(),
   requiredFieldsChecked: Array.from(new Set(requiredFieldsChecked)).sort(),
+  provenance: AUTONOMOUS_SCOPE_PROVENANCE,
+  disclaimer: AUTONOMOUS_PCI_QSA_DISCLAIMER,
+});
+
+/**
+ * DiscoveryClaim — the audit-trail payload returned by the autonomous PCI
+ * scope-discovery tool. Distinct shape from {@link PciAutonomousScopeClaim}
+ * because scope discovery is a point-in-time inventory operation, not a
+ * time-window evaluation:
+ *   - `discoveredAt` records the snapshot timestamp (when the inventory ran)
+ *     rather than fabricating a `from`/`to` window.
+ *   - There is no `requirementsEvaluated` field — discovery does not evaluate
+ *     PCI requirements. (Earlier versions emitted a ScopeClaim with `from:
+ *     new Date(0)` and `requirementsEvaluated: []`, which lied about the
+ *     semantics of both fields. This dedicated type makes the contract
+ *     honest.)
+ *   - `fieldHintsInspected` documents the static field-hint list the
+ *     discovery scanner probed for ECS-coverage purposes — distinct in
+ *     meaning from the requirement-driven `requiredFieldsChecked` on a
+ *     ScopeClaim.
+ */
+export interface PciAutonomousDiscoveryClaim {
+  pciDssVersion: typeof AUTONOMOUS_PCI_DSS_VERSION;
+  indices: string[];
+  discoveredAt: string;
+  fieldHintsInspected: string[];
+  provenance: typeof AUTONOMOUS_SCOPE_PROVENANCE;
+  disclaimer: typeof AUTONOMOUS_PCI_QSA_DISCLAIMER;
+}
+
+export interface BuildAutonomousDiscoveryClaimArgs {
+  indices: string[];
+  discoveredAt: string;
+  fieldHintsInspected: string[];
+}
+
+/**
+ * Build a DiscoveryClaim from per-tool inputs. Same dedupe + sort discipline
+ * as {@link buildAutonomousScopeClaim}.
+ */
+export const buildAutonomousDiscoveryClaim = ({
+  indices,
+  discoveredAt,
+  fieldHintsInspected,
+}: BuildAutonomousDiscoveryClaimArgs): PciAutonomousDiscoveryClaim => ({
+  pciDssVersion: AUTONOMOUS_PCI_DSS_VERSION,
+  indices: Array.from(new Set(indices)).sort(),
+  discoveredAt,
+  fieldHintsInspected: Array.from(new Set(fieldHintsInspected)).sort(),
   provenance: AUTONOMOUS_SCOPE_PROVENANCE,
   disclaimer: AUTONOMOUS_PCI_QSA_DISCLAIMER,
 });

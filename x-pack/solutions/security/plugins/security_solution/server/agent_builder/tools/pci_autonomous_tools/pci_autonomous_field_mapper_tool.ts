@@ -10,13 +10,12 @@
  *
  * Part of the autonomous skill's 4-tool bundle.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5, v6 deep autonomy): the ECS field-mapping
- * heuristics (`FIELD_MAPPING_HINTS`, `SENSITIVE_FIELD_PATTERNS`, `matchFieldToEcs`) are
- * authored locally in this file rather than imported from the hand-written variant.
- * The tool ID, description, schema, and engine modules it consumes
- * (`pci_autonomous_schemas`) are likewise independent. The CI test
- * `pci_autonomous_modules_no_handwritten_imports.test.ts` enforces zero imports from
- * `pci_compliance_*` across the whole `pci_autonomous_tools/` tree.
+ * The ECS field-mapping heuristics (`FIELD_MAPPING_HINTS`,
+ * `SENSITIVE_FIELD_PATTERNS`, `matchFieldToEcs`) are authored locally in this
+ * file rather than imported from the hand-written variant. The CI test
+ * `pci_autonomous_modules_no_handwritten_imports.test.ts` enforces zero
+ * imports from `pci_compliance_*` across the whole `pci_autonomous_tools/`
+ * tree.
  */
 
 import { z } from '@kbn/zod';
@@ -55,18 +54,30 @@ const pciAutonomousFieldMapperSchema = z.object({
 
 export const PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID = securityTool('pci_autonomous_field_mapper');
 
+// Cardholder-data and credential field-name patterns that the mapper refuses
+// to suggest as ECS sources or echo back in sample-hit payloads. Patterns are
+// deliberately tight: they target literal PAN/CHD field names plus a small
+// set of credential keywords. Earlier versions used `/token/i`, which also
+// matched benign fields like `session_token`, `id_token`, and
+// `csrf_token` — pulling them out of the suggestion set degraded mapping
+// quality without adding any real PCI protection. The remaining `token`
+// patterns are explicitly anchored to PAN-token / card-token semantics.
 const SENSITIVE_FIELD_PATTERNS = [
-  /card/i,
-  /pan/i,
+  /(^|[._\-])card([._\-]|$)/i,
+  /(^|[._\-])pan([._\-]|$)/i,
   /\bcvv\b/i,
   /\bcvc\b/i,
   /account.?number/i,
-  /credit/i,
-  /ssn/i,
+  /credit.?card/i,
+  /\bssn\b/i,
   /social.?security/i,
-  /secret/i,
-  /password/i,
-  /token/i,
+  /\bsecret([._\-]|$)/i,
+  /(^|[._\-])password([._\-]|$)/i,
+  /api.?key/i,
+  /(^|[._\-])token$/i,
+  /card.?token/i,
+  /pan.?token/i,
+  /payment.?token/i,
 ];
 
 const DEFAULT_ECS_TARGETS = [

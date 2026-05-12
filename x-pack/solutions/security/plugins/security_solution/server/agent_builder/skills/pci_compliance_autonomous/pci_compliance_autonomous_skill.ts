@@ -15,19 +15,18 @@ import {
 } from '../../tools';
 
 /**
- * Registry-scoped tool IDs advertised by the autonomously-architected PCI compliance skill.
+ * Registry-scoped tool IDs advertised by the autonomous PCI compliance skill.
  *
- * IMPORTANT — these are a fully **independent** tool set from the hand-written `pci-compliance`
- * skill. The autonomous variant does not reference, depend on, or know about the hand-written
- * variant's `core.security.pci_compliance` / `pci_scope_discovery` / `pci_field_mapper` tool
- * IDs. This validates the end-to-end autonomous-stack workflow: when a future domain is
- * architected autonomously, the resulting skill+tool bundle must work without leaning on a
- * pre-existing hand-written variant's surface.
+ * These are a fully **independent** tool set from the hand-written
+ * `pci-compliance` skill. The autonomous variant does not reference, depend
+ * on, or know about the hand-written variant's `core.security.pci_compliance`
+ * / `pci_scope_discovery` / `pci_field_mapper` tool IDs.
  *
- * The autonomous variant follows the autonomous architect's blueprint of a 4-security-tool
- * decomposition with **check** and **report** as *separate* tools (rather than one tool with
- * a `mode` parameter). The architect's argument was that two narrow tools are easier for the
- * LLM to route between than one mode-parameterised tool whose behaviour branches at runtime.
+ * The bundle separates "compliance check" (per-requirement findings with
+ * ES|QL evidence) from "scorecard report" (executive roll-up) as two narrow
+ * tools rather than one mode-parameterised tool. The two are designed to be
+ * called as a sequence: scorecard first for posture, then check on any
+ * RED/AMBER requirements that need actionable evidence.
  */
 export const PCI_COMPLIANCE_AUTONOMOUS_SKILL_TOOL_IDS = [
   PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID,
@@ -43,23 +42,17 @@ export const PCI_COMPLIANCE_AUTONOMOUS_SKILL_ID = 'pci-compliance-autonomous';
 /**
  * PCI DSS v4.0.1 Compliance — autonomously architected variant.
  *
- * Skill content authored by the `skill.architect` orchestrator (`elastic-agent-builder-skill-dev`)
- * during the autonomous-skill-validation experiment using:
- *   - autonomous web research (10 corroborated hints, 46 web-research citations)
- *   - LLM training-corpus knowledge (5 surviving model-knowledge citations including
- *     SAQ taxonomy, v3→v4 deltas, scope-reduction levers, technical-vs-process classification)
- *   - rule-13b reconciliation (1 redundant mk claim dropped post-hoc, 1 partial-overlap
- *     promoted to `model-internal-corroborated` with the corroborating URL pinned inline)
+ * The sister skill `pci-compliance` (hand-written) ships its own, separate
+ * tool IDs (`pci_scope_discovery` / `pci_compliance` / `pci_field_mapper`).
+ * The autonomous variant here intentionally does NOT share or reference those
+ * tool IDs — that isolation is the core property under test in the
+ * side-by-side eval comparison at
+ * `x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance` (set
+ * `EVAL_PCI_VARIANT=autonomous` to evaluate this variant).
  *
- * Gate score: 0.90. Provenance breakdown: 51 citations across 2 distinct provenance classes
- * (46 web-research + 5 model-knowledge), classDiversity 0.5.
- *
- * Sister skill `pci-compliance` (Smriti's hand-written variant) ships its own, separate tool
- * IDs (`pci_scope_discovery` / `pci_compliance` / `pci_field_mapper`). The autonomous variant
- * here intentionally does **not** share or reference those tool IDs — that isolation is the
- * core property under test in the side-by-side eval comparison at
- * `x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance`
- * (set `EVAL_PCI_VARIANT=autonomous` to evaluate this one).
+ * Authoring/provenance metadata for this skill (autonomous research traces,
+ * gate scores, citation classes) lives alongside the eval suite, not in this
+ * runtime file. Comments here describe the agent-facing contract only.
  */
 export const pciComplianceAutonomousSkill = defineSkillType({
   id: PCI_COMPLIANCE_AUTONOMOUS_SKILL_ID,
@@ -98,16 +91,20 @@ Do **not** use this skill when:
 ## Available Tools
 
 - **${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}** — Inventory PCI-relevant indices and classify
-  them by scope area (network, identity, endpoint, cloud, application, vulnerability). The
-  \`scopeClaim\` it returns is the provenance record for every check that follows.
+  them by scope area (network, identity, endpoint, cloud, application, vulnerability).
+  Returns a \`discoveryClaim\` (point-in-time inventory snapshot) plus a \`dataGaps\` array
+  surfacing any cluster errors that limited inventory completeness. Call this first to anchor
+  every subsequent check.
 - **${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}** — Run a PCI DSS v4.0.1 compliance CHECK for
   one or more requirements. Returns per-requirement findings (RED / AMBER / GREEN /
-  NOT_ASSESSABLE) with ES|QL evidence and a scopeClaim. Use this when the user wants
+  NOT_ASSESSABLE) with ES|QL evidence and a \`scopeClaim\`. Use this when the user wants
   actionable findings on specific requirements.
 - **${PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID}** — Produce a PCI DSS v4.0.1 posture SCORECARD
   rolling up RED/AMBER/GREEN/NOT_ASSESSABLE verdicts across all 12 requirements with a
   confidence-weighted overall score (0-100). Use this when the user wants an executive
-  posture snapshot.
+  posture snapshot. Returns a \`scopeClaim\` and an \`overallStatus\` derived from the same
+  severity-based rollup the compliance-check tool uses, so the two tools cannot disagree
+  on posture.
 - **${PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID}** — Inspect non-ECS fields and suggest ECS mappings
   when scope discovery reports low ECS coverage (e.g. \`username\` → \`user.name\`, \`src_ip\`
   → \`source.ip\`, \`cve\` → \`vulnerability.id\`).
@@ -122,22 +119,29 @@ Do **not** use this skill when:
 \`${PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID}\`). Do **not** improvise raw ES|QL queries against
 PCI indices when one of these tools applies. The tools encode requirement-specific detection
 logic (default-account patterns, weak-TLS regex sets, brute-force thresholds, field-mapping
-heuristics, requirement → category classification) that ad-hoc ES|QL will miss.
+heuristics) that ad-hoc ES|QL will miss.
+
+The recommended order is **discover → roll up → drill down**:
 
 1. **Discover available data.** Call \`${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}\` to identify
-   indices and data coverage. Inspect \`scopeClaim\` in the response to verify which indices
-   were evaluated.
-2. **Run a check OR a report — pick one tool, not both.**
-   - For *per-requirement findings with evidence*, call
-     \`${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}\`. Pass specific requirement IDs via the
-     \`requirements\` parameter (e.g. \`["2.2.4"]\` or \`["8.3.4", "8.3.6"]\`). The findings
-     include ES|QL evidence rows; use them verbatim as audit evidence.
-   - For *an executive posture snapshot rolling up all 12 requirements*, call
+   indices and data coverage. Inspect the \`discoveryClaim\` and \`dataGaps\` in the response —
+   if \`dataGaps\` is non-empty, the inventory is incomplete and downstream verdicts should be
+   reported with that caveat.
+2. **Match the question to the next tool. The check and scorecard tools are designed to be
+   used as a sequence, not as an either/or:**
+   - If the user asks "what is our PCI posture?" or "are we compliant?", call
      \`${PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID}\` with \`format: "summary"\` (default),
-     \`"detailed"\`, or \`"executive"\`. The scorecard ships a confidence-weighted overall
-     score plus per-requirement rows.
-   These two tools are **siblings, not interchangeable** — the architect kept them separate so
-   the LLM does not need to encode mode-routing logic.
+     \`"detailed"\`, or \`"executive"\`. The scorecard ships an \`overallStatus\` (severity-
+     based — any RED ⇒ overall RED), an \`overallScore\` (numeric 0-100 metric), and per-
+     requirement rows. Use this for executive snapshots.
+   - If the user asks about a specific requirement OR the scorecard surfaced one or more
+     RED / AMBER rows that need actionable evidence, call
+     \`${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}\` with the requirement IDs from the scorecard
+     (e.g. \`["8.3.4"]\` or \`["2.2.4", "10.2.1"]\`). The findings include ES|QL evidence
+     rows; surface them verbatim as audit evidence.
+   - Calling both for the same posture is fine and often optimal: scorecard for the
+     headline, then check for the drill-down. They share the same evaluator under the hood,
+     so the per-requirement verdicts will match.
 3. **Handle non-ECS data.** If \`${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}\` reports low ECS
    coverage on an index, call \`${PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID}\` to discover field
    mappings, then use \`${platformCoreTools.generateEsql}\` with those mappings.
@@ -147,22 +151,27 @@ heuristics, requirement → category classification) that ad-hoc ES|QL will miss
 ## Tiered Status Vocabulary
 
 Surface compliance verdicts using the standard tiered status (RED / AMBER / GREEN /
-NOT_ASSESSABLE) so the consumer can route by severity.
+NOT_ASSESSABLE) so the consumer can route by severity. The "Recommended Remediation SLA"
+column below is **operational guidance**, not normative PCI DSS text — only the req 6.3.3
+30-day patching window is sourced directly from the v4.0.1 spec; the rest are remediation
+defaults a QSA would typically agree with but which an organisation may tune.
 
-| Tier | Meaning | Recommended Remediation SLA |
+| Tier | Meaning | Recommended Remediation SLA (operational guidance) |
 |---|---|---|
 | **GREEN + HIGH confidence** | Genuinely compliant with strong telemetry evidence | review at next quarterly assessment |
 | **GREEN + MEDIUM/LOW confidence** | Data present, evaluation may be incomplete | recommend additional validation; treat as soft-green |
-| **AMBER** | Partial data or no matching events | widen time range or check index patterns; **escalate to critical if AMBER persists > 30 days** |
-| **RED + HIGH confidence** | Genuine violation with evidence | immediate remediation required; **30-day patching window for critical-severity only (req 6.3.3)** |
+| **AMBER** | Partial data or no matching events | widen time range or check index patterns; escalate if AMBER persists > 30 days |
+| **RED + HIGH confidence** | Genuine violation with evidence | immediate remediation required; **30-day patching window for critical-severity only (req 6.3.3, per spec)** |
 | **NOT_ASSESSABLE** | Required fields missing from indices | onboard the data source; mark as process-attestation if requirement is in the process-based set |
 
-## ScopeClaim Provenance
+## ScopeClaim and DiscoveryClaim Provenance
 
-Every PCI tool response ships a \`scopeClaim\` payload covering DSS version, indices, time
-range, requirement IDs evaluated, fields probed, and the QSA disclaimer. Surface this verbatim
-to the user when producing audit-facing output — it is the audit trail that makes the agent's
-output QSA-defensible.
+Every compliance-check and scorecard response ships a \`scopeClaim\` payload covering DSS
+version, indices, time range, requirement IDs evaluated, fields probed, and the QSA
+disclaimer. The scope-discovery response ships a \`discoveryClaim\` instead — same
+provenance/disclaimer block but with point-in-time \`discoveredAt\` semantics rather than a
+time-range window. Surface the relevant claim verbatim to the user when producing audit-
+facing output; it is the audit trail that makes the agent's output QSA-defensible.
 
 ## Deduplication
 
@@ -185,10 +194,11 @@ a finding back to the user.
 
 - **PCI SAQ taxonomy.** v4.0.1 defines 9 distinct SAQ types: A (full e-commerce outsourcing),
   A-EP (partial outsourcing with payment redirect), B, B-IP, C, C-VT, D-MER (merchants
-  storing PAN), P2PE-HW, D-SP (service providers). **Selecting the wrong SAQ is the most
-  common audit-scoping error** — picking the right one removes ~70% of irrelevant requirements
-  before any check runs. Surface the user's SAQ classification when they describe their
-  business model and use it to filter requirements.
+  storing PAN), P2PE-HW, D-SP (service providers). Picking the right SAQ removes a large
+  fraction of irrelevant requirements before any check runs (assessor guidance commonly
+  cites figures in the 50–80% range; treat as a heuristic, not a guarantee). Surface the
+  user's SAQ classification when they describe their business model and use it to filter
+  requirements.
 - **v3.2.1 → v4.0.1 deltas.** Three requirements are net-new in v4.0 and most-missed by tools
   trained on v3-era guidance: **3.4.1** (PAN masking on display), **8.4.2** (MFA for ALL CDE
   access including non-console admin), and **11.4.1** (continuous monitoring of CDE network).

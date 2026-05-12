@@ -8,51 +8,35 @@
 /**
  * Autonomously-authored PCI DSS v4.0.1 requirement catalog.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5):
- *   This module encodes the PCI DSS v4.0.1 spec (published June 2024 by the
- *   PCI Security Standards Council) and is authored from the public spec — NOT
- *   from the hand-written sibling `pci_compliance_requirements.ts`. Zero
- *   imports from `pci_compliance_*` modules; the CI test
- *   `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in.
+ * Encodes the PCI DSS v4.0.1 spec (published June 2024 by the PCI Security
+ * Standards Council) from the public spec. Zero imports from `pci_compliance_*`
+ * modules; the CI test `pci_autonomous_modules_no_handwritten_imports.test.ts`
+ * locks this in.
  *
- * Independent design choices vs the hand-written sibling:
+ * Notable shape choices:
  *
- *   1. Verdict-type encoding — uses `'detect_violations' | 'verify_presence'`
- *      rather than `'rows_mean_violation' | 'rows_mean_evidence'`. Clearer
- *      intent: a check either looks for things that should NOT be there
- *      (violations) or things that SHOULD be there (presence of telemetry).
+ *   1. Verdict-type encoding — uses `'detect_violations' | 'verify_presence'`.
+ *      Clearer intent: a check either looks for things that should NOT be
+ *      there (violations) or things that SHOULD be there (presence of
+ *      telemetry).
  *
- *   2. ES|QL parameter names — uses `?_window_start` / `?_window_end` instead
- *      of `?_tstart` / `?_tend`. Self-documenting at the binding site; an
- *      auditor reading a logged query knows immediately what is bound.
+ *   2. ES|QL parameter names — `?_window_start` / `?_window_end`. Self-
+ *      documenting at the binding site; an auditor reading a logged query
+ *      knows immediately what is bound.
  *
- *   3. Default-lookback shape — `defaultLookback: { days, rationale }` rather
- *      than a bare `defaultLookbackDays: number`. The rationale captures WHY
- *      this lookback (spec-mandated, telemetry-baseline, etc.) so a reviewer
- *      tuning it later knows whether they are changing a fact or a heuristic.
+ *   3. Default-lookback shape — `defaultLookback: { days, rationale }`. The
+ *      rationale captures WHY this lookback (spec-mandated, telemetry-
+ *      baseline, etc.) so a reviewer tuning it later knows whether they
+ *      are changing a fact or a heuristic.
  *
- *   4. Required fields — each requirement names `requiredFields` AND a
- *      `requiredCategories` set of `event.category` values that ought to be
- *      present. The hand-written sibling implicitly conflates these. Splitting
- *      lets the preflight stage distinguish "schema is wrong" (missing fields)
- *      from "right schema but wrong slice" (missing categories).
- *
- *   5. Query phrasing — uses `WHERE ... IN (...)`, `WHERE ... | STATS ... |
- *      WHERE` post-aggregation filters, `COUNT_DISTINCT` for spread metrics,
- *      and different `KEEP/SORT/LIMIT` shapes than the hand-written variant.
- *      Same underlying facts; different encoding. Diffing this file against
- *      `pci_compliance_requirements.ts` will not yield aligned hunks.
- *
- *   6. Catalog organisation — grouped by PCI scope category (network,
+ *   4. Catalog organisation — grouped by PCI scope category (network,
  *      identity, vulnerability, audit, physical, malware, policy) with
- *      section comments rather than the hand-written variant's flat
- *      "12 top-level then 17 sub" ordering.
+ *      section comments.
  *
- *   7. Holdout-aware default-account list — includes Windows-style
- *      (`Administrator`, `Guest`) and generic service accounts
- *      (`service_acct_*`) by pattern, not just Unix shorthand. Sourced from
- *      public assessor guidance on the most-commonly-missed defaults across
- *      enterprise PCI environments.
+ *   5. Default-account list — includes Unix shorthand, Windows-style
+ *      (`Administrator`, `Guest`), and common database superusers. Sourced
+ *      from public assessor guidance on the most-commonly-missed defaults
+ *      across enterprise PCI environments.
  *
  * The catalog/schema sync invariant (every key here matches
  * `pciAutonomousRequirementIdSchema`) is enforced at runtime by
@@ -63,12 +47,7 @@
 // Public types
 // ──────────────────────────────────────────────────────────────────────────
 
-export type AutonomousComplianceStatus =
-  | 'RED'
-  | 'AMBER'
-  | 'GREEN'
-  | 'NOT_APPLICABLE'
-  | 'NOT_ASSESSABLE';
+export type AutonomousComplianceStatus = 'RED' | 'AMBER' | 'GREEN' | 'NOT_ASSESSABLE';
 
 export type AutonomousComplianceConfidence = 'HIGH' | 'MEDIUM' | 'LOW' | 'NOT_ASSESSABLE';
 
@@ -100,8 +79,6 @@ export interface AutonomousRequirementDef {
   pciReference: string;
   /** ECS field names that must be mappable for a meaningful assessment. */
   requiredFields: string[];
-  /** Optional ECS event.category values expected to appear in the data. */
-  requiredCategories?: string[];
   verdict: AutonomousVerdictType;
   defaultLookback: AutonomousLookback;
   recommendations: string[];
@@ -199,7 +176,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'to be tracked through change management.',
     pciReference: 'PCI DSS v4.0.1 Requirement 1',
     requiredFields: ['@timestamp', 'event.category', 'source.ip', 'destination.ip'],
-    requiredCategories: ['network'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -223,7 +199,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'requires secure-baseline enforcement on every in-scope system component.',
     pciReference: 'PCI DSS v4.0.1 Requirement 2',
     requiredFields: ['@timestamp', 'event.category', 'event.action', 'host.name'],
-    requiredCategories: ['configuration'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -249,7 +224,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'human attestation. Telemetry is supportive only.',
     pciReference: 'PCI DSS v4.0.1 Requirement 3',
     requiredFields: ['@timestamp', 'event.category', 'event.action'],
-    requiredCategories: ['database'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -296,7 +270,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'all systems and networks (not just commonly-affected ones).',
     pciReference: 'PCI DSS v4.0.1 Requirement 5',
     requiredFields: ['@timestamp', 'event.category', 'event.module', 'host.name'],
-    requiredCategories: ['malware'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -321,7 +294,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'the patching SLA: 30 days for CRITICAL severity only (v4.0 had required critical+high).',
     pciReference: 'PCI DSS v4.0.1 Requirement 6',
     requiredFields: ['@timestamp', 'vulnerability.id', 'vulnerability.severity', 'host.name'],
-    requiredCategories: ['vulnerability'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -346,7 +318,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'least-privilege with documented business need-to-know.',
     pciReference: 'PCI DSS v4.0.1 Requirement 7',
     requiredFields: ['@timestamp', 'event.category', 'user.name', 'event.action'],
-    requiredCategories: ['iam'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -374,7 +345,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       '(Req 8.4.2) and eliminated the password-only option (Req 8.3.9).',
     pciReference: 'PCI DSS v4.0.1 Requirement 8',
     requiredFields: ['@timestamp', 'event.category', 'event.outcome', 'user.name'],
-    requiredCategories: ['authentication'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -399,7 +369,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'systems. Telemetry from those systems can supplement but not satisfy Requirement 9.',
     pciReference: 'PCI DSS v4.0.1 Requirement 9',
     requiredFields: ['@timestamp', 'event.category', 'event.action'],
-    requiredCategories: ['physical_access'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -447,7 +416,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'mandates payment-page tamper-detection.',
     pciReference: 'PCI DSS v4.0.1 Requirement 11',
     requiredFields: ['@timestamp', 'event.category', 'vulnerability.id'],
-    requiredCategories: ['intrusion_detection', 'vulnerability'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -499,7 +467,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'changes to flow through documented change management.',
     pciReference: 'PCI DSS v4.0.1 Section 1.2.1',
     requiredFields: ['@timestamp', 'event.category', 'event.action', 'user.name'],
-    requiredCategories: ['configuration'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -572,7 +539,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'their passwords changed before deployment.',
     pciReference: 'PCI DSS v4.0.1 Section 2.2.4',
     requiredFields: ['@timestamp', 'event.category', 'event.outcome', 'user.name'],
-    requiredCategories: ['authentication'],
     verdict: 'detect_violations',
     defaultLookback: {
       days: 90,
@@ -608,7 +574,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'Req 7.2.2 requires access to be assigned based on job classification and function.',
     pciReference: 'PCI DSS v4.0.1 Section 7.2.2',
     requiredFields: ['@timestamp', 'event.category', 'event.action', 'user.name'],
-    requiredCategories: ['iam'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -645,7 +610,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'Req 8.2.4 requires removal or disabling of inactive accounts within 90 days.',
     pciReference: 'PCI DSS v4.0.1 Section 8.2.4',
     requiredFields: ['@timestamp', 'event.category', 'event.outcome', 'user.name'],
-    requiredCategories: ['authentication'],
     verdict: 'detect_violations',
     defaultLookback: {
       days: 365,
@@ -679,7 +643,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'of 10 attempts within the window. Indicates lockout mechanisms may not be enforced.',
     pciReference: 'PCI DSS v4.0.1 Section 8.3.4',
     requiredFields: ['@timestamp', 'event.category', 'event.outcome', 'user.name', 'source.ip'],
-    requiredCategories: ['authentication'],
     verdict: 'detect_violations',
     defaultLookback: {
       days: 7,
@@ -713,7 +676,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'systems unable to support 12 must enforce ≥8 with documented justification.',
     pciReference: 'PCI DSS v4.0.1 Section 8.3.6',
     requiredFields: ['@timestamp', 'event.category', 'event.action', 'user.name'],
-    requiredCategories: ['iam'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -744,7 +706,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'in use.',
     pciReference: 'PCI DSS v4.0.1 Section 8.3.9',
     requiredFields: ['@timestamp', 'event.category', 'event.action', 'user.name'],
-    requiredCategories: ['iam'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 90,
@@ -775,7 +736,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'admin access.',
     pciReference: 'PCI DSS v4.0.1 Section 8.4.2',
     requiredFields: ['@timestamp', 'event.category', 'event.action', 'user.name'],
-    requiredCategories: ['authentication'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -811,7 +771,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'detection events confirms an anti-malware solution is deployed and active.',
     pciReference: 'PCI DSS v4.0.1 Section 5.2.1',
     requiredFields: ['@timestamp', 'event.category', 'host.name'],
-    requiredCategories: ['malware'],
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
@@ -845,7 +804,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'narrowed this from "critical+high" (in v4.0) to "critical only".',
     pciReference: 'PCI DSS v4.0.1 Section 6.3.3',
     requiredFields: ['@timestamp', 'vulnerability.id', 'vulnerability.severity', 'host.name'],
-    requiredCategories: ['vulnerability'],
     verdict: 'detect_violations',
     defaultLookback: {
       days: 30,
@@ -1004,7 +962,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
       'producing alerts that are monitored.',
     pciReference: 'PCI DSS v4.0.1 Section 11.5',
     requiredFields: ['@timestamp', 'event.category', 'event.kind'],
-    requiredCategories: ['intrusion_detection'],
     verdict: 'detect_violations',
     defaultLookback: {
       days: 7,
@@ -1064,60 +1021,6 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequi
         `| LIMIT 25`,
     },
   },
-};
-
-// ──────────────────────────────────────────────────────────────────────────
-// Categorisation helper
-// ──────────────────────────────────────────────────────────────────────────
-
-/**
- * Top-level requirement family for a given ID. Used by the scorecard tool to
- * group findings by category in executive output.
- */
-export const requirementCategory = (
-  requirementId: string
-):
-  | 'network'
-  | 'identity'
-  | 'data'
-  | 'crypto'
-  | 'malware'
-  | 'vulnerability'
-  | 'access'
-  | 'authentication'
-  | 'physical'
-  | 'logging'
-  | 'testing'
-  | 'governance' => {
-  const top = requirementId.split('.')[0];
-  switch (top) {
-    case '1':
-      return 'network';
-    case '2':
-      return 'identity';
-    case '3':
-      return 'data';
-    case '4':
-      return 'crypto';
-    case '5':
-      return 'malware';
-    case '6':
-      return 'vulnerability';
-    case '7':
-      return 'access';
-    case '8':
-      return 'authentication';
-    case '9':
-      return 'physical';
-    case '10':
-      return 'logging';
-    case '11':
-      return 'testing';
-    case '12':
-      return 'governance';
-    default:
-      return 'governance';
-  }
 };
 
 // ──────────────────────────────────────────────────────────────────────────

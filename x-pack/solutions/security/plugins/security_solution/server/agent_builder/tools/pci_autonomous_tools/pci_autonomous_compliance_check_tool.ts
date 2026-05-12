@@ -8,16 +8,15 @@
 /**
  * Autonomously-architected PCI DSS compliance check tool.
  *
- * Per the autonomous architect's blueprint, the autonomous variant splits the consolidated
- * `pci_compliance` tool into two specialised tools: this one (check mode only) and the
- * sibling `pci_autonomous_scorecard_report` tool. The argument was that two narrow tools
- * are easier for the LLM to route between than a single tool with a `mode` parameter that
- * branches behaviour.
+ * Companion to `pci_autonomous_scorecard_report`. This tool returns per-requirement
+ * findings with ES|QL evidence; the scorecard tool returns an executive roll-up.
+ * Both share the underlying evaluator orchestration via
+ * {@link runAutonomousPciEvaluationPack} so the two surfaces stay aligned.
  *
- * INDEPENDENCE CLAIM (see comparison.html §1.5): this tool now imports only from the
- * autonomously-authored engine modules (`pci_autonomous_requirements`,
- * `pci_autonomous_evaluator`, `pci_autonomous_schemas`). It has ZERO imports from the
- * hand-written sibling's `pci_compliance_*` modules. The CI test
+ * Imports only from the autonomously-authored engine modules
+ * (`pci_autonomous_requirements`, `pci_autonomous_evaluator`,
+ * `pci_autonomous_schemas`). Zero imports from the hand-written sibling's
+ * `pci_compliance_*` modules; the CI test
  * `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in.
  */
 
@@ -30,9 +29,6 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
 import {
-  type AutonomousComplianceStatus,
-  type AutonomousComplianceConfidence,
-  AUTONOMOUS_PCI_REQUIREMENTS,
   getAutonomousIndexList,
   getAutonomousIndexPattern,
   getAutonomousTimeRangeForCheck,
@@ -46,10 +42,9 @@ import {
   buildAutonomousScopeClaim,
 } from './pci_autonomous_schemas';
 import {
-  type AutonomousEvaluatedRequirement,
-  evaluateAutonomousRequirement,
-  runAutonomousWithConcurrency,
-  AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY,
+  rollupAutonomousConfidence,
+  rollupAutonomousOverallStatus,
+  runAutonomousPciEvaluationPack,
 } from './pci_autonomous_evaluator';
 
 const pciAutonomousComplianceCheckSchema = z
@@ -92,32 +87,6 @@ export const PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID = securityTool(
   'pci_autonomous_compliance_check'
 );
 
-const rollupConfidence = (
-  rows: AutonomousEvaluatedRequirement[]
-): AutonomousComplianceConfidence => {
-  if (rows.length === 0) return 'NOT_ASSESSABLE';
-  const counts = rows.reduce((acc, r) => {
-    acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  if ((counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'NOT_ASSESSABLE';
-  if ((counts.LOW ?? 0) + (counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'LOW';
-  if ((counts.HIGH ?? 0) >= rows.length / 2) return 'HIGH';
-  return 'MEDIUM';
-};
-
-const rollupOverallStatus = (
-  rows: AutonomousEvaluatedRequirement[]
-): AutonomousComplianceStatus => {
-  const counts = rows.reduce((acc, r) => {
-    acc[r.status] = (acc[r.status] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  if ((counts.RED ?? 0) > 0) return 'RED';
-  if ((counts.AMBER ?? 0) > 0 || (counts.NOT_ASSESSABLE ?? 0) > 0) return 'AMBER';
-  return 'GREEN';
-};
-
 export const pciAutonomousComplianceCheckTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
@@ -130,8 +99,8 @@ export const pciAutonomousComplianceCheckTool = (
       'coverage, and preflight evaluations and returns per-requirement findings with ES|QL ' +
       'evidence and a scopeClaim provenance payload. Use this for actionable findings on one or ' +
       'more requirements. For an executive posture roll-up across the full standard, use the ' +
-      'sibling pci_autonomous_scorecard_report tool — the autonomous architect split these into ' +
-      'two specialised tools rather than one mode-parameterised tool.',
+      'sibling pci_autonomous_scorecard_report tool first, then drill down here on any ' +
+      'RED/AMBER requirements that need ES|QL evidence.',
     schema: pciAutonomousComplianceCheckSchema,
     availability: {
       cacheMode: 'space',
@@ -179,40 +148,14 @@ export const pciAutonomousComplianceCheckTool = (
       const indexList = getAutonomousIndexList(indices);
       const indexPattern = getAutonomousIndexPattern(indices);
 
-      const tasks = requirementIds.map((reqId) => async () => {
-        const { from, to } = getAutonomousTimeRangeForCheck(reqId, timeRange);
-        return evaluateAutonomousRequirement({
-          requirementId: reqId,
+      const { rows, requiredFieldsChecked, resolvedTimeRange } =
+        await runAutonomousPciEvaluationPack({
+          requirementIds,
           indexPattern,
-          from,
-          to,
+          timeRange,
           includeEvidence,
           esClient: esClient.asCurrentUser,
         });
-      });
-
-      const rows = await runAutonomousWithConcurrency(
-        tasks,
-        AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY
-      );
-
-      const requiredFieldsChecked = Array.from(
-        new Set(
-          requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? [])
-        )
-      );
-
-      const resolvedTimeRange =
-        timeRange ??
-        (() => {
-          const ranges = requirementIds.map((id) => getAutonomousTimeRangeForCheck(id));
-          const from = ranges.reduce(
-            (earliest, r) => (r.from < earliest ? r.from : earliest),
-            ranges[0].from
-          );
-          const to = ranges.reduce((latest, r) => (r.to > latest ? r.to : latest), ranges[0].to);
-          return { from, to };
-        })();
 
       const scopeClaim = buildAutonomousScopeClaim({
         indices: indexList,
@@ -227,8 +170,8 @@ export const pciAutonomousComplianceCheckTool = (
         return acc;
       }, {} as Record<string, number>);
 
-      const overallStatus = rollupOverallStatus(rows);
-      const overallConfidence = rollupConfidence(rows);
+      const overallStatus = rollupAutonomousOverallStatus(rows);
+      const overallConfidence = rollupAutonomousConfidence(rows);
 
       const results: Array<{
         type: ToolResultType;
