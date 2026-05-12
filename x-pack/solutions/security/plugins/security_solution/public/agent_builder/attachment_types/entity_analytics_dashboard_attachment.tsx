@@ -42,6 +42,7 @@ import {
   navigateToEntityAnalyticsHomePageInApp,
   type SecurityAgentBuilderChrome,
 } from './entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent_navigation_context';
 
 export type EntityAnalyticsDashboardAttachment = Attachment<
   typeof SecurityAgentBuilderAttachments.entityAnalyticsDashboard,
@@ -473,12 +474,7 @@ const EntityAnalyticsDashboardCanvasContent: React.FC<
           </EuiTitle>
           <EuiSpacer size="m" />
           {data.entities.length ? (
-            <EntityListTable
-              entities={data.entities}
-              application={application}
-              searchSession={searchSession}
-              closeCanvas={closeCanvas}
-            />
+            <EntityListTable entities={data.entities} closeCanvas={closeCanvas} />
           ) : (
             <EuiText size="s" color="subdued">
               {i18n.translate(
@@ -529,66 +525,76 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   searchSession?: ISessionService;
-}): AttachmentUIDefinition<EntityAnalyticsDashboardAttachment> => ({
-  getLabel: (attachment) =>
-    attachment.data.attachmentLabel ??
-    i18n.translate('xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.pillLabel', {
-      defaultMessage: 'Entity Analytics dashboard',
-    }),
-  getIcon: () => 'dashboardApp',
-  canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
-  renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
-  renderCanvasContent: (props, { closeCanvas }) => (
-    <EntityAnalyticsDashboardCanvasContent
-      {...props}
-      application={application}
-      searchSession={searchSession}
-      closeCanvas={closeCanvas}
-    />
-  ),
-  getActionButtons: ({ attachment, openCanvas, isCanvas, openSidebarConversation }) => {
-    if (isCanvas) {
-      const data = attachment.data;
+}): AttachmentUIDefinition<EntityAnalyticsDashboardAttachment> => {
+  return {
+    getLabel: (attachment) =>
+      attachment.data.attachmentLabel ??
+      i18n.translate('xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.pillLabel', {
+        defaultMessage: 'Entity Analytics dashboard',
+      }),
+    getIcon: () => 'dashboardApp',
+    canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
+    renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
+    renderCanvasContent: (props, { closeCanvas }) => (
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        agentBuilder={agentBuilder}
+        chrome={chrome}
+        openSidebarConversation={props.openSidebarConversation}
+        searchSession={searchSession}
+      >
+        <EntityAnalyticsDashboardCanvasContent
+          {...props}
+          application={application}
+          searchSession={searchSession}
+          closeCanvas={closeCanvas}
+        />
+      </EntityAnalyticsAgentNavigationProvider>
+    ),
+    getActionButtons: ({ attachment, openCanvas, isCanvas, openSidebarConversation }) => {
+      if (isCanvas) {
+        const data = attachment.data;
+        return [
+          {
+            label: i18n.translate(
+              'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.openInSecurity',
+              {
+                defaultMessage: 'Open Entity Analytics in Security',
+              }
+            ),
+            icon: 'popout',
+            type: ActionButtonType.SECONDARY,
+            handler: () => {
+              navigateToEntityAnalyticsHomePageInApp({
+                application,
+                appId: APP_UI_ID,
+                agentBuilder,
+                chrome,
+                openSidebarConversation,
+                watchlistId: data.watchlist_id,
+                watchlistName: data.watchlist_name,
+                searchSession,
+              });
+            },
+          },
+        ];
+      }
+      if (!openCanvas) {
+        return [];
+      }
       return [
         {
           label: i18n.translate(
-            'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.openInSecurity',
+            'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.preview',
             {
-              defaultMessage: 'Open Entity Analytics in Security',
+              defaultMessage: 'Preview',
             }
           ),
-          icon: 'popout',
+          icon: 'eye',
           type: ActionButtonType.SECONDARY,
-          handler: () => {
-            navigateToEntityAnalyticsHomePageInApp({
-              application,
-              appId: APP_UI_ID,
-              agentBuilder,
-              chrome,
-              openSidebarConversation,
-              watchlistId: data.watchlist_id,
-              watchlistName: data.watchlist_name,
-              searchSession,
-            });
-          },
+          handler: openCanvas,
         },
       ];
-    }
-    if (!openCanvas) {
-      return [];
-    }
-    return [
-      {
-        label: i18n.translate(
-          'xpack.securitySolution.agentBuilder.entityAnalyticsDashboard.preview',
-          {
-            defaultMessage: 'Preview',
-          }
-        ),
-        icon: 'eye',
-        type: ActionButtonType.SECONDARY,
-        handler: openCanvas,
-      },
-    ];
-  },
-});
+    },
+  };
+};
