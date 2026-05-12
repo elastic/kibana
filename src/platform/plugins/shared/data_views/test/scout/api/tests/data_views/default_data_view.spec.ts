@@ -11,22 +11,46 @@ import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, SERVICE_PATH, SERVICE_KEY } from '../../fixtures/constants';
 
+type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
+type ApiClientFixture = ApiWorkerFixtures['apiClient'];
+
 apiTest.describe(
   `default ${SERVICE_KEY} API (data view api)`,
   { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+    const testSpaceId = `default-data-view-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     const newId = () => `default-id-${Date.now()}-${Math.random()}`;
     const defaultPath = `${SERVICE_PATH}/default`;
     const serviceKeyId = `${SERVICE_KEY}_id`;
+    const scopedPath = (path: string) => `s/${testSpaceId}/${path}`;
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    function expectDefaultDataView(apiClient: ApiClientFixture, defaultId: string) {
+      return expect
+        .poll(async () => {
+          const getResponse = await apiClient.get(scopedPath(defaultPath), {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          });
+          return getResponse.body[serviceKeyId];
+        })
+        .toBe(defaultId);
+    }
+
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
+      await apiServices.spaces.create({
+        id: testSpaceId,
+        name: testSpaceId,
+      });
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
-      await apiClient.post(defaultPath, {
+      await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -39,10 +63,14 @@ apiTest.describe(
       });
     });
 
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.spaces.delete(testSpaceId);
+    });
+
     apiTest('can set default data view', async ({ apiClient }) => {
       const defaultId = newId();
 
-      const setResponse = await apiClient.post(defaultPath, {
+      const setResponse = await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -57,22 +85,13 @@ apiTest.describe(
       expect(setResponse).toHaveStatusCode(200);
       expect(setResponse.body.acknowledged).toBe(true);
 
-      const getResponse = await apiClient.get(defaultPath, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[serviceKeyId]).toBe(defaultId);
+      await expectDefaultDataView(apiClient, defaultId);
     });
 
     apiTest('does not override existing default without force flag', async ({ apiClient }) => {
       const defaultId = newId();
 
-      await apiClient.post(defaultPath, {
+      await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -84,7 +103,7 @@ apiTest.describe(
         },
       });
 
-      const overrideResponse = await apiClient.post(defaultPath, {
+      const overrideResponse = await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -97,22 +116,13 @@ apiTest.describe(
 
       expect(overrideResponse).toHaveStatusCode(200);
 
-      const getResponse = await apiClient.get(defaultPath, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[serviceKeyId]).toBe(defaultId);
+      await expectDefaultDataView(apiClient, defaultId);
     });
 
     apiTest('can clear default data view with force flag', async ({ apiClient }) => {
       const defaultId = newId();
 
-      await apiClient.post(defaultPath, {
+      await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -124,7 +134,7 @@ apiTest.describe(
         },
       });
 
-      const clearResponse = await apiClient.post(defaultPath, {
+      const clearResponse = await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -138,16 +148,7 @@ apiTest.describe(
 
       expect(clearResponse).toHaveStatusCode(200);
 
-      const getResponse = await apiClient.get(defaultPath, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[serviceKeyId]).toBe('');
+      await expectDefaultDataView(apiClient, '');
     });
   }
 );

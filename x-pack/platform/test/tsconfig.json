@@ -2,12 +2,7 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "node",
-      "cheerio",
-      "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
-    ],
+    "types": ["node", "cheerio", "@kbn/ambient-ui-types", "@kbn/ambient-ftr-types"],
     // there is still a decent amount of JS in this plugin and we are taking
     // advantage of the fact that TS doesn't know the types of that code and
     // gives us `any`. Once that code is converted to .ts we can remove this
@@ -179,7 +174,6 @@
     "@kbn/dev-cli-runner",
     "@kbn/ui-actions-plugin",
     "@kbn/product-doc-common",
-    "@kbn/lens-common",
     "@kbn/alerting-v2-episodes-ui"
   ]
 }
