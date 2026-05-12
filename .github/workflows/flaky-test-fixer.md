@@ -68,7 +68,7 @@ safe-outputs:
     draft: true
     max: 1
     title-prefix: "[flaky-fix] "
-    labels: [auto:flaky-fix, flaky-fix:running]
+    labels: [auto:flaky-fix]
     base-branch: main
     allowed-base-branches: [main]
     if-no-changes: "ignore"
@@ -91,13 +91,22 @@ timeout-minutes: 90
 
 # Flaky Test Fixer
 
-You are picking up a `failed-test` issue that the Failed Test Investigator has marked as auto-fixable. Your job is to open exactly one draft pull request with the smallest credible test-side fix.
+You are picking up a `failed-test` issue that the Failed Test Investigator has marked as auto-fixable. Your job is to produce the right outcome for this issue. Most of the time that means opening one draft pull request with the smallest credible test-side fix. Sometimes it means posting a single comment explaining why a fix is not appropriate or not yet possible, and opening no PR at all. Both outcomes are correct. What is not acceptable is opening a PR you are not reasonably confident in.
 
 ## Target issue
 
 - If triggered by `issues`, the target is the labeled issue (`needs-flaky-fix` was just added). It is a non-PR issue.
 - If triggered by `workflow_dispatch`, the target is issue number `${{ github.event.inputs.issue_number }}` in this repository.
 - In `workflow_dispatch` mode, fetch the issue first with the GitHub tools before doing anything else.
+
+## Where to post comments
+
+The `add_comment` safe output is configured with `target: "triggering"`. That means:
+
+- On the `issues: [labeled]` trigger, a comment lands on the failed-test issue that just received the `needs-flaky-fix` label. This is the normal path. Whenever this prompt tells you to "post a comment and stop", emit a single `add_comment` safe output — it goes there automatically.
+- On the `workflow_dispatch` trigger there is no triggering issue, so `add_comment` has nowhere to land. In that case, **do not emit an `add_comment`** for any of the "post a comment and stop" exits. Just stop. The workflow run logs are the only audit trail for manual dispatches; that is acceptable because `workflow_dispatch` is an operator escape hatch, not a normal user-facing path.
+
+Comments are never posted on the PR you would have opened — the PR does not exist when these exits fire.
 
 ## Pre-flight checks (do all of these before touching code)
 
@@ -110,12 +119,16 @@ If any of these fail, post a single comment on the issue explaining what happene
 
 ## Investigation and patch
 
-Once pre-flight passes, follow the Flaky Test Doctor playbook (in this repo at `x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc` — read it before starting). The short version:
+Once pre-flight passes:
 
-1. Read the failing test file and the helpers/fixtures it imports.
-2. Apply Steps 0–2 of the playbook quickly — verify the test is still meaningful, look for duplicate coverage, sanity-check that the test is at the right layer. If any of those checks indicate the right action is "delete" or "migrate" or "move to API/unit", **stop** and post a comment explaining why; do not open a fix PR. The investigator should have caught this, but verify.
-3. Identify the smallest test-side patch that addresses the root cause from the investigator's `Suspected Root Cause`. Test-side only. Do not change product code, do not change CI configuration, do not change `package.json` or any lockfile. The `excluded-files` policy will strip those from the patch anyway, but you should not try to write them in the first place.
-4. Apply the patch by editing the file(s) in the workspace.
+1. Read the failing test file and the helpers, fixtures, and page objects it imports.
+2. Re-read the investigator's `Suspected Root Cause` and `Proposed Fix` from the latest investigator comment on the issue.
+3. Sanity-check the test before patching. If any of the following is true, **stop** and post a comment explaining what you found; do not open a fix PR. The investigator should have caught these, but verify.
+   - The test no longer exercises a meaningful behavior (asserts on something trivially true, or covers behavior that has been removed).
+   - The behavior under test is already covered at a lower layer (an existing API or unit test asserts the same thing), making this test redundant.
+   - The test is at the wrong layer for the failure mode (a UI test asserting on a pure server-side concern, or vice versa).
+4. Identify the smallest test-side patch that addresses the root cause. Test-side only — no product code, no CI configuration, no `package.json` or lockfile edits. The `excluded-files` policy will drop those from the patch anyway, but do not write them in the first place.
+5. Apply the patch by editing the file(s) in the workspace.
 
 ## Local smoke gate
 
@@ -138,7 +151,16 @@ If the smoke gate fails:
 
 If the smoke gate passes on attempt N (N ≤ 5):
 
-- Proceed to "Output" below. Do not run further attempts.
+- Proceed to the Confidence gate below. Do not run further attempts.
+
+## Confidence gate (before opening the PR)
+
+A green smoke gate is necessary but not sufficient. Before you emit the `create_pull_request` output, answer both of these honestly:
+
+1. **Does the patch plausibly address the root cause from the investigator's `Suspected Root Cause`, not just make the symptom go away?** If you cannot explain in one sentence why this patch fixes the underlying race / ordering / state issue, your confidence is too low — post a comment describing what you tried and what you are unsure about, and stop without opening a PR.
+2. **Did the local smoke gate exercise the failure mode?** A Scout or FTR test that passed once locally on an unloaded machine is weak evidence against a flake that only shows up under CI parallel load. If the patch is a guess that "feels right" and you have no independent signal that it addresses the actual failure mode (e.g. the investigator's evidence, a clearly missing wait/assertion, a well-known anti-pattern in the failing test), post a comment and stop.
+
+The Flaky Test Runner exists to validate that the fix holds across many runs once the PR is open, but it cannot rescue a patch that is wrong by construction. When in doubt, comment and let a human take it from there — that is a successful outcome of this workflow, not a failure.
 
 ## Output
 
