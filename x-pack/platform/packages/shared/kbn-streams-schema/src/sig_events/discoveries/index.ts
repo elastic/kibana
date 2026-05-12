@@ -50,8 +50,6 @@ const findingFields = {
   infra_components: z.array(infraComponentSchema),
   cause_kis: z.array(causeKiSchema),
   evidences: z.array(evidenceSchema),
-  // Stamped post-creation by stamp_source_grouped when this finding is
-  // absorbed into a group discovery.
   grouped_into: z.string().optional(),
 };
 

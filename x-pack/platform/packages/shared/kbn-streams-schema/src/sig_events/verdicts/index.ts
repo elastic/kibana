@@ -46,7 +46,6 @@ const judgeVerdictSchema = z.object({
   dependency_edges: z.array(dependencyEdgeSchema),
   infra_components: z.array(infraComponentSchema),
   evidences: z.array(evidenceSchema),
-  // Populated only when the judge emits a group verdict.
   grouped_discovery_ids: z.array(z.string()).optional(),
 });
 

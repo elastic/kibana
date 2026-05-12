@@ -15,10 +15,6 @@ export interface CommonSearchOptions {
   to?: string;
 }
 
-/**
- * AND-combine two ES|QL WHERE conditions. Returns `next` when `current` is
- * undefined so callers can keep their first-clause path branchless.
- */
 export const andWhere = (
   current: LatestSourceWhereCondition | undefined,
   next: LatestSourceWhereCondition
@@ -26,11 +22,6 @@ export const andWhere = (
   return current ? esql.exp`${current} AND ${next}` : next;
 };
 
-/**
- * Build a `col IN (value1, value2, ...)` ES|QL expression for a list of
- * string values. Callers are expected to skip this helper when the list is
- * empty (an empty `IN ()` is not valid ES|QL).
- */
 export const inList = (col: string, values: string[]): LatestSourceWhereCondition => {
   const literals = values.map((v) => esql.str(v));
   return esql.exp`${esql.col(col)} IN (${literals})`;
