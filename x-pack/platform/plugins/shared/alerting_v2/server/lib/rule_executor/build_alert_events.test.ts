@@ -123,7 +123,7 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('does not set severity when the value is not in the supported set', () => {
-      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'urgent' }]);
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
 
       expect(doc.severity).toBeUndefined();
     });
@@ -153,9 +153,9 @@ describe('createAlertEventsBatchBuilder', () => {
     });
 
     it('keeps the unsupported severity value in the data attribute', () => {
-      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'urgent' }]);
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
 
-      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'urgent' });
+      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'SEV1' });
     });
   });
 });

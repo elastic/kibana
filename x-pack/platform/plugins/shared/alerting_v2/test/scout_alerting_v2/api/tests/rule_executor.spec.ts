@@ -469,7 +469,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     async ({ apiServices }) => {
       /**
        * Three breached groups exercise the three branches of the
-       * `severity` extraction in `createAlertEventsBatchBuilder`:
+       * `severity` extraction:
        *
        * - `host-severity-supported` — the ES|QL value is one of the
        *   supported severities (`critical`) and is copied onto the
@@ -478,7 +478,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
        *   executor lowercases the value before matching, so the
        *   top-level field is `high` while the original casing is
        *   preserved in `data.severity`.
-       * - `host-severity-unknown` — the ES|QL value (`urgent`) is not
+       * - `host-severity-unknown` — the ES|QL value (`SEV1`) is not
        *   in the supported set, so no top-level severity is written.
        *   The original value still shows up in `data.severity` because
        *   the executor never mutates the row payload.
@@ -510,16 +510,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-severity-extraction' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-severity-supported", "host-severity-uppercase", "host-severity-unknown") | KEEP host.name, severity, value`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
