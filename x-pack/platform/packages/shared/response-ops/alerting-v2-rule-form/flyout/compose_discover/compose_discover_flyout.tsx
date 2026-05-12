@@ -238,7 +238,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             <ComposeDiscoverChild
               state={uiState}
               dispatch={dispatch}
-              services={services}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
             />
           )}

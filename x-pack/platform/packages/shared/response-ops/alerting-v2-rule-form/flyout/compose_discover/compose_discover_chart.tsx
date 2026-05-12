@@ -9,10 +9,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { TypedLensByValueInput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
+import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import type { QueryColumn } from './use_query_execution';
 
 const CHART_HEIGHT = 180;
@@ -22,8 +22,6 @@ interface ComposeDiscoverChartProps {
   timeField: string;
   timeRange: { from: string; to: string };
   columns: QueryColumn[];
-  lens: LensPublicStart;
-  dataViews: DataViewsPublicPluginStart;
 }
 
 const toDatatableColumns = (columns: QueryColumn[]): DatatableColumn[] =>
@@ -41,9 +39,8 @@ export const ComposeDiscoverChart: React.FC<ComposeDiscoverChartProps> = ({
   timeField,
   timeRange,
   columns,
-  lens,
-  dataViews,
 }) => {
+  const { lens, dataViews } = useRuleFormServices();
   const [lensAttributes, setLensAttributes] = useState<
     TypedLensByValueInput['attributes'] | undefined
   >(undefined);

@@ -32,7 +32,7 @@ import {
 import { CodeEditor } from '@kbn/code-editor';
 import { ESQL_LANG_ID } from '@kbn/code-editor';
 import type { FormValues } from '../../form/types';
-import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
 import { useQueryExecution } from './use_query_execution';
@@ -41,7 +41,6 @@ import { ComposeDiscoverChart } from './compose_discover_chart';
 interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
-  services: RuleFormServices;
   onClose: () => void;
 }
 
@@ -57,9 +56,9 @@ const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   state,
   dispatch,
-  services,
   onClose,
 }) => {
+  const services = useRuleFormServices();
   const [localQuery, setLocalQuery] = useState(state.sandbox.query);
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
@@ -325,8 +324,6 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
                 timeField={timeField}
                 timeRange={timeRange}
                 columns={columns}
-                lens={services.lens}
-                dataViews={services.dataViews}
               />
 
               <EuiSpacer size="m" />
