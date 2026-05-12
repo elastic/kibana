@@ -669,29 +669,18 @@ export class PackageInstaller {
       await this.uninstallOpenAPISpec({ inferenceId: effectiveInferenceId });
 
       if (isDefaultLinuxElserInferenceId(effectiveInferenceId)) {
+        // Ensure ELSER is deployed
         await ensureDefaultElserDeployed({
           client: this.esClient,
         });
       } else {
+        // or ARM which can be a different Inference id
         await ensureInferenceDeployed({ client: this.esClient, inferenceId: effectiveInferenceId });
       }
-      // Ensure ELSER is deployed
-<<<<<<< HEAD
-      // Build artifact name
-      const inferenceIdSuffix = isImpliedDefaultElserInferenceId(effectiveInferenceId)
-        ? ''
-        : `--${effectiveInferenceId}`;
-      const artifactFileName = `kb-product-doc-openapi-${stackVersion}${inferenceIdSuffix}.zip`;
-=======
-      await ensureDefaultElserDeployed({
-        client: this.esClient,
-      });
-
       const artifactFileName = this.getOpenApiArtifactFileName({
         stackVersion,
         inferenceId: effectiveInferenceId,
       });
->>>>>>> upstream/main
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
       const artifactPath = `${this.artifactsFolder}/${artifactFileName}`;
 
