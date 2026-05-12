@@ -5,30 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { settingDefinitions } from '../setting_definitions';
-import type { SettingValidation } from '../setting_definitions/types';
-
-// retrieve validation from config definitions settings and validate on the server
-const knownSettings = settingDefinitions.reduce<Record<string, SettingValidation>>(
-  (acc, { key, validation }) => {
-    acc[key] = validation;
-    return acc;
-  },
-  {}
-);
-
-export const serviceRt = t.partial({
-  name: t.string,
-  environment: t.string,
-});
-
-export const settingsRt = t.intersection([t.record(t.string, t.string), t.partial(knownSettings)]);
-
-export const agentConfigurationIntakeRt = t.intersection([
-  t.partial({ agent_name: t.string }),
-  t.type({
-    service: serviceRt,
-    settings: settingsRt,
-  }),
-]);
+export { serviceRt, settingsRt, agentConfigurationIntakeRt } from '@kbn/apm-agent-configuration';
