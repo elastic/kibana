@@ -382,8 +382,8 @@ describe('UpdateSLO', () => {
 
       expectInstallationOfUpdatedSLOResources();
 
-      const errorMessages = mockLogger.error.mock.calls.map(([msg]) => String(msg));
-      expect(errorMessages).toEqual(
+      const warnMessages = mockLogger.warn.mock.calls.map(([msg]) => String(msg));
+      expect(warnMessages).toEqual(
         expect.arrayContaining([
           expect.stringContaining(
             `previous revision of SLO [id=${slo.id}, revision=${slo.revision}]`
