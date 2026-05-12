@@ -44,7 +44,7 @@ Based on what Steps 2-3 revealed, choose the most relevant deep-dive:
 **If latency is the main signal:**
 - `get_trace_metrics` with `groupBy: "transaction"` — find which transactions are slow.
 - `get_trace_change_points` — statistical detection of **ingress** (incoming) latency / throughput / failure shifts over time.
-- `get_exit_span_change_points` — same for **egress** (outbound dependency) metrics.
+- `get_exit_span_change_points` — statistical detection of **egress** (outbound dependency) metrics.
 - `get_traces` — examine slow traces span-by-span to find the bottleneck.
 - `get_runtime_metrics` — check if JVM/runtime resource exhaustion (GC pauses, heap pressure) is causing slowness.
 

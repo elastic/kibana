@@ -14,7 +14,6 @@ import {
   type ApmSynthtraceEsClient,
   generateTraceChangePointsData,
 } from '@kbn/synthtrace';
-import { generateApmErrorData, indexAll, type ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { timerange } from '@kbn/synthtrace-client';
