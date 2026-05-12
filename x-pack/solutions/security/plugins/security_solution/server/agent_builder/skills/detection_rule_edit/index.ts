@@ -48,9 +48,17 @@ This covers the rule type ES|QL. Do not create a rule with a rule type other tha
 
 ## Core Workflow
 
-### Step 1: Always Read the Attachment First
+### Determine the path
 
-Before accessing or modifying any rule data, you MUST call \`attachment_read\` on the rule attachment to get the current state. Never assume attachment contents.
+Before doing anything, determine the user's intent and whether a rule attachment exists in the conversation context:
+
+- **Attachment exists in context** → edit path: proceed to Step 1.
+- **No attachment, creation intent** (user wants to build a new rule) → creation path: skip Step 1, go directly to Step 2 then Step 3 (create).
+- **No attachment, edit intent** (user references an existing rule they want to modify) → call \`attachment_list\` to check whether a rule attachment exists in the session but wasn't yet referenced. If one is found, proceed with the edit path. If nothing is found, tell the user that the rule needs to be open as an attachment before it can be edited, and ask them to open it first.
+
+### Step 1: Read the Attachment (edit path only)
+
+Before accessing or modifying any rule data, call \`attachment_read\` on the rule attachment to get the current state. Never assume attachment contents.
 
 ### Step 2: Research Before Creating or Editing
 
@@ -66,41 +74,42 @@ This is especially important when:
 
 ### Step 3: Create or Modify the Rule
 
-If you are creating a new rule, first apply the clarification gate:
+#### Creation path (no attachment in context)
 
-**Clarification gate**: Before calling \`security.create_detection_rule\`, check whether the request is specific enough. A request is specific enough if it includes at least one of:
+Before calling \`security.create_detection_rule\`, apply the clarification gate:
+
+**Clarification gate**: Check whether the request is specific enough. A request is specific enough if it includes at least one of:
 - A concrete behavior or indicator (e.g., "PowerShell spawning cmd.exe", "failed logins from unusual countries")
 - A data source or index hint (e.g., "Windows event logs", "authentication data")
 - A frequency or count condition (e.g., "more than 10 failures in 5 minutes")
 
 If none of the above is present, ask the user one focused question — the single most important missing piece — before generating the rule. Do not ask multiple questions at once.
 
-Once the request is specific enough:
-- **Creating a new rule**: ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule to create. The tool handles rule creation AND attachment update automatically. Do NOT call \`attachment_update\`.
-- after calling the \`security.create_detection_rule\` tool, move to step 4.
-- render the latest version of the attachment inline.
+Once the request is specific enough, ALWAYS use the \`security.create_detection_rule\` tool. Pass a natural language description of the detection rule. The tool handles rule creation AND attachment creation automatically. Do NOT call \`attachment_update\`.
 
+After the tool returns, render the attachment inline.
 
-When asked to edit or update the rule or any field of the rule, use the following:
-**Editing an existing rule** (changing fields like tags, severity, description, schedule, MITRE ATT&CK, index patterns, query, etc.):
+---
+
+#### Edit path (attachment in context, or found via attachment_list)
 
 When the user says "add to the rule", "edit the rule", "change the rule", "update the rule", or any variation — they ALWAYS mean the **rule attachment**. The rule lives inside the attachment's \`text\` field as stringified JSON. There is no other rule object.
 
 Follow these steps exactly. Every step is MANDATORY:
 
-1. **Read the latest attachment** — call \`attachment_read\` to get the current version. NEVER skip this, even if you read it before. Always get the latest state.
-2. **Parse** the \`text\` field (stringified JSON of the rule).
-3. **Modify** only the fields the user asked to change. Do not add or remove other fields.
-4. **Re-stringify the ENTIRE rule object** — never send partial updates.
-5. **Call \`attachment_update\`** to persist the change:
+1. **Parse** the \`text\` field from the attachment (stringified JSON of the rule).
+2. **Modify** only the fields the user asked to change. Do not add or remove other fields.
+3. **Re-stringify the ENTIRE rule object** — never send partial updates.
+4. **Call \`attachment_update\`** to persist the change:
 \`\`\`
 attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "<full stringified rule JSON>" } })
 \`\`\`
-- Render the latest version of the attachment inline.
+
+After the tool returns, render the attachment inline.
 
 
 Checklist before finishing the answer:
-- [ ] Did I call the tool read attachment first?
+- [ ] (Edit path only) Did I call \`attachment_list\` (if no attachment was in context) and then \`attachment_read\` before modifying?
 - [ ] Did I render inline the latest version of the attachment? ← YOU MUST DO THIS, always render the latest version of the attachment inline.
 
 ---
@@ -322,9 +331,9 @@ User says: "Add the tags Network and Lateral Movement to the rule"
 
 ## CRITICAL INSTRUCTIONS — READ CAREFULLY
 
-1. "The rule" ALWAYS refers to the rule attachment. Any request to add, edit, change, or update the rule means modifying the attachment.
+1. "The rule" ALWAYS refers to the rule attachment. Any request to add, edit, change, or update the rule means modifying the attachment — unless no attachment exists and none can be found via \`attachment_list\`, in which case tell the user to open the rule first.
 2. NEVER just suggest or describe changes — ALWAYS apply them by calling \`attachment_update\` or \`security.create_detection_rule\`. The user expects the rule to be updated, not a description of what to update.
-3. ALWAYS read the attachment before modifying it.
+3. ALWAYS read the attachment before modifying it (edit path only — skip for fresh creation).
 4. ALWAYS re-stringify the FULL rule object — never send partial updates.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
 6. ALWAYS use \`security.create_detection_rule\` when creating a new rule.
