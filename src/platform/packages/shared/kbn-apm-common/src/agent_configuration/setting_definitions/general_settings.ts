@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EDOT_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
+import { EDOT_AGENT_NAMES, OTEL_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
 import { logEcsReformattingRt } from '../runtime_types/log_ecs_reformatting_rt';
@@ -38,6 +38,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'android/java',
       'iOS/swift',
       ...EDOT_AGENT_NAMES,
+      ...OTEL_AGENT_NAMES,
     ],
   },
 
@@ -63,6 +64,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'android/java',
       'iOS/swift',
       ...EDOT_AGENT_NAMES,
+      ...OTEL_AGENT_NAMES,
     ],
   },
 
@@ -85,7 +87,15 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions', value: 'transactions' },
       { text: 'all', value: 'all' },
     ],
-    excludeAgents: ['js-base', 'rum-js', 'php', 'android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'php',
+      'android/java',
+      'iOS/swift',
+      ...EDOT_AGENT_NAMES,
+      ...OTEL_AGENT_NAMES,
+    ],
   },
 
   {
@@ -124,6 +134,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'android/java',
       'iOS/swift',
       ...EDOT_AGENT_NAMES,
+      ...OTEL_AGENT_NAMES,
     ],
   },
 
@@ -297,16 +308,7 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When set to non-recording, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when set to non-recording, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.',
     }),
-    excludeAgents: [
-      'nodejs',
-      'rum-js',
-      'js-base',
-      'opentelemetry/dotnet/elastic',
-      'opentelemetry/nodejs/elastic',
-      'opentelemetry/php/elastic',
-      'opentelemetry/python/elastic',
-      'opentelemetry/java/elastic',
-    ],
+    excludeAgents: ['nodejs', 'rum-js', 'js-base', ...EDOT_AGENT_NAMES, ...OTEL_AGENT_NAMES],
   },
 
   {
@@ -409,6 +411,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'android/java',
       'iOS/swift',
       ...EDOT_AGENT_NAMES,
+      ...OTEL_AGENT_NAMES,
     ],
   },
 
@@ -491,7 +494,14 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.transactionMaxSpans.description', {
       defaultMessage: 'Limits the amount of spans that are recorded per transaction.',
     }),
-    excludeAgents: ['js-base', 'rum-js', 'android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'android/java',
+      'iOS/swift',
+      ...EDOT_AGENT_NAMES,
+      ...OTEL_AGENT_NAMES,
+    ],
   },
 
   // Transaction sample rate
@@ -506,7 +516,7 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.',
     }),
-    excludeAgents: ['android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
+    excludeAgents: ['android/java', 'iOS/swift', ...EDOT_AGENT_NAMES, ...OTEL_AGENT_NAMES],
   },
 
   // Sanitize field names
