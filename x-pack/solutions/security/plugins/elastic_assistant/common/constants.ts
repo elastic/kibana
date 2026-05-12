@@ -12,7 +12,7 @@ export {
 
 export const PLUGIN_ID = 'elasticAssistant';
 
-export const AI_ASSISTANT_INFERENCE_FEATURE_ID = 'ai_assistant';
+export const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
 export const ELASTIC_AI_ASSISTANT_INFERENCE_FEATURE_ID = 'elastic_assistant';
 export const PLUGIN_NAME = 'elasticAssistant';
 

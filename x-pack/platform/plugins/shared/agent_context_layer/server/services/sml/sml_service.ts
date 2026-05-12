@@ -10,7 +10,13 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
-import type { SmlService, SmlSearchResult, SmlDocument, SmlTypeDefinition } from './types';
+import type {
+  SmlService,
+  SmlSearchResult,
+  SmlDocument,
+  SmlTypeDefinition,
+  SmlSearchFilters,
+} from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
@@ -75,7 +81,7 @@ class SmlServiceImpl implements SmlServiceInstance {
 
     return {
       getCrawler: () => crawler,
-      search: async ({ query, size = 10, spaceId, esClient, request, skipContent }) => {
+      search: async ({ query, size = 10, spaceId, esClient, request, skipContent, filters }) => {
         const rawResults = await searchSml({
           query,
           size,
@@ -83,6 +89,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           esClient,
           logger,
           skipContent,
+          filters,
         });
         return filterResultsByPermissions({
           searchResult: rawResults,
@@ -316,8 +323,11 @@ const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
 ] as const;
 
 /**
- * Build the search query from a single string. Only `type` and `title` (search_as_you_type + bool_prefix) are searched.
- * After trim: empty string or `*` → `match_all` (return everything)
+ * Build the search query from a single string. `type` and `title` use search_as_you_type + bool_prefix
+ * for autocomplete-style matching, while `content` and `description` (semantic_text fields) are
+ * matched with standard `match` queries so longer-form text is also retrievable.
+ *
+ * After trim: empty string or `*` → `match_all` (return everything).
  */
 const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
   const trimmed = query.trim();
@@ -325,12 +335,78 @@ const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
     return { match_all: {} };
   }
   return {
-    multi_match: {
-      query: trimmed,
-      type: 'bool_prefix',
-      fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+    bool: {
+      should: [
+        {
+          multi_match: {
+            query: trimmed,
+            type: 'bool_prefix',
+            fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
+          },
+        },
+        { match: { content: trimmed } },
+        { match: { description: trimmed } },
+      ],
+      minimum_should_match: 1,
     },
   };
+};
+
+/**
+ * Build an ES filter clause from per-type SML search filters.
+ *
+ * For each type with an `ids` constraint, the filter returns documents that
+ * either (a) match the type AND have an origin_id in the list, or (b) are
+ * NOT of the constrained type. Types without filters are unaffected.
+ */
+export const buildTypeFilters = (
+  filters: SmlSearchFilters | undefined
+): Record<string, unknown> | undefined => {
+  if (!filters) {
+    return undefined;
+  }
+
+  const clauses: Array<Record<string, unknown>> = [];
+
+  for (const [typeId, criteria] of Object.entries(filters)) {
+    if (!criteria?.ids) {
+      continue;
+    }
+
+    if (criteria.ids.length === 0) {
+      // Explicitly empty → exclude all documents of this type
+      clauses.push({ bool: { must_not: [{ term: { type: typeId } }] } });
+    } else {
+      // Non-empty → allow matching documents of this type, pass through other types
+      clauses.push({
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [{ term: { type: typeId } }, { terms: { origin_id: criteria.ids } }],
+              },
+            },
+            {
+              bool: {
+                must_not: [{ term: { type: typeId } }],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+  }
+
+  if (clauses.length === 0) {
+    return undefined;
+  }
+
+  if (clauses.length === 1) {
+    return clauses[0];
+  }
+
+  return { bool: { must: clauses } };
 };
 
 /**
@@ -344,6 +420,7 @@ const searchSml = async ({
   esClient,
   logger,
   skipContent,
+  filters,
 }: {
   query: string;
   size: number;
@@ -351,6 +428,7 @@ const searchSml = async ({
   esClient: IScopedClusterClient;
   logger: Logger;
   skipContent?: boolean;
+  filters?: SmlSearchFilters;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
   logger.debug(
     `SML search: query=${JSON.stringify(
@@ -361,6 +439,19 @@ const searchSml = async ({
   try {
     const smlQuery = buildSmlSearchQuery(query);
 
+    const typeFilter = buildTypeFilters(filters);
+    const filterClauses: Array<Record<string, unknown>> = [
+      {
+        bool: {
+          should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+          minimum_should_match: 1,
+        },
+      },
+    ];
+    if (typeFilter) {
+      filterClauses.push(typeFilter);
+    }
+
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
       size,
@@ -369,17 +460,10 @@ const searchSml = async ({
       query: {
         bool: {
           must: [smlQuery],
-          filter: [
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: filterClauses,
         },
       },
-      _source: skipContent ? { excludes: ['content'] } : true,
+      _source: skipContent ? { excludes: ['content', 'description'] } : true,
     });
 
     const total =
@@ -397,10 +481,13 @@ const searchSml = async ({
           title: source.title ?? '',
           origin_id: source.origin_id ?? '',
           content: source.content,
+          description: source.description,
+          references: source.references,
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
+          user_id: source.user_id,
           score: hit._score ?? 0,
         };
       });
@@ -470,6 +557,15 @@ const getDocumentsByIds = async ({
         spaces: source.spaces ?? [],
         permissions: source.permissions ?? [],
       };
+      if (source.description !== undefined) {
+        doc.description = source.description;
+      }
+      if (source.user_id !== undefined) {
+        doc.user_id = source.user_id;
+      }
+      if (source.references !== undefined) {
+        doc.references = source.references;
+      }
       docMap.set(doc.id, doc);
     }
   } catch (error) {

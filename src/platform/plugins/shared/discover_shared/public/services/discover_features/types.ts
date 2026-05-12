@@ -13,6 +13,7 @@ import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
@@ -112,6 +113,7 @@ export interface ObservabilityLogEventsFeature {
       enableDocumentViewer: false;
       enableFilters: false;
     };
+    executionContext?: KibanaExecutionContext;
   }) => JSX.Element;
 }
 
@@ -143,11 +145,29 @@ export interface SecuritySolutionAlertFlyoutFooterFeature {
   renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
+export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
+  id: 'security-solution-ioc-flyout-overview-tab';
+  render: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutHeaderFeature {
+  id: 'security-solution-ioc-flyout-header';
+  renderHeader: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutFooterFeature {
+  id: 'security-solution-ioc-flyout-footer';
+  renderFooter: (props: DocViewRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
   | SecuritySolutionAlertFlyoutHeaderTitleFeature
-  | SecuritySolutionAlertFlyoutFooterFeature;
+  | SecuritySolutionAlertFlyoutFooterFeature
+  | SecuritySolutionIOCFlyoutOverviewTabFeature
+  | SecuritySolutionIOCFlyoutHeaderFeature
+  | SecuritySolutionIOCFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 
