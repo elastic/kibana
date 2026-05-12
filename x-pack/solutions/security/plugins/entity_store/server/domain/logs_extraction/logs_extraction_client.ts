@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/se
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type {
+  EntityIdentity,
   EntityType,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
@@ -528,6 +529,7 @@ export class LogsExtractionClient {
         const probePromise = this.runLogPaginationCursorProbeForNextPage({
           indexPatterns,
           type,
+          identityField: entityDefinition.identityField,
           fromDateISO,
           toDateISO,
           logsPageCursorStart,
@@ -593,6 +595,7 @@ export class LogsExtractionClient {
   private async runLogPaginationCursorProbeForNextPage({
     indexPatterns,
     type,
+    identityField,
     fromDateISO,
     toDateISO,
     logsPageCursorStart,
@@ -601,20 +604,37 @@ export class LogsExtractionClient {
   }: {
     indexPatterns: string[];
     type: EntityType;
+    /**
+     * Definition's own identity. Required for stream-derived (KI) generic
+     * definitions whose identity field is not `entity.id`; without it the
+     * probe falls back to the registry's static identity for `type` and
+     * emits `entity.id IS NOT NULL` in the WHERE clause, which fails
+     * verification against arbitrary stream indices.
+     */
+    identityField: EntityIdentity;
     fromDateISO: string;
     toDateISO: string;
     logsPageCursorStart: PaginationParams | undefined;
     maxLogsPerPage: number;
     opts?: LogsExtractionOptions;
   }): Promise<LogPaginationCursor> {
-    const logPaginationCursorProbeQuery = buildLogPaginationCursorProbeEsql({
-      indexPatterns,
-      type,
-      fromDateISO,
-      toDateISO,
-      logsPageCursorStart,
-      maxLogsPerPage,
-    });
+    const logPaginationCursorProbeQuery =
+      // Mirrors the main extraction query (and the CCS probe) in tolerating
+      // unmapped source columns. Required for stream-derived (KI) definitions
+      // whose `indexPatterns` (e.g. `logs.ecs.windows`) may not map every
+      // entity.*/event.*/asset.* column referenced through `identityField` or
+      // its dependent ESQL helpers. Without this, ESQL aborts the probe with
+      // `verification_exception` and the whole extraction loop fails.
+      `SET unmapped_fields="nullify";\n` +
+      buildLogPaginationCursorProbeEsql({
+        indexPatterns,
+        type,
+        identityField,
+        fromDateISO,
+        toDateISO,
+        logsPageCursorStart,
+        maxLogsPerPage,
+      });
 
     const logPaginationCursorProbeResponse = await executeEsqlQuery({
       esClient: this.esClient,
