@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { CreateNewWorkflowSubform } from './components/create_new_workflow_subform';
 import { ExistingWorkflowSelector } from './components/existing_workflow_selector';
 import { getDefaultSingleStepWorkflowType } from './registry';
@@ -36,23 +36,20 @@ export const SingleStepWorkflowForm = ({
   isInvalid,
   errorMessage,
 }: SingleStepWorkflowFormProps) => {
-  const handleSelectExisting = useCallback(
-    (workflowId: string) => {
-      if (value.mode === 'existing' && value.workflowId === workflowId) return;
-      onChange({ mode: 'existing', workflowId });
-    },
-    [onChange, value]
-  );
+  const handleSelectExisting = (workflowId: string) => {
+    if (value.mode === 'existing' && value.workflowId === workflowId) return;
+    onChange({ mode: 'existing', workflowId });
+  };
 
-  const handleCreateNew = useCallback(() => {
+  const handleCreateNew = () => {
     if (value.mode === 'create') return;
     onChange(createInitialCreateValue());
-  }, [onChange, value.mode]);
+  };
 
-  const handleBackToExisting = useCallback(() => {
+  const handleBackToExisting = () => {
     if (value.mode === 'existing' && value.workflowId === null) return;
     onChange({ mode: 'existing', workflowId: null });
-  }, [onChange, value]);
+  };
 
   if (value.mode === 'existing') {
     return (

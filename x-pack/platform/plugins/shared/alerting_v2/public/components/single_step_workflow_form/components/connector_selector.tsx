@@ -8,7 +8,7 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useFetchConnectorsByType } from '../hooks/use_fetch_connectors_by_type';
 
 interface ConnectorSelectorProps {
@@ -20,21 +20,15 @@ interface ConnectorSelectorProps {
 export const ConnectorSelector = ({ connectorTypeId, value, onChange }: ConnectorSelectorProps) => {
   const { data: connectors = [], isLoading } = useFetchConnectorsByType({ connectorTypeId });
 
-  const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(
-    () =>
-      connectors.map((connector) => ({
-        label: connector.name,
-        value: connector.id,
-        disabled: connector.isMissingSecrets,
-      })),
-    [connectors]
-  );
+  const options: Array<EuiComboBoxOptionOption<string>> = connectors.map((connector) => ({
+    label: connector.name,
+    value: connector.id,
+    disabled: connector.isMissingSecrets,
+  }));
 
-  const selected = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    if (!value) return [];
-    const match = connectors.find((c) => c.id === value);
-    return [{ label: match?.name ?? value, value }];
-  }, [connectors, value]);
+  const selected: Array<EuiComboBoxOptionOption<string>> = value
+    ? [{ label: connectors.find((c) => c.id === value)?.name ?? value, value }]
+    : [];
 
   return (
     <EuiFormRow

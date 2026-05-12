@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useFetchWorkflows } from '../../../hooks/use_fetch_workflows';
 import { SINGLE_STEP_WORKFLOW_TAG } from '../constants';
 
@@ -46,25 +46,21 @@ export const ExistingWorkflowSelector = ({
     isEnabled: isWorkflowsEnabled,
   });
 
-  const workflowOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    const results = workflowsData?.results ?? [];
-    return [
-      ...results.map((w) => ({ label: w.name, value: w.id })),
-      {
-        label: i18n.translate(
-          'xpack.alertingV2.singleStepWorkflow.existing.createNewWorkflowOption',
-          { defaultMessage: '+ Create new workflow' }
-        ),
-        value: CREATE_NEW_OPTION_VALUE,
-      },
-    ];
-  }, [workflowsData?.results]);
+  const results = workflowsData?.results ?? [];
+  const workflowOptions: Array<EuiComboBoxOptionOption<string>> = [
+    ...results.map((w) => ({ label: w.name, value: w.id })),
+    {
+      label: i18n.translate(
+        'xpack.alertingV2.singleStepWorkflow.existing.createNewWorkflowOption',
+        { defaultMessage: '+ Create new workflow' }
+      ),
+      value: CREATE_NEW_OPTION_VALUE,
+    },
+  ];
 
-  const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(() => {
-    if (!value) return [];
-    const match = workflowsData?.results.find((w) => w.id === value);
-    return [{ label: match?.name ?? value, value }];
-  }, [value, workflowsData?.results]);
+  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = value
+    ? [{ label: results.find((w) => w.id === value)?.name ?? value, value }]
+    : [];
 
   if (!isWorkflowsEnabled) {
     const settingsUrl = application.getUrlForApp('management', {
