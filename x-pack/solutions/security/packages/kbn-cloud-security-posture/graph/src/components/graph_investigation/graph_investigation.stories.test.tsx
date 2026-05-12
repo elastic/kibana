@@ -445,7 +445,7 @@ describe('GraphInvestigation Component', () => {
     });
   });
 
-  describe('overlay dismissal (issue #264433)', () => {
+  describe('dismisses external overlays on ReactFlow pane click', () => {
     const openFilterDropdown = async (container: HTMLElement) => {
       await showActionsByNode(container, 'admin@example.com');
       // The filter button takes a moment to appear in the search bar after the
