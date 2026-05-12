@@ -333,17 +333,16 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Alerts RAG Regression'
-        key: kbn-evals-weekly-alerts-rag-regression
+      - label: 'Evals: Security Alerts RAG Regression'
+        key: kbn-evals-weekly-security-alerts-rag-regression
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'alerts-rag-regression'
+          EVAL_SUITE_ID: 'security-alerts-rag-regression'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          # Keep in sync with `weeklyEisModelGroups` for alerts-rag-regression in evals.suites.json.
-          EVAL_MODEL_GROUPS: 'eis/openai-gpt-4o,eis/anthropic-claude-3-5-sonnet,eis/google-gemini-2-5-pro'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

@@ -188,18 +188,12 @@
       "ciLabels": ["evals:security-automatic-migrations"]
     },
     {
-      "id": "alerts-rag-regression",
-      "name": "Alerts RAG Regression",
+      "id": "security-alerts-rag-regression",
+      "name": "Security Alerts RAG Regression",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/playwright.config.ts",
       "tags": ["security", "alerts-rag"],
-      "ciLabels": ["evals:alerts-rag-regression"],
-      "schedule": "nightly",
-      "weeklyEisModelGroups": [
-        "eis/openai-gpt-4o",
-        "eis/anthropic-claude-3-5-sonnet",
-        "eis/google-gemini-2-5-pro"
-      ]
+      "ciLabels": ["evals:security-alerts-rag-regression"]
     }
   ]
 }
