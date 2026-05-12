@@ -268,33 +268,9 @@ The lookback should be at least as long as the interval. A common pattern is int
 
 ### Query, Language, and Type
 
-\`query\` (string): The detection query.
-\`language\` (string): Query language.
-\`type\` (string): Rule type.
-
-Always set \`type\` and \`language\` together. Supported languages per rule type:
-
-\`\`\`
-esql           → language: "esql"
-eql            → language: "eql"
-query          → language: "kuery" | "lucene"
-saved_query    → language: "kuery" | "lucene"
-threshold      → language: "kuery" | "lucene"
-threat_match   → language: "kuery" | "lucene"
-new_terms      → language: "kuery" | "lucene"
-machine_learning → no query or language fields
-\`\`\`
-
-**Example** — KQL query rule:
-\`\`\`json
-{
-  "type": "query",
-  "language": "kuery",
-  "query": "process.name: powershell.exe and event.action: start",
-  "index": ["logs-*", "winlogbeat-*"],
-  ...
-}
-\`\`\`
+\`query\` (string): The ES|QL detection query.
+\`language\` (string): Always \`"esql"\`.
+\`type\` (string): Always \`"esql"\`.
 
 ### Index Patterns
 
