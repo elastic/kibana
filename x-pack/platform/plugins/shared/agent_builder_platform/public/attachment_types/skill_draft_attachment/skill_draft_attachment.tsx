@@ -23,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import {
   ActionButtonType,
   type ActionButton,
@@ -389,6 +390,13 @@ export const createSkillDraftAttachmentDefinition = ({
   application,
 }: CreateSkillDraftDeps): AttachmentUIDefinition<SkillDraftAttachment> => {
   const canCreate = application.capabilities.agentBuilder?.manageSkills === true;
+  const isLatest = ({
+    version,
+    versionCount,
+  }: {
+    version: number | undefined;
+    versionCount: number | undefined;
+  }) => typeof version === 'number' && typeof versionCount === 'number' && version === versionCount;
 
   return {
     getLabel: (attachment) =>
@@ -396,7 +404,44 @@ export const createSkillDraftAttachmentDefinition = ({
       i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.label', {
         defaultMessage: 'Skill draft',
       }),
-    getIcon: () => 'bullseye',
+    getHeaderIcon: () => 'sparkles',
+    getHeaderBadges: ({ attachment, version, versionCount }) => {
+      const headerBadges: HeaderBadge[] = [];
+      const isCreated = Boolean(attachment.origin);
+
+      if (isCreated) {
+        const createdBadge: HeaderBadge = {
+          label: i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createdBadge', {
+            defaultMessage: 'Created',
+          }),
+          color: 'success',
+          iconType: 'check',
+        };
+        headerBadges.push(createdBadge);
+        // Created attachments only show created badge
+        return headerBadges;
+      }
+
+      const draftBadge: HeaderBadge = {
+        label: i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge', {
+          defaultMessage: 'Draft',
+        }),
+        color: 'hollow',
+      };
+      headerBadges.push(draftBadge);
+
+      if (isLatest({ version, versionCount })) {
+        const latestBadge: HeaderBadge = {
+          label: i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.latestBadge', {
+            defaultMessage: 'Latest',
+          }),
+          color: 'primary',
+        };
+        headerBadges.push(latestBadge);
+      }
+
+      return headerBadges;
+    },
     renderInlineContent: (props) => <SkillDraftInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillDraftCanvasContent {...props} />,
     getActionButtons: ({
@@ -408,8 +453,7 @@ export const createSkillDraftAttachmentDefinition = ({
       versionCount,
     }) => {
       const isCreated = Boolean(attachment.origin);
-      const isOutdatedVersion =
-        typeof version === 'number' && typeof versionCount === 'number' && version !== versionCount;
+
       const actionButtons: ActionButton[] = [];
       const createSkill = async () => {
         try {
@@ -442,15 +486,13 @@ export const createSkillDraftAttachmentDefinition = ({
           label: viewFullSkillLabel,
           icon: 'expand',
           type: ActionButtonType.SECONDARY,
-          handler: () => {
-            openCanvas();
-          },
+          handler: openCanvas,
         };
         actionButtons.push(viewFullSkillButton);
       }
 
-      if (!isOutdatedVersion) {
-        // Outdated drafts can only be viewed, not created — the create action belongs to the latest draft.
+      if (isLatest({ version, versionCount })) {
+        // Only show create button for the latest draft
         const createButton: ActionButton = {
           label: isCreated ? createdLabel : createSkillLabel,
           icon: isCreated ? 'check' : 'save',

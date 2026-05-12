@@ -12,6 +12,8 @@ export type {
   CanvasRenderCallbacks,
   InlineRenderCallbacks,
   GetActionButtonsParams,
+  GetHeaderParams,
+  HeaderBadge,
   ActionButton,
   AttachmentPreviewState,
   AttachmentLifecycleParams,

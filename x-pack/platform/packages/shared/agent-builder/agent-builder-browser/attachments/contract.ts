@@ -122,6 +122,31 @@ export interface AttachmentLifecycleParams<
 }
 
 /**
+ * Parameters passed to header-level resolvers (`getHeaderIcon`, `getHeaderBadges`).
+ */
+export interface GetHeaderParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
+  /** The attachment being rendered in the header. */
+  attachment: TAttachment;
+  /** The version number being rendered. Undefined when version metadata is unavailable. */
+  version?: number;
+  /** Total number of versions for this attachment in the conversation. */
+  versionCount?: number;
+}
+
+/**
+ * Badge definition for rendering in the attachment header next to the title.
+ * Maps directly onto `EuiBadge`'s props.
+ */
+export interface HeaderBadge {
+  /** Badge content. */
+  label: string;
+  /** Optional EUI badge color (e.g. 'hollow', 'success', 'warning', 'accent'). */
+  color?: string;
+  /** Optional icon to display alongside the label. */
+  iconType?: IconType;
+}
+
+/**
  * UI definition for rendering attachments of a specific type.
  */
 export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -130,9 +155,19 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getLabel: (attachment: TAttachment) => string;
   /**
-   * Returns the icon type to display for the attachment.
+   * Returns the icon type to display for the attachment pill (pre-send chip).
    */
   getIcon?: () => IconType;
+  /**
+   * Returns the icon to render in the attachment header (inline / canvas), next
+   * to the title. Falls back to no icon when not provided.
+   */
+  getHeaderIcon?: (params: GetHeaderParams<TAttachment>) => IconType | undefined;
+  /**
+   * Returns badges to render in the attachment header (inline / canvas), next
+   * to the title. Falls back to no badges when not provided.
+   */
+  getHeaderBadges?: (params: GetHeaderParams<TAttachment>) => HeaderBadge[];
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

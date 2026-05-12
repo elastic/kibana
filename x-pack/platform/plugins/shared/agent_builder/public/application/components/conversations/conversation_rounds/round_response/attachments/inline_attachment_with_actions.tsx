@@ -136,6 +136,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const headerIcon = uiDefinition?.getHeaderIcon?.({ attachment, version, versionCount });
+  const headerBadges = uiDefinition?.getHeaderBadges?.({ attachment, version, versionCount });
 
   return (
     <EuiSplitPanel.Outer
@@ -147,7 +149,9 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       `}
     >
       <AttachmentHeader
+        icon={headerIcon}
         title={title}
+        badges={headerBadges}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
       />

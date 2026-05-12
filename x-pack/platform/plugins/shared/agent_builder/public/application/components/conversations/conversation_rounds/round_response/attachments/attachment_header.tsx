@@ -11,13 +11,15 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSplitPanel,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { ActionButton, HeaderBadge } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
+import type { IconType } from '@elastic/eui';
 import { AttachmentActions } from './attachment_actions';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
@@ -38,7 +40,10 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHea
 export const HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
+  icon?: IconType;
   title: string;
+  /** Optional badges rendered alongside the title. */
+  badges?: HeaderBadge[];
   actionButtons?: ActionButton[];
   onClose?: () => void;
   /**
@@ -51,7 +56,9 @@ interface AttachmentHeaderProps {
 }
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
+  icon,
   title,
+  badges,
   actionButtons,
   onClose,
   previewBadgeState = 'none',
@@ -95,14 +102,37 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
       )}
       <EuiFlexGroup
         responsive={false}
+        direction="row"
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ width: '100%' }}
       >
+        {icon && (
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiIcon type={icon} aria-hidden={true} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-          <EuiText css={textStyles} size="s">
-            {title}
-          </EuiText>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            wrap
+            style={{ minWidth: 0 }}
+          >
+            <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+              <EuiText css={textStyles} size="s">
+                {title}
+              </EuiText>
+            </EuiFlexItem>
+            {badges?.map((badge, index) => (
+              <EuiFlexItem grow={false} key={index}>
+                <EuiBadge color={badge.color ?? 'hollow'} iconType={badge.iconType}>
+                  {badge.label}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
         {previewBadgeState !== 'previewing' && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
