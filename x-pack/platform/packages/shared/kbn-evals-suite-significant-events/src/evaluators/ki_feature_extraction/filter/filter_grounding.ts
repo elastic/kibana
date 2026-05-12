@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import {
   isAndCondition,
@@ -66,9 +67,22 @@ export const filterGroundingEvaluator = {
       return { score: null, explanation: 'No entity features with filters to check' };
     }
 
-    const flatDocs = input.sample_documents.map((hit) => ({
-      ...(hit.fields ?? {}),
-      ...getFlattenedObject(hit._source ?? {}),
+    const taskOutput =
+      output != null && !Array.isArray(output)
+        ? (output as unknown as Record<string, unknown>)
+        : undefined;
+    const taskDocs = taskOutput?.sample_documents as
+      | Array<SearchHit<Record<string, unknown>>>
+      | undefined;
+
+    const rawDocs = taskDocs ?? input.sample_documents ?? [];
+    if (rawDocs.length === 0) {
+      return { score: null, explanation: 'No sample documents available' };
+    }
+
+    const flatDocs = rawDocs.map((hit) => ({
+      ...((hit.fields as Record<string, unknown>) ?? {}),
+      ...getFlattenedObject((hit._source ?? {}) as Record<string, unknown>),
     }));
 
     const perEntityDetails: Array<{

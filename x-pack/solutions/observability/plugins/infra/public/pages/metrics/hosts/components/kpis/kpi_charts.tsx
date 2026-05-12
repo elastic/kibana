@@ -65,7 +65,7 @@ export const getSubtitle = ({
 };
 
 export const KpiCharts = () => {
-  const { searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
   const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
@@ -95,9 +95,15 @@ export const KpiCharts = () => {
 
   // prevents requests and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
-  // attributes passed to useAfterLoadedState don't need to be memoized
+  // attributes passed to useAfterLoadedState don't need to be memoized.
+  //
+  // Use the resolved absolute timestamps (parsedDateRange) instead of the raw
+  // relative strings from searchCriteria.dateRange so that Lens queries the
+  // exact same window the table was populated from. This keeps KPIs consistent
+  // with the hosts table and prevents N/A when relative ranges drift between
+  // the two after the page has been idle.
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    dateRange: searchCriteria.dateRange,
+    dateRange: parsedDateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
     reloadRequestTime,

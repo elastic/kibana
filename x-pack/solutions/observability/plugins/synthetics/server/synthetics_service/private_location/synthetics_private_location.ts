@@ -237,6 +237,7 @@ export class SyntheticsPrivateLocation {
               }
             : {}),
           ...(runOnce ? { run_once: runOnce } : {}),
+          ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
         maintenanceWindows

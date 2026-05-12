@@ -13,7 +13,10 @@ import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('AddNewMonitorsPublicAPI - Private locations', function () {
@@ -29,13 +32,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     it('should return error for empty monitor', async function () {

@@ -409,6 +409,7 @@
                 "lineNumber": 57,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "AbortSignal",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -442,7 +443,13 @@
           "tags": [],
           "label": "telemetryService",
           "description": [
-            "{@link TelemetryServicePublicApis}"
+            {
+              "pluginId": "telemetry",
+              "scope": "public",
+              "docId": "kibTelemetryPluginApi",
+              "section": "def-public.TelemetryServicePublicApis",
+              "text": "TelemetryServicePublicApis"
+            }
           ],
           "signature": [
             {
@@ -527,7 +534,13 @@
           "tags": [],
           "label": "telemetryService",
           "description": [
-            "{@link TelemetryService}"
+            {
+              "pluginId": "telemetry",
+              "scope": "public",
+              "docId": "kibTelemetryPluginApi",
+              "section": "def-public.TelemetryService",
+              "text": "TelemetryService"
+            }
           ],
           "signature": [
             {
@@ -560,7 +573,15 @@
         "tags": [],
         "label": "DataTelemetryBasePayload",
         "description": [
-          "\nCommon counters for the {@link DataTelemetryDocument}s"
+          "\nCommon counters for the ",
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryDocument",
+            "text": "DataTelemetryDocument"
+          },
+          "s"
         ],
         "path": "src/platform/plugins/shared/telemetry/server/telemetry_collection/get_data_telemetry/get_data_telemetry.ts",
         "lineNumber": 15,
@@ -754,7 +775,15 @@
         "tags": [],
         "label": "NodeUsage",
         "description": [
-          "\nData returned by GET /_nodes/usage, but flattened as an array of {@link estypes.NodeUsageInformation}\nwith the node ID set in the field `node_id`."
+          "\nData returned by GET /_nodes/usage, but flattened as an array of ",
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.estypes.NodeUsageInformation",
+            "text": "estypes.NodeUsageInformation"
+          },
+          "\nwith the node ID set in the field `node_id`."
         ],
         "signature": [
           {
@@ -801,7 +830,14 @@
         "tags": [],
         "label": "DataTelemetryPayload",
         "description": [
-          "\nThe Data Telemetry is reported as an array of {@link DataTelemetryDocument}"
+          "\nThe Data Telemetry is reported as an array of ",
+          {
+            "pluginId": "telemetry",
+            "scope": "server",
+            "docId": "kibTelemetryPluginApi",
+            "section": "def-server.DataTelemetryDocument",
+            "text": "DataTelemetryDocument"
+          }
         ],
         "signature": [
           {

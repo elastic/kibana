@@ -36,9 +36,20 @@ const NO_DATA_BEHAVIOR_LABELS: Record<string, string> = {
   }),
 };
 
-export const RuleConditions: React.FunctionComponent = () => {
+export interface RuleConditionsProps {
+  /**
+   * `'full'` (default) shows all condition fields, matching the details page.
+   * `'summary'` hides Recovery, Alert delay, Recovery delay, and No data config — used by the rule summary flyout.
+   */
+  variant?: 'full' | 'summary';
+}
+
+export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
+  variant = 'full',
+}) => {
   const rule = useRule();
   const isAlertMode = rule.kind === 'alert';
+  const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(rule.evaluation?.query?.base) || EMPTY_VALUE;
 
   const conditionItems = [
@@ -111,13 +122,17 @@ export const RuleConditions: React.FunctionComponent = () => {
         />
       ),
     },
-    {
-      title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
-        defaultMessage: 'Recovery',
-      }),
-      description: <RecoveryPolicy recoveryPolicy={rule.recovery_policy} />,
-    },
-    ...(isAlertMode
+    ...(isSummary
+      ? []
+      : [
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
+              defaultMessage: 'Recovery',
+            }),
+            description: <RecoveryPolicy recoveryPolicy={rule.recovery_policy} />,
+          },
+        ]),
+    ...(isAlertMode && !isSummary
       ? [
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {
@@ -143,25 +158,41 @@ export const RuleConditions: React.FunctionComponent = () => {
           },
         ]
       : []),
-    {
-      title: i18n.translate('xpack.alertingV2.ruleDetails.noDataConfig', {
-        defaultMessage: 'No data config',
-      }),
-      description: (
-        <ItemValueRuleSummary
-          data-test-subj="alertingV2RuleDetailsNoDataConfig"
-          itemValue={
-            rule.no_data?.behavior
-              ? NO_DATA_BEHAVIOR_LABELS[rule.no_data.behavior] ?? rule.no_data.behavior
-              : EMPTY_VALUE
-          }
-        />
-      ),
-    },
+    ...(isSummary
+      ? []
+      : [
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.noDataConfig', {
+              defaultMessage: 'No data config',
+            }),
+            description: (
+              <ItemValueRuleSummary
+                data-test-subj="alertingV2RuleDetailsNoDataConfig"
+                itemValue={
+                  rule.no_data?.behavior
+                    ? NO_DATA_BEHAVIOR_LABELS[rule.no_data.behavior] ?? rule.no_data.behavior
+                    : EMPTY_VALUE
+                }
+              />
+            ),
+          },
+        ]),
   ];
 
   return (
     <>
+      {isSummary && (
+        <>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
+                defaultMessage: 'Rule conditions',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiTitle size="xxs">
         <h3>
           {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {

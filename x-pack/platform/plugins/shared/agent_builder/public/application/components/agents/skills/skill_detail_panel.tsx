@@ -51,10 +51,10 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         headerContent={
           <>
             <EuiText
-              size="xs"
+              size="s"
               color="subdued"
               css={css`
-                margin-top: ${euiTheme.size.xs};
+                margin-top: ${euiTheme.size.s};
               `}
             >
               {skill?.id}
@@ -63,7 +63,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
               size="s"
               color="subdued"
               css={css`
-                margin-top: ${euiTheme.size.s};
+                margin-top: ${euiTheme.size.l};
               `}
             >
               {skill?.description}

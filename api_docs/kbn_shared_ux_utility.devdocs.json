@@ -59,6 +59,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Loader",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -82,6 +83,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DynamicOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -159,6 +161,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HTMLElement",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -226,6 +229,7 @@
             "lineNumber": 15,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "MouseEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -275,6 +279,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           },

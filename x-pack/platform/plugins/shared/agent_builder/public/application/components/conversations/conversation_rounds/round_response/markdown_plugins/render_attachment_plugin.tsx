@@ -19,6 +19,7 @@ import {
 import type { AttachmentsService } from '../../../../../../services';
 import { createTagParser } from './utils';
 import { InlineAttachmentWithActions } from '../attachments/inline_attachment_with_actions';
+import { AttachmentLoadingSkeleton } from '../attachments/attachment_loading_skeleton';
 
 interface ResolveAttachmentVersionParams {
   explicitVersion: string | number | undefined;
@@ -123,7 +124,9 @@ export const createRenderAttachmentRenderer = ({
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
     if (!attachment) {
-      return null;
+      // During streaming the conversation query is disabled, so newly created attachments
+      // won't be in conversationAttachments yet. Show a skeleton until data arrives.
+      return <AttachmentLoadingSkeleton />;
     }
 
     const versionToUse = resolveAttachmentVersion({

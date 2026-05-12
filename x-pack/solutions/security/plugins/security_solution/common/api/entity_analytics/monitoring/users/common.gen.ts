@@ -14,91 +14,62 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export type UserName = z.infer<typeof UserName>;
-export const UserName = z.object({
-  user: z
-    .object({
-      /**
-       * The name of the user.
-       */
-      name: z.string().optional(),
-    })
-    .optional(),
-  /**
-   * Entity analytics monitoring configuration for the user
-   */
-  entity_analytics_monitoring: z
-    .object({
-      /**
-       * Array of labels associated with the user
-       */
-      labels: z
-        .array(
-          z.object({
-            /**
-             * The field name for the label
-             */
-            field: z.string().optional(),
-            /**
-             * The value of the label
-             */
-            value: z.string().optional(),
-            /**
-             * The source where this label was created (api, csv, or index_sync)
-             */
-            source: z.enum(['api', 'csv', 'index_sync']).optional(),
-          })
-        )
-        .optional(),
-    })
-    .optional(),
-});
-
-export type MonitoringLabel = z.infer<typeof MonitoringLabel>;
-export const MonitoringLabel = z.object({
-  field: z.string(),
-  value: z.string(),
-  source: z.string(),
-});
-
-export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
-export const MonitoredUserUpdateDoc = z.object({
-  id: z.string().optional(),
-  user: z
-    .object({
-      name: z.string().optional(),
-      /**
-       * Indicates if the user is privileged.
-       */
-      is_privileged: z.boolean().optional(),
-    })
-    .optional(),
-  labels: z
-    .object({
-      sources: z.array(z.unknown()).optional(),
-      source_ids: z.array(z.string()).optional(),
-      source_integrations: z.array(z.string()).optional(),
-    })
-    .optional(),
-  entity_analytics_monitoring: z
-    .object({
-      labels: z.array(MonitoringLabel).optional(),
-    })
-    .optional(),
-});
-
-export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;
-export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
+export const UserName = lazySchema(() =>
   z.object({
-    event: z
+    user: z
       .object({
-        ingested: z.string().datetime().optional(),
-        '@timestamp': z.string().datetime().optional(),
+        /**
+         * The name of the user.
+         */
+        name: z.string().optional(),
       })
       .optional(),
-    '@timestamp': z.string().datetime().optional(),
+    /**
+     * Entity analytics monitoring configuration for the user
+     */
+    entity_analytics_monitoring: z
+      .object({
+        /**
+         * Array of labels associated with the user
+         */
+        labels: z
+          .array(
+            z.object({
+              /**
+               * The field name for the label
+               */
+              field: z.string().optional(),
+              /**
+               * The value of the label
+               */
+              value: z.string().optional(),
+              /**
+               * The source where this label was created (api, csv, or index_sync)
+               */
+              source: z.enum(['api', 'csv', 'index_sync']).optional(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+  })
+);
+export type UserName = z.infer<typeof UserName>;
+
+export const MonitoringLabel = lazySchema(() =>
+  z.object({
+    field: z.string(),
+    value: z.string(),
+    source: z.string(),
+  })
+);
+export type MonitoringLabel = z.infer<typeof MonitoringLabel>;
+
+export const MonitoredUserUpdateDoc = lazySchema(() =>
+  z.object({
+    id: z.string().optional(),
     user: z
       .object({
         name: z.string().optional(),
@@ -106,19 +77,56 @@ export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
          * Indicates if the user is privileged.
          */
         is_privileged: z.boolean().optional(),
-        entity: z
-          .object({
-            attributes: z
-              .object({
-                /**
-                 * Indicates if the user is privileged.
-                 */
-                Privileged: z.boolean().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+      })
+      .optional(),
+    labels: z
+      .object({
+        sources: z.array(z.unknown()).optional(),
+        source_ids: z.array(z.string()).optional(),
+        source_integrations: z.array(z.string()).optional(),
+      })
+      .optional(),
+    entity_analytics_monitoring: z
+      .object({
+        labels: z.array(MonitoringLabel).optional(),
       })
       .optional(),
   })
 );
+export type MonitoredUserUpdateDoc = z.infer<typeof MonitoredUserUpdateDoc>;
+
+export const MonitoredUserDoc = lazySchema(() =>
+  MonitoredUserUpdateDoc.merge(
+    z.object({
+      event: z
+        .object({
+          ingested: z.string().datetime().optional(),
+          '@timestamp': z.string().datetime().optional(),
+        })
+        .optional(),
+      '@timestamp': z.string().datetime().optional(),
+      user: z
+        .object({
+          name: z.string().optional(),
+          /**
+           * Indicates if the user is privileged.
+           */
+          is_privileged: z.boolean().optional(),
+          entity: z
+            .object({
+              attributes: z
+                .object({
+                  /**
+                   * Indicates if the user is privileged.
+                   */
+                  Privileged: z.boolean().optional(),
+                })
+                .optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+  )
+);
+export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;

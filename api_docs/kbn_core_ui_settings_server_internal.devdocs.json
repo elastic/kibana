@@ -58,6 +58,7 @@
                 "lineNumber": 14,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiSettingsServiceOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -117,6 +118,7 @@
                 "lineNumber": 18,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "UiSettingsServiceOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -153,6 +155,7 @@
                 "lineNumber": 23,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -278,6 +281,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -424,6 +428,7 @@
                 "lineNumber": 124,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "ConfigDeprecationFactory",
                 "trackAdoption": false
               }
             ]

@@ -91,6 +91,7 @@
             "lineNumber": 19,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "App",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -153,6 +154,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IBasePath",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -172,6 +174,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           },

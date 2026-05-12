@@ -8,12 +8,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import escape from 'lodash/escape';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
-import { getHighlightHtml, checkForMissingValueHtml } from '../utils';
+import { getHighlightReact } from '../utils';
 
 function convertLookupEntriesToMap(
   lookupEntries: Array<{ key?: string | null; value: unknown }>
@@ -107,22 +106,22 @@ export class StaticLookupFormat extends FieldFormat {
     return String(result ?? '');
   };
 
-  htmlConvert: HtmlContextTypeConvert = (value, options = {}) => {
-    const { result, isMissingValue } = this.lookup(value);
+  reactConvertSingle: ReactContextTypeSingleConvert = (val, options = {}) => {
+    const { result, isMissingValue } = this.lookup(val);
 
     if (isMissingValue) {
-      const missingHtml = checkForMissingValueHtml(result);
-      if (missingHtml) {
-        return missingHtml;
-      }
+      const missing = this.checkForMissingValueReact(result);
+      if (missing) return missing;
     }
 
-    // Escape the result and handle highlights
     const { field, hit } = options;
-    const formatted = escape(String(result ?? ''));
+    const formatted = String(result ?? '');
 
-    return !field || !hit || !hit.highlight || !hit.highlight[field.name]
-      ? formatted
-      : getHighlightHtml(formatted, hit.highlight[field.name]);
+    const fieldName = field?.name;
+    if (fieldName && hit?.highlight?.[fieldName]) {
+      return getHighlightReact(formatted, hit.highlight[fieldName]);
+    }
+
+    return formatted;
   };
 }

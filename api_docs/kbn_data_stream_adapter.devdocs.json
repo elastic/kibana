@@ -84,6 +84,7 @@
                 "lineNumber": 12,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetIndexTemplateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -134,6 +135,7 @@
                 "lineNumber": 16,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -217,6 +219,7 @@
                 "lineNumber": 17,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetIndexTemplateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -275,6 +278,7 @@
                 "lineNumber": 21,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }

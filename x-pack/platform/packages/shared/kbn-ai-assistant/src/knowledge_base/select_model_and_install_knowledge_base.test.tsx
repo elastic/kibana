@@ -42,7 +42,6 @@ jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
     </div>
   ),
   useEisKnowledgeBaseCalloutDismissed: () => [false, mockSetEisKnowledgeBaseCalloutDismissed],
-  useAIAgentTourDismissed: () => [true],
 }));
 
 const onInstall = jest.fn();

@@ -56,14 +56,19 @@ properties:
     description: The type of action.
     enum:
       - assignees
-      - create_case
+      - category
       - comment
       - connector
+      - create_case
+      - customFields
+      - delete_case
       - description
+      - extended_fields
+      - observables
       - pushed
-      - tags
-      - title
-      - status
       - settings
       - severity
+      - status
+      - tags
+      - title
     example: create_case

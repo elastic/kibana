@@ -28,6 +28,7 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/sig_events/description_generation/route';
 import { featureRoutes as internalFeatureRoutes } from './internal/sig_events/features/route';
+import { identifyFeaturesRoutes as internalIdentifyFeaturesRoutes } from './internal/sig_events/features/identify_route';
 import { internalInsightsRoutes } from './internal/sig_events/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
@@ -36,6 +37,10 @@ import { internalEligibleStreamsRoutes } from './internal/sig_events/extraction/
 import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
 import { internalMemoryRoutes } from './internal/memory/route';
+import { internalSigEventsDetectionsRoutes } from './internal/sig_events/detections/route';
+import { internalSigEventsDiscoveriesRoutes } from './internal/sig_events/discoveries/route';
+import { internalSigEventsVerdictsRoutes } from './internal/sig_events/verdicts/route';
+import { internalSigEventsEventsRoutes } from './internal/sig_events/events/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -53,6 +58,7 @@ export const streamsRouteRepository = {
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
   ...internalFeatureRoutes,
+  ...internalIdentifyFeaturesRoutes,
   ...internalInsightsRoutes,
   ...internalTasksRoutes,
   ...internalOnboardingRoutes,
@@ -60,6 +66,10 @@ export const streamsRouteRepository = {
   ...internalEligibleStreamsRoutes,
   ...internalSignificantEventsSettingsRoutes,
   ...internalMemoryRoutes,
+  ...internalSigEventsDetectionsRoutes,
+  ...internalSigEventsDiscoveriesRoutes,
+  ...internalSigEventsVerdictsRoutes,
+  ...internalSigEventsEventsRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

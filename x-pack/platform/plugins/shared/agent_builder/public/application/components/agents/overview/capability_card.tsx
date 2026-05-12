@@ -53,6 +53,7 @@ export const CapabilityCard: React.FC<CapabilityCardProps> = ({
         paddingSize="m"
         title={title}
         titleElement="h4"
+        titleSize="xs"
         textAlign="left"
         footer={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

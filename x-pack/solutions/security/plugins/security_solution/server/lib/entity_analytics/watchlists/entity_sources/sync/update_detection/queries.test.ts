@@ -31,10 +31,9 @@ describe('Watchlist sync queries', () => {
         'event.action: "login"'
       );
       const must = searchBody.query?.bool?.must as unknown[];
-      expect(must).toHaveLength(2);
+      // terms filter + default range filter + KQL filter
+      expect(must).toHaveLength(3);
       expect(must[0]).toEqual({ terms: { 'user.name': ['jdoe'] } });
-      // KQL parsed query should be present as second filter
-      expect(must[1]).toBeDefined();
     });
 
     it('handles pagination with afterKey', () => {
@@ -50,7 +49,48 @@ describe('Watchlist sync queries', () => {
 
     it('does not add KQL filter when queryRule is undefined', () => {
       const searchBody = buildIndexSourceSearchBody('host.name', ['server-1']);
-      expect(searchBody.query?.bool?.must).toHaveLength(1);
+      // terms filter + default range filter
+      expect(searchBody.query?.bool?.must).toHaveLength(2);
+    });
+
+    it('applies @timestamp range filter from provided range', () => {
+      const range = { start: 'now-7d', end: 'now' };
+      const searchBody = buildIndexSourceSearchBody(
+        'user.name',
+        ['jdoe'],
+        undefined,
+        100,
+        undefined,
+        range
+      );
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d', lte: 'now' } },
+      });
+    });
+
+    it('uses default 10-day range when range is not provided', () => {
+      const searchBody = buildIndexSourceSearchBody('user.name', ['jdoe']);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-10d', lte: 'now' } },
+      });
+    });
+
+    it('composes range filter with queryRule filter', () => {
+      const range = { start: 'now-14d', end: 'now' };
+      const searchBody = buildIndexSourceSearchBody(
+        'user.name',
+        ['jdoe'],
+        undefined,
+        100,
+        'event.action: "login"',
+        range
+      );
+      const must = searchBody.query?.bool?.must as unknown[];
+      // terms filter + range filter + KQL filter
+      expect(must).toHaveLength(3);
+      expect(must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-14d', lte: 'now' } },
+      });
     });
   });
 
@@ -174,6 +214,51 @@ describe('Watchlist sync queries', () => {
       expect(searchBody.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
+    });
+
+    it('applies range filter when no syncMarker is set', () => {
+      const range = { start: 'now-7d', end: 'now' };
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        undefined,
+        undefined,
+        undefined,
+        range
+      );
+
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d', lte: 'now' } },
+      });
+    });
+
+    it('prefers syncMarker over range when both are provided', () => {
+      const syncMarker = '2024-01-15T00:00:00Z';
+      const range = { start: 'now-7d', end: 'now' };
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        syncMarker,
+        undefined,
+        undefined,
+        range
+      );
+
+      // syncMarker takes precedence
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
+      });
+      // range filter should NOT be present separately
+      expect(searchBody.query?.bool?.must).not.toContainEqual({
+        range: { '@timestamp': { gte: 'now-7d', lte: 'now' } },
+      });
+    });
+
+    it('does not add range filter when neither syncMarker nor range is set', () => {
+      const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
     });
   });
 });

@@ -22,7 +22,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
-import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import {
+  AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+} from '@kbn/management-settings-ids';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
@@ -49,7 +52,8 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, productDocBase, analytics } = services;
+  const { application, http, productDocBase, analytics, genAiSettingsApi, notifications } =
+    services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -67,7 +71,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
     chatExperienceField?.defaultValue ??
-    AIChatExperience.Classic;
+    AIChatExperience.Agent;
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
   const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
@@ -106,6 +110,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   }, [application, http.basePath, isPermissionsBased]);
 
   async function handleSave() {
+    const tokenUsageTrackingTurnedOn =
+      unsavedChanges[GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]?.unsavedValue === true;
+
     const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
       ? chatExperienceField.savedValue
       : undefined;
@@ -117,13 +124,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     )
       ? (unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue as AIChatExperience)
       : undefined;
-    const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Classic;
+    const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Agent;
 
     // Telemetry should compare the effective "before" and "after" values.
     // - "before" should include the default if there is no saved value.
     // - "after" should reflect the unsaved change, or fall back to "before" if unchanged.
     const telemetryBeforeChatExperience =
-      savedChatExperience ?? defaultChatExperience ?? AIChatExperience.Classic;
+      savedChatExperience ?? defaultChatExperience ?? AIChatExperience.Agent;
     const telemetryAfterChatExperience = unsavedChatExperience ?? telemetryBeforeChatExperience;
     const shouldTrackOptInConfirmed =
       telemetryBeforeChatExperience !== AIChatExperience.Agent &&
@@ -133,6 +140,22 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       telemetryAfterChatExperience !== AIChatExperience.Agent;
 
     const needsReload = await saveAll();
+
+    if (tokenUsageTrackingTurnedOn) {
+      try {
+        await genAiSettingsApi('POST /internal/gen_ai_settings/install_token_usage_dashboard', {
+          signal: null,
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.gen_ai_settings.tokenUsageTracking.installDashboardError', {
+            defaultMessage: 'Failed to install token usage dashboard',
+          }),
+          text: error?.body?.message ?? error?.message,
+        });
+      }
+    }
+
     if (shouldTrackOptInConfirmed) {
       analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.OptInAction, {
         action: 'confirmed',

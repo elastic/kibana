@@ -77,6 +77,13 @@ jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
   useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
+const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(false);
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  ...jest.requireActual('../../../hooks/use_experimental_features'),
+  useIsExperimentalFeatureEnabled: (feature: string) =>
+    mockUseIsExperimentalFeatureEnabled(feature),
+}));
+
 const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
     wrapper: ({ children }) => <TestProviders store={options?.store}>{children}</TestProviders>,
@@ -262,6 +269,28 @@ describe('SecuritySideNav', () => {
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
           categories: getNavCategories(false),
+        })
+      );
+    });
+  });
+
+  describe('isNewEAHomePageEnabled feature flag', () => {
+    it('should call getNavCategories with true when feature flag is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, true),
+        })
+      );
+    });
+
+    it('should call getNavCategories with false when feature flag is disabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, false),
         })
       );
     });

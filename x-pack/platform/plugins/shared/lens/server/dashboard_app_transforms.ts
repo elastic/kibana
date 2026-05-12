@@ -20,7 +20,8 @@ export function registerLensEmbeddableTransformsForDashboardApp(
   embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
 ) {
-  embeddableSetup.registerTransforms(LENS_DASHBOARD_APP_TYPE, {
+  embeddableSetup.registerEmbeddableServerDefinition(LENS_DASHBOARD_APP_TYPE, {
+    title: 'Visualization (dashboard application)',
     getTransforms: (drilldownTransforms) =>
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, true),

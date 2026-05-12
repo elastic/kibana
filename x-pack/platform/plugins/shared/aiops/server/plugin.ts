@@ -83,21 +83,24 @@ export class AiopsPlugin
       defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });
 
-    plugins.embeddable.registerTransforms(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
+      title: 'Change point detection chart',
       getTransforms: () => ({
         transformIn: changePointTransformIn,
         transformOut: changePointTransformOut,
       }),
     });
 
-    plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
+      title: 'Pattern analysis',
       getTransforms: () => ({
         transformIn: patternAnalysisTransformIn,
         transformOut: patternAnalysisTransformOut,
       }),
     });
 
-    plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
+      title: 'Log rate analysis',
       getTransforms: () => ({
         transformIn: logRateTransformIn,
         transformOut: logRateTransformOut,

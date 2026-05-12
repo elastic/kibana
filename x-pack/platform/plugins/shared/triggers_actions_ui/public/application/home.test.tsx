@@ -7,7 +7,6 @@
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen } from '@testing-library/react';
 import { createLocation, createMemoryHistory } from 'history';
@@ -50,7 +49,16 @@ const { useGetRuleTypesPermissions } = jest.requireMock(
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-const queryClient = new QueryClient();
+const renderHome = (props: RouteComponentProps<MatchParams>) =>
+  render(
+    <IntlProvider locale="en">
+      <Router history={props.history}>
+        <QueryClientProvider client={new QueryClient()}>
+          <TriggersActionsUIHome {...props} />
+        </QueryClientProvider>
+      </Router>
+    </IntlProvider>
+  );
 
 describe('home', () => {
   beforeEach(() => {
@@ -75,15 +83,7 @@ describe('home', () => {
       },
     };
 
-    render(
-      <IntlProvider locale="en">
-        <Router history={props.history}>
-          <QueryClientProvider client={queryClient}>
-            <TriggersActionsUIHome {...props} />
-          </QueryClientProvider>
-        </Router>
-      </IntlProvider>
-    );
+    renderHome(props);
 
     expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
   });
@@ -105,16 +105,10 @@ describe('home', () => {
       },
     };
 
-    const home = mountWithIntl(
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
-      </Router>
-    );
+    renderHome(props);
 
     // Just rules and logs
-    expect(home.find('span.euiTab__content').length).toBe(2);
+    expect(screen.getAllByRole('tab').length).toBe(2);
   });
 
   it('hides the logs tab if the read rules privilege is missing', async () => {
@@ -136,16 +130,10 @@ describe('home', () => {
       },
     };
 
-    const home = mountWithIntl(
-      <Router history={props.history}>
-        <QueryClientProvider client={queryClient}>
-          <TriggersActionsUIHome {...props} />
-        </QueryClientProvider>
-      </Router>
-    );
+    renderHome(props);
 
     // Just rules
-    expect(home.find('span.euiTab__content').length).toBe(1);
+    expect(screen.getAllByRole('tab').length).toBe(1);
   });
 
   describe('setHeaderActions', () => {
@@ -179,15 +167,7 @@ describe('home', () => {
         },
       };
 
-      render(
-        <IntlProvider locale="en">
-          <Router history={props.history}>
-            <QueryClientProvider client={queryClient}>
-              <TriggersActionsUIHome {...props} />
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      );
+      renderHome(props);
 
       expect(await screen.findByTestId('createRuleButton')).toBeInTheDocument();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
@@ -215,19 +195,11 @@ describe('home', () => {
         },
       };
 
-      render(
-        <IntlProvider locale="en">
-          <Router history={props.history}>
-            <QueryClientProvider client={queryClient}>
-              <TriggersActionsUIHome {...props} />
-            </QueryClientProvider>
-          </Router>
-        </IntlProvider>
-      );
+      renderHome(props);
 
-      expect(await screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
       expect(await screen.findByTestId('rulesSettingsLink')).toBeInTheDocument();
       expect(await screen.findByTestId('documentationLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });
   });
 });

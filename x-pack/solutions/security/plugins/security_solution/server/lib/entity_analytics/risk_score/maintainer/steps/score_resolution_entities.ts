@@ -21,6 +21,7 @@ import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskScoreModifierEntity } from './pipeline_types';
+import { MAX_RESOLUTION_MEMBER_FETCH_COUNT } from '../../constants';
 
 interface ScoreResolutionEntitiesParams {
   esClient: ElasticsearchClient;
@@ -41,6 +42,8 @@ interface ResolutionPageResult {
   bucketCount: number;
   afterKey: Record<string, string> | undefined;
 }
+
+const RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE = 1_000;
 
 export const calculateResolutionEntityScores = async function* ({
   esClient,
@@ -94,6 +97,23 @@ export const calculateResolutionEntityScores = async function* ({
     let modifiedScores: EntityRiskScoreRecord[] = [];
     if (parsedScores.length > 0) {
       const allMemberIds = collectMemberEntityIds(parsedScores);
+      const alertDerivedMemberCount = allMemberIds.size;
+      const resolutionTargetIds = [
+        ...new Set(parsedScores.map((score) => score.resolution_target_id)),
+      ];
+      // ES|QL only surfaces members attached to contributing alerts. Pull the
+      // full group from entity store before fetching modifier entities.
+      const fullGroupMemberIds = await fetchResolutionGroupMemberIds({
+        crudClient,
+        resolutionTargetIds,
+        logger,
+      });
+      for (const memberId of fullGroupMemberIds) {
+        allMemberIds.add(memberId);
+      }
+      logger.debug(
+        `[resolution][page:${pagesProcessed}] alert_derived_members=${alertDerivedMemberCount}, store_derived_members=${fullGroupMemberIds.size}, total_unique=${allMemberIds.size}`
+      );
       const memberEntities = await fetchEntitiesByIds({
         crudClient,
         entityIds: [...allMemberIds],
@@ -198,6 +218,71 @@ const collectMemberEntityIds = (parsedScores: ParsedResolutionScore[]): Set<stri
   return allMemberIds;
 };
 
+// ES|QL only tells us which members contributed alerts to a resolved score.
+// This helper expands that to the full resolution group from entity store so
+// silent aliases can still contribute modifiers like watchlists and criticality.
+export const fetchResolutionGroupMemberIds = async ({
+  crudClient,
+  resolutionTargetIds,
+  logger,
+}: {
+  crudClient: EntityUpdateClient;
+  resolutionTargetIds: string[];
+  logger: ScopedLogger;
+}): Promise<Set<string>> => {
+  const memberIds = new Set<string>();
+  if (resolutionTargetIds.length === 0) {
+    return memberIds;
+  }
+
+  try {
+    const maxIterations = Math.ceil(
+      MAX_RESOLUTION_MEMBER_FETCH_COUNT / RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE
+    );
+    let searchAfter: Array<string | number> | undefined;
+    let iterations = 0;
+    let fetchedCount = 0;
+    do {
+      iterations += 1;
+      if (iterations > maxIterations) {
+        logger.warn(
+          `fetchResolutionGroupMemberIds exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
+      }
+
+      const { entities, nextSearchAfter } = await crudClient.listEntities({
+        filter: {
+          terms: { 'entity.relationships.resolution.resolved_to': resolutionTargetIds },
+        },
+        size: RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE,
+        searchAfter,
+        source: ['entity.id'],
+      });
+      fetchedCount += entities.length;
+      for (const entity of entities) {
+        const id = entity.entity?.id;
+        if (typeof id === 'string') {
+          memberIds.add(id);
+        }
+      }
+      if (fetchedCount >= MAX_RESOLUTION_MEMBER_FETCH_COUNT) {
+        logger.warn(
+          `fetchResolutionGroupMemberIds fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
+      }
+      searchAfter = nextSearchAfter;
+    } while (searchAfter !== undefined);
+  } catch (error) {
+    logger.warn(
+      `Error fetching full resolution group members. Resolution scoring will proceed with alert-derived members only: ${error}`
+    );
+  }
+
+  return memberIds;
+};
+
 const applyResolutionModifiers = ({
   parsedScores,
   memberEntities,
@@ -213,11 +298,39 @@ const applyResolutionModifiers = ({
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
 }): EntityRiskScoreRecord[] => {
+  const membersByResolutionTarget = new Map<string, string[]>();
+  for (const [entityId, entity] of memberEntities) {
+    const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
+    if (typeof resolvedTo === 'string' && entityId !== resolvedTo) {
+      const members = membersByResolutionTarget.get(resolvedTo) ?? [];
+      members.push(entityId);
+      membersByResolutionTarget.set(resolvedTo, members);
+    }
+  }
+
   const mergedModifierEntities = new Map(
-    parsedScores.map((score) => [
-      score.resolution_target_id,
-      buildResolutionModifierEntity({ score, memberEntities }),
-    ])
+    parsedScores.map((score) => {
+      const relatedEntityIds = new Set(
+        score.related_entities.map((relatedEntity) => relatedEntity.entity_id)
+      );
+      const storeOnlyMembers = (membersByResolutionTarget.get(score.resolution_target_id) ?? [])
+        .filter((entityId) => !relatedEntityIds.has(entityId))
+        .map((entityId) => ({
+          entity_id: entityId,
+          relationship_type: 'entity.relationships.resolution.resolved_to',
+        }));
+
+      return [
+        score.resolution_target_id,
+        buildResolutionModifierEntity({
+          score: {
+            ...score,
+            related_entities: [...score.related_entities, ...storeOnlyMembers],
+          },
+          memberEntities,
+        }),
+      ];
+    })
   );
   const scoresForModifierPipeline = parsedScores.map((score) => ({
     entity_id: score.resolution_target_id,

@@ -594,6 +594,10 @@ function getPatternFiringAlertsAsDataRuleType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    // Tests that need an empty `cleanedPayload` on the run that recovers an
+    // alert (e.g. to assert the alert builder falls back to the predecessor
+    // doc) can opt out of the default recovery payload.
+    setRecoveryPayload: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -666,11 +670,13 @@ function getPatternFiringAlertsAsDataRuleType() {
       }
 
       // set recovery payload
-      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
-        alertsClient.setAlertData({
-          id: recoveredAlert.alert.getId(),
-          payload: { patternIndex: -1, instancePattern: [] },
-        });
+      if (params.setRecoveryPayload !== false) {
+        for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+          alertsClient.setAlertData({
+            id: recoveredAlert.alert.getId(),
+            payload: { patternIndex: -1, instancePattern: [] },
+          });
+        }
       }
 
       return {

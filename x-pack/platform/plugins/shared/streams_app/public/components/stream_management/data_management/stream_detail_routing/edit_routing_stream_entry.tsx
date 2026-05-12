@@ -22,7 +22,10 @@ export function EditRoutingStreamEntry({
   routingRule: RoutingDefinitionWithUIAttributes;
 }) {
   const { euiTheme } = useEuiTheme();
-  const { partitionName, prefix } = useChildStreamInput(routingRule.destination, true);
+  const { partitionName, prefix } = useChildStreamInput({
+    streamName: routingRule.destination,
+    readOnly: true,
+  });
   const { setConditionEditorValidity } = useStreamRoutingEvents();
 
   return (

@@ -63,6 +63,15 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
       }, []);
       const bulkResp = await client.bulk({ operations, refresh: true });
 
+      if (bulkResp.errors) {
+        const errors = bulkResp.items
+          .filter((item) => item.create?.error)
+          .map((item) => item.create?.error);
+        throw new Error(`Bulk indexing had errors: ${JSON.stringify(errors)}`);
+      }
+
+      await client.indices.refresh({ index: eventsIndex });
+
       const eventsInfo = events.map((event: Event, i: number) => {
         return { event, _id: bulkResp.items[i].create?._id };
       });
@@ -93,7 +102,18 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
           return array;
         }, []);
         // force a refresh here otherwise the documents might not be available when the tests search for them
-        await client.bulk({ operations, refresh: true });
+        const bulkResp = await client.bulk({ operations, refresh: true });
+
+        if (bulkResp.errors) {
+          const errors = bulkResp.items
+            .filter((item) => item.create?.error)
+            .map((item) => item.create?.error);
+          throw new Error(`Bulk indexing had errors: ${JSON.stringify(errors)}`);
+        }
+
+        await client.indices.refresh({ index: eventsIndex });
+        await client.indices.refresh({ index: alertsIndex });
+
         allTrees.push(tree);
       }
       return { trees: allTrees, indices: [eventsIndex, alertsIndex] };

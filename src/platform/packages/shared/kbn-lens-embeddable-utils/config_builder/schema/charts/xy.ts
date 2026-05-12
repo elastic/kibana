@@ -254,6 +254,27 @@ export const xyDataLayerSharedSchema = {
   ),
 };
 
+const legendSeriesHeaderSchema = schema.object(
+  {
+    visible: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, shows the legend table series header.' },
+      })
+    ),
+    text: schema.maybe(
+      schema.string({
+        meta: { description: 'Legend table series header text.' },
+      })
+    ),
+  },
+  {
+    meta: {
+      id: 'xyLegendSeriesHeader',
+      description: 'Legend table series header configuration.',
+    },
+  }
+);
+
 /**
  * Common legend configuration properties for positioning and statistics
  */
@@ -265,6 +286,7 @@ const sharedLegendSchema = {
       maxSize: statisticsOptionsSize,
     })
   ),
+  series_header: schema.maybe(legendSeriesHeaderSchema),
 };
 
 /**
@@ -585,28 +607,37 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     ...xyDataLayerSharedSchema,
     breakdown_by: schema.maybe(
-      mergeAllBucketsWithChartDimensionSchema({
-        collapse_by: schema.maybe(collapseBySchema),
-        color: schema.maybe(colorMappingSchema),
-        aggregate_first: schema.maybe(
-          schema.boolean({
-            meta: { description: 'Whether to aggregate before splitting series' },
-          })
-        ),
-      })
+      mergeAllBucketsWithChartDimensionSchema(
+        {
+          collapse_by: schema.maybe(collapseBySchema),
+          color: schema.maybe(colorMappingSchema),
+          aggregate_first: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When `true`, aggregates data before splitting into series. Defaults to `false`.',
+              },
+            })
+          ),
+        },
+        'xyBreakdown'
+      )
     ),
     y: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-        axis: schema.maybe(yMetricOnAxisSchema),
-        color: schema.maybe(
-          schema.oneOf([staticColorSchema, autoColorSchema], {
-            defaultValue: AUTO_COLOR,
-          })
-        ),
-      }),
+      mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+        {
+          axis: schema.maybe(yMetricOnAxisSchema),
+          color: schema.maybe(
+            schema.oneOf([staticColorSchema, autoColorSchema], {
+              defaultValue: AUTO_COLOR,
+            })
+          ),
+        },
+        'xyY'
+      ),
       { meta: { description: 'Array of metrics to display on Y-axis' }, maxSize: 100 }
     ),
-    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({})),
+    x: schema.maybe(mergeAllBucketsWithChartDimensionSchema({}, 'xyX')),
   },
   {
     meta: {
@@ -744,7 +775,7 @@ const referenceLineLayerSchemaNoESQL = schema.object(
     ...dataSourceSchema,
     type: schema.literal('reference_lines'),
     thresholds: schema.arrayOf(
-      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared),
+      mergeAllMetricsWithChartDimensionSchemaWithStaticOps(referenceLineLayerShared, 'xyRefLine'),
       { meta: { description: 'Array of reference line thresholds' }, minSize: 1, maxSize: 100 }
     ),
   },
@@ -953,6 +984,7 @@ const annotationByRefLayerSchema = schema.object(
   {
     meta: {
       id: 'xyAnnotationByRefLayer',
+      title: 'Annotation Layer (By Reference)',
       description: 'Reference to a library annotation group',
     },
   }
@@ -992,7 +1024,7 @@ const xyLayerUnionESQL = objectUnion([xyDataLayerSchemaESQL], {
 /**
  * XY chart state for DSL layers
  */
-export const xyStateSchemaNoESQL = schema.object(
+export const xyConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
@@ -1016,7 +1048,7 @@ export const xyStateSchemaNoESQL = schema.object(
 /**
  * XY chart state for ES|QL layers only (reference lines are not supported)
  */
-export const xyStateSchemaESQL = schema.object(
+export const xyConfigSchemaESQL = schema.object(
   {
     type: schema.literal('xy'),
     ...sharedPanelInfoSchema,
@@ -1039,7 +1071,7 @@ export const xyStateSchemaESQL = schema.object(
 /**
  * XY chart state
  */
-export const xyStateSchema = objectUnion([xyStateSchemaNoESQL, xyStateSchemaESQL], {
+export const xyConfigSchema = objectUnion([xyConfigSchemaNoESQL, xyConfigSchemaESQL], {
   meta: {
     id: 'xyChart',
     title: 'XY Chart',
@@ -1047,9 +1079,9 @@ export const xyStateSchema = objectUnion([xyStateSchemaNoESQL, xyStateSchemaESQL
   },
 });
 
-export type XYStateNoESQL = TypeOf<typeof xyStateSchemaNoESQL>;
-export type XYStateESQL = TypeOf<typeof xyStateSchemaESQL>;
-export type XYState = TypeOf<typeof xyStateSchema>;
+export type XYConfigNoESQL = TypeOf<typeof xyConfigSchemaNoESQL>;
+export type XYConfigESQL = TypeOf<typeof xyConfigSchemaESQL>;
+export type XYConfig = TypeOf<typeof xyConfigSchema>;
 export type DataLayerTypeESQL = TypeOf<typeof xyDataLayerSchemaESQL>;
 export type DataLayerTypeNoESQL = TypeOf<typeof xyDataLayerSchemaNoESQL>;
 export type DataLayerType = DataLayerTypeNoESQL | DataLayerTypeESQL;
@@ -1071,5 +1103,3 @@ export type LayerTypeNoESQL =
   | ReferenceLineLayerTypeNoESQL
   | AnnotationLayerType;
 export type XYLayer = LayerTypeNoESQL | LayerTypeESQL;
-
-export type XYStyling = TypeOf<typeof xyStylingSchema>;

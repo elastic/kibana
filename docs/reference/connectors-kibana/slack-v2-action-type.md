@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, resolve channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, list channels, resolve channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, resolve public channel IDs, send messages, create channels, and invite users to Slack channels using the Slack Web API. It authenticates using OAuth Authorization Code (Slack OAuth v2).
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It authenticates using OAuth Authorization Code (Slack OAuth v2).
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -41,6 +41,14 @@ Search messages
     - `includeMessageBlocks` (optional): Include Block Kit blocks. Defaults to `true`.
     - `raw` (optional): If `true`, returns the full raw Slack response (verbose).
 
+List channels
+:   List Slack conversations the token can see (one page per call), using Slack `conversations.list`. Use this to browse channel IDs or answer which channels exist. When the response includes `hasMore: true`, call **List channels** again with `nextCursor` from the previous response.
+    - `types` (optional): Conversation types to include: `public_channel`, `private_channel`, `im`, `mpim`. Defaults to `public_channel` only. If you pass an empty array, it defaults to `public_channel`.
+    - `excludeArchived` (optional): Exclude archived conversations. Defaults to `true`.
+    - `cursor` (optional): Pagination cursor from a previous **List channels** response (`nextCursor`). Omit for the first page.
+    - `limit` (optional): Conversations per page (1 to 1000). Defaults to `1000`.
+    - `raw` (optional): If `true`, returns the full raw Slack API response instead of a compact result. Defaults to `false`.
+
 Resolve channel ID
 :   Resolve a Slack conversation ID (`C...` for public channels, `G...` for private channels) from a human channel name (for example, `#general`).
     - `name` (required): Channel name (with or without `#`).
@@ -63,7 +71,7 @@ Invite to conversation
 
 Send message
 :   Send a message to a Slack conversation ID.
-    - `channel` (required): Conversation ID (for example, `C123...`). Use **Resolve channel ID** first if you only have a channel name.
+    - `channel` (required): Conversation ID (for example, `C123...`). Use **List channels** to browse IDs, or **Resolve channel ID** if you know the channel name.
     - `text` (required): Message text.
     - `threadTs` (optional): Reply in a thread (timestamp of the parent message).
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
@@ -80,12 +88,12 @@ To use the Slack (v2) connector, you need a Slack app configured for OAuth.
 1. Go to [Slack API: Your Apps](https://api.slack.com/apps) and select **Create New App**.
 2. Choose **From scratch**, give it a name (for example, "Kibana Slack Connector"), and select your workspace.
 3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
-   - `channels:read` — resolve public channel IDs
+   - `channels:read` — list and resolve public channel IDs
    - `chat:write` — send messages
    - `files:read` — access shared files
-   - `groups:read` — list private channels
-   - `im:read` — list direct messages
-   - `mpim:read` — list group direct messages
+   - `groups:read` — list private channels (including for **List channels** when `types` includes `private_channel`)
+   - `im:read` — list direct messages (when `types` includes `im`)
+   - `mpim:read` — list group direct messages (when `types` includes `mpim`)
    - `search:read.files` — search files
    - `search:read.im` — search direct messages
    - `search:read.mpim` — search group direct messages

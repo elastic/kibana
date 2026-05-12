@@ -6,24 +6,32 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { FeatureClient } from './feature_client';
 import type { StoredFeature } from './stored_feature';
-import { getFeatureStorageSettings } from './storage_settings';
-import { FEATURE_ID, FEATURE_PROPERTIES, FEATURE_SUBTYPE, FEATURE_UUID } from './fields';
+import {
+  featureStorageSettings,
+  getFeatureStorageSettings,
+  type FeatureStorageSettings,
+} from './storage_settings';
+import {
+  FEATURE_ID,
+  FEATURE_PROPERTIES,
+  FEATURE_SEARCH_EMBEDDING,
+  FEATURE_SUBTYPE,
+  FEATURE_UUID,
+} from './fields';
 import { storedFeatureSchema } from './stored_feature';
-import type { InferenceResolver } from '../assets/query/helpers/inference_availability';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../common/sig_events_tuning_config';
+import { getInferenceIdFromIndex } from '../helpers/get_inference_id_from_index';
 
 export class FeatureService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly resolveInference: InferenceResolver,
     private readonly logger: Logger
   ) {}
 
@@ -36,14 +44,20 @@ export class FeatureService {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
 
-    const settings = getFeatureStorageSettings(inferenceId);
+    const existingInferenceId = await getInferenceIdFromIndex(
+      esClient,
+      featureStorageSettings.name,
+      FEATURE_SEARCH_EMBEDDING,
+      this.logger
+    );
 
-    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredFeature>(
+    const storageSettings = getFeatureStorageSettings(existingInferenceId);
+
+    const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(
       esClient,
       this.logger.get('features'),
-      settings,
+      storageSettings as FeatureStorageSettings,
       {
         migrateSource: (source) => {
           if (!(FEATURE_ID in source)) {
@@ -70,7 +84,6 @@ export class FeatureService {
         storageClient: adapter.getClient(),
         logger: this.logger,
       },
-      inferenceAvailable,
       config
     );
   }

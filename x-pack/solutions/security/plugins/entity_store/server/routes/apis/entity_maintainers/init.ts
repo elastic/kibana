@@ -22,6 +22,9 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
       access: 'internal',
+      summary: 'Initialize entity maintainers',
+      description:
+        'Initialize all registered entity maintainer tasks. Requires the Entity Store to be installed and the user to have sufficient privileges.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

@@ -31,12 +31,19 @@ jest.mock('../../../hooks/use_last_agent_id', () => ({
   getLastAgentId: () => 'test-agent',
 }));
 
+jest.mock('../../../context/active_space_context', () => ({
+  useActiveSpaceId: () => 'default',
+}));
+
 jest.mock('../../../hooks/use_conversation_list', () => ({
   useConversationList: () => ({ conversations: [], isLoading: false, refresh: jest.fn() }),
 }));
 
-jest.mock('../../../hooks/use_feature_flags', () => ({
-  useFeatureFlags: () => ({ experimental: false }),
+jest.mock('../../../hooks/use_route_access_config', () => ({
+  useRouteAccessConfig: () => ({
+    featureFlags: { experimental: false },
+    capabilities: { isUIAMEnabled: false },
+  }),
 }));
 
 jest.mock('./shared/sidebar_header', () => ({
@@ -46,6 +53,10 @@ jest.mock('./shared/sidebar_header', () => ({
 jest.mock('react-use/lib/useLocalStorage', () => ({
   __esModule: true,
   default: () => [undefined, jest.fn()],
+}));
+
+jest.mock('../../../context/send_message/send_message_context', () => ({
+  useSendMessageContext: () => ({ removeAllErrors: jest.fn() }),
 }));
 
 import { UnifiedSidebar } from './unified_sidebar';

@@ -16,7 +16,7 @@ import {
   ALERT_TIME_RANGE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import type { Alert, LegacyField } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
@@ -102,89 +102,8 @@ const alerts: Alert[] = [
     [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   },
 ];
-const oldAlertsData = [
-  [
-    {
-      field: AlertsField.name,
-      value: ['one'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['two'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['three'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['four'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['five'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['six'],
-    },
-  ],
-] as LegacyField[][];
-const ecsAlertsData = [
-  [
-    {
-      '@timestamp': ['2023-01-28T10:48:49.559Z'],
-      _id: 'SomeId',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['one'],
-          },
-          reason: ['two'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-27T10:48:49.559Z'],
-      _id: 'SomeId2',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['three'],
-          },
-          reason: ['four'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-26T10:48:49.559Z'],
-      _id: 'SomeId3',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['five'],
-          },
-          reason: ['six'],
-        },
-      },
-    },
-  ],
-];
 const mockSearchAlertsResponse: Awaited<ReturnType<typeof searchAlerts>> = {
   alerts,
-  ecsAlertsData,
-  oldAlertsData,
   total: alerts.length,
   querySnapshot: { request: [], response: [] },
 };
@@ -897,8 +816,6 @@ describe('AlertsTable', () => {
     beforeEach(() => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
       });
@@ -921,8 +838,6 @@ describe('AlertsTable', () => {
       mockStorageData.clear();
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('An error occurred'),
@@ -932,8 +847,6 @@ describe('AlertsTable', () => {
     it('should show error if sorted by column which is not supported', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
@@ -969,8 +882,6 @@ describe('AlertsTable', () => {
     it('should render reset button on error', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Error while fetching alerts'),
@@ -986,8 +897,6 @@ describe('AlertsTable', () => {
     it('should go back to previous state when reset sort button is clicked', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Sorting by range field [kibana.alert.time_range] is not supported'),
@@ -1030,8 +939,6 @@ describe('AlertsTable', () => {
     it('should go back to default state when reset button is clicked', async () => {
       mockSearchAlerts.mockResolvedValue({
         alerts: [],
-        oldAlertsData: [],
-        ecsAlertsData: [],
         total: 0,
         querySnapshot: { request: [], response: [] },
         error: new Error('Something went wrong'),

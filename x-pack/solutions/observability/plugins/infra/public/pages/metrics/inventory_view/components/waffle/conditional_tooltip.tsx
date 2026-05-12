@@ -14,6 +14,7 @@ import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
@@ -38,7 +39,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
-      schema: preferredSchema ?? 'ecs',
+      schema: preferredSchema ?? DEFAULT_SCHEMA,
     })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<

@@ -19,7 +19,7 @@ spec:
       description: Updates OTel semantic conventions and regenerates TypeScript field definitions
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_ON_SUCCESS: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#obs-onboarding'
       allow_rebuilds: false

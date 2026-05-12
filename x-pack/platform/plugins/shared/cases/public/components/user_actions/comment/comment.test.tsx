@@ -380,7 +380,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added an alert from Awesome rule'
       );
     });
@@ -401,7 +401,7 @@ describe('createCommentUserActionBuilder', () => {
 
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added an alert from Awesome rule'
       );
 
@@ -462,7 +462,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
       expect(screen.getByTestId('comment-action-show-alerts-1234'));
@@ -489,7 +489,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
 

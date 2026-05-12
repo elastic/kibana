@@ -35,6 +35,7 @@
             "lineNumber": 51,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "GridLayoutProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -94,6 +95,7 @@
             "lineNumber": 60,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "GridLayoutData",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -117,6 +119,7 @@
             "lineNumber": 60,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "GridLayoutData",
             "trackAdoption": false,
             "isRequired": true
           }

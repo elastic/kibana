@@ -52,7 +52,7 @@
                 "id": "def-public.coreContextMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ production = false }",
                 "description": [],
                 "signature": [
                   "{ production?: boolean | undefined; }"
