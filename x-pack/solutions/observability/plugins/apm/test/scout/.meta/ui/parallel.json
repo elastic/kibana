@@ -1,5 +1,5 @@
 {
-  "sha1": "ab77df4a05dcd50ed11882c976e8273c7ff4ceef",
+  "sha1": "8d99e0d799f84d32165b3e0e95d0239542b9b9f2",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 30,
+        "line": 31,
         "column": 1
       }
     },
@@ -653,7 +653,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 44,
+        "line": 49,
         "column": 9
       }
     },
@@ -669,7 +669,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 52,
+        "line": 57,
         "column": 9
       }
     },
@@ -685,7 +685,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 63,
+        "line": 68,
         "column": 9
       }
     },
@@ -2544,6 +2544,54 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
         "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-e9cb937ad8469a8",
+      "title": "Trace waterfall flyout Full trace flyout renders waterfall and opens child flyouts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-ff7eb0f1f1af6e7",
+      "title": "Trace waterfall flyout \"Open in Discover\" opens Discover with trace filter and results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-89205e72f80dbc5",
+      "title": "Trace waterfall flyout \"Open in APM\" navigates to the root transaction detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 93,
         "column": 9
       }
     },

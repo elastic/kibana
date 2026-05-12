@@ -49,6 +49,7 @@ jest.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assi
   useViewInAiAssistant: () => ({
     showAssistantOverlay: jest.fn(),
     disabled: false,
+    isAssistantVisible: true,
   }),
 }));
 
