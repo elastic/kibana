@@ -102,7 +102,11 @@ function AlertConditionStep({
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
       // ESQLAstItem is a wide union — use a local type alias to access the 'by' option
       // safely rather than an inline interface (which triggers lint in function scope).
-      type CmdOption = { type: string; name: string; args?: unknown[] };
+      interface CmdOption {
+        type: string;
+        name: string;
+        args?: unknown[];
+      }
       const byOption = (statsCmd?.args as CmdOption[] | undefined)?.find(
         (a) => a.type === 'option' && a.name === 'by'
       );

@@ -158,11 +158,7 @@ export const RulesListPage = () => {
             data-test-subj="createRuleSplitButton"
           >
             <EuiSplitButton.ActionPrimary
-              onClick={() =>
-                application.navigateToUrl(
-                  http.basePath.prepend(paths.ruleCreate)
-                )
-              }
+              onClick={() => application.navigateToUrl(http.basePath.prepend(paths.ruleCreate))}
               data-test-subj="createRuleButton"
             >
               <FormattedMessage
