@@ -924,6 +924,46 @@ class MyPlugin {
 }
 ```
 
+### Chat events: per-conversation streams
+
+`events.chat$` exposes a hot observable of every chat event from every in-flight
+conversation. Concurrent per-conversation streams are now supported, so this stream
+interleaves events across conversations, and most event payloads do not carry a
+`conversation_id` you can filter on directly. **`chat$` is deprecated.**
+
+Use `events.getChatEvents$(conversationId)` instead. It returns a hot observable
+scoped to a single conversation — every event is tagged with the conversation that
+produced it, and the returned stream filters to the matching tag.
+
+```ts
+// Before — works only when a single conversation streams at a time.
+agentBuilder.events.chat$
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to a known conversation id.
+agentBuilder.events
+  .getChatEvents$(conversationId)
+  .pipe(filter(isRoundCompleteEvent))
+  .subscribe((event) => { ... });
+
+// After — scope to whichever conversation the chat surface is currently focused on.
+agentBuilder.events.ui.activeConversation$
+  .pipe(
+    filter((c): c is ActiveConversation => c?.id != null),
+    switchMap((c) => agentBuilder.events.getChatEvents$(c.id!))
+  )
+  .subscribe((event) => { ... });
+```
+
+`switchMap` cancels the previous per-conversation subscription whenever the active
+conversation changes — e.g. when a consumer follows the user's focus.
+
+All chat in Kibana is initiated through the agent_builder UI (sidebar, embeddable,
+or full-page chat), and the UI generates a client-side conversation UUID before
+each request. Plugins consuming this contract have access to that id via
+`events.ui.activeConversation$` and can pass it straight to `getChatEvents$`.
+
 ## Registering skills
 
 **Note**: Skills are currently an experimental feature. You need to enable the `agentBuilder:experimentalFeatures` uiSetting to enable and use them.
@@ -1016,7 +1056,7 @@ does; the skill tells it *when* to do it.
 
 ### Marking a skill as experimental
 
-Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition. 
+Individual built-in skills can be flagged as experimental by setting `experimental: true` on their definition.
 Experimental skills are only visible and usable when the `agentBuilder:experimentalFeatures` uiSetting is enabled.
 
 **Example:**

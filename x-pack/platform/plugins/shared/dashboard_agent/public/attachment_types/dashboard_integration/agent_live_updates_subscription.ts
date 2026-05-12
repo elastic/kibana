@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, type Subscription } from 'rxjs';
+import { EMPTY, filter, switchMap, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -28,53 +28,60 @@ export const createAgentLiveUpdatesSubscription = ({
   api,
   setAttachments,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
-  agentBuilder.events.chat$.pipe(filter(isRoundCompleteEvent)).subscribe((event) => {
-    const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
-    const incomingAttachments = dashboardAttachments.filter((attachment) => {
-      return (
-        event.data.round.input.attachment_refs?.some(
-          (ref) =>
-            ref.attachment_id === attachment.id &&
-            (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
-              ref.operation === ATTACHMENT_REF_OPERATION.created)
-        ) === true
+  agentBuilder.events.ui.activeConversation$
+    .pipe(
+      switchMap((conversation) =>
+        conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+      ),
+      filter(isRoundCompleteEvent)
+    )
+    .subscribe((event) => {
+      const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
+      const incomingAttachments = dashboardAttachments.filter((attachment) => {
+        return (
+          event.data.round.input.attachment_refs?.some(
+            (ref) =>
+              ref.attachment_id === attachment.id &&
+              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
+                ref.operation === ATTACHMENT_REF_OPERATION.created)
+          ) === true
+        );
+      });
+
+      setAttachments(
+        dashboardAttachments
+          .map((attachment): DashboardAttachment | undefined => {
+            const latestVersionData = getLatestVersion(attachment)?.data;
+            return latestVersionData
+              ? {
+                  id: attachment.id,
+                  type: attachment.type,
+                  data: latestVersionData,
+                  origin: attachment.origin,
+                }
+              : undefined;
+          })
+          .filter((attachment): attachment is DashboardAttachment => attachment !== undefined)
       );
+
+      // TODO: we're assuming only one attachment is coming in at a time
+      const incomingAttachment = incomingAttachments?.at(0);
+      if (!incomingAttachment) {
+        return;
+      }
+
+      const currentSavedObjectId = api.savedObjectId$.getValue();
+
+      // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
+      if (currentSavedObjectId && incomingAttachment.origin !== currentSavedObjectId) {
+        return;
+      }
+
+      const latestVersionData = getLatestVersion(incomingAttachment)?.data;
+
+      if (!latestVersionData) {
+        return;
+      }
+
+      api.setState(attachmentDataToDashboardState(latestVersionData));
     });
-
-    setAttachments(
-      dashboardAttachments
-        .map((attachment): DashboardAttachment | undefined => {
-          const latestVersionData = getLatestVersion(attachment)?.data;
-          return latestVersionData
-            ? {
-                id: attachment.id,
-                type: attachment.type,
-                data: latestVersionData,
-                origin: attachment.origin,
-              }
-            : undefined;
-        })
-        .filter((attachment): attachment is DashboardAttachment => attachment !== undefined)
-    );
-
-    // TODO: we're assuming only one attachment is coming in at a time
-    const incomingAttachment = incomingAttachments?.at(0);
-    if (!incomingAttachment) {
-      return;
-    }
-
-    const currentSavedObjectId = api.savedObjectId$.getValue();
-
-    // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
-    if (currentSavedObjectId && incomingAttachment.origin !== currentSavedObjectId) {
-      return;
-    }
-
-    const latestVersionData = getLatestVersion(incomingAttachment)?.data;
-
-    if (!latestVersionData) {
-      return;
-    }
-
-    api.setState(attachmentDataToDashboardState(latestVersionData));
-  });
