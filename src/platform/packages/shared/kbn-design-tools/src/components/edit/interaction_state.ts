@@ -8,6 +8,7 @@
  */
 
 import type { ResizeHandle } from '../../lib/constants';
+import { HANDLE_CURSORS } from '../../lib/constants';
 import type { ElementSession } from './element_registry';
 
 /**
@@ -63,3 +64,19 @@ export interface ResizeState {
 }
 
 export const IDLE: IdleState = { type: 'idle' };
+
+/**
+ * Derive the CSS cursor from the current interaction state and hover target.
+ */
+export const deriveCursor = (state: InteractionState, target: HTMLElement | null): string => {
+  switch (state.type) {
+    case 'drag':
+      return 'grabbing';
+    case 'resize':
+      return HANDLE_CURSORS[state.handle];
+    case 'hover':
+      return state.handle ? HANDLE_CURSORS[state.handle] : 'grab';
+    default:
+      return target ? 'grab' : '';
+  }
+};

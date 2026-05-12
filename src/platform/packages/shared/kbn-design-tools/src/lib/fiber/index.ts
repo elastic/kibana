@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EditOutline } from './edit_outline';
-export { OutlineControls, EditButton, DeleteButton, DuplicateButton } from './controls';
+export {
+  EUI_COMPONENTS,
+  resolveEuiTag,
+  resolveReactComponentName,
+  resolveTag,
+} from './resolve_component_name';

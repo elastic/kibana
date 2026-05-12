@@ -10,6 +10,8 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
+import { SVG_INTERNALS } from '../../../lib/constants';
+import { resolveTag } from '../../../lib/fiber';
 
 interface TreeNode {
   tag: string;
@@ -19,21 +21,20 @@ interface TreeNode {
   isClosing?: boolean;
 }
 
-const resolveEuiTag = (el: Element): string | null => {
-  for (const cls of el.classList) {
-    if (/^eui[A-Z]/.test(cls)) {
-      return cls.charAt(0).toUpperCase() + cls.slice(1);
-    }
-  }
-  return null;
-};
-
 const flatten = (el: Element, depth: number): TreeNode[] => {
-  const tag = resolveEuiTag(el) ?? el.tagName.toLowerCase();
+  const tag = resolveTag(el);
   const children = Array.from(el.children);
   const nodes: TreeNode[] = [];
 
-  if (children.length === 0) {
+  // Treat SVG containers as leaf nodes — don't recurse into path/g/circle etc.
+  const isSvg = el.tagName.toLowerCase() === 'svg';
+  const isSvgInternal = SVG_INTERNALS.has(el.tagName.toLowerCase());
+
+  if (isSvgInternal) {
+    return nodes;
+  }
+
+  if (children.length === 0 || isSvg) {
     nodes.push({ tag, depth, element: el, hasChildren: false });
     return nodes;
   }

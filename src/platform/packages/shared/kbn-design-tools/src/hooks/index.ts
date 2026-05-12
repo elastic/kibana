@@ -17,3 +17,4 @@ export { useOverlayZIndex } from './use_overlay_z_index';
 export type { OverlayZIndex } from './use_overlay_z_index';
 export { usePortalZIndex } from './use_portal_z_index';
 export { useScrollSync } from './use_scroll_sync';
+export { useLockedTarget } from './use_locked_target';

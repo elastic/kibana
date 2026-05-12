@@ -28,7 +28,7 @@ export const LayoutTypeSelector = ({ layoutType, onChange }: Props) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('kbnDesignTools.layoutSettings.layoutType', {
+      label={i18n.translate('kbnDesignTools.layout.settings.layoutType', {
         defaultMessage: 'Layout',
       })}
     >

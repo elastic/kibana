@@ -11,16 +11,13 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import { EuiBadge, EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
-
 import { SpacingMeasurement } from './spacing_measurement';
 import { getElementFromPoint } from '../../lib';
 import { handleEventPropagation } from '../../lib/dom/handle_event_propagation';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
-
 import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
-
 import { MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { useEscapeKey, useOverlayZIndex } from '../../hooks';
 import { GlobalCursorOverride } from '../global_cursor_override';

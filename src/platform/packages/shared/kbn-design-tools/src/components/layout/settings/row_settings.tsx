@@ -34,7 +34,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('kbnDesignTools.layoutSettings.count', {
+        label={i18n.translate('kbnDesignTools.layout.settings.count', {
           defaultMessage: 'Count',
         })}
       >
@@ -48,7 +48,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('kbnDesignTools.layoutSettings.alignType', {
+        label={i18n.translate('kbnDesignTools.layout.settings.alignType', {
           defaultMessage: 'Align',
         })}
       >
@@ -62,7 +62,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
       </EuiFormRow>
       {config.rowAlignType !== 'stretch' && (
         <EuiFormRow
-          label={i18n.translate('kbnDesignTools.layoutSettings.height', {
+          label={i18n.translate('kbnDesignTools.layout.settings.height', {
             defaultMessage: 'Height',
           })}
         >
@@ -78,7 +78,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         </EuiFormRow>
       )}
       <EuiFormRow
-        label={i18n.translate('kbnDesignTools.layoutSettings.gutter', {
+        label={i18n.translate('kbnDesignTools.layout.settings.gutter', {
           defaultMessage: 'Gutter',
         })}
       >
@@ -92,7 +92,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('kbnDesignTools.layoutSettings.margin', {
+        label={i18n.translate('kbnDesignTools.layout.settings.margin', {
           defaultMessage: 'Margin',
         })}
       >

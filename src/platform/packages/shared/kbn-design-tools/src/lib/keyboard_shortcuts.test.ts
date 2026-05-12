@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEscapeKey, isMeasureShortcut } from './keyboard_shortcut';
+import { isEscapeKey, isDeleteKey, isMeasureShortcut } from './keyboard_shortcuts';
 
-describe('keyboard_shortcut', () => {
+describe('keyboard_shortcuts', () => {
   describe('isEscapeKey', () => {
     it('returns true for Escape key', () => {
       const event = { key: 'Escape' } as KeyboardEvent;
@@ -19,6 +19,23 @@ describe('keyboard_shortcut', () => {
     it('returns false for other keys', () => {
       const event = { key: 'Enter' } as KeyboardEvent;
       expect(isEscapeKey(event)).toBe(false);
+    });
+  });
+
+  describe('isDeleteKey', () => {
+    it('returns true for Delete key', () => {
+      const event = { key: 'Delete' } as KeyboardEvent;
+      expect(isDeleteKey(event)).toBe(true);
+    });
+
+    it('returns true for Backspace key', () => {
+      const event = { key: 'Backspace' } as KeyboardEvent;
+      expect(isDeleteKey(event)).toBe(true);
+    });
+
+    it('returns false for other keys', () => {
+      const event = { key: 'Enter' } as KeyboardEvent;
+      expect(isDeleteKey(event)).toBe(false);
     });
   });
 

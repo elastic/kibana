@@ -20,7 +20,7 @@ export const EditButton = ({ onClick }: Props) => (
     iconType="pencil"
     color="text"
     size="xs"
-    aria-label={i18n.translate('kbnDesignTools.editOutline.editElement', {
+    aria-label={i18n.translate('kbnDesignTools.edit.outline.controls.editElement', {
       defaultMessage: 'Edit element',
     })}
     onClick={onClick}

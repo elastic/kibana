@@ -10,7 +10,11 @@
 import React, { createRef } from 'react';
 import { cleanup, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { DEVELOPER_TOOLBAR_ID, DEVTOOL_MANAGED_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import {
+  DEVELOPER_TOOLBAR_ID,
+  DEVTOOL_MANAGED_ATTR,
+  MEASURE_OVERLAY_ID,
+} from '../../lib/constants';
 import { getDefaultLayoutConfig } from '../../lib/layout/layout_config';
 import { EditOverlay } from './edit_overlay';
 import type { EditOverlayHandle } from './edit_overlay';

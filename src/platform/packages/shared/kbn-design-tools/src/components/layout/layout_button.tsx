@@ -86,17 +86,17 @@ export const LayoutButton = () => {
       items: [
         {
           name: isLayoutVisible
-            ? i18n.translate('kbnDesignTools.layoutButton.layout.hideLabel', {
+            ? i18n.translate('kbnDesignTools.layout.popover.layoutHideLabel', {
                 defaultMessage: 'Hide layout',
               })
-            : i18n.translate('kbnDesignTools.layoutButton.layout.showLabel', {
+            : i18n.translate('kbnDesignTools.layout.popover.layoutShowLabel', {
                 defaultMessage: 'Show layout',
               }),
           icon: isLayoutVisible ? 'eyeClosed' : 'eye',
           onClick: handleToggleLayout,
         },
         {
-          name: i18n.translate('kbnDesignTools.layoutButton.layout.settingsLabel', {
+          name: i18n.translate('kbnDesignTools.layout.popover.layoutSettingsLabel', {
             defaultMessage: 'Layout settings',
           }),
           icon: 'controlsHorizontal',
@@ -107,21 +107,21 @@ export const LayoutButton = () => {
         },
         {
           name: isEditMode
-            ? i18n.translate('kbnDesignTools.layoutButton.editMode.exitLabel', {
+            ? i18n.translate('kbnDesignTools.layout.popover.editMode.exitLabel', {
                 defaultMessage: 'Exit edit',
               })
-            : i18n.translate('kbnDesignTools.layoutButton.editMode.startLabel', {
+            : i18n.translate('kbnDesignTools.layout.popover.editMode.startLabel', {
                 defaultMessage: 'Edit',
               }),
           icon: isEditMode ? 'logOut' : 'pencil',
           onClick: handleToggleEditMode,
-          toolTipContent: i18n.translate('kbnDesignTools.layoutButton.editMode.buttonTooltip', {
+          toolTipContent: i18n.translate('kbnDesignTools.layout.popover.editMode.buttonTooltip', {
             defaultMessage:
               'Snapping is enabled while layout is active. Hold Shift to move freely.',
           }),
         },
         {
-          name: i18n.translate('kbnDesignTools.layoutButton.editMode.resetButtonLabel', {
+          name: i18n.translate('kbnDesignTools.layout.popover.editMode.resetButtonLabel', {
             defaultMessage: 'Reset edits',
           }),
           icon: 'undo',
@@ -158,7 +158,7 @@ export const LayoutButton = () => {
               iconType="grid"
               isSelected={isLayoutVisible}
               aria-pressed={isLayoutVisible}
-              aria-label={i18n.translate('kbnDesignTools.layoutButton.ariaLabel', {
+              aria-label={i18n.translate('kbnDesignTools.layout.toggle.ariaLabel', {
                 defaultMessage: 'Layout overlay',
               })}
               color="text"
@@ -170,7 +170,7 @@ export const LayoutButton = () => {
         closePopover={() => setIsPopoverOpen(false)}
         anchorPosition="upRight"
         panelPaddingSize="none"
-        aria-label={i18n.translate('kbnDesignTools.layoutButton.toggleLabel', {
+        aria-label={i18n.translate('kbnDesignTools.layout.toggle.label', {
           defaultMessage: 'Toggle layout',
         })}
       >
@@ -187,7 +187,7 @@ export const LayoutButton = () => {
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
               <h2 id="layoutSettingsFlyoutTitle">
-                {i18n.translate('kbnDesignTools.layoutButton.settingsLabel', {
+                {i18n.translate('kbnDesignTools.layout.settings.flyoutTitle', {
                   defaultMessage: 'Layout settings',
                 })}
               </h2>

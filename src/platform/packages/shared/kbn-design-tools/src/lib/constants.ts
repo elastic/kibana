@@ -99,3 +99,42 @@ export const ROUNDING_THRESHOLD = 4;
 
 /** Width (px) of the edge zone where dead-zone compensation applies. */
 export const EDGE_ZONE = 16;
+
+/** SVG child element tag names that are not meaningful to show in UI trees. */
+export const SVG_INTERNALS = new Set([
+  'path',
+  'g',
+  'circle',
+  'rect',
+  'line',
+  'polyline',
+  'polygon',
+  'ellipse',
+  'text',
+  'tspan',
+  'defs',
+  'clippath',
+  'mask',
+  'use',
+  'symbol',
+  'lineargradient',
+  'radialgradient',
+  'stop',
+  'filter',
+  'feblend',
+  'fecolormatrix',
+  'fecomponenttransfer',
+  'fecomposite',
+  'feconvolvematrix',
+  'fediffuselighting',
+  'fedisplacementmap',
+  'feflood',
+  'fegaussianblur',
+  'feimage',
+  'femerge',
+  'femorphology',
+  'feoffset',
+  'fespecularlighting',
+  'fetile',
+  'feturbulence',
+]);

@@ -24,7 +24,7 @@ interface Props {
   target: HTMLElement;
   onDelete: () => void;
   onDuplicate: () => void;
-  onEdit: () => void;
+  onEdit: (target: HTMLElement) => void;
 }
 
 export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) => {
@@ -90,7 +90,11 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
           data-test-subj={`editOverlayResizeHandle-${h}`}
         />
       ))}
-      <OutlineControls onDelete={onDelete} onDuplicate={onDuplicate} onEdit={onEdit} />
+      <OutlineControls
+        onDelete={onDelete}
+        onDuplicate={onDuplicate}
+        onEdit={() => onEdit(target)}
+      />
     </div>
   );
 };

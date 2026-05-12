@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Check if Escape key was pressed.
- */
-export const isEscapeKey = (event: KeyboardEvent): boolean => event.key === 'Escape';
-
-const isDot = (event: KeyboardEvent): boolean => event.code === 'Period' || event.key === '.';
-
-/**
- * Check if the keyboard event corresponds to the measure shortcut (Meta/Ctrl + .).
- */
-export const isMeasureShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && isDot(event);
+export { EditModal } from './edit_modal';
+export type { StyleChange, TextNodeChange } from './edit_modal';
+export { ElementTree } from './element_tree';
+export { TextNodeEditor } from './text_node_editor';
+export type { TextNodeEntry } from './text_node_editor';

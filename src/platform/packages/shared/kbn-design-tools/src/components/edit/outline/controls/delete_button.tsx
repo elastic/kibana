@@ -20,7 +20,7 @@ export const DeleteButton = ({ onClick }: Props) => (
     iconType="trash"
     color="danger"
     size="xs"
-    aria-label={i18n.translate('kbnDesignTools.editOutline.deleteElement', {
+    aria-label={i18n.translate('kbnDesignTools.edit.outline.controls.deleteElement', {
       defaultMessage: 'Delete element',
     })}
     onClick={onClick}

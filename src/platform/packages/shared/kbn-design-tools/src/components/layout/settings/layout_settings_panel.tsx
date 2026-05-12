@@ -71,7 +71,7 @@ export const LayoutSettingsPanel = ({ config, defaultConfig, setConfig }: Props)
       <ColorSetting color={config.color} onChange={updateConfig} />
       <EuiSpacer size="m" />
       <EuiButton size="s" onClick={resetLayoutDefaults} data-test-subj="layoutSettingsResetButton">
-        {i18n.translate('kbnDesignTools.layoutSettings.reset', {
+        {i18n.translate('kbnDesignTools.layout.settings.reset', {
           defaultMessage: 'Reset to default',
         })}
       </EuiButton>

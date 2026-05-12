@@ -22,7 +22,7 @@ export const GridCellSettings = ({ config, onChange }: Props) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('kbnDesignTools.layoutSettings.cellSize', {
+      label={i18n.translate('kbnDesignTools.layout.settings.cellSize', {
         defaultMessage: 'Size',
       })}
     >

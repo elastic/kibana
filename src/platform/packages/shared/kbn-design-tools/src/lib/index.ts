@@ -22,7 +22,9 @@ export {
   RESIZE_HANDLE_SIZE,
 } from './constants';
 export type { ResizeHandle } from './constants';
-export { isEscapeKey, isMeasureShortcut } from './keyboard_shortcut';
+export { isEscapeKey, isMeasureShortcut } from './keyboard_shortcuts';
+
+export { EUI_COMPONENTS, resolveEuiTag, resolveReactComponentName, resolveTag } from './fiber';
 
 export {
   isIgnoredElement,

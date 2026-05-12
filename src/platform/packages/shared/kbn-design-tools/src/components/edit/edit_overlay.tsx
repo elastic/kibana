@@ -17,8 +17,10 @@ import {
   useEditListeners,
   useOverlayZIndex,
   useScrollSync,
+  useLockedTarget,
 } from '../../hooks';
 import { DEVTOOL_HIDDEN_ATTR, HANDLE_CURSORS, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { isEscapeKey, isDeleteKey } from '../../lib/keyboard_shortcuts';
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
@@ -32,26 +34,11 @@ import {
 import { createDuplicate } from './duplicate_helpers';
 import { findNearHandle, startResize, applyResizeMove } from './resize_helpers';
 import type { InteractionState } from './interaction_state';
-import { IDLE } from './interaction_state';
+import { IDLE, deriveCursor } from './interaction_state';
 import { EditOutline } from './outline';
-import { EditModal } from './outline/controls/edit_modal';
+import { EditModal } from './modal/edit_modal';
+import type { StyleChange, TextNodeChange } from './modal/edit_modal';
 import { hasSignificantRounding, isInRoundedDeadZone } from '../../lib/dom/rounded_dead_zone';
-
-/**
- * Derive the CSS cursor from the current interaction state and hover target.
- */
-const deriveCursor = (state: InteractionState, target: HTMLElement | null): string => {
-  switch (state.type) {
-    case 'drag':
-      return 'grabbing';
-    case 'resize':
-      return HANDLE_CURSORS[state.handle];
-    case 'hover':
-      return state.handle ? HANDLE_CURSORS[state.handle] : 'grab';
-    default:
-      return target ? 'grab' : '';
-  }
-};
 
 export interface EditOverlayHandle {
   resetAll: () => void;
@@ -90,6 +77,7 @@ export const EditOverlay = ({
   const styleEdits = useRef<Array<{ element: HTMLElement; property: string; original: string }>>(
     []
   );
+  const textEdits = useRef<Array<{ node: Text; original: string }>>([]);
   const roundedTargets = useRef(new WeakSet<HTMLElement>());
 
   const updateCursor = useCallback(
@@ -104,7 +92,9 @@ export const EditOverlay = ({
   const notifyCount = useCallback(() => {
     const hiddenOriginals = document.querySelectorAll(`[${DEVTOOL_HIDDEN_ATTR}]`).length;
     const duplicates = [...registry.current.values()].filter((s) => s.isDuplicate).length;
-    onChangeCount?.(hiddenOriginals + duplicates + styleEdits.current.length);
+    onChangeCount?.(
+      hiddenOriginals + duplicates + styleEdits.current.length + textEdits.current.length
+    );
   }, [onChangeCount]);
 
   const deleteElement = useCallback(
@@ -136,6 +126,10 @@ export const EditOverlay = ({
       element.style.setProperty(property, original);
     }
     styleEdits.current = [];
+    for (const { node, original } of textEdits.current) {
+      node.textContent = original;
+    }
+    textEdits.current = [];
     onChangeCount?.(0);
   }, [onChangeCount, restoreAll]);
 
@@ -333,7 +327,7 @@ export const EditOverlay = ({
 
   const handleKeydown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (isEscapeKey(event)) {
         if (document.getElementById(MEASURE_OVERLAY_ID)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -341,7 +335,7 @@ export const EditOverlay = ({
         return;
       }
 
-      if ((event.key === 'Delete' || event.key === 'Backspace') && hoverTarget) {
+      if (isDeleteKey(event) && hoverTarget) {
         event.preventDefault();
         event.stopPropagation();
         deleteElement(hoverTarget);
@@ -389,53 +383,51 @@ export const EditOverlay = ({
   const showOutline =
     hoverTarget && interaction.current.type !== 'drag' && interaction.current.type !== 'resize';
 
+  const lockedTarget = useLockedTarget(hoverTarget, !!showOutline);
+
   const handleDelete = useCallback(() => {
     if (!hoverTarget) return;
     deleteElement(hoverTarget);
   }, [hoverTarget, deleteElement]);
 
-  const hideClones = useCallback(() => {
-    for (const session of registry.current.values()) {
-      session.el.dataset.savedZIndex = session.el.style.zIndex;
-      session.el.style.zIndex = '-1';
-    }
-  }, []);
-
-  const showClones = useCallback(() => {
-    for (const session of registry.current.values()) {
-      session.el.style.zIndex = session.el.dataset.savedZIndex ?? '';
-      delete session.el.dataset.savedZIndex;
-    }
-  }, []);
-
-  const handleEdit = useCallback(() => {
-    if (!hoverTarget) return;
-    setEditModalTarget(hoverTarget);
+  const handleEdit = useCallback((target: HTMLElement) => {
+    setEditModalTarget(target);
     setCursor('');
     setHoverTarget(null);
-    hideClones();
-  }, [hoverTarget, hideClones]);
+  }, []);
 
   const handleEditClose = useCallback(() => {
     setEditModalTarget(null);
-    showClones();
-  }, [showClones]);
+  }, []);
 
   const handleEditSave = useCallback(
-    (changes: Array<{ element: Element; property: string; value: string }>) => {
-      for (const { element, property, value } of changes) {
-        if (element instanceof HTMLElement) {
-          const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
-          const original = element.style.getPropertyValue(cssProp);
-          styleEdits.current.push({ element, property: cssProp, original });
-          element.style.setProperty(cssProp, value);
+    (savedStyleChanges: StyleChange[], savedTextChanges: TextNodeChange[]) => {
+      // Apply style changes
+      for (const { element, property, value } of savedStyleChanges) {
+        const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
+        const original = element.style.getPropertyValue(cssProp);
+        styleEdits.current.push({ element, property: cssProp, original });
+        element.style.setProperty(cssProp, value);
+      }
+
+      // Apply text node changes
+      for (const { node, text, color: textColor } of savedTextChanges) {
+        if (text !== undefined) {
+          textEdits.current.push({ node, original: node.textContent ?? '' });
+          node.textContent = text;
+        }
+        if (textColor !== undefined && node.parentElement) {
+          const parent = node.parentElement;
+          const original = parent.style.color;
+          styleEdits.current.push({ element: parent, property: 'color', original });
+          parent.style.color = textColor;
         }
       }
+
       setEditModalTarget(null);
-      showClones();
       notifyCount();
     },
-    [showClones, notifyCount]
+    [notifyCount]
   );
 
   const handleDuplicate = useCallback(() => {
@@ -450,10 +442,10 @@ export const EditOverlay = ({
   return (
     <>
       {cursor && <GlobalCursorOverride cursor={cursor} allowButtons />}
-      {showOutline ? (
+      {showOutline && lockedTarget ? (
         <EuiPortal>
           <EditOutline
-            target={hoverTarget}
+            target={lockedTarget}
             onDelete={handleDelete}
             onDuplicate={handleDuplicate}
             onEdit={handleEdit}

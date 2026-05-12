@@ -8,11 +8,7 @@
  */
 
 import { getElementUnder } from './get_element_under';
-import {
-  DEVELOPER_TOOLBAR_ID,
-  DEVTOOL_MANAGED_ATTR,
-  DEVTOOL_HIDDEN_ATTR,
-} from '../constants';
+import { DEVELOPER_TOOLBAR_ID, DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR } from '../constants';
 
 describe('getElementUnder', () => {
   let originalElementsFromPoint: typeof document.elementsFromPoint;
@@ -38,7 +34,7 @@ describe('getElementUnder', () => {
     expect(getElementUnder(10, 10)).toBeNull();
   });
 
-    it('should return a managed element directly', () => {
+  it('should return a managed element directly', () => {
     const clone = document.createElement('div');
     clone.setAttribute(DEVTOOL_MANAGED_ATTR, '');
     document.elementsFromPoint = jest.fn().mockReturnValue([clone]);
@@ -46,7 +42,7 @@ describe('getElementUnder', () => {
     expect(getElementUnder(10, 10)).toBe(clone);
   });
 
-    it('should return the managed element root when clicking a child inside it', () => {
+  it('should return the managed element root when clicking a child inside it', () => {
     const clone = document.createElement('div');
     clone.setAttribute(DEVTOOL_MANAGED_ATTR, '');
     const child = document.createElement('span');

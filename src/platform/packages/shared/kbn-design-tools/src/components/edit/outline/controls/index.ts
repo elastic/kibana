@@ -8,8 +8,6 @@
  */
 
 export { OutlineControls } from './outline_controls';
-export { EditModal } from './edit_modal';
 export { EditButton } from './edit_button';
 export { DeleteButton } from './delete_button';
 export { DuplicateButton } from './duplicate_button';
-export { ElementTree } from './element_tree';

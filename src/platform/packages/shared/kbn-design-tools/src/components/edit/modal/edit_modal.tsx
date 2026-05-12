@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   useEuiTheme,
   EuiBadge,
+  rgbToHex,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -30,21 +31,48 @@ import {
   DEVTOOL_HIDDEN_ATTR,
   DEVTOOL_MANAGED_ATTR,
   EDIT_MODAL_ID,
-} from '../../../../lib/constants';
-import { copyStylesDeep } from '../../../../lib/dom/clone_element';
-import { useOverlayZIndex, usePortalZIndex } from '../../../../hooks';
+} from '../../../lib/constants';
+import { copyStylesDeep } from '../../../lib/dom/clone_element';
+import { useOverlayZIndex, usePortalZIndex } from '../../../hooks';
 import { ElementTree } from './element_tree';
+import { TextNodeEditor } from './text_node_editor';
+import type { TextNodeEntry } from './text_node_editor';
 
-interface PendingChange {
-  element: Element;
+export interface StyleChange {
+  element: HTMLElement;
   property: string;
   value: string;
 }
 
+export interface TextNodeChange {
+  node: Text;
+  text?: string;
+  color?: string;
+}
+
+/**
+ * Recursively collect all non-empty Text nodes within the given element tree.
+ */
+const collectAllTextNodes = (el: Element): Text[] => {
+  const nodes: Text[] = [];
+  const walk = (node: Node) => {
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const child = node.childNodes[i];
+      if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
+        nodes.push(child as Text);
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        walk(child);
+      }
+    }
+  };
+  walk(el);
+  return nodes;
+};
+
 interface Props {
   target: HTMLElement;
   onClose: () => void;
-  onSave: (changes: PendingChange[]) => void;
+  onSave: (styleChanges: StyleChange[], textChanges: TextNodeChange[]) => void;
 }
 
 export const EditModal = ({ target, onClose, onSave }: Props) => {
@@ -53,10 +81,13 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   usePortalZIndex(EDIT_MODAL_ID, zIndex.modal, true);
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
   const [color, setColor] = useState('');
-  const [changes, setChanges] = useState<PendingChange[]>([]);
+  const [styleChanges, setStyleChanges] = useState<StyleChange[]>([]);
+  const [textChanges, setTextChanges] = useState<Map<Text, TextNodeChange>>(new Map());
   const [cloneRoot, setCloneRoot] = useState<HTMLElement | null>(null);
   const elementMap = useRef(new Map<Element, Element>());
   const cloneRef = useRef<HTMLElement | null>(null);
+  const textNodeMap = useRef<Array<{ original: Text; clone: Text }>>([]);
+  const [textEntries, setTextEntries] = useState<TextNodeEntry[]>([]);
 
   const previewCallbackRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -104,8 +135,30 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       elementMap.current = map;
       cloneRef.current = clone;
 
+      // Append clone to DOM first so getComputedStyle works
       node.innerHTML = '';
       node.appendChild(clone);
+
+      // Collect all text nodes from the full tree
+      const origTextNodes = collectAllTextNodes(target);
+      const cloneTextNodes = collectAllTextNodes(clone);
+      const entries: TextNodeEntry[] = [];
+      const mapping: Array<{ original: Text; clone: Text }> = [];
+      for (let idx = 0; idx < origTextNodes.length; idx++) {
+        const orig = origTextNodes[idx];
+        const cl = cloneTextNodes[idx];
+        if (!cl) continue;
+        const parentEl = cl.parentElement;
+        entries.push({
+          node: orig,
+          text: cl.textContent ?? '',
+          color: parentEl ? rgbToHex(getComputedStyle(parentEl).color) || '' : '',
+        });
+        mapping.push({ original: orig, clone: cl });
+      }
+      textNodeMap.current = mapping;
+      setTextEntries(entries);
+
       setCloneRoot(clone);
     },
     [target]
@@ -145,20 +198,20 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   const handleColorChange = useCallback(
     (newColor: string) => {
       setColor(newColor);
-      if (!selectedElement) return;
+      if (!(selectedElement instanceof HTMLElement)) return;
 
       const cloneEl = elementMap.current.get(selectedElement);
       if (cloneEl instanceof HTMLElement) {
         cloneEl.style.backgroundColor = newColor;
       }
 
-      setChanges((prev) => {
+      setStyleChanges((prev) => {
         const filtered = prev.filter(
           (c) => !(c.element === selectedElement && c.property === 'backgroundColor')
         );
         return [
           ...filtered,
-          { element: selectedElement, property: 'backgroundColor', value: newColor },
+          { element: selectedElement as HTMLElement, property: 'backgroundColor', value: newColor },
         ];
       });
     },
@@ -166,8 +219,41 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   );
 
   const handleSave = useCallback(() => {
-    onSave(changes);
-  }, [changes, onSave]);
+    onSave(styleChanges, [...textChanges.values()]);
+  }, [styleChanges, textChanges, onSave]);
+
+  const handleTextNodeChange = useCallback(
+    (index: number, updates: { text?: string; color?: string }) => {
+      const entry = textNodeMap.current[index];
+      if (!entry) return;
+
+      // Update clone preview
+      if (updates.text !== undefined) {
+        entry.clone.textContent = updates.text;
+      }
+      if (updates.color !== undefined) {
+        const parent = entry.clone.parentElement;
+        if (parent) {
+          parent.style.setProperty('color', updates.color, 'important');
+          parent.style.setProperty('-webkit-text-fill-color', updates.color, 'important');
+        }
+      }
+
+      // Update entries state
+      setTextEntries((prev) => prev.map((e, i) => (i === index ? { ...e, ...updates } : e)));
+
+      // Track changes keyed by original Text node
+      setTextChanges((prev) => {
+        const next = new Map(prev);
+        const existing = next.get(entry.original) ?? { node: entry.original };
+        if (updates.text !== undefined) existing.text = updates.text;
+        if (updates.color !== undefined) existing.color = updates.color;
+        next.set(entry.original, existing);
+        return next;
+      });
+    },
+    []
+  );
 
   const previewCss = useMemo(
     () =>
@@ -198,7 +284,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <h3>
-                {i18n.translate('kbnDesignTools.editModal.title', {
+                {i18n.translate('kbnDesignTools.edit.modal.title', {
                   defaultMessage: 'Edit Element',
                 })}
               </h3>
@@ -225,10 +311,10 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-
+        <TextNodeEditor entries={textEntries} onChange={handleTextNodeChange} />
         {selectedElement && (
           <EuiFormRow
-            label={i18n.translate('kbnDesignTools.editModal.backgroundColor', {
+            label={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
               defaultMessage: 'Background color',
             })}
             style={{ marginTop: euiTheme.size.m }}
@@ -237,15 +323,18 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
           </EuiFormRow>
         )}
       </EuiModalBody>
-
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose}>
-          {i18n.translate('kbnDesignTools.editModal.cancel', {
+          {i18n.translate('kbnDesignTools.edit.modal.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton onClick={handleSave} fill disabled={changes.length === 0}>
-          {i18n.translate('kbnDesignTools.editModal.save', {
+        <EuiButton
+          onClick={handleSave}
+          fill
+          disabled={styleChanges.length === 0 && textChanges.size === 0}
+        >
+          {i18n.translate('kbnDesignTools.edit.modal.save', {
             defaultMessage: 'Save',
           })}
         </EuiButton>

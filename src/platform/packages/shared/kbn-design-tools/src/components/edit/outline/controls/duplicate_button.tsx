@@ -20,7 +20,7 @@ export const DuplicateButton = ({ onClick }: Props) => (
     iconType="copy"
     color="text"
     size="xs"
-    aria-label={i18n.translate('kbnDesignTools.editOutline.duplicateElement', {
+    aria-label={i18n.translate('kbnDesignTools.edit.outline.controls.duplicateElement', {
       defaultMessage: 'Duplicate element',
     })}
     onClick={onClick}

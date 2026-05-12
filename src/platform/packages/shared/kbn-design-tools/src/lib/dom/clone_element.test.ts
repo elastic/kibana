@@ -54,7 +54,7 @@ describe('cloneElement', () => {
     expect(clone.style.height).toBe('40px');
   });
 
-    it('should set the devtool managed attribute', () => {
+  it('should set the devtool managed attribute', () => {
     const { clone } = cloneElement(target, 9001);
 
     expect(clone.hasAttribute(DEVTOOL_MANAGED_ATTR)).toBe(true);

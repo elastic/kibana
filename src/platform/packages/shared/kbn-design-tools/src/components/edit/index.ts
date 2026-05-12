@@ -8,15 +8,8 @@
  */
 
 export { EditOverlay } from './edit_overlay';
-export {
-  EditOutline,
-  OutlineControls,
-  EditModal,
-  EditButton,
-  DeleteButton,
-  DuplicateButton,
-  ElementTree,
-} from './outline';
+export { EditOutline, OutlineControls, EditButton, DeleteButton, DuplicateButton } from './outline';
+export { EditModal, ElementTree } from './modal';
 export { ElementRegistry } from './element_registry';
 export { IDLE } from './interaction_state';
 export {
