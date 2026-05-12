@@ -20,6 +20,8 @@ export const CLIENT_ASSERTION_TYPE = 'urn:ietf:params:oauth:client-assertion-typ
 const CERTIFICATE_MARKER = /-----BEGIN CERTIFICATE-----/;
 const PRIVATE_KEY_MARKER = /-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----/;
 
+export type EntraAuthErrorKind = 'assertion' | 'exchange';
+
 /**
  * Raised by `OAuthEntraClientCertificate.configure` for any failure in the
  * Entra cert auth flow. The `kind` discriminator separates user-fixable
@@ -28,10 +30,11 @@ const PRIVATE_KEY_MARKER = /-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----/;
  * rejected the assertion, network error, non-2xx response).
  */
 export class EntraAuthError extends Error {
-  public readonly kind: 'assertion' | 'exchange';
+  public readonly kind: EntraAuthErrorKind;
 
-  constructor(kind: 'assertion' | 'exchange', message: string, options?: ErrorOptions) {
+  constructor(kind: EntraAuthErrorKind, message: string, options?: ErrorOptions) {
     super(message, options);
+
     this.name = 'EntraAuthError';
     this.kind = kind;
   }

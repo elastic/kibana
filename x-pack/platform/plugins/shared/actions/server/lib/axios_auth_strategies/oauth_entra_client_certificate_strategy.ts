@@ -47,7 +47,6 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
         secrets: {},
       },
       connectorTokenClient,
-      tokenEndpointAuthMethod: opts.tokenEndpointAuthMethod,
     });
   }
 }
