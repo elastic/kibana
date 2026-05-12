@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inference-workflows-plugin",
+  "owner": ["@elastic/search-kibana"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Registers AI workflow steps (ai.prompt, ai.summarize, ai.classify) that bridge the inference and workflows_extensions plugins.",
+  "plugin": {
+    "id": "inferenceWorkflows",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "inferenceWorkflows"],
+    "requiredPlugins": ["inference", "workflowsExtensions"]
+  }
+}
