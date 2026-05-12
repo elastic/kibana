@@ -6,18 +6,19 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { manageDashboardTool } from '../tools';
+import { inspectDashboardTool, manageDashboardTool, type InspectDashboardToolDeps } from '../tools';
 import { dashboardTools } from '../../common';
 import { gridLayoutPrompt } from './grid_layout_prompt';
 import { dashboardCompositionPrompt } from './dashboard_composition_prompt';
 
-export const dashboardManagementSkill = defineSkillType({
-  id: 'dashboard-management',
-  name: 'dashboard-management',
-  basePath: 'skills/platform/dashboard',
-  description:
-    'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
-  content: `## When to Use This Skill
+export const dashboardManagementSkill = (inspectDashboardToolDeps: InspectDashboardToolDeps) =>
+  defineSkillType({
+    id: 'dashboard-management',
+    name: 'dashboard-management',
+    basePath: 'skills/platform/dashboard',
+    description:
+      'Compose and update Kibana dashboards, involving panel creation, layout, and inline visualization editing.',
+    content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing Kibana dashboards.
@@ -76,6 +77,7 @@ Supported operations:
 - \`remove_panels\`: remove existing panels by \`id\`.
 
 After a successful call:
+- For non-trivial dashboards, call ${dashboardTools.inspectDashboard} before your final answer. Use its findings to make one follow-up ${dashboardTools.manageDashboard} call when it identifies clear, fixable layout or readability problems.
 - Render only the final dashboard attachment inline, as the last part of your response, after any text. Never render individual visualization attachments during dashboard composition.
 - Remember \`data.dashboardAttachment.id\` for follow-up updates.
 - Use returned \`id\` values for future panel removals.
@@ -106,5 +108,5 @@ ${gridLayoutPrompt}
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before calling \`remove_panels\`, \`add_panels\`, or any other replacement operations.
 - If the tool returns partial failures, explain which panel creations failed and include the reported \`type\`, \`identifier\`, and \`error\` for each one.
 `,
-  getInlineTools: () => [manageDashboardTool()],
-});
+    getInlineTools: () => [manageDashboardTool(), inspectDashboardTool(inspectDashboardToolDeps)],
+  });

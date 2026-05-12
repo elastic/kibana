@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { dashboardTools } from './constants';
+export {
+  DASHBOARD_SCREENSHOT_APP_ID,
+  DASHBOARD_SCREENSHOT_CONTEXT_KEY,
+  dashboardTools,
+} from './constants';

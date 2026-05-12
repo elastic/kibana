@@ -9,6 +9,8 @@
  * Namespace for dashboard-related tools
  */
 export const DASHBOARD_NAMESPACE = 'platform.dashboard';
+export const DASHBOARD_SCREENSHOT_APP_ID = 'dashboard_agent_screenshot';
+export const DASHBOARD_SCREENSHOT_CONTEXT_KEY = 'dashboardAttachmentData';
 
 /**
  * Helper function to create tool IDs in the dashboard namespace
@@ -23,4 +25,5 @@ const dashboardTool = (toolName: string) => {
  */
 export const dashboardTools = {
   manageDashboard: dashboardTool('manage_dashboard'),
+  inspectDashboard: dashboardTool('inspect_dashboard'),
 } as const;
