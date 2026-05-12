@@ -103,9 +103,10 @@ Every conclusion must cite specific evidence. Do not guess.
 
 Set `classification` based on where the evidence points:
 
-- **`test-design`**: timing, waits, selectors, fixtures, retries, setup/teardown, test data coupling, cleanup, or isolation issues in the test harness.
-- **`application`**: real product bug, broken contract, regression, or race in app/server/shared code.
-- **`external`**: CI instability, downed dependency, env/network/credentials, or unrelated platform incidents.
+- **`test-design`**: issue lives in the test code — timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape.
+- **`test-environment`**: test code is fine, but its surroundings are wrong — leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference.
+- **`application`**: real product bug exposed by the test — race, regression, broken contract, feature-flag bug.
+- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
 - **`inconclusive`**: evidence does not support a defensible call.
 
 Set `fixability` to exactly one of:
@@ -166,7 +167,7 @@ The visible section is a _distillation_ of the collapsed one. Do not repeat cont
 
 4. **Flakiness Finding bullets** — exactly these five, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
 
-   - `classification`: `test-design` | `application` | `external` | `inconclusive`
+   - `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
    - `confidence`: `high` | `medium` | `low`
    - `fixability`: `fixable` | `not-a-flake` | `env-issue` | `inconclusive` | `noop`
    - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
