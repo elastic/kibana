@@ -212,7 +212,7 @@ If the cherry-pick has conflicts:
    - Run `yarn kbn bootstrap` when a lockfile conflict exists or package conflict resolution requires dependency regeneration.
    - Do not edit lockfiles that were not part of the conflict unless `yarn kbn bootstrap` updates them as part of dependency regeneration.
 5. If a conflict is structural, semantic, or requires product judgment that cannot be verified from the source and target branch context, abort the cherry-pick, leave the worktree for logs, and return `needs manual backport` with the conflicted files and reason.
-6. After resolving, verify no conflict markers remain with a repository search for `<<<<<<<`, `=======`, and `>>>>>>>`.
+6. After resolving, verify no conflict markers remain with a worktree search for `<<<<<<<`, `=======`, and `>>>>>>>`.
 7. Stage only the resolved cherry-pick files.
 8. Continue the cherry-pick and preserve the `-x` attribution.
 9. Stay in the worktree directory and run `git branch --show-current`.
