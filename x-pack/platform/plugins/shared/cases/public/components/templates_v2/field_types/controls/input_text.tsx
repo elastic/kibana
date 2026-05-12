@@ -23,6 +23,7 @@ import {
   FIELD_PATTERN_MISMATCH,
   FIELD_PATTERN_INVALID,
 } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 const { emptyField } = fieldValidators;
 
@@ -87,6 +88,7 @@ export const InputText = ({
       config={{ validations }}
       componentProps={{
         label,
+        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
       }}
     />
   );

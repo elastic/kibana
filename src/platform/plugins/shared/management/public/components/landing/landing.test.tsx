@@ -155,5 +155,19 @@ describe('Landing Page', () => {
 
       expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
+
+    test('Hides AutoOps callout when hideAnnouncements is true', async () => {
+      const coreStart = coreMock.createStart();
+      coreStart.notifications.tours.isEnabled.mockReturnValue(false);
+
+      await renderLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: false },
+        coreStart,
+      });
+
+      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
+    });
   });
 });

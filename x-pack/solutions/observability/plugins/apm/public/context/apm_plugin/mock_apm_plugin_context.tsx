@@ -148,6 +148,10 @@ const mockCore = merge({}, coreStart, {
       PageTemplate: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     },
   },
+  triggersActionsUi: {
+    ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+    actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+  },
 });
 
 const mockConfig: ConfigSchema = {
@@ -216,6 +220,9 @@ const mockPlugin = {
         },
       },
     },
+  },
+  observability: {
+    useRulesLink: () => ({ href: '/app/rules', onClick: jest.fn() }),
   },
 };
 

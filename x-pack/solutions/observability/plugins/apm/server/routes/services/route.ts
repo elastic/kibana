@@ -45,12 +45,14 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceAnnotations } from './annotations';
+import type { ServiceAnomalyScoreResponse } from './get_services/get_service_anomaly_score_for_service';
+import { getServiceAnomalyScoreForService } from './get_services/get_service_anomaly_score_for_service';
+import { getSloAlertsClient } from '../../lib/helpers/get_slo_alerts_client';
 import { getServiceAgent } from './get_service_agent';
 import { getServiceDependencies } from './get_service_dependencies';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
@@ -66,7 +68,6 @@ import { getServiceSlos } from './get_service_slos';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesAlerts } from './get_services/get_service_alerts';
 import { getServicesItems } from './get_services/get_services_items';
-import { getServiceTransactionDetailedStatsPeriods } from './get_services_detailed_statistics/get_service_transaction_detailed_statistics';
 import { getThroughput } from './get_throughput';
 
 const servicesRoute = createApmServerRoute({
@@ -749,6 +750,47 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceAnomalyScoreRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_score',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([rangeRt, environmentRt]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceAnomalyScoreResponse> => {
+    const mlClient = await getMlClient(resources);
+    if (!mlClient) {
+      return {};
+    }
+
+    const { path, query } = resources.params;
+    const { serviceName } = path;
+    const { start, end, environment } = query;
+
+    try {
+      return await getServiceAnomalyScoreForService({
+        mlClient,
+        environment,
+        start,
+        end,
+        serviceName,
+      });
+    } catch (error) {
+      if (
+        (Boom.isBoom(error) && error.output.statusCode === 501) ||
+        error instanceof UnknownMLCapabilitiesError ||
+        error instanceof InsufficientMLCapabilities ||
+        error instanceof MLPrivilegesUninitialized
+      ) {
+        return {};
+      }
+      throw error;
+    }
+  },
+});
+
 const serviceSlosRoute = createApmServerRoute({
   endpoint: routeDefinitions.services.slos.endpoint,
   params: routeDefinitions.services.slos.params,
@@ -794,5 +836,6 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceAnomalyScoreRoute,
   ...serviceSlosRoute,
 };

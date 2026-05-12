@@ -67,3 +67,23 @@ export const globalSetupFixtures = mergeTests(
   esArchiverFixture,
   apiServicesFixture
 );
+
+/**
+ * Fixtures available in the global teardown hook (`global.teardown.ts`).
+ *
+ * Intentionally narrower than `globalSetupFixtures`: `esArchiver` is omitted on
+ * purpose. Scout's `esArchiver` fixture only exposes `loadIfNeeded` (see
+ * `fixtures/scope/worker/es_archiver.ts`) — archive-driven unloading is not
+ * supported by design, because deleting indexes that way is slow and offers
+ * no real benefit (leftover indexes in the cluster don't affect test outcomes
+ * once setup is idempotent). For state that *does* need to be reset across
+ * configs sharing the cluster (e.g. server-wide feature-flag overrides,
+ * legacy/hand-indexed data), teardown should use direct primitives:
+ *   - `esClient.indices.delete` / `deleteByQuery` / `indices.deleteDataStream`
+ *   - `kbnClient.savedObjects.*` and `kbnClient.uiSettings.{unset,update,updateGlobal}`
+ *   - `apiServices.*` (e.g. `apiServices.core.settings(...)` to revert feature flags)
+ *
+ * This is also consistent with the `scout_no_es_archiver_in_parallel_tests`
+ * ESLint rule, which only allows `esArchiver` in `global.setup.ts`.
+ */
+export const globalTeardownFixtures = mergeTests(coreWorkerFixtures, apiServicesFixture);

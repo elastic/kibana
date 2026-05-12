@@ -37,6 +37,15 @@ export {
   mapRuleResponseToFormValues,
 } from './form';
 
+// Field groups — for composing custom form layouts
+export {
+  RuleDetailsFieldGroup,
+  ConditionFieldGroup,
+  RuleExecutionFieldGroup,
+  AlertConditionsFieldGroup,
+  KindField,
+} from './form';
+
 // Types
 export type {
   FormValues,

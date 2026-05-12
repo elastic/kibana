@@ -1,5 +1,5 @@
 {
-  "sha1": "62eb681391ebdf24c631e5a3f68a1d1b39f1bad0",
+  "sha1": "a6b3cdc30811201eac10783df03947319cb4664d",
   "tests": [
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 40,
+        "line": 44,
         "column": 7
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 55,
+        "line": 59,
         "column": 7
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/browse_integration.spec.ts",
-        "line": 68,
+        "line": 72,
         "column": 7
       }
     },

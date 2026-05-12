@@ -79,6 +79,9 @@ const mockPlugin = {
       },
     },
   },
+  observability: {
+    useRulesLink: () => ({ href: '/app/rules', onClick: jest.fn() }),
+  },
 };
 
 const mockCore = {
@@ -86,6 +89,7 @@ const mockCore = {
     capabilities: {
       apm: {},
       ml: {},
+      slo: { read: true },
       savedObjectsManagement: {},
     },
     currentAppId$: new Observable(),
@@ -202,7 +206,13 @@ export function MockApmPluginStorybook({
   const callApmApi = mockCreateCallApmApiV2(contextMock.core);
   setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
-    merge({}, contextMock.core, { telemetry: storybookTelemetry }) as unknown as Partial<CoreStart>
+    merge({}, contextMock.core, {
+      telemetry: storybookTelemetry,
+      triggersActionsUi: {
+        ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+        actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+      },
+    }) as unknown as Partial<CoreStart>
   );
 
   const history = createMemoryHistory({

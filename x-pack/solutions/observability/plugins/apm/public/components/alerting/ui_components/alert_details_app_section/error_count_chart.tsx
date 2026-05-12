@@ -22,7 +22,7 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 type ErrorDistribution =
@@ -149,6 +149,7 @@ export function ErrorCountChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
+                  element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
