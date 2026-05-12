@@ -62,7 +62,7 @@ export function ServiceHeaderBadges({
         .catch(() => ({ alertsCount: 0 }));
     },
     [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
-    { showToastOnError: false }
+    { showToastOnError: false, useCallApmApiV2: true }
   );
 
   const { data: anomalyData, status: anomalyStatus } = useFetcher(
@@ -80,7 +80,7 @@ export function ServiceHeaderBadges({
         .catch((): { anomalyScore?: number } => ({}));
     },
     [serviceName, start, end, environment, canReadMlJobs],
-    { showToastOnError: false }
+    { showToastOnError: false, useCallApmApiV2: true }
   );
 
   const alertsCount = alertsData?.alertsCount ?? 0;

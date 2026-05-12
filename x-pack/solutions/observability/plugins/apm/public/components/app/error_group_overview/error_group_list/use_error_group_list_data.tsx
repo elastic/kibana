@@ -7,11 +7,11 @@
 
 import { useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useStateDebounced } from '../../../../hooks/use_debounce';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import type { TableOptions, VisibleItemsStartEnd } from '../../../shared/managed_table';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -78,7 +78,8 @@ export function useErrorGroupListData({
           });
         }
       },
-      [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery]
+      [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery],
+      { useCallApmApiV2: true }
     );
 
   const itemsToFetch = useMemo(
@@ -120,7 +121,7 @@ export function useErrorGroupListData({
     // only fetches agg results when main statistics are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, itemsToFetch, comparisonEnabled, offset],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   return {

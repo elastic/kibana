@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { APIReturnType } from './create_call_apm_api';
-import { callApmApi } from './create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import { getApmInternalServices } from '../../plugin';
 import { reportFetchError } from './report_fetch_error';
+export const FETCH_TRACE_ROOT_SPAN_OPERATION_ID = 'fetch-trace-root-span';
 
 type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
 
-export const FETCH_TRACE_ROOT_SPAN_OPERATION_ID = 'fetch-trace-root-span';
-
-export const fetchRootSpanByTraceId = async (
+export const fetchRootSpanByTraceId = (
   {
     traceId,
     start,
@@ -26,7 +25,8 @@ export const fetchRootSpanByTraceId = async (
   signal: AbortSignal
 ): Promise<TraceRootSpan | undefined> => {
   try {
-    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
+    const { callApmApi } = getApmInternalServices();
+    return callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
       params: {
         path: { traceId },
         query: {

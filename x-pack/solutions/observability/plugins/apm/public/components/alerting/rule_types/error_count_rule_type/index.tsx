@@ -118,7 +118,8 @@ export function ErrorCountRuleType(props: Props) {
       params.errorGroupingKey,
       params.groupBy,
       params.searchConfiguration,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const onGroupByChange = useCallback(

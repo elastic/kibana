@@ -45,7 +45,8 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType, offset]
+    [start, end, environment, kuery, serviceName, transactionType, offset],
+    { useCallApmApiV2: true }
   );
 
   const getComparisonValueFormatter = useCallback(

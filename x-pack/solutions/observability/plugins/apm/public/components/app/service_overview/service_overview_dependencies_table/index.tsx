@@ -75,7 +75,8 @@ export function ServiceOverviewDependenciesTable({
         },
       });
     },
-    [start, end, serviceName, environment, offset, comparisonEnabled]
+    [start, end, serviceName, environment, offset, comparisonEnabled],
+    { useCallApmApiV2: true }
   );
 
   useEffect(() => {

@@ -17,7 +17,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 import { getIsIndexTemplateOk } from './summary_tab/index_templates_status';
 import { getIsIndicesTabOk } from './summary_tab/indicies_status';

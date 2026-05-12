@@ -49,7 +49,8 @@ export function FullTraceWaterfallRenderer({
         },
       });
     },
-    [rangeFrom, rangeTo, traceId]
+    [rangeFrom, rangeTo, traceId],
+    { useCallApmApiV2: true }
   );
 
   if (isPending(status)) {

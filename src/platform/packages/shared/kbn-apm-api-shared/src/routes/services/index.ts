@@ -23,6 +23,7 @@ import { serviceDependenciesBreakdownRoute } from './service_dependencies_breakd
 import { serviceAnomalyChartsRoute } from './service_anomaly_charts';
 import { serviceAlertsCountRoute } from './service_alerts_count';
 import { serviceSlosRoute } from './service_slos';
+import { serviceAnnotationsScoreRoute } from './service_annotations_score';
 
 export const servicesRouteDefinitions = {
   servicesList: servicesListRoute,
@@ -33,6 +34,7 @@ export const servicesRouteDefinitions = {
   transactionTypes: serviceTransactionTypesRoute,
   nodeMetadata: serviceNodeMetadataRoute,
   annotationsSearch: serviceAnnotationsSearchRoute,
+  annotationsScore: serviceAnnotationsScoreRoute,
   throughput: serviceThroughputRoute,
   instancesMainStatistics: serviceInstancesMainStatisticsRoute,
   instancesDetailedStatistics: serviceInstancesDetailedStatisticsRoute,
@@ -55,6 +57,7 @@ export type { ServiceAgentResponse } from './service_agent';
 export type { ServiceTransactionTypesResponse } from './service_transaction_types';
 export type { ServiceNodeMetadataResponse } from './service_node_metadata';
 export type { ServiceAnnotationResponse } from './service_annotations_search';
+export type { ServiceAnomalyScoreResponse } from './service_annotations_score';
 export type {
   ServiceThroughputResponse,
   ServiceThroughputRouteResponse,

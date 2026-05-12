@@ -57,7 +57,8 @@ export function ProfilingHostsFlamegraph({
         });
       }
     },
-    [dataSource, serviceName, start, end, environment, kuery]
+    [dataSource, serviceName, start, end, environment, kuery],
+    { useCallApmApiV2: true }
   );
 
   const profilingKueryFilter =

@@ -5,35 +5,24 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
-import * as t from 'io-ts';
+import {
+  routeDefinitions,
+  type ServicesFlamegraphResponse,
+  type ServicesFunctionsResponse,
+  type ProfilingStatusResponse,
+} from '@kbn/apm-api-shared';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { fetchFlamegraph } from './fetch_flamegraph';
 import { fetchFunctions } from './fetch_functions';
 import { getStacktracesIdsField } from './get_stacktraces_ids_field';
 
 const servicesFlamegraphRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      kueryRt,
-      environmentRt,
-      rangeRt,
-      t.partial({
-        transactionName: t.string,
-      }),
-      t.type({
-        transactionType: t.string,
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.profiling.flamegraph.endpoint,
+  params: routeDefinitions.profiling.flamegraph.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<BaseFlameGraph | undefined> => {
+  handler: async (resources): Promise<ServicesFlamegraphResponse | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
     const [esClient, profilingDataAccessStart, apmEventClient] = await Promise.all([
@@ -78,25 +67,10 @@ const servicesFlamegraphRoute = createApmServerRoute({
 });
 
 const servicesFunctionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      environmentRt,
-      rangeRt,
-      t.partial({
-        transactionName: t.string,
-      }),
-      t.type({
-        startIndex: toNumberRt,
-        endIndex: toNumberRt,
-        transactionType: t.string,
-      }),
-      kueryRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.profiling.functions.endpoint,
+  params: routeDefinitions.profiling.functions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<TopNFunctions | undefined> => {
+  handler: async (resources): Promise<ServicesFunctionsResponse | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
 
@@ -153,9 +127,9 @@ const servicesFunctionsRoute = createApmServerRoute({
 });
 
 const profilingStatusRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/profiling/status',
+  endpoint: routeDefinitions.profiling.status.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ initialized: boolean }> => {
+  handler: async (resources): Promise<ProfilingStatusResponse> => {
     const { context, plugins, logger } = resources;
     const [esClient, profilingDataAccessStart] = await Promise.all([
       (await context.core).elasticsearch.client,

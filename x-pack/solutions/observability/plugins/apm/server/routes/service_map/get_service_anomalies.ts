@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import { rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { sortBy, uniqBy } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
@@ -21,16 +22,23 @@ import {
   ML_SERVICE_NAME_FIELD,
   ML_TRANSACTION_TYPE_FIELD,
 } from '../../lib/anomaly_detection/anomaly_search';
+<<<<<<< HEAD
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
+=======
+export type { ServiceAnomaliesResponse } from '@kbn/apm-types';
+>>>>>>> 2475af6bc734 (04 - Spacetime apm changes)
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
   serviceAnomalies: [],
 };
+<<<<<<< HEAD
 
+=======
+>>>>>>> 2475af6bc734 (04 - Spacetime apm changes)
 export async function getServiceAnomalies({
   mlClient,
   environment,

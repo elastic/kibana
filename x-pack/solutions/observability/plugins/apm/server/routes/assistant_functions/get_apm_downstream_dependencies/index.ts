@@ -5,8 +5,10 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { termQuery } from '@kbn/observability-plugin/server';
+import type { downstreamDependenciesRouteRt } from '@kbn/apm-types';
+import { type APMDownstreamDependency } from '@kbn/apm-types';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -15,26 +17,7 @@ import { getConnectionStats } from '../../../lib/connections/get_connection_stat
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { NodeType } from '../../../../common/connections';
 
-export const downstreamDependenciesRouteRt = t.intersection([
-  t.type({
-    serviceName: t.string,
-    start: t.string,
-    end: t.string,
-  }),
-  t.partial({
-    serviceEnvironment: t.string,
-  }),
-]);
-
-export interface APMDownstreamDependency {
-  'service.name'?: string;
-  'span.destination.service.resource': string;
-  'span.type'?: string;
-  'span.subtype'?: string;
-  errorRate?: number;
-  latencyMs?: number;
-  throughputPerMin?: number;
-}
+export { downstreamDependenciesRouteRt, type APMDownstreamDependency } from '@kbn/apm-types';
 
 export async function getApmDownstreamDependencies({
   arguments: args,

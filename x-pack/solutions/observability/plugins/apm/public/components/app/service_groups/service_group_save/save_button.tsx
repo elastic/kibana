@@ -28,7 +28,8 @@ export function ServiceGroupSaveButton() {
         });
       }
     },
-    [serviceGroup, isGroupEditMode]
+    [serviceGroup, isGroupEditMode],
+    { useCallApmApiV2: true }
   );
   const savedServiceGroup = data?.serviceGroup;
 

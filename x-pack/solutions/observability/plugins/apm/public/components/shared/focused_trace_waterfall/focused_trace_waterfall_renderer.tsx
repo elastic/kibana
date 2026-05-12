@@ -36,7 +36,8 @@ export function FocusedTraceWaterfallRenderer({ traceId, rangeFrom, rangeTo, doc
         },
       });
     },
-    [docId, rangeFrom, rangeTo, traceId]
+    [docId, rangeFrom, rangeTo, traceId],
+    { useCallApmApiV2: true }
   );
 
   if (isPending(status)) {

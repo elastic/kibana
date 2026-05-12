@@ -13,12 +13,13 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
 } from './es_fields/apm';
-export type { ServiceGroup, SavedServiceGroup } from '@kbn/apm-types';
 
 export const LABELS = 'labels'; // implies labels.* wildcard
 
 export const APM_SERVICE_GROUP_SAVED_OBJECT_TYPE = 'apm-service-group';
 export const MAX_NUMBER_OF_SERVICE_GROUPS = 500;
+
+export type { ServiceGroup, SavedServiceGroup } from '@kbn/apm-types';
 
 export const SERVICE_GROUP_SUPPORTED_FIELDS = [
   AGENT_NAME,

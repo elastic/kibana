@@ -107,7 +107,7 @@ export const useServiceMap = ({
       esQuery,
       config.serviceMapEnabled,
     ],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   const { data, status, error } = fetcherResult;

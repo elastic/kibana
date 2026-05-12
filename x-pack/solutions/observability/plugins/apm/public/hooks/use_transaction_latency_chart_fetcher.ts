@@ -90,7 +90,8 @@ export function useTransactionLatencyChartsFetcher({
       transactionName,
       comparisonEnabled,
       offset,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();

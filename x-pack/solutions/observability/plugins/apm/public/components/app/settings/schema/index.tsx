@@ -9,13 +9,13 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { SchemaOverview } from './schema_overview';
 import { ConfirmSwitchModal } from './confirm_switch_modal';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { getApmInternalServices } from '../../../../plugin';
 
 type FleetMigrationCheckResponse = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
@@ -43,6 +43,7 @@ export function Schema() {
     status,
   } = useFetcher((callApi) => callApi('GET /internal/apm/fleet/migration_check'), [], {
     preservePreviousData: false,
+    useCallApmApiV2: true,
   });
   const isLoading = status !== FETCH_STATUS.SUCCESS;
   const cloudApmMigrationEnabled = !!data.cloud_apm_migration_enabled;
@@ -108,6 +109,7 @@ export function Schema() {
 }
 
 async function getUnsupportedApmServerConfigs(toasts: NotificationsStart['toasts']) {
+  const { callApmApi } = getApmInternalServices();
   try {
     const { unsupported } = await callApmApi(
       'GET /internal/apm/fleet/apm_server_schema/unsupported',
@@ -130,6 +132,7 @@ async function createCloudApmPackagePolicy(
   toasts: NotificationsStart['toasts'],
   updateLocalStorage: (status: FETCH_STATUS) => void
 ) {
+  const { callApmApi } = getApmInternalServices();
   updateLocalStorage(FETCH_STATUS.LOADING);
   try {
     const { cloudApmPackagePolicy } = await callApmApi(

@@ -66,7 +66,8 @@ export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurren
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId, errorId]
+    [environment, kuery, serviceName, start, end, groupId, errorId],
+    { useCallApmApiV2: true }
   );
   const onSampleClick = (sample: string) => {
     history.push({

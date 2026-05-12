@@ -39,7 +39,8 @@ export function CustomLinkFlyout({
         isCachable: false,
         params: { query: convertFiltersToQuery(filters) },
       }),
-    [filters]
+    [filters],
+    { useCallApmApiV2: true }
   );
 
   return (

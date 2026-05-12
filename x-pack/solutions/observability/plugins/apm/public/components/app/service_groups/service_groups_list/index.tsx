@@ -36,7 +36,9 @@ export function ServiceGroupsList() {
     data = { serviceGroups: [] },
     status,
     refetch,
-  } = useFetcher((callApmApi) => callApmApi('GET /internal/apm/service-groups'), []);
+  } = useFetcher((callApmApi) => callApmApi('GET /internal/apm/service-groups'), [], {
+    useCallApmApiV2: true,
+  });
 
   const { serviceGroups } = data;
 
@@ -46,7 +48,8 @@ export function ServiceGroupsList() {
         return callApmApi('GET /internal/apm/service-group/counts');
       }
     },
-    [serviceGroups.length]
+    [serviceGroups.length],
+    { useCallApmApiV2: true }
   );
 
   const isLoading = isPending(status);

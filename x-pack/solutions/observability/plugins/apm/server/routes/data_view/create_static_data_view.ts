@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { TRANSACTION_ID, TRANSACTION_DURATION } from '../../../common/es_fields/apm';

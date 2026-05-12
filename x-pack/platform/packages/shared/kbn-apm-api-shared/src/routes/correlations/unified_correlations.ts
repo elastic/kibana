@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import type { CorrelationsResponse } from '@kbn/apm-types';
+import { environmentRt, type CorrelationsResponse } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeRt } from '../../default_api_types';
 import { entityTypeRt, metricRt } from './types';
@@ -22,6 +22,9 @@ export const unifiedCorrelationsRoute = defineRoute<UnifiedCorrelationsRouteResp
         metric: metricRt,
       }),
       t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
         fieldCandidates: t.array(t.string),
         durationMin: toNumberRt,
         durationMax: toNumberRt,
@@ -29,6 +32,7 @@ export const unifiedCorrelationsRoute = defineRoute<UnifiedCorrelationsRouteResp
         includeHistogram: toBooleanRt,
         kuery: t.string,
       }),
+      t.partial(environmentRt.props),
       rangeRt,
     ]),
   }),

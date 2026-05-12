@@ -44,7 +44,8 @@ export const useTransactionDistributionChartData = () => {
         });
       }
     },
-    [params]
+    [params],
+    { useCallApmApiV2: true }
   );
 
   useEffect(() => {
@@ -97,7 +98,8 @@ export const useTransactionDistributionChartData = () => {
         });
       }
     },
-    [params, overallLatencyData.durationMin, overallLatencyData.durationMax]
+    [params, overallLatencyData.durationMin, overallLatencyData.durationMax],
+    { useCallApmApiV2: true }
   );
 
   useEffect(() => {

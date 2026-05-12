@@ -98,7 +98,7 @@ export function SelectServices({
       }
     },
     [kuery, start, end],
-    { preservePreviousData: true }
+    { preservePreviousData: true, useCallApmApiV2: true }
   );
 
   const isServiceListPreviewLoading = status === FETCH_STATUS.LOADING;

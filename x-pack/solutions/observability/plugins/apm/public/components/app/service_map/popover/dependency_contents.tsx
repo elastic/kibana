@@ -11,6 +11,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
@@ -19,7 +20,6 @@ import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type DependencyReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -56,7 +56,8 @@ export function DependencyContents({ selection, environment, start, end }: Conte
         });
       }
     },
-    [environment, dependencyName, start, end, offset, comparisonEnabled]
+    [environment, dependencyName, start, end, offset, comparisonEnabled],
+    { useCallApmApiV2: true }
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

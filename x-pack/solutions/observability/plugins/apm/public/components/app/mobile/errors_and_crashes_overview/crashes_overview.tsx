@@ -10,12 +10,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elast
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
 import { MobileErrorsAndCrashesTreemap } from '../charts/mobile_errors_and_crashes_treemap';
 import { MobileCrashGroupList } from './crash_group_list';
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ErrorDistribution } from '../errors_and_crashes_group_details/shared/distribution';
@@ -133,7 +133,8 @@ export function MobileCrashesOverview() {
       sortDirection,
       page,
       pageSize,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const { requestId, mobileCrashGroupMainStatistics, currentPageGroupIds } = crashGroupListData;
@@ -168,7 +169,7 @@ export function MobileCrashesOverview() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   const kueryForTreemap = getKueryWithMobileCrashFilter({

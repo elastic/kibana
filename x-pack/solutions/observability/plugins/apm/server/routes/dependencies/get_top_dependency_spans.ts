@@ -9,6 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { DependencySpan } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -28,24 +29,9 @@ import type { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { maybe } from '../../../common/utils/maybe';
-import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_SPANS = 1000;
-
-export interface DependencySpan {
-  '@timestamp': number;
-  spanId: string;
-  spanName: string;
-  serviceName: string;
-  agentName: AgentName;
-  traceId: string;
-  transactionId?: string;
-  transactionType?: string;
-  transactionName?: string;
-  duration: number;
-  outcome: EventOutcome;
-}
 
 export async function getTopDependencySpans({
   apmEventClient,

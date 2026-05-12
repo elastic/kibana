@@ -8,12 +8,13 @@ import { sumBy } from 'lodash';
 import type { ESFilter } from '@kbn/es-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { NodeStats } from '@kbn/apm-types';
+import type { ServiceMapServiceNodeInfoResponse } from '@kbn/apm-api-shared';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import type { NodeStats } from '../../../common/service_map';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
@@ -339,11 +340,6 @@ function getMemoryStats({
 
     return memoryUsage;
   });
-}
-
-export interface ServiceMapServiceNodeInfoResponse {
-  currentPeriod: NodeStats;
-  previousPeriod: NodeStats | undefined;
 }
 
 export async function getServiceMapServiceNodeInfo({

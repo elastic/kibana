@@ -53,7 +53,8 @@ export function MobileErrorsAndCrashesTreemap({
         });
       }
     },
-    [environment, kuery, serviceName, start, end, selectedTreemap]
+    [environment, kuery, serviceName, start, end, selectedTreemap],
+    { useCallApmApiV2: true }
   );
   return (
     <EuiPanel hasBorder={true} style={{ position: 'relative' }}>

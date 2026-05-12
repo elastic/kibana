@@ -20,6 +20,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { ERROR_GROUP_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
@@ -27,7 +28,6 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';

@@ -47,7 +47,8 @@ export function ServiceGroupTemplate({
         });
       }
     },
-    [serviceGroupId]
+    [serviceGroupId],
+    { useCallApmApiV2: true }
   );
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;

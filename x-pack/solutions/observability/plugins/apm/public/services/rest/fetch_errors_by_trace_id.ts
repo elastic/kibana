@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { APIReturnType } from './create_call_apm_api';
-import { callApmApi } from './create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import { getApmInternalServices } from '../../plugin';
 import { reportFetchError } from './report_fetch_error';
-
-type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
-
 export const FETCH_TRACE_ERRORS_OPERATION_ID = 'fetch-trace-errors';
 
-export const fetchErrorsByTraceId = async (
+type ErrorsByTraceId = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/errors'>;
+export const fetchErrorsByTraceId = (
   {
     traceId,
     docId,
@@ -28,7 +26,8 @@ export const fetchErrorsByTraceId = async (
   signal: AbortSignal
 ): Promise<ErrorsByTraceId> => {
   try {
-    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
+    const { callApmApi } = getApmInternalServices();
+    return callApmApi('GET /internal/apm/unified_traces/{traceId}/errors', {
       params: {
         path: { traceId },
         query: {

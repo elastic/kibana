@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { type IndiciesItem } from '../../../../server/routes/diagnostics/route';
+import { type IndiciesItem } from '@kbn/apm-types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
@@ -97,7 +97,7 @@ export function DiagnosticsIndices() {
     },
   ];
 
-  return (
+   return (
     <>
       <EuiText>
         This section shows the concrete indices backing the data streams, and highlights mapping

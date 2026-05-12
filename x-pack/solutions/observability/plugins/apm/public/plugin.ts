@@ -89,10 +89,12 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ICPSManager } from '@kbn/cps-utils';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { APMClientV2 } from '@kbn/apm-api-shared';
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-} from '../common/cps_feature_flag';
+} from '@kbn/apm-api-shared';
 import type { ConfigSchema } from '.';
 import {
   getApmEnrollmentFlyoutData,
@@ -145,6 +147,7 @@ export interface ApmServices {
 
 export interface ApmInternalServices {
   cpsManager?: ICPSManager;
+  callApmApi: APMClientV2;
 }
 
 export const [getApmInternalServices, setApmInternalServices] =
@@ -306,15 +309,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     const getApmDataHelper = async () => {
-      const { fetchObservabilityOverviewPageData, getHasData } = await import(
-        './services/rest/apm_observability_overview_fetchers'
-      );
-      const { fetchSpanLinks } = await import('./services/rest/span_links');
-      const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
-      const { fetchRootSpanByTraceId } = await import(
-        './services/rest/fetch_trace_root_span_by_trace_id'
-      );
-      const { fetchSpan } = await import('./services/rest/fetch_span');
       const { fetchLatencyOverallTransactionDistribution } = await import(
         './services/rest/fetch_latency_overall_transaction_distribution'
       );
@@ -329,13 +323,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       createCallApmApi(core);
 
       return {
-        fetchObservabilityOverviewPageData,
-        getHasData,
         hasFleetApmIntegrations,
-        fetchSpanLinks,
-        fetchErrorsByTraceId,
-        fetchRootSpanByTraceId,
-        fetchSpan,
         fetchLatencyOverallTransactionDistribution,
         fetchLatencyOverallSpanDistribution,
       };
@@ -368,31 +356,35 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.getHasData();
+        const { getHasData } = await import('./services/rest/apm_observability_overview_fetchers');
+        return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.fetchObservabilityOverviewPageData(params);
+        const { fetchObservabilityOverviewPageData } = await import(
+          './services/rest/apm_observability_overview_fetchers'
+        );
+        return await fetchObservabilityOverviewPageData(params);
       },
     });
 
     plugins.exploratoryView.register({
       appName: 'apm',
       hasData: async () => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.getHasData();
+        const { getHasData } = await import('./services/rest/apm_observability_overview_fetchers');
+        return await getHasData();
       },
       fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getApmDataHelper();
-        return await dataHelper.fetchObservabilityOverviewPageData(params);
+        const { fetchObservabilityOverviewPageData } = await import(
+          './services/rest/apm_observability_overview_fetchers'
+        );
+        return await fetchObservabilityOverviewPageData(params);
       },
     });
 
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-span-links',
       fetchSpanLinks: async (params, signal) => {
-        const { fetchSpanLinks } = await getApmDataHelper();
+        const { fetchSpanLinks } = await import('./services/rest/span_links');
         return fetchSpanLinks(params, signal);
       },
     });
@@ -400,7 +392,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-errors',
       fetchErrorsByTraceId: async (params, signal) => {
-        const { fetchErrorsByTraceId } = await getApmDataHelper();
+        const { fetchErrorsByTraceId } = await import('./services/rest/fetch_errors_by_trace_id');
         return fetchErrorsByTraceId(params, signal);
       },
     });
@@ -408,7 +400,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-root-span-by-trace-id',
       fetchRootSpanByTraceId: async (params, signal) => {
-        const { fetchRootSpanByTraceId } = await getApmDataHelper();
+        const { fetchRootSpanByTraceId } = await import(
+          './services/rest/fetch_trace_root_span_by_trace_id'
+        );
         return fetchRootSpanByTraceId(params, signal);
       },
     });
@@ -416,7 +410,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.discoverShared.features.registry.register({
       id: 'observability-traces-fetch-span',
       fetchSpan: async (params, signal) => {
-        const { fetchSpan } = await getApmDataHelper();
+        const { fetchSpan } = await import('./services/rest/fetch_span');
         return fetchSpan(params, signal);
       },
     });
@@ -553,19 +547,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet, discoverShared } = plugins;
+    const isCpsEnabled = core.featureFlags.getBooleanValue(
+      OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
+      OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
+    );
 
-    if (
-      core.featureFlags.getBooleanValue(
-        OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
-        OBSERVABILITY_APM_CPS_ENABLED_DEFAULT
-      )
-    ) {
+    const callApmApi = createCallApmApiV2(core, { cpsManager: plugins.cps?.cpsManager });
+    const ApmInternalServices: ApmInternalServices = {
+      callApmApi,
+    };
+
+    if (isCpsEnabled) {
       plugins.cps?.cpsManager?.registerAppAccess('apm', () => ProjectRoutingAccess.EDITABLE);
       setApmInternalServices({
+        ...ApmInternalServices,
         cpsManager: plugins.cps?.cpsManager,
       });
     } else {
-      setApmInternalServices({});
+      setApmInternalServices(ApmInternalServices);
     }
     if (plugins.agentBuilder) {
       registerServiceMapAttachment(plugins.agentBuilder!.attachments);

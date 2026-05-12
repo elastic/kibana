@@ -60,7 +60,8 @@ export function CustomLinkMenuSection({
         isCachable: false,
         params: { query: convertFiltersToQuery(filters) },
       }),
-    [filters]
+    [filters],
+    { useCallApmApiV2: true }
   );
 
   const customLinks = data?.customLinks ?? [];

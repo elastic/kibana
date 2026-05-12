@@ -6,17 +6,13 @@
  */
 import { sortBy, take } from 'lodash';
 import { kqlQuery } from '@kbn/observability-plugin/server';
+import type { ServiceDependenciesBreakdownResponse } from '@kbn/apm-api-shared';
 import { getNodeName } from '../../../common/connections';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
-
-export type ServiceDependenciesBreakdownResponse = Array<{
-  title: string;
-  data: Array<{ x: number; y: number }>;
-}>;
 
 export async function getServiceDependenciesBreakdown({
   apmEventClient,

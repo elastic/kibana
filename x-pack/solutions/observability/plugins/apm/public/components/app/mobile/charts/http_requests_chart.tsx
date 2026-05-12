@@ -64,7 +64,8 @@ export function HttpRequestsChart({
         }
       );
     },
-    [environment, kuery, serviceName, start, end, transactionName, offset, comparisonEnabled]
+    [environment, kuery, serviceName, start, end, transactionName, offset, comparisonEnabled],
+    { useCallApmApiV2: true }
   );
 
   const timeseries = [

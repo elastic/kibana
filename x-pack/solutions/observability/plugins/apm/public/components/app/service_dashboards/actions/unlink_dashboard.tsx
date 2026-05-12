@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import type { MergedServiceDashboard } from '..';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
+import { getApmInternalServices } from '../../../../plugin';
 
 export function UnlinkDashboard({
   currentDashboard,
@@ -22,6 +22,7 @@ export function UnlinkDashboard({
   defaultDashboard: MergedServiceDashboard;
   onRefresh: () => void;
 }) {
+  const { callApmApi } = getApmInternalServices();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const {
     core: { notifications },
@@ -72,6 +73,7 @@ export function UnlinkDashboard({
       isModalVisible,
       history,
       defaultDashboard,
+      callApmApi,
     ]
   );
   return (

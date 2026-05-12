@@ -35,7 +35,8 @@ export function useServiceTransactionTypesFetcher({
         });
       }
     },
-    [serviceName, start, end, documentType, rollupInterval]
+    [serviceName, start, end, documentType, rollupInterval],
+    { useCallApmApiV2: true }
   );
 
   return { transactionTypes: data.transactionTypes, status };
