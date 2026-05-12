@@ -92,6 +92,24 @@ export function hasCustomEventTrigger(definition: WorkflowYaml | null): boolean 
   return false;
 }
 
+export function getWorkflowCustomTriggerTypeIds(definition: WorkflowYaml | null): string[] {
+  if (!definition?.triggers?.length) {
+    return [];
+  }
+
+  const ids: string[] = [];
+  for (const trigger of definition.triggers) {
+    if (trigger && typeof trigger === 'object' && 'type' in trigger) {
+      const type = (trigger as { type: unknown }).type;
+      if (typeof type === 'string' && !isTriggerType(type)) {
+        ids.push(type);
+      }
+    }
+  }
+
+  return ids;
+}
+
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';

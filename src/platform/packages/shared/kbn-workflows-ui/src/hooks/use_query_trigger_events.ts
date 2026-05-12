@@ -8,11 +8,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type {
-  SearchTriggerEventLogParams,
-  SearchTriggerEventLogResult,
-  TriggerEventTriggerIdsResponse,
-} from '../api/types';
+import type { SearchTriggerEventLogParams, SearchTriggerEventLogResult } from '../api/types';
 import { useWorkflowsApi } from '../api/use_workflows_api';
 
 export function useQueryTriggerEvents(
@@ -27,16 +23,5 @@ export function useQueryTriggerEvents(
     queryFn: () => api.searchTriggerEvents(params),
     enabled: options?.enabled ?? true,
     keepPreviousData: true,
-  });
-}
-
-export function useQueryTriggerEventTriggerIds(options?: { enabled?: boolean }) {
-  const api = useWorkflowsApi();
-
-  return useQuery<TriggerEventTriggerIdsResponse>({
-    networkMode: 'always',
-    queryKey: ['workflowTriggerEventTriggerIds'],
-    queryFn: () => api.getTriggerEventTriggerIds(),
-    enabled: options?.enabled ?? true,
   });
 }

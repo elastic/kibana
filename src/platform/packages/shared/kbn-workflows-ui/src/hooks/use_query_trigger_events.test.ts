@@ -10,8 +10,8 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useQueryTriggerEvents, useQueryTriggerEventTriggerIds } from './use_query_trigger_events';
-import type { SearchTriggerEventLogResult, TriggerEventTriggerIdsResponse } from '../api/types';
+import { useQueryTriggerEvents } from './use_query_trigger_events';
+import type { SearchTriggerEventLogResult } from '../api/types';
 import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
 
@@ -50,25 +50,6 @@ describe('useQueryTriggerEvents', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(mockWorkflowApi.searchTriggerEvents).toHaveBeenCalledWith(params);
-    expect(result.current.data).toEqual(mockData);
-  });
-});
-
-describe('useQueryTriggerEventTriggerIds', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    queryClient.clear();
-  });
-
-  it('calls getTriggerEventTriggerIds', async () => {
-    const mockData: TriggerEventTriggerIdsResponse = { triggerIds: ['a', 'b'] };
-    mockWorkflowApi.getTriggerEventTriggerIds.mockResolvedValue(mockData);
-
-    const { result } = renderHook(() => useQueryTriggerEventTriggerIds(), { wrapper });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(mockWorkflowApi.getTriggerEventTriggerIds).toHaveBeenCalled();
     expect(result.current.data).toEqual(mockData);
   });
 });

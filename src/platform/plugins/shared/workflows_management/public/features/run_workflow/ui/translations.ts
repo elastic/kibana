@@ -43,8 +43,7 @@ export const TRIGGER_TABS_DESCRIPTIONS: Record<WorkflowTriggerTab, string> = {
     defaultMessage: 'Choose an existing alert directly',
   }),
   event: i18n.translate('plugins.workflowsManagement.workflowsExecution.eventTriggerDescription', {
-    defaultMessage:
-      'Browse historical events for your trigger type, select one, and run with that payload',
+    defaultMessage: 'Select one of possible events that you can use to run a workflow',
   }),
   historical: i18n.translate(
     'plugins.workflowsManagement.workflowsExecution.historicalTriggerDescription',

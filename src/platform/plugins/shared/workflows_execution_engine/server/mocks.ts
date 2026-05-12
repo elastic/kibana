@@ -35,7 +35,6 @@ export const workflowsExecutionEngineMock = {
         page: 1,
         size: 10,
       }),
-      getDistinctTriggerIdsForSpace: jest.fn().mockResolvedValue([]),
     },
     config: {
       maxWorkflowDepth: 10,

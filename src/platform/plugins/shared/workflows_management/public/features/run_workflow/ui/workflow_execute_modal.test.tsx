@@ -77,6 +77,18 @@ const mockWorkflowExecuteHistoricalForm = jest.fn(() => null);
 jest.mock('./workflow_execute_historical_form', () => ({
   WorkflowExecuteHistoricalForm: () => mockWorkflowExecuteHistoricalForm(),
 }));
+const mockWorkflowExecuteEventForm = jest.fn(() => null);
+jest.mock('./workflow_execute_event_form', () => ({
+  WorkflowExecuteEventForm: () => mockWorkflowExecuteEventForm(),
+}));
+
+jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
+  useEventDrivenExecutionStatus: () => ({
+    eventDrivenExecutionEnabled: true,
+    isLoading: false,
+    error: false,
+  }),
+}));
 
 jest.mock('../../../entities/workflows/model/use_workflow_execution', () => ({
   useWorkflowExecution: () => ({ data: null, isLoading: false }),
@@ -320,9 +332,7 @@ describe('WorkflowExecuteModal', () => {
       expect(getByText('Provide custom JSON data manually')).toBeInTheDocument();
       expect(getByText('Choose a document from Elasticsearch')).toBeInTheDocument();
       expect(
-        getByText(
-          'Browse historical events for your trigger type, select one, and run with that payload'
-        )
+        getByText('Select one of possible events that you can use to run a workflow')
       ).toBeInTheDocument();
       expect(getByText('Choose an existing alert directly')).toBeInTheDocument();
       expect(getByText('Reuse input data from previous executions')).toBeInTheDocument();

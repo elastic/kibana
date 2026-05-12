@@ -50,7 +50,6 @@ export interface TriggerEventsContract {
   searchTriggerEventLog: (
     params: SearchTriggerEventLogParams
   ) => Promise<SearchTriggerEventLogResult>;
-  getDistinctTriggerIdsForSpace: (spaceId: string) => Promise<string[]>;
 }
 
 export interface WorkflowsExecutionEnginePluginStart {

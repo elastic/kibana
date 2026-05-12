@@ -46,5 +46,4 @@ export const createMockWorkflowApi = (): MockWorkflowApi =>
 
     getConfig: jest.fn(),
     searchTriggerEvents: jest.fn(),
-    getTriggerEventTriggerIds: jest.fn(),
   } as unknown as MockWorkflowApi);

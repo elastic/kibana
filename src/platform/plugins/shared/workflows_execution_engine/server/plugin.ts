@@ -52,10 +52,7 @@ import { StepExecutionRepository } from './repositories/step_execution_repositor
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
-import {
-  getDistinctTriggerIdsForSpace as queryDistinctTriggerIdsForSpace,
-  searchTriggerEventLog as querySearchTriggerEventLog,
-} from './trigger_events/trigger_event_log_query';
+import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/trigger_event_log_query';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
@@ -1277,12 +1274,8 @@ export class WorkflowsExecutionEnginePlugin
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
       searchTriggerEventLog: async (params) => {
-        const client = await triggerEventsClientPromise;
-        return querySearchTriggerEventLog(client, params);
-      },
-      getDistinctTriggerIdsForSpace: async (spaceId) => {
-        const client = await triggerEventsClientPromise;
-        return queryDistinctTriggerIdsForSpace(client, spaceId);
+        const triggerEventsClient = await triggerEventsClientPromise;
+        return querySearchTriggerEventLog(triggerEventsClient, params);
       },
     };
 

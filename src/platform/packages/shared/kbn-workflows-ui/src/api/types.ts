@@ -146,7 +146,3 @@ export interface SearchTriggerEventLogResult {
   page: number;
   size: number;
 }
-
-export interface TriggerEventTriggerIdsResponse {
-  triggerIds: string[];
-}

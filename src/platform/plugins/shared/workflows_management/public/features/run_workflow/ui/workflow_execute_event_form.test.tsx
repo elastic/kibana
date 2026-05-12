@@ -1,0 +1,190 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { EuiProvider } from '@elastic/eui';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useQueryTriggerEvents } from '@kbn/workflows-ui';
+import { testQueryClientConfig } from '@kbn/workflows-ui/src/test_utils';
+import { MockSearchBar } from './test_utils/workflow_form_test_setup';
+import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
+import { useKibana } from '../../../hooks/use_kibana';
+
+const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
+const mockData = dataPluginMock.createStartContract();
+const mockUiSettings = {
+  get: jest.fn(),
+  isDefault: jest.fn(() => true),
+};
+const mockStorage = {
+  get: jest.fn(),
+  set: jest.fn(),
+  clear: jest.fn(),
+  remove: jest.fn(),
+};
+
+jest.mock('../../../hooks/use_kibana');
+jest.mock('../../workflow_list/ui/use_event_driven_execution_status', () => ({
+  useEventDrivenExecutionStatus: () => ({
+    eventDrivenExecutionEnabled: true,
+    isLoading: false,
+    error: false,
+  }),
+}));
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useQueryTriggerEvents: jest.fn(),
+  };
+});
+
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseQueryTriggerEvents = useQueryTriggerEvents as jest.MockedFunction<
+  typeof useQueryTriggerEvents
+>;
+const queryClient = new QueryClient(testQueryClientConfig);
+
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiProvider>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>{children}</I18nProvider>
+    </QueryClientProvider>
+  </EuiProvider>
+);
+
+const baseDefinition = {
+  version: '1',
+  name: 'wf',
+  enabled: true,
+  triggers: [{ type: 'custom.trigger' }],
+  steps: [],
+};
+
+describe('WorkflowExecuteEventForm', () => {
+  const mockSetValue = jest.fn();
+  const mockSetErrors = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: [
+          {
+            id: 'doc-1',
+            source: {
+              '@timestamp': '2025-01-01T12:00:00.000Z',
+              eventId: 'e1',
+              triggerId: 'custom.trigger',
+              spaceId: 'default',
+              subscriptions: [],
+              payload: { foo: 'bar' },
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isError: false,
+      error: undefined,
+      isSuccess: true,
+      status: 'success',
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+    mockUseKibana.mockReturnValue({
+      services: {
+        unifiedSearch: {
+          ui: {
+            SearchBar: MockSearchBar,
+          },
+        },
+        dataViews: {
+          create: jest.fn().mockResolvedValue({
+            id: 'dv-workflows-events',
+            title: '.workflows-events',
+            timeFieldName: '@timestamp',
+            getFieldByName: jest.fn(() => ({ name: 'triggerId' })),
+            fields: {
+              replaceAll: jest.fn(),
+              getByName: jest.fn(() => null),
+              getAll: jest.fn().mockReturnValue([]),
+              create: jest.fn(),
+              add: jest.fn(),
+              remove: jest.fn(),
+              update: jest.fn(),
+              filter: jest.fn().mockReturnValue([]),
+            },
+          }),
+          refreshFields: jest.fn().mockResolvedValue(undefined),
+        },
+        notifications: {
+          toasts: {
+            addWarning: jest.fn(),
+          },
+        },
+        http: {},
+        theme: mockTheme,
+        fieldFormats: fieldFormatsMock,
+        uiSettings: mockUiSettings,
+        storage: mockStorage,
+        data: mockData,
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+  });
+
+  it('renders trigger events table', async () => {
+    const { getByTestId, findByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    expect(getByTestId('workflowTriggerEventsTable')).toBeInTheDocument();
+  });
+
+  it('updates selection JSON when a row is selected', async () => {
+    const { findByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    const rowCheckbox = await findByTestId('dscGridSelectDoc-doc-1');
+    fireEvent.click(rowCheckbox);
+
+    await waitFor(() => {
+      expect(mockSetValue).toHaveBeenCalled();
+    });
+
+    const payload = JSON.parse(mockSetValue.mock.calls[0][0] as string);
+    expect(payload.event).toEqual({ foo: 'bar' });
+  });
+});

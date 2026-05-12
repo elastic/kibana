@@ -76,30 +76,4 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
         }
       })
     );
-
-  router.versioned
-    .get({
-      path: '/internal/workflows/trigger_events/_trigger_ids',
-      access: 'internal',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
-    })
-    .addVersion(
-      {
-        version: INTERNAL_API_VERSION,
-        validate: false,
-      },
-      withAvailabilityCheck(async (_context, request, response) => {
-        try {
-          const spaceId = spaces.getSpaceId(request);
-          const { triggerEvents } = await service.getWorkflowsExecutionEngine();
-          const triggerIds = await triggerEvents.getDistinctTriggerIdsForSpace(spaceId);
-          return response.ok({ body: { triggerIds } });
-        } catch (error) {
-          return handleRouteError(
-            response,
-            error instanceof Error ? error : new Error(String(error))
-          );
-        }
-      })
-    );
 }

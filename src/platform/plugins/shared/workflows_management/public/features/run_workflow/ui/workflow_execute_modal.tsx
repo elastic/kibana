@@ -33,6 +33,7 @@ import { ENABLED_TRIGGER_TABS } from './constants';
 import { TRIGGER_TABS_DESCRIPTIONS, TRIGGER_TABS_LABELS } from './translations';
 import type { WorkflowTriggerTab } from './types';
 import { WorkflowExecuteAlertForm } from './workflow_execute_alert_form';
+import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
@@ -46,6 +47,7 @@ import {
 } from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
 import { sanitizeText } from '../../../shared/lib/sanitize_text';
+import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
 
 export interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
@@ -63,6 +65,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const { services } = useKibana();
     const { http } = services;
     const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+    const { eventDrivenExecutionEnabled } = useEventDrivenExecutionStatus();
 
     const [hasAlertRacAccess, setHasAlertRacAccess] = useState(true);
 
@@ -116,7 +119,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         if (trigger === 'historical' && !canReadWorkflowExecution) {
           return;
         }
-        if (trigger === 'event' && !canReadWorkflowExecution) {
+        if (trigger === 'event' && (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)) {
           return;
         }
         if (trigger === selectedTrigger) {
@@ -126,7 +129,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setExecutionInputErrors(null);
         setSelectedTrigger(trigger);
       },
-      [hasAlertRacAccess, canReadWorkflowExecution, selectedTrigger]
+      [hasAlertRacAccess, canReadWorkflowExecution, eventDrivenExecutionEnabled, selectedTrigger]
     );
 
     const shouldAutoRun = useMemo(() => {
@@ -155,12 +158,18 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         if (current === 'historical' && !canReadWorkflowExecution) {
           return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
         }
-        if (current === 'event' && !canReadWorkflowExecution) {
-          return getFallbackTriggerTab(normalizedInputs, definition, false);
+        if (current === 'event' && (!canReadWorkflowExecution || !eventDrivenExecutionEnabled)) {
+          return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
         }
         return current;
       });
-    }, [hasAlertRacAccess, canReadWorkflowExecution, normalizedInputs, definition]);
+    }, [
+      hasAlertRacAccess,
+      canReadWorkflowExecution,
+      eventDrivenExecutionEnabled,
+      normalizedInputs,
+      definition,
+    ]);
 
     if (shouldAutoRun) {
       return null;
@@ -182,6 +191,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       }
     );
 
+    const eventTabEventDrivenDisabledTooltip = i18n.translate(
+      'workflows.workflowExecuteModal.eventTabEventDrivenDisabledTooltip',
+      {
+        defaultMessage:
+          'Event-driven workflows are disabled in this deployment. Enable event-driven execution to browse trigger events.',
+      }
+    );
+
     const modalTitle = isTestRun
       ? {
           id: 'workflows.workflowExecuteModal.testTitle',
@@ -192,30 +209,149 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           defaultMessage: 'Run Workflow',
         };
 
+    const isEventTabLayout = selectedTrigger === 'event';
+
     return (
       <>
-        {/*
-        The following Global CSS is needed to ensure that modal will not overlay SearchBar's
-        autocomplete popup. The autocomplete popup has z-index 4001, so we need to ensure
-        the modal and its overlay don't block it.
-      */}
         <Global
           styles={css`
             .euiOverlayMask:has(.workflowExecuteModal) {
               z-index: 4000;
             }
-            /* Ensure query input container allows autocomplete to overflow */
             .workflowExecuteModal [data-test-subj='workflow-query-input'] {
               position: relative;
               z-index: 1;
             }
-            /* Allow autocomplete popup to render above modal */
             .workflowExecuteModal .kbnQueryBar__textareaWrapOuter {
               overflow: visible;
             }
             .workflowExecuteModal .kbnTypeahead,
             .workflowExecuteModal .kbnTypeahead__popover {
               z-index: 4002 !important;
+            }
+
+            #kibana-body
+              .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen) {
+              top: 0 !important;
+              height: 100dvh !important;
+              max-height: 100dvh !important;
+            }
+
+            .workflowExecuteModal .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen) {
+              position: fixed !important;
+              inset: 0 !important;
+              box-sizing: border-box !important;
+              width: 100vw !important;
+              height: 100dvh !important;
+              max-width: none !important;
+              max-height: 100dvh !important;
+              min-height: 0 !important;
+              z-index: 8001 !important;
+              margin: 0 !important;
+              border-radius: 0 !important;
+              display: flex !important;
+              flex-direction: column !important;
+              overflow-x: hidden !important;
+              overflow-y: auto !important;
+              padding-block-start: max(
+                calc(${euiTheme.size.xxl} * 2.25),
+                env(safe-area-inset-top, 0px)
+              ) !important;
+              padding-inline: ${euiTheme.size.m} !important;
+              padding-block-end: ${euiTheme.size.xs} !important;
+            }
+
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
+              [data-test-subj='workflowExecuteModalTriggerTabs'] {
+              display: none !important;
+            }
+
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
+              .euiModalBody
+              .euiModalBody__overflow {
+              overflow: visible !important;
+            }
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
+              [data-test-subj='workflowExecuteModalBodyContent'] {
+              overflow: visible !important;
+            }
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
+              .euiModalBody__overflow
+              > .euiFlexGroup {
+              overflow: visible !important;
+            }
+
+            .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
+              > .euiFlexItem:first-of-type {
+              flex-shrink: 0 !important;
+              min-height: min-content !important;
+              overflow: visible !important;
+            }
+
+            .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
+              .euiDataGrid.euiDataGrid--fullScreen {
+              position: relative !important;
+              inset: auto !important;
+              width: 100% !important;
+              height: 100% !important;
+              max-width: none !important;
+              max-height: none !important;
+              min-height: 0 !important;
+              flex: 1 1 auto !important;
+              z-index: auto !important;
+            }
+
+            .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
+              .unifiedDataTableToolbar,
+            .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
+              .unifiedDataTableToolbarBottom {
+              flex-shrink: 0 !important;
+            }
+
+            .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
+              .euiDataGrid__content {
+              flex: 1 1 auto !important;
+              min-height: 0 !important;
+            }
+
+            .workflowExecuteModal
+              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
+              .euiDataGrid__focusWrap:has(.euiDataGrid--fullScreen) {
+              flex: 1 1 auto !important;
+              display: flex !important;
+              flex-direction: column !important;
+              min-height: 0 !important;
+              height: 100% !important;
+            }
+
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen) .kbnTypeahead,
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen) .kbnTypeahead__popover {
+              z-index: 9002 !important;
+            }
+
+            .euiOverlayMask:has(.workflowExecuteModal .euiDataGrid--fullScreen) {
+              padding: 0 !important;
+              align-items: stretch !important;
+            }
+            .euiOverlayMask:has(.workflowExecuteModal .euiDataGrid--fullScreen)
+              .workflowExecuteModal {
+              width: 100vw !important;
+              max-width: none !important;
+              height: 100dvh !important;
+              max-block-size: 100dvh !important;
+              min-block-size: 100dvh !important;
+              margin: 0 !important;
+              border-radius: 0 !important;
+            }
+
+            .workflowExecuteModal:has(.euiDataGrid--fullScreen) *:not(.euiDataGrid--fullScreen *) {
+              transform: none !important;
             }
           `}
         />
@@ -254,6 +390,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               `}
             >
               <EuiFlexItem
+                data-test-subj="workflowExecuteModalTriggerTabs"
                 grow={false}
                 css={css`
                   padding: 0 ${euiTheme.size.l};
@@ -264,11 +401,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     let triggerDisabledTooltip: string | undefined;
                     if (trigger === 'alert' && !hasAlertRacAccess) {
                       triggerDisabledTooltip = alertTabDisabledTooltip;
-                    } else if (
-                      (trigger === 'historical' || trigger === 'event') &&
-                      !canReadWorkflowExecution
-                    ) {
+                    } else if (trigger === 'historical' && !canReadWorkflowExecution) {
                       triggerDisabledTooltip = historicalTabDisabledTooltip;
+                    } else if (trigger === 'event') {
+                      if (!canReadWorkflowExecution) {
+                        triggerDisabledTooltip = historicalTabDisabledTooltip;
+                      } else if (!eventDrivenExecutionEnabled) {
+                        triggerDisabledTooltip = eventTabEventDrivenDisabledTooltip;
+                      }
                     }
                     const isTriggerTabDisabled = triggerDisabledTooltip !== undefined;
                     const triggerButton = (
@@ -373,10 +513,24 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
               </EuiFlexItem>
 
               <EuiFlexItem
+                data-test-subj="workflowExecuteModalBodyContent"
+                grow={isEventTabLayout}
                 css={css`
-                  overflow: hidden;
+                  ${isEventTabLayout
+                    ? css`
+                        flex: 1;
+                        min-height: 0;
+                        overflow: hidden;
+                      `
+                    : css`
+                        flex: 0 1 auto;
+                        overflow: visible;
+                      `}
+                  display: flex;
+                  flex-direction: column;
                   background-color: ${euiTheme.colors.backgroundBaseSubdued};
-                  padding: ${euiTheme.size.m} ${euiTheme.size.l};
+                  padding: ${euiTheme.size.m} ${euiTheme.size.l}
+                    ${selectedTrigger === 'event' ? 0 : euiTheme.size.m};
                 `}
               >
                 {selectedTrigger === 'alert' && (
@@ -399,6 +553,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 )}
                 {selectedTrigger === 'index' && (
                   <WorkflowExecuteIndexForm
+                    setValue={handleInputChange}
+                    errors={executionInputErrors}
+                    setErrors={setExecutionInputErrors}
+                  />
+                )}
+                {selectedTrigger === 'event' && (
+                  <WorkflowExecuteEventForm
+                    definition={definition}
+                    value={executionInput}
                     setValue={handleInputChange}
                     errors={executionInputErrors}
                     setErrors={setExecutionInputErrors}

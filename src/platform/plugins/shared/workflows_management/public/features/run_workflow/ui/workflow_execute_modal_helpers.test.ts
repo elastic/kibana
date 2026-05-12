@@ -12,6 +12,7 @@ import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conve
 import type { NormalizedWorkflowInputs } from './workflow_execute_modal_helpers';
 import {
   getFallbackTriggerTab,
+  getWorkflowCustomTriggerTypeIds,
   hasCustomEventTrigger,
   resolveInitialSelectedTrigger,
 } from './workflow_execute_modal_helpers';
@@ -63,6 +64,25 @@ describe('hasCustomEventTrigger', () => {
     expect(hasCustomEventTrigger(workflowWithExtensionTriggers([{ type: 'cases.created' }]))).toBe(
       true
     );
+  });
+});
+
+describe('getWorkflowCustomTriggerTypeIds', () => {
+  it('returns extension trigger type strings', () => {
+    expect(
+      getWorkflowCustomTriggerTypeIds(
+        workflowWithExtensionTriggers([{ type: 'cases.created' }, { type: 'alert' }])
+      )
+    ).toEqual(['cases.created']);
+  });
+
+  it('returns empty when no extension triggers', () => {
+    expect(
+      getWorkflowCustomTriggerTypeIds({
+        ...baseDefinition,
+        triggers: [{ type: 'manual' }, { type: 'scheduled', with: { every: '1h' } }],
+      })
+    ).toEqual([]);
   });
 });
 

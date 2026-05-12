@@ -256,16 +256,6 @@ describe('WorkflowApi', () => {
     });
   });
 
-  describe('getTriggerEventTriggerIds', () => {
-    it('should call GET /internal/workflows/trigger_events/_trigger_ids with version 1', async () => {
-      await api.getTriggerEventTriggerIds();
-
-      expect(http.get).toHaveBeenCalledWith('/internal/workflows/trigger_events/_trigger_ids', {
-        version: INTERNAL_VERSION,
-      });
-    });
-  });
-
   // ---------------------------------------------------------------------------
   // Execution operations
   // ---------------------------------------------------------------------------

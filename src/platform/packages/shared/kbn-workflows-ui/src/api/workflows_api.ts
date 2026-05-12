@@ -47,7 +47,6 @@ import type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
   TestWorkflowParams,
-  TriggerEventTriggerIdsResponse,
   UpdateWorkflowParams,
   ValidateWorkflowParams,
   WorkflowExecutionLogsResponse,
@@ -304,13 +303,6 @@ export class WorkflowApi {
   ): Promise<SearchTriggerEventLogResult> {
     return this.http.post(`${INTERNAL_BASE}/trigger_events/_search`, {
       body: JSON.stringify(params),
-      version: INTERNAL_API_VERSION,
-    });
-  }
-
-  /** Distinct `triggerId` values present in `.workflows-events` for the current space. */
-  async getTriggerEventTriggerIds(): Promise<TriggerEventTriggerIdsResponse> {
-    return this.http.get(`${INTERNAL_BASE}/trigger_events/_trigger_ids`, {
       version: INTERNAL_API_VERSION,
     });
   }
