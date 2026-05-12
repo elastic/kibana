@@ -26,13 +26,7 @@ Empty or whitespace-only input returns `[]` — consistent with the agent treati
 
 ## Grammar source
 
-The build script fetches the antlr4 grammar file `Eql.g4` from `elastic/elastic-agent`, and generates the TypeScript parser in `src/antlr/`.
-
-Pinned upstream:
-
-- Repo: <https://github.com/elastic/elastic-agent>
-- Path: `internal/pkg/eql/Eql.g4`
-- Tag: **v9.4.0** (override with `AGENT_EQL_GRAMMAR_TAG` env var or by editing the constant at the top of `scripts/build_parser.js`)
+The build script resolves the latest tagged release of `elastic/elastic-agent` via the GitHub API, fetches `internal/pkg/eql/Eql.g4`, and generates the TypeScript parser in `src/parser/`.
 
 ## Regenerating the parser
 
@@ -42,7 +36,7 @@ yarn build:antlr4
 
 This runs `scripts/build_parser.js`, which:
 
-1. Fetches the upstream `Eql.g4` at the pinned tag.
+1. Fetches the latest upstream `Eql.g4`.
 2. Spawns the ANTLR4 tool to generate the TypeScript lexer/parser/listener/visitor.
 3. Renames the PascalCase output to snake_case (`EqlLexer.ts → eql_lexer.ts`, etc.) and rewrites the sibling imports inside each file.
 4. Prepends the Elastic License 2.0 header and `// @ts-nocheck` to each generated `.ts`.
