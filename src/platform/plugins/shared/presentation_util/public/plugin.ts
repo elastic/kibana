@@ -35,7 +35,9 @@ export class PresentationUtilPlugin
     _coreSetup: CoreSetup<PresentationUtilPluginStartDeps, PresentationUtilPluginStart>,
     _setupPlugins: PresentationUtilPluginSetupDeps
   ): PresentationUtilPluginSetup {
-    return {};
+    return {
+      registerPanelPlacementSettings,
+    };
   }
 
   public start(
