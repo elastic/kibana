@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const SetupHealthResponse = t.exact(t.type({}));
-export type SetupHealthResponse = t.TypeOf<typeof SetupHealthResponse>;
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 1,
+  runGlobalSetup: true,
+});
