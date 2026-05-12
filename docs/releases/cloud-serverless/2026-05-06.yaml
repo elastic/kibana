@@ -1,0 +1,537 @@
+﻿products:
+- product: cloud-serverless
+  target: 2026-05-06
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+entries:
+- file:
+    name: 266512.yaml
+    checksum: a2bf1559babe637ecae9be83069b81b7c9332741
+  type: bug-fix
+  title: Fix a bug that caused long runs of whitespace in KQL to be parsed slowly
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Kibana platform
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/266512
+  issues:
+  - https://github.com/elastic/kibana/issues/217598
+- file:
+    name: 266115.yaml
+    checksum: e2846df0cd2165718243a604fb209215fe0c45c9
+  type: bug-fix
+  title: Fix the "Take Action" bulk menu that allowed changing to the same Attach Discovery status
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266115
+- file:
+    name: 265518.yaml
+    checksum: 8903d9d66ae567a4ec8b45313772eb62cbb61bec
+  type: bug-fix
+  title: Fix inference plugin routes to limit the size of arrays accepted in payloads
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/265518
+- file:
+    name: 255005.yaml
+    checksum: 3eb551710799324f0cf41ba8a5243083cb31aeff
+  type: bug-fix
+  title: Adhere to user selected time range for CSV exports
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/255005
+  issues:
+  - https://github.com/elastic/kibana/issues/216605
+- file:
+    name: 266138.yaml
+    checksum: 70ec326b96b27d83021d778d47bf52906ea1efbd
+  type: bug-fix
+  title: Fix service map embeddable flyout position
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266138
+  issues:
+  - https://github.com/elastic/kibana/issues/265826
+- file:
+    name: 266513.yaml
+    checksum: e20ac08a179602905793f9e3a619d6ca2a05cef1
+  type: bug-fix
+  title: Fix old package version conditions on settings page
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  description: Fix version comparison on integration detail settings page that incorrectly hid or showed install options, and disable the "Add integration" button when viewing a version different from the installed or latest available version.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/266513
+- file:
+    name: 265145.yaml
+    checksum: f82f4f9953d3cc0859f4b8efe87b0dd38166af1c
+  type: enhancement
+  title: Enable attachments for all stream types by default, removing the `observability:streamsEnableAttachments` advanced setting
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/265145
+- file:
+    name: 266365.yaml
+    checksum: fa059b6d54dc55d3810e7bfff8d6e2be865ab3f6
+  type: bug-fix
+  title: Validate SSL certificate paths for whitespace
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/266365
+  issues:
+  - https://github.com/elastic/kibana/issues/265694
+- file:
+    name: 260835.yaml
+    checksum: e31a1e0806567097c741b2ac45dd0b8a1f6e8c1d
+  type: enhancement
+  title: Change display language from settings
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  description: 'Added per-user language selection to Kibana, as a Beta feature. Users can now choose their preferred display language from the User Profile page or from the Language option in the user menu. Kibana resolves the display language using the following priority: user profile setting, then the i18n.locale server configuration.'
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/260835
+- file:
+    name: 264765.yaml
+    checksum: 01dab1b1489bc2241358049c13d745f50e2e3e00
+  type: feature
+  title: Add partitioning support to query streams with deep nesting structure and proper parent reference validation
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/264765
+  issues:
+  - https://github.com/elastic/kibana/issues/251402
+- file:
+    name: 266021.yaml
+    checksum: e6169999b4f6520f411a3533c276212fb4f78ebf
+  type: enhancement
+  title: Add context highlights for embeddable and focused APM service maps
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266021
+  issues:
+  - https://github.com/elastic/kibana/issues/265690
+- file:
+    name: 265027.yaml
+    checksum: 1e5ba45724d9543f6258b425cf07c0b3a24d0236
+  type: bug-fix
+  title: Optimize large workflow render context
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/265027
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/16985'
+- file:
+    name: 266522.yaml
+    checksum: 0d7aae06bae20880e42a27acf760ef53f2bf6beb
+  type: bug-fix
+  title: Make search box case-insensitive
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/266522
+- file:
+    name: 266105.yaml
+    checksum: 1727cc79f70d65e499f05d11afebb8bc9547ab7f
+  type: bug-fix
+  title: Fix truncated title in "Run" attack discovery button
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266105
+- file:
+    name: 266001.yaml
+    checksum: 83093f2ae98f792d48d95d02b2cd1970a4bc5dc8
+  type: bug-fix
+  title: Fix known issues in significant events
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266001
+- file:
+    name: 266406.yaml
+    checksum: c2acd7067fd6aabf673eb29c066370cbf7b797c2
+  type: bug-fix
+  title: Do not override panels with Save As on dashboard
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/266406
+  issues:
+  - https://github.com/elastic/kibana/issues/265591
+- file:
+    name: 265495.yaml
+    checksum: 51054bbf9ae888f5d35bd1d49ac03f859701db37
+  type: bug-fix
+  title: Fix query rules routes to limit the size of arrays accepted in data
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/265495
+- file:
+    name: 263687.yaml
+    checksum: 97b24ca60ea3a20fcdcd4afc1ee35c71384f4d47
+  type: feature
+  title: Move Endpoint exceptions to the Endpoint Artifacts page and add per-policy usage with export and import functionality for all Endpoint artifacts
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/263687
+- file:
+    name: 264457.yaml
+    checksum: 1bb893c88cdd094b0f71fdb468d7aacc6babeaac
+  type: enhancement
+  title: Redesign Add to Dashboard UI
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Alerting and reporting
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/264457
+  issues:
+  - https://github.com/elastic/kibana/issues/251032
+- file:
+    name: 262757.yaml
+    checksum: 955bc17ecb7d55047a78c5e41e62316562107f3f
+  type: bug-fix
+  title: 'Fix bug with Auth header needing "Authorization: Bearer <token>"'
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  description: Fixed a bug where the Figma and Notion connectors were returning 401 when chatting in Agent Builder, despite the connectors being authorized.
+  prs:
+  - https://github.com/elastic/kibana/pull/262757
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/13907'
+- file:
+    name: 265529.yaml
+    checksum: a4b0c3c4103d0ab6bd2bed4adcdf8816c47590c2
+  type: bug-fix
+  title: Fix issue where the decimals setting in the number formatter was not used to generate appropriate axis ticks
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/265529
+  issues:
+  - https://github.com/elastic/kibana/issues/170151
+- file:
+    name: 265926.yaml
+    checksum: 9009b746cebd39867c455401421639f4244c3bf4
+  type: bug-fix
+  title: Fix search bar not displaying query after navigation
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/265926
+- file:
+    name: 266824.yaml
+    checksum: 4a709b2bdd686ff20eedab68220e1b3cea2766da
+  type: bug-fix
+  title: Fix Security serverless navigation ignoring UI defaults when preferred chat experience or Elastic Workflows UI has no saved space value
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266824
+- file:
+    name: 266127.yaml
+    checksum: 0d6d3bc7850cdb3cbe97b2ce7353f3450e24531b
+  type: bug-fix
+  title: Fix the visiblity of case action under the Attack Discovery tab when the cases privilege is set to NONE
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266127
+- file:
+    name: 266561.yaml
+    checksum: 8c561345928120cc6b6d55d77136c2da8f0c7d54
+  type: feature
+  title: Enable natural language to ES|QL functionality in the editor
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/266561
+- file:
+    name: 259465.yaml
+    checksum: e01f2efa526df4878a23dc3d2f744e3f1b405ecd
+  type: enhancement
+  title: Add new metric recommended queries to ES|QL
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/259465
+  issues:
+  - https://github.com/elastic/kibana/issues/255950
+- file:
+    name: 261119.yaml
+    checksum: 18b5fdcad3b24bbe0f82830c766e77eea2b21ad2
+  type: enhancement
+  title: Customize start and update actions for rerank models
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/261119
+- file:
+    name: 266185.yaml
+    checksum: 62b69d9872bdce55fd7ca7cad0053831d1b62f4b
+  type: bug-fix
+  title: Fix the time filter component in Discover and Dashboards
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  description: >-
+    - The input now shows a blinking cursor on focus, instead of selected text.
+
+    - The input placeholder is prefixed with "Type" to make its purpose clearer.
+
+    - The popover panel height now adapts correctly in small viewports.
+
+    - A calendar icon has been added to the control.
+  prs:
+  - https://github.com/elastic/kibana/pull/266185
+- file:
+    name: 266783.yaml
+    checksum: 1b227eec6fb99d7fe42b85f651501a6f06fbeff4
+  type: bug-fix
+  title: Fix a bug in the alert details preview chart for log threshold rules
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  description: Fixes a bug where the Log threshold rule's alert details preview chart would fail to render with a KQL syntax error when a criterion used `matches phrase` or `does not match phrase` with a value containing characters such as `:`.
+  prs:
+  - https://github.com/elastic/kibana/pull/266783
+  issues:
+  - https://github.com/elastic/kibana/issues/203071
+- file:
+    name: 266384.yaml
+    checksum: fe1e42c349a1e7e6f594b22bde0e0b34248b0dbe
+  type: bug-fix
+  title: Fix integrations disappearing after refresh with category/agentless filter
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/266384
+  issues:
+  - https://github.com/elastic/kibana/issues/265510
+- file:
+    name: 266278.yaml
+    checksum: 33229a3b2a9451915d0d588b21600204627d4e67
+  type: bug-fix
+  title: Prevent browser history pollution on search input keystroke
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266278
+  issues:
+  - https://github.com/elastic/kibana/issues/251672
+- file:
+    name: 266242.yaml
+    checksum: bc22c2aedfd33a74fd3b54e016787ab2576900fe
+  type: bug-fix
+  title: Fix a bug where ES|QL Editors might exhibit different behavior when submitting a query by clicking the Search button versus pressing Command-Enter or Control-Enter.
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/266242
+- file:
+    name: 265740.yaml
+    checksum: e102c39a6d73b09ead27bd3a750f999f12679c77
+  type: bug-fix
+  title: Fix Ip location processor bug
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/265740
+  issues:
+  - https://github.com/elastic/kibana/issues/257233
+- file:
+    name: 266117.yaml
+    checksum: 1937886e57d8317d57bbed36caf049294dcb7ae5
+  type: bug-fix
+  title: Fix blinking integration icons in Attack Discovery schedules
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266117
+- file:
+    name: 265916.yaml
+    checksum: ef1adc65ec2881c876bde5b2daa4a86fbfc4ab64
+  type: feature
+  title: Add bulk revoke and delete actions, filtering, and search to the Fleet enrollment tokens page
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/265916
+  issues:
+  - https://github.com/elastic/kibana/issues/258057
+- file:
+    name: 265015.yaml
+    checksum: 1a86caa38c7f681e8173ef473c9a87ca0f927b37
+  type: enhancement
+  title: Remove custom feedback button and use One Feedback with custom questions for anomaly detection and data frame analytics results
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/265015
+- file:
+    name: 266225.yaml
+    checksum: 920bae24cb2ca858be1d41e660842e00adbcc465
+  type: bug-fix
+  title: Fix behavioral analytics to limit the size of name to 1024 characters.
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/266225
+- file:
+    name: 266823.yaml
+    checksum: 148f9a86c737f0e2b36e696acc9934aa11c388d7
+  type: bug-fix
+  title: Use password field for multi-value secret variables in integration policy forms
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/266823
+  issues:
+  - https://github.com/elastic/kibana/issues/266608
+- file:
+    name: 261016.yaml
+    checksum: 3b352798fcef644f7675e3eaac20d3d7912058b7
+  type: bug-fix
+  title: Trim whitespace from space names on create/update
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/261016
+- file:
+    name: 264613.yaml
+    checksum: 287ebca02f489f411c3247783dd9d8378be35004
+  type: feature
+  title: Add "Use global filters" option to ES|QL visualization
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/264613
+  issues:
+  - https://github.com/elastic/kibana/issues/261988
+- file:
+    name: 265995.yaml
+    checksum: 8853f8165918be6732d66840e9e89a18b4e9a9b1
+  type: feature
+  title: Add backend foundation for OsQuery results export
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/265995
+- file:
+    name: 266194.yaml
+    checksum: 712f15cbfc45fd73772651d4a1a32b44203b3bae
+  type: enhancement
+  title: Replace Health by Anomalies in service inventory table
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/266194
+  issues:
+  - https://github.com/elastic/kibana/issues/266192
+- file:
+    name: 267290.yaml
+    checksum: 87b7eb3fdc0ad577dee358b51e1b79943ff0f19a
+  type: bug-fix
+  title: Fix workflow steps where summary and description were swapped
+  products:
+  - product: cloud-serverless
+    target: 2026-05-06
+  prs:
+  - https://github.com/elastic/kibana/pull/267290
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17130'
