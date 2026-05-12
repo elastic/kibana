@@ -35,6 +35,7 @@ export function ServiceContents({
   environment,
   kuery,
   isEmbedded,
+  showFocusMap,
 }: ContentsProps) {
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
@@ -131,7 +132,7 @@ export function ServiceContents({
           })}
         </EuiButton>
       </EuiFlexItem>
-      {!isEmbedded && (
+      {(showFocusMap ?? !isEmbedded) && (
         <EuiFlexItem>
           <EuiButton
             data-test-subj="apmServiceContentsFocusMapButton"

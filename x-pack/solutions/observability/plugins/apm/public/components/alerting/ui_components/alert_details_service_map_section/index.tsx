@@ -201,6 +201,10 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 // Keep `kuery` scoping the graph data, but let badges aggregate across
                 // all visible services so neighbors with active alerts also light up.
                 badgesKuery=""
+                // Show the popover's "Focus map" button in the alert preview so users
+                // can drill into a focused map for any node they click. Embedded
+                // contexts hide it by default (kept for dashboards).
+                showFocusMapInPopover
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
               />

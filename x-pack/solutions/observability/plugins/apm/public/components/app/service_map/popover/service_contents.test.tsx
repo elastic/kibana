@@ -102,5 +102,15 @@ describe('ServiceContents', () => {
       render(<ServiceContents {...defaultProps} isEmbedded={true} />);
       expect(screen.queryByTestId('apmServiceContentsFocusMapButton')).not.toBeInTheDocument();
     });
+
+    it('renders when showFocusMap is true even if isEmbedded is true', () => {
+      render(<ServiceContents {...defaultProps} isEmbedded={true} showFocusMap={true} />);
+      expect(screen.getByTestId('apmServiceContentsFocusMapButton')).toBeInTheDocument();
+    });
+
+    it('does not render when showFocusMap is false even if isEmbedded is false', () => {
+      render(<ServiceContents {...defaultProps} isEmbedded={false} showFocusMap={false} />);
+      expect(screen.queryByTestId('apmServiceContentsFocusMapButton')).not.toBeInTheDocument();
+    });
   });
 });

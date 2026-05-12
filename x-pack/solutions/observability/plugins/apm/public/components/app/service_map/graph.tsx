@@ -89,6 +89,12 @@ interface GraphProps {
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
   /**
+   * Optional override for the popover's "Focus map" button visibility. When omitted,
+   * defaults to `!isEmbedded` so dashboard embeds keep hiding it. The alert details
+   * preview sets this to `true` to show "Focus map" inside an embedded context.
+   */
+  showFocusMap?: boolean;
+  /**
    * When set to a service name that exists on the map, that node gets context highlight
    * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
    */
@@ -108,6 +114,7 @@ function GraphInner({
   onToggleFullscreen,
   fullMapHref,
   isEmbedded = false,
+  showFocusMap,
   highlightedServiceName,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -641,6 +648,7 @@ function GraphInner({
           end={end}
           onClose={handlePopoverClose}
           isEmbedded={isEmbedded}
+          showFocusMap={showFocusMap}
         />
       </div>
     </ServiceMapSearchProvider>

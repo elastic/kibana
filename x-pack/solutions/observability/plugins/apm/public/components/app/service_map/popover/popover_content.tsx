@@ -45,6 +45,12 @@ export interface ContentsProps {
   showDiagnoseButton?: boolean;
   onDiagnoseClick?: () => void;
   isEmbedded?: boolean;
+  /**
+   * Override for the "Focus map" button visibility. When omitted, falls back to
+   * `!isEmbedded` so dashboard embeds keep hiding it. The alert details preview
+   * sets this to `true` to show "Focus map" inside an embedded context.
+   */
+  showFocusMap?: boolean;
 }
 
 export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
@@ -93,6 +99,8 @@ interface PopoverContentProps {
   onOpenDiagnostic?: () => void;
   /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
+  /** Optional override for the Focus map button visibility. Defaults to `!isEmbedded`. */
+  showFocusMap?: boolean;
 }
 
 /**
@@ -108,6 +116,7 @@ export function PopoverContent({
   onFocusClick,
   onOpenDiagnostic,
   isEmbedded,
+  showFocusMap,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -165,6 +174,7 @@ export function PopoverContent({
         showDiagnoseButton={isDiagnosticModeEnabled}
         onDiagnoseClick={onOpenDiagnostic}
         isEmbedded={isEmbedded}
+        showFocusMap={showFocusMap}
       />
     </EuiFlexGroup>
   );

@@ -58,6 +58,13 @@ export interface ServiceMapEmbeddableProps {
    * scoped to the alerting service/transaction but badges should appear on every neighbor.
    */
   badgesKuery?: string;
+  /**
+   * Override for the popover's "Focus map" button visibility. When omitted, the button is
+   * hidden in embedded contexts (current dashboard behavior). The alert details preview
+   * sets this to `true` because users want to drill from the alert preview into a focused
+   * service map of the clicked node.
+   */
+  showFocusMapInPopover?: boolean;
 }
 
 function LoadingSpinner() {
@@ -81,6 +88,7 @@ export function ServiceMapEmbeddable({
   badgesRangeFrom,
   badgesRangeTo,
   badgesKuery,
+  showFocusMapInPopover,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -256,6 +264,7 @@ export function ServiceMapEmbeddable({
           isFullscreen={false}
           fullMapHref={fullMapHref}
           isEmbedded
+          showFocusMap={showFocusMapInPopover}
         />
       </div>
       {sloOverviewFlyout && (
