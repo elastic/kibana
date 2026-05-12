@@ -13,7 +13,8 @@ import { test } from '../fixtures';
  * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
  * until ECH support lands.
  */
-test.describe('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/268841
+test.describe.skip('Execution history — smoke', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAlertingV2Viewer();
   });
