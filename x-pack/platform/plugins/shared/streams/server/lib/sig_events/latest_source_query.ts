@@ -31,11 +31,10 @@ export const applyTimeWindow = (
 };
 
 export const collapseToLatest = (query: ComposerQuery, groupBy: string): ComposerQuery =>
-  query
-    .pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
-    .where`@timestamp == latest_ts`
-    .pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
-    .where`_id == tiebreaker_id`;
+  query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
+    .where`@timestamp == latest_ts`.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(
+    groupBy
+  )}`.where`_id == tiebreaker_id`;
 
 export const executeSourceQuery = async <T>(
   esClient: ElasticsearchClient,
