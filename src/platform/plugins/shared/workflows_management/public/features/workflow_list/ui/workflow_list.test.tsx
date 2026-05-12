@@ -248,6 +248,23 @@ describe('WorkflowList', () => {
   });
 
   describe('with workflow data', () => {
+    it('normalizes string enabled filters to booleans before querying workflows', () => {
+      const searchWithStringEnabled = {
+        ...defaultSearch,
+        enabled: ['false'],
+      } as unknown as WorkflowsSearchParams;
+
+      renderComponent({
+        search: searchWithStringEnabled,
+      });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: [false],
+        })
+      );
+    });
+
     it('renders the workflows table', () => {
       renderComponent();
       expect(screen.getByTestId('workflowListTable')).toBeInTheDocument();
