@@ -32,7 +32,6 @@ export default async function ({ readConfigFile }) {
       require.resolve('./unified_field_list_examples'),
       require.resolve('./unified_tabs_examples'),
       require.resolve('./discover_customization_examples'),
-      require.resolve('./error_boundary'),
       require.resolve('./response_stream'),
       require.resolve('./esql_ux_example'),
     ],
