@@ -6,6 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  causeKiSchema,
+  dependencyEdgeSchema,
+  evidenceSchema,
+  infraComponentSchema,
+} from '../common';
 
 export const sigEventSchema = z.object({
   '@timestamp': z.iso.datetime(),
@@ -25,6 +31,12 @@ export const sigEventSchema = z.object({
   summary: z.string().optional(),
   root_cause: z.string().optional(),
   recommendations: z.string().optional(),
+  impact: z.string().optional(),
+  workflow_execution_id: z.string().optional(),
+  dependency_edges: z.array(dependencyEdgeSchema).optional(),
+  infra_components: z.array(infraComponentSchema).optional(),
+  cause_kis: z.array(causeKiSchema).optional(),
+  evidences: z.array(evidenceSchema).optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;

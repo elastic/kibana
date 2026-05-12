@@ -6,6 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  causeKiSchema,
+  dependencyEdgeSchema,
+  evidenceSchema,
+  infraComponentSchema,
+} from '../common';
 
 export const verdictSchema = z.object({
   '@timestamp': z.iso.datetime(),
@@ -23,6 +29,17 @@ export const verdictSchema = z.object({
   verdict_summary: z.string().optional(),
   assessment_note: z.string().optional(),
   recommendations: z.string().optional(),
+  impact: z.string().optional(),
+  confidence: z.number().int().optional(),
+  original_verdict: z.string().optional(),
+  verdict_source: z.string().optional(),
+  workflow_execution_id: z.string().optional(),
+  conversation_id: z.string().optional(),
+  grouped_discovery_ids: z.array(z.string()).optional(),
+  dependency_edges: z.array(dependencyEdgeSchema).optional(),
+  infra_components: z.array(infraComponentSchema).optional(),
+  cause_kis: z.array(causeKiSchema).optional(),
+  evidences: z.array(evidenceSchema).optional(),
 });
 
 export type Verdict = z.infer<typeof verdictSchema>;
