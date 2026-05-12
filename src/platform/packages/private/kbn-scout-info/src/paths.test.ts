@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import mm from 'micromatch';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB,
   SCOUT_CONFIG_PATH_GLOB,
@@ -16,6 +19,8 @@ import {
   SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX,
+  SCOUT_TESTS_ONLY_NOISE_PATTERNS,
+  SCOUT_TESTS_ONLY_SCOPE_GLOBS,
 } from './paths';
 
 describe('Scout path globs', () => {
@@ -403,5 +408,44 @@ describe('Scout path regexes', () => {
         )
       ).toBe(false);
     });
+  });
+});
+
+/**
+ * Lockstep test: `.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts`
+ * inlines `SCOUT_TESTS_ONLY_NOISE_PATTERNS` and `SCOUT_TESTS_ONLY_SCOPE_GLOBS` because
+ * pipeline-utils is hermetic and cannot import @kbn/* packages. This test asserts the
+ * inlined arrays stay in sync with this file (the source of truth).
+ */
+describe('Scout tests-only patterns mirror in pipeline-utils/selective_scout', () => {
+  const mirrorPath = path.resolve(
+    REPO_ROOT,
+    '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts'
+  );
+  const mirrorSource = fs.readFileSync(mirrorPath, 'utf-8');
+
+  // The mirror file uses single-quoted string literals (TS/Kibana style); check
+  // for either single- or double-quoted form so the test stays resilient to a
+  // future formatter change.
+  const containsPatternLiteral = (source: string, pattern: string): boolean =>
+    source.includes(`'${pattern}'`) || source.includes(`"${pattern}"`);
+
+  it.each(SCOUT_TESTS_ONLY_NOISE_PATTERNS)(
+    'mirror file contains noise pattern verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(mirrorSource, pattern)).toBe(true);
+    }
+  );
+
+  it.each(SCOUT_TESTS_ONLY_SCOPE_GLOBS)(
+    'mirror file contains scope glob verbatim: %s',
+    (pattern) => {
+      expect(containsPatternLiteral(mirrorSource, pattern)).toBe(true);
+    }
+  );
+
+  it('mirror file marks the lockstep block clearly', () => {
+    expect(mirrorSource).toContain('LOCKSTEP:scout-info BEGIN');
+    expect(mirrorSource).toContain('LOCKSTEP:scout-info END');
   });
 });
