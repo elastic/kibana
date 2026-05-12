@@ -18,24 +18,21 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
-import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import { FormattedCount } from '../../../../common/components/formatted_number';
-import { FILTER_CLOSED } from '../../../../../common/types';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import { FormattedCount } from '../../../common/components/formatted_number';
+import { FILTER_CLOSED } from '../../../../common/types';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import {
+  useAlertsByStatus,
+  type UseAlertsByStatusProps,
+} from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type {
   AlertsByStatus,
   ParsedAlertsData,
-} from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
+} from '../../../overview/components/detection_response/alerts_by_status/types';
+import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID } from './test_ids';
-import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 const ORDER = ['Low', 'Medium', 'High', 'Critical'];
 
@@ -50,7 +47,7 @@ interface AlertCountInsightProps {
    */
   entityType?: string;
 
-  entityRecord?: EntityStoreRecord | null;
+  entityRecord?: UseAlertsByStatusProps['entityRecord'];
   /**
    * Global query inspector id; use a unique suffix when multiple instances mount (e.g. left + right flyout).
    */
@@ -64,10 +61,9 @@ interface AlertCountInsightProps {
    */
   ['data-test-subj']?: string;
   /**
-   * The function to open the details panel. When omitted, the count is rendered as plain
-   * text instead of a link (used by Flyout v2 surfaces that don't navigate to a sub-flyout).
+   * Callback to show alert count details. When omitted, the count is rendered as plain text.
    */
-  openDetailsPanel?: (path: EntityDetailsPath) => void;
+  onShowAlertCountDetails?: () => void;
 }
 
 /**
@@ -114,7 +110,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   entityRecord,
   queryId = DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
   direction,
-  openDetailsPanel,
+  onShowAlertCountDetails,
   'data-test-subj': dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -141,7 +137,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   const alertCount = useMemo(() => {
     const formattedAlertCount = <FormattedCount count={totalAlertCount} />;
 
-    if (!openDetailsPanel) {
+    if (!onShowAlertCountDetails) {
       return formattedAlertCount;
     }
 
@@ -157,18 +153,13 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
       >
         <EuiLink
           data-test-subj={INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID}
-          onClick={() =>
-            openDetailsPanel({
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.ALERTS,
-            })
-          }
+          onClick={() => onShowAlertCountDetails()}
         >
           {formattedAlertCount}
         </EuiLink>
       </EuiToolTip>
     );
-  }, [totalAlertCount, openDetailsPanel]);
+  }, [totalAlertCount, onShowAlertCountDetails]);
 
   if (!isLoading && totalAlertCount === 0) return null;
 

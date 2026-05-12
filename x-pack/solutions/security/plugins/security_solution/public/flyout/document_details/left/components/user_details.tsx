@@ -73,7 +73,7 @@ import { USER_PREVIEW_BANNER } from '../../../../flyout_v2/document/components/u
 import { PreviewLink } from '../../../shared/components/preview_link';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { AlertCountInsight } from '../../../../flyout_v2/document/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -86,6 +86,10 @@ import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
 } from '../../../entity_details/shared/entity_store_risk_utils';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import { mergeLegacyIdentityWhenStoreEntityMissing, type IdentityFields } from '../../shared/utils';
 
 const USER_DETAILS_ID = 'entities-users-details';
@@ -506,7 +510,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           entityType={EntityType.user}
           queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}
           direction="column"
-          openDetailsPanel={openDetailsPanel}
+          onShowAlertCountDetails={() =>
+            openDetailsPanel({
+              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+              subTab: CspInsightLeftPanelSubTab.ALERTS,
+            })
+          }
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
         <MisconfigurationsInsight

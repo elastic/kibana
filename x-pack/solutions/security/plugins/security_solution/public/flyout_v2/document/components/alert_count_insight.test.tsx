@@ -7,28 +7,26 @@
 
 import React from 'react';
 import { render, renderHook } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight';
-import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
+import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import type { ParsedAlertsData } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useEuiTheme } from '@elastic/eui';
 import {
   INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
   INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
 } from './test_ids';
-import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
-jest.mock(
-  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
-);
+jest.mock('../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status');
 
 const name = 'test host';
 const testId = 'test';
@@ -62,7 +60,7 @@ const mockAlertData: ParsedAlertsData = {
   },
 };
 
-const openDetailsPanel = jest.fn();
+const onShowAlertCountDetails = jest.fn();
 
 const renderAlertCountInsight = () => {
   return render(
@@ -70,7 +68,7 @@ const renderAlertCountInsight = () => {
       <AlertCountInsight
         identityFields={{ 'host.name': name }}
         data-test-subj={testId}
-        openDetailsPanel={openDetailsPanel}
+        onShowAlertCountDetails={onShowAlertCountDetails}
       />
     </TestProviders>
   );
@@ -95,14 +93,14 @@ describe('AlertCountInsight', () => {
     expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('open entity details panel when clicking on the count', () => {
+  it('shows alert count details when clicking on the count', () => {
     (useAlertsByStatus as jest.Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
     const { getByTestId } = renderAlertCountInsight();
     getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
-    expect(openDetailsPanel).toHaveBeenCalled();
+    expect(onShowAlertCountDetails).toHaveBeenCalled();
   });
 
   it('renders loading spinner if data is being fetched', () => {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InsightDistributionBar } from './insight_distribution_bar';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 
 const title = 'test title';
 const count = <div data-test-subj="test-count">{'100'}</div>;

@@ -27,9 +27,9 @@ import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_no
 import { useNavigateToUserDetails } from '../../../flyout/entity_details/user_right/hooks/use_navigate_to_user_details';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import type { UserEntity } from '../../../../common/api/entity_analytics';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -74,7 +74,7 @@ import {
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../overview/components/common';
 import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
-import { AlertCountInsight } from '../../../flyout/document_details/shared/components/alert_count_insight';
+import { AlertCountInsight } from './alert_count_insight';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -93,7 +93,7 @@ export interface UserEntityOverviewProps {
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
    * so Overview section uses the same entity store data used to decide visibility.
    */
-  entityRecord?: EntityStoreRecord | null;
+  entityRecord?: UserEntity | null;
   /**
    * Scope id used by cell actions and preview link.
    */
@@ -413,7 +413,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         identityFields={userIdentityFields}
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
-        openDetailsPanel={enableEntityLinks ? openDetailsPanel : undefined}
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight

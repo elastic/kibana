@@ -116,6 +116,11 @@ export const CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID =
 export const CORRELATIONS_RELATED_ATTACKS_TEST_ID =
   `${CORRELATIONS_TEST_ID}RelatedAttacks` as const;
 
+const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
+export const INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCount` as const;
+export const INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID =
+  `${INSIGHTS_TEST_ID}AlertsCountNavigationButton` as const;
+
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
 export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
   `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;

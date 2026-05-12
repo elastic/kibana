@@ -33,9 +33,9 @@ import { useNavigateToHostDetails } from '../../../flyout/entity_details/host_ri
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
+import type { HostEntity } from '../../../../common/api/entity_analytics';
 import { HOST_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -81,7 +81,7 @@ import {
 import { RiskScoreDocTooltip } from '../../../overview/components/common';
 import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../../flyout/document_details/shared/components/vulnerabilities_insight';
-import { AlertCountInsight } from '../../../flyout/document_details/shared/components/alert_count_insight';
+import { AlertCountInsight } from './alert_count_insight';
 import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -102,7 +102,7 @@ export interface HostEntityOverviewProps {
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
    * so Overview section uses the same entity store data used to decide visibility.
    */
-  entityRecord?: EntityStoreRecord | null;
+  entityRecord?: HostEntity | null;
   /**
    * Scope id used by cell actions and preview link.
    */
@@ -430,7 +430,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         identityFields={hostIdentityFields}
         entityType={EntityType.host}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}
-        openDetailsPanel={enableEntityLinks ? openDetailsPanel : undefined}
         data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight

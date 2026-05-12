@@ -29,7 +29,7 @@ import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
 } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { InsightDistributionBar } from './insight_distribution_bar';
+import { InsightDistributionBar } from '../../../../flyout_v2/document/components/insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import {
