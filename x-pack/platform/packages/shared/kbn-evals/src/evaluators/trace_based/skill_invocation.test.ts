@@ -59,7 +59,7 @@ describe('createSkillInvocationEvaluator', () => {
     await evaluateWith(evaluator, VALID_TRACE_ID);
 
     const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
-    expect(calledQuery).toContain(`trace.id == "${VALID_TRACE_ID}"`);
+    expect(calledQuery).toContain(`trace_id == "${VALID_TRACE_ID}"`);
     expect(calledQuery).toContain('total_spans = COUNT(*)');
     expect(calledQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');

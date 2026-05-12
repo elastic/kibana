@@ -23,7 +23,7 @@ export function createOutputTokensEvaluator({
     config: {
       name: 'Output Tokens',
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE trace_id == "${traceId}"
         | STATS 
         output_tokens = SUM(attributes.gen_ai.usage.output_tokens)`,
       extractResult: (response) => {
@@ -50,7 +50,7 @@ export function createInputTokensEvaluator({
     config: {
       name: 'Input Tokens',
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE trace_id == "${traceId}"
         | STATS 
         input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
       extractResult: (response) => {
@@ -77,7 +77,7 @@ export function createCachedTokensEvaluator({
     config: {
       name: 'Cached Tokens',
       buildQuery: (traceId) => `FROM traces-*
-        | WHERE trace.id == "${traceId}"
+        | WHERE trace_id == "${traceId}"
         | STATS 
         cached_tokens = SUM(attributes.gen_ai.usage.cached_input_tokens)`,
       extractResult: (response) => {
