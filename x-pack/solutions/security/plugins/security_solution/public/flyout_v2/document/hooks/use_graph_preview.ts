@@ -15,12 +15,10 @@ import {
   getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common';
 import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { getField, getFieldArray } from '../../../flyout/document_details/shared/utils';
 import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
 import { useIsEntityStoreV2Available } from '../../../flyout/shared/hooks/use_is_entity_store_v2_available';
 import { useEntityStoreStatus } from '../../../entity_analytics/components/entity_store/hooks/use_entity_store';
-import { EventKind } from '../constants/event_kinds';
 
 export interface UseGraphPreviewParams {
   /**
@@ -58,11 +56,6 @@ export interface UseGraphPreviewResult {
    * Boolean indicating if the event has all required data fields for graph visualization
    */
   hasGraphData: boolean;
-
-  /**
-   * Boolean indicating if the event is an alert or not
-   */
-  isAlert: boolean;
 }
 
 const hasEuidIdentity = (
@@ -133,14 +126,11 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
 
   const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreAvailable;
 
-  const isAlert = getField(getFieldsData(EVENT_KIND)) === EventKind.signal;
-
   return {
     timestamp,
     eventIds,
     action,
     shouldShowGraph,
     hasGraphData,
-    isAlert,
   };
 };

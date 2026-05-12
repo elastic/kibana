@@ -6,10 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, getFieldValue, type EsHitRecord } from '@kbn/discover-utils';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
 import { GraphVisualization as SharedGraphVisualization } from '../../../shared/components/graph_visualization';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 
 export { GRAPH_ID } from '../../../shared/components/graph_visualization';
 
@@ -20,7 +22,11 @@ export { GRAPH_ID } from '../../../shared/components/graph_visualization';
 export const GraphVisualization: React.FC = memo(() => {
   const { searchHit, scopeId } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const { eventIds, timestamp, isAlert } = useGraphPreview({ hit });
+  const { eventIds, timestamp } = useGraphPreview({ hit });
+  const isAlert = useMemo(
+    () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+    [hit]
+  );
 
   return (
     <SharedGraphVisualization

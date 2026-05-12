@@ -73,7 +73,6 @@ const previewAvailable = {
   action: ['action'],
   shouldShowGraph: true,
   hasGraphData: true,
-  isAlert: true,
 };
 
 describe('<GraphPreviewContainer />', () => {

@@ -144,7 +144,6 @@ jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview', () => ({
   useGraphPreview: () => ({
     eventIds: MOCK_EVENT_IDS,
     timestamp: MOCK_TIMESTAMP,
-    isAlert: false,
   }),
 }));
 

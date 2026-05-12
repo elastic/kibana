@@ -97,7 +97,6 @@ describe('useGraphPreview', () => {
     expect(result.current.timestamp).toBe('2025-01-01T00:00:00.000Z');
     expect(result.current.eventIds).toEqual(['original-event-id']);
     expect(result.current.action).toEqual(['action']);
-    expect(result.current.isAlert).toBe(true);
     expect(result.current.hasGraphData).toBe(true);
     expect(result.current.shouldShowGraph).toBe(true);
   });
@@ -117,7 +116,6 @@ describe('useGraphPreview', () => {
     );
 
     expect(result.current.eventIds).toEqual(['event-id']);
-    expect(result.current.isAlert).toBe(false);
   });
 
   it('returns hasGraphData=false when timestamp is missing', () => {

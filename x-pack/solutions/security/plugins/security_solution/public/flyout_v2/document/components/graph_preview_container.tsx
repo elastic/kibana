@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
   GRAPH_PREVIEW,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { GraphPreview } from '../../shared/components/graph_preview';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from './test_ids';
+import { EventKind } from '../constants/event_kinds';
 
 export interface GraphPreviewContainerProps {
   /**
@@ -49,7 +51,11 @@ export interface GraphPreviewContainerProps {
  */
 export const GraphPreviewContainer = memo(
   ({ hit, onShowGraph, showIcon, disableNavigation }: GraphPreviewContainerProps) => {
-    const { eventIds, timestamp, isAlert, shouldShowGraph } = useGraphPreview({ hit });
+    const { eventIds, timestamp, shouldShowGraph } = useGraphPreview({ hit });
+    const isAlert = useMemo(
+      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
 
     const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 
