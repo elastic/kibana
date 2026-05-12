@@ -8,6 +8,20 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+
+/**
+ * Main hook for accessing Evals API and Kibana services
+ * Returns Kibana HTTP service and notifications for making API calls
+ */
+export const useEvalsApi = () => {
+  const { services } = useKibana<{ http: HttpStart; notifications: NotificationsStart }>();
+
+  return {
+    http: services.http!,
+    notifications: services.notifications!,
+  };
+};
 import {
   EVALS_RUNS_URL,
   EVALS_RUN_URL,

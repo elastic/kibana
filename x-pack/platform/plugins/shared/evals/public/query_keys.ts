@@ -40,6 +40,22 @@ export const queryKeys = {
     all: ['evals', 'traces'] as const,
     detail: (traceId: string) => ['evals', 'traces', 'detail', traceId] as const,
   },
+  evaluators: {
+    all: ['evals', 'evaluators'] as const,
+    list: (filters?: { page?: number; perPage?: number; search?: string }) =>
+      ['evals', 'evaluators', 'list', filters] as const,
+    detail: (evaluatorId: string) => ['evals', 'evaluators', 'detail', evaluatorId] as const,
+  },
+  evaluation: {
+    all: ['evals', 'evaluation'] as const,
+    gates: () => ['evals', 'evaluation', 'gates'] as const,
+  },
+  monitoring: {
+    all: ['evals', 'monitoring'] as const,
+    metrics: (skillId: string, from: string, to: string) =>
+      ['evals', 'monitoring', 'metrics', skillId, from, to] as const,
+    alerts: (skillId: string) => ['evals', 'monitoring', 'alerts', skillId] as const,
+  },
   tracing: {
     all: ['evals', 'tracing'] as const,
     projects: (filters?: {

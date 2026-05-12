@@ -37,6 +37,10 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/react-kibana-mount'
   - '@kbn/react-kibana-context-theme'
+  - '@kbn/evals-extensions'
+  - '@kbn/fs'
+  - '@kbn/zod'
+  - '@kbn/actions-plugin'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/core-http-browser'
 tags:

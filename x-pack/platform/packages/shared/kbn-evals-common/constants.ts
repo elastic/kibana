@@ -24,8 +24,14 @@ export const EVALS_DATASET_URL = `${EVALS_DATASETS_URL}/{datasetId}` as const;
 export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as const;
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
+export const EVALS_DATASET_VERSIONS_URL = `${EVALS_DATASET_URL}/versions` as const;
+export const EVALS_DATASET_VERSION_TAG_URL = `${EVALS_DATASET_URL}/versions/tag` as const;
+export const EVALS_DATASET_STATS_URL = `${EVALS_DATASET_URL}/stats` as const;
+export const EVALS_DATASET_EXAMPLE_SPLITS_URL = `${EVALS_DATASET_EXAMPLE_URL}/splits` as const;
+export const EVALS_DATASET_IMPORT_URL = `${EVALS_DATASET_URL}/import` as const;
 
 export const EVALUATIONS_INDEX_PATTERN = 'kibana-evaluations*' as const;
+export const EVALUATIONS_WRITE_INDEX = 'kibana-evaluations' as const;
 export const TRACES_INDEX_PATTERN = 'traces-*' as const;
 
 export const API_VERSIONS = {

@@ -117,8 +117,10 @@ describe('ExampleScoresTable', () => {
     });
     expect(pagination).toBeInTheDocument();
 
+    // Input column renders full JSON via renderJsonPreview
     expect(screen.getByText(/"prompt": "input-r1"/)).toBeInTheDocument();
-    expect(screen.getByText(/"completion": "output-r1"/)).toBeInTheDocument();
+    // Output column uses renderOutputPreview which extracts the string value from single-field objects
+    expect(screen.getByText('output-r1')).toBeInTheDocument();
     expect(screen.getByText('Criteria:')).toBeInTheDocument();
     expect(screen.getByText('0.95')).toBeInTheDocument();
 

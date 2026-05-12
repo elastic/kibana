@@ -195,3 +195,12 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
+
+# OpenSpec planning workspace (not part of Kibana source tree; may be a
+# symlink in worktrees pointing to the primary checkout's openspec dir)
+/openspec
+/openspec/
+
+# Stray declaration files generated next to .ts sources in kbn-fs
+# (target/ is already ignored globally; these are the in-tree variants)
+x-pack/platform/packages/shared/kbn-fs/**/*.d.ts

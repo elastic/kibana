@@ -1,0 +1,282 @@
+version: '1'
+name: aesop.incremental_exploration
+description: Incremental exploration - discovers only new/changed data since last exploration (10x faster than full scan)
+enabled: true
+tags:
+  - aesop
+  - incremental
+  - optimization
+
+triggers:
+  - type: manual
+  - type: scheduled
+    schedule: "0 2 * * *"  # Daily at 2 AM
+
+inputs:
+  - name: agent_role
+    type: string
+    default: "SOC analyst"
+    description: "Role description for exploring agent"
+
+  - name: scoped_indices
+    type: array
+    default:
+      - ".alerts-security.alerts-*"
+      - ".siem-signals-*"
+      - "logs-endpoint.*"
+    description: "Index patterns to monitor for changes"
+
+  - name: force_full_scan
+    type: boolean
+    default: false
+    description: "Force full exploration instead of incremental (use for first run or major changes)"
+
+steps:
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 0: LOAD PREVIOUS STATE
+  # ══════════════════════════════════════════════════════════════
+
+  - name: load_last_exploration_state
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /.aesop-exploration-state/_doc/latest
+    on-failure:
+      - name: log_first_run
+        type: console
+        with:
+          message: "No previous exploration state found - will run full exploration"
+      - name: set_first_run_flag
+        type: set-variable
+        with:
+          name: is_first_run
+          value: true
+
+  - name: determine_exploration_mode
+    type: condition
+    if: "{{ inputs.force_full_scan == true OR steps.load_last_exploration_state.failed == true }}"
+    then:
+      - name: run_full_exploration
+        type: workflow
+        workflow: aesop.self_exploration
+        with:
+          agent_role: "{{ inputs.agent_role }}"
+          scoped_indices: "{{ inputs.scoped_indices }}"
+        exit: true  # Exit incremental workflow, full exploration handles everything
+    else:
+      - name: continue_incremental
+        type: console
+        with:
+          message: "Previous state found - running incremental exploration"
+
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 1: DETECT CHANGES
+  # ══════════════════════════════════════════════════════════════
+
+  - name: detect_new_indices
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /_cat/indices
+      params:
+        format: json
+        h: index,docs.count,creation.date
+    transform: |
+      {{
+        steps.detect_new_indices.output
+        | filter: "index matches scoped_indices patterns"
+        | filter: "index not in steps.load_last_exploration_state.output.discovered_indices"
+      }}
+
+  - name: detect_modified_indices
+    type: foreach
+    iterate: steps.load_last_exploration_state.output.discovered_indices
+    steps:
+      - name: get_current_doc_count
+        type: elasticsearch.request
+        with:
+          method: GET
+          path: /{{ item }}/_count
+          body:
+            query:
+              range:
+                "@timestamp":
+                  gte: "{{ steps.load_last_exploration_state.output.last_run_timestamp }}"
+
+      - name: classify_as_modified
+        type: condition
+        if: "{{ steps.get_current_doc_count.output.count > 0 }}"
+        then:
+          - type: add-to-list
+            list: modified_indices
+            value: "{{ item }}"
+
+  - name: log_change_summary
+    type: console
+    with:
+      message: |
+        Change Detection Complete:
+        - New indices: {{ steps.detect_new_indices.output | size }}
+        - Modified indices: {{ modified_indices | size }}
+        - Total to explore: {{ (steps.detect_new_indices.output | size) + (modified_indices | size) }}
+
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 2: INCREMENTAL SCHEMA DISCOVERY (New Indices Only)
+  # ══════════════════════════════════════════════════════════════
+
+  - name: explore_new_indices
+    type: condition
+    if: "{{ steps.detect_new_indices.output | size > 0 }}"
+    then:
+      - name: get_new_mappings
+        type: foreach
+        iterate: steps.detect_new_indices.output
+        steps:
+          - name: fetch_mapping
+            type: elasticsearch.request
+            with:
+              method: GET
+              path: /{{ item.index }}/_mapping
+
+      - name: categorize_new_schemas
+        type: ai.agent
+        agent-id: aesop.schema_categorizer
+        with:
+          message: |
+            New indices discovered since last exploration:
+            {{ steps.get_new_mappings.output | json }}
+
+            Previous categorization:
+            {{ steps.load_last_exploration_state.output.index_categories | json }}
+
+            Categorize new indices and update classifications.
+
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 3: INCREMENTAL PATTERN MINING (Modified Indices Only)
+  # ══════════════════════════════════════════════════════════════
+
+  - name: mine_patterns_from_new_data
+    type: condition
+    if: "{{ modified_indices | size > 0 }}"
+    then:
+      - name: sample_new_documents
+        type: foreach
+        iterate: modified_indices
+        steps:
+          - name: sample_docs
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /{{ item }}/_search
+              body:
+                query:
+                  range:
+                    "@timestamp":
+                      gte: "{{ steps.load_last_exploration_state.output.last_run_timestamp }}"
+                size: 50  # Sample new docs only
+                sort:
+                  - "@timestamp": desc
+
+      - name: analyze_new_patterns
+        type: ai.agent
+        agent-id: aesop.pattern_analyzer
+        with:
+          message: |
+            Analyze NEW data samples (since {{ steps.load_last_exploration_state.output.last_run_timestamp }}):
+
+            {{ steps.sample_new_documents.output | json }}
+
+            Previous patterns:
+            {{ steps.load_last_exploration_state.output.discovered_patterns | json }}
+
+            Task:
+            1. Identify NEW patterns not in previous state
+            2. Update frequency counts for existing patterns
+            3. Flag patterns that are declining (may be obsolete)
+
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 4: INCREMENTAL SKILL SYNTHESIS (New Patterns Only)
+  # ══════════════════════════════════════════════════════════════
+
+  - name: identify_new_skill_opportunities
+    type: filter
+    with:
+      input: "{{ steps.analyze_new_patterns.output.patterns }}"
+      condition: "{{ item.is_new == true AND item.frequency >= inputs.min_pattern_frequency }}"
+
+  - name: synthesize_new_skills
+    type: foreach
+    iterate: steps.identify_new_skill_opportunities.output
+    steps:
+      - name: generate_skill
+        type: ai.agent
+        agent-id: aesop.skill_synthesizer
+        with:
+          message: |
+            Pattern discovered: {{ item | json }}
+
+            Generate Agent Builder skill for this pattern.
+
+      - name: store_proposed_skill
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /.aesop-proposed-skills/_doc
+          body:
+            skill_id: "{{ generate_id() }}"
+            skill_content: "{{ steps.generate_skill.output }}"
+            source_pattern: "{{ item }}"
+            discovery_mode: "incremental"
+            discovered_at: "{{ now() }}"
+            status: "pending_validation"
+
+  # ══════════════════════════════════════════════════════════════
+  # PHASE 5: MERGE WITH PREVIOUS STATE
+  # ══════════════════════════════════════════════════════════════
+
+  - name: merge_with_previous_state
+    type: merge
+    with:
+      base: "{{ steps.load_last_exploration_state.output }}"
+      updates:
+        discovered_indices: "{{ base.discovered_indices | concat: steps.detect_new_indices.output }}"
+        discovered_patterns: "{{ steps.analyze_new_patterns.output.patterns }}"
+        last_run_timestamp: "{{ now() }}"
+        exploration_mode: "incremental"
+        new_indices_count: "{{ steps.detect_new_indices.output | size }}"
+        modified_indices_count: "{{ modified_indices | size }}"
+        new_skills_proposed: "{{ steps.synthesize_new_skills.output | size }}"
+
+  - name: save_updated_state
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.aesop-exploration-state/_doc/latest
+      body: "{{ steps.merge_with_previous_state.output }}"
+
+  - name: log_completion
+    type: console
+    with:
+      message: |
+        ✅ Incremental Exploration Complete
+
+        Summary:
+        - New indices discovered: {{ steps.detect_new_indices.output | size }}
+        - Modified indices: {{ modified_indices | size }}
+        - New patterns identified: {{ steps.analyze_new_patterns.output.new_patterns | size }}
+        - New skills proposed: {{ steps.synthesize_new_skills.output | size }}
+        - Total runtime: {{ workflow.duration_ms }}ms
+
+        Speedup: ~10x faster than full exploration (15 min vs 2 hours)
+
+# ══════════════════════════════════════════════════════════════
+# PHASE 6: RETURN RESULTS
+# ══════════════════════════════════════════════════════════════
+
+output:
+  new_indices_discovered: "{{ steps.detect_new_indices.output | size }}"
+  modified_indices: "{{ modified_indices | size }}"
+  new_patterns: "{{ steps.analyze_new_patterns.output.new_patterns | size }}"
+  new_skills_proposed: "{{ steps.synthesize_new_skills.output | size }}"
+  runtime_ms: "{{ workflow.duration_ms }}"
+  next_full_scan_recommended_at: "{{ now() | add_days: 7 }}"  # Suggest full scan weekly

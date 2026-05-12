@@ -1,7 +1,6 @@
 {
-  "type": "test-helper",
+  "type": "shared-common",
   "id": "@kbn/evals-extensions",
   "owner": ["@elastic/obs-ai-team", "@elastic/security-generative-ai"],
-  "description": "Advanced evaluation capabilities for @kbn/evals - standalone extensions package. Home for features ported from cursor-plugin-evals and Phases 3-5 of evals roadmap.",
-  "devOnly": true
+  "description": "Advanced evaluation capabilities for @kbn/evals. Provides prompt templates and evaluator helpers consumed by the evals plugin's server-side evaluator registry."
 }

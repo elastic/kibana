@@ -20,6 +20,7 @@ import { EvalsApp } from '../application';
 interface MountSectionParams {
   core: CoreSetup;
   mountParams: ManagementAppMountParams;
+  aesopEnabled: boolean;
 }
 
 const aiBreadcrumbLabel = i18n.translate('xpack.evals.stackManagement.breadcrumbs.ai', {
@@ -29,6 +30,7 @@ const aiBreadcrumbLabel = i18n.translate('xpack.evals.stackManagement.breadcrumb
 export const mountManagementSection = async ({
   core,
   mountParams: { element, setBreadcrumbs, history },
+  aesopEnabled,
 }: MountSectionParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
   coreStart.chrome.docTitle.change(PLUGIN_NAME);
@@ -61,6 +63,7 @@ export const mountManagementSection = async ({
               setBreadcrumbs={setBreadcrumbs}
               getHref={getHref}
               breadcrumbPrefix={breadcrumbPrefix}
+              aesopEnabled={aesopEnabled}
             />
           </KibanaContextProvider>
         </I18nProvider>

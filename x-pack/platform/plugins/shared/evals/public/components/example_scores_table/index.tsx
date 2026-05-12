@@ -277,6 +277,54 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     );
   };
 
+  /**
+   * Renders task output with smart formatting: extracts plain text from
+   * single-string-field objects (e.g. `{ response: "..." }`) and renders
+   * as readable text instead of raw JSON.
+   */
+  const renderOutputPreview = (value: unknown) => {
+    if (value == null) {
+      return '-';
+    }
+
+    // Plain string output — render directly
+    if (typeof value === 'string') {
+      return (
+        <EuiCodeBlock
+          overflowHeight={200}
+          paddingSize="none"
+          transparentBackground
+          fontSize="s"
+          whiteSpace="pre-wrap"
+        >
+          {value}
+        </EuiCodeBlock>
+      );
+    }
+
+    // Unwrap single-string-field objects like { response: "..." }
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const entries = Object.entries(value as Record<string, unknown>);
+      const stringEntry = entries.find(([, v]) => typeof v === 'string');
+      if (stringEntry && entries.length <= 2) {
+        return (
+          <EuiCodeBlock
+            overflowHeight={200}
+            paddingSize="none"
+            transparentBackground
+            fontSize="s"
+            whiteSpace="pre-wrap"
+          >
+            {stringEntry[1] as string}
+          </EuiCodeBlock>
+        );
+      }
+    }
+
+    // Fall through to JSON for complex objects
+    return renderJsonPreview(value);
+  };
+
   const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
     [
       exampleId,
@@ -350,7 +398,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         row: ExampleScoreRow
       ) => {
         const firstScoreDocument = getScoresForSelectedRepetition(row)[0];
-        return renderJsonPreview(firstScoreDocument?.task.output);
+        return renderOutputPreview(firstScoreDocument?.task.output);
       },
     },
     {

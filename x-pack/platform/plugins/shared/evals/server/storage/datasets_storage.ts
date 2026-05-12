@@ -16,15 +16,23 @@ export const datasetsStorageSettings = {
     properties: {
       name: types.keyword({}),
       description: types.text({}),
+      versions: types.object({ dynamic: false, properties: {} }),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
   },
 } satisfies IndexStorageSettings;
 
+export interface DatasetVersionEntry {
+  tag: string;
+  created_at: string;
+  examples_count: number;
+}
+
 export interface DatasetStorageProperties {
   name: string;
   description: string;
+  versions?: DatasetVersionEntry[];
   created_at: string;
   updated_at: string;
 }

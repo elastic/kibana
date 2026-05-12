@@ -28,7 +28,9 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import { createSkillTypeColumn, createAesopSuggestionColumn } from './skills_columns';
 import { SkillContextMenu } from './skills_table_context_menu';
+import { useAesopSuggestions, type AesopSkillSuggestion } from './use_aesop_suggestions';
 
 export const AgentBuilderSkillsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
@@ -49,12 +51,14 @@ export const AgentBuilderSkillsTable = memo(() => {
     cancelForceDelete,
   } = useDeleteSkill();
 
+  const { suggestionsBySkillId } = useAesopSuggestions();
+
   const deleteSkillTitleId = useGeneratedHtmlId({ prefix: 'deleteSkillTitle' });
   const deleteSkillUsedByAgentsTitleId = useGeneratedHtmlId({
     prefix: 'deleteSkillUsedByMultipleAgentsTitle',
   });
 
-  const columns = useSkillsTableColumns({ onDelete: deleteSkill });
+  const columns = useSkillsTableColumns({ onDelete: deleteSkill, suggestionsBySkillId });
 
   const searchConfig = useMemo(() => {
     const filters: SearchFilterConfig[] = [
@@ -178,8 +182,10 @@ export const AgentBuilderSkillsTable = memo(() => {
 
 const useSkillsTableColumns = ({
   onDelete,
+  suggestionsBySkillId,
 }: {
   onDelete: (skillId: string) => void;
+  suggestionsBySkillId: Map<string, AesopSkillSuggestion>;
 }): Array<EuiBasicTableColumn<PublicSkillSummary>> => {
   const { manageSkills } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
@@ -249,16 +255,15 @@ const useSkillsTableColumns = ({
           </EuiFlexGroup>
         ),
       },
-      {
-        field: 'readonly',
-        name: labels.skills.typeLabel,
-        width: '100px',
-        render: (readonly: boolean) => (
-          <EuiBadge color={readonly ? 'hollow' : 'primary'}>
-            {readonly ? labels.skills.builtinLabel : labels.skills.customLabel}
-          </EuiBadge>
-        ),
-      },
+      createSkillTypeColumn(),
+      ...(suggestionsBySkillId.size > 0
+        ? [
+            createAesopSuggestionColumn({
+              suggestionsBySkillId,
+              onNavigateToSkill: handleSkillClick,
+            }),
+          ]
+        : []),
       {
         field: 'tool_ids',
         name: labels.skills.toolsLabel,
@@ -287,6 +292,6 @@ const useSkillsTableColumns = ({
         ),
       },
     ],
-    [manageSkills, handleSkillClick, onDelete]
+    [manageSkills, handleSkillClick, onDelete, suggestionsBySkillId]
   );
 };

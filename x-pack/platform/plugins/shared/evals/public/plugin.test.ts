@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import { EvalsPublicPlugin } from './plugin';
 
@@ -32,8 +33,15 @@ describe('EvalsPublicPlugin', () => {
       getStartServices: jest.fn(),
     } as any);
 
+  const createInitializerContextMock = (aesopEnabled = false) =>
+    ({
+      config: {
+        get: () => ({ aesop: { enabled: aesopEnabled } }),
+      },
+    } as unknown as PluginInitializerContext);
+
   it('registers the Stack Management AI entry when management is available', () => {
-    const plugin = new EvalsPublicPlugin();
+    const plugin = new EvalsPublicPlugin(createInitializerContextMock());
     const management = createManagementMock();
 
     const coreSetup = createCoreSetupMock();
@@ -52,7 +60,7 @@ describe('EvalsPublicPlugin', () => {
   });
 
   it('does not register the Stack Management AI entry when management is not available', () => {
-    const plugin = new EvalsPublicPlugin();
+    const plugin = new EvalsPublicPlugin(createInitializerContextMock());
 
     const coreSetup = createCoreSetupMock();
 

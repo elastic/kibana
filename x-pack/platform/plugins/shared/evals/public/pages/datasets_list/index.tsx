@@ -31,6 +31,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import type { DatasetSummary } from '@kbn/evals-common';
 import { useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
+import { ImportWizard } from './import_wizard';
 import * as i18n from './translations';
 
 export const DatasetsListPage: React.FC = () => {
@@ -42,6 +43,7 @@ export const DatasetsListPage: React.FC = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [createError, setCreateError] = useState<string | null>(null);
+  const [isImportWizardOpen, setIsImportWizardOpen] = useState(false);
 
   const createDataset = useCreateDataset();
 
@@ -134,6 +136,11 @@ export const DatasetsListPage: React.FC = () => {
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => setIsImportWizardOpen(true)} iconType="importAction">
+              {i18n.IMPORT_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
               {i18n.CREATE_DATASET_BUTTON}
             </EuiButton>
@@ -216,6 +223,7 @@ export const DatasetsListPage: React.FC = () => {
           </EuiFlyoutFooter>
         </EuiFlyout>
       ) : null}
+      {isImportWizardOpen && <ImportWizard onClose={() => setIsImportWizardOpen(false)} />}
     </>
   );
 };

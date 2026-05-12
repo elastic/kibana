@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { Suspense } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -20,6 +20,10 @@ import type {
   EvalsStartDependencies,
 } from './types';
 
+interface EvalsBrowserConfig {
+  aesop: { enabled: boolean };
+}
+
 const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
 
 const DEFAULT_ADD_TO_DATASET_LABEL = i18n.translate('xpack.evals.addToDatasetAction.label', {
@@ -30,11 +34,19 @@ export class EvalsPublicPlugin
   implements
     Plugin<EvalsPublicSetup, EvalsPublicStart, EvalsSetupDependencies, EvalsStartDependencies>
 {
+  private readonly aesopEnabled: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    const config = initializerContext.config.get<EvalsBrowserConfig>();
+    this.aesopEnabled = config?.aesop?.enabled ?? false;
+  }
+
   public setup(
     coreSetup: CoreSetup<EvalsStartDependencies>,
     { management }: EvalsSetupDependencies
   ): EvalsPublicSetup {
     if (management) {
+      const aesopEnabled = this.aesopEnabled;
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,
         title: i18n.translate('xpack.evals.stackManagement.aiNavTitle', {
@@ -45,7 +57,7 @@ export class EvalsPublicPlugin
         capabilitiesId: PLUGIN_ID,
         mount: async (mountParams) => {
           const { mountManagementSection } = await import('./management_section/mount_section');
-          return mountManagementSection({ core: coreSetup, mountParams });
+          return mountManagementSection({ core: coreSetup, mountParams, aesopEnabled });
         },
       });
     }
