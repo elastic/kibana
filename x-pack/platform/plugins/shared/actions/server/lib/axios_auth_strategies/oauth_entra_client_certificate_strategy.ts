@@ -7,8 +7,8 @@
 
 import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts } from '@kbn/connector-specs';
-import { getDeleteTokenAxiosInterceptor } from '..';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
+import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
 import type { AuthStrategyDeps, AxiosAuthStrategy } from './types';
 
 export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {

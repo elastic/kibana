@@ -209,6 +209,74 @@ describe('requestOAuthClientCredentialsToken', () => {
     );
   });
 
+  test('omits client_secret from body when clientSecret is absent (assertion-based auth)', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        token_type: 'Bearer',
+        access_token: 'assertion-token',
+        expires_in: 600,
+      },
+    });
+
+    await requestOAuthClientCredentialsToken(
+      'https://test-assertion',
+      mockLogger,
+      {
+        scope: 'https://graph.microsoft.com/.default',
+        clientId: 'client-cert',
+        client_assertion: 'signed.jwt.assertion',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      },
+      configurationUtilities
+    );
+
+    const receivedDataString = axiosInstanceMock.mock.calls[0][1].data;
+    const receivedParams = new URLSearchParams(receivedDataString);
+    const paramsObject = paramsToObject(receivedParams);
+
+    expect(paramsObject).not.toHaveProperty('client_secret');
+    expect(paramsObject).toEqual({
+      client_id: 'client-cert',
+      client_assertion: 'signed.jwt.assertion',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      grant_type: 'client_credentials',
+      scope: 'https://graph.microsoft.com/.default',
+    });
+  });
+
+  test('omits client_secret and uses no Authorization header when clientSecret absent with client_secret_basic', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        token_type: 'Bearer',
+        access_token: 'token123',
+      },
+    });
+
+    await requestOAuthClientCredentialsToken(
+      'https://test-basic-no-secret',
+      mockLogger,
+      {
+        scope: 'openid',
+        clientId: 'client-cert',
+        client_assertion: 'signed.jwt.assertion',
+      },
+      configurationUtilities,
+      'client_secret_basic'
+    );
+
+    const requestConfig = axiosInstanceMock.mock.calls[0][1];
+    const receivedParams = new URLSearchParams(requestConfig.data);
+    const paramsObject = paramsToObject(receivedParams);
+
+    expect(paramsObject).not.toHaveProperty('client_secret');
+    expect(paramsObject).not.toHaveProperty('client_id');
+    expect(requestConfig.headers).not.toHaveProperty('Authorization');
+  });
+
   test('throw the exception and log the proper error if token was not get successfuly', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({

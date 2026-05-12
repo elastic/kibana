@@ -259,6 +259,18 @@ describe('OAuthAuthCodeStrategy', () => {
       );
     });
 
+    it('throws when opts clientSecret is absent', async () => {
+      const opts = {
+        authType: 'oauth',
+        tokenUrl: 'https://provider.example.com/token',
+        clientId: 'id',
+      } as unknown as OAuthGetTokenOpts;
+      await expect(strategy.getToken(opts, baseDeps)).rejects.toThrow(
+        'clientSecret is required for OAuth authorization code flow'
+      );
+      expect(mockGetOAuthAuthorizationCodeAccessToken).not.toHaveBeenCalled();
+    });
+
     it('delegates to getOAuthAuthorizationCodeAccessToken with correct credentials', async () => {
       mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer token');
 

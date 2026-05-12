@@ -225,6 +225,66 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     });
   });
 
+  test('returns null and logs warning when both clientSecret and client_assertion are missing', async () => {
+    const accessToken = await getOAuthClientCredentialsAccessToken({
+      ...getOAuthClientCredentialsAccessTokenOpts,
+      credentials: {
+        config: {
+          clientId: 'clientId',
+        },
+        secrets: {},
+      },
+    });
+
+    expect(accessToken).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Missing required fields for requesting OAuth Client Credentials access token`
+    );
+    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
+  });
+
+  test('requests new token when clientSecret is absent but client_assertion is present', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: null,
+    });
+    (requestOAuthClientCredentialsToken as jest.Mock).mockResolvedValueOnce({
+      tokenType: 'Bearer',
+      accessToken: 'assertion-token',
+      expiresIn: 1000,
+    });
+
+    const accessToken = await getOAuthClientCredentialsAccessToken({
+      ...getOAuthClientCredentialsAccessTokenOpts,
+      credentials: {
+        config: {
+          clientId: 'clientId',
+          additionalFields: {
+            client_assertion: 'signed.jwt.assertion',
+            client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+          },
+        },
+        secrets: {},
+      },
+    });
+
+    expect(accessToken).toEqual('Bearer assertion-token');
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
+      'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
+      logger,
+      {
+        scope: 'https://graph.microsoft.com/.default',
+        clientId: 'clientId',
+        clientSecret: undefined,
+        client_assertion: 'signed.jwt.assertion',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      },
+      configurationUtilities,
+      undefined
+    );
+  });
+
   test('throws error if requestOAuthClientCredentialsToken throws error', async () => {
     connectorTokenClient.get.mockResolvedValueOnce({
       hasErrors: false,
