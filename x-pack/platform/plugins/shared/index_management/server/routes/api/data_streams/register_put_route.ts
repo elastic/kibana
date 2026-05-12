@@ -82,7 +82,6 @@ export function registerPutDataStreamFailureStore({
   router,
   lib: { handleEsError },
 }: RouteDependencies) {
-
   const bodySchema = schema.object({
     dataStreams: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
     dsFailureStore: schema.boolean(),
