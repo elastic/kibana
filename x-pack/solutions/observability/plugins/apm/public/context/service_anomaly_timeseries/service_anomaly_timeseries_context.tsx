@@ -65,7 +65,8 @@ export function ServiceAnomalyTimeseriesContextProvider({
         },
       });
     },
-    [serviceName, canGetAnomalies, transactionType, start, end, preferredEnvironment]
+    [serviceName, canGetAnomalies, transactionType, start, end, preferredEnvironment],
+    { useCallApmApiV2: true }
   );
 
   return (

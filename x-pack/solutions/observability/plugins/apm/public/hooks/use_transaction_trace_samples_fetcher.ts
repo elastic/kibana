@@ -71,7 +71,8 @@ export function useTransactionTraceSamplesFetcher({
       transactionName,
       sampleRangeFrom,
       sampleRangeTo,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   return useMemo(

@@ -102,7 +102,8 @@ export function StorageDetailsPerService({ serviceName, indexLifecyclePhase }: P
         },
       });
     },
-    [indexLifecyclePhase, start, end, environment, kuery, serviceName]
+    [indexLifecyclePhase, start, end, environment, kuery, serviceName],
+    { useCallApmApiV2: true }
   );
 
   if (isPending(status)) {

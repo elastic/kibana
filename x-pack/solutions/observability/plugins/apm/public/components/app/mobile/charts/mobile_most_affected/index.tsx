@@ -10,11 +10,16 @@ import { EuiSpacer } from '@elastic/eui';
 import { TreemapSelect, TreemapTypes } from './treemap_select';
 import { TreemapChart } from '../../../../shared/charts/treemap_chart';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
-import { DEVICE_MODEL_IDENTIFIER, SERVICE_VERSION } from '../../../../../../common/es_fields/apm';
+import {
+  DEVICE_MODEL_IDENTIFIER,
+  HOST_OS_VERSION,
+  SERVICE_VERSION,
+} from '../../../../../../common/es_fields/apm';
 
 const ES_FIELD_MAPPING: Record<TreemapTypes, string> = {
   [TreemapTypes.Devices]: DEVICE_MODEL_IDENTIFIER,
-  [TreemapTypes.Versions]: SERVICE_VERSION,
+  [TreemapTypes.AppVersions]: SERVICE_VERSION,
+  [TreemapTypes.OsVersions]: HOST_OS_VERSION,
 };
 
 export function MobileTreemap({
@@ -35,7 +40,6 @@ export function MobileTreemap({
   const { data, status } = useFetcher(
     (callApmApi) => {
       const fieldName = ES_FIELD_MAPPING[selectedTreemap];
-
       if (fieldName) {
         return callApmApi('GET /internal/apm/mobile-services/{serviceName}/terms', {
           params: {
@@ -57,7 +61,6 @@ export function MobileTreemap({
     [environment, kuery, serviceName, start, end, selectedTreemap],
     { useCallApmApiV2: true }
   );
-
   return (
     <>
       <TreemapSelect selectedTreemap={selectedTreemap} onChange={selectTreemap} />

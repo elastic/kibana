@@ -43,7 +43,8 @@ export function ServiceDependenciesBreakdownChart({ height }: { height: number }
         },
       });
     },
-    [serviceName, start, end, kuery, environment]
+    [serviceName, start, end, kuery, environment],
+    { useCallApmApiV2: true }
   );
 
   const timeseries: Array<TimeSeries<Coordinate>> =

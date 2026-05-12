@@ -14,15 +14,15 @@ import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { TopAlert } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { asInteger } from '../../../../../common/utils/formatters';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 import { useGetChartAlertAnnotations } from './use_get_chart_alert_annotations';
 
 type ErrorDistribution =
@@ -98,7 +98,8 @@ export function ErrorCountChart({
         });
       }
     },
-    [environment, serviceName, start, end, groupId, transactionName, kuery, preferred]
+    [environment, serviceName, start, end, groupId, transactionName, kuery, preferred],
+    { useCallApmApiV2: true }
   );
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
@@ -148,7 +149,6 @@ export function ErrorCountChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.ERROR_COUNT}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

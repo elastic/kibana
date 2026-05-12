@@ -51,7 +51,8 @@ export function ServiceLogs() {
 
       return getInfrastructureFilter({ containerIds, environment, serviceName });
     },
-    [environment, kuery, serviceName, start, end]
+    [environment, kuery, serviceName, start, end],
+    { useCallApmApiV2: true }
   );
 
   const internalLogFilters = useMemo(() => {

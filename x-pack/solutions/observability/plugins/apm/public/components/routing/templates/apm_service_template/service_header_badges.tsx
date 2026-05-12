@@ -15,7 +15,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import type { ApmPluginStartDeps, ApmServices } from '../../../../plugin';
-import { AnomaliesBadge } from '../../../app/service_inventory/service_list/anomalies_badge';
 
 interface ServiceHeaderBadgesProps {
   serviceName: string;
@@ -39,7 +38,6 @@ export function ServiceHeaderBadges({
   const { capabilities, navigateToUrl } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const canReadSlos = !!capabilities.slo?.read;
-  const canReadMlJobs = !!capabilities.ml?.canGetJobs;
 
   const { mostCriticalSloStatus, sloFetchStatus } = useServiceSloContext();
 
@@ -57,30 +55,10 @@ export function ServiceHeaderBadges({
           path: { serviceName },
           query: { start, end, environment },
         },
-      })
-        .then((res) => ({ alertsCount: res.alertsCount }))
-        .catch(() => ({ alertsCount: 0 }));
+      });
     },
     [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
-    { showToastOnError: false }
-  );
-
-  const { data: anomalyData, status: anomalyStatus } = useFetcher(
-    (callApmApi) => {
-      if (!canReadMlJobs) {
-        return;
-      }
-      return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_score', {
-        params: {
-          path: { serviceName },
-          query: { start, end, environment },
-        },
-      })
-        .then((res) => ({ anomalyScore: res.anomalyScore }))
-        .catch((): { anomalyScore?: number } => ({}));
-    },
-    [serviceName, start, end, environment, canReadMlJobs],
-    { showToastOnError: false }
+    { useCallApmApiV2: true }
   );
 
   const alertsCount = alertsData?.alertsCount ?? 0;
@@ -90,12 +68,6 @@ export function ServiceHeaderBadges({
     canReadAlerts &&
     alertsStatus === FETCH_STATUS.SUCCESS &&
     alertsCount > 0;
-
-  const showAnomaliesBadge =
-    canReadMlJobs &&
-    anomalyStatus === FETCH_STATUS.SUCCESS &&
-    anomalyData?.anomalyScore !== undefined;
-
   const showSloBadge = canReadSlos && sloFetchStatus === FETCH_STATUS.SUCCESS;
 
   useEffect(() => {
@@ -104,7 +76,7 @@ export function ServiceHeaderBadges({
     }
   }, [showSloBadge, telemetry]);
 
-  if (!showAlertsBadge && !showSloBadge && !showAnomaliesBadge) {
+  if (!showAlertsBadge && !showSloBadge) {
     return null;
   }
 
@@ -150,11 +122,6 @@ export function ServiceHeaderBadges({
             serviceName={serviceName}
             onClick={onSloClick}
           />
-        </EuiFlexItem>
-      )}
-      {showAnomaliesBadge && (
-        <EuiFlexItem grow={false} data-test-subj="serviceHeaderAnomaliesBadge">
-          <AnomaliesBadge score={anomalyData?.anomalyScore} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

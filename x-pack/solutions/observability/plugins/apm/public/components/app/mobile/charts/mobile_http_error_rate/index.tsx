@@ -68,7 +68,8 @@ export function HttpErrorRateChart({
         },
       });
     },
-    [environment, kuery, serviceName, start, end, offset, comparisonEnabled]
+    [environment, kuery, serviceName, start, end, offset, comparisonEnabled],
+    { useCallApmApiV2: true }
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();

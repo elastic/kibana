@@ -21,11 +21,7 @@ import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './form_row_select';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
-import {
-  isOpenTelemetryAgentName,
-  isEDOTAgentName,
-  isOTELAgentName,
-} from '../../../../../../../common/agent_name';
+import { isOpenTelemetryAgentName, isEDOTAgentName } from '../../../../../../../common/agent_name';
 import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface Props {
@@ -46,7 +42,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       }
     },
     [newConfig.service.name],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   const { link } = useApmRouter();
@@ -70,7 +66,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
       setNewConfig((prev) => ({ ...prev, agent_name: agentName }));
     },
-    [newConfig.service.name, setNewConfig]
+    [newConfig.service.name, setNewConfig],
+    { useCallApmApiV2: true }
   );
 
   const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
@@ -89,7 +86,6 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
   const isAgentConfigurationSupported =
     !newConfig.agent_name ||
     (newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName)) ||
-    (newConfig.agent_name && isOTELAgentName(newConfig.agent_name as AgentName)) ||
     (newConfig.agent_name && !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
 
   const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(

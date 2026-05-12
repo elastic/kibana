@@ -128,7 +128,8 @@ export function SpanFlyout({
         },
       });
     },
-    [traceId, spanId, parentTransactionId, start, end]
+    [traceId, spanId, parentTransactionId, start, end],
+    { useCallApmApiV2: true }
   );
 
   const { span, parentTransaction } = data;

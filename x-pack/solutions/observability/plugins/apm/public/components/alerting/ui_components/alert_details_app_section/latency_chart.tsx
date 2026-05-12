@@ -34,7 +34,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
 
 export function LatencyChart({
   alert,
@@ -135,7 +135,8 @@ export function LatencyChart({
       preferred,
       kuery,
       filters,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
@@ -211,7 +212,6 @@ export function LatencyChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.LATENCY}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

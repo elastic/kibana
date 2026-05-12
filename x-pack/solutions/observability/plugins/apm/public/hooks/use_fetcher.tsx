@@ -11,9 +11,11 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { AutoAbortedAPMClientV2 } from '@kbn/apm-api-shared';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import type { AutoAbortedAPMClient } from '../services/rest/create_call_apm_api';
 import { callApmApi } from '../services/rest/create_call_apm_api';
+import { getApmInternalServices } from '../plugin';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -79,25 +81,70 @@ const createAutoAbortedAPMClient = (
   }) as AutoAbortedAPMClient;
 };
 
+const createAutoAbortedAPMClientV2 = (
+  signal: AbortSignal,
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
+): AutoAbortedAPMClientV2 => {
+  const { callApmApi: callApmApiV2 } = getApmInternalServices();
+  return ((endpoint, options) => {
+    return callApmApiV2(endpoint, {
+      ...options,
+      signal,
+    } as any)
+      .catch((err) => {
+        addInspectorRequest({
+          status: FETCH_STATUS.FAILURE,
+          data: err.body?.attributes,
+        });
+        throw err;
+      })
+      .then((response) => {
+        addInspectorRequest({
+          data: response,
+          status: FETCH_STATUS.SUCCESS,
+        });
+        return response;
+      });
+  }) as AutoAbortedAPMClientV2;
+};
+
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
 type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<infer TResponseType>
   ? TResponseType
   : unknown;
 
+export interface UseFetcherOptions {
+  preservePreviousData?: boolean;
+  showToastOnError?: boolean;
+  skipTimeRangeRefreshUpdate?: boolean;
+}
+
+// Temporary: useCallApmApiV2 overloads exist while migrating APIs from the APM plugin's
+// callApmApi to the shared @kbn/apm-api-shared client. Once all routes are migrated,
+// remove the useCallApmApiV2 option, the V1 overload, and the V1 client creator.
+// After migration is complete, this hook could be moved to @kbn/apm-ui-shared.
+export function useFetcher<TReturn>(
+  fn: (callApmApi: AutoAbortedAPMClientV2, signal: AbortSignal) => TReturn,
+  fnDeps: any[],
+  options: UseFetcherOptions & { useCallApmApiV2: true }
+): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void };
+
 export function useFetcher<TReturn>(
   fn: (callApmApi: AutoAbortedAPMClient, signal: AbortSignal) => TReturn,
   fnDeps: any[],
-  options: {
-    preservePreviousData?: boolean;
-    showToastOnError?: boolean;
-    skipTimeRangeRefreshUpdate?: boolean;
-  } = {}
+  options?: UseFetcherOptions & { useCallApmApiV2?: false }
+): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void };
+
+export function useFetcher<TReturn>(
+  fn: (callApmApi: any, signal: AbortSignal) => TReturn,
+  fnDeps: any[],
+  options: UseFetcherOptions & { useCallApmApiV2?: boolean } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const {
     services: { notifications, rendering },
   } = useKibana();
-  const { preservePreviousData = true, showToastOnError = true } = options;
+  const { preservePreviousData = true, showToastOnError = true, useCallApmApiV2 = false } = options;
   const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
@@ -131,7 +178,11 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest), signal);
+      const client = useCallApmApiV2
+        ? createAutoAbortedAPMClientV2(signal, addInspectorRequest)
+        : createAutoAbortedAPMClient(signal, addInspectorRequest);
+
+      const promise = fn(client, signal);
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success

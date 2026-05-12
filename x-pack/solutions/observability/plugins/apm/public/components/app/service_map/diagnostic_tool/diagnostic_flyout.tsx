@@ -28,12 +28,12 @@ import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
 import { DiagnosticResults } from './diagnostic_results';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
 import type { ServiceMapSelection } from '../popover/popover_content';
+import { getApmInternalServices } from '../../../../plugin';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
@@ -55,6 +55,7 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
 }
 
 export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
+  const { callApmApi } = getApmInternalServices();
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(

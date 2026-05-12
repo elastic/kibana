@@ -26,8 +26,6 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
-import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -43,7 +41,6 @@ export function ServiceOverviewThroughputChart({
   kuery: string;
   transactionName?: string;
 }) {
-  const license = useLicenseContext();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
@@ -110,7 +107,8 @@ export function ServiceOverviewThroughputChart({
       transactionName,
       comparisonEnabled,
       preferred,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
@@ -187,39 +185,24 @@ export function ServiceOverviewThroughputChart({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <OpenAnomalies
-                dataTestSubj="apmServiceOverviewThroughputChartOpenAnomalies"
-                hasValidMlLicense={license?.getFeature('ml').isAvailable}
-                mlJobId={preferredAnomalyTimeseries?.jobId}
-                detectorType={AnomalyDetectorType.txThroughput}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <OpenInDiscover
-                dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
-                variant="iconButton"
-                label={i18n.translate(
-                  'xpack.apm.serviceOverviewThroughputChart.openTracesInDiscover',
-                  {
-                    defaultMessage: 'Open traces in Discover',
-                  }
-                )}
-                indexType="traces"
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                queryParams={{
-                  kuery,
-                  serviceName,
-                  environment,
-                  transactionName,
-                  transactionType,
-                  sortDirection: 'DESC',
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <OpenInDiscover
+            dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+            variant="iconButton"
+            label={i18n.translate('xpack.apm.serviceOverviewThroughputChart.openTracesInDiscover', {
+              defaultMessage: 'Open traces in Discover',
+            })}
+            indexType="traces"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName,
+              environment,
+              transactionName,
+              transactionType,
+              sortDirection: 'DESC',
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

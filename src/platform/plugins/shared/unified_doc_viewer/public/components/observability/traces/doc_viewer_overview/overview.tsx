@@ -129,6 +129,7 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
               }
             >
               <EuiSpacer size="m" />
+              <EuiSpacer size="m" />
               <About
                 hit={hit}
                 dataView={dataView}
