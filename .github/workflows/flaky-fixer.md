@@ -1,6 +1,6 @@
 ---
 name: Flaky Test Fixer
-description: Open a draft fix PR for a `failed-test` issue that the Failed Test Investigator marked as auto-fixable.
+description: Open a draft fix PR for a `failed-test` issue that the Failed Test Investigator labeled `needs-flaky-fix`.
 on:
   issues:
     types: [labeled]
@@ -68,7 +68,7 @@ safe-outputs:
     draft: true
     max: 1
     title-prefix: "[flaky-fix] "
-    labels: [flaky-fix:running, automated]
+    labels: [auto:flaky-fix, flaky-fix:running]
     base-branch: main
     allowed-base-branches: [main]
     if-no-changes: "ignore"
@@ -106,8 +106,7 @@ If any of these fail, post a single comment on the issue explaining what happene
 1. **The issue still has the `needs-flaky-fix` label.** A human may have removed it after the workflow was queued.
 2. **The latest Failed Test Investigator comment on the issue still says `fixability: auto-fixable`.** Parse the `Flakiness Finding` bullets. If `fixability` is anything else, stop.
 3. **Pull `test.file` and `test.type` out of the same bullets.** If `test.file` is `unknown` or the file does not exist on the default branch, stop.
-4. **No fix is already in flight for this test.** Search open PRs in this repository with `gh pr list --search 'in:body "Fixes #<issue-number>" is:pr is:open'` or by branch prefix `flaky-fix/issue-<issue-number>`. If a matching PR exists, post a no-op comment that says one is already open, link to it, and stop.
-5. **The triggering pipeline is `kibana-on-merge`.** This is the only pipeline in scope for v1. Look at the Buildkite URLs cited in the issue body or comments — if all of them are on a different pipeline, stop.
+4. **No fix is already in flight for this issue.** Search open PRs in this repository with the canonical label this workflow applies: `gh pr list --search 'is:pr is:open label:auto:flaky-fix' --json number,body --jq '.[] | select(.body | contains("Fixes #<issue-number>"))'`. If a matching PR exists, post a comment that links to it and stop.
 
 ## Investigation and patch
 
@@ -120,38 +119,17 @@ Once pre-flight passes, follow the Flaky Test Doctor playbook (in this repo at `
 
 ## Local smoke gate
 
-After every patch attempt, run all three of these in this order. The patch is acceptable only when all three pass.
+After every patch attempt, run three checks in this order. The patch is acceptable only when all three pass.
 
-```bash
-# 1. Make sure node_modules are linked. This is required by everything else.
-yarn kbn bootstrap
-
-# 2. Lint and type-check just the agent profile (fast, scoped to changed code).
-node scripts/check --profile agent
-
-# 3. Run the targeted test once, the way it will run on CI.
-# Pick ONE of these based on test.type from the investigator metadata:
-
-# Scout UI (when path is .../test/scout*/ui/tests/...):
-node scripts/scout.js run-tests \
-  --location local --arch stateful --domain classic \
-  --testFiles <test.file>
-
-# Scout API (when path is .../test/scout*/api/tests/...):
-node scripts/scout.js run-tests \
-  --location local --arch stateful --domain classic \
-  --testFiles <test.file>
-
-# Scout parallel (when path is .../parallel_tests/...): same command as above; the
-# CLI auto-resolves parallel.playwright.config.ts based on the path segment.
-
-# FTR: identify the FTR config that owns this test (look at sibling `configs/*.config.ts`
-# files in the test's suite folder), then:
-node scripts/functional_tests --config <ftr-config.ts>
-
-# Jest:
-node scripts/jest --runTestsByPath <test.file>
-```
+1. **Bootstrap**. Run `yarn kbn bootstrap` so dependencies and project references are linked. Required by everything that follows.
+2. **Lint and type-check.** Run `node scripts/check --profile agent` (scoped lint + type-check tuned for AI-driven changes).
+3. **Run the targeted test.** Use the documented mechanism for the test's framework:
+   - **Scout** — follow [`docs/extend/scout/run-tests.md`](../../docs/extend/scout/run-tests.md). For iterating on a single test, prefer starting servers once and then running Playwright against them, rather than `node scripts/scout.js run-tests` (which boots and tears down servers every invocation). The efficient loop is:
+     1. `node scripts/scout.js start-server --location local --arch stateful --domain classic` (leave running in one shell)
+     2. `npx playwright test --config <playwright.config.ts> <test.file>` (re-run after each patch tweak)
+     The config to pass to `--config` is the `playwright.config.ts` in the test's `test/scout*/{ui,api}/` directory; if the test path contains `parallel_tests/`, use the sibling `parallel.playwright.config.ts` instead.
+   - **FTR** — identify the config that owns this test (the `configs/*.config.ts` in the same suite folder whose `testFiles` resolves to your test), then run `node scripts/functional_tests --config <ftr-config.ts>`.
+   - **Jest** — `node scripts/jest --runTestsByPath <test.file>`.
 
 If the smoke gate fails:
 
@@ -167,8 +145,10 @@ If the smoke gate passes on attempt N (N ≤ 5):
 Emit exactly one safe-output `create_pull_request` with:
 
 - **Branch name**: `flaky-fix/issue-<issue-number>`. The safe-output handler will sanitize and salt as needed.
-- **Title**: a short, human-readable summary of what the patch does. The `[flaky-fix] ` prefix is added automatically. Example: `Fix flaky Scout test "alerts histogram legend" by waiting for alerts to populate`.
-- **Body**: use exactly this template, with placeholders replaced. Keep it short.
+- **Title**: must be of the form `[<Plugin name>] <concise summary of what the patch does>`. The `[flaky-fix] ` prefix is added automatically by the workflow, so do **not** include it yourself; the final title that lands on the PR will read `[flaky-fix] [<Plugin name>] <summary>`. Identify the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`, `x-pack/solutions/observability/plugins/infra/...` → `Infra`); CODEOWNERS and the `package.json` `name` field next to the test are reliable sources. Examples:
+  - `[Security Solution] Wait for alerts to populate before asserting on histogram legend`
+  - `[Infra] Replace .within() with .find() to avoid stale element reference`
+- **Body**: keep it to two short paragraphs. Use this template, with placeholders replaced:
 
   ```
   Fixes #<issue-number>.
@@ -176,18 +156,7 @@ Emit exactly one safe-output `create_pull_request` with:
   <one sentence: what was failing, what this patch does>
 
   This PR was opened automatically by the Flaky Test Fixer. The Flaky Test Runner will validate that the fix holds across many runs once this PR is ready — until then, treat as a candidate.
-
-  <!-- flaky-fix:state
-  {
-    "issue": <issue-number>,
-    "attempt": <N>,
-    "smokeGate": "passed",
-    "investigatorComment": "<url-to-investigator-comment>"
-  }
-  -->
   ```
-
-  The trailing HTML comment is the machine-readable state block for downstream automation. Keep the JSON valid. Do not add anything after the closing `-->`.
 
 - **Commit message**: same as the PR title.
 
