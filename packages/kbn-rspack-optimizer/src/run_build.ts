@@ -243,7 +243,7 @@ async function runWatchBuild(
     };
 
     log?.info('Setting up RSPack watcher...');
-    log?.debug('Watcher will ignore: /node_modules/');
+    log?.debug('Watcher will ignore: /node_modules/, /target/');
     log?.debug('Aggregate timeout: 50ms');
 
     if (hmrServer) {
@@ -257,7 +257,7 @@ async function runWatchBuild(
     const watching = compiler.watch(
       {
         aggregateTimeout: 50,
-        ignored: /node_modules/,
+        ignored: /node_modules|[/\\]target[/\\]/,
       },
       (err, stats) => {
         if (isShuttingDown) {
