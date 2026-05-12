@@ -71,7 +71,15 @@ export function useSplitQueryCompletion({ baseQuery, search }: UseSplitQueryComp
         // Offset into the full query = base length + 1 (for the space) + editor offset
         const fullQueryOffset = currentBaseQuery.length + 1 + editorOffset;
 
-        const rawSuggestions = await suggest(fullQuery, fullQueryOffset, callbacks);
+        let rawSuggestions: Awaited<ReturnType<typeof suggest>>;
+        try {
+          rawSuggestions = await suggest(fullQuery, fullQueryOffset, callbacks);
+        } catch {
+          // Monaco already swallows unhandled rejections from provideCompletionItems,
+          // but wrapping here prevents unhandled promise rejection warnings and makes
+          // the degradation explicit: autocomplete silently returns nothing on failure.
+          return { suggestions: [] };
+        }
 
         // Use word range at cursor — simpler than full range computation and works well
         // for field names, functions, and keywords which are the main autocomplete targets.
