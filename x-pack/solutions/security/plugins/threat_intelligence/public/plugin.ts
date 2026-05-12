@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { THREAT_INTELLIGENCE_FEATURE_ID } from '../common';
 import type {
   ThreatIntelligencePluginPublicSetup,
   ThreatIntelligencePluginPublicStart,
@@ -26,12 +35,30 @@ export class ThreatIntelligencePlugin
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<
-      ThreatIntelligencePublicStartDependencies,
-      ThreatIntelligencePluginPublicStart
-    >,
+    core: CoreSetup<ThreatIntelligencePublicStartDependencies, ThreatIntelligencePluginPublicStart>,
     _plugins: ThreatIntelligencePublicSetupDependencies
   ): ThreatIntelligencePluginPublicSetup {
+    // Register the Security > Intelligence Hub app. The mount handler
+    // dynamically imports the dashboard so this plugin's setup stays cheap
+    // when the user never opens the app.
+    core.application.register({
+      id: THREAT_INTELLIGENCE_FEATURE_ID,
+      title: i18n.translate('xpack.threatIntelligence.app.title', {
+        defaultMessage: 'Intelligence Hub',
+      }),
+      euiIconType: 'logoSecurity',
+      order: 9050,
+      visibleIn: ['globalSearch', 'sideNav'],
+      category: DEFAULT_APP_CATEGORIES.security,
+      async mount(params: AppMountParameters) {
+        const [{ renderApp }, [coreStart]] = await Promise.all([
+          import('./app/render'),
+          core.getStartServices(),
+        ]);
+        return renderApp({ core: coreStart, params });
+      },
+    });
+
     return {};
   }
 

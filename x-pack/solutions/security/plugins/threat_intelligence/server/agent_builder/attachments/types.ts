@@ -231,8 +231,8 @@ export type SubscriptionConfirmationPayload = z.infer<typeof subscriptionConfirm
  * and the user can edit tags / severity / schedule / delivery in place
  * before clicking Submit. Submit posts directly to
  * `/internal/threat_intelligence/subscriptions/submit`, which calls the
- * shared `persistSubscription` helper used by the `create_subscription`
- * tool — no second agent round-trip required.
+ * shared `persistSubscription` helper used by the `manage_subscriptions`
+ * tool's `action="create"` branch — no second agent round-trip required.
  */
 export const subscriptionConfirmationAttachmentType: AttachmentTypeDefinition<
   typeof ATTACHMENT_TYPES.subscriptionConfirmation,

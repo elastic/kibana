@@ -22,7 +22,8 @@ import type {
 } from './types';
 import { registerSkills } from './agent_builder/skills';
 import { registerAttachmentTypes } from './agent_builder/attachments';
-import { extractIocsTool } from './agent_builder/tools';
+import { analyseEnvironmentTool, extractIocsTool } from './agent_builder/tools';
+import { registerThreatIntelligenceFeature } from './features';
 import { registerRoutes } from './routes';
 import { installIndexTemplates } from './setup/index_templates';
 import { seedDefaultSources } from './setup/seed_default_sources';
@@ -56,13 +57,24 @@ export class ThreatIntelligencePlugin
     coreSetup: CoreSetup<ThreatIntelligenceStartDependencies, ThreatIntelligencePluginStart>,
     setupDeps: ThreatIntelligenceSetupDependencies
   ): ThreatIntelligencePluginSetup {
-    const { agentBuilder, taskManager } = setupDeps;
+    const { agentBuilder, features, taskManager } = setupDeps;
+
+    // Register the Kibana feature with the three-tier privilege model
+    // (read / write / admin) that gates route access. Routes thread the
+    // `THREAT_INTELLIGENCE_API_PRIVILEGES` values through
+    // `security.authz.requiredPrivileges`.
+    registerThreatIntelligenceFeature({ features });
 
     // `extract_iocs` is registered globally so Workflow 2 can invoke it
-    // directly via a `builtin` step. The other `threat_intel.*` tools live
-    // inline on the skill (BuiltinSkillBoundedTool — no `tags`/`availability`)
-    // so they're surfaced only when the skill is loaded into a conversation.
+    // directly via a `builtin` step. `analyse_environment` is registered
+    // globally so the orchestrating agent can call it through the registry
+    // when tailoring feed recommendations without consuming one of the
+    // skill's seven inline-tool slots. The other `threat_intel.*` tools
+    // live inline on the skill (BuiltinSkillBoundedTool — no
+    // `tags`/`availability`) so they're surfaced only when the skill is
+    // loaded into a conversation.
     agentBuilder.tools.register(extractIocsTool);
+    agentBuilder.tools.register(analyseEnvironmentTool);
 
     registerAttachmentTypes(agentBuilder);
 

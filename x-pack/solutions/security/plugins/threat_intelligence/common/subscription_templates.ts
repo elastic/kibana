@@ -25,6 +25,13 @@ export interface SubscriptionTemplate {
   severity_threshold: SeverityLevel;
   schedule_rrule: string;
   delivery_type_default: 'email' | 'slack';
+  /**
+   * Optional default Kibana actions connector id. Templates are static, so
+   * the field is intentionally a hint, not a guarantee — operators usually
+   * have to fill it in at subscription-creation time. Left undefined for
+   * the built-in templates because connector ids are environment-specific.
+   */
+  delivery_connector_id_default?: string;
 }
 
 export const SUBSCRIPTION_TEMPLATES: Readonly<Record<string, SubscriptionTemplate>> = {

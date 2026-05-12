@@ -7,17 +7,14 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  THREAT_INTELLIGENCE_SKILL_ID,
-  THREAT_INTEL_TOOL_IDS,
-} from '../../../../common';
+import { THREAT_INTELLIGENCE_SKILL_ID, THREAT_INTEL_TOOL_IDS } from '../../../../common';
 import {
   searchReportsTool,
   ingestReportTool,
   huntBehaviorTool,
-  createSubscriptionTool,
-  listSubscriptionsTool,
+  manageSubscriptionsTool,
   coverageGapTool,
+  huntForThreatTool,
 } from '../../tools';
 
 /**
@@ -106,20 +103,34 @@ identifiers; behavior is durable because it's constrained by the OS.**
   a \`threat-intel-mitre-heatmap\` attachment with \`mode: "coverage"\` (covered
   cells render green, uncovered cells render red). Use when the user asks
   "what's hot that I don't cover?" or before \`hunt_behavior\` to prioritize.
-- **${THREAT_INTEL_TOOL_IDS.createSubscription}** — Create a scheduled digest
-  subscription (email/Slack). Optional \`template_id\` bootstraps the form with
-  pre-staged defaults (\`daily-threat-debrief\`, \`weekly-ciso-digest\`,
-  \`ransomware-watch\`). With \`confirm=false\` the tool returns proposed
-  parameters for an editable confirmation card; the card submits directly to
+- **${THREAT_INTEL_TOOL_IDS.huntForThreat}** — Active forward hunt across the
+  customer environment (\`.alerts-security.alerts-*\`, \`metrics-endpoint.*\`,
+  \`logs-vulnerability.*\`, \`logs-aws.*\`, \`logs-network_traffic.*\`) for a
+  report's IOCs and ATT&CK technique IDs. Returns the top matching documents
+  AND an \`affected_assets\` aggregation (unique hosts + users currently
+  matched). Use when the user asks "are we affected by this advisory?",
+  "is X in our environment?", or "which hosts touched this campaign?".
+  Distinct from \`hunt_behavior\` (which extracts behaviors into proposed
+  Detection Engine rules) and from the retrospective
+  \`hit_provenance_backfill\` workflow (which attributes existing alerts back
+  to reports).
+- **${THREAT_INTEL_TOOL_IDS.manageSubscriptions}** — One tool, three actions:
+  \`create\` / \`list\` / \`delete\`. For \`create\`, optional \`template_id\`
+  bootstraps from a pre-staged preset (\`daily-threat-debrief\`,
+  \`weekly-ciso-digest\`, \`ransomware-watch\`). With \`confirm=false\` the
+  tool returns proposed parameters for an editable confirmation card; the
+  card submits directly to
   \`/internal/threat_intelligence/subscriptions/submit\` so a follow-up
   \`confirm=true\` call is only needed for non-interactive callers.
-- **${THREAT_INTEL_TOOL_IDS.listSubscriptions}** — List the user's active
-  subscriptions for inspection or edit.
 
 Registry tools available via this skill:
 - \`security.create_detection_rule\` — AI-driven Detection Engine rule creation
   (gated behind \`aiRuleCreationEnabled\`; see degradation rule below).
 - \`security.security_labs_search\` — search Elastic Security Labs publications.
+- \`${THREAT_INTEL_TOOL_IDS.analyseEnvironment}\` — coarse-grained environment
+  profile (active data streams + OS mix + cloud-provider mix) for tailoring
+  feed recommendations. Call before recommending which threat-intel sources
+  to enable.
 - \`${platformCoreTools.cases}\` — open cases for critical findings.
 
 ## Orchestration Rules
@@ -167,17 +178,33 @@ Registry tools available via this skill:
 
 ### For subscription requests ("send me a weekly digest of...")
 
-1. Call \`${THREAT_INTEL_TOOL_IDS.createSubscription}\` with \`confirm=false\`
-   (and optionally a \`template_id\` such as \`"daily-threat-debrief"\`); the
-   response carries \`status: pending_confirmation\` plus the proposed shape.
+1. Call \`${THREAT_INTEL_TOOL_IDS.manageSubscriptions}\` with
+   \`action="create"\`, \`confirm=false\` (and optionally a \`template_id\`
+   such as \`"daily-threat-debrief"\`); the response carries
+   \`status: pending_confirmation\` plus the proposed shape.
 2. Render a \`threat-intel-subscription-confirmation\` attachment with the
    proposed parameters. The card is editable inline — the user can adjust
-   tags, severity, schedule, and delivery before Submit.
+   tags, severity, schedule, delivery, and connector id before Submit.
 3. The Submit button posts directly to
    \`/internal/threat_intelligence/subscriptions/submit\` so the agent does
    NOT need to be re-invoked with \`confirm=true\`. Only call this tool a
-   second time with \`confirm=true\` when acting non-interactively (e.g.
-   from a workflow with no human in the loop).
+   second time with \`action="create"\` + \`confirm=true\` when acting
+   non-interactively (e.g. from a workflow with no human in the loop).
+4. For listing or removing existing subscriptions, call the same tool with
+   \`action="list"\` or \`action="delete"\` (with \`subscription_id\`).
+
+### For environment-impact questions ("are we affected by this advisory?")
+
+1. Optionally call \`${THREAT_INTEL_TOOL_IDS.ingestReport}\` first if the
+   advisory was pasted by the user; otherwise pick the relevant
+   \`report_id\` via \`${THREAT_INTEL_TOOL_IDS.searchReports}\`.
+2. Call \`${THREAT_INTEL_TOOL_IDS.huntForThreat}\` with that \`report_id\`
+   (or explicit \`iocs[]\` / \`techniques[]\` when the report has not been
+   extracted yet). The tool returns top matching documents and an
+   \`affected_assets\` block (unique hosts + users).
+3. Summarize the result in chat: counts per index, top affected hosts/users,
+   and a recommended next step (open a case via \`${platformCoreTools.cases}\`
+   when any host is matched in \`.alerts-security.alerts-*\`).
 
 ### For Streams-hunt requests ("turn that behavior into a Streams KI")
 
@@ -214,15 +241,22 @@ alert", "this alert keeps firing on rotating hashes — build a durable rule".
     ingestReportTool,
     huntBehaviorTool,
     coverageGapTool,
-    createSubscriptionTool,
-    listSubscriptionsTool,
+    huntForThreatTool,
+    manageSubscriptionsTool,
     // 6 inline (cap is 7). One slot reserved for Phase C
-    // (`threat_intel.generalize_from_telemetry`).
+    // (`threat_intel.generalize_from_telemetry`). The previous
+    // `create_subscription` + `list_subscriptions` pair was merged into
+    // `manage_subscriptions` (action: create | list | delete) so adding
+    // `hunt_for_threat` did not blow the cap. `analyse_environment` lives
+    // in the registry tool list below — it is invoked occasionally to
+    // tailor feed recommendations and does not need a permanent inline
+    // slot.
   ],
   getRegistryTools: () => [
     'security.create_detection_rule',
     'security.security_labs_search',
     THREAT_INTEL_TOOL_IDS.extractIocs, // demoted to registry — Workflow 2 calls it directly
+    THREAT_INTEL_TOOL_IDS.analyseEnvironment,
     platformCoreTools.cases,
   ],
 });

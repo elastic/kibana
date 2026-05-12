@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { SEVERITY_LEVELS, SUBMIT_SUBSCRIPTION_API_PATH, type SeverityLevel } from '../../common';
+import {
+  SEVERITY_LEVELS,
+  SUBMIT_SUBSCRIPTION_API_PATH,
+  THREAT_INTELLIGENCE_API_PRIVILEGES,
+  type SeverityLevel,
+} from '../../common';
 import { persistSubscription } from '../agent_builder/tools';
 
 const submitBodySchema = schema.object({
@@ -22,6 +27,7 @@ const submitBodySchema = schema.object({
   delivery: schema.object({
     type: schema.oneOf([schema.literal('email'), schema.literal('slack')]),
     target: schema.string({ minLength: 1 }),
+    connector_id: schema.maybe(schema.string({ minLength: 1 })),
   }),
   template_id: schema.maybe(schema.string({ minLength: 1 })),
 });
@@ -30,12 +36,14 @@ const submitBodySchema = schema.object({
  * Internal route used by the interactive subscription-confirmation
  * attachment. Posting here bypasses a second agent round-trip — the form
  * submits values directly to this endpoint, which delegates to the same
- * `persistSubscription` helper that backs `create_subscription` with
- * `confirm=true`. Keeping a single helper means the two paths can't drift.
+ * `persistSubscription` helper that backs `manage_subscriptions` with
+ * `action="create"` + `confirm=true`. Keeping a single helper means the
+ * two paths can't drift.
  *
- * Authorization is delegated to Elasticsearch via the current user
- * client — writing to `.threat-intel-subscriptions` requires the same
- * privileges as the `create_subscription` tool.
+ * Authorization gates on `threatIntelligence_write_subscriptions` so the
+ * three-tier (read / write / admin) privilege model is honored at the
+ * HTTP boundary; the underlying ES write still runs as the current user
+ * so role-based document/field-level rules also apply.
  */
 export const registerSubmitSubscriptionRoute = (router: IRouter, logger: Logger): void => {
   router.versioned
@@ -44,11 +52,7 @@ export const registerSubmitSubscriptionRoute = (router: IRouter, logger: Logger)
       access: 'internal',
       security: {
         authz: {
-          enabled: false,
-          reason:
-            'This route delegates authorization to Elasticsearch via the current user client; ' +
-            'writing the subscription document requires the privileges Kibana already enforces ' +
-            'on `.threat-intel-subscriptions`.',
+          requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions],
         },
       },
     })

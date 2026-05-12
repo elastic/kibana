@@ -8,8 +8,9 @@
 export { searchReportsTool } from './search_reports';
 export { ingestReportTool } from './ingest_report';
 export { huntBehaviorTool } from './hunt_behavior';
-export { createSubscriptionTool, persistSubscription } from './create_subscription';
-export type { PersistSubscriptionInput } from './create_subscription';
-export { listSubscriptionsTool } from './list_subscriptions';
+export { manageSubscriptionsTool, persistSubscription } from './manage_subscriptions';
+export type { PersistSubscriptionInput } from './manage_subscriptions';
 export { coverageGapTool } from './coverage_gap';
 export { extractIocsTool } from './extract_iocs';
+export { huntForThreatTool } from './hunt_for_threat';
+export { analyseEnvironmentTool } from './analyse_environment';

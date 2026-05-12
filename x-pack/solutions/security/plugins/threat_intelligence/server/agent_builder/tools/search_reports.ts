@@ -12,7 +12,9 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   SEVERITY_LEVELS,
   SOURCE_TYPES,
+  THREAT_CATEGORIES,
   THREAT_INTEL_TOOL_IDS,
+  THREAT_REGIONS,
   THREAT_REPORTS_INDEX_PATTERN,
 } from '../../../common';
 
@@ -47,6 +49,21 @@ const searchReportsSchema = z.object({
     })
     .optional()
     .describe('Restrict to reports ingested in this time window.'),
+  categories: z
+    .array(z.enum(THREAT_CATEGORIES))
+    .optional()
+    .describe(
+      'Restrict to reports whose closed-set categories overlap any of the given values ' +
+        '(e.g. ["ransomware", "supply-chain"]). Categories are populated by the stage-2 ' +
+        'enrichment in the `nl_extraction_behavioral` workflow.'
+    ),
+  regions: z
+    .array(z.enum(THREAT_REGIONS))
+    .optional()
+    .describe(
+      'Restrict to reports tagged with any of the given macro geographic regions ' +
+        '(e.g. ["north-america", "europe"]). Backed by `geography.regions` on the report.'
+    ),
 });
 
 const SEVERITY_RANK: Record<(typeof SEVERITY_LEVELS)[number], number> = {
@@ -76,7 +93,15 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
     'CVEs in the wild, threat actors, or wants a digest of recent intel matching a topic.',
   schema: searchReportsSchema,
   handler: async (
-    { query, size, source_types: sourceTypes, min_severity: minSeverity, time_range: timeRange },
+    {
+      query,
+      size,
+      source_types: sourceTypes,
+      min_severity: minSeverity,
+      time_range: timeRange,
+      categories,
+      regions,
+    },
     { esClient, logger }
   ) => {
     const filters: Array<Record<string, unknown>> = [];
@@ -84,6 +109,8 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
     if (timeRange) {
       filters.push({ range: { '@timestamp': { gte: timeRange.from, lte: timeRange.to } } });
     }
+    if (categories?.length) filters.push({ terms: { 'extracted.categories': categories } });
+    if (regions?.length) filters.push({ terms: { 'geography.regions': regions } });
     filters.push(...buildSeverityFilter(minSeverity));
 
     const sharedFilter = filters.length ? { bool: { filter: filters } } : undefined;
@@ -102,6 +129,8 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
           'severity',
           'extracted.ttps.techniques',
           'extracted.threat_actors',
+          'extracted.categories',
+          'geography.regions',
           'content_fingerprint',
         ],
         retriever: {

@@ -1,12 +1,15 @@
 # =============================================================================
 # Workflow 2 — nl_extraction_behavioral
 #
-# Schedule: every 6 hours (offset from Workflow 1 by ~30m so newly-ingested
-# documents are available).
+# Schedule: every 4 hours (offset from Workflow 1 by ~30m so newly-ingested
+# documents are available). Matches Workflow 1's 4h cadence so the extraction
+# pass doesn't lag the ingestion pass.
 # Purpose:  For each freshly-ingested report (where extraction_method == 'pending'),
-#           extract IOCs via the registry tool and behaviors via the LLM-driven
-#           hunt_behavior delegated through the AI agent. Skip documents whose
-#           content_fingerprint has already been processed (dedup gate).
+#           extract IOCs via the registry tool, behaviors via the LLM-driven
+#           hunt_behavior delegated through the AI agent, and the closed-set
+#           threat-category + geographic-region tags via a stage-2 LLM step.
+#           Skip documents whose content_fingerprint has already been processed
+#           (dedup gate).
 # =============================================================================
 name: threat_intel.nl_extraction_behavioral
 description: Extract IOCs + behaviors from freshly ingested threat reports (deduped by content_fingerprint)
@@ -14,7 +17,7 @@ enabled: true
 triggers:
   - type: scheduled
     with:
-      every: "6h"
+      every: "4h"
 steps:
   - name: load_pending_reports
     type: elasticsearch.search
@@ -89,6 +92,47 @@ steps:
             {{ item._id }}. Report text:
             {{ item._source.content.body_text }}
 
+      # Stage 2 — closed-set taxonomy enrichment. Drives the visual
+      # dashboard's category-breakdown panel and the "Affects You" geo
+      # filter without dragging hunt_behavior off-task. The LLM is
+      # constrained to the THREAT_CATEGORIES / THREAT_REGIONS enums
+      # (see common/constants.ts) so downstream consumers don't have
+      # to handle long-tail free-text labels. Hallucinations outside
+      # the enums are dropped by the persist step's `default: []`.
+      - name: enrich_taxonomy
+        type: ai.agent
+        with:
+          agentId: default
+          prompt: >-
+            You are a threat intel taxonomist. Categorize the following report.
+
+            Return a strict JSON object with exactly two keys:
+
+              categories: array of zero or more values from this closed set:
+                ["apt", "malware", "ransomware", "vulnerability", "data-breach",
+                 "phishing", "cloud", "supply-chain", "cybercrime",
+                 "insider-threat", "iot", "ot-ics", "government-policy",
+                 "privacy-compliance", "research-tools"]
+
+              regions: array of zero or more values from this closed set:
+                ["north-america", "south-america", "europe", "middle-east",
+                 "africa", "south-asia", "east-asia", "southeast-asia",
+                 "oceania", "global"]
+
+            Pick only categories actively described in the text (not background
+            mentions). Pick "global" for regions only when the activity
+            genuinely targets multiple continents. Do not invent values
+            outside the closed sets.
+
+            Report id: {{ item._id }}
+            Report title: {{ item._source.content.title }}
+            Report text:
+            {{ item._source.content.body_text }}
+        on-failure:
+          # Enrichment is best-effort — a stale connector or an over-quota
+          # LLM should not block the rest of the extraction pipeline.
+          continue: true
+
       # Cross-report correlation: find OTHER reports that already share this
       # report's IOC set hash. The exact-set match is cheap (one terms query
       # against the keyword field) and high-signal — it catches RSS-syndicated
@@ -124,9 +168,12 @@ steps:
               iocs: "{{ steps.extract_iocs.output.iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
               behaviors: "{{ steps.extract_behaviors.output.behaviors }}"
+              categories: "{{ steps.enrich_taxonomy.output.categories | default: [] }}"
+            geography:
+              regions: "{{ steps.enrich_taxonomy.output.regions | default: [] }}"
             provenance:
               extracted_at: "{{ now }}"
-              extraction_method: workflow_v1
+              extraction_method: workflow_v2
               related_reports: "{{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
               related_reports_count: "{{ steps.find_related_reports.output.hits.total.value }}"
         on-failure:

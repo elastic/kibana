@@ -69,11 +69,15 @@ steps:
         on-failure:
           continue: true
 
-      # Delivery dispatched per subscription delivery.type. For now only
-      # email/slack are supported; the connector wiring lives in follow-up PRs
-      # because it depends on the actions plugin being wired into the workflow
-      # engine's `connector` step. Keep this branch present so the schema and
-      # wiring are validated end-to-end.
+      # Delivery dispatched per subscription delivery.type. The
+      # `connector-id` is liquid-rendered per iteration so each subscription
+      # ships through its own configured Kibana actions connector. The
+      # delivery branches are gated on `delivery.connector_id` being present
+      # because a missing connector id would surface as an opaque "connector
+      # not found" runtime error — far less actionable than the explicit
+      # warning below. Operators wire the connector id in via the
+      # subscription-confirmation form (or `create_subscription`'s
+      # `delivery_connector_id` parameter).
       - name: deliver
         type: switch
         with:
@@ -81,22 +85,58 @@ steps:
           cases:
             - match: email
               steps:
-                - name: email_send_placeholder
-                  type: data.set
-                  with:
-                    key: delivery
-                    value: >-
-                      Email delivery to {{ item._source.delivery.target }} -
-                      wire to actions/email connector in a follow-up PR.
+                - name: email_guard
+                  type: if
+                  condition: "{{ item._source.delivery.connector_id | size }} > 0"
+                  steps:
+                    - name: email_send
+                      type: email
+                      connector-id: "{{ item._source.delivery.connector_id }}"
+                      with:
+                        to:
+                          - "{{ item._source.delivery.target }}"
+                        subject: >-
+                          Threat intelligence digest [{{ item._source.severity_threshold }}+] -
+                          {{ item._source.tags | join: ", " }}
+                        message: "{{ steps.render_digest.output.text }}"
+                      on-failure:
+                        continue: true
+                  else:
+                    - name: email_missing_connector
+                      type: data.set
+                      with:
+                        key: warning
+                        value: >-
+                          Subscription {{ item._id }} has delivery.type=email but no
+                          delivery.connector_id - skipping email send. Update the
+                          subscription with a configured Kibana actions connector id
+                          (preconfigured-email-connector / Gmail / etc.).
             - match: slack
               steps:
-                - name: slack_send_placeholder
-                  type: data.set
-                  with:
-                    key: delivery
-                    value: >-
-                      Slack delivery to {{ item._source.delivery.target }} -
-                      wire to actions/slack connector in a follow-up PR.
+                - name: slack_guard
+                  type: if
+                  condition: "{{ item._source.delivery.connector_id | size }} > 0"
+                  steps:
+                    - name: slack_send
+                      type: slack
+                      connector-id: "{{ item._source.delivery.connector_id }}"
+                      with:
+                        message: >-
+                          *Threat intelligence digest* [{{ item._source.severity_threshold }}+]
+                          ({{ item._source.tags | join: ", " }})
+
+                          {{ steps.render_digest.output.text }}
+                      on-failure:
+                        continue: true
+                  else:
+                    - name: slack_missing_connector
+                      type: data.set
+                      with:
+                        key: warning
+                        value: >-
+                          Subscription {{ item._id }} has delivery.type=slack but no
+                          delivery.connector_id - skipping slack send. Update the
+                          subscription with a configured Kibana actions connector id.
           default:
             - name: log_unknown_delivery
               type: data.set

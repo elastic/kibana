@@ -30,8 +30,20 @@ import {
  * for the Workflow 4 hit-provenance-backfill loop, and introduces the
  * `.threat-intel-indicators` companion index template for the IOC indicator
  * sync Task Manager job.
+ *
+ * v4: adds `delivery.connector_id` to `.threat-intel-subscriptions` so the
+ * `digest_delivery` workflow can dispatch through a configured Kibana actions
+ * connector (email / slack) instead of the previous `data.set` placeholder.
+ *
+ * v5: adds the 15-category `extracted.categories` keyword array and the
+ * `geography.regions` macro-region keyword array to `threat-reports-*`.
+ * Both fields are populated by the stage-2 LLM enrichment step in
+ * `nl_extraction_behavioral` and consumed by the visual dashboard's
+ * category-breakdown / "Affects You" panels and by `search_reports`'s new
+ * `categories[]` / `regions[]` filters. Both arrays are closed enums
+ * (see `THREAT_CATEGORIES` / `THREAT_REGIONS` in `common/constants.ts`).
  */
-const TEMPLATE_VERSION = 3;
+const TEMPLATE_VERSION = 5;
 
 const TEMPLATE_META = { managed_by: 'threat_intelligence', version: TEMPLATE_VERSION };
 
@@ -131,6 +143,19 @@ const threatReportsTemplate = {
             },
             threat_actors: { type: 'keyword' as const },
             target_sectors: { type: 'keyword' as const },
+            // Closed-set 15-category taxonomy. Populated by the stage-2
+            // enrichment in `nl_extraction_behavioral`. See
+            // `THREAT_CATEGORIES` in `common/constants.ts` for the allowed
+            // values.
+            categories: { type: 'keyword' as const },
+          },
+        },
+        // Closed-set geographic macro-region taxonomy. Populated by the
+        // same stage-2 enrichment as `extracted.categories`. See
+        // `THREAT_REGIONS` in `common/constants.ts` for the allowed values.
+        geography: {
+          properties: {
+            regions: { type: 'keyword' as const },
           },
         },
         provenance: {
@@ -213,6 +238,11 @@ const COMPANION_INDEX_TEMPLATES: Array<{
               properties: {
                 type: { type: 'keyword' },
                 target: { type: 'keyword' },
+                // Configured Kibana actions connector instance id. Required
+                // for the `digest_delivery` workflow to dispatch through the
+                // actions plugin (the connector type is implied by
+                // `delivery.type`: `.email` for `email`, `.slack` for `slack`).
+                connector_id: { type: 'keyword' },
               },
             },
             workflow_id: { type: 'keyword' },

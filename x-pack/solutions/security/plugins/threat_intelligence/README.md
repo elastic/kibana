@@ -11,7 +11,9 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
   `provenance.related_reports[]` slots for cross-report correlation).
 - An Agent Builder skill **`threat-intelligence`** with six inline tools
   (one slot reserved for Phase C):
-  - `threat_intel.search_reports` — semantic + BM25 hybrid search.
+  - `threat_intel.search_reports` — semantic + BM25 hybrid search. Supports
+    `categories[]` and `regions[]` filters backed by the v5 schema
+    additions.
   - `threat_intel.ingest_report` — analyst-paste / ad-hoc URL ingestion.
   - `threat_intel.hunt_behavior` — LLM-then-catalog-validate behavioral
     extraction. Returns each surviving behavior with a `proposed_esql_rule`
@@ -23,12 +25,26 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
     `threat-reports-*`) against enabled Detection Engine rules and returns
     uncovered techniques. Renders through the existing
     `threat-intel-mitre-heatmap` attachment with `mode: "coverage"`.
-  - `threat_intel.create_subscription` / `threat_intel.list_subscriptions` —
-    digest subscriptions. `create_subscription` accepts an optional
-    `template_id` to bootstrap from a pre-staged preset
-    (`daily-threat-debrief`, `weekly-ciso-digest`, `ransomware-watch`).
-- One registry tool:
+  - `threat_intel.hunt_for_threat` — active forward hunt across the
+    customer's environment indices (`.alerts-security.alerts-*`,
+    `metrics-endpoint.*`, `logs-vulnerability.*`, `logs-aws.*`,
+    `logs-network_traffic.*`) for a report's IOCs and ATT&CK technique IDs.
+    Returns top matching documents AND an `affected_assets` aggregation
+    (unique hosts + users currently matched).
+  - `threat_intel.manage_subscriptions` — single tool with three actions:
+    `create` / `list` / `delete`. Replaces the prior
+    `create_subscription` + `list_subscriptions` pair so adding
+    `hunt_for_threat` did not blow the seven-inline-tool skill cap.
+    `create` accepts `template_id` to bootstrap from a pre-staged preset
+    (`daily-threat-debrief`, `weekly-ciso-digest`, `ransomware-watch`) and
+    `delivery_connector_id` to nominate which configured actions connector
+    to dispatch through.
+- Registry tools:
   - `threat_intel.extract_iocs` — used by Workflow 2.
+  - `threat_intel.analyse_environment` — coarse environment profile
+    (active data streams + OS family mix + cloud provider mix) so feed
+    recommendations can be tailored. Lives in the registry tool list so it
+    does not consume one of the skill's seven inline slots.
 - Five custom attachment types under the `threat-intel-` prefix (see below).
   The subscription-confirmation card is an editable form that submits
   directly to a plugin-internal route — no second agent round-trip required.
@@ -38,12 +54,14 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
   exposes batch **Investigate** (opens a pre-populated Case) and
   **Dismiss** header actions.
 - Four bundled workflow YAMLs:
-  - `source_ingestion` (every 6h) — pull adapters, fingerprint, write.
-  - `nl_extraction_behavioral` (every 6h, offset ~30m) — extract IOCs +
+  - `source_ingestion` (every 4h) — pull adapters, fingerprint, write.
+  - `nl_extraction_behavioral` (every 4h, offset ~30m) — extract IOCs +
     behaviors. Persists `extracted.ioc_set_hash` and
     `provenance.related_reports[]`, surfaced as a "shares · N" badge.
   - `digest_delivery` (hourly fan-out) — render and ship subscription
-    digests.
+    digests through the configured actions connector
+    (`delivery.connector_id` on the subscription doc → `connector-id` on
+    the workflow's `email` / `slack` step).
   - `hit_provenance_backfill` (hourly) — walk back from
     `.alerts-security.alerts-*` to the originating `threat-reports-*` doc
     and populate `provenance.environment_hits[]` /
@@ -68,6 +86,16 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
   experimental flag and the optional `taskManager` plugin.
 - A small seeded set of default sources so the skill is useful on a fresh
   install before the operator expands the source list.
+- A **Kibana app** at `Security > Intelligence Hub` (`app/threatIntelligence`)
+  that renders a visual overview dashboard — stats ribbon (total /
+  critical / high / affects-you), category breakdown, geographic
+  region breakdown (with the **Affects you** badge), top ATT&CK
+  techniques, an activity-by-severity timeline, an environment-impact
+  panel (Layer 1 + Layer 2 hits, sample affected hosts), and a
+  recent-advisories list with per-row environment-hit badges. Backed by
+  a single internal aggregation endpoint
+  (`GET /internal/threat_intelligence/dashboard/overview`) gated by
+  the `threatIntelligence_read` privilege.
 
 ## Phased scope
 
@@ -190,15 +218,42 @@ under any of these phrasings:
 >
 > **Trade-off accepted.** We lose the original plan's "semantic downgrade" (T1059 → T1059.001 based on description-vs-evidence similarity); in practice the dominant correctness improvement was the existence check, which the static catalog provides for free.
 
+## RBAC
+
+The plugin registers a single Kibana feature, `threatIntelligence`, with the
+PRD's three-tier privilege model:
+
+| Tier | Kibana privilege | Grants |
+|------|------------------|--------|
+| `read` | feature `read` | Search reports, view subscriptions, hunt against the environment, view sources. |
+| `write` | feature `all` minus the `manageSources` sub-feature | `read` plus create / delete subscriptions and ingest analyst-paste reports. |
+| `admin` | feature `all` | `write` plus manage feed sources (add / edit / disable). |
+
+Routes thread these through `security.authz.requiredPrivileges`. Granular
+sub-feature toggling is exposed in Role Management.
+
+Per-space data isolation (the PRD's `.cisonews-*-{space}` pattern) is **not**
+implemented in this release. The indices live globally because the bundled
+workflows execute on a global schedule with no space context — making them
+per-space would require either deploying one workflow per space (operator
+burden) or threading space-aware index resolution through every step in the
+workflow YAMLs. Instead the plugin uses the standard Kibana RBAC boundary
+(feature privileges + ES role mappings) to scope access. Future work that
+introduces per-space isolation should pair it with a per-space workflow
+deployment story.
+
 ## Trade-offs accepted
 
 - **Workflow YAML registration is a follow-up** — the plugin ships the YAMLs as
   static assets; wiring `workflowsManagement.createWorkflow()` into plugin
   start needs a scoped request and is captured for a separate PR. Until then
   the YAMLs are POST-able manually.
-- **Connector delivery is a placeholder** — Workflow 3's email/slack delivery
-  steps emit `data.set` placeholders pending actions plugin integration with
-  the workflow engine's `connector` step.
+- **Connector delivery is now wired** — Workflow 3's email/slack delivery
+  steps call the actions plugin's `email` / `slack` connector through the
+  workflow engine. The connector id is liquid-rendered from
+  `item._source.delivery.connector_id` on the subscription doc. Subscriptions
+  created without a `connector_id` skip delivery with an explicit warning
+  instead of failing the workflow.
 - **`proposed_esql_rule` is a starting point** — the generated query is
   intentionally generic; a detection engineer should review the FROM clause
   and WHERE predicates against the customer's index pattern + ECS field
@@ -210,9 +265,11 @@ under any of these phrasings:
   deployments, but a follow-up PR can add a paged streaming version if
   customers exceed it.
 - **Hard cap of 7 inline tools** — six are in use; the remaining slot is
-  reserved for Phase C's `generalize_from_telemetry`. After Phase C, any
-  further additions need to either merge tools (e.g. `create_subscription` +
-  `list_subscriptions` → `manage_subscriptions`) or split the skill in two.
+  reserved for Phase C's `generalize_from_telemetry`. The previous
+  `create_subscription` + `list_subscriptions` pair has been merged into
+  `manage_subscriptions` (action: `create` | `list` | `delete`) so adding
+  `hunt_for_threat` did not blow the cap. Further additions must either
+  merge tools further or split the skill in two.
 - **Layer 3 (Streams Query KIs) is RFC-only in this release** — the prior
   in-tree implementation that piped threat-intel-authored ES|QL straight
   into `platform.streams.sig_events.ki_query_create` was removed. It had

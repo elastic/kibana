@@ -90,7 +90,7 @@ export interface SubscriptionConfirmationPayload {
   tags: string[];
   severity_threshold: SeverityLevel;
   schedule_rrule: string;
-  delivery: { type: 'email' | 'slack'; target: string };
+  delivery: { type: 'email' | 'slack'; target: string; connector_id?: string };
   human_summary: string;
   template_id?: string;
 }

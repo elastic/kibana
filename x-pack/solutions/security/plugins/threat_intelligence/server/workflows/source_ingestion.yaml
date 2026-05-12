@@ -1,7 +1,9 @@
 # =============================================================================
 # Workflow 1 — source_ingestion
 #
-# Schedule: every 6 hours.
+# Schedule: every 4 hours (matches the PRD's "feed ingestion cadence" target;
+#           previously 6h. The downstream Workflow 2 keeps its ~30-minute
+#           offset relative to this run via its own scheduled trigger).
 # Purpose:  Pull threat-intel-sources, dispatch each enabled source by
 #           adapter_type via the engine's first-class `switch` step, and write
 #           normalized documents into the `threat-reports-*` data stream
@@ -18,7 +20,7 @@ enabled: true
 triggers:
   - type: scheduled
     with:
-      every: "6h"
+      every: "4h"
 steps:
   - name: load_sources
     type: elasticsearch.search

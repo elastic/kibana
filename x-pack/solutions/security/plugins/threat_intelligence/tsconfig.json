@@ -17,6 +17,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/features-plugin",
+    "@kbn/react-kibana-context-render",
     "@kbn/securitysolution-mitre-catalog",
     "@kbn/securitysolution-rules",
     "@kbn/task-manager-plugin"

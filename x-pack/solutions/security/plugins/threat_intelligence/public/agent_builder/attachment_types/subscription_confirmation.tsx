@@ -41,6 +41,7 @@ interface FormState {
   schedule_rrule: string;
   delivery_type: 'email' | 'slack';
   delivery_target: string;
+  delivery_connector_id: string;
 }
 
 const SCHEDULE_PRESETS: Array<{ value: string; label: string }> = [
@@ -64,6 +65,7 @@ const SubscriptionForm: React.FC<{
     schedule_rrule: initial.schedule_rrule,
     delivery_type: initial.delivery.type,
     delivery_target: initial.delivery.target,
+    delivery_connector_id: initial.delivery.connector_id ?? '',
   });
   const [submitState, setSubmitState] = useState<
     | { kind: 'idle' }
@@ -94,6 +96,7 @@ const SubscriptionForm: React.FC<{
     }
     setSubmitState({ kind: 'submitting' });
     try {
+      const connectorId = form.delivery_connector_id.trim();
       const response = (await http.post(SUBMIT_SUBSCRIPTION_API_PATH, {
         version: '1',
         body: JSON.stringify({
@@ -103,6 +106,7 @@ const SubscriptionForm: React.FC<{
           delivery: {
             type: form.delivery_type,
             target: form.delivery_target.trim(),
+            ...(connectorId ? { connector_id: connectorId } : {}),
           },
           template_id: initial.template_id,
         }),
@@ -304,10 +308,37 @@ const SubscriptionForm: React.FC<{
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.threatIntelligence.attachments.subscriptionConfirmation.deliveryConnectorLabel',
+          { defaultMessage: 'Delivery connector id (optional)' }
+        )}
+        helpText={i18n.translate(
+          'xpack.threatIntelligence.attachments.subscriptionConfirmation.deliveryConnectorHelp',
+          {
+            defaultMessage:
+              'Configured Kibana actions connector to dispatch through (.email or .slack). Leave blank to let the digest workflow pick the first matching connector for the chosen channel.',
+          }
+        )}
+        fullWidth
+      >
+        <EuiFieldText
+          fullWidth
+          disabled={isSubmitted || isSubmitting}
+          value={form.delivery_connector_id}
+          placeholder={i18n.translate(
+            'xpack.threatIntelligence.attachments.subscriptionConfirmation.deliveryConnectorPlaceholder',
+            { defaultMessage: 'e.g. preconfigured-email-connector' }
+          )}
+          onChange={(e) => setForm((prev) => ({ ...prev, delivery_connector_id: e.target.value }))}
+        />
+      </EuiFormRow>
+
       {submitState.kind === 'error' ? (
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="alert"
             size="s"
@@ -325,6 +356,7 @@ const SubscriptionForm: React.FC<{
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             color="success"
             iconType="check"
             size="s"

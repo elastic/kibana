@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -13,6 +14,7 @@ import type {
 
 export interface ThreatIntelligenceSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
+  features: FeaturesPluginSetup;
   taskManager?: TaskManagerSetupContract;
 }
 

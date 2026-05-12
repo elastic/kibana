@@ -6,8 +6,10 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
+import { registerDashboardOverviewRoute } from './dashboard_overview';
 import { registerSubmitSubscriptionRoute } from './submit_subscription';
 
 export const registerRoutes = (router: IRouter, logger: Logger): void => {
   registerSubmitSubscriptionRoute(router, logger);
+  registerDashboardOverviewRoute(router, logger);
 };

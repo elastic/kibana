@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-export type { SourceType, SeverityLevel, IocType } from './constants';
+export type { SourceType, SeverityLevel, IocType, ThreatCategory, ThreatRegion } from './constants';
 export {
   PLUGIN_ID,
   PLUGIN_NAME,
+  THREAT_INTELLIGENCE_FEATURE_ID,
+  THREAT_INTELLIGENCE_API_PRIVILEGES,
   THREAT_REPORTS_DATA_STREAM,
   THREAT_REPORTS_INDEX_PATTERN,
   THREAT_INTEL_SOURCES_INDEX,
@@ -21,7 +23,11 @@ export {
   SOURCE_TYPES,
   SEVERITY_LEVELS,
   IOC_TYPES,
+  THREAT_CATEGORIES,
+  THREAT_REGIONS,
+  HUNT_FOR_THREAT_INDEX_PATTERNS,
   SUBMIT_SUBSCRIPTION_API_PATH,
+  DASHBOARD_OVERVIEW_API_PATH,
 } from './constants';
 export type { ExperimentalFeatures } from './experimental_features';
 export { allowedExperimentalValues, parseExperimentalConfigValue } from './experimental_features';
@@ -38,3 +44,4 @@ export {
   severityToRiskScore,
   severityFromConfidence,
 } from './rule_export';
+export type { DashboardOverviewResponse } from './dashboard_types';
