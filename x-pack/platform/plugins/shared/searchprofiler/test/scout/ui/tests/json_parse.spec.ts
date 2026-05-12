@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
+import { mockNoShardsProfileResponse } from '../fixtures/mocks';
 
 const INDEX_NAME = 'search_profiler_json_parse_index';
 
@@ -58,8 +59,10 @@ test.describe('Search Profiler JSON parsing', { tag: testData.SEARCH_PROFILER_TA
   });
 
   test('uses a no-shards notification when the selected index does not match shards', async ({
+    page,
     pageObjects,
   }) => {
+    await mockNoShardsProfileResponse(page);
     await pageObjects.searchProfiler.setIndex('search-profiler-missing-index-*');
     await pageObjects.searchProfiler.setQuery(testData.SIMPLE_QUERY);
 
