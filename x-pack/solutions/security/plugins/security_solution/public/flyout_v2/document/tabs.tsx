@@ -37,13 +37,17 @@ export interface GetTabsDisplayedOptions {
    */
   hit: DataTableRecord;
   /**
-   * Cell action renderer for the overview tab visualizations section.
+   * Cell action renderer for the overview and table tabs.
    */
   renderCellActions: CellActionRenderer;
   /**
    * Callback invoked after alert mutations to refresh the flyout content.
    */
   onAlertUpdated: () => void;
+  /**
+   * Scope ID passed to cell actions for sourcerer context.
+   */
+  scopeId?: string;
 }
 
 /**
@@ -53,6 +57,7 @@ export const getTabsDisplayed = ({
   hit,
   renderCellActions,
   onAlertUpdated,
+  scopeId = '',
 }: GetTabsDisplayedOptions): TabType[] => [
   {
     id: 'overview',
@@ -80,7 +85,7 @@ export const getTabsDisplayed = ({
         defaultMessage="Table"
       />
     ),
-    content: <TableTab hit={hit} />,
+    content: <TableTab hit={hit} renderCellActions={renderCellActions} scopeId={scopeId} />,
   },
   {
     id: 'json',

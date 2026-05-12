@@ -59,13 +59,18 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Scope ID passed to cell actions (e.g. 'alerts-page', 'timeline-1').
+   * Defaults to '' which resolves to PageScope.default.
+   */
+  scopeId?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, scopeId = '' }: DocumentFlyoutProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -85,8 +90,8 @@ export const DocumentFlyout = memo(
     });
 
     const tabs = useMemo(
-      () => getTabsDisplayed({ hit, renderCellActions, onAlertUpdated }),
-      [hit, renderCellActions, onAlertUpdated]
+      () => getTabsDisplayed({ hit, renderCellActions, onAlertUpdated, scopeId }),
+      [hit, renderCellActions, onAlertUpdated, scopeId]
     );
 
     const onShowNotes = useCallback(() => {
