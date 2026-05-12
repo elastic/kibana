@@ -1,0 +1,9 @@
+# Pinned ref of https://github.com/elastic/workflows used by the
+# workflows-examples-dryrun pipeline.
+#
+# Prefer a full 40-char commit SHA so PR runs are reproducible and a malicious
+# upstream commit can't influence build outputs. Renovate or a separate sync
+# job is expected to bump this file. A branch name (`main`) is accepted as a
+# bootstrap fallback only — the runner emits a warning in that case.
+
+WORKFLOWS_REF=main

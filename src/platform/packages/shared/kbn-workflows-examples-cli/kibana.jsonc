@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/workflows-examples-cli",
+  "owner": "@elastic/workflows-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}
