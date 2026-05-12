@@ -5,17 +5,21 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@emotion/react/types/css-prop"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".storybook/**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/storybook",
+    "@kbn/index-lifecycle-management-common-shared"
   ]
 }
