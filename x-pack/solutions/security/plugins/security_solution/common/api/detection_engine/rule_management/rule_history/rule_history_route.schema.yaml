@@ -3,7 +3,7 @@ info:
   title: Rule Changes History API endpoint
   version: '1'
 paths:
-  /internal/detection_engine/rules/_history:
+  /internal/detection_engine/rules/{ruleId}/history:
     get:
       x-labels: [ess, serverless]
       x-internal: true
@@ -17,8 +17,8 @@ paths:
       tags:
         - Rules API
       parameters:
-        - name: id
-          in: query
+        - name: ruleId
+          in: path
           required: true
           description: The rule's object `id` value (Saved Object id).
           schema:

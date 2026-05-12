@@ -74,6 +74,7 @@ import type {
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
   RuleChangesHistoryRequestQueryInput,
+  RuleChangesHistoryRequestParamsInput,
   RuleChangesHistoryResponse,
 } from './detection_engine/rule_management/rule_history/rule_history_route.gen';
 import type {
@@ -3066,7 +3067,7 @@ the immediately preceding revision in `old_values`.
     this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
     return this.kbnClient
       .request<RuleChangesHistoryResponse>({
-        path: '/internal/detection_engine/rules/_history',
+        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -4131,6 +4132,7 @@ export interface ResolveTimelineProps {
 }
 export interface RuleChangesHistoryProps {
   query: RuleChangesHistoryRequestQueryInput;
+  params: RuleChangesHistoryRequestParamsInput;
 }
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;

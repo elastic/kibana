@@ -11,6 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   RULE_HISTORY_URL,
+  RuleChangesHistoryRequestParams,
   RuleChangesHistoryRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { RuleChangesHistoryResponse } from '../../../../../../../common/api/detection_engine/rule_management';
@@ -33,6 +34,7 @@ export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
         version: '1',
         validate: {
           request: {
+            params: buildRouteValidationWithZod(RuleChangesHistoryRequestParams),
             query: buildRouteValidationWithZod(RuleChangesHistoryRequestQuery),
           },
         },
@@ -41,13 +43,14 @@ export const ruleHistoryRoute = (router: SecuritySolutionPluginRouter) => {
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const { id, page, per_page: perPage } = request.query;
+          const { ruleId } = request.params;
+          const { page, per_page: perPage } = request.query;
 
           const ctx = await context.resolve(['securitySolution']);
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const result = await detectionRulesClient.getHistoryForRule({
-            ruleId: id,
+            ruleId,
             page,
             perPage,
           });

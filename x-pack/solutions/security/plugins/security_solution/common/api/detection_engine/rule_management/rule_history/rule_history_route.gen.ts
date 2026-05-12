@@ -76,10 +76,6 @@ export type RuleHistoryItem = z.infer<typeof RuleHistoryItem>;
 export const RuleChangesHistoryRequestQuery = lazySchema(() =>
   z.object({
     /**
-     * The rule's object `id` value (Saved Object id).
-     */
-    id: RuleObjectId,
-    /**
      * Page number (1-based).
      */
     page: z.coerce.number().int().min(1).optional().default(1),
@@ -91,6 +87,17 @@ export const RuleChangesHistoryRequestQuery = lazySchema(() =>
 );
 export type RuleChangesHistoryRequestQuery = z.infer<typeof RuleChangesHistoryRequestQuery>;
 export type RuleChangesHistoryRequestQueryInput = z.input<typeof RuleChangesHistoryRequestQuery>;
+
+export const RuleChangesHistoryRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The rule's object `id` value (Saved Object id).
+     */
+    ruleId: RuleObjectId,
+  })
+);
+export type RuleChangesHistoryRequestParams = z.infer<typeof RuleChangesHistoryRequestParams>;
+export type RuleChangesHistoryRequestParamsInput = z.input<typeof RuleChangesHistoryRequestParams>;
 
 export const RuleChangesHistoryResponse = lazySchema(() =>
   z.object({

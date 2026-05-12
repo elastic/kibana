@@ -45,7 +45,10 @@ import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
-import type { RuleChangesHistoryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/rule_history/rule_history_route.gen';
+import type {
+  RuleChangesHistoryRequestQueryInput,
+  RuleChangesHistoryRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/rule_history/rule_history_route.gen';
 import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
@@ -459,7 +462,12 @@ the immediately preceding revision in `old_values`.
       */
   ruleChangesHistory(props: RuleChangesHistoryProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/internal/detection_engine/rules/_history', kibanaSpace))
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+          kibanaSpace
+        )
+      )
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -693,6 +701,7 @@ export interface ReadRuleExecutionResultsProps {
 }
 export interface RuleChangesHistoryProps {
   query: RuleChangesHistoryRequestQueryInput;
+  params: RuleChangesHistoryRequestParamsInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
