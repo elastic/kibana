@@ -431,6 +431,17 @@ function main() {
     return;
   }
 
+  if (hasFlag(args, '--local')) {
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals')
+      .injectLocalConnector(process.argv)
+      .then(function () {
+        return require('@kbn/evals').cli.run();
+      });
+    return;
+  }
+
   process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
   require('@kbn/setup-node-env');
   void require('@kbn/evals').cli.run();
