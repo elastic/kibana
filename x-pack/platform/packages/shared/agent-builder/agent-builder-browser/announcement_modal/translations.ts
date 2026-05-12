@@ -62,7 +62,7 @@ export const IMPORTANT_NOTES_TITLE = i18n.translate(
 export const NOTE_REPLACES_LEGACY_AGENTS = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteReplacesLegacyAgents',
   {
-    defaultMessage: 'This replaces Threat Hunting and Observability Agents.',
+    defaultMessage: 'Threat Hunting Agent and Observability Agents will be removed.',
   }
 );
 
