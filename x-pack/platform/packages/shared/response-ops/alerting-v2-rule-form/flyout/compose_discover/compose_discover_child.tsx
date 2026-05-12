@@ -67,8 +67,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   useEsqlAutocomplete(services);
 
   const [localQuery, setLocalQuery] = useState(state.fullQuery);
-  const [dateStart, setDateStart] = useState('now-15m');
-  const [dateEnd, setDateEnd] = useState('now');
+  // Date range persists in the reducer so it's remembered across Sandbox open/close.
+  // It is intentionally not connected to schedule.lookback in FormValues — it's a
+  // preview window for testing the query, not a rule configuration field.
+  const dateStart = state.sandboxDateStart;
+  const dateEnd = state.sandboxDateEnd;
 
   const timeRange = useMemo(() => ({ from: dateStart, to: dateEnd }), [dateStart, dateEnd]);
 
@@ -211,8 +214,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
                 start={dateStart}
                 end={dateEnd}
                 onTimeChange={({ start, end }) => {
-                  setDateStart(start);
-                  setDateEnd(end);
+                  dispatch({ type: 'SET_SANDBOX_DATE_RANGE', start, end });
                 }}
                 showUpdateButton={false}
                 compressed

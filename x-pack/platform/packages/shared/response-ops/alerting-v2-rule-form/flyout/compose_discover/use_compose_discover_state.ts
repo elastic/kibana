@@ -36,6 +36,8 @@ const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => 
   yamlMode: false,
   childOpen: mode === 'create',
   queryCommitted: mode === 'edit',
+  sandboxDateStart: 'now-15m',
+  sandboxDateEnd: 'now',
 });
 
 /**
@@ -104,6 +106,8 @@ function reducer(
       const prevStep = Math.max(state.step - 1, 0);
       return { ...state, step: prevStep, childOpen: false };
     }
+    case 'SET_SANDBOX_DATE_RANGE':
+      return { ...state, sandboxDateStart: action.start, sandboxDateEnd: action.end };
     case 'OPEN_CHILD':
       return { ...state, childOpen: true };
     case 'OPEN_CHILD_FOR_STEP':

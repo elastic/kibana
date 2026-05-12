@@ -37,6 +37,9 @@ export interface ComposeDiscoverState {
   yamlMode: boolean;
   childOpen: boolean;
   queryCommitted: boolean;
+  /** Date range for the Discover Sandbox preview window — persists across open/close */
+  sandboxDateStart: string;
+  sandboxDateEnd: string;
 }
 
 export type ComposeDiscoverAction =
@@ -57,6 +60,7 @@ export type ComposeDiscoverAction =
   | { type: 'GO_NEXT' }
   | { type: 'GO_BACK' }
   | { type: 'SET_NOTIFICATIONS_ENABLED'; enabled: boolean }
+  | { type: 'SET_SANDBOX_DATE_RANGE'; start: string; end: string }
   | { type: 'OPEN_CHILD' }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
