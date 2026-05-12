@@ -34,13 +34,16 @@ import { ESQL_LANG_ID } from '@kbn/code-editor';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
+import type { ComposeDiscoverState, ComposeDiscoverAction, SandboxTabConfig } from './types';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
+import { ComposeDiscoverTabs } from './compose_discover_tabs';
 
 interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
+  /** Controls whether the Sandbox renders a single editor or a Base/Alert/Recovery tab layout. */
+  tabConfig: SandboxTabConfig;
   onClose: () => void;
 }
 
@@ -56,10 +59,12 @@ const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   state,
   dispatch,
+  tabConfig,
   onClose,
 }) => {
   const services = useRuleFormServices();
-  const [localQuery, setLocalQuery] = useState(state.sandbox.query);
+  const isSplit = tabConfig.type !== 'single';
+  const [localQuery, setLocalQuery] = useState(state.fullQuery);
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
   // preview window for testing the query, not a rule configuration field.
@@ -68,8 +73,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
   const timeRange = useMemo(() => ({ from: dateStart, to: dateEnd }), [dateStart, dateEnd]);
 
-  // Single-editor mode: always use localQuery
-  const activeQuery = localQuery;
+  // In split mode the "active" query for execution and field-detection is the full assembled
+  // query (base + alert block). In single mode it is the local editor content.
+  const activeQuery = isSplit
+    ? [state.baseQuery, state.alertBlock].filter(Boolean).join('\n')
+    : localQuery;
 
   // Read timeField from RHF — it lives there, not in the UI reducer
   const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
@@ -144,9 +152,26 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   }, [run]);
 
   const handleDone = useCallback(() => {
-    dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: localQuery });
+    if (isSplit) {
+      dispatch({
+        type: 'COMMIT_CHILD_SPLIT',
+        baseQuery: state.baseQuery,
+        alertBlock: state.alertBlock,
+        recoveryBlock: state.recoveryBlock,
+      });
+    } else {
+      dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: localQuery });
+    }
     onClose();
-  }, [localQuery, dispatch, onClose]);
+  }, [
+    isSplit,
+    state.baseQuery,
+    state.alertBlock,
+    state.recoveryBlock,
+    localQuery,
+    dispatch,
+    onClose,
+  ]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -255,18 +280,22 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
         <EuiPanel hasBorder paddingSize="none" style={{ margin: '0 16px', ...editorPanelStyles }}>
-          <CodeEditor
-            languageId={ESQL_LANG_ID}
-            value={localQuery}
-            onChange={setLocalQuery}
-            height="100%"
-            options={{
-              minimap: { enabled: false },
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-            }}
-          />
+          {isSplit ? (
+            <ComposeDiscoverTabs state={state} dispatch={dispatch} tabConfig={tabConfig} />
+          ) : (
+            <CodeEditor
+              languageId={ESQL_LANG_ID}
+              value={localQuery}
+              onChange={setLocalQuery}
+              height="100%"
+              options={{
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+              }}
+            />
+          )}
         </EuiPanel>
 
         {/* ── 3. Footer stats ─────────────────────────────────────────── */}

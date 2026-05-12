@@ -28,7 +28,11 @@ import {
   mapFormValuesToUpdateRequest,
 } from '../../form/utils/rule_request_mappers';
 import type { ComposeDiscoverMode } from './types';
-import { useComposeDiscoverState, getStepTitles } from './use_compose_discover_state';
+import {
+  useComposeDiscoverState,
+  getStepTitles,
+  getSandboxTabConfig,
+} from './use_compose_discover_state';
 import { ComposeDiscoverForm } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -129,16 +133,21 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const stepTitles = getStepTitles();
+  const stepTitles = getStepTitles(uiState.tracking);
   const isLastStep = uiState.step === stepTitles.length - 1;
 
   // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
+  // When tracking is disabled: sync fullQuery → evaluation.query.base.
+  // When tracking is enabled:  sync baseQuery → evaluation.query.base (the base portion is
+  //   what the rule executor runs; the alert block is stored separately).
   // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
-    if (uiState.queryCommitted && uiState.sandbox.query) {
-      methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
+    if (!uiState.queryCommitted) return;
+    const queryBase = uiState.tracking ? uiState.baseQuery : uiState.fullQuery;
+    if (queryBase) {
+      methods.setValue('evaluation', { query: { base: queryBase } });
     }
-  }, [uiState.sandbox.query, uiState.queryCommitted, methods]);
+  }, [uiState.fullQuery, uiState.baseQuery, uiState.tracking, uiState.queryCommitted, methods]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
@@ -148,16 +157,19 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     }
   });
 
+  // Details & Artifacts step index depends on whether tracking is active (inserts Recovery step).
+  const detailsStepIndex = uiState.tracking ? 2 : 1;
+
   const handleNext = useCallback(async () => {
     // Step 0: require a committed query before advancing
     if (uiState.step === 0 && !uiState.queryCommitted) return;
-    // Step 1: validate that the rule name has been filled in
-    if (uiState.step === 1) {
+    // Details & Artifacts step: validate the rule name before advancing
+    if (uiState.step === detailsStepIndex) {
       const valid = await methods.trigger(['metadata.name']);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT' });
-  }, [uiState.step, uiState.queryCommitted, methods, dispatch]);
+  }, [uiState.step, uiState.queryCommitted, detailsStepIndex, methods, dispatch]);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -242,6 +254,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             <ComposeDiscoverChild
               state={uiState}
               dispatch={dispatch}
+              tabConfig={getSandboxTabConfig(uiState)}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
             />
           )}

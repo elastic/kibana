@@ -7,47 +7,50 @@
 
 export type ComposeDiscoverMode = 'create' | 'edit';
 
+export type RecoveryType = 'default' | 'custom';
+
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
 /**
  * Describes which tabs the Discover Sandbox should show.
- * Always `{ type: 'single' }` for now — tabs (Base/Alert/Recovery) are added in the
- * custom recovery follow-up PR.
- */
-export interface SandboxTabConfig {
-  type: 'single';
-}
-
-/**
- * Pending query values being edited in the Discover Sandbox.
- * These are draft values — NOT yet committed to FormValues / the API.
- * They become the source of truth only after the user clicks "Apply changes",
- * which syncs them into RHF via the bridge in ComposeDiscoverFlyout.
+ * Computed from state by getSandboxTabConfig().
  *
- * Tracking mode follow-up will extend this with:
- *   baseQuery: string;
- *   alertBlock: string;
- *   recoveryBlock: string;
+ * - 'single'        — no tracking; single editor with fullQuery
+ * - 'base-alert'    — tracking on, Alert Condition step: locked base above editable alert block
+ * - 'base-recovery' — tracking on, Recovery Condition step: locked base above editable recovery block
  */
-export interface SandboxDraft {
-  query: string;
-}
+export type SandboxTabConfig =
+  | { type: 'single' }
+  | { type: 'base-alert' }
+  | { type: 'base-recovery' };
 
 /**
  * UI-only state for the ComposeDiscover flyout.
  *
- * This reducer manages navigation and Sandbox state only.
- * All form values (name, schedule, query fields, delays, etc.) live in
- * useForm<FormValues>() via RHF and are never stored here.
+ * This reducer manages navigation, Sandbox state, and split-query state.
+ * All form values (name, schedule, delays, etc.) live in useForm<FormValues>()
+ * via RHF and are never stored here. The exception is the query/split fields:
+ * they live here until committed, at which point they are synced into RHF.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
   /**
-   * Pending (draft) query values being edited in the Sandbox.
-   * Not committed to FormValues until the user clicks "Apply changes".
+   * When false: a single fullQuery editor is shown.
+   * When true: the query is split into baseQuery + alertBlock, with an optional
+   * recoveryBlock for custom recovery. The Sandbox shows a tab bar.
    */
-  sandbox: SandboxDraft;
+  tracking: boolean;
+  /** Full (unsplit) query — used when tracking is disabled. */
+  fullQuery: string;
+  /** Base portion of the split query (FROM … | STATS …) — used when tracking is enabled. */
+  baseQuery: string;
+  /** Alert condition block (| WHERE …) — used when tracking is enabled. */
+  alertBlock: string;
+  /** Recovery condition block — used when tracking + custom recovery are enabled. */
+  recoveryBlock: string;
+  /** How recovery is detected. 'default' = invert the alert block; 'custom' = recoveryBlock. */
+  recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
@@ -58,7 +61,13 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_SANDBOX_QUERY'; query: string }
+  | { type: 'SET_FULL_QUERY'; query: string }
+  | { type: 'SET_BASE_QUERY'; query: string }
+  | { type: 'SET_ALERT_BLOCK'; block: string }
+  | { type: 'SET_RECOVERY_BLOCK'; block: string }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
+  | { type: 'ENABLE_TRACKING'; base: string; alertBlock: string }
+  | { type: 'DISABLE_TRACKING' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT' }
@@ -67,4 +76,5 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD' }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_SANDBOX_QUERY'; query: string };
+  | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string }
+  | { type: 'COMMIT_CHILD_SPLIT'; baseQuery: string; alertBlock: string; recoveryBlock: string };

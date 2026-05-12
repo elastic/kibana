@@ -10,8 +10,10 @@ import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
   ComposeDiscoverMode,
+  QueryTab,
   SandboxTabConfig,
 } from './types';
+import { guessRecoveryBlock } from './use_heuristic_split';
 
 const createInitialState = (
   mode: ComposeDiscoverMode,
@@ -19,7 +21,12 @@ const createInitialState = (
 ): ComposeDiscoverState => ({
   mode,
   step: 0,
-  sandbox: { query: initialSandboxQuery },
+  tracking: false,
+  fullQuery: initialSandboxQuery,
+  baseQuery: '',
+  alertBlock: '',
+  recoveryBlock: '',
+  recoveryType: 'default',
   activeTab: 'alert',
   childOpen: mode === 'create',
   queryCommitted: mode === 'edit',
@@ -28,31 +35,101 @@ const createInitialState = (
 });
 
 /**
- * Returns the ordered list of step titles. Always 3 steps for PR B.
- * Tracking / Recovery Condition step added in the custom recovery follow-up.
+ * Returns the ordered list of step titles based on current tracking state.
+ * When tracking is enabled a Recovery Condition step is inserted after Alert Condition.
  */
-export function getStepTitles(): string[] {
+export function getStepTitles(tracking: boolean): string[] {
+  if (tracking) {
+    return ['Alert Condition', 'Recovery Condition', 'Details & Artifacts', 'Notifications'];
+  }
   return ['Alert Condition', 'Details & Artifacts', 'Notifications'];
 }
 
 /**
- * Returns the SandboxTabConfig for the current state.
- * Always single for now — tabs (Base/Alert/Recovery) added in custom recovery follow-up.
+ * Returns which default tab to activate for the Sandbox based on the tab config.
  */
-export function getSandboxTabConfig(_state: ComposeDiscoverState): SandboxTabConfig {
+function defaultTabForConfig(tabConfig: SandboxTabConfig): QueryTab {
+  if (tabConfig.type === 'base-recovery') return 'recovery';
+  if (tabConfig.type === 'base-alert') return 'alert';
+  return 'alert';
+}
+
+/**
+ * Returns the SandboxTabConfig for the current state.
+ *
+ * step 0 (Alert Condition) + tracking  → base-alert
+ * step 1 (Recovery Condition) + custom → base-recovery
+ * everything else                      → single
+ */
+export function getSandboxTabConfig(state: ComposeDiscoverState): SandboxTabConfig {
+  if (!state.tracking) return { type: 'single' };
+
+  const stepTitles = getStepTitles(state.tracking);
+  const currentStep = stepTitles[state.step] ?? '';
+
+  if (currentStep === 'Alert Condition') return { type: 'base-alert' };
+  if (currentStep === 'Recovery Condition' && state.recoveryType === 'custom') {
+    return { type: 'base-recovery' };
+  }
   return { type: 'single' };
 }
 
 function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): ComposeDiscoverState {
   switch (action.type) {
-    case 'SET_SANDBOX_QUERY':
-      return { ...state, sandbox: { ...state.sandbox, query: action.query } };
+    case 'SET_FULL_QUERY':
+      return { ...state, fullQuery: action.query };
+    case 'SET_BASE_QUERY':
+      return { ...state, baseQuery: action.query };
+    case 'SET_ALERT_BLOCK':
+      return { ...state, alertBlock: action.block };
+    case 'SET_RECOVERY_BLOCK':
+      return { ...state, recoveryBlock: action.block };
+    case 'SET_RECOVERY_TYPE': {
+      const seedBlock =
+        action.recoveryType === 'custom' && !state.recoveryBlock && state.alertBlock
+          ? guessRecoveryBlock(state.alertBlock)
+          : state.recoveryBlock;
+      return {
+        ...state,
+        recoveryType: action.recoveryType,
+        recoveryBlock: seedBlock,
+        ...(action.recoveryType === 'custom'
+          ? { childOpen: true, activeTab: 'recovery' as const }
+          : {}),
+      };
+    }
+    case 'ENABLE_TRACKING': {
+      const stateWithTracking = { ...state, tracking: true };
+      const tabConfig = getSandboxTabConfig({ ...stateWithTracking, step: 0 });
+      return {
+        ...state,
+        tracking: true,
+        baseQuery: action.base,
+        alertBlock: action.alertBlock,
+        // Jump back to step 0 if we were somehow ahead (shouldn't happen on first toggle)
+        step: 0,
+        activeTab: defaultTabForConfig(tabConfig),
+      };
+    }
+    case 'DISABLE_TRACKING':
+      return {
+        ...state,
+        tracking: false,
+        // Re-assemble into fullQuery so the single editor is populated
+        fullQuery: [state.baseQuery, state.alertBlock].filter(Boolean).join('\n'),
+        baseQuery: '',
+        alertBlock: '',
+        recoveryBlock: '',
+        recoveryType: 'default',
+        step: 0,
+        activeTab: 'alert',
+      };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
-      const steps = getStepTitles();
+      const steps = getStepTitles(state.tracking);
       const nextStep = Math.min(state.step + 1, steps.length - 1);
       return { ...state, step: nextStep, childOpen: false };
     }
@@ -62,16 +139,30 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
     }
     case 'SET_SANDBOX_DATE_RANGE':
       return { ...state, sandboxDateStart: action.start, sandboxDateEnd: action.end };
-    case 'OPEN_CHILD':
-      return { ...state, childOpen: true };
-    case 'OPEN_CHILD_FOR_STEP':
-      return { ...state, step: action.step, childOpen: true };
-    case 'CLOSE_CHILD':
-      return { ...state, childOpen: false };
-    case 'COMMIT_SANDBOX_QUERY':
+    case 'OPEN_CHILD': {
+      const tabConfig = getSandboxTabConfig(state);
+      return { ...state, childOpen: true, activeTab: defaultTabForConfig(tabConfig) };
+    }
+    case 'OPEN_CHILD_FOR_STEP': {
+      const stateAtStep = { ...state, step: action.step };
+      const tabConfig = getSandboxTabConfig(stateAtStep);
       return {
         ...state,
-        sandbox: { ...state.sandbox, query: action.query },
+        step: action.step,
+        childOpen: true,
+        activeTab: defaultTabForConfig(tabConfig),
+      };
+    }
+    case 'CLOSE_CHILD':
+      return { ...state, childOpen: false };
+    case 'COMMIT_CHILD_QUERY':
+      return { ...state, fullQuery: action.fullQuery, childOpen: false, queryCommitted: true };
+    case 'COMMIT_CHILD_SPLIT':
+      return {
+        ...state,
+        baseQuery: action.baseQuery,
+        alertBlock: action.alertBlock,
+        recoveryBlock: action.recoveryBlock,
         childOpen: false,
         queryCommitted: true,
       };
