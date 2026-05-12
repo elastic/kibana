@@ -9,12 +9,16 @@ import { z } from '@kbn/zod/v4';
 
 export const discoverySchema = z.object({
   '@timestamp': z.iso.datetime(),
+  kind: z.enum(['finding', 'clearance']),
   status: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  closes: z.string().optional(),
+  grouped_into: z.string().optional(),
+  closed_by_execution_id: z.string().optional(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
-  grouped_discovery_ids: z.array(z.string()),
+  grouped_discovery_ids: z.array(z.string()).optional(),
   title: z.string().optional(),
   summary: z.string().optional(),
   root_cause: z.string().optional(),

@@ -6,6 +6,7 @@
  */
 
 import { discoverySchema, type Discovery } from '@kbn/streams-schema';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -27,6 +28,20 @@ const discoveriesSearchRoute = createServerRoute({
     query: z.object({
       from: z.iso.datetime().optional(),
       to: z.iso.datetime().optional(),
+      kind: z.enum(['finding', 'clearance']).optional(),
+      discovery_id: z.string().optional(),
+      discovery_slug: z
+        .union([z.string().transform((value) => [value]), z.array(z.string())])
+        .optional(),
+      closes: z.string().optional(),
+      was_grouped: BooleanFromString.optional(),
+      rule_names: z
+        .union([z.string().transform((value) => [value]), z.array(z.string())])
+        .optional(),
+      stream_names: z
+        .union([z.string().transform((value) => [value]), z.array(z.string())])
+        .optional(),
+      closed_by_execution_id: z.string().optional(),
     }),
   }),
   handler: async ({

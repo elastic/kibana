@@ -8,6 +8,7 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { andWhere } from '../esql_utils';
 import { type CommonSearchOptions } from '../query_utils';
 import { type LatestSourceWhereCondition, runLatestSourceEsqlQuery } from '../latest_source_query';
 import {
@@ -35,13 +36,6 @@ export interface DetectionsSearchOptions extends CommonSearchOptions {
     to?: string;
   };
 }
-
-const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
-  return current ? esql.exp`${current} AND ${next}` : next;
-};
 
 export class DetectionClient {
   constructor(
