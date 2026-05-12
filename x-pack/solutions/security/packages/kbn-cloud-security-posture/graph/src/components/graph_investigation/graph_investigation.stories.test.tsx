@@ -448,27 +448,18 @@ describe('GraphInvestigation Component', () => {
   describe('dismisses external overlays on ReactFlow pane click', () => {
     const openFilterDropdown = async (container: HTMLElement) => {
       await showActionsByNode(container, 'admin@example.com');
-      // The filter button takes a moment to appear in the search bar after the
-      // action is dispatched.
       await waitFor(() => {
         expect(container.querySelector(`[data-test-subj*="filter-id-0"]`)).not.toBeNull();
       });
       (container.querySelector(`[data-test-subj*="filter-id-0"]`) as HTMLButtonElement).click();
-      // The dropdown's "Disable filter" item is the marker that the dropdown is open.
       await waitFor(() => {
         expect(screen.getByTestId('disableFilter')).toBeInTheDocument();
       });
     };
 
     it('dispatches synthetic mouse events on the container when pointer-down hits the graph pane', async () => {
-      // ReactFlow's d3-zoom suppresses the native mousedown/mouseup chain
-      // on pane interactions, so `EuiOutsideClickDetector` (KQL autocomplete)
-      // and `react-focus-on` (EuiPopover) never see the click. The pane-click
-      // fix attaches an `onPointerDownCapture` handler that synthesizes
-      // `mousedown`+`mouseup` on the GraphInvestigation root so those
-      // detectors fire. We verify that signal is dispatched; whether the
-      // overlay then unmounts depends on the focus trap activating, which
-      // doesn't fully work under jsdom's focus management.
+      // Asserts the synthesized signal is dispatched; jsdom doesn't fully run
+      // the focus trap, so the actual overlay close isn't observable here.
       const { container } = renderStory({ showToggleSearch: true });
       await openFilterDropdown(container);
 
@@ -486,22 +477,13 @@ describe('GraphInvestigation Component', () => {
         root.removeEventListener('mouseup', mouseupSpy);
       }
 
-      // Synthetic `mouseup` is the signal EuiOutsideClickDetector listens for.
       expect(mouseupSpy).toHaveBeenCalled();
       expect(mouseupSpy.mock.calls[0][0].target).toBe(root);
     });
 
     it('does not dispatch synthetic mouse events when only a graph-internal popover is open', async () => {
-      // Graph-internal popovers (node expand, label expand, etc.) have their
-      // own dismissal flow inside `useGraphPopovers`, so pane click should
-      // not synthesize an outside-click to close them. The gate uses the
-      // fact that graph-internal and external popovers are mutually
-      // exclusive: when any graph popover is open, every panel in the DOM is
-      // graph-owned, so the handler treats `.euiPopover__panel` as "not
-      // external" and stays a no-op.
       const { container } = renderStory({ showToggleSearch: true });
       await expandNode(container, 'admin@example.com');
-      // Marker that the node expand popover is open.
       await waitFor(() => {
         expect(screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toBeInTheDocument();
       });

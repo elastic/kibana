@@ -359,32 +359,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       eventPopover,
     ].some(({ state: { isOpen } }) => isOpen);
 
-    // Pane click on the ReactFlow canvas doesn't dismiss overlays because
-    // d3-zoom (used by ReactFlow for pan/zoom) calls
-    // `stopImmediatePropagation` on `mousedown` at the ReactFlow root, and
-    // `preventDefault` + `stopImmediatePropagation` on a capture-phase
-    // `mouseup` listener on `window`. So:
-    //   - EuiPopover (`react-focus-on`, listens for document `mousedown`)
-    //     never sees the event — popovers stay open.
-    //   - KQL autocomplete (`EuiOutsideClickDetector`, listens for
-    //     document `mouseup`) never sees it either — suggestions stay open.
-    //
-    // We synthesize both events on the graph container in the capture phase,
-    // which runs before d3-zoom. Dispatching on the container (not
-    // `document`) means the events propagate up through this subtree only,
-    // so the parent EuiFlyout's outside-click handling treats them as
-    // inside.
-    //
-    // Scope the gate to overlays that live *outside* the graph (search-bar
-    // filter chips, date pickers, KQL autocomplete). Graph-internal popovers
-    // (node expand, label expand, ips, country flags, event details) are
-    // owned by `useGraphPopovers` and have their own dismissal flow, so
-    // pane-click shouldn't force them closed. Graph-internal and external
-    // popovers are mutually exclusive — opening one auto-closes the other on
-    // outside click — so when any graph popover is open, every
-    // `.euiPopover__panel` in the DOM belongs to us; otherwise any panel
-    // present must be external. `#kbnTypeahead__items` (not an EuiPopover)
-    // covers the KQL autocomplete separately.
+    // d3-zoom suppresses native `mousedown`/`mouseup` on the ReactFlow pane,
+    // so `react-focus-on` (EuiPopover) and `EuiOutsideClickDetector` (KQL
+    // autocomplete) never see the click. Synthesize both events on the
+    // graph container in capture phase (before d3-zoom) so they reach those
+    // detectors but stay "inside" the parent EuiFlyout. Graph-internal
+    // popovers own their own dismissal and are mutually exclusive with
+    // external ones — when any is open, every `.euiPopover__panel` is ours.
     const isExternalOverlayOpen = useCallback(
       () =>
         (!isPopoverOpen && document.querySelector('.euiPopover__panel') !== null) ||
