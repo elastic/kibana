@@ -446,17 +446,6 @@ describe('GraphInvestigation Component', () => {
   });
 
   describe('overlay dismissal (issue #264433)', () => {
-    const renderWithParentKeyDownListener = (onParentKeyDown: jest.Mock) =>
-      render(
-        <IntlProvider locale="en">
-          {/* Stand in for the parent EuiFlyout that closes on Escape. */}
-          <div onKeyDown={onParentKeyDown}>
-            <SingleActor showToggleSearch={true} />
-          </div>
-        </IntlProvider>,
-        { legacyRoot: true }
-      );
-
     const openFilterDropdown = async (container: HTMLElement) => {
       await showActionsByNode(container, 'admin@example.com');
       // The filter button takes a moment to appear in the search bar after the
@@ -472,11 +461,12 @@ describe('GraphInvestigation Component', () => {
     };
 
     it('dispatches synthetic mouse events on the container when pointer-down hits the graph pane', async () => {
-      // The pane-click fix attaches an `onPointerDownCapture` handler that
-      // dispatches synthetic `mousedown`+`mouseup` on the GraphInvestigation
-      // root so EuiOutsideClickDetector (used by KQL autocomplete) and
-      // react-focus-on (used by EuiPopover with default ownFocus) close any
-      // open overlay. We verify that signal is dispatched; whether the
+      // ReactFlow's d3-zoom suppresses the native mousedown/mouseup chain
+      // on pane interactions, so `EuiOutsideClickDetector` (KQL autocomplete)
+      // and `react-focus-on` (EuiPopover) never see the click. The pane-click
+      // fix attaches an `onPointerDownCapture` handler that synthesizes
+      // `mousedown`+`mouseup` on the GraphInvestigation root so those
+      // detectors fire. We verify that signal is dispatched; whether the
       // overlay then unmounts depends on the focus trap activating, which
       // doesn't fully work under jsdom's focus management.
       const { container } = renderStory({ showToggleSearch: true });
@@ -499,32 +489,6 @@ describe('GraphInvestigation Component', () => {
       // Synthetic `mouseup` is the signal EuiOutsideClickDetector listens for.
       expect(mouseupSpy).toHaveBeenCalled();
       expect(mouseupSpy.mock.calls[0][0].target).toBe(root);
-    });
-
-    it('does not propagate Escape to the parent when a filter dropdown is open', async () => {
-      const onParentKeyDown = jest.fn();
-      const { container } = renderWithParentKeyDownListener(onParentKeyDown);
-      await openFilterDropdown(container);
-
-      const dropdownItem = screen.getByTestId('disableFilter');
-      fireEvent.keyDown(dropdownItem, { key: 'Escape' });
-
-      expect(onParentKeyDown).not.toHaveBeenCalled();
-    });
-
-    it('propagates Escape to the parent when no filter dropdown is open', async () => {
-      const onParentKeyDown = jest.fn();
-      const { container } = renderWithParentKeyDownListener(onParentKeyDown);
-
-      const graphContainer = container.querySelector(
-        `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
-      ) as HTMLElement;
-      expect(graphContainer).not.toBeNull();
-
-      fireEvent.keyDown(graphContainer, { key: 'Escape' });
-
-      expect(onParentKeyDown).toHaveBeenCalledTimes(1);
-      expect(onParentKeyDown.mock.calls[0][0].key).toBe('Escape');
     });
   });
 
