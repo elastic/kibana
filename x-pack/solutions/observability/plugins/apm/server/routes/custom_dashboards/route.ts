@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import {
+  routeDefinitions,
+  type SaveServiceDashboardResponse,
+  type GetServiceDashboardsResponse,
+} from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { saveServiceDashbord } from './save_service_dashboard';
-import type { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 import { deleteServiceDashboard } from './remove_service_dashboard';
 import { getCustomDashboards } from './get_custom_dashboards';
 import { getServicesWithDashboards } from './get_services_with_dashboards';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { rangeRt } from '../default_api_types';
 
 const serviceDashboardSaveRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/custom-dashboard',
-  params: t.type({
-    query: t.union([
-      t.partial({
-        customDashboardId: t.string,
-      }),
-      t.undefined,
-    ]),
-    body: t.type({
-      dashboardSavedObjectId: t.string,
-      kuery: t.union([t.string, t.undefined]),
-      serviceNameFilterEnabled: t.boolean,
-      serviceEnvironmentFilterEnabled: t.boolean,
-    }),
-  }),
+  endpoint: routeDefinitions.customDashboards.saveServiceDashboard.endpoint,
+  params: routeDefinitions.customDashboards.saveServiceDashboard.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  handler: async (resources): Promise<SavedApmCustomDashboard> => {
+  handler: async (resources): Promise<SaveServiceDashboardResponse> => {
     const { context, params } = resources;
     const { customDashboardId } = params.query;
     const {
@@ -52,15 +41,10 @@ const serviceDashboardSaveRoute = createApmServerRoute({
 });
 
 const serviceDashboardsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/dashboards',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: rangeRt,
-  }),
+  endpoint: routeDefinitions.customDashboards.getServiceDashboards.endpoint,
+  params: routeDefinitions.customDashboards.getServiceDashboards.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ serviceDashboards: SavedApmCustomDashboard[] }> => {
+  handler: async (resources): Promise<GetServiceDashboardsResponse> => {
     const { context, params } = resources;
     const { start, end } = params.query;
 
@@ -89,12 +73,8 @@ const serviceDashboardsRoute = createApmServerRoute({
 });
 
 const serviceDashboardDeleteRoute = createApmServerRoute({
-  endpoint: 'DELETE /internal/apm/custom-dashboard',
-  params: t.type({
-    query: t.type({
-      customDashboardId: t.string,
-    }),
-  }),
+  endpoint: routeDefinitions.customDashboards.deleteServiceDashboard.endpoint,
+  params: routeDefinitions.customDashboards.deleteServiceDashboard.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],

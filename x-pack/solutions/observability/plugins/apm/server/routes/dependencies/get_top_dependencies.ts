@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import type { TopDependenciesResponse } from '@kbn/apm-api-shared';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import type {
-  ConnectionStats,
-  ConnectionStatsItemWithImpact,
-  Node,
-} from '../../../common/connections';
+import type { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { NodeType } from '../../../common/connections';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
@@ -65,22 +62,6 @@ async function getTopDependenciesForTimeRange({
     ),
     sampled,
   };
-}
-
-export interface TopDependenciesResponse {
-  dependencies: Array<{
-    currentStats: ConnectionStats & {
-      impact: number;
-    };
-    previousStats:
-      | (ConnectionStats & {
-          impact: number;
-        })
-      | null;
-    location: Node;
-  }>;
-  // to inform when the query used random sampler aggregation
-  sampled: boolean;
 }
 
 export async function getTopDependencies(options: Options): Promise<TopDependenciesResponse> {

@@ -5,40 +5,22 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import {
+  routeDefinitions,
+  type MetricsChartsResponse,
+  type ServiceMetricsNodesRouteResponse,
+} from '@kbn/apm-api-shared';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import type { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
-import type { ServiceNodesResponse } from './get_service_nodes';
 import { getServiceNodes } from './get_service_nodes';
 import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({
-        agentName: t.string,
-      }),
-      t.partial({
-        serviceNodeName: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.metrics.charts.endpoint,
+  params: routeDefinitions.metrics.charts.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    charts: FetchAndTransformMetrics[];
-  }> => {
+  handler: async (resources): Promise<MetricsChartsResponse> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
@@ -61,15 +43,10 @@ const metricsChartsRoute = createApmServerRoute({
 });
 
 const serviceMetricsJvm = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
-  }),
+  endpoint: routeDefinitions.metrics.nodes.endpoint,
+  params: routeDefinitions.metrics.nodes.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ serviceNodes: ServiceNodesResponse }> => {
+  handler: async (resources): Promise<ServiceMetricsNodesRouteResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;

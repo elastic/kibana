@@ -6,6 +6,7 @@
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { ServerlessFunctionsOverviewResponse } from '@kbn/apm-api-shared';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART,
@@ -20,16 +21,6 @@ import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { calcMemoryUsed } from './helper';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export type ServerlessFunctionsOverviewResponse = Array<{
-  serverlessId: string;
-  serverlessFunctionName: string;
-  serverlessDurationAvg: number | null;
-  billedDurationAvg: number | null;
-  coldStartCount: number | null;
-  avgMemoryUsed: number | undefined;
-  memorySize: number | null;
-}>;
 
 export async function getServerlessFunctionsOverview({
   end,

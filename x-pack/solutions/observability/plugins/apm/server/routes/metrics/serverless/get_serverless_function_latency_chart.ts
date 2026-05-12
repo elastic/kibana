@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { isEmpty } from 'lodash';
+import type { GenericMetricsChart } from '@kbn/apm-api-shared';
 import type { APMConfig } from '../../..';
 import type { ApmTransactionDocumentType } from '../../../../common/document_type';
 import { FAAS_BILLED_DURATION, FAAS_ID, METRICSET_NAME } from '../../../../common/es_fields/apm';
@@ -16,7 +17,6 @@ import type { RollupInterval } from '../../../../common/rollup';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
-import type { GenericMetricsChart } from '../fetch_and_transform_metrics';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import type { ChartBase } from '../types';
 

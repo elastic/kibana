@@ -12,6 +12,7 @@ import {
   getOutcomeAggregation,
   getDurationFieldForTransactions,
 } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceTransactionDetailedStatPeriodsResponse } from '@kbn/apm-api-shared';
 import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
@@ -24,13 +25,6 @@ import type { APMEventClient } from '../../../lib/helpers/create_es_client/creat
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { maybe } from '../../../../common/utils/maybe';
-
-export interface ServiceTransactionDetailedStat {
-  serviceName: string;
-  latency: Array<{ x: number; y: number | null }>;
-  transactionErrorRate?: Array<{ x: number; y: number | null }>;
-  throughput?: Array<{ x: number; y: number | null }>;
-}
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
@@ -171,11 +165,6 @@ export async function getServiceTransactionDetailedStats({
     }) ?? [],
     'serviceName'
   );
-}
-
-export interface ServiceTransactionDetailedStatPeriodsResponse {
-  currentPeriod: Record<string, ServiceTransactionDetailedStat>;
-  previousPeriod: Record<string, ServiceTransactionDetailedStat>;
 }
 
 export async function getServiceTransactionDetailedStatsPeriods({

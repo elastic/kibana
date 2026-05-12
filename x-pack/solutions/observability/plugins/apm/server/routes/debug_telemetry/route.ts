@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { routeDefinitions, type DebugTelemetryResponse } from '@kbn/apm-api-shared';
+import type { APMTelemetry } from '@kbn/apm-types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { APM_TELEMETRY_TASK_NAME } from '../../lib/apm_telemetry';
-import type { APMTelemetry } from '../../lib/apm_telemetry/types';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
+
 export const debugTelemetryRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/debug-telemetry',
+  endpoint: routeDefinitions.debugTelemetry.debugTelemetry.endpoint,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  handler: async (resources): Promise<APMTelemetry> => {
+  handler: async (resources): Promise<DebugTelemetryResponse> => {
     const { plugins, context } = resources;
     const coreContext = await context.core;
     const taskManagerStart = await plugins.taskManager?.start();

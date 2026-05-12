@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { ServicesItemsResponse } from '@kbn/apm-api-shared';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import type { RollupInterval } from '../../../../common/rollup';
 import type { ServiceGroup } from '../../../../common/service_groups';
@@ -19,16 +20,9 @@ import { getServiceAnomalyScores } from './get_service_anomaly_scores';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServicesSloStats } from './get_services_slo_stats';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
-import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
-
-export interface ServicesItemsResponse {
-  items: MergedServiceStat[];
-  maxCountExceeded: boolean;
-  serviceOverflowCount: number;
-}
 
 export async function getServicesItems({
   environment,

@@ -9,7 +9,8 @@ import { range } from 'lodash';
 
 import { termQuery } from '@kbn/observability-plugin/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import type { LatencyCorrelation } from '@kbn/apm-types';
+import type { SignificantCorrelationsResponse } from '@kbn/apm-api-shared';
 import type {
   CommonCorrelationsQueryParams,
   EntityType,
@@ -28,13 +29,6 @@ import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_ran
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventTypeFromEntityType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface SignificantCorrelationsResponse {
-  latencyCorrelations: LatencyCorrelation[];
-  ccsWarning: boolean;
-  totalDocCount: number;
-  fallbackResult?: LatencyCorrelation;
-}
 
 function isSignificantLatencyCorrelation(
   d: unknown,

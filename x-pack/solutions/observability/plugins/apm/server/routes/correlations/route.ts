@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-
 import { i18n } from '@kbn/i18n';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
+import {
+  routeDefinitions,
+  type DurationFieldCandidatesResponse,
+  type FieldValueStatsTransactionsResponse,
+  type FieldValuePairsResponse,
+  type SignificantCorrelationsResponse,
+  type PValuesResponse,
+  type UnifiedCorrelationsRouteResponse,
+} from '@kbn/apm-api-shared';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import type { DurationFieldCandidatesResponse } from './queries/fetch_duration_field_candidates';
 import { fetchDurationFieldCandidates } from './queries/fetch_duration_field_candidates';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
-import type { FieldValuePairsResponse } from './queries/fetch_field_value_pairs';
 import { fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
-import type { SignificantCorrelationsResponse } from './queries/fetch_significant_correlations';
 import { fetchSignificantCorrelations } from './queries/fetch_significant_correlations';
-import type { PValuesResponse } from './queries/fetch_p_values';
 import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
-import type { CorrelationsResponse } from '../../../common/correlations/types';
 import { fetchCorrelations } from './queries/fetch_correlations';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
@@ -39,19 +37,8 @@ const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
 });
 
 const fieldCandidatesTransactionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/correlations/field_candidates/transactions',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.correlations.fieldCandidatesTransactions.endpoint,
+  params: routeDefinitions.correlations.fieldCandidatesTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<DurationFieldCandidatesResponse> => {
     const { context } = resources;
@@ -87,26 +74,10 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
 });
 
 const fieldValueStatsTransactionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/correlations/field_value_stats/transactions',
-  params: t.type({
-    query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-        samplerShardSize: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        fieldName: t.string,
-        fieldValue: t.union([t.string, t.number]),
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.correlations.fieldValueStatsTransactions.endpoint,
+  params: routeDefinitions.correlations.fieldValueStatsTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<TopValuesStats> => {
+  handler: async (resources): Promise<FieldValueStatsTransactionsResponse> => {
     const { context } = resources;
     const { license } = await context.licensing;
     if (!isActivePlatinumLicense(license)) {
@@ -157,22 +128,8 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
 });
 
 const fieldValuePairsTransactionsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/field_value_pairs/transactions',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        fieldCandidates: t.array(t.string),
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.correlations.fieldValuePairsTransactions.endpoint,
+  params: routeDefinitions.correlations.fieldValuePairsTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<FieldValuePairsResponse> => {
     const { context } = resources;
@@ -218,29 +175,8 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
 });
 
 const significantCorrelationsTransactionsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/significant_correlations/transactions',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-        durationMin: toNumberRt,
-        durationMax: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        fieldValuePairs: t.array(
-          t.type({
-            fieldName: t.string,
-            fieldValue: t.union([t.string, toNumberRt]),
-          })
-        ),
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.correlations.significantCorrelationsTransactions.endpoint,
+  params: routeDefinitions.correlations.significantCorrelationsTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<SignificantCorrelationsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -283,24 +219,8 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
 });
 
 const pValuesTransactionsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/p_values/transactions',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-        durationMin: toNumberRt,
-        durationMax: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        fieldCandidates: t.array(t.string),
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.correlations.pValuesTransactions.endpoint,
+  params: routeDefinitions.correlations.pValuesTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<PValuesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -343,53 +263,11 @@ const pValuesTransactionsRoute = createApmServerRoute({
   },
 });
 
-const entityTypeRt = t.union([t.literal('transaction'), t.literal('exit_span')]);
-
-const metricRt = t.union([t.literal('latency'), t.literal('failure_rate')]);
-
-/**
- * Unified correlations API
- *
- * To run exit span latency correlations, call:
- *
- *  - `POST /internal/apm/correlations`
- *  - with `entityType` set to `'exit_span'`
- *  - and `metric` set to `'latency'`
- *
- * Example request body:
- *
- * {
- *   "entityType": "exit_span",
- *   "metric": "latency",
- *   "start": "<from>",
- *   "end": "<to>",
- *   "kuery": "<optional KQL>",
- *   "percentileThreshold": 95,
- * }
- *
- * When `scope` is omitted, the API defaults to transaction-based correlations.
- */
 const unifiedCorrelationsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations',
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        entityType: entityTypeRt,
-        metric: metricRt,
-      }),
-      t.partial({
-        fieldCandidates: t.array(t.string),
-        durationMin: toNumberRt,
-        durationMax: toNumberRt,
-        percentileThreshold: toNumberRt,
-        includeHistogram: toBooleanRt,
-        kuery: t.string,
-      }),
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.correlations.unifiedCorrelations.endpoint,
+  params: routeDefinitions.correlations.unifiedCorrelations.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<CorrelationsResponse> => {
+  handler: async (resources): Promise<UnifiedCorrelationsRouteResponse> => {
     const { context } = resources;
     const { license } = await context.licensing;
     if (!isActivePlatinumLicense(license)) {
