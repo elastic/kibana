@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { AGENT_TYPE_OPAMP } from '../../../common/constants';
-import { FleetError } from '../../errors';
+import { AgentRequestInvalidError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
@@ -18,7 +18,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { bulkUpdateAgents, getAgentById, getAgents, getAgentsByKuery, updateAgent } from './crud';
 import type { GetAgentsOptions } from './crud';
 
-export class CollectorRemovalError extends FleetError {}
+export class CollectorRemovalError extends AgentRequestInvalidError {}
 
 export async function removeCollector(
   esClient: ElasticsearchClient,
