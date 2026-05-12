@@ -17,6 +17,7 @@ const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> =
     registerStepDefinition: jest.fn(),
     registerTriggerDefinition: jest.fn(),
     registerWorkflowsClientProvider: jest.fn(),
+    registerHookHandler: jest.fn(),
   };
 };
 
@@ -28,9 +29,13 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
     getAllTriggerDefinitions: jest.fn(),
     getTriggerDefinition: jest.fn(),
     getClient: jest.fn().mockResolvedValue({
+      isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
+      invokeHook: jest.fn().mockResolvedValue({ status: 'pass_through', output: {} }),
     }),
     isReady: jest.fn(() => Promise.resolve()),
+    invokeHook: jest.fn().mockResolvedValue({ status: 'pass_through', output: {} }),
+    getSessionCapabilities: jest.fn().mockReturnValue(undefined),
   };
 };
 

@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { TriggerRegistry } from './trigger_registry';
+import type { TriggerSyncBlock } from '../../common/trigger_registry/types';
 import type { ServerTriggerDefinition } from '../types';
 
 const validEventSchema = z.object({
@@ -30,6 +31,104 @@ describe('TriggerRegistry', () => {
 
   beforeEach(() => {
     registry = new TriggerRegistry();
+  });
+
+  describe('register — sync block validation', () => {
+    it('registers a valid trigger with a sync block', () => {
+      const def = createValidDefinition({
+        sync: {
+          outputSchema: z.object({ system: z.string().optional(), messages: z.array(z.unknown()) }),
+          maxTimeout: '10s',
+          failurePolicy: 'closed',
+          chained: true,
+        },
+      });
+      registry.register(def);
+      expect(registry.has('cases.updated')).toBe(true);
+    });
+
+    it('throws when sync.outputSchema is not a Zod schema', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            sync: {
+              outputSchema: null as unknown as TriggerSyncBlock['outputSchema'],
+              maxTimeout: '10s',
+              failurePolicy: 'closed',
+              chained: true,
+            },
+          })
+        );
+      }).toThrow('sync.outputSchema must be a Zod schema');
+    });
+
+    it('throws when sync.outputSchema is not a Zod object schema', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            sync: {
+              outputSchema: z.string() as unknown as TriggerSyncBlock['outputSchema'],
+              maxTimeout: '10s',
+              failurePolicy: 'closed',
+              chained: true,
+            },
+          })
+        );
+      }).toThrow('sync.outputSchema must be a Zod object schema');
+    });
+
+    it('throws when sync.maxTimeout is not a valid duration string', () => {
+      for (const invalid of ['', '10x', 'abc', '10']) {
+        expect(() => {
+          registry.register(
+            createValidDefinition({
+              sync: {
+                outputSchema: z.object({}),
+                maxTimeout: invalid,
+                failurePolicy: 'closed',
+                chained: true,
+              },
+            })
+          );
+        }).toThrow('sync.maxTimeout must be a duration string');
+      }
+    });
+
+    it('throws when sync.failurePolicy is invalid', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            sync: {
+              outputSchema: z.object({}),
+              maxTimeout: '10s',
+              failurePolicy: 'invalid' as unknown as 'open' | 'closed',
+              chained: true,
+            },
+          })
+        );
+      }).toThrow("sync.failurePolicy must be 'open' or 'closed'");
+    });
+
+    it('throws when sync.chained is not a boolean', () => {
+      expect(() => {
+        registry.register(
+          createValidDefinition({
+            sync: {
+              outputSchema: z.object({}),
+              maxTimeout: '10s',
+              failurePolicy: 'closed',
+              chained: 'yes' as unknown as boolean,
+            },
+          })
+        );
+      }).toThrow('sync.chained must be a boolean');
+    });
+
+    it('allows registration without sync block (async-only trigger)', () => {
+      const def = createValidDefinition();
+      registry.register(def);
+      expect(registry.has('cases.updated')).toBe(true);
+    });
   });
 
   describe('register', () => {

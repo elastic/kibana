@@ -14,12 +14,18 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { WorkflowsClient, WorkflowsClientProvider } from '@kbn/workflows/server/types';
+import type {
+  HookHandler,
+  HookResult,
+  WorkflowsClient,
+  WorkflowsClientProvider,
+} from '@kbn/workflows/server/types';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
-import { TriggerRegistry } from './trigger_registry';
+import { HookHandlerRegistry, TriggerRegistry } from './trigger_registry';
+import { invokeHookInternal } from './trigger_registry/invoke_hook_internal';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
   WorkflowsExtensionsRequestHandlerContext,
@@ -41,19 +47,27 @@ export class WorkflowsExtensionsServerPlugin
   private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  private readonly hookHandlerRegistry: HookHandlerRegistry;
+  // Short-lived store keyed by sessionId, set before handlers run and deleted in finally.
+  // Lets YAML step executors look up call-scoped capabilities (e.g. AnonymizationContext)
+  // without them appearing in the YAML event payload.
+  // Known limitation: concurrent calls sharing the same sessionId on one node race on this
+  // map. Benign for the POC (Agent Builder drives sequential calls). Fix: thread context
+  // through the workflow engine's per-execution context (Phase 2).
+  private readonly sessionCapabilityCache = new Map<string, Record<string, unknown>>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
+    this.hookHandlerRegistry = new HookHandlerRegistry();
   }
 
   public setup(
     core: CoreSetup<WorkflowsExtensionsServerPluginStartDeps>,
     _plugins: WorkflowsExtensionsServerPluginSetupDeps
   ): WorkflowsExtensionsServerPluginSetup {
-    // Register the workflows client provider to the workflows request context
     core.http.registerRouteHandlerContext<WorkflowsExtensionsRequestHandlerContext, 'workflows'>(
       'workflows',
       (_context, request) => {
@@ -69,7 +83,7 @@ export class WorkflowsExtensionsServerPlugin
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
-    registerInternalStepDefinitions(core, this.stepRegistry);
+    registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
 
     return {
@@ -84,6 +98,9 @@ export class WorkflowsExtensionsServerPlugin
           throw new Error('Workflows client provider already set');
         }
         this.workflowsClientProvider = provider;
+      },
+      registerHookHandler: (triggerId: string, handler: HookHandler) => {
+        this.hookHandlerRegistry.register(triggerId, handler);
       },
     };
   }
@@ -119,16 +136,40 @@ export class WorkflowsExtensionsServerPlugin
         }
         return this.workflowsClientProvider(request);
       },
+      invokeHook: (
+        triggerId: string,
+        payload: Record<string, unknown>,
+        capabilities?: Record<string, unknown>
+      ): Promise<HookResult> => {
+        return this.invokeHookInternal(triggerId, payload, capabilities);
+      },
+      getSessionCapabilities: (sessionId: string): Record<string, unknown> | undefined => {
+        return this.sessionCapabilityCache.get(sessionId);
+      },
     };
+  }
+
+  private invokeHookInternal(
+    triggerId: string,
+    payload: Record<string, unknown>,
+    capabilities?: Record<string, unknown>
+  ): Promise<HookResult> {
+    return invokeHookInternal(
+      {
+        triggerRegistry: this.triggerRegistry,
+        hookHandlerRegistry: this.hookHandlerRegistry,
+        sessionCapabilityCache: this.sessionCapabilityCache,
+        logger: this.logger,
+      },
+      triggerId,
+      payload,
+      capabilities
+    );
   }
 
   public stop() {}
 
-  /**
-   * Returns a noop workflows client to avoid errors when the workflows client provider is not set.
-   * This scenario should never happen, but it's a fallback to avoid errors in case not all workflows plugins are enabled.
-   * @returns A noop workflows client
-   */
+  // Fallback when workflowsManagement plugin is not enabled — should not happen in practice.
   private getNoopWorkflowsClient(): WorkflowsClient {
     return {
       isWorkflowsAvailable: false,
@@ -136,6 +177,12 @@ export class WorkflowsExtensionsServerPlugin
         this.logger.warn(
           'No workflows client provider set, using noop emitEvent to avoid errors. Trigger event ignored.'
         );
+      },
+      invokeHook: async (_triggerId, payload) => {
+        this.logger.warn(
+          'No workflows client provider set, using noop invokeHook. Hook call is a pass-through.'
+        );
+        return { status: 'pass_through', output: payload };
       },
     };
   }

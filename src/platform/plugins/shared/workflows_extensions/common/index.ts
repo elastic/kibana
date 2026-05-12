@@ -8,12 +8,20 @@
  */
 
 export type { CommonStepDefinition } from './step_registry/types';
-export type { CommonTriggerDefinition } from './trigger_registry/types';
+export type {
+  CommonTriggerDefinition,
+  HookFailurePolicy,
+  TriggerSyncBlock,
+} from './trigger_registry/types';
 export { EVENT_FIELD_PREFIX } from './trigger_registry/constants';
 export { DataMapStepTypeId } from './steps/data';
 export {
   WORKFLOW_EXECUTION_FAILED_TRIGGER_ID,
   workflowExecutionFailedEventSchema,
   commonWorkflowExecutionFailedTriggerDefinition,
+  BEFORE_PROMPT_SEND_TRIGGER_ID,
+  AFTER_COMPLETION_TRIGGER_ID,
+  beforePromptSendEventSchema,
+  afterCompletionEventSchema,
 } from './triggers';
 export type { WorkflowExecutionFailedEvent } from './triggers';

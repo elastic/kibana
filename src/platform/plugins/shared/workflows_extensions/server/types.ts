@@ -9,9 +9,10 @@
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
+  HookHandler,
+  HookResult,
   WorkflowsApiRequestHandlerContext,
   WorkflowsClient,
   WorkflowsClientProvider,
@@ -55,6 +56,16 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if provider is already registered
    */
   registerWorkflowsClientProvider(provider: WorkflowsClientProvider): void;
+
+  /**
+   * Register an in-process synchronous hook handler for a trigger that has a `sync` block.
+   * Handlers are called in registration order when `WorkflowsClient.invokeHook` is used.
+   * Must only be called during setup.
+   *
+   * @param triggerId - The trigger to subscribe to
+   * @param handler - The handler function
+   */
+  registerHookHandler(triggerId: string, handler: HookHandler): void;
 }
 
 /**
@@ -80,6 +91,26 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The workflows client
      */
     getClient(request: KibanaRequest): Promise<WorkflowsClient>;
+
+    /**
+     * Invoke all in-process hook handlers for a sync trigger, in registration order.
+     * In chained mode each handler's output becomes the next handler's input.
+     * `capabilities` carries call-scoped objects (e.g. AnonymizationContext) that must
+     * not appear in the YAML event payload.
+     */
+    invokeHook(
+      triggerId: string,
+      payload: Record<string, unknown>,
+      capabilities?: Record<string, unknown>
+    ): Promise<HookResult>;
+
+    /**
+     * Look up call-scoped capabilities by session ID.
+     * Used by step executors in dependent plugins (e.g. inferenceWorkflows) to retrieve
+     * the AnonymizationContext for PII anonymization/restoration steps.
+     * Returns undefined if no capabilities are stored for the given session ID.
+     */
+    getSessionCapabilities(sessionId: string): Record<string, unknown> | undefined;
   };
 
 /**
@@ -101,7 +132,6 @@ export type ServerStepDefinitionOrLoader<
  */
 export interface WorkflowsExtensionsServerPluginStartDeps {
   actions: ActionsPluginStartContract;
-  inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
 }
 
