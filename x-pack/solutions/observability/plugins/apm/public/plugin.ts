@@ -108,6 +108,7 @@ import { TelemetryService } from './services/telemetry';
 import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
 import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
+import { registerEmbeddables } from './embeddable/register_embeddables';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -515,15 +516,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
       }
     );
-    import('./embeddable/register_embeddables').then(({ registerEmbeddables }) => {
-      registerEmbeddables({
-        coreSetup: core,
-        pluginsSetup: plugins,
-        config,
-        kibanaEnvironment,
-        observabilityRuleTypeRegistry,
-        telemetry,
-      });
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
     });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
