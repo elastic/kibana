@@ -17,37 +17,38 @@ import {
   FIELD_INPUT,
 } from '../screens/exceptions';
 import {
-  ALERTS_TAB,
-  EXCEPTIONS_TAB,
-  FIELDS_BROWSER_BTN,
-  LAST_EXECUTION_STATUS_REFRESH_BUTTON,
-  REMOVE_EXCEPTION_BTN,
-  RULE_SWITCH,
-  DEFINITION_DETAILS,
-  INDEX_PATTERNS_DETAILS,
-  DETAILS_TITLE,
-  DETAILS_DESCRIPTION,
-  EXCEPTION_ITEM_ACTIONS_BUTTON,
-  EDIT_EXCEPTION_BTN,
-  ENDPOINT_EXCEPTIONS_TAB,
-  EDIT_RULE_SETTINGS_LINK,
-  EXCEPTIONS_TAB_EXPIRED_FILTER,
-  EXCEPTIONS_TAB_ACTIVE_FILTER,
-  RULE_NAME_HEADER,
-  INVESTIGATION_FIELDS_DETAILS,
   ABOUT_DETAILS,
-  EXECUTIONS_TAB,
-  EXECUTION_TABLE,
-  EXECUTION_LOG_CONTAINER,
+  ALERTS_TAB,
+  DEFINITION_DETAILS,
+  DETAILS_DESCRIPTION,
+  DETAILS_TITLE,
+  EDIT_EXCEPTION_BTN,
+  EDIT_RULE_SETTINGS_LINK,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EXCEPTIONS_TAB,
+  EXCEPTIONS_TAB_ACTIVE_FILTER,
+  EXCEPTIONS_TAB_EXPIRED_FILTER,
+  EXECUTION_RESULTS_CONTAINER,
+  EXECUTION_RESULTS_TABLE,
+  EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS,
+  EXECUTION_DETAILS_FLYOUT,
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
+  EXECUTIONS_TAB,
+  EXPORT_RULE_ACTION_BUTTON,
+  FIELDS_BROWSER_BTN,
+  INDEX_PATTERNS_DETAILS,
+  INVESTIGATION_FIELDS_DETAILS,
+  LAST_EXECUTION_STATUS_REFRESH_BUTTON,
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  REMOVE_EXCEPTION_BTN,
   RULE_BACKFILLS_TABLE,
-  RULE_GAPS_TABLE,
-  RULE_GAPS_STATUS_FILTER,
   RULE_GAPS_DATE_FILTER_OPTION,
   RULE_GAPS_DATE_PICKER_APPLY_REFRESH,
-  POPOVER_ACTIONS_TRIGGER_BUTTON,
-  EXPORT_RULE_ACTION_BUTTON,
+  RULE_GAPS_STATUS_FILTER,
+  RULE_GAPS_TABLE,
+  RULE_NAME_HEADER,
+  RULE_SWITCH,
 } from '../screens/rule_details';
 import type { RuleDetailsTabs } from '../urls/rule_details';
 import { ruleDetailsUrl } from '../urls/rule_details';
@@ -60,6 +61,8 @@ import {
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 import { visit } from './navigation';
 import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
+import { GAP_AUTO_FILL_LOGS_TABLE } from '../screens/rule_gaps';
+import { ENDPOINT_EXCEPTIONS_URL } from '../urls/navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -73,6 +76,7 @@ export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsP
 export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
+  cy.get(RULE_SWITCH).scrollIntoView();
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
@@ -114,12 +118,6 @@ export const addExceptionFlyoutFromViewerHeader = () => {
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
-export const addExceptionFromRuleDetails = (exception: Exception) => {
-  addExceptionFlyoutFromViewerHeader();
-  addExceptionConditions(exception);
-  submitNewExceptionItem();
-};
-
 export const addFirstExceptionFromRuleDetails = (exception: Exception, name: string) => {
   openExceptionFlyoutFromEmptyViewerPrompt();
   addExceptionFlyoutItemName(name);
@@ -145,8 +143,8 @@ export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
 };
 
-export const goToEndpointExceptionsTab = () => {
-  cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
+export const navigateToEndpointExceptions = () => {
+  cy.visit(ENDPOINT_EXCEPTIONS_URL);
 };
 
 export const openEditException = (index = 0) => {
@@ -209,10 +207,31 @@ export const goToRuleEditSettings = () => {
   cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };
 
-export const getExecutionLogTableRow = () => cy.get(EXECUTION_TABLE).find('tbody tr');
+export const getExecutionResultsTableRows = () => cy.get(EXECUTION_RESULTS_TABLE).find('tbody tr');
 
-export const refreshRuleExecutionTable = () =>
-  cy.get(`${EXECUTION_LOG_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
+export const refreshExecutionResultsTable = () =>
+  cy.get(`${EXECUTION_RESULTS_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
+
+export const waitForExecutionResultsTableToBePopulated = (minRowCount = 1) => {
+  cy.waitUntil(
+    () => {
+      cy.log('Waiting for execution results to appear in table');
+      refreshExecutionResultsTable();
+      return getExecutionResultsTableRows().then((rows) => rows.length >= minRowCount);
+    },
+    { interval: 5000, timeout: 30000 }
+  );
+};
+
+export const openExecutionDetailsFlyout = (rowIndex: number) => {
+  getExecutionResultsTableRows()
+    .eq(rowIndex)
+    .within(($row) => {
+      cy.wrap($row).trigger('mouseover');
+      cy.get(EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS).click();
+    });
+  cy.get(EXECUTION_DETAILS_FLYOUT).should('be.visible');
+};
 
 export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER).click();
@@ -239,4 +258,8 @@ export const filterGapsByStatus = (status: string) => {
 
 export const refreshGapsTable = () => {
   cy.get(RULE_GAPS_DATE_PICKER_APPLY_REFRESH).click();
+};
+
+export const getGapAutoFillLogsTableRows = () => {
+  return cy.get(GAP_AUTO_FILL_LOGS_TABLE).find('tbody tr');
 };

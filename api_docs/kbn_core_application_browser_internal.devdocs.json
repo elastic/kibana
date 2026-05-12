@@ -14,6 +14,8 @@
           "(appBasePath?: string, path?: string) => string"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/append_app_path.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "string"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/append_app_path.ts",
+            "lineNumber": 12,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -43,6 +47,8 @@
               "string"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/append_app_path.ts",
+            "lineNumber": 12,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +71,8 @@
           "PublicAppInfo"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/get_app_info.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,7 +88,10 @@
               "<unknown>"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/get_app_info.ts",
+            "lineNumber": 19,
+            "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "App",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -107,6 +118,8 @@
           " | undefined"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,6 +134,8 @@
               "string"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,7 +151,10 @@
               "IBasePath"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IBasePath",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -153,7 +171,10 @@
               "<unknown>>"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -168,6 +189,8 @@
               "string"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/parse_app_url.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -189,6 +212,8 @@
           "(url: string) => string"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/relative_to_absolute.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -203,6 +228,8 @@
               "string"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/relative_to_absolute.ts",
+            "lineNumber": 21,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -224,6 +251,8 @@
           "(url: string, { trailing, leading, duplicates, }?: { trailing?: boolean | undefined; leading?: boolean | undefined; duplicates?: boolean | undefined; }) => string"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -238,6 +267,8 @@
               "string"
             ],
             "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -250,6 +281,8 @@
             "label": "{\n    trailing = false,\n    leading = false,\n    duplicates = true,\n  }",
             "description": [],
             "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
+            "lineNumber": 20,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -264,6 +297,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
+                "lineNumber": 20,
+                "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -278,6 +313,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
+                "lineNumber": 20,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -292,6 +329,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/core/packages/application/browser-internal/src/utils/remove_slashes.ts",
+                "lineNumber": 20,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -317,6 +356,8 @@
           "[]"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -333,6 +374,8 @@
           "[]"
         ],
         "path": "src/core/packages/application/browser-internal/src/utils/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

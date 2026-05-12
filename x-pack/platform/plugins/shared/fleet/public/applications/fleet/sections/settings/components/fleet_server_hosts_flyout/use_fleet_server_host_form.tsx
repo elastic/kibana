@@ -22,6 +22,7 @@ import {
   useSecretInput,
 } from '../../../../hooks';
 import { isDiffPathProtocol } from '../../../../../../../common/services';
+import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetServerHost } from '../../../../types';
 import type { ClientAuth, NewFleetServerHost, ValueOf } from '../../../../../../../common/types';
@@ -43,6 +44,10 @@ export interface FleetServerHostSSLInputsType {
   sslESKeySecretInput: ReturnType<typeof useSecretInput>;
   sslEsCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
   sslClientAuthInput: ReturnType<typeof useRadioInput>;
+  sslAgentCertificateInput: ReturnType<typeof useInput>;
+  sslAgentKeyInput: ReturnType<typeof useInput>;
+  sslAgentKeySecretInput: ReturnType<typeof useSecretInput>;
+  sslAgentCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
 }
 
 const ConfirmTitle = () => (
@@ -168,28 +173,36 @@ export function useFleetServerHostsForm(
   const sslCertificateAuthoritiesInput = useComboInput(
     'sslCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslCertificateInput = useInput(
     fleetServerHost?.ssl?.certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
 
   const sslEsCertificateAuthoritiesInput = useComboInput(
     'sslEsCertificateAuthoritiesComboxBox',
     fleetServerHost?.ssl?.es_certificate_authorities ?? [],
-    undefined,
+    validateSslPathsCombo,
     isEditDisabled
   );
   const sslEsCertificateInput = useInput(
     fleetServerHost?.ssl?.es_certificate ?? '',
-    () => undefined,
+    validateSslPathInput,
     isEditDisabled
   );
-  const sslKeyInput = useInput(fleetServerHost?.ssl?.key ?? '', undefined, isEditDisabled);
-  const sslESKeyInput = useInput(fleetServerHost?.ssl?.es_key ?? '', undefined, isEditDisabled);
+  const sslKeyInput = useInput(
+    fleetServerHost?.ssl?.key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
+  const sslESKeyInput = useInput(
+    fleetServerHost?.ssl?.es_key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
 
   const sslKeySecretInput = useSecretInput(
     (fleetServerHost as FleetServerHost)?.secrets?.ssl?.key,
@@ -208,6 +221,28 @@ export function useFleetServerHostsForm(
     isEditDisabled
   );
 
+  const sslAgentCertificateAuthoritiesInput = useComboInput(
+    'sslAgentCertificateAuthoritiesComboxBox',
+    fleetServerHost?.ssl?.agent_certificate_authorities ?? [],
+    validateSslPathsCombo,
+    isEditDisabled
+  );
+  const sslAgentCertificateInput = useInput(
+    fleetServerHost?.ssl?.agent_certificate ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
+  const sslAgentKeySecretInput = useSecretInput(
+    (fleetServerHost as FleetServerHost)?.secrets?.ssl?.agent_key,
+    undefined,
+    isEditDisabled
+  );
+  const sslAgentKeyInput = useInput(
+    fleetServerHost?.ssl?.agent_key ?? '',
+    validateSslPathInput,
+    isEditDisabled
+  );
+
   const inputs: FleetServerHostSSLInputsType = useMemo(
     () => ({
       nameInput,
@@ -223,6 +258,10 @@ export function useFleetServerHostsForm(
       sslKeySecretInput,
       sslESKeySecretInput,
       sslClientAuthInput,
+      sslAgentCertificateAuthoritiesInput,
+      sslAgentCertificateInput,
+      sslAgentKeyInput,
+      sslAgentKeySecretInput,
     }),
     [
       nameInput,
@@ -238,6 +277,10 @@ export function useFleetServerHostsForm(
       sslKeySecretInput,
       sslESKeySecretInput,
       sslClientAuthInput,
+      sslAgentCertificateAuthoritiesInput,
+      sslAgentCertificateInput,
+      sslAgentKeyInput,
+      sslAgentKeySecretInput,
     ]
   );
   const validate = useCallback(() => validateInputs({ ...inputs }), [inputs]);
@@ -265,16 +308,23 @@ export function useFleetServerHostsForm(
           es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
             (val) => val !== ''
           ),
+          agent_certificate: sslAgentCertificateInput.value,
+          agent_key: sslAgentKeyInput.value || undefined,
+          agent_certificate_authorities: sslAgentCertificateAuthoritiesInput.value.filter(
+            (val) => val !== ''
+          ),
           ...(sslClientAuthInput.value !== clientAuth.None && {
             client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
           }),
         },
         ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
-          (!sslESKeyInput.value && sslESKeySecretInput.value)) && {
+          (!sslESKeyInput.value && sslESKeySecretInput.value) ||
+          (!sslAgentKeyInput.value && sslAgentKeySecretInput.value)) && {
           secrets: {
             ssl: {
               key: sslKeySecretInput.value || undefined,
               es_key: sslESKeySecretInput.value || undefined,
+              agent_key: sslAgentKeySecretInput.value || undefined,
             },
           },
         }),
@@ -324,6 +374,10 @@ export function useFleetServerHostsForm(
     sslESKeySecretInput.value,
     fleetServerHost,
     notifications.toasts,
+    sslAgentKeyInput.value,
+    sslAgentKeySecretInput.value,
+    sslAgentCertificateInput.value,
+    sslAgentCertificateAuthoritiesInput.value,
     onSuccess,
   ]);
 
@@ -333,8 +387,19 @@ export function useFleetServerHostsForm(
     isEditDisabled ||
     isLoading ||
     !hasChanged ||
+    !nameInput.value ||
+    !hostUrlsInput.value.some((v) => v.trim()) ||
     hostUrlsInput.props.isInvalid ||
-    nameInput.props.isInvalid;
+    nameInput.props.isInvalid ||
+    sslCertificateAuthoritiesInput.props.isInvalid ||
+    sslCertificateInput.props.isInvalid ||
+    sslKeyInput.props.isInvalid ||
+    sslEsCertificateAuthoritiesInput.props.isInvalid ||
+    sslEsCertificateInput.props.isInvalid ||
+    sslESKeyInput.props.isInvalid ||
+    sslAgentCertificateAuthoritiesInput.props.isInvalid ||
+    sslAgentCertificateInput.props.isInvalid ||
+    sslAgentKeyInput.props.isInvalid;
 
   return {
     isLoading,

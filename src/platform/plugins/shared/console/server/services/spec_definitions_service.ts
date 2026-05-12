@@ -46,7 +46,7 @@ export class SpecDefinitionsService {
   public addEndpointDescription(
     endpoint: string,
     description: EndpointDescription = {},
-    docsLinkToApiReference: boolean = false
+    isServerless: boolean = false
   ) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
@@ -74,8 +74,16 @@ export class SpecDefinitionsService {
       _.defaults(description.url_params, urlParamsDef);
     }
 
-    if (docsLinkToApiReference) {
-      description.documentation = API_DOCS_LINK;
+    if (isServerless) {
+      const serverlessDocUrl =
+        typeof description.documentation_serverless === 'string'
+          ? description.documentation_serverless.trim()
+          : undefined;
+      description.documentation = serverlessDocUrl || API_DOCS_LINK;
+
+      if (!serverlessDocUrl) {
+        delete description.documentation_serverless;
+      }
     }
 
     _.assign(copiedDescription, description);
@@ -110,13 +118,13 @@ export class SpecDefinitionsService {
     // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
     const generatedFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER, '*.json'))
-    );
+    ).map((p) => normalizePath(p));
     const overrideFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER, '*.json'))
-    );
+    ).map((p) => normalizePath(p));
     const manualFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, MANUAL_SUBFOLDER, '*.json'))
-    );
+    ).map((p) => normalizePath(p));
 
     // definitions files contain only 1 definition per endpoint name { "endpointName": { endpointDescription }}
     // all endpoints need to be merged into 1 object with endpoint names as keys and endpoint definitions as values

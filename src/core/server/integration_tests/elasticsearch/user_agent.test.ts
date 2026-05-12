@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
+import type * as net from 'net';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Root } from '@kbn/core-root-server-internal';
 import {
@@ -16,19 +16,26 @@ import {
   USER_AGENT_HEADER,
   configureClient,
   AgentManager,
+  getRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema, ElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
 
-function createFakeElasticsearchServer(hook: (req: http.IncomingMessage) => void) {
-  const server = http.createServer((req, res) => {
-    hook(req);
-    res.writeHead(200, undefined, { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' });
-    res.write('{}');
-    res.end();
+function createFakeElasticsearchServer(
+  hook: (req: http.IncomingMessage) => void
+): Promise<{ server: http.Server; port: number }> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      hook(req);
+      res.writeHead(200, undefined, { [PRODUCT_RESPONSE_HEADER]: 'Elasticsearch' });
+      res.write('{}');
+      res.end();
+    });
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address() as net.AddressInfo;
+      resolve({ server, port: address.port });
+    });
   });
-  server.listen(esTestConfig.getPort());
-
-  return server;
 }
 
 describe('ES Client - custom user-agent', () => {
@@ -37,6 +44,7 @@ describe('ES Client - custom user-agent', () => {
 
   afterAll(async () => {
     try {
+      // @ts-expect-error upgrade typescript v5.9.3
       await kibanaServer?.shutdown();
     } catch (e) {
       // trap
@@ -53,8 +61,15 @@ describe('ES Client - custom user-agent', () => {
   test('should send a custom user-agent header matching the expected format', async () => {
     const kibanaVersion = '8.42.9';
     const logger = loggerMock.create();
+
+    let userAgentHeader: string | undefined;
+    const { server, port } = await createFakeElasticsearchServer((req) => {
+      userAgentHeader = req.headers[USER_AGENT_HEADER];
+    });
+    esServer = server;
+
     const rawConfig = configSchema.validate({
-      hosts: [`${esTestConfig.getUrl()}`],
+      hosts: [`http://127.0.0.1:${port}`],
     });
     const config = new ElasticsearchConfig(rawConfig);
     const agentFactoryProvider = new AgentManager(logger, { dnsCacheTtlInSeconds: 0 });
@@ -63,11 +78,9 @@ describe('ES Client - custom user-agent', () => {
       logger,
       kibanaVersion,
       agentFactoryProvider,
-    });
-
-    let userAgentHeader: string | undefined;
-    esServer = createFakeElasticsearchServer((res) => {
-      userAgentHeader = res.headers[USER_AGENT_HEADER];
+      onRequest: getRequestHandlerFactory(false)({
+        logger,
+      }),
     });
 
     await esClient.ping();

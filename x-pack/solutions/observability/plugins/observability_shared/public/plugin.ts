@@ -7,18 +7,18 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { PluginInitializerContext } from '@kbn/core/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -43,10 +43,9 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
-import type { ObservabilitySharedBrowserConfig } from '../common/config';
-import { updateGlobalNavigation } from './services/update_global_navigation';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -55,6 +54,7 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -85,11 +85,9 @@ interface ObservabilitySharedLocators {
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private config: ObservabilitySharedBrowserConfig;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
+  constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.config = this.initializerContext.config.get<ObservabilitySharedBrowserConfig>();
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
@@ -105,7 +103,6 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      config: this.config,
     };
   }
 
@@ -128,7 +125,6 @@ export class ObservabilitySharedPlugin implements Plugin {
         registerSections: this.navigationRegistry.registerSections,
       },
       updateGlobalNavigation,
-      config: this.config,
     };
   }
 

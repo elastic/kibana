@@ -111,7 +111,7 @@ export const DocumentsNavPreview = () => {
                   display="base"
                   size="m"
                   onClick={prev}
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   data-test-subj="goToPrevDocButton"
                   aria-label={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.previousArialabel',
@@ -126,7 +126,7 @@ export const DocumentsNavPreview = () => {
                   display="base"
                   size="m"
                   onClick={next}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   data-test-subj="goToNextDocButton"
                   aria-label={i18n.translate(
                     'indexPatternFieldEditor.fieldPreview.documentNav.nextArialabel',

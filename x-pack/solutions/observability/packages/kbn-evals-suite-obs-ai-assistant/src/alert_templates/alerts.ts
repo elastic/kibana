@@ -125,3 +125,23 @@ export const apmTransactionRateAIAssistant = {
     },
   },
 };
+
+export const apmErrorCountAIInsight = {
+  ruleParams: {
+    consumer: 'apm',
+    name: 'Error count threshold - payment service',
+    rule_type_id: 'apm.error_rate',
+    params: {
+      threshold: 1,
+      windowSize: 5,
+      windowUnit: 'm',
+      serviceName: 'payment',
+      environment: 'ENVIRONMENT_ALL',
+      groupBy: ['service.name', 'service.environment'],
+    },
+    actions: [],
+    schedule: {
+      interval: '1m',
+    },
+  },
+};

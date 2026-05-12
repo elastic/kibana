@@ -21,12 +21,8 @@ export const factory: EmbeddableFactory<{}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
-      serializeState: () => {
-        return {
-          rawState: {},
-          references: [],
-        };
-      },
+      serializeState: () => ({}),
+      applySerializedState: () => undefined,
     });
 
     return {

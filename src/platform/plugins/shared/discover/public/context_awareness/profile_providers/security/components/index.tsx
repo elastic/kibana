@@ -17,3 +17,51 @@ export const AlertEventOverviewLazy = withSuspense(
     }))
   )
 );
+
+export const EnhancedAlertEventOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_alert_event_overview').then((module) => ({
+      default: module.EnhancedAlertEventOverview,
+    }))
+  )
+);
+
+export const EnhancedAlertFlyoutHeaderLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_alert_flyout_header').then((module) => ({
+      default: module.EnhancedAlertFlyoutHeader,
+    }))
+  )
+);
+
+export const EnhancedAlertFlyoutFooterLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_alert_flyout_footer').then((module) => ({
+      default: module.EnhancedAlertFlyoutFooter,
+    }))
+  )
+);
+
+export const EnhancedIOCOverviewLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_overview').then((module) => ({
+      default: module.EnhancedIOCOverview,
+    }))
+  )
+);
+
+export const EnhancedIOCFlyoutFooterLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_flyout_footer').then((module) => ({
+      default: module.EnhancedIOCFlyoutFooter,
+    }))
+  )
+);
+
+export const EnhancedIOCFlyoutHeaderLazy = withSuspense(
+  lazy(() =>
+    import('./enhanced_ioc_flyout_header').then((module) => ({
+      default: module.EnhancedIOCFlyoutHeader,
+    }))
+  )
+);

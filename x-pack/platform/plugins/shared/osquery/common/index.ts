@@ -6,6 +6,12 @@
  */
 
 export { OSQUERY_INTEGRATION_NAME, BASE_PATH } from './constants';
+export {
+  allowedExperimentalValues,
+  parseExperimentalConfigValue,
+  getExperimentalAllowedValues,
+} from './experimental_features';
+export type { ExperimentalFeatures } from './experimental_features';
 
 export const PLUGIN_ID = 'osquery';
 export const PLUGIN_NAME = 'Osquery';

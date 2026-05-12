@@ -10,7 +10,15 @@
         "tags": [],
         "label": "FieldCategories",
         "description": [
-          "\nConvenience component for displaying a set of {@link FieldCategory} components, given\na set of categorized fields.\n"
+          "\nConvenience component for displaying a set of ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " components, given\na set of categorized fields.\n"
         ],
         "signature": [
           "({ categorizedFields, categoryCounts, unsavedChanges, onClearQuery, isSavingEnabled, onFieldChange, }: ",
@@ -24,6 +32,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/categories.tsx",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +54,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/categories.tsx",
+            "lineNumber": 41,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldCategoriesProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -73,6 +86,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/category.tsx",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,7 +98,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "- the props to pass to the {@link FieldCategory } component."
+              "- the props to pass to the {@link FieldCategory} component."
             ],
             "signature": [
               {
@@ -95,7 +110,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/category.tsx",
+            "lineNumber": 41,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldCategoryProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -110,7 +128,15 @@
         "tags": [],
         "label": "FieldCategoryKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldCategoryProvider}."
+          "\nKibana-specific Provider that maps Kibana plugins and services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategoryProvider",
+            "text": "FieldCategoryProvider"
+          },
+          "."
         ],
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<",
@@ -124,6 +150,8 @@
           ">>"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/services.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -139,7 +167,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -153,6 +184,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 1109,
+            "columnNumber": 20,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -166,7 +199,15 @@
         "tags": [],
         "label": "FieldCategoryProvider",
         "description": [
-          "\nReact Provider that provides services to a {@link FieldCategory} component and its dependents."
+          "\nReact Provider that provides services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component and its dependents."
         ],
         "signature": [
           "({ children, ...services }: ",
@@ -180,6 +221,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/services.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -189,7 +232,7 @@
             "id": "def-public.FieldCategoryProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
               {
@@ -201,7 +244,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 31,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldRowProviderProps",
             "trackAdoption": false
           }
         ],
@@ -216,9 +262,19 @@
         "tags": [],
         "label": "ClearQueryLinkProps",
         "description": [
-          "\nProps for the {@link ClearQueryLink} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.ClearQueryLink",
+            "text": "ClearQueryLink"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/clear_query_link.tsx",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -232,6 +288,8 @@
               "The total number of fields in the category."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/clear_query_link.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,6 +303,8 @@
               "The number of fields currently being displayed."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/clear_query_link.tsx",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -261,6 +321,8 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/clear_query_link.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -276,7 +338,15 @@
         "tags": [],
         "label": "FieldCategoriesProps",
         "description": [
-          "\nProps for the {@link FieldCategories} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategories",
+            "text": "FieldCategories"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -305,6 +375,8 @@
           ", \"onFieldChange\" | \"isSavingEnabled\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/categories.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -327,6 +399,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/categories.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,6 +421,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/categories.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -370,6 +446,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/categories.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -383,7 +461,15 @@
         "tags": [],
         "label": "FieldCategoryProps",
         "description": [
-          "\nProps for a {@link FieldCategory} component."
+          "\nProps for a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -404,6 +490,8 @@
           ", \"fieldCount\" | \"onClearQuery\">"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/category.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -417,6 +505,8 @@
               "The name of the category."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/category.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -427,7 +517,15 @@
             "tags": [],
             "label": "children",
             "description": [
-              "Children-- should be {@link FieldRow} components."
+              "Children-- should be ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-category",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+                "section": "def-public.FieldRow",
+                "text": "FieldRow"
+              },
+              " components."
             ],
             "signature": [
               "React.ReactElement<",
@@ -449,6 +547,8 @@
               ", \"FieldRow\">[]"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/category.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -462,7 +562,15 @@
         "tags": [],
         "label": "FieldCategoryProviderProps",
         "description": [
-          "\nProps for {@link FieldCategoryProvider}."
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategoryProvider",
+            "text": "FieldCategoryProvider"
+          },
+          "."
         ],
         "signature": [
           {
@@ -482,6 +590,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/services.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -493,9 +603,11 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/services.tsx",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -512,7 +624,15 @@
         "tags": [],
         "label": "FieldCategoryKibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldCategory} component and its dependents."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -532,6 +652,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/types.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -543,7 +665,15 @@
         "tags": [],
         "label": "FieldCategoryServices",
         "description": [
-          "\nContextual services used by a {@link FieldCategory} component and its dependents."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -563,6 +693,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

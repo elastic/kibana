@@ -1,0 +1,53 @@
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          getWorkflowsResponseExample:
+            description: 'Example response returning a paginated list of workflows'
+            value:
+              page: 1
+              size: 20
+              total: 1
+              results:
+                - id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                  name: Example definition
+                  description: This is a workflow example
+                  enabled: true
+                  definition:
+                    name: Example definition
+                    enabled: true
+                    description: This is a workflow example
+                    triggers:
+                      - type: manual
+                    inputs:
+                      - name: message
+                        type: string
+                        default: hello world
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: '{{ inputs.message }}'
+                  createdAt: '2025-11-20T10:30:00.000Z'
+                  history:
+                    - id: exec-001
+                      workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      workflowName: Example definition
+                      status: completed
+                      startedAt: '2025-11-20T12:00:00.000Z'
+                      finishedAt: '2025-11-20T12:00:05.000Z'
+                      duration: 5000
+                  tags:
+                    - example
+                  valid: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/workflows?size=20&page=1" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/workflows?size=20&page=1

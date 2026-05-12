@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { useSourcererDataView } from '.';
@@ -19,20 +19,19 @@ import {
   SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../../common/constants';
-import { useUserInfo, initialState as userInfoState } from '../../detections/components/user_info';
+import { initialState as userInfoState, useUserInfo } from '../../detections/components/user_info';
 import {
+  createMockStore,
   mockGlobalState,
   mockSourcererState,
   TestProviders,
-  createMockStore,
 } from '../../common/mock';
 import type { SelectedDataView } from '../store/model';
-import { SourcererScopeName } from '../store/model';
 import * as source from '../../common/containers/source/use_data_view';
 import { sourcererActions } from '../store';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
-import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useInitSourcerer } from './use_init_sourcerer';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -45,7 +44,6 @@ const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
 jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../detections/components/user_info');
-jest.mock('./create_sourcerer_data_view');
 jest.mock('../../common/utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -65,11 +63,6 @@ const mockSearch = jest.fn();
 
 const mockAddWarning = jest.fn();
 const mockAddError = jest.fn();
-const mockCreateSourcererDataView = jest.fn(() => {
-  const errToReturn = new Error('fake error');
-  errToReturn.name = 'AbortError';
-  throw errToReturn;
-});
 const mockUseKibana = () => ({
   services: {
     application: {
@@ -190,70 +183,13 @@ describe.skip('Sourcerer Hooks', () => {
       },
     });
   });
-  it('sets signal index name', async () => {
-    const mockNewDataViews = {
-      defaultDataView: mockSourcererState.defaultDataView,
-      kibanaDataViews: [mockSourcererState.defaultDataView],
-    };
-    (createSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
-
-    store = createMockStore({
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        signalIndexName: null,
-        defaultDataView: {
-          ...mockGlobalState.sourcerer.defaultDataView,
-          title: DEFAULT_INDEX_PATTERN.join(','),
-          patternList: DEFAULT_INDEX_PATTERN,
-        },
-      },
-    });
-    mockUseUserInfo.mockImplementation(() => ({
-      ...userInfoState,
-      loading: false,
-      signalIndexName: mockSourcererState.signalIndexName,
-    }));
-    const { rerender } = renderHook(useInitSourcerer, {
-      wrapper: StoreProvider,
-    });
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender();
-    await waitFor(() => {
-      expect(mockDispatch.mock.calls[3][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-        payload: { loading: true },
-      });
-      expect(mockDispatch.mock.calls[4][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SIGNAL_INDEX_NAME',
-        payload: { signalIndexName: mockSourcererState.signalIndexName },
-      });
-      expect(mockDispatch.mock.calls[5][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_DATA_VIEW_LOADING',
-        payload: {
-          id: mockSourcererState.defaultDataView.id,
-          loading: true,
-        },
-      });
-      expect(mockDispatch.mock.calls[6][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_DATA_VIEWS',
-        payload: mockNewDataViews,
-      });
-      expect(mockDispatch.mock.calls[7][0]).toEqual({
-        type: 'x-pack/security_solution/local/sourcerer/SET_SOURCERER_SCOPE_LOADING',
-        payload: { loading: false },
-      });
-
-      expect(mockSearch).toHaveBeenCalledTimes(2);
-    });
-  });
 
   it('initializes dataview with data from query string', async () => {
     const selectedPatterns = ['testPattern-*'];
     const selectedDataViewId = 'security-solution-default';
     (useInitializeUrlParam as jest.Mock).mockImplementation((_, onInitialize) =>
       onInitialize({
-        [SourcererScopeName.default]: {
+        [PageScope.default]: {
           id: selectedDataViewId,
           selectedPatterns,
         },
@@ -266,7 +202,7 @@ describe.skip('Sourcerer Hooks', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId,
         selectedPatterns,
       })
@@ -285,7 +221,7 @@ describe.skip('Sourcerer Hooks', () => {
     });
 
     expect(updateUrlParam).toHaveBeenCalledWith({
-      [SourcererScopeName.default]: {
+      [PageScope.default]: {
         id: DEFAULT_DATA_VIEW_ID,
         selectedPatterns: DEFAULT_INDEX_PATTERN,
       },
@@ -316,87 +252,13 @@ describe.skip('Sourcerer Hooks', () => {
     });
   });
 
-  it('does not call addError if updateSourcererDataView receives an AbortError', async () => {
-    // createSourcererDataView throws an 'AbortError' which
-    // puts us in the catch block, but the addError toast is not called
-    (createSourcererDataView as jest.Mock).mockImplementation(mockCreateSourcererDataView);
-
-    store = createMockStore({
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        signalIndexName: null,
-        defaultDataView: {
-          ...mockGlobalState.sourcerer.defaultDataView,
-          title: DEFAULT_INDEX_PATTERN.join(','),
-          patternList: DEFAULT_INDEX_PATTERN,
-        },
-      },
-    });
-
-    mockUseUserInfo.mockImplementation(() => ({
-      ...userInfoState,
-      loading: false,
-      signalIndexName: mockSourcererState.signalIndexName,
-    }));
-
-    const { rerender } = renderHook(() => useInitSourcerer(), {
-      wrapper: StoreProvider,
-    });
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    rerender();
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-
-    expect(mockCreateSourcererDataView).toHaveBeenCalled();
-    expect(mockAddError).not.toHaveBeenCalled();
-  });
-
-  it('does call addError if updateSourcererDataView receives a non-abort error', async () => {
-    // createSourcererDataView throws an 'AbortError' which
-    // puts us in the catch block, but the addError toast is not called
-    (createSourcererDataView as jest.Mock).mockImplementation(() => {
-      throw Error('fake error');
-    });
-
-    store = createMockStore({
-      ...mockGlobalState,
-      sourcerer: {
-        ...mockGlobalState.sourcerer,
-        signalIndexName: null,
-        defaultDataView: {
-          ...mockGlobalState.sourcerer.defaultDataView,
-          title: DEFAULT_INDEX_PATTERN.join(','),
-          patternList: DEFAULT_INDEX_PATTERN,
-        },
-      },
-    });
-    mockUseUserInfo.mockImplementation(() => ({
-      ...userInfoState,
-      loading: false,
-      signalIndexName: mockSourcererState.signalIndexName,
-    }));
-    const { rerender } = renderHook(() => useInitSourcerer(), {
-      wrapper: StoreProvider,
-    });
-
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    rerender();
-
-    await waitFor(() => {
-      expect(mockAddError).toHaveBeenCalled();
-    });
-  });
-
   it('handles detections page', async () => {
     mockUseUserInfo.mockImplementation(() => ({
       ...userInfoState,
       signalIndexName: mockSourcererState.signalIndexName,
       isSignalIndexExists: true,
     }));
-    const { rerender } = renderHook(() => useInitSourcerer(SourcererScopeName.detections), {
+    const { rerender } = renderHook(() => useInitSourcerer(PageScope.alerts), {
       wrapper: StoreProvider,
     });
     await waitFor(() => new Promise((resolve) => resolve(null)));
@@ -404,7 +266,7 @@ describe.skip('Sourcerer Hooks', () => {
     expect(mockDispatch.mock.calls[3][0]).toEqual({
       type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
       payload: {
-        id: 'detections',
+        id: 'alerts',
         selectedDataViewId: mockSourcererState.defaultDataView.id,
         selectedPatterns: [mockSourcererState.signalIndexName],
       },
@@ -427,8 +289,8 @@ describe.skip('Sourcerer Hooks', () => {
         ...mockGlobalState.sourcerer,
         sourcererScopes: {
           ...mockGlobalState.sourcerer.sourcererScopes,
-          [SourcererScopeName.timeline]: {
-            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+          [PageScope.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
             selectedDataViewId: 'different-id',
           },
         },
@@ -463,7 +325,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
           dataViewId: mockSourcererState.defaultDataView.id,
           needToBeInit: false,
-          scopeId: SourcererScopeName.default,
+          scopeId: PageScope.default,
         });
       });
     });
@@ -475,8 +337,8 @@ describe.skip('Sourcerer Hooks', () => {
           ...mockGlobalState.sourcerer,
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
               selectedPatterns: [],
               missingPatterns: [],
             },
@@ -492,7 +354,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
           dataViewId: mockSourcererState.defaultDataView.id,
           needToBeInit: true,
-          scopeId: SourcererScopeName.default,
+          scopeId: PageScope.default,
         });
       });
     });
@@ -508,8 +370,8 @@ describe.skip('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: [],
               missingPatterns: [],
@@ -526,7 +388,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: true,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
           skipScopeUpdate: false,
         });
       });
@@ -543,8 +405,8 @@ describe.skip('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: ['ohboy'],
               missingPatterns: [],
@@ -561,7 +423,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: true,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
           skipScopeUpdate: true,
         });
       });
@@ -582,8 +444,8 @@ describe.skip('Sourcerer Hooks', () => {
           ],
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
               selectedDataViewId: 'something-weird',
               selectedPatterns: [],
               missingPatterns: [],
@@ -600,7 +462,7 @@ describe.skip('Sourcerer Hooks', () => {
         expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
           dataViewId: 'something-weird',
           needToBeInit: false,
-          scopeId: SourcererScopeName.timeline,
+          scopeId: PageScope.timeline,
         });
       });
     });
@@ -614,8 +476,8 @@ describe.skip('Sourcerer Hooks', () => {
           ...mockGlobalState.sourcerer,
           sourcererScopes: {
             ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.default]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
               selectedPatterns: [
                 '-packetbeat-*',
                 'endgame-*',
@@ -632,12 +494,9 @@ describe.skip('Sourcerer Hooks', () => {
         },
       });
 
-      const { result, rerender } = renderHook<SelectedDataView, SourcererScopeName>(
-        useSourcererDataView,
-        {
-          wrapper: StoreProvider,
-        }
-      );
+      const { result, rerender } = renderHook<SelectedDataView, PageScope>(useSourcererDataView, {
+        wrapper: StoreProvider,
+      });
       await waitFor(() => new Promise((resolve) => resolve(null)));
       rerender();
       await waitFor(() =>
@@ -668,7 +527,7 @@ describe.skip('Sourcerer Hooks', () => {
       await act(async () => {
         store.dispatch(
           sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.default,
+            id: PageScope.default,
             selectedDataViewId: 'security-solution-default',
             selectedPatterns: testPatterns,
           })
@@ -685,15 +544,15 @@ describe.skip('Sourcerer Hooks', () => {
 
 describe('getScopeFromPath', () => {
   it('should return default scope', async () => {
-    expect(getScopeFromPath('/')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/exceptions')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules')).toBe(SourcererScopeName.default);
-    expect(getScopeFromPath('/rules/create')).toBe(SourcererScopeName.default);
+    expect(getScopeFromPath('/')).toBe(PageScope.default);
+    expect(getScopeFromPath('/exceptions')).toBe(PageScope.default);
+    expect(getScopeFromPath('/rules')).toBe(PageScope.default);
+    expect(getScopeFromPath('/rules/create')).toBe(PageScope.default);
   });
 
   it('should return detections scope', async () => {
-    expect(getScopeFromPath('/alerts')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo')).toBe(SourcererScopeName.detections);
-    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(SourcererScopeName.detections);
+    expect(getScopeFromPath('/alerts')).toBe(PageScope.alerts);
+    expect(getScopeFromPath('/rules/id/foo')).toBe(PageScope.alerts);
+    expect(getScopeFromPath('/rules/id/foo/edit')).toBe(PageScope.alerts);
   });
 });

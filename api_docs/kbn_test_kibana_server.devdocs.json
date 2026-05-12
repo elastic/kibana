@@ -1,0 +1,848 @@
+{
+  "id": "@kbn/test-kibana-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.DedicatedTaskRunnerConfig",
+        "type": "Class",
+        "tags": [],
+        "label": "DedicatedTaskRunnerConfig",
+        "description": [
+          "\nStatic helpers for the split UI / background-tasks Kibana processes used in tests.\nThe FTR service class ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.DedicatedTaskRunner",
+            "text": "DedicatedTaskRunner"
+          },
+          " in `@kbn/test` wraps these helpers\nwith runtime state (port, URL, KbnClient, etc.)."
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/dedicated_task_runner.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.DedicatedTaskRunnerConfig.getPort",
+            "type": "Function",
+            "tags": [],
+            "label": "getPort",
+            "description": [],
+            "signature": [
+              "(uiPort: number) => number"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/dedicated_task_runner.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-kibana-server",
+                "id": "def-common.DedicatedTaskRunnerConfig.getPort.$1",
+                "type": "number",
+                "tags": [],
+                "label": "uiPort",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-kibana-server/src/dedicated_task_runner.ts",
+                "lineNumber": 18,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.DedicatedTaskRunnerConfig.getUuid",
+            "type": "Function",
+            "tags": [],
+            "label": "getUuid",
+            "description": [],
+            "signature": [
+              "(mainUuid: string) => string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/dedicated_task_runner.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-kibana-server",
+                "id": "def-common.DedicatedTaskRunnerConfig.getUuid.$1",
+                "type": "string",
+                "tags": [],
+                "label": "mainUuid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-kibana-server/src/dedicated_task_runner.ts",
+                "lineNumber": 22,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.findTestPluginPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "findTestPluginPaths",
+        "description": [],
+        "signature": [
+          "(dirs: string | string[]) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.findTestPluginPaths.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dirs",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/find_test_plugin_paths.ts",
+            "lineNumber": 13,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.getArgValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getArgValue",
+        "description": [
+          "\nGet the value of an arg from the CliArg flags."
+        ],
+        "signature": [
+          "(args: ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
+          "[], name: string) => ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
+          "[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 78,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.getArgValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.KibanaCliArg",
+                "text": "KibanaCliArg"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 81,
+            "columnNumber": 29,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.getArgValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 81,
+            "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.getKibanaCliArg",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaCliArg",
+        "description": [
+          "\nParse a list of Kibana CLI Arg flags and find the flag with the given name. If the flag has no\nvalue then a boolean will be returned (assumed to be a switch flag). If the flag does have a value\nthat can be parsed by `JSON.stringify()` the parsed result is returned. Otherwise the raw string\nvalue is returned."
+        ],
+        "signature": [
+          "(rawFlags: string[], name: string) => ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.ArgValue",
+            "text": "ArgValue"
+          },
+          "[] | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 135,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.getKibanaCliArg.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 141,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.getKibanaCliArg.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 141,
+            "columnNumber": 53,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.getKibanaCliLoggers",
+        "type": "Function",
+        "tags": [],
+        "label": "getKibanaCliLoggers",
+        "description": [
+          "\nParse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended\nin a subsequent FTR config"
+        ],
+        "signature": [
+          "(rawFlags: string[]) => unknown[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.getKibanaCliLoggers.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 149,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.parseRawFlags",
+        "type": "Function",
+        "tags": [],
+        "label": "parseRawFlags",
+        "description": [],
+        "signature": [
+          "(rawFlags: string[]) => ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.parseRawFlags.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 93,
+            "columnNumber": 31,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.remapPluginPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "remapPluginPaths",
+        "description": [
+          "\nParse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended\nin a subsequent FTR config"
+        ],
+        "signature": [
+          "(args: ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
+          "[], kibanaInstallDir: string) => ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.KibanaCliArg",
+            "text": "KibanaCliArg"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.remapPluginPaths.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.KibanaCliArg",
+                "text": "KibanaCliArg"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 163,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.remapPluginPaths.$2",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaInstallDir",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+            "lineNumber": 163,
+            "columnNumber": 56,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.runKibanaServer",
+        "type": "Function",
+        "tags": [],
+        "label": "runKibanaServer",
+        "description": [],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.RunKibanaServerOptions",
+            "text": "RunKibanaServerOptions"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.runKibanaServer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.RunKibanaServerOptions",
+                "text": "RunKibanaServerOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 40,
+            "columnNumber": 39,
+            "deprecated": false,
+            "docsReferencedTypeName": "RunKibanaServerOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.KibanaTestServerLaunchConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaTestServerLaunchConfig",
+        "description": [
+          "\nMinimal config surface used to spawn Kibana (and optional dedicated task runner) for tests.\nSatisfied by the FTR ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.Config",
+            "text": "Config"
+          },
+          " type and Scout server configs."
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_test_server_launch_config.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.KibanaTestServerLaunchConfig.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(path: string) => unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_test_server_launch_config.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-kibana-server",
+                "id": "def-common.KibanaTestServerLaunchConfig.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_test_server_launch_config.ts",
+                "lineNumber": 15,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.RunKibanaServerOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RunKibanaServerOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.procs",
+            "type": "Object",
+            "tags": [],
+            "label": "procs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dev-proc-runner",
+                "scope": "common",
+                "docId": "kibKbnDevProcRunnerPluginApi",
+                "section": "def-common.ProcRunner",
+                "text": "ProcRunner"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test-kibana-server",
+                "scope": "common",
+                "docId": "kibKbnTestKibanaServerPluginApi",
+                "section": "def-common.KibanaTestServerLaunchConfig",
+                "text": "KibanaTestServerLaunchConfig"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.installDir",
+            "type": "string",
+            "tags": [],
+            "label": "installDir",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.extraKbnOpts",
+            "type": "Array",
+            "tags": [],
+            "label": "extraKbnOpts",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.logsDir",
+            "type": "string",
+            "tags": [],
+            "label": "logsDir",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.onEarlyExit",
+            "type": "Function",
+            "tags": [],
+            "label": "onEarlyExit",
+            "description": [],
+            "signature": [
+              "((msg: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test-kibana-server",
+                "id": "def-common.RunKibanaServerOptions.onEarlyExit.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+                "lineNumber": 27,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.inspect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "inspect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.remote",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "remote",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.uiEphemeralDirPrefix",
+            "type": "string",
+            "tags": [],
+            "label": "uiEphemeralDirPrefix",
+            "description": [
+              "\nPrefix for UI process `path.data` temp dir (`${prefix}-ui-<uuid>`). FTR default: `ftr`. Scout uses `scout`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test-kibana-server",
+            "id": "def-common.RunKibanaServerOptions.taskRunnerEphemeralDirPrefix",
+            "type": "string",
+            "tags": [],
+            "label": "taskRunnerEphemeralDirPrefix",
+            "description": [
+              "\nPrefix for task-runner `path.data` temp dir (`${prefix}-task-runner-<uuid>`). Default: `ftr`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-kibana-server/src/run_kibana_server.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.ArgValue",
+        "type": "Type",
+        "tags": [],
+        "label": "ArgValue",
+        "description": [],
+        "signature": [
+          "string | number | boolean | Record<string, unknown> | unknown[] | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test-kibana-server",
+        "id": "def-common.KibanaCliArg",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaCliArg",
+        "description": [],
+        "signature": [
+          "string & { readonly __cliArgBrand: unique symbol; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_cli_args.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

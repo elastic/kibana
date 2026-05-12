@@ -6,21 +6,19 @@
  */
 
 import { Journey } from '@kbn/journeys';
-import { subj } from '@kbn/test-subj-selector';
+import { setupDashboardJourney } from '../utils/dashboard_journey';
 
-export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
-  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
-})
-
-  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
-    await page.goto(kbnUrl.get(`/app/dashboards`));
-    await kibanaPage.waitForListViewTable();
-  })
-
-  .step('Go to Ecommerce No Map Dashboard', async ({ page }) => {
-    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Map-Only'));
+export const journey = setupDashboardJourney({
+  // call the journey constructor in this file so the name is set correctly
+  journey: new Journey({
+    esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
+    kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
+  }),
+  dashboardName: 'Ecommerce Dashboard with Map only',
+  dashboardLinkSubj: 'dashboardListingTitleLink-[eCommerce]-Map-Only',
+  loadCompleteAwaiter: async (page, kibanaPage) => {
     await page.waitForSelector(
       'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]'
     );
-  });
+  },
+});

@@ -78,6 +78,9 @@ export const HostsTable = () => {
       />
       <EuiBasicTable
         data-test-subj={`hostsView-table-${loading ? 'loading' : 'loaded'}`}
+        tableCaption={i18n.translate('xpack.infra.waffle.hostsTableCaption', {
+          defaultMessage: 'Hosts overview',
+        })}
         // This table has a lot of columns, so break down into mobile view sooner
         responsiveBreakpoint="xl"
         itemId="id"

@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
@@ -27,6 +27,7 @@ export interface Props {
   onAction: OnActionHandler;
   level: number;
   movingProcessor?: ProcessorInfo;
+  movingProcessorLabel?: string;
 }
 
 const INDENTATION_PX = 34;
@@ -50,10 +51,13 @@ export const TreeNode: FunctionComponent<Props> = ({
   processorInfo,
   onAction,
   movingProcessor,
+  movingProcessorLabel,
   level,
 }) => {
   const stringSelector = useMemo(() => processorInfo.selector.join('.'), [processorInfo.selector]);
   const styles = useStyles({ level });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
   const handlers = useMemo((): Handlers => {
     return {
       onMove: () => {
@@ -80,23 +84,25 @@ export const TreeNode: FunctionComponent<Props> = ({
         <PrivateTree
           level={level + 1}
           movingProcessor={movingProcessor}
+          movingProcessorLabel={movingProcessorLabel}
           onAction={onAction}
           selector={processorInfo.selector.concat('onFailure')}
           processors={processor.onFailure}
         />
         <AddProcessorButton
+          ref={buttonRef}
           data-test-subj={stringSelector}
           renderButtonAsLink
           onClick={() =>
             onAction({
               type: 'addProcessor',
-              payload: { target: processorInfo.selector.concat('onFailure') },
+              payload: { target: processorInfo.selector.concat('onFailure'), buttonRef },
             })
           }
         />
       </div>
     );
-  }, [processor.onFailure, stringSelector, onAction, movingProcessor, level]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [processor.onFailure, stringSelector, onAction, movingProcessor, movingProcessorLabel, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <PipelineProcessorsEditorItem

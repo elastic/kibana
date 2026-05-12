@@ -97,7 +97,10 @@ export const JourneyScreenshotDialog = ({
   return isOpen ? (
     <EuiOutsideClickDetector onOutsideClick={onClose}>
       <EuiModal
-        onClose={(evt?: KeyboardEvent<HTMLDivElement> | MouseEvent<HTMLButtonElement>) => {
+        aria-label={i18n.translate('xpack.synthetics.monitor.screenshotDialog.ariaLabel', {
+          defaultMessage: 'Journey screenshot dialog',
+        })}
+        onClose={(evt) => {
           // for table row click to work
           evt?.stopPropagation?.();
           onClose();
@@ -159,7 +162,7 @@ export const JourneyScreenshotDialog = ({
                   setStepNumber((s) => s - 1);
                   evt.preventDefault();
                 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 aria-label={prevAriaLabel}
               >
                 {prevAriaLabel}
@@ -185,7 +188,7 @@ export const JourneyScreenshotDialog = ({
                   setStepNumber((s) => s + 1);
                   evt.stopPropagation();
                 }}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 aria-label={nextAriaLabel}
               >

@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
                     spaces: ['bar-space'],
                     base: [],
                     feature: {
-                      streams: ['all', 'read'],
+                      manageReporting: ['all', 'read'],
                     },
                   },
                 ],

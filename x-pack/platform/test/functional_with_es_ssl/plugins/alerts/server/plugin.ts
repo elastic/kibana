@@ -9,12 +9,14 @@ import type { Plugin, CoreSetup } from '@kbn/core/server';
 import type { AlertingServerSetup, RuleType, RuleTypeParams } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { IEventLogClientService } from '@kbn/event-log-plugin/server';
+import { registerRoutes } from './routes';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
   alerting: AlertingServerSetup;
   features: FeaturesPluginSetup;
+  eventLog: IEventLogClientService;
 }
 
 export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
@@ -107,11 +109,28 @@ export const failingAlertType: RuleType<never, never, never, never, never, 'defa
   },
 };
 
-export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+const alertingFeatures = [
+  {
+    ruleTypeId: 'test.always-firing',
+    consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+  },
+  { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
+  {
+    ruleTypeId: 'test.failing',
+    consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
+  },
+];
+
+export class AlertingFixturePlugin
+  implements Plugin<void, void, AlertingExampleDeps, AlertingExampleDeps>
+{
+  public setup(core: CoreSetup<AlertingExampleDeps>, { alerting, features }: AlertingExampleDeps) {
     alerting.registerType(noopAlertType);
     alerting.registerType(alwaysFiringAlertType);
     alerting.registerType(failingAlertType);
+
+    registerRoutes(core);
+
     features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',
@@ -122,22 +141,14 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
         { ruleTypeId: 'test.failing', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
       ],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           alerting: {
             rule: {
-              all: [
-                {
-                  ruleTypeId: 'test.always-firing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
-                {
-                  ruleTypeId: 'test.failing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-              ],
+              all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
           },
           savedObject: {
@@ -149,17 +160,10 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         read: {
           alerting: {
             rule: {
-              all: [
-                {
-                  ruleTypeId: 'test.always-firing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-                { ruleTypeId: 'test.noop', consumers: ['alerting_fixture', ALERTING_FEATURE_ID] },
-                {
-                  ruleTypeId: 'test.failing',
-                  consumers: ['alerting_fixture', ALERTING_FEATURE_ID],
-                },
-              ],
+              all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
           },
           savedObject: {

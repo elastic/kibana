@@ -23,6 +23,8 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -46,7 +48,6 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CellValue, getColumns } from '../../configurations/security_solution_detections';
@@ -63,6 +64,7 @@ import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/u
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { DETECTIONS_TABLE_IDS } from '../../constants';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -127,26 +129,31 @@ interface AlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
   tableType?: TableId;
-  sourcererScope?: SourcererScopeName;
+  pageScope?: PageScope;
   isLoading?: boolean;
   onRuleChange?: () => void;
   disableAdditionalToolbarControls?: boolean;
 }
 
-const initialSort: GetSecurityAlertsTableProp<'initialSort'> = [
+const sort: GetSecurityAlertsTableProp<'sort'> = [
   {
     '@timestamp': {
       order: 'desc',
     },
   },
 ];
-const casesConfiguration = { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true };
+const casesConfiguration = {
+  featureId: CASES_FEATURE_ID,
+  owner: [APP_ID],
+  syncAlerts: true,
+  extractObservables: true,
+};
 const emptyInputFilters: Filter[] = [];
 
-const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
+const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlertsEnabled'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = SourcererScopeName.detections,
+  pageScope = PageScope.alerts,
   isLoading,
   onRuleChange,
   disableAdditionalToolbarControls,
@@ -180,11 +187,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     onRuleChange,
   });
   const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(sourcererScope);
+    useSourcererDataView(pageScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(sourcererScope);
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const { dataView: experimentalDataView } = useDataView(pageScope);
+  const experimentalBrowserFields = useBrowserFields(pageScope);
   const runtimeMappings = useMemo(
     () =>
       newDataViewPickerEnabled
@@ -283,7 +290,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [isEventRenderedView]);
 
   const alertColumns = useMemo(
-    () => (columns.length ? columns : getColumns(license)),
+    () => (columns?.length ? columns : getColumns(license)),
     [columns, license]
   );
 
@@ -346,11 +353,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     ACTION_BUTTON_COUNT--;
   }
 
-  // remove space if add notes icon shouldn't be displayed
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  if (!canReadNotes || securitySolutionNotesDisabled) {
+  if (!canReadNotes) {
     ACTION_BUTTON_COUNT--;
   }
 
@@ -368,9 +371,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
       leadingControlColumn,
       userProfiles,
       tableType,
-      sourcererScope,
+      pageScope,
     }),
-    [leadingControlColumn, sourcererScope, tableType, userProfiles]
+    [leadingControlColumn, pageScope, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {
@@ -378,7 +381,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    SourcererScopeName.detections,
+    pageScope,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -457,18 +460,17 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider
-            tableId={tableType}
-            sourcererScope={SourcererScopeName.detections}
-          >
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={pageScope}>
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
+              key={isEventRenderedView ? 'eventRenderedView' : 'defaultView'}
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
               ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
               consumers={ALERT_TABLE_CONSUMERS}
+              projectRouting={PROJECT_ROUTING.ORIGIN}
               query={finalBoolQuery}
-              initialSort={initialSort}
+              sort={sort}
               casesConfiguration={casesConfiguration}
               gridStyle={gridStyle}
               shouldHighlightRow={shouldHighlightRow}
@@ -479,7 +481,8 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               onLoaded={onLoaded}
               additionalContext={additionalContext}
               height={alertTableHeight}
-              initialPageSize={50}
+              isMutedAlertsEnabled={false}
+              pageSize={50}
               runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}
@@ -490,8 +493,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               actionsColumnWidth={leadingControlColumn.width}
               additionalBulkActions={bulkActions}
               fieldsBrowserOptions={
-                tableType === TableId.alertsOnAlertsPage ||
-                tableType === TableId.alertsOnRuleDetailsPage
+                DETECTIONS_TABLE_IDS.some((tableId) => tableId === tableType)
                   ? fieldsBrowserOptions
                   : undefined
               }

@@ -35,6 +35,7 @@ import {
 import {
   isOnlyAgentlessPolicyTemplate,
   isOnlyAgentlessIntegration,
+  isAgentlessIntegration,
 } from '../../../../../../../../common/services/agentless_policy_helper';
 
 import type { IntegrationCardItem } from '..';
@@ -50,6 +51,8 @@ export interface IntegrationsURLParameters {
   searchString?: string;
   categoryId?: string;
   subCategoryId?: string;
+  onlyAgentless?: boolean;
+  showDeprecated?: boolean;
 }
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
@@ -102,6 +105,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
             description,
             icons: icons || restOfPackage.icons,
             categories: uniq(allCategories),
+            ...(policyTemplate.deprecated ? { deprecated: policyTemplate.deprecated } : {}),
           };
         })
       : [];
@@ -110,7 +114,12 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       pkg.policy_templates_behavior,
       topPackage,
       integrationsPolicyTemplates
-    );
+    ).map((tile) => {
+      return {
+        ...tile,
+        supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+      };
+    });
 
     return [...acc, ...tiles];
   }, []);
@@ -140,7 +149,7 @@ export const useAvailablePackages = ({
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) => {
-  const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+  const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
   const { isAgentlessEnabled } = useAgentless();
 
@@ -149,6 +158,7 @@ export const useAvailablePackages = ({
   const {
     initialSelectedCategory,
     initialSubcategory,
+    initialOnlyAgentless,
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     getHref,
@@ -162,6 +172,7 @@ export const useAvailablePackages = ({
     initialSubcategory
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
+  const [onlyAgentlessFilter, setOnlyAgentlessFilter] = useState(initialOnlyAgentless);
 
   const {
     data: eprPackages,
@@ -199,13 +210,20 @@ export const useAvailablePackages = ({
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
 
-  const cards: IntegrationCardItem[] = useMemo(() => {
+  // All cards before any filter (no agentless filter, no category filter).
+  // Used by useBrowseIntegrationHook which applies both filters from the live URL.
+  const allCards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
-
     return eprAndCustomPackages
-      .map((item) => {
-        return mapToCard({ getAbsolutePath, getHref, item, addBasePath, packageVerificationKeyId });
-      })
+      .map((item) =>
+        mapToCard({
+          getAbsolutePath,
+          getHref,
+          item,
+          addBasePath,
+          packageVerificationKeyId,
+        })
+      )
       .sort((a, b) => a.title.localeCompare(b.title));
   }, [
     addBasePath,
@@ -215,6 +233,16 @@ export const useAvailablePackages = ({
     mergedEprPackages,
     packageVerificationKeyId,
   ]);
+
+  // Cards with the agentless filter applied (used by the old home page and
+  // its category sidebar counts). Derived from allCards so the sort/map work
+  // is not duplicated.
+  const cards: IntegrationCardItem[] = useMemo(() => {
+    if (isAgentlessEnabled && onlyAgentlessFilter) {
+      return allCards.filter((item) => item.supportsAgentless === true);
+    }
+    return allCards;
+  }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)
@@ -276,6 +304,9 @@ export const useAvailablePackages = ({
     setUrlandReplaceHistory,
     preference,
     setPreference,
+    onlyAgentlessFilter,
+    setOnlyAgentlessFilter,
+    isAgentlessEnabled,
     isLoading:
       isLoadingReplacmentCustomIntegrations ||
       isLoadingAppendCustomIntegrations ||
@@ -287,5 +318,6 @@ export const useAvailablePackages = ({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
+    allCards,
   };
 };

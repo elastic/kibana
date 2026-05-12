@@ -6,60 +6,41 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchProcessorType } from '../../../types/processors/manual_ingest_pipeline_processors';
-import { elasticsearchProcessorTypes } from '../../../types/processors/manual_ingest_pipeline_processors';
-import type {
-  IngestPipelineGrokProcessor,
-  IngestPipelineDissectProcessor,
-  IngestPipelineDateProcessor,
-  IngestPipelineRenameProcessor,
-  IngestPipelineSetProcessor,
-  IngestPipelineManualIngestPipelineProcessor,
-  IngestPipelineAppendProcessor,
-} from '../../../types/processors/ingest_pipeline_processors';
+import type { IngestPipelineProcessor } from '../../../types/processors/ingest_pipeline_processors';
+import {
+  getStreamlangResolverForProcessor,
+  type StreamlangResolverOptions,
+} from '../../../types/resolvers';
+
 import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import { conditionToPainless } from '../../conditions/condition_to_painless';
+import { processManualIngestPipelineProcessors } from './processors/manual_pipeline_processor';
+import { processMathProcessor } from './processors/math_processor';
+import {
+  applyPreProcessing,
+  processorFieldRenames,
+  renameFields,
+} from './processors/pre_processing';
+import type { ActionToIngestType } from './processors/processor';
+import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
+
 import type { IngestPipelineTranspilationOptions } from '.';
+import { processConcatProcessor } from './processors/concat_processor';
+import { processSortProcessor } from './processors/sort_processor';
+import { processJsonExtractProcessor } from './processors/json_extract_processor';
+import { processEnrichProcessor } from './processors/enrich_processor';
+import { processJoinProcessor } from './processors/join_processor';
 
-type WithOptionalTracingTag<T> = T & { tag?: string };
-interface ActionToIngestType {
-  grok: WithOptionalTracingTag<IngestPipelineGrokProcessor>;
-  dissect: WithOptionalTracingTag<IngestPipelineDissectProcessor>;
-  date: WithOptionalTracingTag<IngestPipelineDateProcessor>;
-  rename: WithOptionalTracingTag<IngestPipelineRenameProcessor>;
-  set: WithOptionalTracingTag<IngestPipelineSetProcessor>;
-  append: WithOptionalTracingTag<IngestPipelineAppendProcessor>;
-  manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
-}
-
-const processorFieldRenames: Record<string, Record<string, string>> = {
-  grok: { from: 'field', where: 'if' },
-  dissect: { from: 'field', where: 'if' },
-  date: { from: 'field', to: 'target_field', where: 'if' },
-  rename: { from: 'field', to: 'target_field', where: 'if' },
-  set: { to: 'field', where: 'if' },
-  append: { to: 'field', where: 'if' },
-  manual_ingest_pipeline: { where: 'if' },
-};
-
-function renameFields<T extends Record<string, any>>(obj: T, renames: Record<string, string>): T {
-  const result: Record<string, any> = {};
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const newKey = renames[key] || key;
-      result[newKey] = obj[key];
-    }
-  }
-  return result as T;
-}
-
-export function convertStreamlangDSLActionsToIngestPipelineProcessors(
+export async function convertStreamlangDSLActionsToIngestPipelineProcessors(
   actionSteps: StreamlangProcessorDefinition[],
-  transpilationOptions?: IngestPipelineTranspilationOptions
-): IngestProcessorContainer[] {
-  return actionSteps.flatMap((actionStep) => {
+  transpilationOptions?: IngestPipelineTranspilationOptions,
+  resolverOptions?: StreamlangResolverOptions
+): Promise<IngestProcessorContainer[]> {
+  const processors = actionSteps.flatMap((actionStep) => {
     const renames = processorFieldRenames[actionStep.action] || {};
     const { action, ...rest } = actionStep;
+
+    // Rename Streamlang to Ingest Processor specific fields
     const processorWithRenames = renameFields(
       rest,
       renames
@@ -76,6 +57,15 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
       }
     }
 
+    // manual_ingest_pipeline handles its own condition compilation because it needs to
+    // combine the parent 'where' condition with nested processor 'if' conditions
+    if (action === 'manual_ingest_pipeline') {
+      return processManualIngestPipelineProcessors(
+        processorWithRenames as Parameters<typeof processManualIngestPipelineProcessors>[0],
+        transpilationOptions
+      );
+    }
+
     const processorWithCompiledConditions =
       'if' in processorWithRenames && processorWithRenames.if
         ? {
@@ -84,70 +74,60 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
           }
         : processorWithRenames;
 
-    if (action === 'manual_ingest_pipeline') {
-      return processManualIngestPipelineProcessors(
-        processorWithCompiledConditions as IngestPipelineManualIngestPipelineProcessor,
-        transpilationOptions
+    if (action === 'remove_by_prefix') {
+      return processRemoveByPrefixProcessor(
+        processorWithCompiledConditions as Parameters<typeof processRemoveByPrefixProcessor>[0]
       );
     }
 
-    return [
-      {
-        [action]: {
-          ...processorWithCompiledConditions,
-        },
-      },
-    ];
+    if (action === 'math') {
+      // Math processor outputs a script processor
+      return [
+        processMathProcessor(
+          processorWithCompiledConditions as Parameters<typeof processMathProcessor>[0]
+        ),
+      ];
+    }
+
+    if (action === 'join') {
+      return processJoinProcessor(
+        processorWithCompiledConditions as Parameters<typeof processJoinProcessor>[0]
+      );
+    }
+
+    if (action === 'concat') {
+      return processConcatProcessor(
+        processorWithCompiledConditions as Parameters<typeof processConcatProcessor>[0]
+      );
+    }
+
+    if (action === 'sort') {
+      return processSortProcessor(
+        processorWithCompiledConditions as Parameters<typeof processSortProcessor>[0]
+      );
+    }
+
+    if (action === 'json_extract') {
+      return [
+        processJsonExtractProcessor(
+          processorWithCompiledConditions as Parameters<typeof processJsonExtractProcessor>[0]
+        ),
+      ];
+    }
+
+    if (action === 'enrich') {
+      const resolver = getStreamlangResolverForProcessor(actionStep, resolverOptions);
+      if (!resolver) {
+        throw new Error('Enrich processor requires an enrich policy resolver.');
+      }
+      return processEnrichProcessor(
+        processorWithCompiledConditions as Parameters<typeof processEnrichProcessor>[0],
+        resolver
+      );
+    }
+
+    return applyPreProcessing(action, processorWithCompiledConditions as IngestPipelineProcessor);
   });
+
+  return Promise.all(processors);
 }
-
-const processManualIngestPipelineProcessors = (
-  manualIngestPipelineProcessor: IngestPipelineManualIngestPipelineProcessor,
-  transpilationOptions?: IngestPipelineTranspilationOptions
-) => {
-  // manual_ingest_pipeline processor is a special case, since it has nested Elasticsearch-level processors and doesn't support if
-  // directly - we need to add it to each nested processor
-  return manualIngestPipelineProcessor.processors.flatMap((nestedProcessor) => {
-    const nestedType = Object.keys(nestedProcessor)[0];
-    if (!elasticsearchProcessorTypes.includes(nestedType as ElasticsearchProcessorType)) {
-      if (transpilationOptions?.ignoreMalformed) {
-        return [];
-      }
-      throw new Error(
-        `Invalid processor type "${nestedType}" in manual_ingest_pipeline processor. Supported types: ${elasticsearchProcessorTypes.join(
-          ', '
-        )}`
-      );
-    }
-    const nestedConfig = nestedProcessor[nestedType as ElasticsearchProcessorType] as Record<
-      string,
-      unknown
-    >;
-    if (typeof nestedConfig !== 'object' || nestedConfig === null) {
-      if (transpilationOptions?.ignoreMalformed) {
-        return [];
-      }
-      throw new Error(
-        `Invalid processor config for "${nestedType}" in manual_ingest_pipeline processor. Expected an object.`
-      );
-    }
-    return {
-      [nestedType]: {
-        ...nestedConfig,
-        tag: manualIngestPipelineProcessor.tag ?? nestedConfig.tag,
-        ignore_failure: nestedConfig.ignore_failure ?? manualIngestPipelineProcessor.ignore_failure,
-        on_failure: nestedConfig.on_failure
-          ? [
-              ...(nestedConfig.on_failure as []),
-              ...(manualIngestPipelineProcessor.on_failure || []),
-            ]
-          : manualIngestPipelineProcessor.on_failure,
-        ...(!nestedConfig.if &&
-        'if' in manualIngestPipelineProcessor &&
-        manualIngestPipelineProcessor.if
-          ? { if: manualIngestPipelineProcessor.if }
-          : {}),
-      },
-    } as IngestProcessorContainer;
-  });
-};

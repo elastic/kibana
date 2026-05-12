@@ -104,6 +104,20 @@ export const flyoutFailedDocsTrendText = i18n.translate(
   }
 );
 
+export const degradedDocsOverTimeText = i18n.translate(
+  'xpack.datasetQuality.overview.degradedDocsOverTime',
+  {
+    defaultMessage: 'Degraded documents over time',
+  }
+);
+
+export const failedDocsOverTimeText = i18n.translate(
+  'xpack.datasetQuality.overview.failedDocsOverTime',
+  {
+    defaultMessage: 'Failed documents over time',
+  }
+);
+
 export const flyoutDegradedDocsPercentageText = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedDocsPercentage',
   {
@@ -185,6 +199,30 @@ export const summaryPanelQualityGoodText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityGoodText',
   {
     defaultMessage: 'Good',
+  }
+);
+
+export const qualityIndicatorGoodTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorGoodTooltipText',
+  {
+    defaultMessage:
+      'All expected fields are present and values look healthy. No issues detected with ingestion or structure.',
+  }
+);
+
+export const qualityIndicatorDegradedTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorDegradedTooltipText',
+  {
+    defaultMessage:
+      'Some documents have missing or malformed fields. Ingestion is working but data may be incomplete or inconsistent.',
+  }
+);
+
+export const qualityIndicatorPoorTooltipText = i18n.translate(
+  'xpack.datasetQuality.qualityIndicatorPoorTooltipText',
+  {
+    defaultMessage:
+      'More than 3% of documents have missing or malformed fields, or are failing ingestion.',
   }
 );
 
@@ -739,6 +777,13 @@ export const manualMitigationCustomPipelineCopyPipelineNameAriaText = i18n.trans
   }
 );
 
+export const manualMitigationCustomPipelineCopyPipelineNameSuccessText = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.copyPipelineNameSuccess',
+  {
+    defaultMessage: 'Pipeline name copied to clipboard',
+  }
+);
+
 export const manualMitigationCustomPipelineCreateEditPipelineLink = i18n.translate(
   'xpack.datasetQuality.details.degradedField.possibleMitigation.createEditPipelineLink',
   {
@@ -750,6 +795,14 @@ export const failedDocsErrorsColumnName = i18n.translate(
   'xpack.datasetQuality.details.failedDocs.errors',
   {
     defaultMessage: 'Error messages',
+  }
+);
+
+export const failedDocsErrorsColumnNameTooltip = i18n.translate(
+  'xpack.datasetQuality.details.failedDocs.errorsTooltip',
+  {
+    defaultMessage:
+      'Sample of error messages for each error type. For more details, open the error type in Discover.',
   }
 );
 
@@ -814,5 +867,40 @@ export const fieldFilterNoneMatching = i18n.translate(
   'xpack.datasetQuality.details.qualityIssuesTable.fieldFilterNoneMatching',
   {
     defaultMessage: 'No fields found',
+  }
+);
+
+export const enableFailureStoreButtonLabel = i18n.translate(
+  'xpack.datasetQuality.enableFailureStore',
+  {
+    defaultMessage: 'Enable failure store',
+  }
+);
+
+export const modifyFieldValue = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.modifyFieldValueLink',
+  {
+    defaultMessage: 'Modify field value',
+  }
+);
+
+export const increaseFieldCharacterLimit = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.increaseFieldCharacterLimitLink',
+  {
+    defaultMessage: 'Increase field character limit',
+  }
+);
+
+export const changeFieldTypeInSchema = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.changeFieldTypeInSchemaLink',
+  {
+    defaultMessage: 'Change field type in schema',
+  }
+);
+
+export const createConvertProcessor = i18n.translate(
+  'xpack.datasetQuality.details.degradedField.possibleMitigation.createConvertProcessorLink',
+  {
+    defaultMessage: 'Create a convert processor',
   }
 );

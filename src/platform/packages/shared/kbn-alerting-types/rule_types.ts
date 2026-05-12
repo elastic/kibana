@@ -20,6 +20,19 @@ export type RuleTypeParams = Record<string, unknown>;
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export enum RuleChangeTrackingAction {
+  ruleCreate = 'rule_create',
+  ruleUpdate = 'rule_update',
+  ruleUpdateApiKey = 'rule_update_api_key',
+  ruleEnable = 'rule_enable',
+  ruleDisable = 'rule_disable',
+  ruleSnooze = 'rule_snooze',
+  ruleUnsnooze = 'rule_unsnooze',
+  ruleDelete = 'rule_delete',
+}
+
+export type ChangeTrackingAction = RuleChangeTrackingAction;
+
 export const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
 export type IsoWeekday = (typeof ISO_WEEKDAYS)[number];
 
@@ -211,6 +224,7 @@ export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
 };
 
 export interface Flapping extends SavedObjectAttributes {
+  enabled?: boolean;
   lookBackWindow: number;
   statusChangeThreshold: number;
 }
@@ -246,6 +260,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   apiKeyCreatedByUser?: boolean | null;
+  uiamApiKey?: string | null;
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
@@ -261,6 +276,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
+  lastEnabledAt?: Date;
   flapping?: Flapping | null;
   artifacts?: Artifacts | null;
 }

@@ -11,12 +11,17 @@ import type { ReactWrapper } from 'enzyme';
 import { Provider } from 'react-redux';
 import type { PreloadedState } from '@reduxjs/toolkit';
 import type { RenderOptions } from '@testing-library/react';
-import type { LensAppServices } from '../app_plugin/types';
+import type {
+  LensAppState,
+  LensState,
+  LensStoreDeps,
+  DatasourceMap,
+  VisualizationMap,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';
-import type { LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { makeConfigureStore } from '../state_management';
 import { getResolvedDateRange } from '../utils';
-import type { DatasourceMap, VisualizationMap } from '../types';
 import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
@@ -37,7 +42,7 @@ export const mockStoreDeps = ({
 
 export function mockDatasourceStates() {
   return {
-    testDatasource: {
+    formBased: {
       state: {},
       isLoading: false,
     },
@@ -53,7 +58,7 @@ export const defaultState = {
   isSaveable: false,
   isLoading: false,
   isLinkedToOriginatingApp: false,
-  activeDatasourceId: 'testDatasource',
+  activeDatasourceId: 'formBased',
   visualization: {
     state: {},
     activeId: 'testVis',

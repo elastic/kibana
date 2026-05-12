@@ -15,7 +15,7 @@ import { type SortOrder, isSortable } from './get_sort';
  * the default sort is returned depending on the data view or non for ES|QL queries
  */
 export function getDefaultSort(
-  dataView: DataView | undefined,
+  dataView: DataView | Pick<DataView, 'timeFieldName'> | undefined,
   defaultSortOrder: string = 'desc',
   hidingTimeColumn: boolean = false,
   isEsqlMode: boolean
@@ -26,7 +26,9 @@ export function getDefaultSort(
 
   if (
     dataView?.timeFieldName &&
-    isSortable(dataView.timeFieldName, dataView, isEsqlMode) &&
+    // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
+    // we assume the time field is sortable since we can't know for sure
+    (!('getFieldByName' in dataView) || isSortable(dataView.timeFieldName, dataView, isEsqlMode)) &&
     !hidingTimeColumn
   ) {
     return [[dataView.timeFieldName, defaultSortOrder]];

@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   const TEST_DS_NAME = 'test-ds-1';
 
@@ -25,8 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     TIME_SERIES = 'Time series',
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/205316
-  describe.skip('Data Streams', () => {
+  describe('Data Streams', () => {
     before(async () => {
       log.debug('Creating required data stream');
       try {
@@ -122,14 +122,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('saveButton');
 
         // Expect to see a success toast
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+        });
       });
 
       describe('Project level data retention checks - security solution', () => {
         this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
         it('shows project data retention in the datastreams list', async () => {
+          // Ensure the callout is visible by setting localStorage
+          await browser.setLocalStorageItem('showProjectLevelRetention', 'true');
+          await browser.refresh();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+
+          expect(await testSubjects.exists('projectLevelRetentionLink')).to.be(true);
           expect(await testSubjects.exists('projectLevelRetentionCallout')).to.be(true);
           expect(await testSubjects.exists('cloudLinkButton')).to.be(true);
         });

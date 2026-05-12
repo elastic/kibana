@@ -18,7 +18,7 @@ export const TRANSLATED_DASHBOARDS_EMPTY_PAGE_MESSAGE = i18n.translate(
   'xpack.securitySolution.siemMigrations.dashboards.emptyPageMessage',
   {
     defaultMessage:
-      'Translate your existing Splunk Dashboards with Elastic Automatic Migration. Got to Automatic Migration for step-by-step guidance.',
+      'Translate your existing SIEM Dashboards with Elastic Automatic Migration. Go to Automatic Migration for step-by-step guidance.',
   }
 );
 

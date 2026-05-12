@@ -8,21 +8,27 @@
 import { uniq, mapValues, difference } from 'lodash';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
+import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type {
   ActionExecutionContext,
   UiActionsStart,
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
-import type { VisualizeEditorContext } from '../../types';
-import type { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import type {
+  VisualizeEditorContext,
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  FormBasedLayer,
+  IndexPattern,
+  IndexPatternRef,
+  DateRange,
+} from '@kbn/lens-common';
 
+import { getFormulaColumnsFromLayer, hasStateFormulaColumn } from '@kbn/lens-common';
+import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
-import type { IndexPattern, IndexPatternRef } from '../../types';
+import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
 
 export function onRefreshIndexPattern() {
   if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
@@ -131,6 +137,30 @@ function getUsedIndexPatterns({
   };
 }
 
+function expandFormulaColumns(
+  state: { layers: Record<string, FormBasedLayer> } | undefined,
+  {
+    indexPatterns,
+    dateRange,
+  }: { indexPatterns: Record<string, IndexPattern>; dateRange?: DateRange }
+) {
+  if (!state || !hasStateFormulaColumn(state)) {
+    return state;
+  }
+  const layers = structuredClone(state.layers);
+  for (const layerId of Object.keys(layers)) {
+    const formulaColumns = getFormulaColumnsFromLayer(layers[layerId]);
+    for (const [columnId, column] of formulaColumns) {
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(columnId, column, layers[layerId], {
+        indexPattern: indexPatterns[layers[layerId].indexPatternId],
+        dateRange,
+      });
+      layers[layerId] = newLayer;
+    }
+  }
+  return { ...state, layers };
+}
+
 export function loadInitialState({
   persistedState,
   references,
@@ -139,6 +169,7 @@ export function loadInitialState({
   initialContext,
   indexPatternRefs = [],
   indexPatterns = {},
+  dateRange,
 }: {
   persistedState?: FormBasedPersistedState;
   references?: Reference[];
@@ -147,8 +178,10 @@ export function loadInitialState({
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   indexPatternRefs?: IndexPatternRef[];
   indexPatterns?: Record<string, IndexPattern>;
+  dateRange?: DateRange;
 }): FormBasedPrivateState {
-  const state = createStateFromPersisted({ persistedState, references });
+  const injectedState = createStateFromPersisted({ persistedState, references });
+  const state = expandFormulaColumns(injectedState, { indexPatterns, dateRange });
   const { usedPatterns, allIndexPatternIds: indexPatternIds } = getUsedIndexPatterns({
     state,
     defaultIndexPatternId,

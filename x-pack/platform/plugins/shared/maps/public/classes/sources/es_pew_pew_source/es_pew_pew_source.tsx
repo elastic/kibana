@@ -150,7 +150,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(requestMeta, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
@@ -209,6 +209,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
       },
+      fetchOptions,
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -230,7 +231,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
-    const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    const { searchSource, fetchOptions } = await this.makeSearchSource(boundsFilters, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destFitToBounds: {
@@ -257,6 +258,7 @@ export class ESPewPewSource extends AbstractESAggSource {
             { description: 'es_pew_pew_source:bounds' },
             boundsFilters.executionContext
           ),
+          ...fetchOptions,
         })
       );
       const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)

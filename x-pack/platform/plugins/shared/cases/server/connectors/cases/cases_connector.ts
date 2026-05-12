@@ -9,22 +9,29 @@ import Boom from '@hapi/boom';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SAVED_OBJECT_TYPES } from '../../../common';
+import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
-import { CasesConnectorRunParamsSchema } from './schema';
+import { ZCasesConnectorRunParamsSchema } from './schema';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import {
   CasesConnectorError,
+  createTaskUserError,
   isCasesClientError,
   isCasesConnectorError,
 } from './cases_connector_error';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import { CasesConnectorRetryService } from './cases_connector_retry_service';
-import { fullJitterBackoffFactory } from '../../common/retry_service';
-import { CASE_RULES_SAVED_OBJECT, CASES_CONNECTOR_SUB_ACTION } from '../../../common/constants';
+import {
+  CASE_RULES_SAVED_OBJECT,
+  CASES_CONNECTOR_SUB_ACTION,
+  MAX_OPEN_CASES_ADVANCED_SETTING,
+  MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+  getMaximumOpenCases,
+} from '../../../common/constants';
+import { getSavedObjectsTypes } from '../../../common';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
@@ -35,6 +42,8 @@ interface CasesConnectorParams {
       request: KibanaRequest,
       savedObjectTypes: string[]
     ) => Promise<SavedObjectsClientContract>;
+    getUiSettingsClient: (request: KibanaRequest) => Promise<IUiSettingsClient>;
+    isCasesAttachmentsEnabled: boolean;
   };
 }
 
@@ -66,7 +75,7 @@ export class CasesConnector extends SubActionConnector<
     this.registerSubAction({
       name: CASES_CONNECTOR_SUB_ACTION.RUN,
       method: 'run',
-      schema: CasesConnectorRunParamsSchema,
+      schema: ZCasesConnectorRunParamsSchema,
     });
   }
 
@@ -105,10 +114,12 @@ export class CasesConnector extends SubActionConnector<
        * is not define before executing the _run method
        */
       const kibanaRequest = this.kibanaRequest as KibanaRequest;
+      const uiSettingsClient = await this.casesParams.getUiSettingsClient(kibanaRequest);
+      const validatedParams = await this.getValidatedRunParams(params, uiSettingsClient);
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,
-        [...SAVED_OBJECT_TYPES, CASE_RULES_SAVED_OBJECT]
+        [...getSavedObjectsTypes(), CASE_RULES_SAVED_OBJECT]
       );
 
       const spaceId = this.casesParams.getSpaceId(kibanaRequest);
@@ -124,16 +135,21 @@ export class CasesConnector extends SubActionConnector<
         casesService: this.casesService,
         casesClient,
         spaceId,
+        isCasesAttachmentsEnabled: this.casesParams.isCasesAttachmentsEnabled,
       });
 
-      this.logDebugCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
+      this.logDebugCurrentState(
+        'start',
+        '[CasesConnector][_run] Executing case connector',
+        validatedParams
+      );
 
-      await connectorExecutor.execute(params);
+      await connectorExecutor.execute(validatedParams);
 
       this.logDebugCurrentState(
         'success',
         '[CasesConnector][_run] Execution of case connector succeeded',
-        params
+        validatedParams
       );
     } catch (error) {
       this.handleError(error);
@@ -146,10 +162,36 @@ export class CasesConnector extends SubActionConnector<
     }
   }
 
+  private async getValidatedRunParams(
+    params: CasesConnectorRunParams,
+    uiSettingsClient: IUiSettingsClient
+  ): Promise<CasesConnectorRunParams> {
+    const configuredMaxOpenCases = getMaximumOpenCases(
+      await uiSettingsClient.get<number>(MAX_OPEN_CASES_ADVANCED_SETTING)
+    );
+
+    if (params.internallyManagedAlerts) {
+      return {
+        ...params,
+        maximumCasesToOpen: MAX_OPEN_CASES_DEFAULT_MAXIMUM,
+      };
+    }
+
+    if (params.maximumCasesToOpen > configuredMaxOpenCases) {
+      throw new CasesConnectorError(
+        `Maximum cases to open must be between 1 and ${configuredMaxOpenCases}.`,
+        400
+      );
+    }
+
+    return params;
+  }
+
   private handleError(error: Error) {
     if (isCasesConnectorError(error)) {
-      this.logError(error);
-      throw error;
+      const userError = createTaskUserError(error);
+      this.logError(userError);
+      throw userError;
     }
 
     if (isCasesClientError(error)) {
@@ -158,8 +200,9 @@ export class CasesConnector extends SubActionConnector<
         error.boomify().output.statusCode
       );
 
-      this.logError(caseConnectorError);
-      throw caseConnectorError;
+      const userError = createTaskUserError(caseConnectorError);
+      this.logError(userError);
+      throw userError;
     }
 
     if (Boom.isBoom(error)) {
@@ -168,9 +211,10 @@ export class CasesConnector extends SubActionConnector<
         error.output.statusCode
       );
 
-      this.logError(caseConnectorError);
+      const userError = createTaskUserError(caseConnectorError);
+      this.logError(userError);
 
-      throw caseConnectorError;
+      throw userError;
     }
 
     const caseConnectorError = new CasesConnectorError(error.message, 500);

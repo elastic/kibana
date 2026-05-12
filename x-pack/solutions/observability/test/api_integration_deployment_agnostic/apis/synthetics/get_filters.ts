@@ -22,6 +22,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const supertest = getService('supertestWithoutAuth');
     const samlAuth = getService('samlAuth');
+    const retry = getService('retry');
 
     const privateLocationTestService = new PrivateLocationTestService(getService);
 
@@ -39,11 +40,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         types: [syntheticsMonitorSavedObjectType, legacySyntheticsMonitorTypeSingle],
       });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await privateLocationTestService.installSyntheticsPackage();
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
     });
 
     const addMonitor = async (monitor: any, type?: string) => {
-      return addMonitorAPIHelper(supertest, monitor, 200, editorUser, samlAuth, false, type);
+      return retry.try(async () => {
+        return addMonitorAPIHelper(supertest, monitor, 200, editorUser, samlAuth, false, type);
+      });
     };
 
     it('get list of filters', async () => {

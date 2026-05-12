@@ -20,6 +20,7 @@ export class SettingsPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly savedObjects = this.ctx.getPageObject('savedObjects');
+  private readonly toasts = this.ctx.getService('toasts');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   async clickLinkText(text: string) {
@@ -191,6 +192,14 @@ export class SettingsPageObject extends FtrService {
     await field.type(dataViewName);
   }
 
+  async expectDisabledDataViewEditor() {
+    const nameField = await this.getNameField();
+    expect(await nameField.getAttribute('disabled')).to.equal('true');
+
+    const titleField = await this.getIndexPatternField();
+    expect(await titleField.getAttribute('disabled')).to.equal('true');
+  }
+
   async getSaveIndexPatternButton() {
     return await this.testSubjects.find('saveIndexPatternButton');
   }
@@ -216,11 +225,16 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
+    await this.testSubjects.click('moreActionsButton');
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
   async getIndexPageHeading() {
     return await this.testSubjects.getVisibleText('indexPatternTitle');
+  }
+
+  async getManagedTag() {
+    return await this.testSubjects.getVisibleText('managed-tag');
   }
 
   async getTableHeader() {
@@ -312,76 +326,71 @@ export class SettingsPageObject extends FtrService {
     );
   }
 
-  async clearFieldTypeFilter(type: string) {
+  async isOptionChecked(option: string) {
+    const element = await this.testSubjects.find(`selectable-option-${option}`);
+    const ariaChecked = await element.getAttribute('aria-checked');
+    return ariaChecked === 'true';
+  }
+
+  async clearSelectableOption(triggerTestSubj: string, selectableTestSubj: string, option: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
-      await this.find.byCssSelector(
-        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
-      );
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(triggerTestSubj);
+      await this.testSubjects.find(selectableTestSubj);
     });
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
-    });
-    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
+
+    expect(await this.isOptionChecked(option)).to.be(true);
+    await this.testSubjects.click(`selectable-option-${option}`);
+    expect(await this.isOptionChecked(option)).to.be(false);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async setSelectableOption(triggerTestSubj: string, selectableTestSubj: string, option: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(triggerTestSubj);
+      await this.testSubjects.find(selectableTestSubj);
+    });
+
+    expect(await this.isOptionChecked(option)).to.be(false);
+    await this.testSubjects.click(`selectable-option-${option}`);
+    expect(await this.isOptionChecked(option)).to.be(true);
+
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async clearFieldTypeFilter(type: string) {
+    await this.clearSelectableOption(
+      'indexedFieldTypeFilterDropdown',
+      'indexedFieldTypeSelectable',
+      type
+    );
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
-      await this.find.byCssSelector(
-        '.euiPopover-isOpen[data-test-subj="indexedFieldTypeFilterDropdown-popover"]'
-      );
-    });
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.setSelectableOption(
+      'indexedFieldTypeFilterDropdown',
+      'indexedFieldTypeSelectable',
+      type
+    );
   }
 
   async setSchemaFieldTypeFilter(type: string) {
-    await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('schemaFieldTypeFilterDropdown');
-      await this.find.byCssSelector(
-        '.euiPopover-isOpen[data-test-subj="schemaFieldTypeFilterDropdown-popover"]'
-      );
-    });
-    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.click(`schemaFieldTypeFilterDropdown-option-${type}`);
-    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}-checked`);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.setSelectableOption('schemaFieldTypeFilterDropdown', 'schemaTypeSelectable', type);
   }
 
   async clearScriptedFieldLanguageFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabledWithoutRetry('scriptedFieldLanguageFilterDropdown');
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    });
-    await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(
-        `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
-      );
-    });
-    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
-    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.clearSelectableOption(
+      'scriptedFieldLanguageFilterDropdown',
+      'scriptedFieldLanguageSelectable',
+      type
+    );
   }
 
   async setScriptedFieldLanguageFilter(language: string) {
-    await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry(
-        'scriptedFieldLanguageFilterDropdown'
-      );
-      return await this.find.byCssSelector('div.euiPopover__panel[data-popover-open]');
-    });
-    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${language}`);
-    await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${language}`);
-    await this.testSubjects.existOrFail(
-      `scriptedFieldLanguageFilterDropdown-option-${language}-checked`
+    await this.setSelectableOption(
+      'scriptedFieldLanguageFilterDropdown',
+      'scriptedFieldLanguageSelectable',
+      language
     );
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
   async filterField(name: string) {
@@ -569,7 +578,7 @@ export class SettingsPageObject extends FtrService {
         }
       );
 
-      await (await this.getSaveIndexPatternButton()).click();
+      await (await this.getSaveDataViewButtonActive()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
@@ -712,6 +721,7 @@ export class SettingsPageObject extends FtrService {
     });
     await this.retry.try(async () => {
       this.log.debug('acceptConfirmation');
+      await this.toasts.dismissAllWithChecks();
       await this.testSubjects.click('confirmFlyoutConfirmButton');
     });
     await this.retry.try(async () => {
@@ -859,7 +869,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async closeIndexPatternFieldEditor() {
-    await this.testSubjects.click('closeFlyoutButton');
+    await this.flyout.closeFlyout();
 
     // We might have unsaved changes and we need to confirm inside the modal
     if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
@@ -884,6 +894,11 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('click Save');
     await this.testSubjects.click('fieldSaveButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async expectDisabledFieldEditor() {
+    expect(await this.testSubjects.getAttribute('input', 'disabled')).to.eql('true');
+    expect(await this.testSubjects.getAttribute('typeField', 'disabled')).to.eql('true');
   }
 
   async setFieldName(name: string) {
@@ -964,6 +979,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('toggling tow = ' + rowTestSubj);
     const row = await this.testSubjects.find(rowTestSubj);
     const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.scrollIntoViewIfNecessary();
     await rowToggle.click();
     return row;
   }
@@ -1093,7 +1109,9 @@ export class SettingsPageObject extends FtrService {
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
 
-    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    });
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');

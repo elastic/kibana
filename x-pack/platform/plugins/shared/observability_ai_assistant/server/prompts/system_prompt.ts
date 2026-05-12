@@ -59,7 +59,7 @@ export function getSystemPrompt({
     // Section One: Core Introduction
     promptSections.push(
       dedent(`
-        # System Prompt: Elastic Observability Assistant
+        # System Prompt: Elastic ${isObservabilityDeployment ? 'Observability ' : ''}Assistant
 
         <RoleAndGoal>
 
@@ -93,7 +93,7 @@ export function getSystemPrompt({
         )}` +
         `${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-            ? ' first attempt to retrieve it using the `context` tool response. If the context does not provide it,'
+            ? ' first check the `context` tool response (which is injected automatically into the conversation and cannot be called directly). If the context does not provide it,'
             : ''
         } **ALWAYS** assume a default time range of **start='now-15m'** and **end='now'**. **DO NOT** ask the user for a time range. When you use a default time range, *always inform the user* which range was used in your response (e.g., "Based on the last 15 minutes...").`;
     }
@@ -191,7 +191,7 @@ export function getSystemPrompt({
           ', '
         )}), ${
           isFunctionAvailable(CONTEXT_FUNCTION_NAME)
-            ? `first try \`${CONTEXT_FUNCTION_NAME}\` to find time range. If no time range is found in context,`
+            ? `first check the \`${CONTEXT_FUNCTION_NAME}\` tool response (injected automatically into the conversation and cannot be called directly) to find time range. If no time range is found in context,`
             : ''
         } use the default (\`start='now-15m'\`, \`end='now'\`) and inform the user. ${
           isFunctionAvailable(ALERTS_FUNCTION_NAME)
@@ -203,10 +203,10 @@ export function getSystemPrompt({
 
     if (isFunctionAvailable(GET_DATASET_INFO_FUNCTION_NAME)) {
       usage.push(
-        `**Get Dataset Information:** Use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields available on them. 
+        `**Get Dataset Information:** Use the \`${GET_DATASET_INFO_FUNCTION_NAME}\` tool to get information about indices/datasets available and the fields available on them.
          * Providing an empty string as index name will retrieve all indices. Otherwise list of all fields for the given index will be given.
          * If the user doesn't specify a particular index, always retrieve all indices.
-         * If no fields are returned this means no indices were matched by provided index pattern. 
+         * If no fields are returned this means no indices were matched by provided index pattern.
          * Wildcards can be part of index name.`
       );
     }
@@ -243,7 +243,7 @@ export function getSystemPrompt({
          * Skip it only when the user already supplied a complete query that includes a valid \`FROM <index>\` clause in the query.
          * Skip it if the user asks you to **assume** their data is in a particular index in their question.
         * For example queries and syntax conversion requests:
-          * If the user doesn't ask for specific data, but rather asks for the query, you can consider it an example query in this context. 
+          * If the user doesn't ask for specific data, but rather asks for the query, you can consider it an example query in this context.
           * If dataset lookup yields nothing, you **MUST** still call \`${QUERY_FUNCTION_NAME}\`
           * Make a sensible index and field assumptions from the user's request. Notify the user of the assumptions you used.
           * Do **NOT** ask them to supply index or field names first.
@@ -272,11 +272,11 @@ export function getSystemPrompt({
 
     if (isFunctionAvailable(CONTEXT_FUNCTION_NAME) && isKnowledgeBaseReady) {
       usage.push(
-        `**Context Retrieval:** You can use the \`${CONTEXT_FUNCTION_NAME}\` tool to retrieve relevant information from the knowledge database. The response will include a "learnings" field containing information
-          from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
+        `**Context Retrieval:** The \`${CONTEXT_FUNCTION_NAME}\` tool response is injected automatically into the conversation and cannot be called directly. It contains relevant information from the knowledge database.
+          The response will include a "learnings" field containing information from the knowledge base that is most relevant to the user's current query. You should incorporate these learnings into your responses when answering the user's questions.
           The information in the "learnings" field contains up-to-date information that you should consider when formulating your responses. DO NOT add disclaimers about the currency or certainty of this information.
           Present this information directly without qualifiers like "I don't have specific, up-to-date information" or "I can't be completely certain".
-          
+
           Stick strictly to the information provided in the "learnings" field. DO NOT assume, infer, or add any details that are not explicitly stated in the response.
           If the user asks for information that is not covered in the "learnings" field, acknowledge the gap and ask for clarification rather than making assumptions or offering suggestions that aren't based on the provided knowledge.`
       );
@@ -305,7 +305,7 @@ export function getSystemPrompt({
     if (isFunctionAvailable(GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME)) {
       usage.push(
         `**Service/APM Dependencies:** Use \`${GET_APM_DOWNSTREAM_DEPENDENCIES_FUNCTION_NAME}\`. Extract the \`service.name\` correctly from the user query. Follow these steps:
-          *  **Prioritize User-Specified Time:** First, you **MUST** scan the user's query for any statement of time (e.g., "last hour," "past 30 minutes," "between 2pm and 4pm yesterday"). 
+          *  **Prioritize User-Specified Time:** First, you **MUST** scan the user's query for any statement of time (e.g., "last hour," "past 30 minutes," "between 2pm and 4pm yesterday").
           *  **Override Defaults:** If a time range is found in the query, you **MUST** use it. This user-provided time range **ALWAYS** takes precedence over and replaces any default or contextual time range (like \`now-15m\`).
           *  **Extract Service Name:** Correctly extract the \`service.name\` from the user query.`
       );

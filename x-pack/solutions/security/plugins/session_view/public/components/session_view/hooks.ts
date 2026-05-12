@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -74,7 +74,16 @@ export const useFetchSessionViewProcessEvents = (
         },
       });
 
-      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
+      const events =
+        res.events?.map((event: any) => {
+          const source = event._source as ProcessEvent;
+
+          if (source?.kibana?.alert && event._index) {
+            source.kibana.alert.index = event._index;
+          }
+
+          return source;
+        }) ?? [];
 
       return { events, cursor, total: res.total };
     },
@@ -117,8 +126,10 @@ export const useFetchSessionViewProcessEvents = (
         }
       },
       refetchOnWindowFocus: false,
-      refetchOnMount: false,
+      refetchOnMount: 'always',
       refetchOnReconnect: false,
+      cacheTime: 0,
+      staleTime: 0,
     }
   );
 
@@ -155,7 +166,16 @@ export const useFetchSessionViewAlerts = (
         },
       });
 
-      const events = res.events?.map((event: any) => event._source as ProcessEvent) ?? [];
+      const events =
+        res.events?.map((event: any) => {
+          const source = event._source as ProcessEvent;
+
+          if (source?.kibana?.alert && event._index) {
+            source.kibana.alert.index = event._index;
+          }
+
+          return source;
+        }) ?? [];
 
       return {
         events,

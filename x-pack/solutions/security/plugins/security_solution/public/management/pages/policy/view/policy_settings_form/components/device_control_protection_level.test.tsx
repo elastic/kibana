@@ -69,6 +69,13 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
     const expectedPolicyUpdate = cloneDeep(formProps.policy);
     expectedPolicyUpdate.windows.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
     expectedPolicyUpdate.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
+    // Notifications should be disabled when switching away from deny_all
+    if (expectedPolicyUpdate.windows.popup.device_control) {
+      expectedPolicyUpdate.windows.popup.device_control.enabled = false;
+    }
+    if (expectedPolicyUpdate.mac.popup.device_control) {
+      expectedPolicyUpdate.mac.popup.device_control.enabled = false;
+    }
 
     render();
 
@@ -82,14 +89,52 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
     });
   });
 
-  it('should allow block mode to be selected', async () => {
+  it('should disable notifications when switching from deny_all to audit', async () => {
+    formProps.policy.windows.popup.device_control = {
+      enabled: true,
+      message: 'Test message',
+    };
+    formProps.policy.mac.popup.device_control = {
+      enabled: true,
+      message: 'Test message',
+    };
+
+    const expectedPolicyUpdate = cloneDeep(formProps.policy);
+    expectedPolicyUpdate.windows.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
+    expectedPolicyUpdate.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
+    expectedPolicyUpdate.windows.popup.device_control!.enabled = false;
+    expectedPolicyUpdate.mac.popup.device_control!.enabled = false;
+
+    render();
+
+    expect(isAccessLevelChecked('deny_all')).toBe(true);
+
+    await clickAccessLevel('audit');
+
+    expect(formProps.onChange).toHaveBeenCalledWith({
+      isValid: true,
+      updatedPolicy: expectedPolicyUpdate,
+    });
+  });
+
+  it('should allow block mode to be selected and enable notifications by default', async () => {
     formProps.policy.windows.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
     formProps.policy.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
+    formProps.policy.windows.popup.device_control = {
+      enabled: false,
+      message: 'Test message',
+    };
+    formProps.policy.mac.popup.device_control = {
+      enabled: false,
+      message: 'Test message',
+    };
 
     const expectedPolicyUpdate = cloneDeep(formProps.policy);
     expectedPolicyUpdate.windows.device_control!.usb_storage =
       DeviceControlAccessLevelEnum.deny_all;
     expectedPolicyUpdate.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.deny_all;
+    expectedPolicyUpdate.windows.popup.device_control!.enabled = true;
+    expectedPolicyUpdate.mac.popup.device_control!.enabled = true;
 
     render();
 
@@ -121,7 +166,7 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
       expectIsViewOnly(renderResult.getByTestId('test'));
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        'USB storage access levelAllow all'
+        'USB storage access levelAllow read, write and execute'
       );
     });
 

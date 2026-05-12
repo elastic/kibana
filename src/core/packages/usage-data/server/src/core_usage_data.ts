@@ -62,7 +62,6 @@ export interface CoreConfigUsageData {
     customHeadersConfigured: boolean;
     shardTimeoutMs: number;
     requestTimeoutMs: number;
-    pingTimeoutMs: number;
     logQueries: boolean;
     ssl: {
       verificationMode: 'none' | 'certificate' | 'full';

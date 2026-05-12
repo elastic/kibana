@@ -27,11 +27,13 @@ describe('saved_searches_utils', () => {
             columns: ['a', 'b'],
             grid: {},
             hideChart: true,
+            hideTable: false,
             isTextBasedQuery: false,
             usesAdHocDataView: false,
             rowsPerPage: 250,
             sampleSize: 1000,
             breakdownField: 'extension.keyword',
+            chartInterval: 'm',
           },
         },
       ];
@@ -43,11 +45,14 @@ describe('saved_searches_utils', () => {
         description: 'foo',
         grid: {},
         hideChart: true,
+        hideTable: false,
         isTextBasedQuery: false,
         usesAdHocDataView: false,
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
+        chartInterval: 'm',
+        controlGroupJson: undefined,
         tabs,
       };
 
@@ -64,16 +69,19 @@ describe('saved_searches_utils', () => {
       ).toMatchInlineSnapshot(`
         Object {
           "breakdownField": "extension.keyword",
+          "chartInterval": "m",
           "columns": Array [
             "a",
             "b",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "foo",
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
+          "hideTable": false,
           "id": "id",
           "isTextBasedQuery": false,
           "managed": false,
@@ -112,12 +120,14 @@ describe('saved_searches_utils', () => {
             Object {
               "attributes": Object {
                 "breakdownField": "extension.keyword",
+                "chartInterval": "m",
                 "columns": Array [
                   "a",
                   "b",
                 ],
                 "grid": Object {},
                 "hideChart": true,
+                "hideTable": false,
                 "isTextBasedQuery": false,
                 "kibanaSavedObjectMeta": Object {
                   "searchSourceJSON": "{}",
@@ -173,6 +183,7 @@ describe('saved_searches_utils', () => {
         description: 'description',
         grid: {},
         hideChart: true,
+        hideTable: false,
         isTextBasedQuery: true,
         usesAdHocDataView: false,
         timeRestore: false,
@@ -188,6 +199,7 @@ describe('saved_searches_utils', () => {
               columns: ['c', 'd'],
               grid: {},
               hideChart: true,
+              hideTable: false,
               isTextBasedQuery: true,
               usesAdHocDataView: false,
               timeRestore: false,

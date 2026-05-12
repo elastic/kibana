@@ -14,8 +14,6 @@ export interface EmptyListContent {
   }) => ReturnType<FunctionComponent>;
 }
 ```
-- `setIndexDetailsPageRoute`: registers a new route for index details page in indices list table. For example, for serverless search users, navigating to an index on the indices list page will lead to the Search Indices detail page.
-
 
 #### Extensions to the indices list and the index details page
 - `addAction(action: any)`: adds an option to the "manage index" menu, for example to add an ILM policy to the index
@@ -52,8 +50,7 @@ interface IndexContent {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];
   }) => ReturnType<FunctionComponent>;
-```
-- `setIndexMappingsContent(content: IndexContent)`: adds content to the mappings tab of the index details page. The content is displayed in the right bottom corner, below the mappings docs link. 
+``` 
 
 ## Index data enrichers
 The extensions service that allows to render additional UI elements in the indices list and on the index details page often

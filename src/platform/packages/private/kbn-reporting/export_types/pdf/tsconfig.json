@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -16,11 +16,13 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/tracing-utils",
     "@kbn/reporting-common",
     "@kbn/screenshotting-plugin",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-mocks-server",
     "@kbn/licensing-types",
+    "@kbn/licensing-plugin",
   ]
 }

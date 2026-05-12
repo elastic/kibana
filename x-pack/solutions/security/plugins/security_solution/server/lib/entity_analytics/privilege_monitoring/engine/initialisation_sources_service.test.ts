@@ -6,99 +6,121 @@
  */
 
 import type { AuditLogger } from '@kbn/core/server';
-import type { PrivilegeMonitoringGlobalDependencies } from './data_client';
-import { PrivilegeMonitoringDataClient } from './data_client';
+
 import {
   createInitialisationSourcesService,
+  shouldUpsertManagedSources,
   type InitialisationSourcesService,
 } from './initialisation_sources_service';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  analyticsServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
-import { mockGlobalState } from '../../../../../public/common/mock';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import { integrationsSourceIndex } from '../data_sources';
+
+const mockListByKuery = jest.fn().mockResolvedValue([]);
+const mockBulkUpsert = jest.fn();
+const mockList = jest.fn().mockResolvedValue({ sources: [], total: 0 });
+const mockBulkCreate = jest.fn();
 
 jest.mock('../saved_objects', () => {
-  const mockEngineDescriptorInit = jest.fn();
-  const mockFind = jest.fn().mockResolvedValue({
-    saved_objects: [],
-    total: 0,
-  });
   return {
     MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
-      findByIndex: jest.fn(),
-      create: jest.fn(),
-      bulkCreate: jest.fn(),
-      update: jest.fn(),
-      find: mockFind,
-      findAll: jest.fn(),
-      bulkUpsert: jest.fn(),
+      bulkCreate: mockBulkCreate,
+      list: mockList,
+      bulkUpsert: mockBulkUpsert,
+      listByKuery: mockListByKuery,
     })),
     PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
-      init: mockEngineDescriptorInit,
+      init: jest.fn(),
       update: jest.fn(),
     })),
   };
 });
 
 describe('createInitialisationSourcesService', () => {
-  const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
-  const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();
+  const namespace = 'default';
 
-  const savedObjectServiceMock = savedObjectsServiceMock.createStartContract();
-  const dataClientDeps: PrivilegeMonitoringGlobalDependencies = {
-    logger: loggerMock,
-    clusterClient: clusterClientMock,
-    namespace: 'default',
-    kibanaVersion: '9.0.0',
-    taskManager: {} as TaskManagerStartContract,
-    auditLogger: auditMock,
-    telemetry: telemetryMock,
-    savedObjects: savedObjectServiceMock,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
-  };
-
-  let dataClient: PrivilegeMonitoringDataClient;
-  let initSourcesService: InitialisationSourcesService;
-  let monitoringDescriptorClient: MonitoringEntitySourceDescriptorClient;
+  let upsertSources: InitialisationSourcesService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    dataClient = new PrivilegeMonitoringDataClient(dataClientDeps);
-    initSourcesService = createInitialisationSourcesService(dataClient);
-    const mockLog = jest.fn();
-    dataClient.log = mockLog;
-    monitoringDescriptorClient = new (MonitoringEntitySourceDescriptorClient as jest.Mock)();
+    mockBulkUpsert.mockClear();
+    const monitoringDescriptorClient = new MonitoringEntitySourceDescriptorClient({
+      soClient: savedObjectsClientMock.create(),
+      namespace,
+    });
+    upsertSources = createInitialisationSourcesService({
+      descriptorClient: monitoringDescriptorClient,
+      logger: loggerMock,
+      auditLogger: auditMock,
+    });
   });
 
   it('should create sources when none exist', async () => {
-    (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue([]);
-    await initSourcesService.upsertSources(monitoringDescriptorClient);
-    expect(monitoringDescriptorClient.bulkCreate).toHaveBeenCalledTimes(1);
-    expect(monitoringDescriptorClient.update).not.toHaveBeenCalled();
+    mockList.mockResolvedValue({ sources: [], total: 0 });
+    await upsertSources(namespace);
+    expect(mockBulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBulkUpsert).not.toHaveBeenCalled();
   });
 
-  it('should update sources when they already exist', async () => {
+  it('should not update sources when they already exist', async () => {
     const existingSources = [
-      { id: '1', name: '.entity_analytics.monitoring.users-default' },
-      { id: '2', name: '.entity_analytics.monitoring.sources.okta-default' },
-      { id: '3', name: '.entity_analytics.monitoring.sources.ad-default' },
+      {
+        id: '1',
+        name: getPrivilegedMonitorUsersIndex(namespace),
+      },
+      {
+        id: '2',
+        name: integrationsSourceIndex(namespace, 'entityanalytics_okta'),
+      },
+      {
+        id: '3',
+        name: integrationsSourceIndex(namespace, 'entityanalytics_ad'),
+      },
     ];
-    (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue(existingSources);
-    await initSourcesService.upsertSources(monitoringDescriptorClient);
-    expect(monitoringDescriptorClient.bulkUpsert).toHaveBeenCalledTimes(1);
+    mockList.mockResolvedValue({ sources: existingSources, total: existingSources.length });
+    mockListByKuery.mockResolvedValue({ sources: existingSources, total: existingSources.length });
+    await upsertSources(namespace);
+    expect(mockBulkUpsert).toHaveBeenCalledTimes(0);
   });
 
   it('should create missing sources and update existing ones', async () => {
     const existingSources = [{ id: '3', name: '.entity_analytics.monitoring.sources.ad-default' }];
-    (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue(existingSources);
-    await initSourcesService.upsertSources(monitoringDescriptorClient);
-    expect(monitoringDescriptorClient.bulkUpsert).toHaveBeenCalledTimes(1);
+    mockList.mockResolvedValue({ sources: existingSources, total: existingSources.length });
+    mockListByKuery.mockResolvedValue({ sources: existingSources, total: existingSources.length });
+
+    await upsertSources(namespace);
+    expect(mockBulkUpsert).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns false when all required sources exist with matching versions', () => {
+    const requiredSources = [
+      { name: 'source-a', managedVersion: 1 },
+      { name: 'source-b', managedVersion: 1 },
+    ];
+    const installedByName = new Map([
+      ['source-a', { id: '1', name: 'source-a', managedVersion: 1 }],
+      ['source-b', { id: '2', name: 'source-b', managedVersion: 1 }],
+    ]);
+
+    expect(shouldUpsertManagedSources(requiredSources, installedByName)).toBe(false);
+  });
+
+  it('returns true when a required source is missing', () => {
+    const requiredSources = [{ name: 'source-a', managedVersion: 1 }];
+    const installedByName = new Map();
+
+    expect(shouldUpsertManagedSources(requiredSources, installedByName)).toBe(true);
+  });
+
+  it('returns true when a managed version differs', () => {
+    const requiredSources = [{ name: 'source-a', managedVersion: 2 }];
+    const installedByName = new Map([
+      ['source-a', { id: '1', name: 'source-a', managedVersion: 1 }],
+    ]);
+
+    expect(shouldUpsertManagedSources(requiredSources, installedByName)).toBe(true);
   });
 });

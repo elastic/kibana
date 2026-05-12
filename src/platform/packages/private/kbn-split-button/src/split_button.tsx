@@ -8,17 +8,21 @@
  */
 
 import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiButtonProps, IconType, UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
 
-type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
+export type SplitButtonProps = React.ComponentProps<typeof EuiButton> & {
   isMainButtonLoading?: boolean;
+  isMainButtonDisabled?: boolean;
   iconOnly?: boolean;
 
   isSecondaryButtonLoading?: boolean;
-  secondaryButtonIcon: string;
+  isSecondaryButtonDisabled?: boolean;
+  secondaryButtonIcon: IconType;
   secondaryButtonAriaLabel?: string;
+  secondaryButtonTitle?: string;
+  secondaryButtonFill?: boolean;
   onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -32,12 +36,16 @@ export const SplitButton = ({
 
   // Secondary button props
   isSecondaryButtonLoading = false,
+  isSecondaryButtonDisabled = false,
   secondaryButtonIcon,
   secondaryButtonAriaLabel,
+  secondaryButtonTitle,
+  secondaryButtonFill,
   onSecondaryButtonClick,
 
   // Primary button props
   isMainButtonLoading = false,
+  isMainButtonDisabled = false,
   iconOnly = false,
   iconType,
   ...mainButtonProps
@@ -50,23 +58,22 @@ export const SplitButton = ({
 
   const areButtonsDisabled = disabled || isDisabled;
 
-  const commonMainButtonProps = {
+  const commonMainButtonProps: EuiButtonProps = {
     css: styles.mainButton,
     style: {
       borderRightColor: borderColor,
     },
     color,
     size,
-    isDisabled: areButtonsDisabled,
+    isDisabled: areButtonsDisabled || isMainButtonDisabled,
     isLoading: isLoading || isMainButtonLoading,
-    'data-icon': iconType,
     ...mainButtonProps,
-    'data-test-subj': mainButtonProps['data-test-subj'] + '-primary-button',
+    'data-test-subj': mainButtonProps['data-test-subj'],
   };
 
   return (
     <div
-      data-test-subj={mainButtonProps['data-test-subj']}
+      data-test-subj={mainButtonProps['data-test-subj'] + '-container'}
       css={[styles.container, hasTransparentBorder && styles.containerWithGap]}
     >
       {iconOnly && iconType ? (
@@ -77,14 +84,14 @@ export const SplitButton = ({
       <EuiButtonIcon
         css={styles.secondaryButton}
         data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
-        data-icon={secondaryButtonIcon}
         aria-label={secondaryButtonAriaLabel}
-        display="base"
+        display={secondaryButtonFill ? 'fill' : 'base'}
+        title={secondaryButtonTitle}
         color={color}
         size={size}
         iconType={secondaryButtonIcon}
         onClick={onSecondaryButtonClick}
-        isDisabled={areButtonsDisabled}
+        isDisabled={areButtonsDisabled || isSecondaryButtonDisabled}
         isLoading={isLoading || isSecondaryButtonLoading}
       />
     </div>

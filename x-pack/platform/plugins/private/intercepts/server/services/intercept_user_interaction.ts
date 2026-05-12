@@ -26,8 +26,6 @@ export class InterceptUserInteractionService {
   private savedObjectRef = interceptInteractionUserRecordSavedObject;
 
   setup(core: CoreSetup, logger: Logger) {
-    core.savedObjects.registerType(this.savedObjectRef);
-
     const router = core.http.createRouter<RequestHandlerContext>();
 
     router.get(

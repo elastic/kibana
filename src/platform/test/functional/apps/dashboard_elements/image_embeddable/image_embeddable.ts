@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should create an image embeddable', async () => {
       // create an image embeddable
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Image');
       await testSubjects.exists(`createImageEmbeddableFlyout`);
       await common.setFileInputPath(require.resolve('./elastic_logo.png'));
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
       await dashboardDrilldownsManage.expectsCreateDrilldownFlyoutOpen();
 
-      await testSubjects.click('actionFactoryItem-DASHBOARD_TO_DASHBOARD_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-dashboard_drilldown');
       await dashboardDrilldownsManage.fillInDashboardToDashboardDrilldownWizard({
         drilldownName: `My drilldown`,
         destinationDashboardTitle: `few panels`,

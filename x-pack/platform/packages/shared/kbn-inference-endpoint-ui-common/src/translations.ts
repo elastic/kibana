@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 export const getRequiredMessage = (field: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
@@ -142,12 +143,49 @@ export const GET_PROVIDERS_FAILED = i18n.translate(
   }
 );
 
-export const ENDPOINT_TITLE = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.EndpointTitle',
+export const ADD_ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.addEndpointTitle',
   {
-    defaultMessage: 'Inference Endpoint',
+    defaultMessage: 'Add inference endpoint',
   }
 );
+
+export const EDIT_ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.editEndpointTitle',
+  {
+    defaultMessage: 'Edit inference endpoint',
+  }
+);
+
+export const TASK_TYPE_DESCRIPTIONS: Partial<Record<InferenceTaskType, string>> = {
+  text_embedding: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.textEmbeddingDescription',
+    {
+      defaultMessage: 'Converts text into dense vector representations for semantic search',
+    }
+  ),
+  sparse_embedding: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.sparseEmbeddingDescription',
+    {
+      defaultMessage: 'Converts text into sparse vector representations for semantic search',
+    }
+  ),
+  rerank: i18n.translate('xpack.inferenceEndpointUICommon.components.taskType.rerankDescription', {
+    defaultMessage: 'Re-ranks search results by relevance',
+  }),
+  completion: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.completionDescription',
+    {
+      defaultMessage: 'Generates text completions from a given input',
+    }
+  ),
+  chat_completion: i18n.translate(
+    'xpack.inferenceEndpointUICommon.components.taskType.chatCompletionDescription',
+    {
+      defaultMessage: 'Generates conversational responses from a chat input',
+    }
+  ),
+};
 
 export const CANCEL = i18n.translate('xpack.inferenceEndpointUICommon.components.cancelBtnLabel', {
   defaultMessage: 'Cancel',
@@ -221,5 +259,72 @@ export const CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.contextWindowLengthTaskTypeValidationMessage',
   {
     defaultMessage: 'Context window length is only applicable for chat completion tasks.',
+  }
+);
+
+export const ADD_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.addHeadersLabel',
+  {
+    defaultMessage: 'Add HTTP headers',
+  }
+);
+
+export const VIEW_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.viewHeadersLabel',
+  {
+    defaultMessage: 'View HTTP headers',
+  }
+);
+
+export const HIDE_HEADERS_SWITCH_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.hideHeadersLabel',
+  {
+    defaultMessage: 'Hide HTTP headers',
+  }
+);
+
+export const ADD_LABEL = i18n.translate('xpack.inferenceEndpointUICommon.components.addLabel', {
+  defaultMessage: 'Add',
+});
+
+export const DELETE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+export const HEADERS_KEY_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersKeyLabel',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const HEADERS_VALUE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HEADERS_DUPLICATE_KEY_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.headersDuplicateKeyMessage',
+  {
+    defaultMessage: 'Header keys must be unique.',
+  }
+);
+
+export const TEMPERATURE_LABEL = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureTextFieldLabel',
+  {
+    defaultMessage: 'Temperature',
+  }
+);
+
+export const TEMPERATURE_VALIDATION_MESSAGE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.temperatureValidationMessage',
+  {
+    defaultMessage: 'Temperature must be a number between 0 and 1.',
   }
 );

@@ -7,8 +7,8 @@
 
 import type { GetPackagePoliciesRequest, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS, packagePolicyRouteService } from '@kbn/fleet-plugin/common';
-import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useHttp } from '../../../common/lib/kibana';
 import type { GetIntegrationPolicyListResponse } from './types';

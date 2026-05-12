@@ -9,9 +9,8 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { initializeStateManager } from '@kbn/presentation-publishing';
+import { apiCanAddNewPanel, initializeStateManager } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';
@@ -45,11 +44,9 @@ export const createSavedBookAction = (core: CoreStart) => {
             onSubmit: async ({ savedObjectId }) => {
               embeddable.addNewPanel<BookEmbeddableState>({
                 panelType: BOOK_EMBEDDABLE_TYPE,
-                serializedState: {
-                  rawState: savedObjectId
-                    ? { savedObjectId }
-                    : newBookStateManager.getLatestState(),
-                },
+                serializedState: savedObjectId
+                  ? { savedObjectId }
+                  : newBookStateManager.getLatestState(),
               });
             },
           });

@@ -23,10 +23,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type {
-  CombinedJob,
-  Datafeed,
-} from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';
@@ -229,6 +227,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
               <>
                 <EuiSpacer />
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   size="s"
                   title={i18n.translate(
@@ -317,7 +316,7 @@ const Contents: FC<{
   return (
     <EuiFlexItem>
       <EuiTitle size="s">
-        <h5 id={flyoutTitleId}>{title}</h5>
+        <h2 id={flyoutTitleId}>{title}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <MLJobEditor

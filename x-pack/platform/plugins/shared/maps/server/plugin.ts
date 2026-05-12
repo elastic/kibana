@@ -19,7 +19,6 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
@@ -74,7 +73,6 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
       dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
       oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
       embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
-      // @ts-expect-error
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,
@@ -103,7 +101,6 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
       dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
       oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
       embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
-      // @ts-expect-error
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: true,
@@ -130,7 +127,6 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
       dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
       oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
       embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
-      // @ts-expect-error
       embeddableType: MAP_SAVED_OBJECT_TYPE,
       embeddableConfig: {
         isLayerTOCOpen: false,
@@ -193,7 +189,6 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
           defaultMessage: 'Maps',
         }),
         category: DEFAULT_APP_CATEGORIES.kibana,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [APP_ID, 'kibana'],
         catalogue: [APP_ID],
         privileges: {
@@ -264,10 +259,7 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
     contentManagement.register({
       id: CONTENT_ID,
-      storage: new MapsStorage({
-        throwOnResultValidationError: this._initializerContext.env.mode.dev,
-        logger: this._logger.get('storage'),
-      }),
+      storage: new MapsStorage(),
       version: {
         latest: LATEST_VERSION,
       },
@@ -275,13 +267,10 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
-    plugins.embeddable.registerTransforms(
-      MAP_SAVED_OBJECT_TYPE,
-      getTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      )
-    );
+    plugins.embeddable.registerEmbeddableServerDefinition(MAP_SAVED_OBJECT_TYPE, {
+      title: 'Map',
+      getTransforms,
+    });
 
     return {
       config: config$,

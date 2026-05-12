@@ -17,6 +17,7 @@ function isOfQueryType(arg: Query | AggregateQuery): arg is Query {
 }
 
 interface UseQueryStringProps {
+  disabled?: boolean;
   query?: Query | AggregateQuery;
   queryStringManager: QueryStringContract;
 }
@@ -27,6 +28,10 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     props.query || props.queryStringManager.getQuery()
   );
   useEffect(() => {
+    if (props.disabled) {
+      return;
+    }
+
     const subscriptions = new Subscription();
 
     subscriptions.add(
@@ -41,17 +46,24 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [props.queryStringManager]);
+  }, [props.queryStringManager, props.disabled]);
 
-  const isQueryType = isOfQueryType(query);
-  const stableQuery = useMemo(() => {
-    if (isQueryType) {
-      return {
-        language: query.language,
-        query: query.query,
-      };
-    }
-    return query;
-  }, [isQueryType, query]);
-  return { query: stableQuery };
+  const stableQuery = useMemo(() => getStableQuery(query), [query]);
+
+  const propsQuery = useMemo(
+    () => getStableQuery(props.query || props.queryStringManager.getDefaultQuery()),
+    [props.query, props.queryStringManager]
+  );
+
+  return { query: props.disabled ? propsQuery : stableQuery };
 };
+
+function getStableQuery(query: Query | AggregateQuery) {
+  if (isOfQueryType(query)) {
+    return {
+      language: query.language,
+      query: query.query,
+    };
+  }
+  return query;
+}

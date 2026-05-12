@@ -9,77 +9,61 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Subject } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
-import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
+import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import type {
-  Datatable,
-  DatatableColumn,
-  DefaultInspectorAdapters,
-} from '@kbn/expressions-plugin/common';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
+import { useStableCallback } from '@kbn/react-hooks';
 import { Histogram } from './histogram';
 import type {
-  UnifiedHistogramBreakdownContext,
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramFetch$,
+  UnifiedHistogramFetchParams,
   UnifiedHistogramHitsContext,
-  UnifiedHistogramInput$,
-  UnifiedHistogramInputMessage,
-  UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  LensVisServiceState,
 } from '../../types';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
-import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
-import { useFetch } from './hooks/use_fetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 import type { LensVisService } from '../../services/lens_vis_service';
-import type { UseRequestParamsResult } from '../../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
-import { useStableCallback } from '../../hooks/use_stable_callback';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
 export interface UnifiedHistogramChartProps {
-  abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   services: UnifiedHistogramServices;
-  dataView: DataView;
-  requestParams: UseRequestParamsResult;
-  isPlainRecord?: boolean;
   lensVisService: LensVisService;
-  relativeTimeRange?: TimeRange;
-  request?: UnifiedHistogramRequestContext;
-  hits?: UnifiedHistogramHitsContext;
-  chart?: UnifiedHistogramChartContext;
-  breakdown?: UnifiedHistogramBreakdownContext;
-  renderCustomChartToggleActions?: () => ReactElement | undefined;
+  lensVisServiceState: LensVisServiceState;
+  hits: UnifiedHistogramHitsContext | undefined;
+  chart: UnifiedHistogramChartContext | undefined;
+  renderToggleActions: () => ReactElement | undefined;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
-  input$?: UnifiedHistogramInput$;
-  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
+  fetch$: UnifiedHistogramFetch$;
+  fetchParams: UnifiedHistogramFetchParams;
+  lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined;
+  dataLoading$: LensEmbeddableOutput['dataLoading$'] | undefined;
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -89,7 +73,6 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  columns?: DatatableColumn[];
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -98,17 +81,13 @@ const HistogramMemoized = memo(Histogram);
 export function UnifiedHistogramChart({
   isChartAvailable,
   services,
-  dataView,
-  requestParams,
-  relativeTimeRange: originalRelativeTimeRange,
-  request,
   hits,
   chart,
-  breakdown,
   lensVisService,
-  isPlainRecord,
-  renderCustomChartToggleActions,
-  input$: originalInput$,
+  lensVisServiceState,
+  renderToggleActions,
+  fetch$,
+  fetchParams,
   lensAdapters,
   dataLoading$,
   isChartLoading,
@@ -117,49 +96,55 @@ export function UnifiedHistogramChart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
-  columns,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
-  const lensVisServiceCurrentSuggestionContext = useObservable(
-    lensVisService.currentSuggestionContext$
-  );
-  const visContext = useObservable(lensVisService.visContext$);
+  const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
+  const visContext = lensVisServiceState.visContext;
   const currentSuggestion = lensVisServiceCurrentSuggestionContext?.suggestion;
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { chartRef, toggleHideChart } = useChartActions({
-    chart,
-    onChartHiddenChange,
-  });
 
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
 
-  const input$ = useMemo(
-    () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
-    [originalInput$]
+  const lensSaveModalInitialInput = useMemo(() => {
+    if (!visContext?.attributes) {
+      return undefined;
+    }
+    const withTablesRemoved = removeTablesFromLensAttributes(visContext.attributes);
+    return {
+      ...withTablesRemoved,
+      attributes: {
+        ...withTablesRemoved.attributes,
+        title: '',
+      },
+    };
+  }, [visContext?.attributes]);
+
+  const {
+    dataView,
+    query,
+    timeRange,
+    relativeTimeRange,
+    abortController,
+    columns,
+    controlsState,
+    isESQLQuery: isPlainRecord,
+    breakdown,
+  } = fetchParams;
+  const hasLensSuggestions = Boolean(
+    isPlainRecord &&
+      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
-
-  const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = requestParams;
-
-  const fetch$ = useFetch({
-    input$,
-    beforeFetch: updateTimeRange,
-  });
 
   useTotalHits({
     services,
-    dataView,
-    request,
     hits,
     chartVisible,
-    filters,
-    query,
-    getTimeRange,
     fetch$,
+    abortController,
     onTotalHitsChange,
-    isPlainRecord,
   });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
@@ -199,7 +184,7 @@ export function UnifiedHistogramChart({
           data: services.data,
           dataView,
           timeInterval: chart?.timeInterval,
-          timeRange: getTimeRange(),
+          timeRange,
           response,
         });
 
@@ -211,10 +196,7 @@ export function UnifiedHistogramChart({
   );
 
   const lensPropsContext = useLensProps({
-    request,
-    getTimeRange,
     fetch$,
-    visContext,
     onLoad,
   });
 
@@ -240,37 +222,15 @@ export function UnifiedHistogramChart({
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
-    relativeTimeRange: originalRelativeTimeRange ?? relativeTimeRange,
+    relativeTimeRange,
     lensAttributes: visContext?.attributes,
     isPlainRecord,
   });
 
-  const toolbarLeftSide = useMemo(
+  const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
+
+  const toolbarSelectors = useMemo(
     () => [
-      renderCustomChartToggleActions ? (
-        renderCustomChartToggleActions()
-      ) : (
-        <IconButtonGroup
-          legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
-            defaultMessage: 'Chart visibility',
-          })}
-          buttonSize="s"
-          buttons={[
-            {
-              label: chartVisible
-                ? i18n.translate('unifiedHistogram.hideChartButton', {
-                    defaultMessage: 'Hide chart',
-                  })
-                : i18n.translate('unifiedHistogram.showChartButton', {
-                    defaultMessage: 'Show chart',
-                  }),
-              iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
-              'data-test-subj': 'unifiedHistogramToggleChartButton',
-              onClick: toggleHideChart,
-            },
-          ]}
-        />
-      ),
       chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
@@ -286,9 +246,7 @@ export function UnifiedHistogramChart({
       </div>,
     ],
     [
-      renderCustomChartToggleActions,
       chartVisible,
-      toggleHideChart,
       isPlainRecord,
       onTimeIntervalChange,
       chart,
@@ -303,15 +261,11 @@ export function UnifiedHistogramChart({
     id: 'unifiedHistogramCollapsablePanel',
   };
 
-  if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
+  if (!chartVisible) {
     return <div {...a11yCommonProps} data-test-subj="unifiedHistogramChartPanelHidden" />;
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
-  const hasLensSuggestions = Boolean(
-    isPlainRecord &&
-      lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
-  );
 
   const canCustomizeVisualization =
     isPlainRecord &&
@@ -351,9 +305,9 @@ export function UnifiedHistogramChart({
   if (canSaveVisualization) {
     actions.push({
       label: i18n.translate('unifiedHistogram.saveVisualizationButton', {
-        defaultMessage: 'Save visualization',
+        defaultMessage: 'Save visualization to dashboard',
       }),
-      iconType: 'save',
+      iconType: 'dashboardApp',
       'data-test-subj': 'unifiedHistogramSaveVisualization',
       onClick: () => setIsSaveModalVisible(true),
     });
@@ -365,14 +319,14 @@ export function UnifiedHistogramChart({
         {...a11yCommonProps}
         toolbarCss={chartToolbarCss}
         toolbar={{
-          leftSide: toolbarLeftSide,
+          toggleActions: toolbarToggleActions,
+          leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
         }}
       >
         {chartVisible && (
           <>
             <section
-              ref={(element) => (chartRef.current.element = element)}
               tabIndex={-1}
               aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
                 defaultMessage: 'Histogram of found documents',
@@ -397,9 +351,9 @@ export function UnifiedHistogramChart({
                   dataView={dataView}
                   chart={chart}
                   bucketInterval={bucketInterval}
-                  getTimeRange={getTimeRange}
                   visContext={visContext}
                   isPlainRecord={isPlainRecord}
+                  abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
                 />
@@ -409,12 +363,13 @@ export function UnifiedHistogramChart({
           </>
         )}
       </ChartSectionTemplate>
-      {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
+      {canSaveVisualization && isSaveModalVisible && lensSaveModalInitialInput && (
         <LensSaveModalComponent
-          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
+          initialInput={lensSaveModalInitialInput}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
+          controlsState={controlsState}
         />
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (

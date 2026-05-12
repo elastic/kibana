@@ -7,25 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
-import type { StoryObj } from '@storybook/react';
-import React, { type ReactNode } from 'react';
+import type { Decorator, StoryContext, StoryObj } from '@storybook/react';
+import React, { useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import type { monaco } from '@kbn/monaco';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { kibanaReactDecorator } from '../../../../.storybook/decorators';
+import {
+  setActiveTab,
+  setExecution,
+  setYamlString,
+  WorkflowDetailStoreProvider,
+} from '../../../entities/workflows/store';
+import type { AppDispatch } from '../../../entities/workflows/store/store';
 
-export default {
-  title: 'Workflows Management/Workflow YAML Editor',
-  component: WorkflowYAMLEditor,
-  decorators: [
-    kibanaReactDecorator,
-    (story: () => ReactNode) => (
-      <MemoryRouter>
-        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>{story()}</div>
-      </MemoryRouter>
-    ),
-  ],
-};
+const storyQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
+
+/**
+ * Helper function to create a mock workflow definition
+ */
+const createMockWorkflowDefinition = () => ({
+  version: '1' as const,
+  name: 'Test Workflow',
+  enabled: true,
+  triggers: [],
+  steps: [],
+});
 
 const workflowYaml = `name: Print famous people
 enabled: true
@@ -77,46 +90,119 @@ steps:
       message: '--------------------------'
 `;
 
-type Story = StoryObj<typeof WorkflowYAMLEditor>;
+/**
+ * Wrapper that provides the required editorRef to WorkflowYAMLEditor
+ */
+const EditorWithRef: React.FC<{
+  onStepRun: (params: { stepId: string; actionType: string }) => void;
+  highlightDiff?: boolean;
+}> = ({ onStepRun, highlightDiff }) => {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  return (
+    <WorkflowYAMLEditor editorRef={editorRef} onStepRun={onStepRun} highlightDiff={highlightDiff} />
+  );
+};
+
+/**
+ * Inner component that can access the Redux store and dispatch actions based on story args
+ */
+const StoryWrapper: React.FC<{
+  story: () => React.ReactElement;
+  isExecutionYaml?: boolean;
+  stepExecutions?: WorkflowStepExecutionDto[];
+}> = ({ story, isExecutionYaml, stepExecutions }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  React.useEffect(() => {
+    // Always set the static YAML
+    dispatch(setYamlString(workflowYaml));
+
+    if (isExecutionYaml) {
+      dispatch(setActiveTab('executions'));
+      if (stepExecutions) {
+        // Create a mock execution with stepExecutions
+        const mockExecution: WorkflowExecutionDto = {
+          id: 'test-execution',
+          isTestRun: false,
+          spaceId: 'default',
+          workflowId: 'test-workflow',
+          status: ExecutionStatus.RUNNING,
+          error: null,
+          startedAt: new Date().toISOString(),
+          finishedAt: new Date().toISOString(),
+          workflowDefinition: createMockWorkflowDefinition(),
+          stepExecutions,
+          duration: null,
+          yaml: workflowYaml,
+        };
+        dispatch(setExecution(mockExecution));
+      }
+    } else {
+      dispatch(setActiveTab('workflow'));
+    }
+  }, [dispatch, isExecutionYaml, stepExecutions]);
+
+  return story();
+};
+
+const StoryProviders: Decorator = (story: () => React.ReactElement, context: StoryContext) => {
+  // Get decorator-specific values from parameters or args (for backward compatibility)
+  const isExecutionYaml =
+    (context.parameters?.isExecutionYaml as boolean | undefined) ??
+    (context.args?.isExecutionYaml as boolean | undefined);
+  const stepExecutions =
+    (context.parameters?.stepExecutions as WorkflowStepExecutionDto[] | undefined) ||
+    (context.args?.stepExecutions as WorkflowStepExecutionDto[] | undefined);
+
+  return (
+    <QueryClientProvider client={storyQueryClient}>
+      <MemoryRouter>
+        <WorkflowDetailStoreProvider>
+          <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+            <StoryWrapper
+              story={story}
+              isExecutionYaml={isExecutionYaml}
+              stepExecutions={stepExecutions}
+            />
+          </div>
+        </WorkflowDetailStoreProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+};
+
+export default {
+  title: 'Workflows Management/Workflow YAML Editor',
+  component: EditorWithRef,
+  decorators: [kibanaReactDecorator, StoryProviders],
+};
+
+type Story = StoryObj<typeof EditorWithRef>;
 
 export const Default: Story = {
   args: {
-    workflowId: '1',
-    filename: 'workflow.yaml',
-    readOnly: false,
-    hasChanges: false,
-    lastUpdatedAt: new Date(),
-    highlightStep: undefined,
-    stepExecutions: [],
-    onMount: () => {},
-    onChange: () => {},
-    onSave: () => {},
-    onValidationErrors: () => {},
-    value: workflowYaml,
+    onStepRun: () => {},
+  },
+  parameters: {
+    isExecutionYaml: false,
   },
 };
 
-export const WithHighlightStep: Story = {
+export const ReadOnly: Story = {
   args: {
-    workflowId: '1',
-    filename: 'workflow.yaml',
-    readOnly: false,
-    hasChanges: false,
-    lastUpdatedAt: new Date(),
-    highlightStep: 'analysis',
-    value: workflowYaml,
+    onStepRun: () => {},
+  },
+  parameters: {
+    isExecutionYaml: true,
   },
 };
 
 export const WithStepExecutions: Story = {
   args: {
-    workflowId: '1',
-    filename: 'workflow.yaml',
-    readOnly: false,
-    hasChanges: false,
-    lastUpdatedAt: new Date(),
-    highlightStep: undefined,
-    value: workflowYaml,
+    onStepRun: () => {},
+  },
+  parameters: {
+    isExecutionYaml: false,
     stepExecutions: [
       {
         stepId: 'analysis',
@@ -126,8 +212,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'debug_ai_response',
@@ -137,8 +224,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'print-enter-dash',
@@ -148,8 +236,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'foreachstep',
@@ -159,8 +248,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'log-name-surname',
@@ -170,8 +260,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'slack_it',
@@ -181,8 +272,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
       {
         stepId: 'print-exit-dash',
@@ -192,8 +284,9 @@ export const WithStepExecutions: Story = {
         workflowId: '1',
         startedAt: new Date().toISOString(),
         topologicalIndex: 0,
-        executionIndex: 0,
-        path: [],
+        globalExecutionIndex: 0,
+        stepExecutionIndex: 0,
+        scopeStack: [],
       },
     ],
   },

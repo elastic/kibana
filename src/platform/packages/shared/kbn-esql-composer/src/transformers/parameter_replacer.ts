@@ -11,11 +11,12 @@ import type {
   ESQLAstBaseItem,
   ESQLColumn,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLLiteral,
   ESQLParamLiteral,
-} from '@kbn/esql-ast';
-import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@kbn/esql-ast';
-import type { ESQLIdentifier, ESQLProperNode } from '@kbn/esql-ast/src/types';
+  ESQLProperNode,
+} from '@elastic/esql/types';
+import { Builder, isColumn, isFunctionExpression, isParamLiteral } from '@elastic/esql';
 import type { FieldValue, Params } from '../types';
 
 type ReplaceableNodes = ESQLParamLiteral | ESQLLiteral | ESQLColumn | ESQLFunction;
@@ -115,7 +116,7 @@ export class ParameterReplacer {
 
     const value = this.resolveParamValue(node);
 
-    if (!value) {
+    if (value === null || value === undefined) {
       return node;
     }
 

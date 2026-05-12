@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Optional } from 'utility-types';
+
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { Optional } from 'utility-types';
 import type {
   lensCreateRequestBodySchema,
+  lensCreateRequestQuerySchema,
   lensCreateResponseBodySchema,
   lensDeleteRequestParamsSchema,
   lensGetRequestParamsSchema,
@@ -20,7 +22,11 @@ import type {
   lensUpdateRequestParamsSchema,
   lensUpdateResponseBodySchema,
 } from './schema';
+import type { lensResponseItemSchema } from './schema/common';
 
+export type LensResponseItem = TypeOf<typeof lensResponseItemSchema>;
+
+export type LensCreateRequestQuery = TypeOf<typeof lensCreateRequestQuerySchema>;
 export type LensCreateRequestBody = TypeOf<typeof lensCreateRequestBodySchema>;
 export type LensCreateResponseBody = TypeOf<typeof lensCreateResponseBodySchema>;
 
@@ -34,7 +40,7 @@ export type LensGetResponseBody = TypeOf<typeof lensGetResponseBodySchema>;
 export type LensSearchRequestQuery = Optional<
   // TODO: find out why default values show as required, adding maybe returns undefined values
   TypeOf<typeof lensSearchRequestQuerySchema>,
-  'page' | 'perPage'
+  'page' | 'per_page'
 >;
 export type LensSearchResponseBody = TypeOf<typeof lensSearchResponseBodySchema>;
 

@@ -17,7 +17,6 @@ import { timelineActions } from '../../../store';
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
-  useEnableExperimental: jest.fn(() => jest.fn()),
 }));
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../hooks/use_create_timeline');
@@ -70,7 +69,7 @@ describe('TimelineModalHeader', () => {
     const { getByTestId, getByText } = renderTimelineModalHeader();
 
     expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
-    expect(getByText('Untitled timeline')).toBeInTheDocument();
+    expect(getByText('Untitled Timeline')).toBeInTheDocument();
     expect(getByTestId('timeline-save-status')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-header-actions')).toBeInTheDocument();
     expect(getByTestId('timeline-modal-new-timeline-dropdown-button')).toBeInTheDocument();

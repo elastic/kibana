@@ -17,6 +17,8 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import { CaseStatuses } from '@kbn/cases-components';
+import type { CaseSeverity, CaseUI } from '../../../../common';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
@@ -24,9 +26,7 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
-import type { CaseUI } from '../../../../common';
 import type { EditConnectorProps } from '../../edit_connector';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
@@ -53,12 +53,17 @@ import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { TemplateFields } from './template_fields';
+import { useStatusAction } from '../../actions/status/use_status_action';
+import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
   caseData,
+  searchTerm,
   actionsNavigation,
   showAlertDetails,
   useFetchAlertData,
@@ -68,6 +73,7 @@ export const CaseViewActivity = ({
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
+  searchTerm?: string;
 }) => {
   const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
     LOCALSTORAGE_SORT_ORDER_KEY,
@@ -96,6 +102,8 @@ export const CaseViewActivity = ({
 
   const { data: casesConfiguration } = useGetCaseConfiguration();
 
+  const isTemplatesV2Enabled = KibanaServices.getConfig()?.templates?.enabled ?? false;
+
   const { userProfiles, reporterAsArray } = parseCaseUsers({
     caseUsers,
     createdBy: caseData.createdBy,
@@ -112,6 +120,13 @@ export const CaseViewActivity = ({
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseData,
   });
+  const refreshCaseViewPage = useRefreshCaseViewPage();
+  const statusAction = useStatusAction({
+    isDisabled: false,
+    onAction: () => {},
+    onActionSuccess: refreshCaseViewPage,
+    selectedStatus: caseData.status,
+  });
 
   const { isLoading: isUpdatingCustomField, mutate: replaceCustomField } = useReplaceCustomField();
 
@@ -119,12 +134,17 @@ export const CaseViewActivity = ({
     (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
-    (status: CaseStatuses) =>
-      onUpdateField({
-        key: 'status',
-        value: status,
-      }),
-    [onUpdateField]
+    (status: CaseStatuses, closeReason?: string) => {
+      if (status !== CaseStatuses.closed) {
+        onUpdateField({
+          key: 'status',
+          value: status,
+        });
+      } else {
+        statusAction.handleUpdateCaseStatus([caseData], status, closeReason);
+      }
+    },
+    [caseData, onUpdateField, statusAction]
   );
 
   const onSubmitTags = useCallback(
@@ -172,6 +192,7 @@ export const CaseViewActivity = ({
         customFieldId: customField.key,
         customFieldValue: customField.value,
         caseVersion: caseData.version,
+        caseData,
       });
     },
     [replaceCustomField, caseData]
@@ -211,7 +232,12 @@ export const CaseViewActivity = ({
           max-width: 75%;
         `}
       >
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <CaseViewTabs
+          caseData={caseData}
+          activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY}
+          searchTerm={searchTerm}
+        />
+        <EuiSpacer size="l" />
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
@@ -248,8 +274,12 @@ export const CaseViewActivity = ({
                   permissions.update ? (
                     <StatusActionButton
                       status={caseData.status}
+                      totalAlerts={caseData.totalAlerts}
+                      syncAlertsEnabled={caseData.settings.syncAlerts}
                       onStatusChanged={changeStatus}
-                      isLoading={isLoading && loadingKey === 'status'}
+                      isLoading={
+                        (isLoading && loadingKey === 'status') || statusAction.isUpdatingStatus
+                      }
                     />
                   ) : null
                 }
@@ -300,6 +330,7 @@ export const CaseViewActivity = ({
               userProfiles={userProfiles}
             />
           ) : null}
+
           <EditTags
             tags={caseData.tags}
             onSubmit={onSubmitTags}
@@ -328,6 +359,14 @@ export const CaseViewActivity = ({
             customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomField}
           />
+          {isTemplatesV2Enabled && (
+            <TemplateFields
+              caseData={caseData}
+              onUpdateField={onUpdateField}
+              isLoading={isLoading}
+              loadingKey={loadingKey}
+            />
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

@@ -58,7 +58,7 @@ export class SearchSynonymsPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      order: 3,
+      order: 4,
       visibleIn: ['sideNav'],
     });
 

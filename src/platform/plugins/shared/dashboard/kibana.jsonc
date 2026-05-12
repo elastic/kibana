@@ -15,7 +15,6 @@
       "dataViewEditor",
       "embeddable",
       "fieldFormats",
-      "controls",
       "inspector",
       "navigation",
       "savedObjectsFinder",
@@ -39,13 +38,14 @@
       "serverless",
       "noDataPage",
       "observabilityAIAssistant",
-      "lens"
+      "lens",
+      "security",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
-      "presentationPanel",
       "savedObjects"
     ]
   }

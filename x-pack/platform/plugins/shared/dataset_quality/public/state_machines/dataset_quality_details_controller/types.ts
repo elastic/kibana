@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-import type { DoneInvokeEvent } from 'xstate';
+import type { FailureStore, Streams } from '@kbn/streams-schema';
 import type {
   Dashboard,
-  DataStreamDetails,
-  DataStreamRolloverResponse,
   DataStreamSettings,
   DegradedFieldAnalysis,
-  DegradedFieldResponse,
   DegradedFieldValues,
-  FailedDocsDetails,
   FailedDocsError,
-  FailedDocsErrorsResponse,
-  NonAggregatableDatasets,
   QualityIssue,
   UpdateFieldLimitResponse,
-  UpdateFailureStoreResponse,
+  DataStreamDetails,
 } from '../../../common/api_types';
 import type { IntegrationType } from '../../../common/data_stream_details';
 import type { TableCriteria, TimeRangeConfig } from '../../../common/types';
 import type { FailedDocsErrorSortField, QualityIssueSortField } from '../../hooks';
+import type { DatasetQualityView } from '../../controller/dataset_quality_details';
 
 export type QualityIssueType = QualityIssue['type'];
 
@@ -61,6 +56,11 @@ export interface FieldLimit {
   error?: boolean;
 }
 
+export interface StreamsUrls {
+  processingUrl?: string;
+  schemaUrl?: string;
+}
+
 export interface WithDefaultControllerState {
   dataStream: string;
   qualityIssues: QualityIssuesTableConfig;
@@ -80,11 +80,13 @@ export interface WithDefaultControllerState {
   };
   isNonAggregatable?: boolean;
   fieldLimit?: FieldLimit;
-  view: 'classic' | 'streams';
+  view: DatasetQualityView;
+  streamDefinition?: Streams.ingest.all.GetResponse;
+  streamsUrls?: StreamsUrls;
 }
 
 export interface WithDataStreamDetails {
-  dataStreamDetails: DataStreamDetails;
+  dataStreamDetails: DataStreamDetailsWithFailureStoreConfig;
 }
 
 export interface WithBreakdownField {
@@ -137,6 +139,14 @@ export interface WithNewFieldLimitResponse {
   fieldLimit: FieldLimit;
 }
 
+export interface DataStreamDetailsWithFailureStoreConfig extends DataStreamDetails {
+  failureStoreDataQualityConfig?: {
+    failureStoreEnabled: boolean;
+    customRetentionPeriod?: string;
+  };
+  failureStoreStreamConfig?: FailureStore;
+}
+
 export type DefaultDatasetQualityDetailsContext = Pick<
   WithDefaultControllerState,
   | 'qualityIssues'
@@ -148,6 +158,8 @@ export type DefaultDatasetQualityDetailsContext = Pick<
   | 'selectedFields'
   | 'qualityIssuesChart'
   | 'view'
+  | 'streamDefinition'
+  | 'streamsUrls'
 >;
 
 export type DatasetQualityDetailsControllerTypeState =
@@ -300,20 +312,8 @@ export type DatasetQualityDetailsControllerEvent =
     }
   | {
       type: 'UPDATE_FAILURE_STORE';
-      dataStreamsDetails: DataStreamDetails;
+      dataStreamsDetails: DataStreamDetailsWithFailureStoreConfig;
     }
-  | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<DataStreamDetails>
-  | DoneInvokeEvent<Error>
-  | DoneInvokeEvent<boolean>
-  | DoneInvokeEvent<FailedDocsDetails>
-  | DoneInvokeEvent<FailedDocsErrorsResponse>
-  | DoneInvokeEvent<DegradedFieldResponse>
-  | DoneInvokeEvent<DegradedFieldValues>
-  | DoneInvokeEvent<DataStreamSettings>
-  | DoneInvokeEvent<Dashboard[]>
-  | DoneInvokeEvent<DegradedFieldAnalysis>
-  | DoneInvokeEvent<UpdateFieldLimitResponse>
-  | DoneInvokeEvent<DataStreamRolloverResponse>
-  | DoneInvokeEvent<UpdateFailureStoreResponse>
-  | DoneInvokeEvent<IntegrationType>;
+  | {
+      type: 'TOGGLE_CURRENT_QUALITY_ISSUES';
+    };

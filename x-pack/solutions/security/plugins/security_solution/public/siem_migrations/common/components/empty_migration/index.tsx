@@ -20,6 +20,7 @@ export const EmptyMigration: React.FC = React.memo(() => {
 
   return (
     <EuiFlexGroup
+      data-test-subj="emptyMigrationContainer"
       alignItems="center"
       gutterSize="s"
       responsive={false}
@@ -37,7 +38,7 @@ export const EmptyMigration: React.FC = React.memo(() => {
       <EuiFlexItem grow={false}>
         <EuiButton
           fill
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           color={'primary'}
           onClick={onClickLink}
           data-test-subj="goToSiemMigrationsButton"

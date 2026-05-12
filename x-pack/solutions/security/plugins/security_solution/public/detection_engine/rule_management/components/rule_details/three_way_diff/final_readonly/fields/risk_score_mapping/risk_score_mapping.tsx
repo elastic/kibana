@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { RiskScoreMapping } from '../../../../../../../../../common/api/detection_engine';
 import * as ruleDetailsI18n from '../../../../translations';

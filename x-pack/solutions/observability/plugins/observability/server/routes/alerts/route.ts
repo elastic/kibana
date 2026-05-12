@@ -8,8 +8,6 @@
 import type { GetRelatedDashboardsResponse } from '@kbn/observability-schema';
 import { getRelatedDashboardsParamsSchema } from '@kbn/observability-schema';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import type { SavedObjectsFindResult } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import { ALERTS_API_URLS } from '../../../common/constants';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { RelatedDashboardsClient } from '../../services/related_dashboards_client';
@@ -31,17 +29,11 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
   handler: async (services): Promise<GetRelatedDashboardsResponse | IKibanaResponse> => {
     const { dependencies, params, request, response, context, logger } = services;
     const { alertId } = params.query;
-    const { ruleRegistry, dashboard } = dependencies;
-    const { getContentClient } = dashboard;
+    const {
+      ruleRegistry,
+      dashboard: { client, scanDashboards },
+    } = dependencies;
     const { savedObjects } = await context.core;
-
-    const dashboardClient = getContentClient()!.getForRequest<
-      SavedObjectsFindResult<DashboardAttributes>
-    >({
-      requestHandlerContext: context,
-      request,
-      version: 1,
-    });
 
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
     const rulesClient = await ruleRegistry.alerting.getRulesClientWithRequest(request);
@@ -50,7 +42,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
 
     const dashboardParser = new RelatedDashboardsClient(
       logger,
-      dashboardClient,
+      (id: string) => client.read(context, id),
+      (page: number, perPage: number) => scanDashboards(context, page, perPage),
       investigateAlertsClient,
       alertId,
       referencedPanelManager

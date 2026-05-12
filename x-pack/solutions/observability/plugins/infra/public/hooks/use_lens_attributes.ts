@@ -14,7 +14,7 @@ import {
   type LensAttributes,
   type LensConfig,
   LensConfigBuilder,
-} from '@kbn/lens-embeddable-utils/config_builder';
+} from '@kbn/lens-embeddable-utils';
 
 import { useKibanaContextForPlugin } from './use_kibana';
 
@@ -32,15 +32,14 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   const { navigateToPrefilledEditor } = lens;
 
   const { value: attributes, error } = useAsync(async () => {
-    const { formula: formulaAPI } = await lens.stateHelperApi();
-    if (!dataViews || !formulaAPI || !params.dataset) {
+    if (!dataViews || !params.dataset) {
       return undefined;
     }
 
-    const builder = new LensConfigBuilder(dataViews, formulaAPI);
+    const builder = new LensConfigBuilder(dataViews);
 
     return builder.build(params) as Promise<LensAttributes>;
-  }, [params, dataViews, lens]);
+  }, [params, dataViews]);
 
   const injectFilters = useCallback(
     ({
@@ -84,7 +83,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
           navigateToPrefilledEditor(
             {
               id: '',
-              timeRange,
+              time_range: timeRange,
               attributes: injectedAttributes,
               lastReloadRequestTime,
             },
@@ -142,7 +141,7 @@ const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action
       });
     },
     getIconType(_context: ActionExecutionContext): string | undefined {
-      return 'visArea';
+      return 'chartArea';
     },
     type: 'actionButton',
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {

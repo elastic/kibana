@@ -6,48 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
-import { omit } from 'lodash';
-import {
-  lensResponseItemSchema,
-  lensAPIAttributesSchema,
-  lensAPIConfigSchema,
-  lensCMUpdateOptionsSchema,
-} from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
+import { lensResponseItemSchema } from './common';
 
 export const lensUpdateRequestParamsSchema = schema.object(
   {
     id: schema.string({
       meta: {
-        description: 'The saved object id of a Lens visualization.',
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
       },
     }),
   },
   { unknowns: 'forbid' }
 );
 
-export const lensUpdateRequestBodySchema = schema.object(
-  {
-    data: schema.object(
-      {
-        ...lensAPIAttributesSchema.getPropSchemas(),
-        // omit id on create options
-        ...pickFromObjectSchema(lensAPIConfigSchema.getPropSchemas(), ['references']),
-      },
-      { unknowns: 'forbid' }
-    ),
-    // TODO should these options be here?
-    options: schema.object(
-      {
-        ...omit(lensCMUpdateOptionsSchema.getPropSchemas(), ['references']),
-      },
-      { unknowns: 'forbid' }
-    ),
-  },
-  {
-    unknowns: 'forbid',
-  }
-);
+export const lensUpdateRequestBodySchema = lensApiConfigSchemaNoESQL;
 
 export const lensUpdateResponseBodySchema = lensResponseItemSchema;

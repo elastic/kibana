@@ -6,6 +6,7 @@ exports[`MonitorBarSeries component renders if the data series is present 1`] = 
 >
   <div
     class="echChart"
+    data-testid="echChart"
     style="width:100%;height:100%"
   >
     <div

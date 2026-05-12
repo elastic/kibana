@@ -8,7 +8,9 @@
 import { intersectionBy } from 'lodash';
 import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
+import { type FieldDefinition, getFromSources, rewriteFromSources } from '@kbn/streams-schema';
 import { ContentPackIncludeError } from '../error';
+import { baseFields } from '../../streams/component_templates/logs_layer';
 
 export function withoutRootPrefix(root: string, name: string) {
   const prefix = `${root}.`;
@@ -68,6 +70,64 @@ export function filterRouting(entry: ContentPackStream, include: ContentPackIncl
   return intersectionBy(routing, include.objects.routing, ({ destination }) => destination);
 }
 
+export function getFields(
+  entry: ContentPackStream,
+  include: ContentPackIncludedObjects
+): FieldDefinition {
+  if (isIncludeAll(include) || include.objects.mappings) {
+    return entry.request.stream.ingest.wired.fields;
+  }
+  return {};
+}
+
+export function withoutBaseFields(fields: FieldDefinition): FieldDefinition {
+  return Object.keys(fields)
+    .filter((key) => !baseFields[key])
+    .reduce((filtered, key) => {
+      filtered[key] = fields[key];
+      return filtered;
+    }, {} as FieldDefinition);
+}
+
+/**
+ * Strips inherited field metadata (`from`, `alias_for`) from field definitions.
+ * Used when exporting content packs to produce clean FieldDefinition objects.
+ */
+export function withoutInheritedFieldMetadata(fields: FieldDefinition): FieldDefinition {
+  return Object.entries(fields).reduce((result, [key, fieldDef]) => {
+    const {
+      from: _from,
+      alias_for: _aliasFor,
+      ...cleanFieldDef
+    } = fieldDef as FieldDefinition[string] & {
+      from?: string;
+      alias_for?: string;
+    };
+    result[key] = cleanFieldDef;
+    return result;
+  }, {} as FieldDefinition);
+}
+
+/**
+ * Derives the original root stream name from a content pack by matching
+ * relative stream names against absolute FROM clause indices in queries.
+ */
+export function deriveSourceRoot(streams: ContentPackStream[]): string | undefined {
+  for (const stream of streams) {
+    if (stream.name === ROOT_STREAM_ID) continue;
+    const suffix = `.${stream.name}`;
+    for (const query of stream.request.queries) {
+      const sources = getFromSources(query.esql.query);
+      for (const source of sources) {
+        if (source.endsWith(suffix)) {
+          return source.slice(0, -suffix.length);
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 export function scopeContentPackStreams({
   root,
   streams,
@@ -75,11 +135,27 @@ export function scopeContentPackStreams({
   root: string;
   streams: ContentPackStream[];
 }): ContentPackStream[] {
+  const sourceRoot = deriveSourceRoot(streams);
+
   return streams.map((stream) => ({
     ...stream,
     name: stream.name === ROOT_STREAM_ID ? root : withRootPrefix(root, stream.name),
     request: {
       ...stream.request,
+      queries:
+        sourceRoot && sourceRoot !== root
+          ? stream.request.queries.map((query) => ({
+              ...query,
+              esql: {
+                query: rewriteFromSources(query.esql.query, (index) => {
+                  if (index === sourceRoot) return root;
+                  if (index.startsWith(`${sourceRoot}.`))
+                    return root + index.slice(sourceRoot.length);
+                  return index;
+                }),
+              },
+            }))
+          : stream.request.queries,
       stream: {
         ...stream.request.stream,
         ingest: {

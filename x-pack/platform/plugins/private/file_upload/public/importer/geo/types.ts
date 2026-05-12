@@ -26,4 +26,6 @@ export interface GeoFileImporter extends IImporter {
   renderEditor(onChange: () => void): ReactNode;
   setGeoFieldType(geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE): void;
   setSmallChunks(smallChunks: boolean): void;
+  getCurrentImportStats(): { docCount: number; failures: ImportFailure[] };
+  getSidecarFiles?(): File[];
 }

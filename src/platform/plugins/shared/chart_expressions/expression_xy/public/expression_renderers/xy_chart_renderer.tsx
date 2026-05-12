@@ -18,7 +18,7 @@ import {
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-common';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -29,7 +29,7 @@ import type {
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 import {
   type ChartSizeEvent,
   type ChartSizeSpec,
@@ -39,7 +39,7 @@ import {
 
 import type { ThemeServiceSetup } from '@kbn/core/public';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
-import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { getDataLayers } from '../helpers';
 import { LayerTypes, SeriesTypes } from '../../common/constants';
 import type { CommonXYDataLayerConfig, XYChartProps } from '../../common';

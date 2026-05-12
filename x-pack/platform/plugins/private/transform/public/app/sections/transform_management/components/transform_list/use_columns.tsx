@@ -126,7 +126,9 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
+          iconType={
+            expandedRowItemIds.includes(item.config.id) ? 'chevronSingleDown' : 'chevronSingleRight'
+          }
           data-test-subj="transformListRowDetailsToggle"
         />
       ),
@@ -159,7 +161,7 @@ export const useColumns = (
                   'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
               })}
             >
-              <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+              <EuiBadge tabIndex={0} color="hollow" data-test-subj="transformListRowIsManagedBadge">
                 {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
                   defaultMessage: 'Managed',
                 })}
@@ -202,7 +204,7 @@ export const useColumns = (
           <>
             <EuiIconTip
               content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}
-              type="alert"
+              type="warning"
               size="s"
               color="warning"
             />

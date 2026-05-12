@@ -2,12 +2,12 @@
 
 exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
 <div>
-  <p
+  <div
+    aria-atomic="true"
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
+    role="status"
+  />
   <button
     class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
@@ -19,6 +19,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -32,6 +33,7 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>
@@ -42,12 +44,12 @@ exports[`<ExitFullScreenButton /> with kibana services is rendered 1`] = `
 
 exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] = `
 <div>
-  <p
+  <div
+    aria-atomic="true"
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
+    role="status"
+  />
   <button
     class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
@@ -79,6 +81,7 @@ exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] =
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>
@@ -89,12 +92,12 @@ exports[`<ExitFullScreenButton /> with kibana services renders custom logo 1`] =
 
 exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
 <div>
-  <p
+  <div
+    aria-atomic="true"
     aria-live="polite"
     class="emotion-euiScreenReaderOnly"
-  >
-    In full screen mode, press ESC to exit.
-  </p>
+    role="status"
+  />
   <button
     class="exitFullScreenButton emotion-euiButtonDisplay-buttonCSS-buttonCSS"
     data-test-subj="exitFullScreenModeButton"
@@ -106,6 +109,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="logoElastic"
         />
       </span>
@@ -119,6 +123,7 @@ exports[`<ExitFullScreenButton /> with manual services is rendered 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
+          aria-hidden="true"
           data-euiicon-type="fullScreenExit"
         />
       </span>

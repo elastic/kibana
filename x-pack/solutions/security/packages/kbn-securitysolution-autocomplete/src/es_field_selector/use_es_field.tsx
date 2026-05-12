@@ -191,7 +191,7 @@ export const useEsField = ({
           content={labelTooltipText}
           position="bottom"
         >
-          <>{label}</>
+          <span>{label}</span>
         </EuiToolTip>
       );
     }
@@ -229,7 +229,6 @@ export const useEsField = ({
             {label}
             <EuiIcon
               data-test-subj="mappingConflictsWarningIcon"
-              tabIndex={0}
               type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"

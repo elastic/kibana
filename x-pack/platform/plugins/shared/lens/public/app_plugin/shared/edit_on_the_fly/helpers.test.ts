@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { getESQLResults, formatESQLColumns } from '@kbn/esql-utils';
+import { getESQLResults, formatESQLColumns, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -16,11 +17,12 @@ import {
   mockAllSuggestions,
 } from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-import { getSuggestions, getGridAttrs } from './helpers';
+import { buildDisplayRowsFromEsqlValues, getGridAttrs, getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
 const mockFetchData = getESQLResults as jest.Mock;
 const mockformatESQLColumns = formatESQLColumns as jest.Mock;
+const mockGetESQLAdHocDataview = getESQLAdHocDataview as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
@@ -65,6 +67,44 @@ jest.mock('@kbn/esql-utils', () => {
 });
 
 describe('Lens inline editing helpers', () => {
+  describe('buildDisplayRowsFromEsqlValues', () => {
+    it('returns values unchanged when value and display columns match in order', () => {
+      const valueColumns = [
+        { name: 'a', type: 'double' },
+        { name: 'b', type: 'integer' },
+      ];
+      const values = [
+        [1, 2],
+        [3, 4],
+      ];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns: valueColumns,
+          valueColumns,
+          values,
+        })
+      ).toEqual(values);
+    });
+
+    it('maps row cells by column name when all_columns is a superset of columns', () => {
+      const displayColumns = [
+        { name: 'count', type: 'double' },
+        { name: 'max_value', type: 'integer' },
+      ];
+      const valueColumns = [{ name: 'max_value', type: 'integer' }];
+      const values = [[500]];
+
+      expect(
+        buildDisplayRowsFromEsqlValues({
+          displayColumns,
+          valueColumns,
+          values,
+        })
+      ).toEqual([[null, 500]]);
+    });
+  });
+
   describe('getSuggestions', () => {
     const query = {
       esql: 'from index1 | limit 10 | stats average = avg(bytes)',
@@ -72,6 +112,7 @@ describe('Lens inline editing helpers', () => {
     const mockStartDependencies =
       createMockStartDependencies() as unknown as LensPluginStartDependencies;
     const dataViews = dataViewPluginMocks.createStartContract();
+    const httpMock = coreMock.createStart().http;
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
     const uiSettingsMock = {
@@ -100,6 +141,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        httpMock,
         uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
@@ -112,11 +154,27 @@ describe('Lens inline editing helpers', () => {
       );
     });
 
+    it('does not populate the title from the suggestion', async () => {
+      const suggestionsAttributes = await getSuggestions(
+        query,
+        startDependencies.data,
+        httpMock,
+        uiSettingsMock,
+        mockDatasourceMap(),
+        mockVisualizationMap(),
+        dataviewSpecArr,
+        jest.fn()
+      );
+      expect(mockAllSuggestions[0].title).not.toBe('');
+      expect(suggestionsAttributes?.title).toBe('');
+    });
+
     it('returns undefined if no suggestions are computed', async () => {
       mockSuggestionApi.mockResolvedValueOnce([]);
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        httpMock,
         uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
@@ -134,6 +192,7 @@ describe('Lens inline editing helpers', () => {
       const suggestionsAttributes = await getSuggestions(
         query,
         startDependencies.data,
+        httpMock,
         uiSettingsMock,
         mockDatasourceMap(),
         mockVisualizationMap(),
@@ -170,6 +229,7 @@ describe('Lens inline editing helpers', () => {
     const startDependencies = {
       ...mockStartDependencies,
       dataViews,
+      http: coreMock.createStart().http,
     };
 
     const uiSettingsMock = {
@@ -189,6 +249,7 @@ describe('Lens inline editing helpers', () => {
         query,
         dataviewSpecArr,
         startDependencies.data,
+        startDependencies.http,
         uiSettingsMock
       );
       expect(gridAttributes.columns).toStrictEqual(queryResponseColumns);
@@ -218,9 +279,119 @@ describe('Lens inline editing helpers', () => {
         query,
         dataviewSpecArr,
         startDependencies.data,
+        startDependencies.http,
         uiSettingsMock
       );
       expect(gridAttributes.columns).toStrictEqual(emptyColumns);
+    });
+
+    it('passes all_columns to formatESQLColumns and expands values by name when columns is a subset', async () => {
+      const allColumnsRaw = [
+        { name: 'count', type: 'double' },
+        { name: 'max_value', type: 'integer' },
+      ];
+      const subsetColumns = [{ name: 'max_value', type: 'integer' }];
+      const formattedColumns = [
+        { name: 'count', id: 'count', meta: { type: 'number', esType: 'double' } },
+        { name: 'max_value', id: 'max_value', meta: { type: 'number', esType: 'integer' } },
+      ];
+
+      mockFetchData.mockImplementation(() => ({
+        response: {
+          all_columns: allColumnsRaw,
+          columns: subsetColumns,
+          values: [[500]],
+        },
+      }));
+      mockformatESQLColumns.mockReturnValueOnce(formattedColumns);
+
+      const gridAttributes = await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(mockformatESQLColumns).toHaveBeenCalledWith(allColumnsRaw);
+      expect(gridAttributes.rows).toEqual([[null, 500]]);
+      expect(gridAttributes.columns).toStrictEqual(formattedColumns);
+    });
+
+    it('falls back to getESQLAdHocDataview when spec has no timeFieldName', async () => {
+      dataViews.create.mockClear();
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        timeFieldName: '@timestamp',
+      });
+
+      const specWithoutTimeField = [
+        {
+          id: 'spec-id-123',
+          title: 'index1',
+          sourceFilters: [],
+          fieldFormats: {},
+          runtimeFieldMap: {},
+          fieldAttrs: {},
+          allowNoIndex: false,
+          name: 'index1',
+        },
+      ];
+
+      await getGridAttrs(
+        query,
+        specWithoutTimeField,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: query.esql,
+          options: { skipFetchFields: true, id: 'spec-id-123' },
+        })
+      );
+      expect(dataViews.create).not.toHaveBeenCalled();
+    });
+
+    it('falls back to getESQLAdHocDataview with id undefined when no spec matches', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockResolvedValue({
+        timeFieldName: '@timestamp',
+      });
+
+      await getGridAttrs(query, [], startDependencies.data, startDependencies.http, uiSettingsMock);
+
+      expect(mockGetESQLAdHocDataview).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: { skipFetchFields: true, id: undefined },
+        })
+      );
+    });
+
+    it('uses dataViews.create when spec has timeFieldName', async () => {
+      mockFetchData.mockImplementation(() => ({
+        response: { columns: queryResponseColumns, values: [] },
+      }));
+      mockGetESQLAdHocDataview.mockClear();
+
+      await getGridAttrs(
+        query,
+        dataviewSpecArr,
+        startDependencies.data,
+        startDependencies.http,
+        uiSettingsMock
+      );
+
+      expect(dataViews.create).toHaveBeenCalledWith(
+        expect.objectContaining({ timeFieldName: '@timestamp' })
+      );
+      expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
     });
   });
 });

@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
+import { styles as toolbarStyles } from '@kbn/unified-data-table/src/components/custom_toolbar/render_custom_toolbar';
 import type { OpenInDiscover } from '../category_table/use_open_in_discover';
 
 export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openInDiscover }) => {
@@ -46,19 +47,20 @@ export const SelectedPatterns: FC<{ openInDiscover: OpenInDiscover }> = ({ openI
       panelPaddingSize="none"
       button={button}
       className="unifiedDataTableToolbarControlButton"
+      css={toolbarStyles.controlButton}
     >
       <EuiContextMenuPanel
         items={[
           <EuiContextMenuItem
             key="in"
-            icon="plusInCircle"
+            icon="plusCircle"
             onClick={() => openFunction(QUERY_MODE.INCLUDE, false)}
           >
             {labels.multiSelect.in}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="out"
-            icon="minusInCircle"
+            icon="minusCircle"
             onClick={() => openFunction(QUERY_MODE.EXCLUDE, false)}
           >
             {labels.multiSelect.out}

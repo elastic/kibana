@@ -76,7 +76,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
             />
           }
         >
-          <span>{label}</span>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       ) : (
         label
@@ -108,7 +108,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
           button={
             <EuiButton
               data-test-subj="o11yReportMetricOptionsButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
@@ -137,10 +137,12 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         (dataView ? (
           <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
             <EuiBadge
+              data-test-subj="o11yReportMetricBadge"
               iconType="cross"
               iconSide="right"
               iconOnClick={() => onChange(undefined)}
               iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+              tabIndex={0}
             >
               {seriesConfig?.metricOptions?.find(
                 (option) =>

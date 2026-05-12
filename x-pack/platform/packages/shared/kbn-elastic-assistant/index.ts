@@ -11,7 +11,11 @@
 // happens in the root of your app. Optionally provide a custom title for the assistant:
 
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
-export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
+export {
+  AssistantProvider,
+  useAssistantContext,
+  useMaybeAssistantContext,
+} from './impl/assistant_context';
 
 // Step 2.1: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:
@@ -109,10 +113,11 @@ export {
   SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY,
   /** The start of the date range of alerts, sent as context to the LLM */
   START_LOCAL_STORAGE_KEY,
+  /** The local storage key that controls visibility of the callout about moving Attack discovery to Attacks page */
+  MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export type { AIConnector } from './impl/connectorland/connector_selector';
-export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
   /** for rendering results in a code block */
@@ -205,4 +210,8 @@ export interface UseAssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
 }

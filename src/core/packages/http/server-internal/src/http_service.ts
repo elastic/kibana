@@ -23,6 +23,7 @@ import type { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type {
   RequestHandlerContextBase,
   IContextContainer,
@@ -33,6 +34,7 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
+import type { DocLinksServicePreboot } from '@kbn/core-doc-links-server';
 import type { RouterOptions } from '@kbn/core-http-router-server-internal';
 import { Router } from '@kbn/core-http-router-server-internal';
 
@@ -48,6 +50,7 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
+  GenerateOasArgs,
 } from './types';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
 import type { ExternalUrlConfigType } from './external_url';
@@ -55,11 +58,13 @@ import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
+  docLinks: DocLinksServicePreboot;
 }
 
 export interface SetupDeps {
   context: InternalContextSetup;
   executionContext: InternalExecutionContextSetup;
+  userActivity: InternalUserActivityServiceSetup;
 }
 
 /** @internal */
@@ -104,6 +109,7 @@ export class HttpService
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
+
     const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup({
@@ -113,7 +119,9 @@ export class HttpService
       path: '/{p*}',
       method: '*',
       handler: (req, responseToolkit) => {
-        this.log.debug(`Kibana server is not ready yet ${req.method}:${req.url.href}.`);
+        this.log.debug(
+          `Kibana server is not ready yet ${req.method}:${req.url.href}. For troubleshooting guidance, see ${deps.docLinks.links.server.troubleshootServerNotReady}`
+        );
 
         // If server is not ready yet, because plugins or core can perform
         // long running tasks (build assets, saved objects migrations etc.)
@@ -187,12 +195,14 @@ export class HttpService
     const { registerRouter, ...serverContract } = await this.httpServer.setup({
       config$: this.config$,
       executionContext: deps.executionContext,
+      userActivity: deps.userActivity,
     });
 
     registerCoreHandlers(serverContract, config, this.env, this.log);
 
     this.internalSetup = {
       ...serverContract,
+      config,
       rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
@@ -226,12 +236,16 @@ export class HttpService
     return this.internalSetup;
   }
 
-  // this method exists because we need the start contract to create the `CoreStart` used to start
+  // this method exists because we need the start contract to create `CoreStart` used to start
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
     return {
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
+      generateOas: (args: GenerateOasArgs) => this.generateOas(args),
       isListening: () => this.httpServer.isListening(),
+      setRedactedSessionIdGetter: (getter) => {
+        this.httpServer.setRedactedSessionIdGetter(getter);
+      },
     };
   }
 
@@ -259,6 +273,24 @@ export class HttpService
     return this.getStartContract();
   }
 
+  private generateOas({ pluginId, baseUrl, filters }: GenerateOasArgs) {
+    // Potentially quite expensive
+    return firstValueFrom(
+      of(1).pipe(
+        HttpService.generateOasSemaphore.acquire(),
+        mergeMap(async () => {
+          return generateOpenApiDocument(this.httpServer.getRouters({ pluginId }), {
+            baseUrl,
+            title: 'Kibana HTTP APIs',
+            version: '0.0.0', // TODO get a better version here
+            filters,
+            env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
+          });
+        })
+      )
+    );
+  }
+
   private registerOasApi(config: HttpConfig) {
     const basePath = this.internalSetup?.basePath;
     const server = this.internalSetup?.server;
@@ -271,7 +303,7 @@ export class HttpService
 
     const stringOrStringArraySchema = schema.oneOf([
       schema.string(),
-      schema.arrayOf(schema.string()),
+      schema.arrayOf(schema.string(), { maxSize: 100 }),
     ]);
     const querySchema = schema.object({
       access: schema.oneOf([schema.literal('public'), schema.literal('internal')], {
@@ -305,32 +337,19 @@ export class HttpService
         } catch (e) {
           return h.response({ message: e.message }).code(400);
         }
-        return await firstValueFrom(
-          of(1).pipe(
-            HttpService.generateOasSemaphore.acquire(),
-            mergeMap(async () => {
-              try {
-                // Potentially quite expensive
-                const result = await generateOpenApiDocument(
-                  this.httpServer.getRouters({ pluginId: query.pluginId }),
-                  {
-                    baseUrl,
-                    title: 'Kibana HTTP APIs',
-                    version: '0.0.0', // TODO get a better version here
-                    filters,
-                    env: { serverless: this.env.packageInfo.buildFlavor === 'serverless' },
-                  }
-                );
-                return h.response(result);
-              } catch (e) {
-                this.log.error(e);
-                return h.response({ message: e.message }).code(500);
-              }
-            })
-          )
-        );
+        try {
+          const result = await this.generateOas({
+            baseUrl,
+            filters,
+            pluginId: query.pluginId,
+          });
+          return h.response(result);
+        } catch (e) {
+          return h.response({ message: e.message }).code(500);
+        }
       },
       options: {
+        auth: false,
         app: {
           access: 'public',
           security: {
@@ -340,7 +359,6 @@ export class HttpService
             },
           },
         },
-        auth: false,
         cache: {
           privacy: 'public',
           otherwise: 'must-revalidate',

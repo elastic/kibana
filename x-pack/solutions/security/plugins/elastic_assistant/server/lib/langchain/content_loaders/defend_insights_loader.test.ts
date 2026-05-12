@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Document } from 'langchain/document';
+import type { Document } from '@langchain/core/documents';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
@@ -60,6 +60,6 @@ describe('defend_insights_loader', () => {
   it('getDefendInsightsDocsCount returns correct count', async () => {
     const result = await getDefendInsightsDocsCount({ logger: loggerMock.create() });
 
-    expect(result).toBe(8);
+    expect(result).toBe(14);
   });
 });

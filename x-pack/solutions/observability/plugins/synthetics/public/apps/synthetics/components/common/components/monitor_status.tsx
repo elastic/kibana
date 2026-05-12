@@ -7,24 +7,26 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
-import { useScreenContext } from '../../../hooks/use_screen_context';
+import { MONITOR_STATUS_ENUM } from '../../../../../../common/constants/monitor_management';
+import type {
+  EncryptedSyntheticsMonitor,
+  OverviewStatusMetaData,
+} from '../../../../../../common/runtime_types';
 
 export const BadgeStatus = ({
   status,
   isBrowserType,
   onClickBadge,
+  monitor,
 }: {
+  monitor?: OverviewStatusMetaData;
   status?: string;
   isBrowserType: boolean;
   onClickBadge?: () => void;
 }) => {
-  const { color, dataTestSubj, labels } = badgeMapping[status || 'unknown'];
+  const monStatus = status ? status : monitor?.overallStatus;
+  const { color, dataTestSubj, labels } = badgeMapping[monStatus || MONITOR_STATUS_ENUM.PENDING];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
-
-  useScreenContext({
-    screenDescription: `The user is viewing the monitor status based on the last test run. The current status is ${label}.`,
-  });
 
   return (
     <EuiBadge
@@ -114,7 +116,7 @@ interface BadgeData {
 }
 
 const badgeMapping: Record<string, BadgeData> = {
-  unknown: {
+  pending: {
     color: 'default',
     dataTestSubj: 'monitorLatestStatusPending',
     labels: { default: PENDING_LABEL },

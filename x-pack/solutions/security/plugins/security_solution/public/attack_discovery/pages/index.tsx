@@ -19,13 +19,16 @@ import {
   QUERY_LOCAL_STORAGE_KEY,
   START_LOCAL_STORAGE_KEY,
   useAssistantContext,
-  useLoadConnectors,
 } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import { SecurityPageName } from '../../../common/constants';
+import {
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SecurityPageName,
+} from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../common/lib/kibana';
@@ -46,18 +49,20 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useInvalidateGetAttackDiscoveryGenerations } from './use_get_attack_discovery_generations';
 import { getConnectorNameFromId } from './utils/get_connector_name_from_id';
+import { MovingAttacksCallout } from './moving_attacks_callout';
 
 export const ID = 'attackDiscoveryQuery';
 
 const AttackDiscoveryPageComponent: React.FC = () => {
   const {
-    services: { uiSettings },
+    services: { uiSettings, settings },
   } = useKibana();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
+    settings,
   });
 
   // for showing / hiding anonymized data:
@@ -190,6 +195,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           size,
           start,
           overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideConnectorName: overrideOptions?.overrideConnectorId
+            ? getConnectorNameFromId({
+                aiConnectors,
+                connectorId: overrideOptions.overrideConnectorId,
+              })
+            : undefined,
           overrideEnd: overrideOptions?.overrideEnd,
           overrideFilter: overrideOptions?.overrideFilter,
           overrideSize: overrideOptions?.overrideSize,
@@ -200,6 +211,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       }
     },
     [
+      aiConnectors,
       end,
       fetchAttackDiscoveries,
       filterQuery,
@@ -222,6 +234,11 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const onClose = useCallback(() => setShowFlyout(false), []);
 
+  const enableAlertsAndAttacksAlignment = uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+    false
+  );
+
   return (
     <div
       css={css`
@@ -243,6 +260,13 @@ const AttackDiscoveryPageComponent: React.FC = () => {
         </HeaderPage>
 
         <EuiSpacer size="s" />
+
+        {enableAlertsAndAttacksAlignment && (
+          <>
+            <MovingAttacksCallout />
+            <EuiSpacer size="s" />
+          </>
+        )}
 
         <History
           aiConnectors={aiConnectors}

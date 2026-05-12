@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -26,6 +26,7 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiTourStep,
+  useEuiTheme,
 } from '@elastic/eui';
 import {
   PagingInfo,
@@ -62,6 +63,8 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
+import * as Styles from '../styles';
+
 import type { APICallData } from './api_call_flyout';
 import { APICallFlyout } from './api_call_flyout';
 
@@ -78,7 +81,6 @@ import {
   Sorting,
   SearchBar,
 } from './search_ui_components';
-import '../search_application_layout.scss';
 
 class InternalSearchApplicationTransporter implements Transporter {
   constructor(
@@ -151,7 +153,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             {hasSchemaConflicts && (
               <>
                 <EuiFlexItem>
-                  <EuiIcon type="alert" color="danger" />
+                  <EuiIcon type="warning" color="danger" />
                 </EuiFlexItem>
                 {!isTourClosed && <EuiSpacer size="xs" />}
               </>
@@ -196,7 +198,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiFlexItem>
               <EuiButtonEmpty
                 color="primary"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={setCloseConfiguration}
               >
@@ -228,7 +230,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 
           <EuiContextMenuItem
             key="Indices"
-            icon="tableDensityExpanded"
+            icon="tableDensityLow"
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -247,7 +249,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           </EuiContextMenuItem>
           <EuiContextMenuItem
             key="Schema"
-            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'kqlField'}
+            icon={hasSchemaConflicts ? <EuiIcon type="warning" color="danger" /> : 'queryField'}
             onClick={() =>
               navigateToUrl(
                 generateEncodedPath(SEARCH_APPLICATION_CONTENT_PATH, {
@@ -349,6 +351,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
   );
 };
 export const SearchApplicationDocsExplorer: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { http } = useValues(HttpLogic);
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
@@ -356,6 +359,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { resultFields, sortableFields } = useValues(SearchApplicationDocsExplorerLogic);
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
 
@@ -394,7 +398,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
       isLoading={isLoadingSearchApplication}
       pageHeader={{
         bottomBorder: false,
-        className: 'searchApplicationHeaderBackgroundColor',
+        css: Styles.searchApplicationHeaderBackgroundColor(euiTheme),
         pageTitle: searchApplicationName,
         rightSideItems: [
           <>
@@ -424,6 +428,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
                           iconType="eye"
                           onClick={() => setShowAPICallFlyout(true)}
                           isLoading={lastAPICall == null}
+                          buttonRef={buttonRef}
                         >
                           {i18n.translate(
                             'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.appendButtonLabel',
@@ -460,6 +465,7 @@ export const SearchApplicationDocsExplorer: React.FC = () => {
         {showAPICallFlyout && lastAPICall && (
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
+            focusButtonRef={buttonRef}
             lastAPICall={lastAPICall}
             searchApplicationName={searchApplicationName}
           />

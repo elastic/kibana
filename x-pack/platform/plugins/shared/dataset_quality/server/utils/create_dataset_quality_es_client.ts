@@ -35,7 +35,7 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
       return esClient.search<TDocument>({
         ...searchParams,
-      }) as Promise<any>;
+      }) as Promise<InferSearchResponseOf<TDocument, TParams>>;
     },
     msearch<TDocument, TParams extends DatasetQualityESSearchParams>(
       index = {} as { index?: Indices },
@@ -45,10 +45,17 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
     }> {
       return esClient.msearch({
         searches: searches.map((search) => [index, search]).flat(),
-      }) as Promise<any>;
+      }) as unknown as Promise<{
+        responses: Array<InferSearchResponseOf<TDocument, TParams>>;
+      }>;
     },
     fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
-      return esClient.fieldCaps({ ...params });
+      return esClient.fieldCaps({
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        expand_wildcards: ['open', 'hidden'],
+        ...params,
+      }) as unknown as Promise<FieldCapsResponse>;
     },
     mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
       return esClient.indices.getMapping(params);

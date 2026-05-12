@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -17,6 +17,7 @@ import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 import { AnomalySwimlaneUserInput } from '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
 
@@ -27,7 +28,7 @@ export type CreateSwimlanePanelActionContext = EmbeddableApiContext & {
 const parentApiIsCompatible = async (
   parentApi: unknown
 ): Promise<PresentationContainer | undefined> => {
-  const { apiIsPresentationContainer } = await import('@kbn/presentation-containers');
+  const { apiIsPresentationContainer } = await import('@kbn/presentation-publishing');
   // we cannot have an async type check, so return the casted parentApi rather than a boolean
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
@@ -55,6 +56,7 @@ export function createAddSwimlanePanelAction(
         defaultMessage: 'View anomaly detection results in a timeline.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
@@ -78,10 +80,8 @@ export function createAddSwimlanePanelAction(
                 presentationContainerParent.addNewPanel({
                   panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
                   serializedState: {
-                    rawState: {
-                      ...initialState,
-                      title: initialState.panelTitle,
-                    },
+                    ...initialState,
+                    title: initialState.panelTitle,
                   },
                 });
                 closeFlyout();

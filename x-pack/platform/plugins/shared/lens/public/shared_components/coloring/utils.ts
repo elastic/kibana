@@ -26,7 +26,12 @@ import {
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { KbnPalettes } from '@kbn/palettes';
-import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '../../types';
+import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '@kbn/lens-common';
+
+/**
+ * Determines if a data type is numeric.
+ */
+export const isDataTypeNumeric = (dataType?: string): boolean => dataType === 'number';
 
 /**
  * Returns array of colors for provided palette or colorMapping
@@ -48,26 +53,42 @@ export function getPaletteDisplayColors(
 }
 
 export function getAccessorTypeFromOperation(
-  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null
+  operation: Pick<OperationDescriptor, 'isBucketed' | 'dataType' | 'hasArraySupport'> | null,
+  dataTypeFallback?: DataType | DatatableColumnType,
+  isTextBased?: boolean
 ) {
+  // Use fallback when the operation's dataType differs from the activeData type (and fallback is defined)
+  const useFallback = dataTypeFallback != null && operation?.dataType !== dataTypeFallback;
+  const dataType = useFallback ? dataTypeFallback : operation?.dataType;
+  const hasArraySupport = operation?.hasArraySupport;
+
+  // For text_based datasource: isBucketed is calculated as isNotNumeric(datatype), which may be wrong. Recalculate from actual data.
+  // For form_based: trust operation.isBucketed as it's explicitly set by the operation definition.
+  const isBucketed =
+    useFallback && isTextBased ? !isDataTypeNumeric(dataTypeFallback) : operation?.isBucketed;
+
   const isNumericTypeFromOperation = Boolean(
-    !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
+    !isBucketed && isDataTypeNumeric(dataType) && !hasArraySupport
   );
   const isBucketableTypeFromOperationType = Boolean(
-    operation?.isBucketed ||
-      (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
+    isBucketed || (dataType !== 'number' && !hasArraySupport)
   );
   return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
 }
 
 /**
  * Analyze the column from the datasource prospective (formal check)
- * to know whether it's a numeric type or not
+ * to know whether it's a numeric type or not.
+ * Optionally accepts a dataTypeFallback from activeData to override schema type
+ * when there's a mismatch.
  * Note: to be used for Lens UI only
  */
 export function getAccessorType(
-  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
-  accessor: string | undefined
+  datasource:
+    | Pick<DatasourcePublicAPI, 'getOperationForColumnId' | 'isTextBasedLanguage'>
+    | undefined,
+  accessor: string | undefined,
+  dataTypeFallback?: DataType | DatatableColumnType
 ) {
   // No accessor means it's not a numeric type by default
   if (!accessor || !datasource) {
@@ -75,8 +96,9 @@ export function getAccessorType(
   }
 
   const operation = datasource.getOperationForColumnId(accessor);
+  const isTextBased = datasource.isTextBasedLanguage();
 
-  return getAccessorTypeFromOperation(operation);
+  return getAccessorTypeFromOperation(operation, dataTypeFallback, isTextBased);
 }
 
 /**
@@ -93,14 +115,14 @@ export function shouldColorByTerms(
 export function getContrastColor(
   color: string,
   isDarkTheme: boolean,
-  darkTextProp: 'euiColorInk' | 'euiTextColor' = 'euiColorInk',
-  lightTextProp: 'euiColorGhost' | 'euiTextColor' = 'euiColorGhost'
+  darkTextProp: 'euiColorTextInk' | 'euiTextColor' = 'euiColorTextInk',
+  lightTextProp: 'euiColorTextGhost' | 'euiTextColor' = 'euiColorTextGhost'
 ) {
-  // when in light theme both text color and colorInk are dark and the choice
+  // when in light theme both text color and textInk are dark and the choice
   // may depends on the specific context.
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars[darkTextProp];
+  const darkColor = isDarkTheme ? euiDarkVars.euiColorTextInk : euiLightVars[darkTextProp];
   // Same thing for light color in dark theme
-  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorGhost;
+  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorTextGhost;
   const backgroundColor = isDarkTheme
     ? euiDarkVars.euiPageBackgroundColor
     : euiLightVars.euiPageBackgroundColor;

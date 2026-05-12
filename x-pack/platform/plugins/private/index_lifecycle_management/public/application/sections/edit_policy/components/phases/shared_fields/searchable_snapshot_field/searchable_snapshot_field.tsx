@@ -10,16 +10,28 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfiguration, UseField, globalFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
+import type { FormInternal } from '../../../../types';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
+import { ForceMergeIndexSwitchField } from './force_merge_index_switch_field';
+import { ForceMergeOnCloneSwitchField } from './force_merge_on_clone_switch_field';
 
-import './_searchable_snapshot_field.scss';
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    searchableSnapshotField: css`
+      max-width: ${euiTheme.components.forms.maxWidth};
+    `,
+  };
+};
+
 import { i18nTexts as i18nTextsEdit } from '../../../../i18n_texts';
 
 export interface Props {
@@ -41,7 +53,7 @@ const geti18nTexts = (
         description: (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
-            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
+            defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. Because snapshots provide resiliency, enabling this option disables and removes replicas from the previous phase. You can manually re-enable replicas if needed. {learnMoreLink}"
             values={{
               learnMoreLink: <LearnMoreLink docPath={fullyMountedSearchableSnapshotLink} />,
             }}
@@ -83,6 +95,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   phase,
   canBeDisabled = true,
 }) => {
+  const styles = useStyles();
   const {
     services: { cloud, docLinks, getUrlForApp },
   } = useKibana();
@@ -90,12 +103,15 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const forceMergeIndexPath = `phases.${phase}.actions.searchable_snapshot.force_merge_index`;
 
   const [formData] = useFormData({
-    watch: globalFields.searchableSnapshotRepo.path,
+    watch: [globalFields.searchableSnapshotRepo.path, forceMergeIndexPath],
   });
 
   const searchableSnapshotGlobalRepo = get(formData, globalFields.searchableSnapshotRepo.path);
+  const forceMergeIndexValue = get(formData, forceMergeIndexPath) as boolean | undefined;
+  const isForceMergeIndexEnabled = forceMergeIndexValue ?? true;
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
@@ -109,8 +125,8 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     )
   );
   const fullyMountedSearchableSnapshotLink = docLinks.links.elasticsearch.ilmSearchableSnapshot;
-  const partiallyMountedSearchableSnapshotLink =
-    docLinks.links.elasticsearch.searchableSnapshotSharedCache;
+  const partiallyMountedSearchableSnapshotLink = docLinks.links.snapshotRestore.searchableSnapshot;
+
   const i18nTexts = geti18nTexts(
     phase,
     fullyMountedSearchableSnapshotLink,
@@ -159,6 +175,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           } else if (repos.length === 0) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 color="warning"
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle',
@@ -194,6 +211,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
           ) {
             calloutContent = (
               <EuiCallOut
+                announceOnMount={false}
                 title={i18n.translate(
                   'xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle',
                   { defaultMessage: 'Repository name not found' }
@@ -227,7 +245,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
         }
 
         return (
-          <div className="ilmSearchableSnapshotField">
+          <div css={styles.searchableSnapshotField}>
             <UseField
               path={searchableSnapshotRepoPath}
               defaultValue={!!searchableSnapshotGlobalRepo ? [searchableSnapshotGlobalRepo] : []}
@@ -239,6 +257,34 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
                 noSuggestions: !!(error || repos.length === 0),
               }}
             />
+
+            <EuiSpacer size="m" />
+
+            <UseField<boolean | undefined, FormInternal>
+              path={forceMergeIndexPath}
+              defaultValue={
+                policy.phases[phase]?.actions?.searchable_snapshot?.force_merge_index ?? true
+              }
+              component={ForceMergeIndexSwitchField}
+              componentProps={{
+                phase,
+              }}
+            />
+
+            <EuiSpacer size="m" />
+            {isForceMergeIndexEnabled ? (
+              <UseField<boolean | undefined, FormInternal>
+                path={`phases.${phase}.actions.searchable_snapshot.force_merge_on_clone`}
+                defaultValue={
+                  policy.phases[phase]?.actions?.searchable_snapshot?.force_merge_on_clone ?? true
+                }
+                component={ForceMergeOnCloneSwitchField}
+                componentProps={{
+                  phase,
+                }}
+              />
+            ) : null}
+
             {calloutContent && (
               <>
                 <EuiSpacer size="s" />
@@ -257,6 +303,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     if (phase === 'hot' && isUsingSearchableSnapshotInHotPhase) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
@@ -271,6 +318,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
     } else if (isDisabledDueToLicense) {
       infoCallout = (
         <EuiCallOut
+          announceOnMount={false}
           data-test-subj="searchableSnapshotDisabledDueToLicense"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotLicenseCalloutTitle',

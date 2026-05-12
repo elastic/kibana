@@ -12,6 +12,7 @@ import { CloudSetup, type CloudSetupConfig } from '@kbn/cloud-security-posture';
 
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
+import { CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { ASSET_POLICY_TEMPLATE, CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from './constants';
 
@@ -35,7 +36,9 @@ export const CloudAssetInventoryPolicyTemplateForm =
       isAgentlessEnabled,
       defaultSetupTechnology,
     }) => {
-      const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
+      const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS = '0.18.0';
+      const CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE = '1.1.3';
+
       const { cloud, uiSettings } = useKibana().services;
       const isValidFormState = !hasErrors(validationResults);
 
@@ -53,14 +56,14 @@ export const CloudAssetInventoryPolicyTemplateForm =
           }
         ),
         overviewPath: `https://ela.st/cloud-asset-discovery-overview`,
-        getStartedPath: `https://ela.st/cloud-asset-discovery-get-started`,
-        cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
+        getStartedPath: `https://www.elastic.co/docs/solutions/security/cloud/asset-disc`,
         showCloudTemplates: true,
         providers: {
           aws: {
             type: CLOUDBEAT_AWS,
             enableOrganization: true,
-            getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-aws.html`,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AWS,
+            getStartedPath: `https://www.elastic.co/docs/solutions/security/cloud/asset-disc-aws`,
             inputFieldMapping: {
               access_key_id: 'aws.access_key_id',
               secret_access_key: 'aws.secret_access_key',
@@ -73,15 +76,17 @@ export const CloudAssetInventoryPolicyTemplateForm =
           gcp: {
             type: CLOUDBEAT_GCP,
             enableOrganization: true,
-            getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-gcp.html`,
+            getStartedPath: `https://www.elastic.co/docs/solutions/security/cloud/asset-disc-gcp`,
             enabled: true,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
           },
           azure: {
             type: CLOUDBEAT_AZURE,
             enabled: true,
             enableOrganization: true,
-            getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-azure.html`,
+            getStartedPath: `https://www.elastic.co/docs/solutions/security/cloud/asset-disc-azure`,
             manualFieldsEnabled: true,
+            cloudConnectorEnabledVersion: CLOUD_CONNECTOR_PACKAGE_VERSION_ENABLED_AZURE,
           },
         },
       };

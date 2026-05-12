@@ -16,9 +16,12 @@ import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import { InterceptDialogApi } from './intercept_dialog_api';
 import type { UserInterceptRunPersistenceService } from './user_intercept_run_persistence_service';
-import { InterceptDisplayManager } from '../component/intercept_display_manager';
+import {
+  type Intercept,
+  InterceptDisplayManagerMemoized,
+} from '../component/intercept_display_manager';
 
-interface InterceptServiceSetupDeps {
+export interface InterceptServiceSetupDeps {
   analytics: AnalyticsServiceSetup;
   notifications: NotificationsSetup;
 }
@@ -31,12 +34,14 @@ export interface InterceptServiceStartDeps {
     UserInterceptRunPersistenceService['start']
   >['updateUserTriggerData'];
   staticAssetsHelper: HttpStart['staticAssets'];
+  resetInterceptTimingRecord: (interceptId: Intercept['id']) => void;
 }
 
 export class InterceptDialogService {
   private readonly api = new InterceptDialogApi();
   private targetDomElement?: HTMLElement;
   private notificationsCoordinator?: ReturnType<NotificationsSetup['coordinator']>;
+  private interceptsStream$?: Rx.Observable<Intercept>;
 
   setup({ analytics, notifications }: InterceptServiceSetupDeps) {
     this.api.setup({ analytics });
@@ -52,6 +57,7 @@ export class InterceptDialogService {
     analytics,
     staticAssetsHelper,
     persistInterceptRunId: persistInterceptRunInteraction,
+    resetInterceptTimingRecord,
   }: InterceptServiceStartDeps) {
     const { ack, add, get$ } = this.api.start({ analytics });
     this.targetDomElement = targetDomElement;
@@ -60,43 +66,70 @@ export class InterceptDialogService {
       throw new Error('Notifications coordinator is not initialized');
     }
 
-    // leverage the notifications coordinator to ensure that we are not showing
-    // multiple intercepts at the same time, and that we are not showing
+    // leverages the notifications coordinator to ensure that we are not showing
     // intercepts when the user is interacting with other notifications
     // (e.g. toast notifications)
-    const intercept$ = this.notificationsCoordinator
+    this.interceptsStream$ = this.notificationsCoordinator
       .optInToCoordination(get$(), ({ locked }) => !locked)
       .pipe(
-        Rx.mergeMap((x) => x),
-        // since the backing store for product intercepts accepts all queued intercepts,
-        // we might receive a list of intercepts that should be attended to,
-        // hence we attempt to present them serially to the user, without interrupting other queued notification types
-        Rx.delayWhen(() =>
-          this.notificationsCoordinator!.lock$.pipe(
-            Rx.filter(({ controller }) => controller === InterceptDialogService.name)
-          )
-        )
+        Rx.scan((pendingInterceptsQueue, incomingIntercepts) => {
+          const pendingInterceptIds = pendingInterceptsQueue.map((intercept) => intercept.id);
+
+          const newIncomingIntercepts = incomingIntercepts.filter(
+            (intercept) => !pendingInterceptIds.includes(intercept.id)
+          );
+
+          // Here we only return the new incoming intercepts,
+          // because we intend to hold on to all previous intercept values till they can be emitted
+          // under the conditions we define
+          return newIncomingIntercepts;
+        }, [] as Intercept[]),
+        // don't emit on empty
+        Rx.filter((pendingInterceptsQueue) => Boolean(pendingInterceptsQueue.length)),
+        Rx.concatMap((pendingInterceptsQueue) => {
+          return Rx.from(pendingInterceptsQueue).pipe(
+            Rx.concatMap((item) =>
+              this.notificationsCoordinator!.lock$.pipe(
+                Rx.filter(
+                  (lockState) =>
+                    !lockState.locked || lockState.controller === InterceptDialogService.name
+                ),
+                Rx.take(1), // Wait until the lock is available, then proceed
+                Rx.tap((lockState) => {
+                  if (!lockState.locked) {
+                    this.notificationsCoordinator!.acquireLock();
+                  }
+                }),
+                Rx.map(() => item)
+              )
+            )
+          );
+        })
       );
 
     const ackIntercept = (
-      ...args: Parameters<ComponentProps<typeof InterceptDisplayManager>['ackIntercept']>
+      ...args: Parameters<ComponentProps<typeof InterceptDisplayManagerMemoized>['ackIntercept']>
     ) => {
       const [{ runId, ...ackArgs }] = args;
 
       ack(ackArgs);
 
+      // Reset the timer start record, so the next interval starts fresh
+      resetInterceptTimingRecord(ackArgs.interceptId);
+
+      // persist the intercept interaction to the user trigger data
       persistInterceptRunInteraction(ackArgs.interceptId, runId);
 
-      // we release the coordination lock on processing the user's acknowledgement of the product intercept,
-      // so that any other pending notification can be shown
+      // Release acquired lock after user acknowledges the intercept
+      // This allows the next queued item in the co-ordination queue (if any) to be processed automatically
       this.notificationsCoordinator?.releaseLock();
     };
 
     render(
       rendering.addContext(
-        <InterceptDisplayManager
+        <InterceptDisplayManagerMemoized
           {...{
-            intercept$,
+            intercept$: this.interceptsStream$,
             ackIntercept,
             staticAssetsHelper,
           }}

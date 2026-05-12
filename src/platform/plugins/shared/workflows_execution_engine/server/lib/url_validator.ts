@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as url from 'url';
-
 export interface UrlValidatorConfig {
   allowedHosts: string[];
 }
@@ -25,41 +23,65 @@ export class UrlValidator {
   }
 
   /**
+   * Parses and validates a URL string into a URL object.
+   * Returns null if the URL cannot be parsed.
+   */
+  parseUrl(uri: string): URL | null {
+    try {
+      if (uri.startsWith('//')) {
+        return null;
+      }
+
+      const parsedUrl = new URL(uri);
+      if (!parsedUrl.hostname) {
+        return null;
+      }
+
+      return parsedUrl;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  /**
    * Checks if a URL is allowed based on the allowedHosts configuration
    */
   isUrlAllowed(uri: string): boolean {
-    try {
-      const parsedUrl = url.parse(uri, false, true);
-      const hostname = parsedUrl.hostname;
-
-      if (!hostname) {
-        return false;
-      }
-
-      return this.isHostnameAllowed(hostname);
-    } catch (error) {
+    const parsedUrl = this.parseUrl(uri);
+    if (!parsedUrl) {
       return false;
     }
+
+    return this.isHostnameAllowed(parsedUrl.hostname);
   }
 
   /**
    * Checks if a hostname is allowed
    */
   isHostnameAllowed(hostname: string): boolean {
-    // Check for wildcard '*' which allows any host
     if (this.allowedHosts.has('*')) {
       return true;
     }
 
-    // Check if the specific hostname is allowed
     return this.allowedHosts.has(hostname);
   }
 
   /**
-   * Validates a URL and throws an error if not allowed
+   * Validates a URL and throws an error if not allowed.
+   * Provides specific error messages for unparseable URLs vs disallowed hosts.
    */
   ensureUrlAllowed(uri: string): void {
-    if (!this.isUrlAllowed(uri)) {
+    const parsedUrl = this.parseUrl(uri);
+
+    if (!parsedUrl) {
+      const hasProtocol = /^https?:\/\//i.test(uri);
+      const message = hasProtocol
+        ? `Invalid URL "${uri}". Ensure the URL is well-formed.`
+        : `Invalid URL "${uri}". URLs must include a protocol (e.g., https://${uri}).`;
+      throw new Error(message);
+    }
+
+    if (!this.isHostnameAllowed(parsedUrl.hostname)) {
       throw new Error(
         `target url "${uri}" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts`
       );

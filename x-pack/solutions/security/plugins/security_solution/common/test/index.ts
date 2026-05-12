@@ -26,12 +26,26 @@ export enum ROLES {
   detections_admin = 'detections_admin',
   platform_engineer = 'platform_engineer',
   // ESS roles
+  admin = 'admin',
   reader = 'reader',
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
   no_risk_engine_privileges = 'no_risk_engine_privileges',
   timeline_none = 'timeline_none',
   notes_none = 'notes_none',
+  rules_read_exceptions_all = 'rules_read_exceptions_all',
+  rules_read_exceptions_read = 'rules_read_exceptions_read',
+  // Rules subfeature roles (V4)
+  rules_read_investigation_guide_all = 'rules_read_investigation_guide_all',
+  rules_read_custom_highlighted_fields_all = 'rules_read_custom_highlighted_fields_all',
+  rules_read_enable_disable_all = 'rules_read_enable_disable_all',
+  rules_read_manual_run_all = 'rules_read_manual_run_all',
+  rules_read_rules_management_settings_all = 'rules_read_rules_management_settings_all',
+  rules_all_enable_disable_none = 'rules_all_enable_disable_none',
+  rules_all_manual_run_none = 'rules_all_manual_run_none',
+  rules_all_rules_management_settings_none = 'rules_all_rules_management_settings_none',
+  rules_read_subfeatures_all = 'rules_read_subfeatures_all',
+  rules_all_preview_index = 'rules_all_preview_index',
 }
 
 /**

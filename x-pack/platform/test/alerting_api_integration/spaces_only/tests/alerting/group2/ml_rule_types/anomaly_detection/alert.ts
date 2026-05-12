@@ -8,8 +8,9 @@
 import expect from '@kbn/expect';
 import { sample } from 'lodash';
 import { duration } from 'moment';
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
@@ -157,6 +158,83 @@ export default function alertTests({ getService }: FtrProviderContext) {
         );
         expect(doc._source['kibana.alert.anomaly_score'][0]).to.be.above(0);
       }
+    });
+
+    describe('custom filter validation', () => {
+      it('rejects disallowed field: job_id', async () => {
+        const { status, body } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test disallowed field job_id',
+            consumer: 'alerts',
+            enabled: true,
+            rule_type_id: ALERT_TYPE_ID,
+            schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
+            actions: [],
+            params: {
+              jobSelection: { jobIds: [AD_JOB_ID] },
+              severity: 0,
+              resultType: 'record',
+              includeInterim: true,
+              kqlQueryString: 'job_id: "test"',
+            },
+          });
+
+        expect(status).to.be(400);
+        expect(body.message).to.contain('job_id');
+        expect(body.message).to.contain('not allowed');
+      });
+    });
+
+    describe('custom filter functionality', () => {
+      it('filters alerts by partition_field_value', async () => {
+        await createAlert({
+          name: 'Test filtered alerts',
+          includeInterim: true,
+          jobSelection: {
+            jobIds: [AD_JOB_ID],
+          },
+          severity: 0,
+          lookbackInterval: undefined,
+          resultType: 'record',
+          topNBuckets: undefined,
+          kqlQueryString: 'partition_field_value: "first-key"',
+        });
+
+        await ingestAnomalousDocWithKey(BASIC_TEST_DATA_INDEX, 'first-key');
+
+        log.debug('Checking created alert instances...');
+
+        const docs = await waitForDocs(1);
+        expect(docs.length).to.be.greaterThan(0);
+      });
+
+      it('does not alert when filter does not match', async () => {
+        await createAlert({
+          name: 'Test filtered alerts no match',
+          includeInterim: true,
+          jobSelection: {
+            jobIds: [AD_JOB_ID],
+          },
+          severity: 0,
+          lookbackInterval: undefined,
+          resultType: 'record',
+          topNBuckets: undefined,
+          kqlQueryString: 'partition_field_value: "non-existent-key"',
+        });
+
+        await ingestAnomalousDocWithKey(BASIC_TEST_DATA_INDEX, 'first-key');
+
+        log.debug('Waiting for potential alerts to be created...');
+        // wait 15s - 5x alert interval
+        await sleep(ALERT_INTERVAL_SECONDS * 5 * 1000);
+
+        log.debug('Verifying no alerts were created...');
+
+        const docs = await waitForDocs(0);
+        expect(docs.length).to.be(0);
+      });
     });
 
     async function waitForDocs(count: number): Promise<any[]> {
@@ -311,6 +389,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
         refresh: 'wait_for',
         index: indexName,
         body: { '@timestamp': Date.now(), value: 10 * 1000, key: sample(DOC_KEYS) },
+      });
+      log.debug('Anomalous doc indexed successfully...');
+    }
+
+    async function ingestAnomalousDocWithKey(indexName: string, key: string) {
+      log.debug(`Ingesting anomalous doc with key '${key}'...`);
+      await es.index({
+        refresh: 'wait_for',
+        index: indexName,
+        body: { '@timestamp': Date.now(), value: 10 * 1000, key },
       });
       log.debug('Anomalous doc indexed successfully...');
     }

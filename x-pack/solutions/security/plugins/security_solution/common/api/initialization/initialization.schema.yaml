@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+  title: Security Solution Initialization Schema
+  version: '2023-10-31'
+paths:
+  /api/security_solution/initialize:
+    post:
+      summary: Initialize security solution flows
+      operationId: InitializeSecuritySolution
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - flows
+              properties:
+                flows:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/InitializationFlowId'
+                  minItems: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - flows
+                properties:
+                  flows:
+                    $ref: '#/components/schemas/InitializationFlowsResult'
+
+components:
+  x-codegen-enabled: true
+  schemas:
+    InitializationFlowId:
+      type: string
+      description: Identifier for an initialization flow.
+      enum:
+        - create-list-indices
+        - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
+
+    InitializationFlowsResult:
+      type: object
+      description: >-
+        Per-flow results. Only requested flows appear in the response, so all
+        properties are optional. Each flow is either a typed ready result or
+        an error result.
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        security-data-views:
+          oneOf:
+            - $ref: '#/components/schemas/SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+
+    CreateListIndicesReadyResult:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+
+    DataViewPayload:
+      type: object
+      required:
+        - id
+        - title
+        - patternList
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        patternList:
+          type: array
+          items:
+            type: string
+
+    SecurityDataViewsReadyResult:
+      type: object
+      required:
+        - status
+        - payload
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+        payload:
+          type: object
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+          properties:
+            defaultDataView:
+              $ref: '#/components/schemas/DataViewPayload'
+            alertDataView:
+              $ref: '#/components/schemas/DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/DataViewPayload'
+            kibanaDataViews:
+              type: array
+              items:
+                $ref: '#/components/schemas/DataViewPayload'
+            signalIndexName:
+              type: string
+
+    PackageInstallReadyResult:
+      type: object
+      required:
+        - status
+        - payload
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+        payload:
+          type: object
+          required:
+            - name
+            - version
+            - install_status
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+            install_status:
+              type: string
+              description: Fleet package installation status (e.g., installed, already_installed).
+
+    InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+
+    InitializationFlowErrorResult:
+      type: object
+      required:
+        - status
+        - error
+      properties:
+        status:
+          type: string
+          enum:
+            - error
+        error:
+          type: string
+          nullable: true

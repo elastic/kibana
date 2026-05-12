@@ -10,8 +10,9 @@
 import React from 'react';
 import type { EuiButtonGroupOptionProps, IconType, EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
-
-import { IconButtonGroupStyles } from './icon_button_group.styles';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import { getIconButtonStyles, getIconButtonGroupStyles } from './icon_button_group.styles';
 
 /**
  * An interface representing a single icon button in the `IconButtonGroup`.
@@ -29,10 +30,16 @@ export interface IconButton {
   'data-test-subj'?: string;
   /** To disable the action **/
   isDisabled?: boolean;
+  /** Tooltip content */
+  toolTipContent?: EuiButtonGroupOptionProps['toolTipContent'];
+  /** Tooltip props */
+  toolTipProps?: EuiButtonGroupOptionProps['toolTipProps'];
   /** A11y for button */
   'aria-expanded'?: boolean;
   /** A11y for button */
   'aria-controls'?: string;
+  /** CSS for the button */
+  css?: SerializedStyles;
 }
 
 /**
@@ -47,9 +54,11 @@ export interface Props {
   buttonSize?: EuiButtonGroupProps['buttonSize'];
   /** Test subject for button group */
   'data-test-subj'?: string;
+  /** CSS for the button group */
+  css?: SerializedStyles;
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
+type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label' | 'css'>;
 
 /**
  * A group of buttons each performing an action, represented by an icon.
@@ -59,19 +68,24 @@ export const IconButtonGroup = ({
   legend,
   buttonSize = 'm',
   'data-test-subj': dataTestSubj,
+  css: buttonGroupCss,
 }: Props) => {
   const euiTheme = useEuiTheme();
-  const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
+  const iconButtonStyles = getIconButtonStyles(euiTheme);
+  const iconButtonGroupStyles = getIconButtonGroupStyles(euiTheme);
 
   const buttonGroupOptions: Option[] = buttons.map((button: IconButton, index) => {
-    const { label, title = label, ...rest } = button;
+    const { label, title = label, css: buttonCss, ...rest } = button;
     return {
       ...rest,
       'aria-label': title ?? label,
       id: `${htmlIdGenerator()()}${index}`,
       label,
       title,
-      css: [iconButtonGroupStyles.button],
+      css: css`
+        ${iconButtonStyles};
+        ${buttonCss ? buttonCss : ''}
+      `,
     };
   });
 
@@ -88,7 +102,10 @@ export const IconButtonGroup = ({
       onChange={onChangeIconsMulti}
       type="multi"
       isIconOnly
-      css={iconButtonGroupStyles.buttonGroup}
+      css={css`
+        ${iconButtonGroupStyles};
+        ${buttonGroupCss ? buttonGroupCss : ''}
+      `}
     />
   );
 };

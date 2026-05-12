@@ -13,7 +13,6 @@ import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@ela
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useKibana } from '../../context';
 import { useUiSetting$ } from '../../ui_settings';
 
@@ -45,31 +44,25 @@ export const OverviewPageFooter: FC<Props> = ({
   if (!show && !save) return <></>;
 
   const defaultRouteButton = defaultRoute.includes(path) ? (
-    <RedirectAppLinks
-      coreStart={{
-        application,
+    <EuiButtonEmpty
+      className="kbnOverviewPageFooter__button"
+      flush="both"
+      iconType="home"
+      size="s"
+      onClick={(event: MouseEvent) => {
+        application.navigateToUrl(
+          addBasePath('/app/management/kibana/settings?query=default+route')
+        );
+        if (onChangeDefaultRoute) {
+          onChangeDefaultRoute(event);
+        }
       }}
     >
-      <EuiButtonEmpty
-        className="kbnOverviewPageFooter__button"
-        flush="both"
-        iconType="home"
-        size="s"
-        onClick={(event: MouseEvent) => {
-          application.navigateToUrl(
-            addBasePath('/app/management/kibana/settings?query=default+route')
-          );
-          if (onChangeDefaultRoute) {
-            onChangeDefaultRoute(event);
-          }
-        }}
-      >
-        <FormattedMessage
-          id="kibana-react.pageFooter.changeHomeRouteLink"
-          defaultMessage="Display a different page on log in"
-        />
-      </EuiButtonEmpty>
-    </RedirectAppLinks>
+      <FormattedMessage
+        id="kibana-react.pageFooter.changeHomeRouteLink"
+        defaultMessage="Display a different page on log in"
+      />
+    </EuiButtonEmpty>
   ) : (
     <EuiButtonEmpty
       className="kbnOverviewPageFooter__button"

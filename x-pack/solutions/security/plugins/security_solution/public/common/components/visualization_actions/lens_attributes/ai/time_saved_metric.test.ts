@@ -7,15 +7,18 @@
 
 import { getTimeSavedMetricLensAttributes } from './time_saved_metric';
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 
 describe('getTimeSavedMetricLensAttributes', () => {
   const mockTheme = {} as EuiThemeComputed;
+  const defaultSignalIndexName = '.alerts-security.alerts-default';
   const defaultParams = {
     euiTheme: mockTheme,
     minutesPerAlert: 8,
     extraOptions: undefined,
     stackByField: undefined,
     esql: undefined,
+    signalIndexName: defaultSignalIndexName,
   };
 
   it('includes the correct formula in the count_column', () => {
@@ -36,15 +39,38 @@ describe('getTimeSavedMetricLensAttributes', () => {
       ...defaultParams,
       extraOptions: { filters },
     });
-    expect(result.state.filters).toBe(filters);
+    expect(result.state.filters).toEqual([getAlertIndexFilter(defaultSignalIndexName), ...filters]);
   });
 
-  it('defaults filters to empty array if extraOptions is not provided', () => {
+  it('includes alert index filter even when extraOptions is not provided', () => {
     const result = getTimeSavedMetricLensAttributes({
       ...defaultParams,
       extraOptions: undefined,
     });
-    expect(result.state.filters).toEqual([]);
+    expect(result.state.filters).toEqual([getAlertIndexFilter(defaultSignalIndexName)]);
+  });
+
+  it('includes alert index filter in filters array', () => {
+    const result = getTimeSavedMetricLensAttributes(defaultParams);
+    const expectedFilter = getAlertIndexFilter(defaultSignalIndexName);
+    expect(result.state.filters).toContainEqual(expectedFilter);
+  });
+
+  it('handles different signal index names correctly', () => {
+    const testCases = [
+      '.alerts-security.alerts-default',
+      '.alerts-security.alerts-custom-space',
+      'custom-alerts-index',
+    ];
+
+    testCases.forEach((signalIndexName) => {
+      const result = getTimeSavedMetricLensAttributes({
+        ...defaultParams,
+        signalIndexName,
+      });
+      const expectedFilter = getAlertIndexFilter(signalIndexName);
+      expect(result.state.filters).toContainEqual(expectedFilter);
+    });
   });
 
   it('returns a LensAttributes object with required properties', () => {

@@ -6,30 +6,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import {
-  SecurityPageName,
-  SECURITY_FEATURE_ID,
-  SIEM_MIGRATIONS_RULES_PATH,
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+  SIEM_MIGRATIONS_FEATURE_ID,
+} from '@kbn/security-solution-features/constants';
+import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
+  SIEM_MIGRATIONS_RULES_PATH,
+  SIEM_MIGRATIONS_MANAGE_PATH,
+  SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { SiemMigrationsIcon } from '../common/icons/siem_migrations';
+import { IconDashboards } from '../common/icons/dashboards';
+import { IconRules } from '../common/icons/rules';
+import { IconAgent } from '../common/icons/agent';
 
 const subLinks: LinkItem[] = [
+  {
+    id: SecurityPageName.siemMigrationsManage,
+    title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
+      defaultMessage: 'Manage Automatic Migrations',
+    }),
+    description: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.description', {
+      defaultMessage: 'Manage your AI powered Automatic Migrations to Elastic.',
+    }),
+    landingIcon: IconAgent,
+    path: SIEM_MIGRATIONS_MANAGE_PATH,
+    capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    skipUrlState: true,
+    hideTimeline: true,
+    hideWhenExperimentalKey: 'siemMigrationsDisabled',
+  },
   {
     id: SecurityPageName.siemMigrationsRules,
     title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationRules.title', {
       defaultMessage: 'Translated rules',
     }),
     description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRules.description', {
-      defaultMessage:
-        'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
+      defaultMessage: 'Migrate your SIEM rules to Elastic using AI powered Automatic migration.',
     }),
-    landingIcon: SiemMigrationsIcon,
+    landingIcon: IconRules,
     path: SIEM_MIGRATIONS_RULES_PATH,
-    capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [[RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
@@ -42,36 +62,35 @@ const subLinks: LinkItem[] = [
     description: i18n.translate(
       'xpack.securitySolution.appLinks.siemMigrationsDashboards.description',
       {
-        defaultMessage:
-          'Our generative AI powered Automatic migration tool automates some of the most time consuming migrations tasks and processes.',
+        defaultMessage: 'Migrate your dashboards to Elastic using AI powered Automatic migration.',
       }
     ),
-    landingIcon: SiemMigrationsIcon,
+    landingIcon: IconDashboards,
     path: SIEM_MIGRATIONS_DASHBOARDS_PATH,
-    capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    capabilities: [[`dashboard_v2.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
     skipUrlState: true,
     hideTimeline: true,
     hideWhenExperimentalKey: 'siemMigrationsDisabled',
     experimentalKey: 'automaticDashboardsMigration',
-    isBeta: true,
-    betaOptions: {
-      text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsDashboards.badge', {
-        defaultMessage: 'Technical Preview',
-      }),
-    },
   },
 ];
 
 export const links: LinkItem = {
   id: SecurityPageName.siemMigrationsLanding,
   title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
-    defaultMessage: 'Migrations',
+    defaultMessage: 'Automatic migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+  capabilities: [
+    [SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+    [RULES_UI_READ_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`],
+  ],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
-      defaultMessage: 'DashboardMigrations',
+      defaultMessage: 'Migrations',
+    }),
+    i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
+      defaultMessage: 'Automatic migrations',
     }),
   ],
   links: subLinks,
@@ -81,7 +100,11 @@ export const links: LinkItem = {
       label: i18n.translate('xpack.securitySolution.appLinks.category.automaticMigrations', {
         defaultMessage: 'Automatic migrations',
       }),
-      linkIds: [SecurityPageName.siemMigrationsRules, SecurityPageName.siemMigrationsDashboards],
+      linkIds: [
+        SecurityPageName.siemMigrationsManage,
+        SecurityPageName.siemMigrationsRules,
+        SecurityPageName.siemMigrationsDashboards,
+      ],
     },
   ],
 };

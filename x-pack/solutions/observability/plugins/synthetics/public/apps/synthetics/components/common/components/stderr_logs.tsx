@@ -124,7 +124,12 @@ export const StdErrorLogs = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {summaryMessage && (
-            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
+            <EuiCallOut
+              announceOnMount
+              title={ERROR_SUMMARY_LABEL}
+              color="danger"
+              iconType="warning"
+            >
               <p>{summaryMessage}</p>
             </EuiCallOut>
           )}
@@ -149,6 +154,7 @@ export const StdErrorLogs = ({
           pageSizeOptions: [2, 5, 10, 20, 50],
         }}
         onTableChange={onTableChange}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );

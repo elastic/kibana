@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { differenceBy } from 'lodash';
 import {
   type TypedUseSelectorHook,
   type ReactReduxContextValue,
@@ -16,9 +15,10 @@ import {
   createSelectorHook,
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
-import React, { useMemo, createContext } from 'react';
+import React, { useMemo, createContext, useContext } from 'react';
+import defaultComparator from 'fast-deep-equal';
 import { useAdHocDataViews } from './runtime_state';
-import type { DiscoverInternalState, TabState } from './types';
+import type { DiscoverAppState, DiscoverInternalState, TabState } from './types';
 import {
   type TabActionPayload,
   type InternalStateDispatch,
@@ -46,6 +46,16 @@ export const InternalStateProvider = ({
 export const useInternalStateDispatch = createDispatchHook(
   internalStateContext
 ) as () => InternalStateDispatch;
+
+export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
+  const { store } = useContext(internalStateContext);
+  return store.getState as () => DiscoverInternalState;
+};
+
+export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
+  const { store } = useContext(internalStateContext);
+  return store.subscribe;
+};
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
@@ -85,10 +95,13 @@ export const useCurrentTabContext = () => {
   return context;
 };
 
-export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) => {
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, equalityFn) => {
   const { currentTabId } = useCurrentTabContext();
-  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)));
+  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)), equalityFn);
 };
+
+export const useAppStateSelector = <T,>(selector: (state: DiscoverAppState) => T): T =>
+  useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
 export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
   actionCreator: (params: TPayload) => TReturn
@@ -100,18 +113,9 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
 export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
-  const originalAdHocDataViews = useAdHocDataViews();
+  const adHocDataViews = useAdHocDataViews();
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-  const defaultProfileAdHocDataViewIds = useInternalStateSelector(
-    (state) => state.defaultProfileAdHocDataViewIds
-  );
-
   return useMemo(() => {
-    const managedDataViews = originalAdHocDataViews.filter(
-      ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
-    );
-    const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
-
-    return { savedDataViews, managedDataViews, adHocDataViews };
-  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews, savedDataViews]);
+    return { savedDataViews, adHocDataViews };
+  }, [adHocDataViews, savedDataViews]);
 };

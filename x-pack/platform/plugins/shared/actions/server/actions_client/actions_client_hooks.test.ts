@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeRegistryOpts } from '../action_type_registry';
@@ -32,6 +32,9 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
+import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 
 jest.mock('uuid', () => ({
   v4: () => ConnectorSavedObject.id,
@@ -52,11 +55,15 @@ const getEventLogClient = jest.fn();
 const preSaveHook = jest.fn();
 const postSaveHook = jest.fn();
 const postDeleteHook = jest.fn();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const getAxiosInstanceWithAuth = jest.fn();
+const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
+let authTypeRegistry: AuthTypeRegistry;
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
@@ -131,9 +138,11 @@ beforeEach(() => {
   };
 
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
   actionsClient = new ActionsClient({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
@@ -146,6 +155,9 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
     getEventLogClient,
+    encryptedSavedObjectsClient,
+    isESOCanEncrypt,
+    getAxiosInstanceWithAuth,
   });
 
   actionTypeRegistry.register({
@@ -154,9 +166,9 @@ beforeEach(() => {
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: { schema: schema.object({ foo: schema.number() }) },
-      secrets: { schema: schema.object({ bar: schema.number() }) },
-      params: { schema: schema.object({}) },
+      config: { schema: z.object({ foo: z.number() }) },
+      secrets: { schema: z.object({ bar: z.number() }) },
+      params: { schema: z.object({}) },
     },
     executor,
     preSaveHook,

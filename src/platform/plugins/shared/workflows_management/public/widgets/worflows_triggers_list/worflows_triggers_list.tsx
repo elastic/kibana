@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import capitalize from 'lodash/capitalize';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import * as i18n from '../../../common/translations';
-import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
+import { capitalize } from 'lodash';
+import React, { Suspense } from 'react';
+import { isTriggerType } from '@kbn/workflows';
 import { PopoverItems } from './popover_items';
+import * as i18n from '../../../common/translations';
+import { triggerSchemas } from '../../trigger_schemas';
+
 interface WorkflowsTriggersListProps {
-  triggers: WorkflowTrigger[];
+  triggers: Array<{ type: string }>;
 }
 
 const TRIGGERS_ICONS: Record<string, string> = {
@@ -25,49 +26,125 @@ const TRIGGERS_ICONS: Record<string, string> = {
   scheduled: 'clock',
 };
 
-export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
-  const [first, ...rest] = triggers || [];
+const DEFAULT_TRIGGER_ICON = 'bolt';
 
-  // Rare edge-case: empty triggers list
-  if (!first) return null;
+const CONTAINER_BREAKPOINT_HIDE = '700px';
+
+const triggersListStyles = {
+  container: css({
+    maxWidth: '100%',
+    minWidth: 0,
+  }),
+  textContainer: css({
+    minWidth: 0,
+    overflow: 'hidden',
+    flexShrink: 1,
+    [`@container (max-width: ${CONTAINER_BREAKPOINT_HIDE})`]: {
+      display: 'none',
+    },
+  }),
+  text: css({
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }),
+};
+
+function getTriggerIconType(triggerType: string): string | React.ComponentType {
+  if (isTriggerType(triggerType) && TRIGGERS_ICONS[triggerType]) {
+    return TRIGGERS_ICONS[triggerType];
+  }
+  const definition = triggerSchemas.getTriggerDefinition(triggerType);
+  if (definition?.icon) {
+    return definition.icon;
+  }
+  return DEFAULT_TRIGGER_ICON;
+}
+
+function getTriggerLabel(triggerType: string): string {
+  const definition = triggerSchemas.getTriggerDefinition(triggerType);
+  return definition?.title ?? capitalize(triggerType);
+}
+
+function TriggerIcon({ triggerType }: { triggerType: string }) {
+  const icon = getTriggerIconType(triggerType);
+  const label = getTriggerLabel(triggerType);
+  if (typeof icon === 'string') {
+    return <EuiIcon type={icon} size="m" title={label} />;
+  }
+  const IconComponent = icon;
+  return (
+    <Suspense fallback={<EuiLoadingSpinner size="s" />}>
+      <EuiIcon type={IconComponent} size="m" title={label} />
+    </Suspense>
+  );
+}
+
+export const WorkflowsTriggersList = ({ triggers }: WorkflowsTriggersListProps) => {
+  if (triggers.length === 0) {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        wrap={false}
+        css={triggersListStyles.container}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="crossCircle" size="m" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={triggersListStyles.textContainer}>
+          <EuiText size="s" color="subdued" css={triggersListStyles.text}>
+            {'No triggers'}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  const [firstTrigger, ...restOfTriggers] = triggers;
 
   return (
-    <>
-      <EuiBadge
-        color="hollow"
-        iconType={TRIGGERS_ICONS[first.type]}
-        css={css`
-          margin: 2px 3px 0 0;
-        `}
-      >
-        <FormattedMessage
-          id={`workflows.workflowList.trigger.${first.type}`}
-          defaultMessage={capitalize(first.type)}
-        />
-      </EuiBadge>
-      {rest.length > 0 && (
-        <PopoverItems
-          items={triggers}
-          popoverTitle={i18n.TRIGGERS_LIST_TITLE}
-          popoverButtonTitle={`+${rest.length.toString()}`}
-          dataTestPrefix="triggers"
-          renderItem={(trigger, idx) => (
-            <EuiBadge
-              key={`${trigger}-${idx}`}
-              color="hollow"
-              iconType={TRIGGERS_ICONS[trigger.type]}
-              css={css`
-                margin: 2px 3px 0 0;
-              `}
-            >
-              <FormattedMessage
-                id={`workflows.workflowList.trigger.${trigger.type}`}
-                defaultMessage={capitalize(trigger.type)}
-              />
-            </EuiBadge>
-          )}
-        />
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+      wrap={false}
+      css={triggersListStyles.container}
+    >
+      <EuiFlexItem grow={false}>
+        <TriggerIcon triggerType={firstTrigger.type} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={triggersListStyles.textContainer}>
+        <EuiText size="s" css={triggersListStyles.text}>
+          {getTriggerLabel(firstTrigger.type)}
+        </EuiText>
+      </EuiFlexItem>
+      {restOfTriggers.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <PopoverItems
+            items={triggers}
+            popoverTitle={i18n.TRIGGERS_LIST_TITLE}
+            popoverButtonTitle={`+${restOfTriggers.length.toString()}`}
+            dataTestPrefix="triggers"
+            renderItem={(trigger, idx) => (
+              <EuiFlexGroup
+                key={`${trigger.type}-${idx}`}
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <TriggerIcon triggerType={trigger.type} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">{getTriggerLabel(trigger.type)}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          />
+        </EuiFlexItem>
       )}
-    </>
+    </EuiFlexGroup>
   );
 };

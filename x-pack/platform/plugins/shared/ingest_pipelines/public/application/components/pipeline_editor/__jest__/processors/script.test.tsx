@@ -5,96 +5,56 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const SCRIPT_TYPE = 'script';
 
 describe('Processor: Script', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-    // disable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = true;
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-    // enable all react-beautiful-dnd development warnings
-    (window as any)['__@hello-pangea/dnd-disable-dev-warnings'] = false;
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    const { component, actions } = testBed;
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: SCRIPT_TYPE },
+    });
 
-    component.update();
-
-    // Open flyout to add new processor
-    actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await actions.addProcessorType(SCRIPT_TYPE);
+    await screen.findByTestId('addProcessorForm');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
-
     // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual(['A value is required.']);
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    expect(await screen.findByText('A value is required.')).toBeInTheDocument();
   });
 
   test('accepts params that contains escaped characters', async () => {
-    const {
-      actions: { saveNewProcessor },
-      find,
-      component,
-    } = testBed;
-
-    await act(async () => {
-      find('scriptSource').simulate('change', {
-        jsonContent: 'ctx._source[params.sum_field]',
-      });
-
-      // advance timers to allow the form to validate
-      jest.advanceTimersByTime(0);
+    fireEvent.change(screen.getByTestId('scriptSource'), {
+      target: { value: 'ctx._source[params.sum_field]' },
     });
-    component.update();
-
-    await act(async () => {
-      find('paramsField').simulate('change', {
-        jsonContent: '{"sum_field":"""aaa"bbb"""}',
-      });
-
-      // advance timers to allow the form to validate
-      jest.advanceTimersByTime(0);
+    fireEvent.change(screen.getByTestId('paramsField'), {
+      target: { value: '{"sum_field":"""aaa"bbb"""}' },
     });
-    component.update();
 
     // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, SCRIPT_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors[0][SCRIPT_TYPE]).toEqual({
       source: 'ctx._source[params.sum_field]',

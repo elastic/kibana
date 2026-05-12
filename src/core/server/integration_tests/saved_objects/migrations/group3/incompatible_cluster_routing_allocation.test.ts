@@ -9,14 +9,14 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
-import { getRelocatingMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
-import { clearLog } from '../kibana_migrator_test_kit';
+import { getRelocatingMigratorTestKit } from '@kbn/migrator-test-kit/fixtures';
+import { clearLog } from '@kbn/migrator-test-kit';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
 
@@ -58,9 +58,7 @@ describe('incompatible_cluster_routing_allocation', () => {
     esServer = await startES();
   });
 
-  afterAll(async () => {
-    await esServer.stop();
-  });
+  afterAll(async () => await esServer?.stop());
 
   it('retries the INIT action with a descriptive message when cluster settings are incompatible', async () => {
     const { client, runMigrations } = await getRelocatingMigratorTestKit({
@@ -92,7 +90,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
 
           // Wait for logs of the second failed attempt to be sure we're correctly incrementing retries
           expect(records.find((rec) => !!rec.message.match(messageRegexp))).toBeDefined();
@@ -110,7 +108,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
 
           expect(
             records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY_SYNC -> DONE'))

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(response.status).to.equal(400);
       expect(response.body.message).to.be(
-        '[request body]: new_terms_fields: Array must contain at most 3 element(s)'
+        '[request body]: new_terms_fields: Too big: expected array to have <=3 items'
       );
     });
   });

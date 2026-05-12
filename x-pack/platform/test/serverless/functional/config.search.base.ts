@@ -32,23 +32,14 @@ export default createTestConfig({
     '--xpack.searchSynonyms.enabled=true',
   ],
   apps: {
-    serverlessElasticsearch: {
-      pathname: '/app/elasticsearch/getting_started',
-    },
     serverlessConnectors: {
       pathname: '/app/connectors',
     },
     searchPlayground: {
       pathname: '/app/search_playground',
     },
-    elasticsearchStart: {
-      pathname: '/app/elasticsearch/start',
-    },
-    elasticsearchIndices: {
-      pathname: '/app/elasticsearch/indices',
-    },
     searchInferenceEndpoints: {
-      pathname: '/app/elasticsearch/relevance/inference_endpoints',
+      pathname: '/app/management/modelManagement/inference_endpoints',
     },
     searchHomepage: {
       pathname: '/app/elasticsearch/home',

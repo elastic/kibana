@@ -43,7 +43,7 @@ export const OnboardingCardBadge = React.memo<PropsWithChildren<{ badge: CardBad
       return (
         <EuiBetaBadge
           label={label.techPreview}
-          iconType="beaker"
+          iconType="flask"
           tooltipContent={tooltip.techPreview}
           data-test-subj="onboardingCardBadge"
         />

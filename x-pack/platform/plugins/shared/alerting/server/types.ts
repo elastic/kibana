@@ -16,7 +16,7 @@ import type {
   IUiSettingsClient,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   ENHANCED_ES_SEARCH_STRATEGY,
@@ -48,7 +48,6 @@ import type {
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
 } from './rules_settings';
-import type { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import type {
   Rule,
@@ -63,6 +62,7 @@ import type {
   SanitizedRule,
   RuleAlertData,
   Artifacts,
+  GapReason,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -89,7 +89,6 @@ export interface AlertingApiRequestHandlerContext {
   getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
-  getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -130,6 +129,7 @@ export interface RuleExecutorServices<
   actionsClient?: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
+  getMaintenanceWindowNames: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
   ruleMonitoringService?: PublicRuleMonitoringService;
   ruleResultService?: PublicRuleResultService;
@@ -372,6 +372,13 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  /**
+   * When true, the alerting framework records change history events for this
+   * rule type via the registered `IChangeTrackingService`. Rule types must
+   * opt in (typically gated behind a config setting) before any history is
+   * tracked.
+   */
+  trackChanges?: boolean;
   alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
@@ -452,15 +459,25 @@ export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
-export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
+export interface ConsumerExecutionMetrics {
+  total_indexing_duration_ms: number;
+  total_enrichment_duration_ms: number;
+  gap_duration_s: number;
+  gap_range: { lte: string; gte: string };
+  matched_indices_count: number;
+  alerts_candidate_count: number;
+  alerts_suppressed_count: number;
+  frozen_indices_queried_count: number;
+  gap_reason?: GapReason;
+}
 
-export interface PublicMetricsSetters {
-  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
-  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
-  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
-  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
-  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
-  setLastRunMetricsGapRange: (gapRange: { lte: string; gte: string } | null) => void;
+export interface PublicRuleMonitoringService {
+  setMetric: <MetricName extends keyof ConsumerExecutionMetrics>(
+    metricName: MetricName,
+    value: ConsumerExecutionMetrics[MetricName]
+  ) => void;
+  setMetrics: (metrics: Partial<ConsumerExecutionMetrics>) => void;
+  clearGap: () => void;
 }
 
 export interface PublicLastRunSetters {
@@ -468,8 +485,6 @@ export interface PublicLastRunSetters {
   addLastRunWarning: (outcomeMsg: string) => void;
   setLastRunOutcomeMessage: (warning: string) => void;
 }
-
-export type PublicRuleMonitoringService = PublicMetricsSetters;
 
 export type PublicRuleResultService = PublicLastRunSetters;
 

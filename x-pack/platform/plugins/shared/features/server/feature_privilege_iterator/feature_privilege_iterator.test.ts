@@ -81,6 +81,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -98,6 +99,7 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              enable: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
@@ -154,6 +156,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -174,6 +177,7 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              enable: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
@@ -226,6 +230,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -300,6 +305,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -344,6 +350,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -394,6 +401,11 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-sub-type'],
                   },
                   alerting: {
+                    rule: {
+                      manual_run: [
+                        { ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] },
+                      ],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
                     },
@@ -459,6 +471,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type'],
             reopenCase: ['cases-reopen-type'],
             assign: ['cases-assign-type'],
+            manageTemplates: ['cases-manage-templates-type'],
           },
           ui: ['ui-action'],
         },
@@ -580,6 +593,11 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-sub-type'],
                   },
                   alerting: {
+                    rule: {
+                      manual_run: [
+                        { ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] },
+                      ],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
                     },
@@ -767,6 +785,11 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-sub-type'],
                   },
                   alerting: {
+                    rule: {
+                      manual_run: [
+                        { ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] },
+                      ],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
                     },
@@ -782,6 +805,7 @@ describe('featurePrivilegeIterator', () => {
                     createComment: ['cases-create-comment-sub-type'],
                     reopenCase: ['cases-reopen-sub-type'],
                     assign: ['cases-assign-sub-type'],
+                    manageTemplates: ['cases-manage-templates-sub-type'],
                   },
                   ui: ['ui-sub-type'],
                 },
@@ -817,6 +841,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [{ ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] }],
               read: [],
             },
             alert: {
@@ -835,6 +862,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-type', 'cases-create-comment-sub-type'],
             reopenCase: ['cases-reopen-type', 'cases-reopen-sub-type'],
             assign: ['cases-assign-type', 'cases-assign-sub-type'],
+            manageTemplates: ['cases-manage-templates-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -856,6 +884,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [{ ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -874,6 +905,7 @@ describe('featurePrivilegeIterator', () => {
             createComment: ['cases-create-comment-sub-type'],
             reopenCase: ['cases-reopen-sub-type'],
             assign: ['cases-assign-sub-type'],
+            manageTemplates: ['cases-manage-templates-sub-type'],
           },
           ui: ['ui-action', 'ui-sub-type'],
         },
@@ -936,6 +968,7 @@ describe('featurePrivilegeIterator', () => {
           },
           alerting: {
             rule: {
+              manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -970,6 +1003,9 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-type'],
                   },
                   alerting: {
+                    rule: {
+                      manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
                     },
@@ -1010,6 +1046,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1048,6 +1087,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1211,6 +1253,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [],
               read: [],
             },
             alert: {
@@ -1459,6 +1504,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1498,6 +1546,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1635,6 +1686,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [],
               read: [],
             },
             alert: {
@@ -1673,6 +1727,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [],
+              enable: [],
+              manage_rule_settings: [],
+              manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {

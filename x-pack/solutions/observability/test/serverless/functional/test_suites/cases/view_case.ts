@@ -34,8 +34,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // https://github.com/elastic/kibana/pull/190690
-  // fails after missing `awaits` were added
   describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
@@ -53,7 +51,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('header-page-supplements');
 
         await testSubjects.existOrFail('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-attachments');
         await testSubjects.existOrFail('description');
 
         await testSubjects.existOrFail('case-view-activity');
@@ -68,7 +66,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('properties', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/239300
+    describe.skip('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
 
       it('edits a case title from the case view page', async () => {
@@ -99,7 +98,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -274,7 +273,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     // FLAKY
-    describe('Lens visualization', () => {
+    describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
         await createAndNavigateToCase(getPageObject, getService, owner);
@@ -319,7 +318,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pagination', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/240911
+    describe.skip('pagination', () => {
       let createdCase: any;
 
       before(async () => {
@@ -383,32 +383,36 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      it("shows the 'files' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
+      it("shows the 'attachments' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-attachments');
+        await testSubjects.existOrFail('case-view-attachments');
       });
     });
 
     describe('Files', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService, owner);
+      before(async () => {
+        // open attachments to have access to the files tab
+        await testSubjects.click('case-view-tab-title-attachments');
+      });
 
       it('adds a file to the case', async () => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
 
-        await cases.casesFilesTable.addFile(require.resolve('./empty.txt'));
+        await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
-        expect(uploadedFileName).to.be('empty.txt');
+        expect(uploadedFileName).to.be('note.txt');
       });
 
       it('search by file name', async () => {
         await cases.casesFilesTable.searchByFileName('foobar');
         await cases.casesFilesTable.emptyOrFail();
-        await cases.casesFilesTable.searchByFileName('empty');
+        await cases.casesFilesTable.searchByFileName('note');
 
         const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
-        expect(uploadedFileName).to.be('empty.txt');
+        expect(uploadedFileName).to.be('note.txt');
       });
 
       it('files added to a case can be deleted', async () => {
@@ -418,13 +422,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       describe('Files User Activity', () => {
         it('file user action is displayed correctly', async () => {
-          await cases.casesFilesTable.addFile(require.resolve('./empty.txt'));
+          await cases.casesFilesTable.addFile(require.resolve('./note.txt'));
 
           await testSubjects.click('case-view-tab-title-activity');
           await testSubjects.existOrFail('case-view-tab-content-activity');
 
           const uploadedFileName = await testSubjects.getVisibleText('cases-files-name-text');
-          expect(uploadedFileName).to.be('empty.txt');
+          expect(uploadedFileName).to.be('note.txt');
         });
       });
     });

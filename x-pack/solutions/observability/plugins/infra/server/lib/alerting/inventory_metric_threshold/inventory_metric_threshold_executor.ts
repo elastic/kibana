@@ -13,6 +13,7 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import type {
@@ -275,9 +276,8 @@ export const createInventoryMetricThresholdExecutor =
           nextState === AlertStates.WARNING ? WARNING_ACTIONS_ID : FIRED_ACTIONS_ID;
 
         const additionalContext = results && results.length > 0 ? results[0][group].context : {};
-        additionalContext.tags = Array.from(
-          new Set([...(additionalContext.tags ?? []), ...ruleTags])
-        );
+        const contextTags = [additionalContext.tags ?? []].flat();
+        additionalContext.tags = Array.from(new Set([...contextTags, ...ruleTags]));
 
         const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
         const thresholds = getThresholds<InventoryMetricConditions>(criteria);
@@ -317,11 +317,16 @@ export const createInventoryMetricThresholdExecutor =
           ...additionalContext,
         };
 
+        const {
+          configuration: { metricAlias },
+        } = source;
+
         const payload = {
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUPING]: grouping,
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
         };
 

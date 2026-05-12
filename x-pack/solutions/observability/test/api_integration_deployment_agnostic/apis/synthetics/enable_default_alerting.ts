@@ -15,7 +15,12 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constan
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
+
+const TEST_INDEX_CONNECTOR_NAME = 'synthetics-default-alerting-test';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
@@ -23,6 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
     const samlAuth = getService('samlAuth');
+    const alerting = getService('alertingApi');
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
@@ -36,13 +42,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
+      await alerting.deleteAllActionConnectors({ roleAuthc: editorUser });
     });
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       _httpMonitorJson = getFixtureJson('http_monitor');
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await privateLocationTestService.installSyntheticsPackage();
+      await alerting.createIndexConnector({
+        roleAuthc: editorUser,
+        name: TEST_INDEX_CONNECTOR_NAME,
+        indexName: 'synthetics-*',
+      });
     });
 
     beforeEach(async () => {
@@ -58,8 +71,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
         .set(editorUser.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
+        .send({
+          ...DYNAMIC_SETTINGS_DEFAULTS,
+          defaultConnectors: [TEST_INDEX_CONNECTOR_NAME],
+        })
+        .expect(200);
+    });
+
+    it('does create the rules when there are no connectors defined', async () => {
+      await supertest
+        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
         .send(DYNAMIC_SETTINGS_DEFAULTS)
         .expect(200);
+
+      const apiResponse = await supertest
+        .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send()
+        .expect(200);
+
+      expect(apiResponse.body.statusRule).not.to.be(null);
+      expect(apiResponse.body.tlsRule).not.to.be(null);
     });
 
     it('returns the created alerted when called', async () => {
@@ -77,6 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'id',
         'updatedAt',
         'createdAt',
+        'lastEnabledAt',
         'scheduledTaskId',
         'executionStatus',
         'monitoring',
@@ -299,7 +335,6 @@ const defaultAlertRules = {
       lastDuration: 64,
     },
     ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
-    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
   tlsRule: {
     id: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
@@ -335,6 +370,5 @@ const defaultAlertRules = {
       lastDuration: 193,
     },
     ruleTypeId: 'xpack.synthetics.alerts.tls',
-    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
 };

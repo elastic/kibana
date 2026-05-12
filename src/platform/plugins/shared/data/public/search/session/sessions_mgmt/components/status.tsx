@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } fro
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { SearchSessionStatus } from '../../../../../common';
 import { dateString } from '../lib/date_string';
 import type { UISession } from '../types';
@@ -95,7 +96,7 @@ const getStatusAttributes = ({
         });
 
         return {
-          icon: <EuiIcon color="#9AA" type="clock" />,
+          icon: <EuiIcon color="#9AA" type="clock" aria-hidden={true} />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };
@@ -107,7 +108,7 @@ const getStatusAttributes = ({
 
     case SearchSessionStatus.CANCELLED:
       return {
-        icon: <EuiIcon color="#9AA" type="error" />,
+        icon: <EuiIcon color="#9AA" type="error" aria-hidden={true} />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.cancelled', {
           defaultMessage: 'Cancelled by user',
@@ -117,7 +118,7 @@ const getStatusAttributes = ({
     case SearchSessionStatus.ERROR:
       return {
         textColor: 'danger',
-        icon: <EuiIcon color="danger" type="error" />,
+        icon: <EuiIcon color="danger" type="error" aria-hidden={true} />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent:
           session.errors && session.errors.length > 0
@@ -139,7 +140,7 @@ const getStatusAttributes = ({
 
         return {
           textColor: 'success',
-          icon: <EuiIcon color="success" type="checkInCircleFilled" />,
+          icon: <EuiIcon color="success" type="checkCircleFill" aria-hidden={true} />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };
@@ -184,7 +185,9 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
 
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+          <EuiFlexItem grow={false} css={iconCss}>
+            {icon}
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TableText
               color={statusDef.textColor}
@@ -205,3 +208,7 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
   // Exception has been caught
   return <TableText>{props.session.status}</TableText>;
 };
+
+const iconCss = css`
+  line-height: 1;
+`;

@@ -31,11 +31,14 @@ const ConditionEntryOperatorSchema = schema.literal('included');
 
 const TrustedDeviceEntrySchema = schema.object({
   field: schema.oneOf([
-    schema.literal(TrustedDeviceConditionEntryField.USERNAME),
-    schema.literal(TrustedDeviceConditionEntryField.HOST),
     schema.literal(TrustedDeviceConditionEntryField.DEVICE_ID),
+    schema.literal(TrustedDeviceConditionEntryField.DEVICE_TYPE),
+    schema.literal(TrustedDeviceConditionEntryField.HOST),
     schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER),
+    schema.literal(TrustedDeviceConditionEntryField.MANUFACTURER_ID),
     schema.literal(TrustedDeviceConditionEntryField.PRODUCT_ID),
+    schema.literal(TrustedDeviceConditionEntryField.PRODUCT_NAME),
+    schema.literal(TrustedDeviceConditionEntryField.USERNAME),
   ]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
@@ -61,6 +64,7 @@ const getTrustedDeviceDuplicateFields = (entries: TrustedDeviceConditionEntry[])
 
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: TrustedDeviceConditionEntry[]) {
     return (
       getTrustedDeviceDuplicateFields(entries)
@@ -87,7 +91,7 @@ const getTrustedDeviceForOsScheme = () =>
       }),
       schema.object({
         type: schema.literal('policy'),
-        policies: schema.arrayOf(schema.string({ minLength: 1 })),
+        policies: schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 1000 }),
       }),
     ]),
     entries: EntriesSchema,

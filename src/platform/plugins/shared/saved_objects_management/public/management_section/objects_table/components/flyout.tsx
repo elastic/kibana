@@ -31,6 +31,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiLoadingSpinner,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,6 +102,8 @@ export class FlyoutClass extends Component<
   FlyoutProps & EuiTablePersistInjectedProps<any>,
   FlyoutState
 > {
+  private flyoutTitleId = htmlIdGenerator()();
+
   constructor(props: FlyoutProps & EuiTablePersistInjectedProps<unknown>) {
     super(props);
 
@@ -360,6 +363,10 @@ export class FlyoutClass extends Component<
 
           return (
             <EuiSelect
+              aria-label={i18n.translate(
+                'savedObjectsManagement.objectsTable.flyout.renderConflicts.selectNewIndexPatternAriaLabel',
+                { defaultMessage: 'Data view' }
+              )}
               value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
@@ -381,6 +388,10 @@ export class FlyoutClass extends Component<
         columns={columns}
         pagination={pagination}
         onTableChange={onTableChange}
+        tableCaption={i18n.translate(
+          'savedObjectsManagement.objectsTable.flyout.renderConflicts.tableCaption',
+          { defaultMessage: 'Conflicting data views' }
+        )}
       />
     );
   }
@@ -567,6 +578,7 @@ export class FlyoutClass extends Component<
     if (this.hasUnmatchedReferences) {
       indexPatternConflictsWarning = (
         <EuiCallOut
+          announceOnMount
           data-test-subj="importSavedObjectsConflictsWarning"
           title={
             <FormattedMessage
@@ -628,10 +640,15 @@ export class FlyoutClass extends Component<
     }
 
     return (
-      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout">
+      <EuiFlyout
+        onClose={close}
+        size="s"
+        data-test-subj="importSavedObjectsFlyout"
+        aria-labelledby={this.flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={this.flyoutTitleId}>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"

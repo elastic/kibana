@@ -20,4 +20,5 @@ export default createTestConfig('spaces_only', {
   useDedicatedTaskRunner: true,
   testFiles: [require.resolve('.')],
   reportName: 'X-Pack Alerting API Integration Tests - Alerting - group1',
+  indexRefreshInterval: '1s',
 });

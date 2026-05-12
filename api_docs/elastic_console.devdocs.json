@@ -1,0 +1,51 @@
+{
+  "id": "elasticConsole",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "elasticConsole",
+        "id": "def-server.featureFlags",
+        "type": "Array",
+        "tags": [],
+        "label": "featureFlags",
+        "description": [],
+        "signature": [
+          "(",
+          "FeatureFlagDefinition",
+          "<\"boolean\"> | ",
+          "FeatureFlagDefinition",
+          "<\"string\"> | ",
+          "FeatureFlagDefinition",
+          "<\"number\">)[]"
+        ],
+        "path": "x-pack/platform/plugins/shared/elastic_console/server/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

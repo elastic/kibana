@@ -8,32 +8,39 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, euiFontSize } from '@elastic/eui';
-import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
-import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, euiFontSize, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
 
+const actionRequiredLabel = i18n.translate(
+  'workflowsManagement.stepExecutionTreeItemLabel.actionRequired',
+  { defaultMessage: 'Action is required' }
+);
+
 export interface StepExecutionTreeItemLabelProps {
   stepId: string;
-  status: ExecutionStatus | null;
-  executionIndex: number;
+  status?: ExecutionStatus;
   executionTimeMs: number | null;
-  stepType: string;
   selected: boolean;
+  onClick?: React.MouseEventHandler;
 }
 
 export function StepExecutionTreeItemLabel({
   stepId,
   status,
-  executionIndex,
   executionTimeMs,
-  stepType,
   selected,
+  onClick,
 }: StepExecutionTreeItemLabelProps) {
   const styles = useMemoCss(componentStyles);
+  // Trigger pseudo-steps are not real steps, they are used to display the trigger context
+  const isTriggerPseudoStep = stepId === 'trigger';
+  const isOverviewPseudoStep = stepId === 'Overview';
   const isDangerous = status && isDangerousStatus(status);
   const isInactiveStatus = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
 
@@ -44,6 +51,7 @@ export function StepExecutionTreeItemLabel({
       justifyContent="spaceBetween"
       responsive={false}
       css={styles.label}
+      onClick={onClick}
     >
       <EuiFlexItem
         css={[
@@ -53,17 +61,26 @@ export function StepExecutionTreeItemLabel({
           isInactiveStatus && styles.inactiveStepName,
         ]}
       >
-        {stepId}
+        <span data-test-subj="workflowStepName">{stepId}</span>
         {status === ExecutionStatus.SKIPPED && (
           <>
             {' '}
-            <span>({getStatusLabel(status).toLowerCase()})</span>
+            <span>{`(${getStatusLabel(status).toLowerCase()})`}</span>
           </>
         )}
       </EuiFlexItem>
-      {executionTimeMs && (
+      {status === ExecutionStatus.WAITING_FOR_INPUT && !isOverviewPseudoStep && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+            {actionRequiredLabel}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
+      {executionTimeMs && status !== ExecutionStatus.WAITING_FOR_INPUT && !isTriggerPseudoStep && (
         <EuiFlexItem grow={false} css={[styles.duration, isDangerous && styles.durationDangerous]}>
-          {executionTimeMs ? formatDuration(executionTimeMs) : null}
+          <EuiText size="xs" color="subdued">
+            {formatDuration(executionTimeMs)}
+          </EuiText>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -82,9 +99,11 @@ const componentStyles = {
     whiteSpace: 'nowrap',
     textAlign: 'left',
   }),
-  selectedStepName: css({
-    fontWeight: 'bold',
-  }),
+  selectedStepName: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: 'bold',
+      color: euiTheme.colors.textPrimary,
+    }),
   dangerousStepName: ({ euiTheme }: UseEuiTheme) =>
     css({
       color: euiTheme.colors.danger,

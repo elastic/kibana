@@ -14,7 +14,9 @@ jest.mock('uuid', () => ({
 import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { inspect } from 'util';
@@ -28,13 +30,17 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
 
   server = createInternalHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {
@@ -53,7 +59,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           return res.ok({ body: { req: String(req) } });
@@ -75,7 +80,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           return res.ok({ body: { req: JSON.stringify(req) } });
@@ -112,7 +116,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           return res.ok({ body: { req: inspect(req) } });
@@ -161,7 +164,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
@@ -184,7 +186,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
@@ -208,7 +209,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
@@ -233,7 +233,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
@@ -256,7 +255,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
@@ -282,7 +280,6 @@ describe('request logging', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: false,
-          options: { authRequired: true },
         },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;

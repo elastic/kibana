@@ -10,6 +10,7 @@
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import type { ICPSManager } from '@kbn/cps-utils';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../common';
@@ -38,8 +39,21 @@ export class HasData {
     return true;
   };
 
-  start(core: CoreStart, callResolveCluster: boolean) {
+  start(core: CoreStart, callResolveCluster: boolean, cpsManager?: ICPSManager) {
     const { http } = core;
+
+    const hasMultipleProjects = async (): Promise<boolean> => {
+      if (!cpsManager) {
+        return false;
+      }
+
+      try {
+        await cpsManager.whenReady();
+        return cpsManager.getTotalProjectCount() > 1;
+      } catch {
+        return false;
+      }
+    };
 
     const hasESDataViaResolveIndex = async () => {
       // fallback to previous implementation
@@ -98,6 +112,9 @@ export class HasData {
       hasESData: async ({
         onRemoteDataTimeout = showRemoteDataTimeoutToast,
       }: HasEsDataParams = {}): Promise<boolean> => {
+        if (await hasMultipleProjects()) {
+          return true;
+        }
         if (callResolveCluster) {
           return hasESDataViaResolveCluster(onRemoteDataTimeout);
         }

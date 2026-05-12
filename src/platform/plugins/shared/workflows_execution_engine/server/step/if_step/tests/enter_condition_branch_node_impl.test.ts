@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterConditionBranchNodeImpl } from '../enter_condition_branch_node_impl';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import { EnterConditionBranchNodeImpl } from '../enter_condition_branch_node_impl';
 
 describe('EnterConditionBranchNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
@@ -19,16 +19,15 @@ describe('EnterConditionBranchNodeImpl', () => {
   } as any;
 
   beforeEach(() => {
-    wfExecutionRuntimeManagerMock = {
-      goToNextStep: jest.fn(),
-      enterScope: jest.fn(),
-    } as any;
+    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManagerMock.navigateToNextNode = jest.fn();
+    wfExecutionRuntimeManagerMock.enterScope = jest.fn();
     impl = new EnterConditionBranchNodeImpl(conditionBranchNode, wfExecutionRuntimeManagerMock);
   });
 
-  it('should go to next step', async () => {
+  it('should go to next node', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 
   it('should enter true scope for enter-then-branch', async () => {

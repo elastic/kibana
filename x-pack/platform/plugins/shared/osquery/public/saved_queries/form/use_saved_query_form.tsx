@@ -46,13 +46,13 @@ interface UseSavedQueryFormProps {
 
 const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   id: payload.id,
-  description: payload.description,
-  query: payload.query,
+  description: payload.description ?? '',
+  query: payload.query ?? '',
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
   timeout: payload.timeout ?? QUERY_TIMEOUT.DEFAULT,
   snapshot: payload.snapshot ?? true,
   removed: payload.removed ?? false,
-  platform: payload.platform,
+  platform: payload.platform ?? '',
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });
@@ -80,7 +80,7 @@ export const savedQueryDataSerializer = (payload: SavedQueryFormData): SavedQuer
   });
 
 export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
-  const { data } = useSavedQueries({});
+  const { data, isLoading: isLoadingIds } = useSavedQueries({});
   const ids: string[] = useMemo<string[]>(() => map(data?.data, 'id') ?? [], [data]);
   const idSet = useMemo<Set<string>>(() => {
     const res = new Set<string>(ids);
@@ -92,6 +92,7 @@ export const useSavedQueryForm = ({ defaultValue }: UseSavedQueryFormProps) => {
   return {
     serializer: savedQueryDataSerializer,
     idSet,
+    isLoadingIds,
     ...useHookForm<SavedQueryFormData>({
       defaultValues: defaultValue
         ? deserializer(defaultValue)

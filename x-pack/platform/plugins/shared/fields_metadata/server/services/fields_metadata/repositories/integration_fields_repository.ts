@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { FieldMetadata } from '../../../../common/fields_metadata/models/field_metadata';
 import { ANY_DATASET } from '../../../../common/fields_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
 import type { IntegrationFieldName } from '../../../../common';
-import { FieldMetadata } from '../../../../common';
 import type {
   ExtractedIntegration,
   ExtractedIntegrationFields,
@@ -60,6 +60,21 @@ export class IntegrationFieldsRepository {
       }
 
       field = this.getCachedField(fieldName, { integration, dataset });
+    }
+
+    // When the dataset was inferred from the field name (not explicitly provided),
+    // the heuristic may have guessed the wrong dataset. For example,
+    // "system.process.summary.total" infers dataset "system.process", but the field
+    // actually belongs to "system.process_summary". Fall back to loading all datasets
+    // for the integration to find the field.
+    if (!field && !params.dataset) {
+      try {
+        await this.extractFields({ integration, dataset: ANY_DATASET });
+      } catch (error) {
+        throw new PackageNotFoundError(error.message);
+      }
+
+      field = this.getCachedField(fieldName, { integration, dataset: ANY_DATASET });
     }
 
     return field;

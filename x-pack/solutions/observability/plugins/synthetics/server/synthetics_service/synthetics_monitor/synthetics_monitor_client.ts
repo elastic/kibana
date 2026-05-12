@@ -53,7 +53,7 @@ export class SyntheticsMonitorClient {
     const publicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
 
     for (const monitorObj of monitors) {
       const { formattedConfig, params, config } = await this.formatConfigWithParams(
@@ -100,7 +100,7 @@ export class SyntheticsMonitorClient {
     const deletedPublicConfigs: ConfigData[] = [];
 
     const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
 
     for (const editedMonitor of monitors) {
       const { str: paramsString, params } = mixParamsWithGlobalParams(
@@ -113,6 +113,7 @@ export class SyntheticsMonitorClient {
         params: paramsBySpace[spaceId],
         monitor: editedMonitor.monitor,
         configId: editedMonitor.id,
+        kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
       };
 
       const editedConfig = formatHeartbeatRequest(configData, paramsString);
@@ -283,6 +284,7 @@ export class SyntheticsMonitorClient {
       monitor,
       configId: id,
       params: paramsBySpace[spaceId],
+      kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
     };
 
     const { str: paramsString, params } = mixParamsWithGlobalParams(
@@ -307,7 +309,7 @@ export class SyntheticsMonitorClient {
       canSave,
       hideParams,
     });
-    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows();
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
 
     const { formattedConfig, params, config } = await this.formatConfigWithParams(
       monitorObj,

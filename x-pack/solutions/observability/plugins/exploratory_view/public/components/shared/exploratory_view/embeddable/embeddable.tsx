@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { FormulaPublicApi, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, XYVisualizationState } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -29,8 +29,8 @@ export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
   attributes: AllSeries;
-  axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
+  axisTitlesVisibility?: XYVisualizationState['axisTitlesVisibilitySettings'];
+  gridlinesVisibilitySettings?: XYVisualizationState['gridlinesVisibilitySettings'];
   customHeight?: string;
   customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
@@ -59,7 +59,6 @@ export interface ExploratoryEmbeddableProps {
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
   lens: LensPublicStart;
   dataViewState: DataViewState;
-  lensFormulaHelper?: FormulaPublicApi;
   analytics?: AnalyticsServiceSetup;
 }
 
@@ -128,24 +127,24 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
   }
 
   if (typeof axisTitlesVisibility !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+    (attributesJSON.state.visualization as XYVisualizationState).axisTitlesVisibilitySettings =
       axisTitlesVisibility;
   }
 
   if (typeof gridlinesVisibilitySettings !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).gridlinesVisibilitySettings =
+    (attributesJSON.state.visualization as XYVisualizationState).gridlinesVisibilitySettings =
       gridlinesVisibilitySettings;
   }
 
   if (typeof legendIsVisible !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+    (attributesJSON.state.visualization as XYVisualizationState).legend.isVisible = legendIsVisible;
   }
   if (typeof legendPosition !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).legend.position = legendPosition;
+    (attributesJSON.state.visualization as XYVisualizationState).legend.position = legendPosition;
   }
 
   if (hideTicks) {
-    (attributesJSON.state.visualization as XYState).tickLabelsVisibilitySettings = {
+    (attributesJSON.state.visualization as XYVisualizationState).tickLabelsVisibilitySettings = {
       x: false,
       yRight: false,
       yLeft: false,

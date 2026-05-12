@@ -1,4 +1,84 @@
-## Security Solution App Features
+# Security Solution Kibana features
 
-This package provides resources to be used for Security Solution app features
+This package (`@kbn/security-solution-features`) defines **Kibana feature registry** entries used by Elastic Security: base feature metadata, **privileges** (UI, API, saved objects, alerting), **sub-features** where applicable, and **product-feature** overlays that turn specific product capabilities on or off.
 
+---
+
+## Security
+
+**Feature id:** `siemV5` (`SECURITY_FEATURE_ID_V5`)
+
+**Display name:** Security
+
+**Role:** Controls access to the main Security Solution experience and related apps. It is the umbrella feature for navigating and using Security, including integration with **Cloud Security Posture** (`csp`) and **Defend for containers** (`cloudDefend`) apps where configured.
+
+**Base privileges**
+
+- **`all` / `read`:** Gate the Security Solution catalogue entry and apps (`securitySolution`, CSP, Cloud Defend, `kibana`).
+- **UI:** `show` (read path) and `crud` (all path) map to broad Security UI capabilities.
+- **API:** Core Security APIs, RAC (`rac`), list APIs (`lists-*`), user read, and `initialize-security-solution`.
+- **Saved objects:** Read/write patterns depend on the privilege level and the saved-object types passed in at registration time; the `all` privilege includes the `alert` saved object type plus Security-related types from parameters.
+
+**Sub-features (v5):** Security is built as a **sub-feature–first** feature. The registry description states that **each sub-feature privilege must be assigned individually** when your pricing plan supports granular privileges; global assignment is only used when the plan does not allow per–sub-feature control.
+
+Sub-features include (non-exhaustive): endpoint host list and workflow insights, SOC management, global artifact management, trusted applications and devices, host isolation exceptions, blocklist, event filters, endpoint exceptions, policy and scripts management, response-actions history, host isolation, process/file operations, execute/scan actions, and related Endpoint capabilities. Some entries are gated by experimental feature flags.
+
+**Product features:** Additional keys in `ProductFeatureSecurityKey` (see `src/product_features_keys.ts` and `src/security/product_feature_config.ts`) layer **extra UI/API privileges** onto Security when those product capabilities are enabled—for example advanced insights, detections-related UI, threat intelligence, investigation guides, and Endpoint-specific behaviors.
+
+**Versioning:** Older Security feature ids (`siem`, `siemV2`–`siemV4`) exist for backward compatibility and migration; current work targets **`siemV5`**.
+
+---
+
+## Rules
+
+**Feature id (current):** `securitySolutionRulesV3` (`RULES_FEATURE_ID_V3`, `RULES_FEATURE_LATEST`)
+
+**Display name:** Rules and Exceptions
+
+**Role:** Governs **creation, editing, and management of Security detection rules** and related **exception lists**, separate from the **Alerts** feature. It wires Security Solution rule types into Kibana **alerting** (rule-level privileges: create, enable, manual run, manage settings, read) and grants access to the **Stack Management → Rules** area (`insightsAndAlerting` / `triggersActions`).
+
+**Apps / catalogue:** Uses the `securitySolutionRules` app and the Security Solution catalogue id.
+
+**Base privileges**
+
+- **`all`:** Full rule and list APIs (`rules-*`, `lists-*`), user read, RAC, initialization; saved-object access for rule-related types (with exceptions for namespace-aware exception lists as defined in code).
+- **`read`:** Read-only rule and list access, read exceptions API, and read-only alerting rule privileges.
+
+**Sub-features (v3):** **Exceptions** (`RulesSubFeatureId.exceptions`) is registered as a sub-feature so exception-list access can be granted with **minimal** privilege combinations alongside base Rules privileges.
+
+**Product features:** `ProductFeatureRulesKey` entries (for example `detections`, `externalDetections`) add targeted UI/API privileges—such as CSP-related APIs for detections—when those product slices are enabled. See `src/rules/product_feature_config.ts`.
+
+**Older versions**
+
+- **`securitySolutionRulesV1`:** Original combined rules feature.
+- **`securitySolutionRulesV2`:** Deprecated; display name was “Rules, Alerts, and Exceptions.” Privileges were split so that **`securitySolutionRulesV3` + `securitySolutionAlertsV1`** replace the older combined model (`replacedBy` mappings in the v2 config).
+
+---
+
+## Alerts
+
+**Feature id:** `securitySolutionAlertsV1` (`ALERTS_FEATURE_ID`)
+
+**Display name:** Alerts
+
+**Role:** Controls access to **alert documents** for Security detection and legacy notification rule types: viewing and updating alerts (status, assignment, tags, and so on), without bundling full **rule authoring** into the same feature. Alerting **alert** privileges (not rule management) are scoped to the same rule type ids as Rules (including `siem.notifications` where applicable).
+
+**Apps:** Uses `securitySolutionAlertsV1`, `kibana`, and `securitySolution` app ids so the Alerts surface can be authorized independently of Rules.
+
+**Base privileges**
+
+- **`all`:** `read_alerts` and `edit_alerts` UI capabilities; `alerts-read` / `alerts-all` APIs; RAC; user read; read access to **data views** (`index-pattern`) for querying alerts.
+- **`read`:** Read-only alerts UI and APIs, read-only alerting alert privileges.
+
+**Product features:** `ProductFeatureAlertsKey` entries (`detections`, `externalDetections`) add UI flags such as `detections` / `external_detections` and optional APIs (for example `bulkGetUserProfiles` for detections on `all`). See `src/alerts/product_feature_config.ts`.
+
+**Compatibility:** Deprecated privilege strings (`alerts-signal-update-deprecated-privilege`, `edit_alerts-update-deprecated-privilege`) exist so older role assignments that implied alert updates under read APIs continue to work where explicitly mapped (for example in deprecated Rules v2).
+
+---
+
+## How these pieces fit together
+
+- **Security (`siemV5`)** is the primary application and platform access feature for the Security UI, lists, and broad saved-object/API access; granular Endpoint and workflow controls are expressed as **sub-features**.
+- **Rules** and **Alerts** split **rule lifecycle** vs **alert workflow** so administrators can assign detection engineers vs analysts with narrower scopes.
+
+For exact privilege strings and merge behavior, follow the source of truth in `src/constants.ts` and the corresponding `kibana_features.ts` / `kibana_sub_features.ts` files for each version.

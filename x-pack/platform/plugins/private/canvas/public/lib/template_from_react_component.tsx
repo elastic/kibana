@@ -8,7 +8,6 @@
 import type { ComponentType, ForwardRefRenderFunction } from 'react';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { unmountComponentAtNode, createPortal } from 'react-dom';
-import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 import type { ArgumentHandlers, UpdatePropsRef } from '../../types/arguments';
@@ -46,10 +45,6 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
   };
 
   const ForwardRefWrappedComponent = forwardRef(WrappedComponent);
-
-  ForwardRefWrappedComponent.propTypes = {
-    renderError: PropTypes.func,
-  };
 
   return (
     domNode: HTMLElement,

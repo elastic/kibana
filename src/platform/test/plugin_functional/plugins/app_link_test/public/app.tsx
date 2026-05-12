@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 const FooApp = ({
   appId,
@@ -24,37 +23,31 @@ const FooApp = ({
   application: ApplicationStart;
 }) => (
   <div data-test-subj={`app-${appId}`}>
-    <RedirectAppLinks
-      coreStart={{
-        application,
-      }}
-    >
-      <h1>{appId}</h1>
-      <div>
-        <a data-test-subj="applink-basic-test" href={basePath.prepend(`/app/${targetAppId}`)}>
-          A with text
-        </a>
-        <br />
-        <a href={basePath.prepend(`/app/${targetAppId}/some-path`)}>
-          <div data-test-subj="applink-path-test">A link with a path in a nested div</div>
-        </a>
-        <br />
-        <a
-          data-test-subj="applink-hash-test"
-          href={basePath.prepend(`/app/${targetAppId}/some-path#/some/hash`)}
-        >
-          <div>A link with a hash</div>
-        </a>
-        <br />
-        <a href={basePath.prepend(`/app/${targetAppId}#bang`)}>
-          <span data-test-subj="applink-nested-test">A text with a hash in a nested span</span>
-        </a>
-        <br />
-        <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/${appId}/some-path`)}>
-          Link to the same app
-        </a>
-      </div>
-    </RedirectAppLinks>
+    <h1>{appId}</h1>
+    <div>
+      <a data-test-subj="applink-basic-test" href={basePath.prepend(`/app/${targetAppId}`)}>
+        A with text
+      </a>
+      <br />
+      <a href={basePath.prepend(`/app/${targetAppId}/some-path`)}>
+        <div data-test-subj="applink-path-test">A link with a path in a nested div</div>
+      </a>
+      <br />
+      <a
+        data-test-subj="applink-hash-test"
+        href={basePath.prepend(`/app/${targetAppId}/some-path#/some/hash`)}
+      >
+        <div>A link with a hash</div>
+      </a>
+      <br />
+      <a href={basePath.prepend(`/app/${targetAppId}#bang`)}>
+        <span data-test-subj="applink-nested-test">A text with a hash in a nested span</span>
+      </a>
+      <br />
+      <a data-test-subj="applink-intra-test" href={basePath.prepend(`/app/${appId}/some-path`)}>
+        Link to the same app
+      </a>
+    </div>
   </div>
 );
 
@@ -69,14 +62,9 @@ export const renderApp = (
   { appId, basePath, targetAppId, application }: AppOptions,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
-    <FooApp
-      appId={appId}
-      targetAppId={targetAppId}
-      basePath={basePath}
-      application={application}
-    />,
-    element
+  const root = createRoot(element);
+  root.render(
+    <FooApp appId={appId} targetAppId={targetAppId} basePath={basePath} application={application} />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

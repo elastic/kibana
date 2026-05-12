@@ -368,6 +368,95 @@ describe('stepInstallIndexTemplatePipelines', () => {
     });
   });
 
+  it('passes concrete data stream type from index template id for dynamic_signal_types input packages', async () => {
+    mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+      installedTemplates: [],
+      esReferences: [],
+    });
+
+    const packageInstallContext = {
+      packageInfo: {
+        title: 'title',
+        name: 'sql_server_input_otel',
+        version: '1.0.0',
+        description: 'test',
+        type: 'input',
+        categories: ['cloud'],
+        format_version: 'string',
+        release: 'experimental',
+        conditions: { kibana: { version: 'x.y.z' } },
+        owner: { github: 'elastic/fleet' },
+        policy_templates: [
+          {
+            name: 'otel',
+            title: 'OTel',
+            description: 'OpenTelemetry',
+            input: 'otelcol',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: true,
+            vars: [],
+          },
+        ],
+      } as any,
+      assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
+      paths: [],
+    };
+
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: {
+          disableILMPolicies: true,
+          fleetServerStandalone: false,
+          onlyAllowAgentUpgradeToKnownVersions: false,
+          retrySetupOnBoot: false,
+          registry: {
+            kibanaVersionCheckEnabled: true,
+            capabilities: [],
+            excludePackages: [],
+          },
+        },
+      })
+    );
+
+    const mockInstalledPackageSo = getMockInstalledPackageSo([
+      {
+        id: 'logs-sql_server_input_otel.data',
+        type: ElasticsearchAssetType.indexTemplate,
+      },
+    ]);
+    const installedPkg = {
+      ...mockInstalledPackageSo,
+      attributes: {
+        ...mockInstalledPackageSo.attributes,
+        install_started_at: new Date(Date.now() - 1000).toISOString(),
+      },
+    };
+
+    await stepInstallIndexTemplatePipelines({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg,
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      esReferences: [],
+    });
+
+    expect(mockedInstallIndexTemplatesAndPipelines).toHaveBeenCalledTimes(1);
+    const callArg = mockedInstallIndexTemplatesAndPipelines.mock.calls[0][0];
+    expect(callArg.onlyForDataStreams).toBeDefined();
+    expect(callArg.onlyForDataStreams!.length).toBeGreaterThan(0);
+    expect(callArg.onlyForDataStreams!.every((ds) => ds.type === 'logs')).toBe(true);
+    expect(
+      callArg.onlyForDataStreams!.every((ds) => ds.dataset === 'sql_server_input_otel.data')
+    ).toBe(true);
+  });
+
   it('Should not call installIndexTemplatesAndPipelines if packageInfo type is input and no data streams are found', async () => {
     mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
       installedTemplates: [

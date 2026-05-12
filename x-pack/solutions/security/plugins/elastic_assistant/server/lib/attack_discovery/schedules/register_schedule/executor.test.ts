@@ -12,6 +12,13 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import type { InferenceConnectorType } from '@kbn/inference-common';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
@@ -27,6 +34,8 @@ import {
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
+import * as transforms from '../../persistence/transforms/transform_to_alert_documents';
+import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 
 jest.mock('../../../../ai_assistant_data_clients/find', () => ({
   ...jest.requireActual('../../../../ai_assistant_data_clients/find'),
@@ -35,6 +44,12 @@ jest.mock('../../../../ai_assistant_data_clients/find', () => ({
 jest.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', () => ({
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/generate_discoveries'),
   generateAttackDiscoveries: jest.fn(),
+}));
+jest.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => ({
+  filterHallucinatedAlerts: jest.fn().mockImplementation(({ attackDiscoveries }) => {
+    // By default, pass through all discoveries (no filtering)
+    return Promise.resolve(attackDiscoveries);
+  }),
 }));
 jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
   ...jest.requireActual('../../../../routes/attack_discovery/helpers/telemetry'),
@@ -46,10 +61,23 @@ jest.mock('../../persistence/deduplication', () => ({
   deduplicateAttackDiscoveries: jest.fn(),
 }));
 
+jest.mock(
+  '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization',
+  () => ({
+    isInvalidAnonymizationError: jest.fn(),
+  })
+);
+
+jest.mock('@kbn/task-manager-plugin/server', () => ({
+  createTaskRunError: jest.fn((error, source) => ({ message: error.message, source })),
+  TaskErrorSource: { USER: 'USER' },
+}));
+
 describe('attackDiscoveryScheduleExecutor', () => {
   const date = '2025-05-20T15:18:21.000Z';
   const mockLogger = loggerMock.create();
   const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
+  const mockInference = inferenceMock.createStartContract();
   const actionsClient = actionsClientMock.create();
   const ruleExecutorServices = alertsMock.createRuleExecutorServices();
   const services = {
@@ -135,6 +163,17 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     (services.alertsClient.report as jest.Mock).mockReturnValue({ uuid: 'fake-alert' });
 
+    // Mock inference.getConnectorByIdWithoutClientRequest to resolve the connector for the executor
+    mockInference.getConnectorByIdWithoutClientRequest.mockResolvedValue({
+      type: params.apiConfig.actionTypeId as InferenceConnectorType,
+      connectorId: params.apiConfig.connectorId,
+      name: params.apiConfig.name,
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
+    });
+
     (findDocuments as jest.Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
@@ -152,6 +191,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -166,6 +206,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -180,6 +221,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -199,6 +241,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -233,6 +276,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(async () => {
       await attackDiscoveryScheduleExecutor({
+        inference: mockInference,
         options,
         logger: mockLogger,
         publicBaseUrl: undefined,
@@ -252,6 +296,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -271,10 +316,33 @@ describe('attackDiscoveryScheduleExecutor', () => {
     });
   });
 
+  it('calls filterHallucinatedAlerts with the expected parameters', async () => {
+    const { filterHallucinatedAlerts } = jest.requireMock(
+      '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'
+    );
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(filterHallucinatedAlerts).toHaveBeenCalledWith({
+      attackDiscoveries: mockAttackDiscoveries,
+      alertsIndexPattern: params.alertsIndexPattern,
+      esClient: services.scopedClusterClient.asCurrentUser,
+      logger: mockLogger,
+    });
+  });
+
   it('should report generated attack discoveries as alerts', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -349,6 +417,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
           'Critical Malware and Phishing Alerts on host e1cb3cf0-30f3-4f99-a9c8-518b955c6f90',
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
+        'kibana.alert.attack_ids': ['fake-alert'],
       },
       context: {
         attack: {
@@ -371,6 +440,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: 'http://fake-host.io/test',
@@ -394,6 +464,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     options.services.shouldStopExecution = () => true;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -408,6 +479,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -434,6 +506,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([]);
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -450,6 +523,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     ]);
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -480,6 +554,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -502,5 +577,97 @@ describe('attackDiscoveryScheduleExecutor', () => {
         context: { attack: expect.objectContaining({ alertIds, timestamp, mitreAttackTactics }) },
       });
     }
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { withReplacements?: boolean };
+    };
+    expect(firstCallArg.alertsParams.withReplacements).toBe(false);
+
+    spy.mockRestore();
+  });
+
+  it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+
+    await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    const firstCallArg = spy.mock.calls[0][0] as {
+      alertsParams: { enableFieldRendering?: boolean };
+    };
+    expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
+
+    spy.mockRestore();
+  });
+
+  it('throws TaskRunError when isInvalidAnonymizationError returns true', async () => {
+    const error = new Error('Invalid Anonymization');
+    (generateAttackDiscoveries as jest.Mock).mockRejectedValue(error);
+    (isInvalidAnonymizationError as jest.Mock).mockReturnValue(true);
+    const options = { ...executorOptions } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        inference: mockInference,
+        options,
+        logger: mockLogger,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(
+      expect.objectContaining({ message: error.message, source: TaskErrorSource.USER })
+    );
+
+    expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
+  });
+
+  it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        apiConfig: {
+          ...params.apiConfig,
+          connectorId: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(generateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          apiConfig: expect.objectContaining({
+            connectorId: LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+          }),
+        }),
+      })
+    );
   });
 });

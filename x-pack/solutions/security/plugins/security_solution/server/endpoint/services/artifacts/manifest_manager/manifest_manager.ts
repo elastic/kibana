@@ -14,7 +14,7 @@ import {
   type ElasticsearchClient,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -60,6 +60,7 @@ import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { SavedObjectsClientFactory } from '../../saved_objects';
+import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -194,6 +195,7 @@ export class ManifestManager {
     policyId,
     schemaVersion,
     exceptionItemDecorator,
+    isEndpointExceptionsPerPolicyEnabled,
   }: {
     elClient: ExceptionListClient;
     listId: ArtifactListId;
@@ -201,6 +203,7 @@ export class ManifestManager {
     policyId?: string;
     schemaVersion: string;
     exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
+    isEndpointExceptionsPerPolicyEnabled?: boolean;
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
@@ -230,8 +233,17 @@ export class ManifestManager {
         ? exception.tags.includes('policy:all') || exception.tags.includes(`policy:${policyId}`)
         : exception.tags.includes('policy:all');
 
-    const exceptions: ExceptionListItemSchema[] =
-      listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
+    let exceptions: ExceptionListItemSchema[];
+
+    if (isEndpointExceptionsPerPolicyEnabled) {
+      // with the feature enabled, we do not make an 'exception' with endpoint exceptions - it's filtered per-policy
+      exceptions = allExceptionsByListId.filter(filter);
+    } else {
+      exceptions =
+        listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          ? allExceptionsByListId
+          : allExceptionsByListId.filter(filter);
+    }
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
@@ -247,9 +259,11 @@ export class ManifestManager {
     os,
     policyId,
     exceptionItemDecorator,
+    isEndpointExceptionsPerPolicyEnabled,
   }: {
     os: string;
     policyId?: string;
+    isEndpointExceptionsPerPolicyEnabled?: boolean;
   } & BuildArtifactsForOsOptions): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
       await this.getCachedExceptions({
@@ -259,6 +273,7 @@ export class ManifestManager {
         policyId,
         listId,
         exceptionItemDecorator,
+        isEndpointExceptionsPerPolicyEnabled,
       }),
       this.schemaVersion,
       os,
@@ -274,14 +289,20 @@ export class ManifestManager {
   protected async buildArtifactsByPolicy(
     allPolicyIds: string[],
     supportedOSs: string[],
-    osOptions: BuildArtifactsForOsOptions
+    osOptions: BuildArtifactsForOsOptions,
+    isEndpointExceptionsPerPolicyEnabled?: boolean
   ): Promise<Record<string, InternalArtifactCompleteSchema[]>> {
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     for (const policyId of allPolicyIds)
       for (const os of supportedOSs) {
         policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
         policySpecificArtifacts[policyId].push(
-          await this.buildArtifactsForOs({ os, policyId, ...osOptions })
+          await this.buildArtifactsForOs({
+            os,
+            policyId,
+            isEndpointExceptionsPerPolicyEnabled,
+            ...osOptions,
+          })
         );
       }
 
@@ -296,10 +317,10 @@ export class ManifestManager {
    * @throws Throws/rejects if there are errors building the list.
    */
   protected async buildExceptionListArtifacts(
-    allPolicyIds: string[]
+    allPolicyIds: string[],
+    isEndpointExceptionsPerPolicyEnabled: boolean
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
     const decorateWildcardOnlyExceptionItem = (item: ExceptionListItemSchema) => {
       const isWildcardOnly = item.entries.every(({ type }) => type === 'wildcard');
@@ -318,18 +339,35 @@ export class ManifestManager {
     };
 
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_LIST_ID,
-      name: ArtifactConstants.GLOBAL_ALLOWLIST_NAME,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      name: ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME,
       exceptionItemDecorator: decorateWildcardOnlyExceptionItem,
     };
 
-    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    for (const os of ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(
+        await this.buildArtifactsForOs({
+          os,
+          isEndpointExceptionsPerPolicyEnabled,
+          ...buildArtifactsForOsOptions,
+        })
+      );
     }
 
-    allPolicyIds.forEach((policyId) => {
-      policySpecificArtifacts[policyId] = defaultArtifacts;
-    });
+    let policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    if (isEndpointExceptionsPerPolicyEnabled) {
+      policySpecificArtifacts = await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions,
+        isEndpointExceptionsPerPolicyEnabled
+      );
+    } else {
+      allPolicyIds.forEach((policyId) => {
+        policySpecificArtifacts[policyId] = defaultArtifacts;
+      });
+    }
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
@@ -594,23 +632,19 @@ export class ManifestManager {
   public async getLastComputedManifest(): Promise<Manifest | null> {
     try {
       let manifestSo;
-      if (this.experimentalFeatures.unifiedManifestEnabled) {
-        const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
-        // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
-        // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
-        // behind for package policy to pick it up.
-        if (unifiedManifestsSo.length === 0) {
-          const legacyManifestSo = await this.getManifestClient().getManifest();
-          const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
-          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
-            unifiedManifestsSo,
-            legacySemanticVersion
-          );
-        } else {
-          manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
-        }
+      const unifiedManifestsSo = await this.getAllUnifiedManifestsSO();
+      // On first run, there will be no existing Unified Manifests SO, so we need to copy the semanticVersion from the legacy manifest
+      // This is to ensure that the first Unified Manifest created has the same semanticVersion as the legacy manifest and is not too far
+      // behind for package policy to pick it up.
+      if (unifiedManifestsSo.length === 0) {
+        const legacyManifestSo = await this.getManifestClient().getManifest();
+        const legacySemanticVersion = legacyManifestSo?.attributes?.semanticVersion;
+        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(
+          unifiedManifestsSo,
+          legacySemanticVersion
+        );
       } else {
-        manifestSo = await this.getManifestClient().getManifest();
+        manifestSo = this.transformUnifiedManifestSOtoLegacyManifestSO(unifiedManifestsSo);
       }
 
       if (manifestSo.version === undefined) {
@@ -682,16 +716,22 @@ export class ManifestManager {
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
   ): Promise<Manifest> {
+    const isEndpointExceptionsPerPolicyEnabled = await getIsEndpointExceptionsPerPolicyEnabled(
+      this.savedObjectsClientFactory.createInternalScopedSoClient({ readonly: false }),
+      this.experimentalFeatures,
+      this.logger
+    );
+
     const allPolicyIds = await this.listEndpointPolicyIds();
     const results = await Promise.all([
-      this.buildExceptionListArtifacts(allPolicyIds),
+      this.buildExceptionListArtifacts(allPolicyIds, isEndpointExceptionsPerPolicyEnabled),
       this.buildTrustedAppsArtifacts(allPolicyIds),
-      ...(this.experimentalFeatures.trustedDevices
-        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
-        : []),
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
     ]);
 
     // Clear cache as the ManifestManager instance is reused on every run.
@@ -742,18 +782,14 @@ export class ManifestManager {
           // SO client is used for the update.
           const updatesBySpace: Record<string, PackagePolicy[]> = {};
 
-          if (this.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-            for (const packagePolicy of currentBatch) {
-              const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
+          for (const packagePolicy of currentBatch) {
+            const packagePolicySpace = packagePolicy.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
 
-              if (!updatesBySpace[packagePolicySpace]) {
-                updatesBySpace[packagePolicySpace] = [];
-              }
-
-              updatesBySpace[packagePolicySpace].push(packagePolicy);
+            if (!updatesBySpace[packagePolicySpace]) {
+              updatesBySpace[packagePolicySpace] = [];
             }
-          } else {
-            updatesBySpace[DEFAULT_SPACE_ID] = currentBatch;
+
+            updatesBySpace[packagePolicySpace].push(packagePolicy);
           }
 
           const response: Required<
@@ -983,23 +1019,7 @@ export class ManifestManager {
   public async commit(manifest: Manifest) {
     const manifestSo = manifest.toSavedObject();
 
-    if (this.experimentalFeatures.unifiedManifestEnabled) {
-      await this.commitUnified(manifestSo);
-    } else {
-      const manifestClient = this.getManifestClient();
-
-      const version = manifest.getSavedObjectVersion();
-
-      if (version == null) {
-        await manifestClient.createManifest(manifestSo);
-      } else {
-        await manifestClient.updateManifest(manifestSo, {
-          version,
-        });
-      }
-
-      this.logger.debug(`Committed manifest ${manifest.getSemanticVersion()}`);
-    }
+    await this.commitUnified(manifestSo);
   }
 
   private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {

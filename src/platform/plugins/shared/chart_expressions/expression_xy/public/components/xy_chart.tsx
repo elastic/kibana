@@ -42,24 +42,23 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
-import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { ESQL_TABLE_TYPE, MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
-import {
-  getAccessorByDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
-import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+  getLegendLayout,
+  getAccessorByDimension,
+  getColumnByAccessor,
+  getOverridesFor,
+} from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
@@ -94,6 +93,7 @@ import {
   getLinesCausedPaddings,
   validateExtent,
   getOriginalAxisPosition,
+  getDecimalsFromFormat,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -132,6 +132,7 @@ declare global {
 }
 
 const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+const DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT = 1000;
 
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -362,6 +363,8 @@ export function XYChart({
     xAxisColumn?.id ? fieldFormats[dataLayers[0].layerId].xAccessors[xAxisColumn?.id] : undefined
   );
 
+  const xTickDecimals = getDecimalsFromFormat(xAxisFormatter);
+
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
     xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
@@ -454,7 +457,8 @@ export function XYChart({
     annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
     formatFactory,
-    timeFormat
+    timeFormat,
+    darkMode
   );
 
   const visualConfigs = [
@@ -755,11 +759,8 @@ export function XYChart({
     formatFactory
   );
 
-  // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
-  const applicationQuery = data.query.queryString.getQuery();
-  const canCreateFilters =
-    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
   // ES|QL charts are allowed to create alert rules only in dashboards
+  const applicationQuery = data.query.queryString.getQuery();
   const canCreateAlerts =
     isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
 
@@ -852,9 +853,15 @@ export function XYChart({
               debugState={window._echDebugStateFlag ?? false}
               showLegend={showLegend}
               legendPosition={legend?.isInside ? legendInsideParams : legend.position}
+              legendLayout={getLegendLayout({
+                isInside: legend.isInside,
+                position: legend.position,
+                layout: legend.layout,
+              })}
               legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendValues={isHistogramViz ? legend.legendStats : []}
               legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
+              legendActionOnHover={interactive}
               theme={[
                 {
                   barSeriesStyle: {
@@ -864,7 +871,15 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                    labelOptions: legend.shouldTruncate
+                      ? {
+                          maxLines: legend?.maxLines ?? 1,
+                          widthLimit: DEFAULT_LEGEND_TRUNCATE_WIDTH_LIMIT,
+                        }
+                      : {
+                          maxLines: 0,
+                          widthLimit: 0,
+                        },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
@@ -892,7 +907,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive && canCreateFilters
+                interactive
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,
@@ -939,6 +954,7 @@ export function XYChart({
                 }
                 return value;
               }}
+              maximumFractionDigits={xTickDecimals}
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
@@ -952,6 +968,10 @@ export function XYChart({
               />
             )}
             {yAxesConfiguration.map((axis) => {
+              const tickDecimals = axis.formatter
+                ? getDecimalsFromFormat(axis.formatter)
+                : undefined;
+
               return (
                 <Axis
                   key={axis.groupId}
@@ -970,6 +990,7 @@ export function XYChart({
                     }
                     return value;
                   }}
+                  maximumFractionDigits={tickDecimals}
                   style={getYAxesStyle(axis)}
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
@@ -1081,8 +1102,18 @@ function getLegendTitle(
   if (typeof title === 'string' && title.length > 0) {
     return title;
   }
-  return layer?.splitAccessors?.[0]
-    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
+
+  const splitAccessorNames =
+    layer?.splitAccessors?.reduce<string[]>((acc, accessor) => {
+      const column = layer?.table.columns.find((c) => c.id === accessor);
+      if (column?.name) {
+        acc.push(column.name);
+      }
+      return acc;
+    }, []) ?? [];
+
+  return splitAccessorNames.length > 0
+    ? splitAccessorNames.join(MULTI_FIELD_KEY_SEPARATOR)
     : defaultLegendTitle;
 }
 

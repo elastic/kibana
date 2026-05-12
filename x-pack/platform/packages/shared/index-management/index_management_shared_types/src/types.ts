@@ -8,15 +8,29 @@
 import type {
   IlmExplainLifecycleLifecycleExplain,
   HealthStatus,
-  IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { ExtensionsSetup } from './services/extensions_service';
 import type { PublicApiServiceSetup } from './services/public_api_service';
+
+export interface EnricherResponse {
+  source: string;
+  indices?: Index[];
+  error?: boolean;
+  /**
+   * Apply this enricher's updates to any index aliases
+   */
+  applyToAliases?: boolean;
+}
+export interface Enricher {
+  name: string;
+  fn: (client: HttpSetup, signal: AbortSignal) => Promise<EnricherResponse>;
+}
 
 export type IndexManagementLocatorParams = SerializableRecord &
   (
@@ -46,6 +60,9 @@ export type IndexManagementLocatorParams = SerializableRecord &
         indexTemplate: string;
       }
     | {
+        page: 'create_template';
+      }
+    | {
         page: 'component_template';
         componentTemplate: string;
       }
@@ -65,6 +82,11 @@ export type IndexManagementLocatorParams = SerializableRecord &
         page: 'create_component_template';
         componentTemplate: string;
       }
+    | {
+        page: 'index_details';
+        indexName: string;
+        tab?: string;
+      }
   );
 
 export type IndexManagementLocator = LocatorPublic<IndexManagementLocatorParams>;
@@ -79,9 +101,13 @@ export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
   renderIndexManagementApp: (params: IndexManagementAppMountParams) => Promise<() => void>;
   locator?: IndexManagementLocator;
+  indexDataEnricher: {
+    add: (enricher: Enricher) => void;
+  };
 }
 
 export interface IndexManagementPluginStart {
+  apiService: PublicApiServiceSetup;
   extensionsService: ExtensionsSetup;
   getIndexMappingComponent: (deps: {
     history: ScopedHistory<unknown>;
@@ -100,14 +126,17 @@ export interface IndexManagementPluginStart {
   }) => React.FC<DatastreamFlyoutProps>;
 }
 
-export interface Index {
+export interface Index extends IndexAttributes {
   name: string;
+}
+export interface IndexAttributes {
   primary?: number | string;
   replica?: number | string;
-  isFrozen: boolean;
-  hidden: boolean;
-  aliases: string | string[];
+  isFrozen?: boolean;
+  hidden?: boolean;
+  aliases?: string | string[];
   data_stream?: string;
+  mode?: string;
 
   // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
   isRollupIndex?: boolean;
@@ -117,11 +146,12 @@ export interface Index {
   // The types from here below represent information returned from the index stats API;
   // treated optional as the stats API is not available on serverless
   health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
+  // Some consumers (e.g. the indices list UI) display user-friendly status text.
+  status?: string;
   uuid?: Uuid;
   documents?: number;
-  size?: string;
-  primary_size?: string;
+  size?: number;
+  primary_size?: number;
   documents_deleted?: number;
 }
 
@@ -144,7 +174,6 @@ export interface DatastreamFlyoutProps {
 export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
-  hasUpdateMappingsPrivilege?: boolean;
 }
 export interface IndexSettingProps {
   indexName: string;

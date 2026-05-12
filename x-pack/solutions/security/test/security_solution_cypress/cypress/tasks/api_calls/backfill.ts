@@ -5,8 +5,8 @@
  * 2.0.
  */
 import {
-  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
   INTERNAL_ALERTING_BACKFILL_API_PATH,
+  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
 } from '@kbn/alerting-plugin/common';
 
 const BACKFILL_RULE_URL_SCHEDULE = `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule`;
@@ -33,18 +33,6 @@ export const manualRuleRun = ({
   });
 };
 
-export const interceptFindBackfillsNoData = () => {
-  cy.intercept('POST', INTERNAL_ALERTING_BACKFILL_FIND_API_PATH, {
-    statusCode: 200,
-    body: {
-      page: 1,
-      per_page: 10,
-      total: 0,
-      data: [],
-    },
-  });
-};
-
 export const FIRST_BACKFILL_ID = 'c51259fb-7c55-4210-8137-b50f0c0dbff5';
 
 export const interceptFindBackfills = () => {
@@ -63,6 +51,7 @@ export const interceptFindBackfills = () => {
           start: '2024-05-21T13:00:00.000Z',
           status: 'pending',
           created_at: '2024-05-27T15:19:43.543Z',
+          initiator: 'user',
           space_id: 'default',
           schedule: [
             {
@@ -91,6 +80,7 @@ export const interceptFindBackfills = () => {
           id: 'c51259fb-7c55-4210-8137-b50f0c0dbff6',
           duration: '5h',
           enabled: true,
+          initiator: 'user',
           end: '2024-05-22T14:05:00.000Z',
           start: '2024-05-21T13:00:00.000Z',
           status: 'running',

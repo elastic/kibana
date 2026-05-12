@@ -48,6 +48,7 @@ import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
+import * as i18n from './translations';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -87,6 +88,16 @@ const mockKibana = () => {
       triggersActionsUi: mockTriggersActionsUiService,
     },
   } as unknown as ReturnType<typeof useKibana>);
+};
+
+const mockEarliestCaseParams = {
+  filterOptions: { from: undefined, to: undefined, owner: [] },
+  queryParams: {
+    page: 1,
+    perPage: 1,
+    sortField: SortFieldCase.createdAt,
+    sortOrder: 'asc',
+  },
 };
 
 // eslint-disable-next-line prefer-object-spread
@@ -151,7 +162,10 @@ describe('AllCasesListGeneric', () => {
   beforeAll(() => {
     patchGetComputedStyle();
     mockKibana();
-    const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+    } = useKibanaMock().services;
+
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
@@ -192,6 +206,10 @@ describe('AllCasesListGeneric', () => {
     expect(
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
+
+    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
+    expect(incrementalIdTextElements).toHaveLength(1);
+    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
 
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
@@ -392,6 +410,32 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should disable select and not call onRowClick for closed cases with modal=true', async () => {
+    const theCase = {
+      ...defaultGetCases.data.cases[0],
+      status: CaseStatuses.closed,
+    };
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      data: {
+        ...defaultGetCases.data,
+        cases: [theCase, ...defaultGetCases.data.cases.slice(1)],
+      },
+    });
+
+    renderWithTestingProviders(<AllCasesList isSelectorView={true} onRowClick={onRowClick} />);
+
+    const selectButton = await screen.findByTestId(`cases-table-row-select-${theCase.id}`);
+    expect(selectButton).toBeDisabled();
+    expect(selectButton).toHaveTextContent('Select');
+    expect(selectButton).not.toHaveTextContent('Added');
+
+    await userEvent.click(selectButton);
+    await waitFor(() => {
+      expect(onRowClick).not.toHaveBeenCalled();
+    });
+  });
+
   it('should NOT call onRowClick when clicking a case with modal=true', async () => {
     renderWithTestingProviders(<AllCasesList isSelectorView={false} />);
 
@@ -409,7 +453,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Status'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -418,6 +462,9 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -438,7 +485,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click((await screen.findAllByTitle('Severity'))[1]);
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -448,6 +495,9 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by title', async () => {
@@ -456,7 +506,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Name'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -466,6 +516,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by updatedOn', async () => {
@@ -474,7 +528,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Updated on'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -484,6 +538,10 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
+    });
   });
 
   it('should sort by category', async () => {
@@ -492,7 +550,7 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTitle('Category'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(
+      expect(useGetCasesMock).toHaveBeenCalledWith(
         expect.objectContaining({
           queryParams: {
             ...DEFAULT_QUERY_PARAMS,
@@ -501,6 +559,10 @@ describe('AllCasesListGeneric', () => {
           },
         })
       );
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -512,14 +574,17 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      expect(useGetCasesMock).toHaveBeenCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          searchFields: ['title', 'description'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
       });
+    });
+
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -637,9 +702,12 @@ describe('AllCasesListGeneric', () => {
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     await userEvent.click(await screen.findByTestId('all-cases-clear-filters-link-icon'));
+    await waitFor(() => {
+      expect(useGetCasesMock).toHaveBeenCalledWith(DEFAULT_CASES_TABLE_STATE);
+    });
 
     await waitFor(() => {
-      expect(useGetCasesMock).toHaveBeenLastCalledWith(DEFAULT_CASES_TABLE_STATE);
+      expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
     });
   });
 
@@ -691,12 +759,24 @@ describe('AllCasesListGeneric', () => {
 
           await userEvent.click(await screen.findByTestId(`cases-bulk-action-status-${status}`));
 
+          if (status === CaseStatuses.closed) {
+            await waitFor(() => {
+              expect(
+                screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+              ).toBeInTheDocument();
+            });
+
+            await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_REASON_DUPLICATE));
+            await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
+          }
+
           await waitFor(() => {
             expect(updateCasesSpy).toBeCalledWith({
               cases: useGetCasesMockState.data.cases.map(({ id, version }) => ({
                 id,
                 version,
                 status,
+                ...(status === CaseStatuses.closed ? { closeReason: 'duplicate' } : {}),
               })),
             });
           });
@@ -974,18 +1054,24 @@ describe('AllCasesListGeneric', () => {
         ).toBeInTheDocument();
 
         // Deactivates assignees filter
-        await userEvent.click(await screen.findByRole('button', { name: 'More' }));
+        await userEvent.click(
+          await screen.findByTestId('options-filter-popover-button-more-filters')
+        );
         await waitForEuiPopoverOpen();
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
 
-        expect(useGetCasesMock).toHaveBeenLastCalledWith({
-          filterOptions: {
-            ...DEFAULT_FILTER_OPTIONS,
-            assignees: [],
-          },
-          queryParams: DEFAULT_QUERY_PARAMS,
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith(mockEarliestCaseParams);
         });
-
+        await waitFor(() => {
+          expect(useGetCasesMock).toHaveBeenCalledWith({
+            filterOptions: {
+              ...DEFAULT_FILTER_OPTIONS,
+              assignees: [],
+            },
+            queryParams: DEFAULT_QUERY_PARAMS,
+          });
+        });
         // Reopens assignees filter
         await userEvent.click(await screen.findByRole('option', { name: 'Assignees' }));
         // Opens the assignees popup

@@ -11,6 +11,14 @@ export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable
   defaultMessage: 'Name',
 });
 
+export const FAILURE_STORE_PERMISSIONS_ERROR = i18n.translate(
+  'xpack.streams.streamsTreeTable.failureStorePermissionsError',
+  {
+    defaultMessage:
+      'Does not include failed documents - user does not have access to failure store',
+  }
+);
+
 export const DOCUMENTS_COLUMN_HEADER = i18n.translate(
   'xpack.streams.streamsTreeTable.documentsColumnName',
   { defaultMessage: 'Documents' }
@@ -62,9 +70,22 @@ export const DOCUMENTS_NO_DATA_ICON_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'No chart data available' }
 );
 
-export const INFINITE_RETENTION_LABEL = i18n.translate(
-  'xpack.streams.streamsRetentionColumn.infiniteRetentionAriaLabel',
-  { defaultMessage: 'Infinite retention - data is kept indefinitely' }
+export const INDEFINITE_RETENTION_ARIA_LABEL = i18n.translate(
+  'xpack.streams.streamsRetentionColumn.indefiniteRetentionAriaLabel',
+  { defaultMessage: 'Indefinite retention - data is kept indefinitely' }
+);
+
+export const INDEFINITE_RETENTION_LABEL = i18n.translate(
+  'xpack.streams.streamsRetentionColumn.indefiniteRetentionLabel',
+  { defaultMessage: 'Indefinite' }
+);
+
+export const CPS_DOCUMENTS_WARNING = i18n.translate(
+  'xpack.streams.streamsTreeTable.cpsDocumentsWarning',
+  {
+    defaultMessage:
+      'Cross-project search is active. Document counts shown here are local to this project and may differ from Discover results.',
+  }
 );
 
 export const NO_RETENTION_LABEL = i18n.translate(

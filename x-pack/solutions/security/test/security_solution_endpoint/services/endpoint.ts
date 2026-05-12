@@ -48,7 +48,7 @@ import {
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
-  unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse>;
+  unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse | undefined>;
   spaceId: string;
 };
 
@@ -175,6 +175,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             'metrics-endpoint.policy-default',
             'logs-endpoint.events.process-default',
             'logs-endpoint.alerts-default',
+            'logs-endpoint.events.device-default',
             alertsPerHost,
             enableFleetIntegration,
             undefined,
@@ -202,7 +203,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       return {
         ...indexedData,
         spaceId,
-        unloadEndpointData: (): Promise<DeleteIndexedHostsAndAlertsResponse> => {
+        unloadEndpointData: (): Promise<DeleteIndexedHostsAndAlertsResponse | undefined> => {
           return this.unloadEndpointData(indexedData, { spaceId });
         },
       };
@@ -216,12 +217,17 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
     async unloadEndpointData(
       indexedData: IndexedHostsAndAlertsResponse,
       { spaceId = DEFAULT_SPACE_ID }: { spaceId?: string } = {}
-    ): Promise<DeleteIndexedHostsAndAlertsResponse> {
+    ): Promise<DeleteIndexedHostsAndAlertsResponse | undefined> {
       return deleteIndexedHostsAndAlerts(
         this.esClient as Client,
         this.getScopedKbnClient(spaceId),
         indexedData
-      );
+      ).catch((error) => {
+        // Avoid returning a rejected promise since this method is normally used at the end of tests to
+        // unload mocked data, so failure here should not impact the test execution state.
+        log.warning(`Error unloading endpoint data: ${error.message}`);
+        return undefined;
+      });
     }
 
     async waitForIndex(

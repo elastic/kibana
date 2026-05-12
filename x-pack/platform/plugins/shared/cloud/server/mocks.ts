@@ -17,6 +17,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     cloudDefaultPort: '443',
     instanceSizeMb: 1234,
     isCloudEnabled: true,
+    isEce: undefined,
     isElasticStaffOwned: true,
     organizationId: 'organization-id',
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
@@ -35,6 +36,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
       productTier: undefined,
       orchestratorTarget: undefined,
     },
+    isInTrial: jest.fn().mockReturnValue(false),
   };
 }
 
@@ -43,6 +45,7 @@ function createStartMock(): jest.Mocked<CloudStart> {
     isCloudEnabled: true,
     projectsUrl: 'projects-url',
     baseUrl: 'base-url',
+    isInTrial: jest.fn().mockReturnValue(false),
   };
 }
 

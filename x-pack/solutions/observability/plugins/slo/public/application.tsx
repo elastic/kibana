@@ -13,10 +13,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
@@ -24,6 +25,7 @@ import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
+import type { ISloTelemetryClient } from './services/telemetry';
 
 interface Props {
   core: CoreStart;
@@ -37,6 +39,7 @@ interface Props {
   isServerless?: boolean;
   experimentalFeatures: ExperimentalFeatures;
   sloClient: SLORepositoryClient;
+  telemetry?: ISloTelemetryClient;
 }
 
 export const renderApp = ({
@@ -51,6 +54,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry,
   experimentalFeatures,
   sloClient,
+  telemetry,
 }: Props) => {
   const { element, history } = appMountParameters;
 
@@ -87,7 +91,7 @@ export const renderApp = ({
   });
 
   ReactDOM.render(
-    core.rendering.addContext(
+    <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
         <CloudProvider>
           <KibanaContextProvider
@@ -109,6 +113,7 @@ export const renderApp = ({
                 observabilityRuleTypeRegistry,
                 experimentalFeatures,
                 sloClient,
+                telemetry,
               }}
             >
               <Router history={history}>
@@ -124,7 +129,7 @@ export const renderApp = ({
           </KibanaContextProvider>
         </CloudProvider>
       </ApplicationUsageTrackingProvider>
-    ),
+    </KibanaRenderContextProvider>,
     element
   );
 
@@ -140,9 +145,8 @@ export const renderApp = ({
 };
 
 function App() {
-  const { isServerless } = usePluginContext();
-
-  const routes = getRoutes(isServerless);
+  const { experimentalFeatures } = usePluginContext();
+  const routes = getRoutes(experimentalFeatures);
 
   return (
     <Routes enableExecutionContextTracking={true}>

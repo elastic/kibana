@@ -67,9 +67,9 @@ export function useUrlSearchState(): {
     const sub = urlStateStorage.current
       ?.change$<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY)
       .subscribe((newSearchState) => {
-        if (newSearchState) {
-          setState(newSearchState);
-        }
+        // When URL has no search params, newSearchState will be null/undefined
+        // In that case, reset to DEFAULT_STATE
+        setState(newSearchState ?? DEFAULT_STATE);
       });
 
     setState(
@@ -88,9 +88,7 @@ export function useUrlSearchState(): {
       const updatedState = { ...state, page: 0, ...newState };
       setState(() => updatedState);
 
-      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState, {
-        replace: true,
-      });
+      urlStateStorage.current?.set(SLO_LIST_SEARCH_URL_STORAGE_KEY, updatedState);
 
       // Discard search itself from session storage. Keep only view preferences
       sessionStorage.current?.set(

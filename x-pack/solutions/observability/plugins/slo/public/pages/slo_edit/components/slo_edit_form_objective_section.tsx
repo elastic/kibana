@@ -98,7 +98,7 @@ export function SloEditFormObjectiveSection() {
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         {isServerless && (
-          <EuiCallOut>
+          <EuiCallOut announceOnMount>
             {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
               defaultMessage: 'Initial data backfill is limited to the past 7 days',
             })}
@@ -179,7 +179,7 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.metric.timeslice' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <p>
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
@@ -192,7 +192,7 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.synthetics.availability' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <p>
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
@@ -283,6 +283,9 @@ export function SloEditFormObjectiveSection() {
                     min={0.001}
                     max={99.999}
                     step={0.001}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.targetSlo.ariaLabel', {
+                      defaultMessage: 'Target / SLO (%)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}

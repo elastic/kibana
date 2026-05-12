@@ -8,11 +8,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { OnboardingFlowForm } from './onboarding_flow_form';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 import { MemoryRouter } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
+import type { ObservabilityOnboardingAppServices } from '../..';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../quickstart_flows/shared/use_pricing_feature');
@@ -27,7 +29,7 @@ jest.mock('./use_custom_cards', () => ({
 }));
 
 jest.mock('../package_list/package_list', () => ({
-  PackageList: ({ list }: { list: any[] }) => (
+  PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
     <div data-test-subj="package-list">
       {list.map((item, index) => (
         <div key={index} data-test-subj={`package-item-${item.id || index}`}>
@@ -63,7 +65,7 @@ describe('OnboardingFlowForm', () => {
           isCloud: false,
         },
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana<ObservabilityOnboardingAppServices>>);
   });
 
   describe('Complete Tier (Metrics Onboarding Enabled)', () => {
@@ -84,7 +86,7 @@ describe('OnboardingFlowForm', () => {
       renderWithProviders(<OnboardingFlowForm />);
 
       expect(
-        screen.getByText(/Monitor your host and the services running on it, set-up SLO/)
+        screen.getByText(/Track your host and its services by setting up SLOs/)
       ).toBeInTheDocument();
     });
 
@@ -92,7 +94,7 @@ describe('OnboardingFlowForm', () => {
       renderWithProviders(<OnboardingFlowForm />);
 
       expect(
-        screen.getByText(/Observe your Kubernetes cluster.*using logs, metrics, traces/)
+        screen.getByText(/Monitor your Kubernetes cluster and container workloads using logs/)
       ).toBeInTheDocument();
     });
 
@@ -164,7 +166,7 @@ describe('OnboardingFlowForm', () => {
 
       expect(screen.getByText('Cloud')).toBeInTheDocument();
       expect(
-        screen.getByText(/Ingest telemetry data from the Cloud for your applications/)
+        screen.getByText(/Ingest telemetry data from your cloud services to better understand/)
       ).toBeInTheDocument();
     });
 

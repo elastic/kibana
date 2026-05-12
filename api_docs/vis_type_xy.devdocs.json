@@ -14,6 +14,8 @@
           "() => ({ text: string; value: \"top\"; } | { text: string; value: \"left\"; } | { text: string; value: \"right\"; } | { text: string; value: \"bottom\"; })[]"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/editor/positions.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -39,6 +41,8 @@
           "; }[]"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/editor/scale_types.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -58,6 +62,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,7 +78,10 @@
               "TruncateLabelsOptionProps"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/truncate_labels.tsx",
+            "lineNumber": 21,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "TruncateLabelsOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -90,6 +99,8 @@
         "label": "CategoryAxis",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,6 +112,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,6 +134,8 @@
               }
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,6 +150,8 @@
               "\"right\" | \"top\" | \"bottom\" | \"left\""
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -149,6 +166,8 @@
               "Scale"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,6 +179,8 @@
             "label": "show",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,6 +195,8 @@
               "{ text?: string | undefined; }"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,6 +217,8 @@
               }
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -218,6 +243,8 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -232,6 +259,8 @@
         "label": "Dimensions",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -253,6 +282,8 @@
               " | null"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -274,6 +305,8 @@
               "[]"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +328,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -316,6 +351,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -337,6 +374,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,6 +397,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,6 +420,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -393,6 +436,8 @@
         "label": "Grid",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -404,6 +449,8 @@
             "label": "categoryLines",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -418,6 +465,8 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -432,6 +481,8 @@
         "label": "SeriesParam",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -446,6 +497,8 @@
               "{ label: string; id: string; }"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -460,6 +513,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,6 +530,8 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,6 +546,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,6 +562,8 @@
               "ChartMode"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -514,6 +575,8 @@
             "label": "show",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -525,6 +588,8 @@
             "label": "showCircles",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -536,6 +601,8 @@
             "label": "circlesRadius",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -556,6 +623,8 @@
               }
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -567,6 +636,8 @@
             "label": "valueAxis",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -581,6 +652,8 @@
         "label": "ThresholdLine",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -592,6 +665,8 @@
             "label": "show",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -606,6 +681,8 @@
               "number | null"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -620,6 +697,8 @@
               "number | null"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -634,6 +713,8 @@
               "ThresholdLineStyle"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -645,6 +726,8 @@
             "label": "color",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -677,6 +760,8 @@
           "<T>"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -691,6 +776,8 @@
               "(paramName: string, isValid: boolean) => void"
             ],
             "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -705,6 +792,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+                "lineNumber": 15,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -720,6 +809,8 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/private/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
+                "lineNumber": 15,
+                "columnNumber": 42,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -755,6 +846,8 @@
           }
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -766,6 +859,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -782,6 +877,8 @@
         "label": "AxisType",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -794,6 +891,8 @@
         "label": "ScaleType",
         "description": [],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/constants.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -826,19 +925,33 @@
           },
           ">, \"params\"> & { params: {} | ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.DateHistogramParams",
             "text": "DateHistogramParams"
           },
           " | ",
-          "HistogramParams",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.HistogramParams",
+            "text": "HistogramParams"
+          },
           " | ",
-          "FakeParams",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.FakeParams",
+            "text": "FakeParams"
+          },
           "; }"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/public/types/param.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -853,6 +966,8 @@
       "label": "VisTypeXyPluginSetup",
       "description": [],
       "path": "src/platform/plugins/private/vis_types/xy/public/plugin.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -883,6 +998,8 @@
           "\nType of charts able to render"
         ],
         "path": "src/platform/plugins/private/vis_types/xy/common/index.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

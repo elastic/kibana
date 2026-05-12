@@ -31,7 +31,10 @@ const createCacheMock = () => {
   const mock: jest.Mocked<ITagsCache> = {
     getState: jest.fn(),
     getState$: jest.fn(),
+    isInitialized: jest.fn(),
   };
+
+  mock.isInitialized.mockReturnValue(false);
 
   return mock;
 };
@@ -64,6 +67,7 @@ const createApiUiMock = () => {
     convertNameToReference: jest.fn(),
     parseSearchQuery: jest.fn(),
     getTagIdsFromReferences: jest.fn(),
+    tagIdToReference: jest.fn(),
     getTagIdFromName: jest.fn(),
     updateTagsReferences: jest.fn(),
     getTag: jest.fn(),

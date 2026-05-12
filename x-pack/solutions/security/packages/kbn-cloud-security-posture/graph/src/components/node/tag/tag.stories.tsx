@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { ThemeProvider } from '@emotion/react';
 import { Tag as TagComponent, type TagProps } from './tag';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 
@@ -24,11 +23,7 @@ const meta: Meta<TagProps> = {
 
 export default meta;
 
-const Template: StoryFn<TagProps> = (props: TagProps) => (
-  <ThemeProvider theme={{ darkMode: false }}>
-    <TagComponent {...props} />
-  </ThemeProvider>
-);
+const Template: StoryFn<TagProps> = (props: TagProps) => <TagComponent {...props} />;
 
 export const Tag: StoryObj<TagProps> = {
   render: Template,

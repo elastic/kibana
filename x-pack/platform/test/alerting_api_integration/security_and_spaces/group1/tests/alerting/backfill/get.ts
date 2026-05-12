@@ -182,6 +182,8 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
               expect(getResponse1.body.end).to.eql(end1);
               expect(getResponse1.body.status).to.eql('pending');
               expect(getResponse1.body.space_id).to.eql(space.id);
+              expect(getResponse1.body.initiator).to.eql('user');
+              expect(getResponse1.body.initiator_id).to.be(undefined);
               expect(typeof getResponse1.body.created_at).to.be('string');
               testExpectedRule(getResponse1.body, ruleId1, false);
               expect(getResponse1.body.schedule.length).to.eql(12);
@@ -202,6 +204,8 @@ export default function getBackfillTests({ getService }: FtrProviderContext) {
               expect(getResponse2.body.end).to.eql(end2);
               expect(getResponse2.body.status).to.eql('pending');
               expect(getResponse2.body.space_id).to.eql(space.id);
+              expect(getResponse2.body.initiator).to.eql('user');
+              expect(getResponse2.body.initiator_id).to.be(undefined);
               expect(typeof getResponse2.body.created_at).to.be('string');
               testExpectedRule(getResponse2.body, ruleId2, false);
               expect(getResponse2.body.schedule.length).to.eql(8);

@@ -8,8 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { VisParams } from '@kbn/visualizations-plugin/common';
-
+import type { VisParams } from '@kbn/visualizations-common';
 import { getMetricFormatter } from './helpers';
 import { getSecondaryMetricInfo } from './secondary_metric_info';
 import type {
@@ -23,6 +22,7 @@ const STATIC_COLOR = ' #FFB300';
 const COLUMN_NAME = 'Column name';
 const SECONDARY_LABEL = 'Secondary label';
 const PALETTE: [string, string, string] = ['#f00', '#0f0', '#00f'];
+const TEXT_PALETTE: [string, string, string] = ['#a00', '#0a0', '#00a'];
 
 const BASELINE_VALUE = 40;
 
@@ -63,6 +63,7 @@ describe('getSecondaryMetricInfo', () => {
     showIcon: true,
     showValue: true,
     palette: PALETTE,
+    textPalette: TEXT_PALETTE,
     baselineValue: BASELINE_VALUE,
     borderColor: undefined,
     compareToPrimary: false,
@@ -129,6 +130,7 @@ describe('getSecondaryMetricInfo', () => {
     expect(result.icon).toBe(INCREASE_ICON);
     expect(result.label).toBe(SECONDARY_LABEL);
     expect(result.badgeColor).toBe('#00f');
+    expect(result.badgeTextColor).toBe('#00a');
   });
 
   it('returns info when trendConfig is provided and compareToPrimary is true with NaN delta', () => {
@@ -147,6 +149,7 @@ describe('getSecondaryMetricInfo', () => {
 
     expect(result.value).toBe('N/A');
     expect(result.badgeColor).toBe(PALETTE[1]);
+    expect(result.badgeTextColor).toBe(TEXT_PALETTE[1]);
   });
 
   it('returns info when trendConfig is provided and compareToPrimary is true with decrease (↓)', () => {
@@ -166,6 +169,7 @@ describe('getSecondaryMetricInfo', () => {
     expect(result.icon).toBe(DECREASE_ICON);
     expect(result.label).toBe(SECONDARY_LABEL);
     expect(result.badgeColor).toBe(PALETTE[0]);
+    expect(result.badgeTextColor).toBe(TEXT_PALETTE[0]);
   });
 
   it('returns info when trendConfig is provided and compareToPrimary is true with increase (↑)', () => {
@@ -186,6 +190,7 @@ describe('getSecondaryMetricInfo', () => {
     expect(result.value).toBe(`${-1 * (rawValue - BASELINE_VALUE)}`);
     expect(result.icon).toBe(INCREASE_ICON);
     expect(result.badgeColor).toBe(PALETTE[2]);
+    expect(result.badgeTextColor).toBe(TEXT_PALETTE[2]);
   });
 
   it('returns info when trendConfig is provided and compareToPrimary is true with stable (=)', () => {
@@ -205,6 +210,18 @@ describe('getSecondaryMetricInfo', () => {
     expect(result.value).toBe('0');
     expect(result.icon).toBe(STABLE_ICON);
     expect(result.badgeColor).toBe(PALETTE[1]);
+    expect(result.badgeTextColor).toBe(TEXT_PALETTE[1]);
+  });
+
+  it('returns undefined badgeTextColor when textPalette is not provided', () => {
+    const { textPalette: _, ...trendConfigWithoutTextPalette } = defaultTrendConfig;
+    const result = getSecondaryMetricInfo({
+      ...defaultSecondaryMetricInfoArgs,
+      trendConfig: trendConfigWithoutTextPalette as TrendConfig,
+    });
+
+    expect(result.badgeColor).toBeDefined();
+    expect(result.badgeTextColor).toBeUndefined();
   });
 
   it('returns formatted value and label when no static color or trendConfig', () => {

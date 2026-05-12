@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -25,9 +24,4 @@ export const TooltipAnnotation: FC<Props> = ({ transformMatrix, text }) => {
       <p>{text}°</p>
     </div>
   );
-};
-
-TooltipAnnotation.propTypes = {
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  text: PropTypes.string.isRequired,
 };

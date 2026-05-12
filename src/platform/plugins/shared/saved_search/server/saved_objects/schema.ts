@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { DataGridDensity } from '@kbn/discover-utils';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
@@ -134,7 +135,11 @@ export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.exten
 
 export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.extends({
   density: schema.maybe(
-    schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
+    schema.oneOf([
+      schema.literal(DataGridDensity.COMPACT),
+      schema.literal(DataGridDensity.EXPANDED),
+      schema.literal(DataGridDensity.NORMAL),
+    ])
   ),
 });
 
@@ -149,9 +154,6 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
   // Remove `title` and `description` from the tab schema as they exist at the top level of the saved object
   attributes: DISCOVER_SESSION_TAB_ATTRIBUTES,
 });
-
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
 
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
@@ -171,3 +173,93 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.exten
   sort: schema.maybe(sort),
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
 });
+
+const CONTROL_GROUP_JSON_SCHEMA = {
+  controlGroupJson: schema.maybe(schema.string()),
+};
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES.extends(CONTROL_GROUP_JSON_SCHEMA);
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
+  ...CONTROL_GROUP_JSON_SCHEMA,
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
+});
+
+// We need to flatten the schema type here to avoid this error:
+// "Type instantiation is excessively deep and possibly infinite",
+// since each `extends()` call wraps the previous type until we hit the depth limit.
+const { tabs: tabsV8, ...restV8Props } = SCHEMA_SEARCH_MODEL_VERSION_8.getPropSchemas();
+
+// This schema temporarily makes `tabs` optional again, to work around an issue
+// where saved objects created via the deprecated saved objects API without a
+// specified version would fail validation if `tabs` was not provided, which
+// broke existing API usages after SCHEMA_SEARCH_MODEL_VERSION_8 was added.
+// It should not be relied on in application code or used for the content
+// management validation schema, and `tabs` should be required again once Core
+// provides a way to fix the underlying issue at the saved objects API level.
+export const SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND = schema.object({
+  ...restV8Props,
+  tabs: schema.maybe(tabsV8),
+});
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8.extends({
+    chartInterval: schema.maybe(schema.string()),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_8.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, { minSize: 1 }),
+});
+
+const { tabs: tabsV10, ...restV10Props } = SCHEMA_SEARCH_MODEL_VERSION_10.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
+  ...restV10Props,
+  tabs: schema.maybe(tabsV10),
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_11 = SCHEMA_SEARCH_MODEL_VERSION_10.extends({
+  chartInterval: schema.maybe(schema.string()),
+});
+
+const { tabs: tabsV11, ...restV11Props } = SCHEMA_SEARCH_MODEL_VERSION_11.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
+  ...restV11Props,
+  tabs: schema.maybe(tabsV11),
+});
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10.extends({
+    hideTable: schema.boolean({ defaultValue: false }),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_12 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_10.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_12 = SCHEMA_SEARCH_MODEL_VERSION_11.extends({
+  hideTable: schema.maybe(schema.boolean({ defaultValue: false })),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_12, { minSize: 1, maxSize: 25 }),
+});
+
+const { tabs: tabsV12, ...restV12Props } = SCHEMA_SEARCH_MODEL_VERSION_12.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND = schema.object({
+  ...restV12Props,
+  tabs: schema.maybe(tabsV12),
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12
+>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_12>;

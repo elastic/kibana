@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -42,7 +42,8 @@
     "@kbn/upgrade-assistant-pkg-public",
     "@kbn/upgrade-assistant-pkg-server",
     "@kbn/upgrade-assistant-pkg-common",
-    "@kbn/reindex-service-plugin"
+    "@kbn/reindex-service-plugin",
+    "@kbn/core-doc-links-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

@@ -11,9 +11,10 @@
  */
 export const CHANGE_POINT_DETECTION_ENABLED = true;
 
-export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
-
-export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
+//
+// Do not change constant value - part of public REST APIs
+//
+export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiops_change_point_chart' as const;
 
 export const CHANGE_POINT_CHART_DATA_VIEW_REF_NAME = 'aiopsChangePointChartDataViewId';
 

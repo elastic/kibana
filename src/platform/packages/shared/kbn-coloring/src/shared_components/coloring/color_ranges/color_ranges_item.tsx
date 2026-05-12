@@ -13,7 +13,6 @@ import type { Dispatch, FocusEvent, ChangeEventHandler } from 'react';
 import React, { useState, useCallback, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
 
-import type { EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
   EuiColorPicker,
@@ -73,13 +72,11 @@ const getActionButton = (mode: ColorRangeItemMode) => {
 };
 
 const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
-  const items: EuiFieldNumberProps['append'] = [];
-
   if (rangeType === 'percent') {
-    items.push('%');
+    return '%';
   }
 
-  return items;
+  return undefined;
 };
 
 export function ColorRangeItem({
@@ -200,9 +197,15 @@ export function ColorRangeItem({
               setPopoverInFocus(false);
             }}
             isInvalid={!isColorValid}
+            aria-label={selectNewColorText}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
+          <EuiIcon
+            type={RelatedIcon}
+            size="m"
+            color={euiTheme.colors.disabled}
+            aria-hidden={true}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>

@@ -15,6 +15,7 @@ const mockedUseUiSetting = jest.mocked(useUiSetting);
 describe('useDefaultTimezone', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    moment.tz.setDefault('Browser');
   });
 
   it('returns browser timezone when kibanaTz is "Browser"', () => {

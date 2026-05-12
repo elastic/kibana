@@ -42,7 +42,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
 import { TextTruncate } from './text_truncate';
@@ -81,7 +80,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
   onCancel,
   onSuccess,
 }) => {
-  const { http } = useKibana();
+  const { http, docLinks } = useKibana();
   const { status, getCode } = useVerification();
   const [form, eventHandlers] = useForm({
     defaultValues,
@@ -223,6 +222,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       ) : (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             title={i18n.translate(
@@ -239,12 +239,16 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
               defaultMessage="Anyone with the address can access your data."
             />
             <EuiSpacer size="xs" />
-            <DocLink app="elasticsearch" doc="configuring-stack-security.html">
+            <EuiLink
+              href={docLinks.links.security.enableElasticSearchSecurityFeatures}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="interactiveSetup.clusterConfigurationForm.insecureClusterLink"
                 defaultMessage="Learn how to enable security features."
               />
-            </DocLink>
+            </EuiLink>
           </EuiCallOut>
           <EuiSpacer />
         </>
@@ -281,7 +285,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       )}
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty flush="right" iconType="chevronSingleLeft" onClick={onCancel}>
             <FormattedMessage
               id="interactiveSetup.clusterConfigurationForm.cancelButton"
               defaultMessage="Back"
@@ -506,6 +510,9 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
       anchorPosition="rightCenter"
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate('interactiveSetup.forgotPasswordPopover.ariaLabel', {
+        defaultMessage: 'Forgot password',
+      })}
     >
       <EuiText size="s" grow={false}>
         <p>

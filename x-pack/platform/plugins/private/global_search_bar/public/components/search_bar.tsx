@@ -34,7 +34,8 @@ import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
-import { blurEvent, isMac, sort } from '.';
+import { isMac } from '@kbn/shared-ux-utility';
+import { blurEvent, sort } from '.';
 import { resultToOption, suggestionToOption } from '../lib';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
@@ -349,7 +350,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           setIsVisible(true);
         }}
       >
-        <EuiIcon type="search" size="m" />
+        <EuiIcon type="magnify" size="m" aria-hidden={true} />
       </EuiHeaderSectionItemButton>
     );
   }
@@ -433,10 +434,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }}
       popoverButton={
         <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
-          <EuiIcon type="search" size="m" />
+          <EuiIcon type="magnify" size="m" aria-hidden={true} />
         </EuiHeaderSectionItemButton>
       }
-      popoverFooter={<PopoverFooter isMac={isMac} />}
+      popoverFooter={<PopoverFooter />}
     />
   );
 };

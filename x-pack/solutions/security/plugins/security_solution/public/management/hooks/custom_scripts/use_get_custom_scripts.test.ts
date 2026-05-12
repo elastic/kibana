@@ -6,13 +6,13 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useQuery } from '@tanstack/react-query';
-import type { UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
 import { useGetCustomScripts } from './use_get_custom_scripts';
 import { useHttp } from '../../../common/lib/kibana';
 import type { HttpSetup } from '@kbn/core/public';
 
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 jest.mock('../../../common/lib/kibana');
 
 describe('useGetCustomScripts', () => {
@@ -57,7 +57,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('endpoint'));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'endpoint'],
+      queryKey: ['get-custom-scripts', 'endpoint', {}],
       queryFn: expect.any(Function),
     });
   });
@@ -66,7 +66,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('crowdstrike'));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'crowdstrike'],
+      queryKey: ['get-custom-scripts', 'crowdstrike', {}],
       queryFn: expect.any(Function),
     });
   });
@@ -75,7 +75,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('sentinel_one'));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'sentinel_one'],
+      queryKey: ['get-custom-scripts', 'sentinel_one', {}],
       queryFn: expect.any(Function),
     });
   });
@@ -117,7 +117,7 @@ describe('useGetCustomScripts', () => {
     renderHook(() => useGetCustomScripts('sentinel_one', undefined, { cacheTime: 1 }));
 
     expect(mockUseQuery).toHaveBeenCalledWith({
-      queryKey: ['get-custom-scripts', 'sentinel_one'],
+      queryKey: ['get-custom-scripts', 'sentinel_one', {}],
       queryFn: expect.any(Function),
       cacheTime: 1,
     });

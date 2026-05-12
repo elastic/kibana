@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ParsedPanel } from '../../../../../../../../../../common/siem_migrations/parsers/types';
+import type { EsqlColumn } from '../../types';
 
 interface ColumnInfo {
   columnId: string;
@@ -25,6 +27,7 @@ interface PanelJSON {
     w: number;
     h: number;
     i: string;
+    sectionId?: string;
   };
   panelIndex?: string;
   embeddableConfig?: {
@@ -39,9 +42,11 @@ interface PanelJSON {
                 columns?: ColumnInfo[];
               };
             };
+            indexPatternRefs?: Array<{ id: string; title: string }>;
           };
         };
         query?: { esql: string };
+        adHocDataViews?: Record<string, { title: string; name: string; [key: string]: unknown }>;
       };
     };
   };
@@ -49,10 +54,15 @@ interface PanelJSON {
 }
 
 // Process the panel and return the modified panelJSON
-export const processPanel = (panel: object, query: string, parsedPanel: ParsedPanel): object => {
+export const processPanel = (
+  panel: object,
+  query: string,
+  esqlColumns: EsqlColumn[],
+  parsedPanel: ParsedPanel
+): object => {
   const panelJSON = structuredClone(panel) as PanelJSON;
 
-  const { columnList, columns } = parseColumns(query);
+  const { columnList, columns } = parseColumns(esqlColumns);
   const vizType = parsedPanel.viz_type;
 
   // Set panel basic properties
@@ -66,6 +76,7 @@ export const processPanel = (panel: object, query: string, parsedPanel: ParsedPa
       w: parsedPanel.position.w,
       h: parsedPanel.position.h,
       i: parsedPanel.id,
+      sectionId: parsedPanel.section?.id,
     };
     panelJSON.panelIndex = parsedPanel.id;
   }
@@ -79,43 +90,33 @@ export const processPanel = (panel: object, query: string, parsedPanel: ParsedPa
 };
 
 // Parse columns from ESQL query and build column array for panel JSON
-function parseColumns(query: string): { columnList: ColumnInfo[]; columns: string[] } {
-  const columnNames = getQueryColumnsFromESQLQuery(query);
+function parseColumns(extractedColumns: EsqlColumn[]): {
+  columnList: ColumnInfo[];
+  columns: string[];
+} {
   const columnList: ColumnInfo[] = [];
-  const columns: string[] = [];
-
-  let metricIndex = 0;
-
-  columnNames.forEach((columnName) => {
-    // For now, assume numeric columns are metrics (first columns) and string columns are dimensions. This is a simplification.
-    // TODO: Determine column types of the ESQL query using the LLM
-    const isNumeric = metricIndex === 0; // First column is "typically" the metric
-
-    if (isNumeric) {
-      columnList.splice(metricIndex, 0, {
+  const columnNames: string[] = [];
+  extractedColumns.forEach(({ name: columnName, type }, index) => {
+    if (index === 0) {
+      columnList.push({
         columnId: columnName,
         fieldName: columnName,
-        meta: { type: 'number' },
+        meta: { type: esFieldTypeToKibanaFieldType(type) },
+        /* The first column is mostly a metric so here we are making that assumption
+         * unless we have better way to do this. */
         inMetricDimension: true,
       });
-      columns.splice(metricIndex, 0, columnName);
-      metricIndex++;
     } else {
       columnList.push({
         columnId: columnName,
         fieldName: columnName,
         meta: { type: 'string' },
       });
-      columns.push(columnName);
     }
+    columnNames.push(columnName);
   });
 
-  // Ensure at least one column has inMetricDimension if no numeric columns
-  if (metricIndex === 0 && columnList.length > 0) {
-    columnList[0].inMetricDimension = true;
-  }
-
-  return { columnList, columns };
+  return { columnList, columns: columnNames };
 }
 
 // Configure chart-specific properties
@@ -135,6 +136,7 @@ function configureVixTypeProperties(
     'area_stacked',
     'line',
     'heatmap',
+    'markdown',
   ];
 
   if (chartTypes.includes(vizType)) {
@@ -240,16 +242,22 @@ function configureStackedProperties(
   columns: string[]
 ): void {
   if ((vizType.includes('stacked') || vizType.includes('line')) && columns.length > 2) {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessor =
-        columns[columns.length - 2];
+    const layer = panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0];
+    if (layer) {
+      if (!layer.splitAccessors) {
+        layer.splitAccessors = [];
+      }
+      layer.splitAccessors[0] = columns[columns.length - 2];
     }
   }
 
   if (vizType.includes('stacked') && columns.length === 2) {
-    if (panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0]) {
-      panelJSON.embeddableConfig.attributes.state.visualization.layers[0].splitAccessor =
-        columns[columns.length - 1];
+    const layer = panelJSON.embeddableConfig?.attributes?.state?.visualization?.layers?.[0];
+    if (layer) {
+      if (!layer.splitAccessors) {
+        layer.splitAccessors = [];
+      }
+      layer.splitAccessors[0] = columns[columns.length - 1];
     }
   }
 }
@@ -260,18 +268,30 @@ function configureDatasourceProperties(
   query: string,
   columnList: ColumnInfo[]
 ): void {
-  if (panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased?.layers) {
+  const indexPattern = getIndexPatternFromESQLQuery(query);
+
+  const textBased = panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased;
+  if (textBased?.layers) {
     const layerId = '3a5310ab-2832-41db-bdbe-1b6939dd5651';
-    if (panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[layerId]) {
-      panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[layerId].query =
-        { esql: query };
-      panelJSON.embeddableConfig.attributes.state.datasourceStates.textBased.layers[
-        layerId
-      ].columns = columnList;
+    if (textBased.layers[layerId]) {
+      textBased.layers[layerId].query = { esql: query };
+      textBased.layers[layerId].columns = columnList;
+    }
+
+    if (textBased.indexPatternRefs?.[0]) {
+      textBased.indexPatternRefs[0].title = indexPattern;
     }
   }
 
-  if (panelJSON.embeddableConfig?.attributes?.state?.query) {
-    panelJSON.embeddableConfig.attributes.state.query.esql = query;
+  const state = panelJSON.embeddableConfig?.attributes?.state;
+  if (state?.query) {
+    state.query.esql = query;
+  }
+
+  if (state?.adHocDataViews) {
+    for (const spec of Object.values(state.adHocDataViews)) {
+      spec.title = indexPattern;
+      spec.name = indexPattern;
+    }
   }
 }

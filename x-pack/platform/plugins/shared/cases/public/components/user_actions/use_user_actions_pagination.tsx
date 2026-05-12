@@ -8,9 +8,8 @@
 import { useMemo } from 'react';
 
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
-import type { AttachmentUI, UserActionUI } from '../../containers/types';
+import type { AttachmentUIV2, UserActionUI } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
-
 interface UserActionsPagination {
   userActivityQueryParams: UserActivityParams;
   caseId: string;
@@ -34,14 +33,14 @@ export const useUserActionsPagination = ({
 
   const infiniteCaseUserActions = useMemo<{
     userActions: UserActionUI[];
-    latestAttachments: AttachmentUI[];
+    latestAttachments: AttachmentUIV2[];
   }>(() => {
     if (!caseInfiniteUserActionsData?.pages?.length || isLoadingInfiniteUserActions) {
       return { userActions: [], latestAttachments: [] };
     }
 
     const userActionsData: UserActionUI[] = [];
-    const latestAttachments: AttachmentUI[] = [];
+    const latestAttachments: AttachmentUIV2[] = [];
 
     // TODO: looks like it can be done in one loop
     caseInfiniteUserActionsData.pages.forEach((page) => userActionsData.push(...page.userActions));

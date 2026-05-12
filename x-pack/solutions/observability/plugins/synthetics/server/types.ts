@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -36,6 +36,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server/plugin';
+import type {
+  MaintenanceWindowClient,
+  MaintenanceWindowsServerStart,
+} from '@kbn/maintenance-windows-plugin/server';
+import type { ObservabilityAgentBuilderPluginSetup } from '@kbn/observability-agent-builder-plugin/server';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
@@ -61,6 +67,9 @@ export interface SyntheticsServerSetup {
   alerting: AlertingServerSetup;
   pluginsStart: SyntheticsPluginsStartDependencies;
   isElasticsearchServerless: boolean;
+  getMaintenanceWindowClientInternal: (
+    request: KibanaRequest
+  ) => MaintenanceWindowClient | undefined;
 }
 
 export interface SyntheticsPluginsSetupDependencies {
@@ -75,6 +84,8 @@ export interface SyntheticsPluginsSetupDependencies {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
+  observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
 }
 
 export interface SyntheticsPluginsStartDependencies {
@@ -86,6 +97,7 @@ export interface SyntheticsPluginsStartDependencies {
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
+  maintenanceWindows?: MaintenanceWindowsServerStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

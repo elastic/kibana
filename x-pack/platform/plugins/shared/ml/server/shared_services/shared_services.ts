@@ -16,6 +16,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { IClusterClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { CoreAuditService } from '@kbn/core-security-server';
+import type { ResolveMlCapabilities, MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
 import type { MlLicense } from '../../common/license';
 
@@ -38,7 +40,6 @@ import {
   getAnomalyDetectorsProvider,
 } from './providers';
 
-import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import type { HasMlCapabilities } from '../lib/capabilities';
 import { hasMlCapabilitiesProvider } from '../lib/capabilities';
 import {
@@ -54,9 +55,9 @@ import type { MlAlertingServiceProvider } from './providers/alerting_service';
 import { getAlertingServiceProvider } from './providers/alerting_service';
 import type { JobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
 import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
-import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
+import type { ServerlessInfo } from '../types';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -111,7 +112,8 @@ export function createSharedServices(
   getAuditService: () => CoreAuditService | null,
   isMlReady: () => Promise<void>,
   compatibleModuleType: CompatibleModule | null,
-  enabledFeatures: MlFeatures
+  enabledFeatures: MlFeatures,
+  serverless: ServerlessInfo
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -138,7 +140,9 @@ export function createSharedServices(
       getUiSettings,
       getFieldsFormat,
       getDataViews,
-      getAuditService
+      getAuditService,
+      mlLicense,
+      serverless
     );
 
     const {
@@ -211,7 +215,9 @@ function getRequestItemsProvider(
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
-  getAuditService: () => CoreAuditService | null
+  getAuditService: () => CoreAuditService | null,
+  mlLicense: MlLicense,
+  serverless: ServerlessInfo
 ) {
   return (request: KibanaRequest) => {
     let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
@@ -271,7 +277,13 @@ function getRequestItemsProvider(
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       const auditLogger = new MlAuditLogger(auditService, request);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger);
+      mlClient = getMlClient(
+        scopedClient,
+        mlSavedObjectService,
+        auditLogger,
+        mlLicense,
+        serverless
+      );
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -282,7 +294,13 @@ function getRequestItemsProvider(
       };
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       const auditLogger = new MlAuditLogger(auditService);
-      mlClient = getMlClient(scopedClient, mlSavedObjectService, auditLogger);
+      mlClient = getMlClient(
+        scopedClient,
+        mlSavedObjectService,
+        auditLogger,
+        mlLicense,
+        serverless
+      );
     }
 
     const getDataViewsService = getDataViewsServiceFactory(

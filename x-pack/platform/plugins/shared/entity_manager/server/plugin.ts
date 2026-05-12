@@ -12,12 +12,10 @@ import type {
   KibanaRequest,
   Logger,
   Plugin,
-  PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { EntityManagerConfig } from '../common/config';
-import { configSchema, exposeToBrowserConfig } from '../common/config';
 import { EntityClient } from './lib/entity_client';
 import { entityManagerRouteRepository } from './routes';
 import type { EntityManagerRouteDependencies } from './routes/types';
@@ -29,17 +27,13 @@ import type {
 } from './types';
 import { disableManagedEntityDiscovery } from './lib/entities/uninstall_entity_definition';
 import { installEntityManagerTemplates } from './lib/manage_index_templates';
+import { createAndInstallILMPolicies } from './lib/entities/manage_ilm_policies';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityManagerServerPluginSetup {}
 export interface EntityManagerServerPluginStart {
   getScopedClient: (options: { request: KibanaRequest }) => Promise<EntityClient>;
 }
-
-export const config: PluginConfigDescriptor<EntityManagerConfig> = {
-  schema: configSchema,
-  exposeToBrowser: exposeToBrowserConfig,
-};
 
 export class EntityManagerServerPlugin
   implements
@@ -54,9 +48,11 @@ export class EntityManagerServerPlugin
   public logger: Logger;
   public server?: EntityManagerServerSetup;
   private isDev: boolean;
+  private isServerless: boolean;
 
   constructor(context: PluginInitializerContext<EntityManagerConfig>) {
     this.isDev = context.env.mode.dev;
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -104,7 +100,12 @@ export class EntityManagerServerPlugin
   }) {
     const clusterClient = coreStart.elasticsearch.client.asScoped(request);
     const soClient = coreStart.savedObjects.getScopedClient(request);
-    return new EntityClient({ clusterClient, soClient, logger: this.logger });
+    return new EntityClient({
+      clusterClient,
+      soClient,
+      isServerless: this.isServerless,
+      logger: this.logger,
+    });
   }
 
   public start(
@@ -121,13 +122,23 @@ export class EntityManagerServerPlugin
     installEntityManagerTemplates({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
+      isServerless: this.isServerless,
     }).catch((err) => this.logger.error(err));
+
+    // Serverless does not support ILM, see: https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/differences-from-other-elasticsearch-offerings#elasticsearch
+    if (!this.isServerless) {
+      createAndInstallILMPolicies(core.elasticsearch.client.asInternalUser).catch((err) =>
+        this.logger.error(err)
+      );
+    }
 
     // Disable v1 built-in definitions.
     // the api key invalidation requires a check against the cluster license
     // which is lazily loaded. we ensure it gets loaded before the update
     firstValueFrom(plugins.licensing.license$)
-      .then(() => disableManagedEntityDiscovery({ server: this.server! }))
+      .then(() =>
+        disableManagedEntityDiscovery({ server: this.server!, isServerless: this.isServerless })
+      )
       .then(() => this.logger.debug(`Disabled managed entity discovery`))
       .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { RuleTagFilter } from '../application/sections';
 import type { RuleTagFilterProps } from '../application/sections/rules_list/components/rule_tag_filter';
 

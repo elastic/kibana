@@ -18,7 +18,9 @@ import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { LENS_CONTENT_TYPE } from '../../common/constants';
+
+// pick up types for the CM storage from the latest version
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import type {
   LensAttributes,
   LensGetOut,
@@ -164,7 +166,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
     // transform data from given version to latest version
     const { value: dataToLatest, error: dataError } = transforms.create.in.data.down<
       LensCreateIn['data'],
-      LensCreateIn['data']
+      LensAttributes
     >(data, itemVersion);
 
     if (dataError) {
@@ -221,10 +223,6 @@ export class LensStorage extends SOContentStorage<LensCrud> {
     return value;
   }
 
-  /**
-   * Lens requires a custom update function because of https://github.com/elastic/kibana/issues/160116
-   * where a forced create with overwrite flag is used instead of regular update
-   */
   async update(
     ctx: StorageContext,
     id: string,
@@ -240,7 +238,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
 
     // transform data from given version to latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.down<
-      LensAttributes,
+      LensUpdateIn['data'],
       LensAttributes
     >(data, itemVersion);
 
@@ -260,12 +258,10 @@ export class LensStorage extends SOContentStorage<LensCrud> {
 
     const soClient = await LensStorage.getSOClientFromRequest(ctx);
 
-    // since we use create below this call is meant to throw if SO id not found
-    await soClient.get(LENS_CONTENT_TYPE, id);
-
+    // We need to use create instead of update because of https://github.com/elastic/kibana/issues/160116
     const savedObject = await soClient.create<LensAttributes>(LENS_CONTENT_TYPE, dataToLatest, {
       id,
-      overwrite: true,
+      overwrite: true, // always upsert
       ...optionsToLatest,
     });
 

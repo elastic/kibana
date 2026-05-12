@@ -9,13 +9,13 @@ import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
 import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
@@ -69,10 +69,22 @@ export const Page: FC = () => {
       <MlPageHeader
         wrapHeader
         rightSideItems={[
-          <SynchronizeSavedObjectsButton refreshJobs={refresh} />,
-          <ExportJobsFlyout isDisabled={!canCreateAnalytics} currentTab={'data-frame-analytics'} />,
-          <ImportJobsFlyout isDisabled={!canCreateAnalytics} onImportComplete={refresh} />,
+          <SynchronizeSavedObjectsButton
+            key="synchronize-saved-objects-button"
+            refreshJobs={refresh}
+          />,
+          <ExportJobsFlyout
+            key="export-jobs-flyout"
+            isDisabled={!canCreateAnalytics}
+            currentTab={'data-frame-analytics'}
+          />,
+          <ImportJobsFlyout
+            key="import-jobs-flyout"
+            isDisabled={!canCreateAnalytics}
+            onImportComplete={refresh}
+          />,
           <CreateAnalyticsButton
+            key="create-analytics-button"
             size="m"
             navigateToSourceSelection={navigateToSourceSelection}
             isDisabled={!canCreateAnalytics}

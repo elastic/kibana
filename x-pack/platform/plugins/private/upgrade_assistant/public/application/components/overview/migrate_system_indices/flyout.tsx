@@ -93,6 +93,12 @@ const i18nTexts = {
       defaultMessage: 'Status',
     }
   ),
+  tableCaption: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.featuresTableCaption',
+    {
+      defaultMessage: 'System indices migration status',
+    }
+  ),
   errorTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.errorTooltipLabel',
     {
@@ -127,7 +133,7 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" color="success" />
+          <EuiIcon type="checkCircleFill" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="green" size="s" data-test-subj="featureNoUpgradeNeeded">
@@ -240,7 +246,9 @@ export const SystemIndicesFlyout = ({
           <EuiButtonIcon
             onClick={() => toggleRow(feature)}
             aria-label={expandedRows[feature.feature_name] ? 'Collapse' : 'Expand'}
-            iconType={expandedRows[feature.feature_name] ? 'arrowDown' : 'arrowRight'}
+            iconType={
+              expandedRows[feature.feature_name] ? 'chevronSingleDown' : 'chevronSingleRight'
+            }
           />
         ) : null;
       },
@@ -257,8 +265,9 @@ export const SystemIndicesFlyout = ({
       <EuiFlyoutBody data-test-subj="flyoutDetails">
         {migrationStatus === 'NO_MIGRATION_NEEDED' && (
           <EuiCallOut
+            announceOnMount={false}
             title={i18nTexts.migrationNotNeeded}
-            iconType="cheer"
+            iconType="popper"
             color="success"
             data-test-subj="noMigrationNeededCallout"
           />
@@ -278,6 +287,7 @@ export const SystemIndicesFlyout = ({
               itemIdToExpandedRowMap={expandedRows}
               pagination={true}
               sorting={true}
+              tableCaption={i18nTexts.tableCaption}
             />
           </>
         )}

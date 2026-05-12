@@ -24,9 +24,10 @@ import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common'
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
-import { getPrompt } from '../lib/prompt';
+import { getPrompt, getInferenceConnectorById } from '../lib/prompt';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import expect from 'expect';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
@@ -35,6 +36,7 @@ jest.mock('../lib/build_response', () => ({
 }));
 jest.mock('../lib/prompt');
 const mockGetPrompt = getPrompt as jest.Mock;
+const mockGetInferenceConnectorById = getInferenceConnectorById as jest.Mock;
 
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 const mockLangChainExecute = langChainExecute as jest.Mock;
@@ -59,6 +61,9 @@ const mockContext = {
     elasticAssistant: {
       actions: {
         getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+      },
+      inference: {
+        getConnectorById: jest.fn().mockResolvedValue(undefined),
       },
       llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
       getRegisteredTools: jest.fn(() => []),
@@ -176,21 +181,18 @@ describe('postActionsConnectorExecuteRoute', () => {
       }
     );
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'my name',
         actionTypeId: '.gen-ai',
-        isMissingSecrets: false,
         config: {
           a: true,
           b: true,
           c: true,
         },
-      },
+      }),
     ]);
+    mockGetInferenceConnectorById.mockReturnValue(() => Promise.resolve(undefined));
   });
 
   it('returns the expected response', async () => {

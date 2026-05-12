@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -30,6 +29,8 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import { O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -50,9 +51,14 @@ import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
-import { OpenErrorInDiscoverButton } from '../../../shared/links/discover_links/open_error_in_discover_button';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentLabel,
+} from '../../../../../common/environment_filter_values';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -88,17 +94,23 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
-  const { uiActions, core } = useApmPluginContext();
+  const { uiActions, core, observabilityAgentBuilder } = useApmPluginContext();
+
+  const ErrorSampleAiInsight = observabilityAgentBuilder?.getErrorSampleAIInsight();
 
   const router = useApmRouter();
 
-  const { query } = useAnyOfApmParams(
+  const {
+    query,
+    path: { groupId },
+  } = useAnyOfApmParams(
     '/services/{serviceName}/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
     '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
   );
 
-  const { kuery } = query;
+  const { kuery, rangeFrom, rangeTo, environment } = query;
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const loadingErrorSamplesData = isPending(errorSamplesFetchStatus);
   const loadingErrorData = isPending(errorFetchStatus);
@@ -126,7 +138,7 @@ export function ErrorSampleDetails({
   const externalContextMenuItems = useAsync(() => {
     return getContextMenuItemsFromActions({
       uiActions,
-      triggerId: ObservabilityTriggerId.ApmErrorContextMenu,
+      triggerId: O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER,
       context: {
         error,
         transaction,
@@ -151,7 +163,7 @@ export function ErrorSampleDetails({
 
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, detailTab) as ErrorTab;
-  const urlFromError = error.error.page?.url || error.url?.full;
+  const urlFromError = error?.error?.page?.url || error?.url?.full;
   const urlFromTransaction = transaction?.transaction?.page?.url || transaction?.url?.full;
   const errorOrTransactionUrl = error?.url ? error : transaction;
   const errorOrTransactionHttp = error?.http ? error : transaction;
@@ -167,9 +179,12 @@ export function ErrorSampleDetails({
   const method = errorOrTransactionHttp?.http?.request?.method;
   const status = errorOrTransactionHttp?.http?.response?.status_code;
   const userAgent = errorOrTransactionUserAgent;
-  const environment = error.service.environment;
-  const serviceVersion = error.service.version;
-  const isUnhandled = error.error.exception?.[0]?.handled === false;
+  const errorEnvironment =
+    error?.service?.environment ??
+    transaction?.service?.environment ??
+    ENVIRONMENT_NOT_DEFINED.value;
+  const serviceVersion = error?.service?.version ?? transaction?.service?.version ?? undefined;
+  const isUnhandled = error?.error?.exception?.[0]?.handled === false;
 
   return (
     <EuiPanel hasBorder={true}>
@@ -189,6 +204,9 @@ export function ErrorSampleDetails({
               pageCount={errorSampleIds.length}
               activePage={sampleActivePage}
               onPageClick={goToSample}
+              aria-label={i18n.translate('xpack.apm.errorSampleDetails.paginationAriaLabel', {
+                defaultMessage: 'Error sample pages',
+              })}
               compressed
             />
           )}
@@ -197,7 +215,23 @@ export function ErrorSampleDetails({
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
         <EuiFlexItem grow={false}>
-          <OpenErrorInDiscoverButton dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton" />
+          <OpenInDiscover
+            dataTestSubj="errorSampleOpenInDiscoverButton"
+            variant="iconButton"
+            label={i18n.translate('xpack.apm.errorSampleDetails.openErrorInDiscover', {
+              defaultMessage: 'Open error in Discover',
+            })}
+            indexType="error"
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            queryParams={{
+              kuery,
+              serviceName: error?.service?.name,
+              errorGroupId: groupId,
+              errorId: error?.error?.id,
+              sortDirection: 'DESC',
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
@@ -210,7 +244,7 @@ export function ErrorSampleDetails({
         <Summary
           items={[
             <Timestamp
-              timestamp={errorData ? error.timestamp.us / 1000 : 0}
+              timestamp={errorData && error ? getTimestampUs(error) / 1000 : 0}
               renderMode="tooltip"
             />,
             errorUrl ? (
@@ -240,27 +274,29 @@ export function ErrorSampleDetails({
                     },
                   })}
                 >
-                  <EuiIcon type="merge" />
+                  <EuiIcon type="merge" aria-hidden={true} />
                   <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>
                 </TransactionDetailLink>
               </EuiToolTip>
             ),
-            environment ? (
-              <EuiToolTip
-                content={i18n.translate('xpack.apm.errorSampleDetails.serviceEnvironment', {
-                  defaultMessage: 'Environment',
-                })}
-              >
-                <EuiBadge color="hollow">{environment}</EuiBadge>
-              </EuiToolTip>
-            ) : null,
+            <EuiToolTip
+              content={i18n.translate('xpack.apm.errorSampleDetails.serviceEnvironment', {
+                defaultMessage: 'Environment',
+              })}
+            >
+              <EuiBadge color="hollow" tabIndex={0}>
+                {getEnvironmentLabel(errorEnvironment)}
+              </EuiBadge>
+            </EuiToolTip>,
             serviceVersion ? (
               <EuiToolTip
                 content={i18n.translate('xpack.apm.errorSampleDetails.serviceVersion', {
                   defaultMessage: 'Service version',
                 })}
               >
-                <EuiBadge color="hollow">{serviceVersion}</EuiBadge>
+                <EuiBadge color="hollow" tabIndex={0}>
+                  {serviceVersion}
+                </EuiBadge>
               </EuiToolTip>
             ) : null,
             isUnhandled ? (
@@ -284,6 +320,15 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
+      {ErrorSampleAiInsight && error && (
+        <ErrorSampleAiInsight
+          errorId={error?.error?.id}
+          serviceName={error?.service?.name ?? transaction?.service?.name}
+          start={start}
+          end={end}
+          environment={environment}
+        />
+      )}
       <ErrorSampleContextualInsight error={error} transaction={transaction} />
 
       <EuiTabs>
@@ -322,7 +367,7 @@ export function ErrorSampleDetailTabContent({
   currentTab,
 }: {
   error: {
-    service: {
+    service?: {
       language?: {
         name?: string;
       };
@@ -332,20 +377,23 @@ export function ErrorSampleDetailTabContent({
   };
   currentTab: ErrorTab;
 }) {
-  const codeLanguage = error?.service.language?.name;
-  const exceptions = error?.error.exception || [];
-  const logStackframes = error?.error.log?.stacktrace;
-  const isPlaintextException =
-    !!error.error.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
+  const codeLanguage = error?.service?.language?.name;
+  const exceptions = error?.error?.exception || [];
+  const hasExceptions = exceptions.length > 0;
+  const logStackframes = error?.error?.log?.stacktrace;
+  const isPlaintextException = hasExceptions
+    ? !!error?.error?.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace
+    : !!error?.error?.stack_trace;
+
   switch (currentTab.key) {
     case ErrorTabKey.LogStackTrace:
       return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
     case ErrorTabKey.ExceptionStacktrace:
       return isPlaintextException ? (
         <PlaintextStacktrace
-          message={exceptions[0].message}
-          type={exceptions[0]?.type}
-          stacktrace={error?.error.stack_trace}
+          message={hasExceptions ? exceptions[0]?.message : undefined}
+          type={hasExceptions ? exceptions[0]?.type : undefined}
+          stacktrace={error?.error?.stack_trace}
           codeLanguage={codeLanguage}
         />
       ) : (

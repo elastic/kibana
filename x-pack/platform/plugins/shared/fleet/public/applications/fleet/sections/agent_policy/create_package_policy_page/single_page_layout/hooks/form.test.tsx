@@ -13,10 +13,11 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { PackageInfo } from '../../../../../types';
 
 import { sendGetPackagePolicies, useConfig } from '../../../../../hooks';
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { SelectedPolicyTab } from '../../components';
 
-import { useOnSubmit } from './form';
+import { useOnSubmit, updateAgentlessCloudConnectorConfig } from './form';
 
 type MockFn = jest.MockedFunction<any>;
 
@@ -228,6 +229,9 @@ describe('useOnSubmit', () => {
   describe('input deployment mode filtering', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+      } as any);
     });
 
     it('should disable inputs that are not allowed for agentless deployment mode', async () => {
@@ -409,6 +413,69 @@ describe('useOnSubmit', () => {
       });
     });
 
+    it('should disable inputs hidden by var_group selection (same pattern as deployment mode)', async () => {
+      const packageInfoWithVarGroups = {
+        ...packageInfo,
+        var_groups: [
+          {
+            name: 'credential_type',
+            title: 'Credential',
+            selector_title: 'Select credential',
+            required: true,
+            options: [
+              { name: 'cloud_connectors', title: 'Cloud Connector', vars: [] },
+              { name: 'direct_access_key', title: 'Direct', vars: [] },
+            ],
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'guardduty',
+            title: 'GuardDuty',
+            description: 'GuardDuty',
+            inputs: [
+              {
+                type: 'guardduty',
+                title: 'GuardDuty',
+                description: 'GuardDuty input',
+                hide_in_var_group_options: { credential_type: ['cloud_connectors'] },
+              },
+            ],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithVarGroups,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '' },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
+        renderResult.result.current.updatePackagePolicy({
+          var_group_selections: { credential_type: 'cloud_connectors' },
+        });
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const guarddutyInput = packagePolicy.inputs?.find(
+          (input: any) => input.type === 'guardduty'
+        );
+        expect(guarddutyInput?.enabled).toBe(false);
+      });
+    });
+
     it('should enable all inputs for default deployment mode', async () => {
       // Mock packageInfo with inputs
       const packageInfoWithInputs: PackageInfo = {
@@ -470,6 +537,590 @@ describe('useOnSubmit', () => {
         expect(logsInput?.enabled).toBe(true);
         expect(metricsInput?.enabled).toBe(true);
       });
+    });
+
+    it('should auto-enable a single disabled input when switching to agentless deployment mode', async () => {
+      // Single-input agentless package whose stream has enabled:false in the spec.
+      // The simplified UX shows no toggle, so the input must be auto-enabled so that
+      // configuration fields are visible and the integration can actually be deployed.
+      const packageInfoWithDisabledInputs: PackageInfo = {
+        ...packageInfo,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'test.access',
+            path: 'access',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache access logs',
+            streams: [
+              {
+                input: 'logfile',
+                enabled: false,
+                vars: [],
+              },
+            ],
+          },
+        ] as any,
+        policy_templates: [
+          {
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache integration',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logfile',
+                title: 'Log files',
+                description: 'Collect Apache log files',
+                deployment_modes: ['default', 'agentless'],
+              },
+            ],
+          },
+        ],
+      };
+
+      (useConfig as MockFn).mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoWithDisabledInputs,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      // Verify input starts disabled (stream has enabled:false in spec)
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        expect(logfileInput?.enabled).toBe(false);
+      });
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        // Single agentless input should be auto-enabled so config fields are visible
+        expect(logfileInput?.enabled).toBe(true);
+        expect(logfileInput?.streams.every((s: any) => s.enabled)).toBe(true);
+      });
+    });
+
+    it('should not auto-enable disabled inputs for multi-input agentless packages', async () => {
+      // Multi-input package: the user should be able to choose which inputs to enable,
+      // so we must not blindly enable everything when switching to agentless.
+      const packageInfoMultiInput: PackageInfo = {
+        ...packageInfo,
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'test.access',
+            path: 'access',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache access logs',
+            streams: [{ input: 'logfile', enabled: false, vars: [] }],
+          },
+          {
+            type: 'metrics',
+            dataset: 'test.metrics',
+            path: 'metrics',
+            release: 'ga',
+            package: 'apache',
+            ingest_pipeline: 'default',
+            title: 'Apache metrics',
+            streams: [{ input: 'apache/metrics', enabled: false, vars: [] }],
+          },
+        ] as any,
+        policy_templates: [
+          {
+            name: 'apache',
+            title: 'Apache',
+            description: 'Apache integration',
+            deployment_modes: {
+              default: { enabled: true },
+              agentless: { enabled: true },
+            },
+            inputs: [
+              {
+                type: 'logfile',
+                title: 'Log files',
+                description: 'Collect Apache log files',
+                deployment_modes: ['default', 'agentless'],
+              },
+              {
+                type: 'apache/metrics',
+                title: 'Metrics',
+                description: 'Collect Apache metrics',
+                deployment_modes: ['default', 'agentless'],
+              },
+            ],
+          },
+        ],
+      };
+
+      (useConfig as MockFn).mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+
+      renderResult = testRenderer.renderHook(() =>
+        useOnSubmit({
+          agentCount: 0,
+          packageInfo: packageInfoMultiInput,
+          withSysMonitoring: false,
+          selectedPolicyTab: SelectedPolicyTab.NEW,
+          newAgentPolicy: { name: 'test', namespace: '', supports_agentless: true },
+          queryParamsPolicyId: undefined,
+          hasFleetAddAgentsPrivileges: true,
+          setNewAgentPolicy: jest.fn(),
+          setSelectedPolicyTab: jest.fn(),
+        })
+      );
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      act(() => {
+        renderResult.result.current.handleSetupTechnologyChange('agentless' as any);
+      });
+
+      await waitFor(() => {
+        const { packagePolicy } = renderResult.result.current;
+        const logfileInput = packagePolicy.inputs.find((input: any) => input.type === 'logfile');
+        const metricsInput = packagePolicy.inputs.find(
+          (input: any) => input.type === 'apache/metrics'
+        );
+        // Multi-input packages are not auto-enabled; user must enable them explicitly
+        expect(logfileInput?.enabled).toBe(false);
+        expect(metricsInput?.enabled).toBe(false);
+      });
+    });
+  });
+
+  describe('updateAgentlessCloudConnectorConfig', () => {
+    it('should update agentless cloud connector config when enabled and target CSP is aws', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'aws.supports_cloud_connectors': { value: true },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'azure',
+          },
+        },
+      } as any;
+
+      // Should update cloud_connectors to enabled: true, target_csp: 'aws'
+      // and set supports_cloud_connector to true in packagePolicy
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: true,
+      });
+    });
+
+    it('should set cloud_connectors enabled to false and supports_cloud_connector to false for aws when cloud connector input var is false', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'aws.supports_cloud_connectors': { value: false },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: false,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'aws',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: false,
+      });
+    });
+
+    it('should update agentless cloud connector config when enabled and target CSP is azure', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'azure',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'azure.supports_cloud_connectors': { value: true },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'azure',
+          },
+        },
+      } as any;
+
+      // Should update cloud_connectors to enabled: true, target_csp: 'aws'
+      // and set supports_cloud_connector to true in packagePolicy
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'azure',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: true,
+      });
+    });
+
+    it('should set cloud_connectors enabled to false and supports_cloud_connector to false for azure when cloud connector input var is false', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'azure',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'azure.supports_cloud_connectors': { value: false },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: false,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'azure',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'azure',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: false,
+      });
+    });
+
+    it('should update cloud_connectors with target_csp gcp and set supports_cloud_connector to false for gcp', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'gcp',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'gcp.supports_cloud_connectors': { value: true },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'gcp',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: true,
+      });
+    });
+
+    it('should set cloud_connectors enabled to false and supports_cloud_connector to false for gcp when cloud connector input var is false', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'gcp',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'gcp.supports_cloud_connectors': { value: false },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: false,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+        ...newAgentPolicy,
+        agentless: {
+          ...newAgentPolicy.agentless,
+          cloud_connectors: {
+            enabled: false,
+            target_csp: 'gcp',
+          },
+        },
+      });
+      expect(setPackagePolicy).toHaveBeenCalledWith({
+        ...packagePolicy,
+        supports_cloud_connector: false,
+      });
+    });
+
+    it('should not update agentless cloud connector config if nothing changed', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [
+              {
+                vars: {
+                  'aws.supports_cloud_connectors': { value: true },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {
+          cloud_connectors: {
+            enabled: true,
+            target_csp: 'aws',
+          },
+        },
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).not.toHaveBeenCalled();
+      expect(setPackagePolicy).not.toHaveBeenCalled();
+    });
+
+    it('should not update if input is missing or not enabled', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'aws',
+            enabled: false,
+            streams: [
+              {
+                vars: {
+                  'aws.supports_cloud_connectors': { value: true },
+                },
+              },
+            ],
+          },
+        ],
+        supports_cloud_connector: undefined,
+      } as any;
+
+      const newAgentPolicy = {
+        supports_agentless: true,
+        agentless: {},
+      } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(setNewAgentPolicy).not.toHaveBeenCalled();
+      expect(setPackagePolicy).not.toHaveBeenCalled();
     });
   });
 });

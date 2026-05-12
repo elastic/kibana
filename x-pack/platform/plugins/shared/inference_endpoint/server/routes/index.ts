@@ -24,6 +24,8 @@ const inferenceEndpointSchema = schema.object({
     provider: schema.string(),
     taskType: schema.string(),
     providerConfig: schema.any(),
+    taskTypeConfig: schema.maybe(schema.any()),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   secrets: schema.object({
     providerSecrets: schema.any(),
@@ -111,12 +113,20 @@ export const getInferenceServicesRoute = (
             ...unflattenObject(secrets?.providerSecrets ?? {}),
           };
 
+          const taskSettingsWithHeaders = {
+            ...unflattenObject(config?.taskTypeConfig ?? {}), // TODO: confirm this unflatten is needed
+            ...(config?.headers ? { headers: config.headers } : {}),
+          };
+
           const result = await esClient.inference.put({
             inference_id: config?.inferenceId ?? '',
             task_type: config?.taskType as InferenceTaskType,
             inference_config: {
               service: config?.provider,
               service_settings: serviceSettings,
+              ...(Object.keys(taskSettingsWithHeaders).length
+                ? { task_settings: taskSettingsWithHeaders }
+                : {}),
             },
           });
 
@@ -208,23 +218,38 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
-          // currently update api only allows api_key and num_allocations
-          const serviceSettings = {
+          const taskSettingsWithHeaders = {
+            ...unflattenObject(config?.taskTypeConfig ?? {}),
+            ...(config?.headers ? { headers: config.headers } : {}),
+          };
+
+          const adaptiveAllocations = config?.providerConfig?.adaptive_allocations;
+          const numAllocations = config?.providerConfig?.num_allocations;
+
+          let allocationSettings = {};
+          if (adaptiveAllocations) {
+            allocationSettings = { adaptive_allocations: adaptiveAllocations };
+          } else if (numAllocations) {
+            allocationSettings = { num_allocations: numAllocations };
+          }
+
+          const body = {
             service_settings: {
               ...(secrets?.providerSecrets?.api_key && {
                 api_key: secrets.providerSecrets.api_key,
               }),
-              ...(config?.providerConfig?.num_allocations !== undefined && {
-                num_allocations: config.providerConfig.num_allocations,
-              }),
+              ...allocationSettings,
             },
+            ...(Object.keys(taskSettingsWithHeaders).length
+              ? { task_settings: taskSettingsWithHeaders }
+              : {}),
           };
 
           const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(
             {
               method: 'PUT',
               path: `/_inference/${config.taskType}/${config.inferenceId}/_update`,
-              body: JSON.stringify(serviceSettings),
+              body: JSON.stringify(body),
             },
             {
               headers: {

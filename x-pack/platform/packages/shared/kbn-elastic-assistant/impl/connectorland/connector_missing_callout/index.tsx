@@ -40,9 +40,10 @@ export const ConnectorMissingCallout: React.FC<Props> = React.memo(({ isConnecto
     <>
       {showMissingCallout ? (
         <EuiCallOut
+          announceOnMount={false}
           data-test-subj="connectorMissingCallout"
           color="danger"
-          iconType="controlsVertical"
+          iconType="controls"
           size="m"
           title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
           css={css`

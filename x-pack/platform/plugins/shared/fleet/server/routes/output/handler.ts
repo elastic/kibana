@@ -32,6 +32,16 @@ import { outputService } from '../../services/output';
 import { FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { throwIfSslPathInvalid } from '../utils/ssl_utils';
+
+function validateOutputSslPaths(output: Partial<Output>) {
+  throwIfSslPathInvalid([
+    ...(output.ssl?.certificate_authorities ?? []),
+    output.ssl?.certificate,
+    output.ssl?.key,
+    output.secrets?.ssl?.key,
+  ]);
+}
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
@@ -48,8 +58,7 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
 }
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
-  const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list();
 
   const body: GetOutputsResponse = {
     items: outputs.items,
@@ -64,9 +73,8 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
 export const getOneOutputHandler: RequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    const output = await outputService.get(soClient, request.params.outputId);
+    const output = await outputService.get(request.params.outputId);
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -95,9 +103,10 @@ export const putOutputHandler: RequestHandler<
   const outputUpdate = request.body;
   try {
     await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
+    validateOutputSslPaths(outputUpdate);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
-    const output = await outputService.get(soClient, request.params.outputId);
+    const output = await outputService.get(request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(esClient);
     } else {
@@ -130,6 +139,7 @@ export const postOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { id, ...newOutput } = request.body;
   await validateOutputServerless(newOutput, soClient);
+  validateOutputSslPaths(newOutput);
   ensureNoDuplicateSecrets(newOutput);
   const output = await outputService.create(soClient, esClient, newOutput, { id });
   if (output.is_default || output.is_default_monitoring) {
@@ -152,18 +162,15 @@ async function validateOutputServerless(
   if (!cloudSetup?.isServerlessEnabled) {
     return;
   }
-  if (output.type === outputType.RemoteElasticsearch) {
-    throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
-  }
   // Elasticsearch outputs must have the default host URL in serverless.
   // No need to validate on update if hosts are not passed.
   if (outputId && !output.hosts) {
     return;
   }
-  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+  const defaultOutput = await outputService.get(SERVERLESS_DEFAULT_OUTPUT_ID);
   let originalOutput;
   if (outputId) {
-    originalOutput = await outputService.get(soClient, outputId);
+    originalOutput = await outputService.get(outputId);
   }
   const type = output.type || originalOutput?.type;
   if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
@@ -176,9 +183,8 @@ async function validateOutputServerless(
 export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = (await context.core).savedObjects.client;
   try {
-    await outputService.delete(soClient, request.params.outputId);
+    await outputService.delete(request.params.outputId);
 
     const body: DeleteOutputResponse = {
       id: request.params.outputId,

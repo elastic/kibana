@@ -21,15 +21,21 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { SettingsGroup } from './settings_group';
 import { SettingsFormRow } from './settings_form_row';
 import type { DevToolsSettings } from '../../../services';
 import type { EsHostService } from '../../lib';
+import { normalizeUrl } from '../../../lib/utils';
+
+const styles = {
+  minWidthControl: css`
+    min-width: 220px;
+  `,
+};
 
 const DEBOUNCE_DELAY = 500;
-const ON_LABEL = i18n.translate('console.settingsPage.onLabel', { defaultMessage: 'On' });
-const OFF_LABEL = i18n.translate('console.settingsPage.offLabel', { defaultMessage: 'Off' });
 
 const onceTimeInterval = () =>
   i18n.translate('console.settingsPage.refreshInterval.onceTimeInterval', {
@@ -94,8 +100,13 @@ export const SettingsEditor = (props: Props) => {
         await props.esHostService.waitForInitialization();
         const hosts = props.esHostService.getAllHosts();
         setAvailableHosts(hosts);
-        // If no host is selected, default to the first one
-        if (!props.settings.selectedHost && hosts.length > 0) {
+
+        const storedHost = props.settings.selectedHost;
+        const isStoredHostValid =
+          storedHost != null && hosts.some((h) => normalizeUrl(h) === normalizeUrl(storedHost));
+
+        // Reset to first available host if nothing is selected OR if stored host is stale
+        if (!isStoredHostValid && hosts.length > 0) {
           setSelectedHost(hosts[0]);
         }
       }
@@ -228,36 +239,45 @@ export const SettingsEditor = (props: Props) => {
         })}
       />
       <SettingsFormRow
+        id="saveRequestsToHistory-label"
         label={i18n.translate('console.settingsPage.saveRequestsToHistoryLabel', {
           defaultMessage: 'Save requests to history',
         })}
       >
         <EuiSwitch
           checked={isHistoryEnabled}
-          label={isHistoryEnabled ? ON_LABEL : OFF_LABEL}
+          label=""
+          showLabel={false}
+          aria-labelledby="saveRequestsToHistory-label"
           onChange={(e) => toggleSavingToHistory(e.target.checked)}
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="keyboardShortcuts-label"
         label={i18n.translate('console.settingsPage.enableKeyboardShortcutsLabel', {
           defaultMessage: 'Keyboard shortcuts',
         })}
       >
         <EuiSwitch
           data-test-subj="enableKeyboardShortcuts"
-          label={isKeyboardShortcutsEnabled ? ON_LABEL : OFF_LABEL}
+          label=""
+          showLabel={false}
+          aria-labelledby="keyboardShortcuts-label"
           checked={isKeyboardShortcutsEnabled}
           onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="accessibilityOverlay-label"
         label={i18n.translate('console.settingsPage.enableAccessibilityOverlayLabel', {
           defaultMessage: 'Accessibility overlay',
         })}
       >
         <EuiSwitch
           data-test-subj="enableA11yOverlay"
-          label={isAccessibilityOverlayEnabled ? ON_LABEL : OFF_LABEL}
+          label=""
+          showLabel={false}
+          aria-labelledby="accessibilityOverlay-label"
           checked={isAccessibilityOverlayEnabled}
           onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
         />
@@ -268,7 +288,7 @@ export const SettingsEditor = (props: Props) => {
         })}
       >
         <EuiSuperSelect
-          css={{ minWidth: '220px' }}
+          css={styles.minWidthControl}
           compressed
           disabled={availableHosts.length < 2}
           options={availableHosts.map((host) => ({
@@ -276,6 +296,9 @@ export const SettingsEditor = (props: Props) => {
             inputDisplay: host,
           }))}
           valueOfSelected={selectedHost || (availableHosts.length > 0 ? availableHosts[0] : '')}
+          aria-label={i18n.translate('console.settingsPage.elasticsearchHostLabel', {
+            defaultMessage: 'Elasticsearch host',
+          })}
           onChange={(value) => setSelectedHost(value)}
         />
       </SettingsFormRow>
@@ -287,14 +310,16 @@ export const SettingsEditor = (props: Props) => {
         })}
       />
       <SettingsFormRow
+        id="fontSize-label"
         label={i18n.translate('console.settingsPage.fontSizeLabel', {
           defaultMessage: 'Font size',
         })}
       >
         <EuiFieldNumber
-          css={{ minWidth: '220px' }}
+          css={styles.minWidthControl}
           compressed
           data-test-subj="setting-font-size-input"
+          aria-labelledby="fontSize-label"
           value={fontSize}
           min={6}
           max={50}
@@ -306,26 +331,32 @@ export const SettingsEditor = (props: Props) => {
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="wrapLongLines-label"
         label={i18n.translate('console.settingsPage.wrapLongLinesLabel', {
           defaultMessage: 'Wrap long lines',
         })}
       >
         <EuiSwitch
           data-test-subj="settingsWrapLines"
-          label={wrapMode ? ON_LABEL : OFF_LABEL}
+          label=""
+          showLabel={false}
+          aria-labelledby="wrapLongLines-label"
           checked={wrapMode}
           onChange={(e) => setWrapMode(e.target.checked)}
           id="wrapLines"
         />
       </SettingsFormRow>
       <SettingsFormRow
+        id="tripleQuotes-label"
         label={i18n.translate('console.settingsPage.tripleQuotesMessage', {
           defaultMessage: 'Triple quotes in output',
         })}
       >
         <EuiSwitch
           data-test-subj="tripleQuotes"
-          label={tripleQuotes ? ON_LABEL : OFF_LABEL}
+          label=""
+          showLabel={false}
+          aria-labelledby="tripleQuotes-label"
           checked={tripleQuotes}
           onChange={(e) => setTripleQuotes(e.target.checked)}
           id="tripleQuotes"
@@ -339,10 +370,12 @@ export const SettingsEditor = (props: Props) => {
         })}
       />
       {autoCompleteCheckboxes.map((opts) => (
-        <SettingsFormRow key={opts.id} label={opts.label}>
+        <SettingsFormRow key={opts.id} id={`autocomplete-${opts.id}-label`} label={opts.label}>
           <EuiSwitch
+            label=""
             data-test-subj={`autocomplete-settings-${opts.id}`}
-            label={opts.checked ? ON_LABEL : OFF_LABEL}
+            showLabel={false}
+            aria-labelledby={`autocomplete-${opts.id}-label`}
             checked={opts.checked}
             onChange={(e) => opts.stateSetter(e.target.checked)}
           />
@@ -370,10 +403,13 @@ export const SettingsEditor = (props: Props) => {
             })}
           >
             <EuiSuperSelect
-              css={{ minWidth: '220px' }}
+              css={styles.minWidthControl}
               compressed
               options={intervalOptions}
               valueOfSelected={pollInterval.toString()}
+              aria-label={i18n.translate('console.settingsPage.refreshingDataLabel', {
+                defaultMessage: 'Refresh frequency',
+              })}
               onChange={onPollingIntervalChange}
             />
           </SettingsFormRow>

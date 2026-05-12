@@ -40,7 +40,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   onSelect,
 }) => {
   const usageTracker = useUsageTracker();
-  const managementLink = useManagementLink(selectedModel?.connectorId || '');
+  const managementLink = useManagementLink();
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
@@ -82,7 +82,11 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
             <EuiFlexItem grow={false}>
               <EuiIcon type={model.icon} />
             </EuiFlexItem>
-            <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexGroup
+              gutterSize="xs"
+              direction="column"
+              data-test-subj={`summarization_model_select_${model.connectorName}_${model.value}`}
+            >
               <EuiText size="s">{model.name}</EuiText>
               {model.showConnectorName && model.connectorName && (
                 <EuiText size="xs" color="subdued">

@@ -27,6 +27,8 @@ import type {
   ManagementSetup,
   ManagementStart,
   NavigationCardsSubject,
+  AutoOpsStatusHook,
+  AutoOpsStatusResult,
 } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -37,14 +39,23 @@ import {
 } from './management_sections_service';
 import type { ManagementSection } from './utils';
 
+const defaultAutoOpsStatusResult: AutoOpsStatusResult = {
+  isCloudConnectAutoopsEnabled: false,
+  isLoading: true,
+};
+
+const defaultAutoOpsStatusHook: AutoOpsStatusHook = () => defaultAutoOpsStatusResult;
+
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
   share: SharePluginSetup;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
 }
 
 interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
 }
 
 export class ManagementPlugin
@@ -59,18 +70,22 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
-      (section: ManagementSection) => ({
+    const deepLinks: AppDeepLink[] = this.managementSections
+      .getAllSections()
+      .map((section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
-          id: mgmtApp.id,
-          title: mgmtApp.title,
-          path: mgmtApp.basePath,
-          keywords: mgmtApp.keywords,
-        })),
-      })
-    );
+        deepLinks: section
+          .getAppsEnabled()
+          .filter((mgmtApp) => mgmtApp.visibleIn || !mgmtApp.hideFromGlobalSearch)
+          .map((mgmtApp) => ({
+            id: mgmtApp.id,
+            title: mgmtApp.title,
+            path: mgmtApp.basePath,
+            keywords: mgmtApp.keywords,
+            ...(mgmtApp.visibleIn ? { visibleIn: mgmtApp.visibleIn } : {}),
+          })),
+      }));
 
     return { deepLinks };
   });
@@ -83,12 +98,21 @@ export class ManagementPlugin
     hideLinksTo: [],
     extendCardNavDefinitions: {},
   });
+  private autoOpsStatusHook?: AutoOpsStatusHook;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
+  private registerAutoOpsStatusHook = (hook: AutoOpsStatusHook) => {
+    this.autoOpsStatusHook = hook;
+  };
+
+  private getAutoOpsStatusHook = () => {
+    return this.autoOpsStatusHook ?? defaultAutoOpsStatusHook;
+  };
+
   public setup(
     core: CoreSetup<ManagementStartDependencies>,
-    { home, share }: ManagementSetupDependencies
+    { home, share, cloud }: ManagementSetupDependencies
   ) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
@@ -125,10 +149,21 @@ export class ManagementPlugin
         const [coreStart, deps] = await core.getStartServices();
         const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
+        // Resolve fleet at runtime via `core.plugins.onStart` instead of declaring it
+        // as a plugin dependency to avoid massive circular dependency issues in the plugin graph.
+        const fleetResult = await coreStart.plugins.onStart<{
+          fleet: { config: { isAirGapped?: boolean } };
+        }>('fleet');
+        const isAirGapped =
+          Boolean(fleetResult.fleet.found && fleetResult.fleet.contract.config.isAirGapped) &&
+          !Boolean(deps.cloud?.isCloudEnabled);
+
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           coreStart,
+          cloud: deps.cloud,
+          isAirGapped,
           setBreadcrumbs: (newBreadcrumbs) => {
             if (deps.serverless) {
               // drop the root management breadcrumb in serverless because it comes from the navigation tree
@@ -143,6 +178,7 @@ export class ManagementPlugin
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
           cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
           chromeStyle$,
+          getAutoOpsStatusHook: managementPlugin.getAutoOpsStatusHook,
         });
       },
     });
@@ -156,6 +192,7 @@ export class ManagementPlugin
     return {
       sections: this.managementSections.setup(),
       locator,
+      registerAutoOpsStatusHook: this.registerAutoOpsStatusHook,
     };
   }
 

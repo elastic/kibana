@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type {
   CriticalityLevelWithUnassigned,
   IdField,
@@ -40,7 +40,7 @@ export const useGenericEntityCriticality = ({
 
   const genericEntityAssetCriticalityQueryKey = [QUERY_KEY, idField, idValue];
 
-  const getAssetCriticality = useQuery<AssetCriticalityRecord>({
+  const getAssetCriticality = useQuery<AssetCriticalityRecord | null>({
     queryKey: genericEntityAssetCriticalityQueryKey,
     queryFn: () =>
       fetchAssetCriticality({

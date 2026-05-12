@@ -83,7 +83,7 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
                 <EuiBetaBadge
                   label={TECHNICAL_PREVIEW}
                   tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
-                  iconType="beaker"
+                  iconType="flask"
                   size="s"
                   data-test-subj={testId('betaBadge')}
                 />

@@ -29,9 +29,17 @@
           "\nThis is a helper schema to convert comma separated strings to arrays. Useful\nfor processing query params.\n"
         ],
         "signature": [
-          "(schema: T) => Zod.ZodEffects<Zod.ZodArray<T, \"many\">, T[\"_output\"][], unknown>"
+          "(schema: T) => ",
+          "ZodPipe",
+          "<",
+          "ZodTransform",
+          "<unknown, unknown>, ",
+          "ZodArray",
+          "<T>>"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/array_from_string.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/array_from_string.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,8 +55,11 @@
             "signature": [
               "T"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/array_from_string.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/array_from_string.ts",
+            "lineNumber": 19,
+            "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -68,26 +79,31 @@
           "\nZod validation factory for Kibana route's request validation.\nIt allows to pass a Zod schema for parameters, query and/or body validation.\n\nExample:\n\n```ts\nrouter.versioned\n  .post({\n    access: 'public',\n    path: MY_URL,\n  })\n  .addVersion(\n    {\n      version: 'my-version',\n      validate: {\n        request: {\n          params: buildRouteValidationWithZod(MyRequestParamsZodSchema),\n          query: buildRouteValidationWithZod(MyRequestQueryZodSchema),\n          body: buildRouteValidationWithZod(MyRequestBodyZodSchema),\n        },\n      },\n    },\n```"
         ],
         "signature": [
-          "(schema: ZodSchema) => ",
+          "(schema: ZodSafeParseable<Output>) => ",
           "RouteValidationFunction",
-          "<Type>"
+          "<Output>"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/build_route_validation_with_zod.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/build_route_validation_with_zod.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/zod-helpers",
             "id": "def-common.buildRouteValidationWithZod.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "ZodSchema"
+              "ZodSafeParseable<Output>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/build_route_validation_with_zod.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/build_route_validation_with_zod.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodSafeParseable",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -103,9 +119,15 @@
         "label": "createIsNarrowSchema",
         "description": [],
         "signature": [
-          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends Zod.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, Zod.input<TNarrowSchema>>"
+          "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends ",
+          "input",
+          "<TBaseSchema>>(value: TValue) => value is Extract<TValue, ",
+          "input",
+          "<TNarrowSchema>>"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -119,8 +141,11 @@
             "signature": [
               "TBaseSchema"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBaseSchema",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -134,8 +159,11 @@
             "signature": [
               "TNarrowSchema"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+            "lineNumber": 15,
+            "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "TNarrowSchema",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -149,11 +177,15 @@
         "type": "Function",
         "tags": [],
         "label": "DeepStrict",
-        "description": [],
-        "signature": [
-          "(schema: TSchema) => TSchema"
+        "description": [
+          "\nWraps a Zod schema to deeply reject any unrecognized keys in the input.\n\nThis works by trial-parsing the input with the given schema, then comparing\nthe flattened keys of the raw input against the flattened keys of the parsed\noutput. Any excess keys in the input will cause validation to fail.\n\nThe actual parsing is done by piping through the original schema, so all\nschema-level errors are preserved."
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
+        "signature": [
+          "(schema: TSchema) => any"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/deep_strict.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -167,8 +199,11 @@
             "signature": [
               "TSchema"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/deep_strict.ts",
+            "lineNumber": 39,
+            "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "TSchema",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -184,9 +219,13 @@
         "label": "expectParseError",
         "description": [],
         "signature": [
-          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
+          "(result: ",
+          "ZodSafeParseResult",
+          "<Output>) => void"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_error.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/expect_parse_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,10 +237,14 @@
             "label": "result",
             "description": [],
             "signature": [
-              "Zod.SafeParseReturnType<Input, Output>"
+              "ZodSafeParseResult",
+              "<Output>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_error.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/expect_parse_error.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodSafeParseResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -217,9 +260,13 @@
         "label": "expectParseSuccess",
         "description": [],
         "signature": [
-          "(result: Zod.SafeParseReturnType<Input, Output>) => void"
+          "(result: ",
+          "ZodSafeParseResult",
+          "<Output>) => void"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_success.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/expect_parse_success.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,10 +278,14 @@
             "label": "result",
             "description": [],
             "signature": [
-              "Zod.SafeParseReturnType<Input, Output>"
+              "ZodSafeParseResult",
+              "<Output>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/expect_parse_success.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/expect_parse_success.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodSafeParseResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -250,9 +301,11 @@
         "label": "isBooleanFromString",
         "description": [],
         "signature": [
-          "(val: unknown) => val is KbnZodBooleanFromString"
+          "(val: unknown) => val is any"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/kbn_zod_types/boolean_from_string.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,8 +319,70 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/kbn_zod_types/boolean_from_string.ts",
+            "lineNumber": 33,
+            "columnNumber": 37,
             "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isNonEmptyOrWhitespace",
+        "type": "Function",
+        "tags": [],
+        "label": "isNonEmptyOrWhitespace",
+        "description": [
+          "\nChecks that the input is a string that is not empty while allowing whitespace."
+        ],
+        "signature": [
+          "(input: string, ctx: ",
+          "node_modules/zod/v4/core/api",
+          "$RefinementCtx<unknown>) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isNonEmptyOrWhitespace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+            "lineNumber": 31,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isNonEmptyOrWhitespace.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "node_modules/zod/v4/core/api",
+              "$RefinementCtx<unknown>"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+            "lineNumber": 31,
+            "columnNumber": 55,
+            "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -283,9 +398,13 @@
         "label": "isNonEmptyString",
         "description": [],
         "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => void"
+          "(input: string, ctx: ",
+          "node_modules/zod/v4/core/api",
+          "$RefinementCtx<unknown>) => void"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -299,7 +418,9 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+            "lineNumber": 13,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -312,10 +433,14 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "Zod.RefinementCtx"
+              "node_modules/zod/v4/core/api",
+              "$RefinementCtx<unknown>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+            "lineNumber": 13,
+            "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -331,9 +456,13 @@
         "label": "isoToEpoch",
         "description": [],
         "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => number"
+          "(input: string, ctx: ",
+          "node_modules/zod/v4/core/api",
+          "$RefinementCtx<unknown>) => number"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/iso_to_epoch.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,7 +476,9 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/iso_to_epoch.ts",
+            "lineNumber": 13,
+            "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -360,10 +491,14 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "Zod.RefinementCtx"
+              "node_modules/zod/v4/core/api",
+              "$RefinementCtx<unknown>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/iso_to_epoch.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/iso_to_epoch.ts",
+            "lineNumber": 13,
+            "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -379,9 +514,14 @@
         "label": "isPassThroughAny",
         "description": [],
         "signature": [
-          "(val: unknown) => val is KbnPassThroughAny"
+          "(val: unknown) => val is ",
+          "ZodAny",
+          " & ",
+          "KbnZodType"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/kbn_zod_types/pass_through_any.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -395,7 +535,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/kbn_zod_types/pass_through_any.ts",
+            "lineNumber": 29,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -414,7 +556,9 @@
         "signature": [
           "(schema: TSchema, value: unknown) => boolean"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -428,8 +572,11 @@
             "signature": [
               "TSchema"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSchema",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -443,7 +590,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/schema.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/schema.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -460,9 +609,13 @@
         "label": "isValidDateMath",
         "description": [],
         "signature": [
-          "(input: string, ctx: Zod.RefinementCtx) => void"
+          "(input: string, ctx: ",
+          "node_modules/zod/v4/core/api",
+          "$RefinementCtx<unknown>) => void"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/is_valid_date_math.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/is_valid_date_math.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -476,7 +629,9 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/is_valid_date_math.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/is_valid_date_math.ts",
+            "lineNumber": 25,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -489,10 +644,14 @@
             "label": "ctx",
             "description": [],
             "signature": [
-              "Zod.RefinementCtx"
+              "node_modules/zod/v4/core/api",
+              "$RefinementCtx<unknown>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/is_valid_date_math.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/is_valid_date_math.ts",
+            "lineNumber": 25,
+            "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -520,7 +679,9 @@
           },
           "<T>"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/required_optional.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/required_optional.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -536,8 +697,11 @@
             "signature": [
               "T"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/required_optional.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/required_optional.ts",
+            "lineNumber": 42,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -557,9 +721,13 @@
           "\nSafely parse a payload against a schema, returning the output or undefined.\nThis method does not throw validation errors and is useful for validating\noptional objects when we don't care about errors.\n"
         ],
         "signature": [
-          "(payload: unknown, schema: T) => T[\"_output\"] | undefined"
+          "(payload: unknown, schema: T) => ",
+          "output",
+          "<T> | undefined"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/safe_parse_result.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/safe_parse_result.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -575,7 +743,9 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/safe_parse_result.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/safe_parse_result.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -592,8 +762,11 @@
             "signature": [
               "T"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/safe_parse_result.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/safe_parse_result.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -611,9 +784,13 @@
         "label": "stringifyZodError",
         "description": [],
         "signature": [
-          "(err: Zod.ZodError<any>) => string"
+          "(err: ",
+          "ZodError",
+          "<any>) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/stringify_zod_error.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/stringify_zod_error.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -625,10 +802,14 @@
             "label": "err",
             "description": [],
             "signature": [
-              "Zod.ZodError<any>"
+              "ZodError",
+              "<any>"
             ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/stringify_zod_error.ts",
+            "path": "src/platform/packages/shared/kbn-zod-helpers/v4/stringify_zod_error.ts",
+            "lineNumber": 14,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodError",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -640,6 +821,42 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.BooleanFromString",
+        "type": "Any",
+        "tags": [],
+        "label": "BooleanFromString",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/kbn_zod_types/boolean_from_string.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.PassThroughAny",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "PassThroughAny",
+        "description": [],
+        "signature": [
+          "ZodAny",
+          " & ",
+          "KbnZodType"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/kbn_zod_types/pass_through_any.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.RequiredOptional",
@@ -654,7 +871,9 @@
         "signature": [
           "{ [K in keyof T]-?: [T[K]]; } extends infer U ? U extends Record<keyof U, [unknown]> ? { [K in keyof U]: U[K][0]; } : never : never"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/required_optional.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/required_optional.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -663,15 +882,17 @@
     "objects": [
       {
         "parentPluginId": "@kbn/zod-helpers",
-        "id": "def-common.BooleanFromString",
+        "id": "def-common.NonEmptyOrWhitespaceString",
         "type": "Object",
         "tags": [],
-        "label": "BooleanFromString",
+        "label": "NonEmptyOrWhitespaceString",
         "description": [],
         "signature": [
-          "KbnZodBooleanFromString"
+          "ZodString"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -684,24 +905,11 @@
         "label": "NonEmptyString",
         "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodString, string, string>"
+          "ZodString"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/zod-helpers",
-        "id": "def-common.PassThroughAny",
-        "type": "Object",
-        "tags": [],
-        "label": "PassThroughAny",
-        "description": [],
-        "signature": [
-          "KbnPassThroughAny"
-        ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/v4/non_empty_string.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

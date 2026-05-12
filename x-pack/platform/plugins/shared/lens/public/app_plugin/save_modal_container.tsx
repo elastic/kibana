@@ -10,19 +10,25 @@ import { i18n } from '@kbn/i18n';
 import { isFilterPinned } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { omit } from 'lodash';
+import type {
+  LensAppState,
+  LensAppServices,
+  LensDocument,
+  VisualizeEditorContext,
+  LensSerializedState,
+} from '@kbn/lens-common';
+import type { Simplify } from '@kbn/chart-expressions-common';
 import { SaveModal } from './save_modal';
-import type { LensAppProps, LensAppServices } from './types';
+import type { LensAppProps } from './types';
 import type { SaveProps } from './app';
-import type { LensDocumentService, LensDocument } from '../persistence';
 import { APP_ID, getFullPath } from '../../common/constants';
-import type { LensAppState } from '../state_management';
 import { getFromPreloaded } from '../state_management/init_middleware/load_initial';
-import type { Simplify, VisualizeEditorContext } from '../types';
 import { redirectToDashboard } from './save_modal_container_helpers';
-import type { LensSerializedState } from '../react_embeddable/types';
 import { isLegacyEditorEmbeddable } from './app_helpers';
+import { transformToApiConfig } from '../react_embeddable/helper';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -34,6 +40,12 @@ export type SaveModalContainerProps = {
   getOriginatingPath?: (dashboardId: string) => string;
   persistedDoc?: LensDocument;
   lastKnownDoc?: LensDocument;
+  /**
+   * Used if you want to carry to the save modal the state of the controls
+   * (e.g. your Lens visualization is controlled by a UI control and you want to
+   * transfer the control state)
+   */
+  controlsState?: ControlPanelsState;
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
   onSave?: (saveProps: SaveProps) => void;
@@ -78,6 +90,7 @@ export function SaveModalContainer({
   lensServices,
   initialContext,
   managed,
+  controlsState,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -148,9 +161,10 @@ export function SaveModalContainer({
           redirectToOrigin,
           originatingApp,
           getOriginatingPath,
+          controlsState,
           onAppLeave: () => {},
           ...lensServices,
-        },
+        } satisfies SaveVisualizationProps,
         saveProps,
         options
       );
@@ -169,6 +183,7 @@ export function SaveModalContainer({
 
   return (
     <SaveModal
+      hasLibraryItemWithTitle={lensServices.lensDocumentService.hasLibraryItemWithTitle}
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
@@ -197,7 +212,7 @@ function fromDocumentToSerializedState(
   return {
     ...originalInput,
     attributes: omit(doc, 'savedObjectId'),
-    savedObjectId: doc.savedObjectId,
+    ref_id: doc.savedObjectId,
     ...panelSettings,
   };
 }
@@ -231,7 +246,7 @@ export type SaveVisualizationProps = Simplify<
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
-    lensDocumentService: LensDocumentService;
+    controlsState?: ControlPanelsState;
   } & ExtraProps &
     Pick<
       LensAppServices,
@@ -269,7 +284,7 @@ export const runSaveLensVisualization = async (
     textBasedLanguageSave,
     switchDatasource,
     application,
-    lensDocumentService,
+    controlsState,
   } = props;
 
   if (!lastKnownDoc) {
@@ -292,31 +307,15 @@ export const runSaveLensVisualization = async (
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-  const originalSavedObjectId = originalInput?.savedObjectId;
-  if (options.saveToLibrary) {
-    await lensDocumentService.checkForDuplicateTitle(
-      {
-        id: originalSavedObjectId,
-        title: docToSave.title,
-        displayName: i18n.translate('xpack.lens.app.saveModalType', {
-          defaultMessage: 'Lens visualization',
-        }),
-        lastSavedTitle: lastKnownDoc.title,
-        copyOnSave: saveProps.newCopyOnSave,
-        isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
-      },
-      saveProps.onTitleDuplicate
-    );
-    // ignore duplicate title failure, user notified in save modal
-  }
+  const originalSavedObjectId = originalInput?.ref_id;
 
   try {
     // wrap the doc into a serializable state
     const newDoc = fromDocumentToSerializedState(
       docToSave,
       {
-        timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
-        savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
+        time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
+        ref_id: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
       originalInput
     );
@@ -356,8 +355,9 @@ export const runSaveLensVisualization = async (
     }
 
     if (shouldNavigateBackToOrigin) {
+      const apiConfig = transformToApiConfig({ ...newDoc, ref_id: savedObjectId });
       redirectToOrigin({
-        state: { ...newDoc, savedObjectId },
+        state: apiConfig,
         isCopied: saveProps.newCopyOnSave,
       });
       return;
@@ -368,11 +368,12 @@ export const runSaveLensVisualization = async (
     // without redirect?
     if (saveProps.dashboardId) {
       redirectToDashboard({
-        embeddableInput: { ...newDoc, savedObjectId },
+        embeddableInput: { ...newDoc, ref_id: savedObjectId },
         dashboardId: saveProps.dashboardId,
         stateTransfer,
         originatingApp: props.originatingApp,
         getOriginatingPath: props.getOriginatingPath,
+        controlsState,
       });
       return;
     }

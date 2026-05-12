@@ -176,7 +176,6 @@ describe('buildEsQuery', () => {
         filter: 'host.name: admin-console.prod.001',
         total: 'http.response.status_code: *',
       },
-      groupBy: ['not_nested_1', 'not_nested_2'],
       groupings: {
         not_nested_1: 'authentication',
         not_nested_2: 'blast-mail.co',
@@ -184,12 +183,9 @@ describe('buildEsQuery', () => {
     },
   ];
 
-  test.each(testData)(
-    'should generate correct es query for $title',
-    ({ params, groupBy, groupings }) => {
-      expect(
-        getESQueryForLogRateAnalysis(params as KQLCustomIndicator['params'], groupBy, groupings)
-      ).toMatchSnapshot();
-    }
-  );
+  test.each(testData)('should generate correct es query for $title', ({ params, groupings }) => {
+    expect(
+      getESQueryForLogRateAnalysis(params as KQLCustomIndicator['params'], groupings)
+    ).toMatchSnapshot();
+  });
 });

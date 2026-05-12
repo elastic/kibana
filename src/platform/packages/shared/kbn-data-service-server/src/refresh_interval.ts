@@ -9,15 +9,24 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const refreshIntervalSchema = schema.object({
-  pause: schema.boolean({
+export const refreshIntervalSchema = schema.object(
+  {
+    pause: schema.boolean({
+      meta: {
+        description: 'When `true`, auto-refresh is paused.',
+      },
+    }),
+    value: schema.number({
+      meta: {
+        description: 'The refresh interval in milliseconds.',
+      },
+    }),
+  },
+  {
     meta: {
-      description: 'Set to false to auto-refresh data on an interval.',
+      id: 'kbn-data-service-server-refreshIntervalSchema',
+      title: 'Refresh interval',
+      description: 'Specifies the auto-refresh interval for the object.',
     },
-  }),
-  value: schema.number({
-    meta: {
-      description: 'A numeric value indicating refresh frequency in milliseconds.',
-    },
-  }),
-});
+  }
+);

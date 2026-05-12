@@ -34,7 +34,6 @@ export default function ({ getService }: FtrProviderContext) {
         packageName: 'system',
         composedOfTemplates: [],
         templatePriority: 200,
-        mappings: { properties: [] },
         type: 'logs',
       });
 

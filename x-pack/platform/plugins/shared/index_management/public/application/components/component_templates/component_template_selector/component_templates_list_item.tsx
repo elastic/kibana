@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React from 'react';
 import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import {
@@ -15,18 +15,55 @@ import {
   EuiLink,
   EuiIcon,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import type { ComponentTemplateListItem } from '../../../../../common';
 import { TemplateContentIndicator } from '../../shared';
-
-import './component_templates_list_item.scss';
 
 interface Action {
   label: string;
   icon: string;
   handler: (component: ComponentTemplateListItem) => void;
 }
+
+const useStyles = ({ isSelected }: { isSelected: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    listItem: css`
+      background-color: ${euiTheme.colors.body};
+      padding: ${euiTheme.size.m};
+      border-bottom: ${euiTheme.border.thin};
+      position: relative;
+      height: calc(${euiTheme.size.l} * 2);
+
+      ${isSelected &&
+      css`
+        &::before {
+          content: '';
+          background-color: rgba(${euiTheme.colors.emptyShade}, 0.7);
+          height: 100%;
+          left: 0;
+          position: absolute;
+          top: 0;
+          width: 100%;
+          z-index: ${Number(euiTheme.levels.content) + 1};
+        }
+      `}
+    `,
+    contentIndicator: css`
+      flex-direction: row;
+    `,
+    checkIcon: css`
+      position: absolute;
+      right: ${euiTheme.size.base};
+      top: ${euiTheme.size.base};
+      z-index: ${Number(euiTheme.levels.content) + 2};
+    `,
+  };
+};
+
 export interface Props {
   component: ComponentTemplateListItem;
   isSelected?: boolean | ((component: ComponentTemplateListItem) => boolean);
@@ -45,33 +82,32 @@ export const ComponentTemplatesListItem = ({
   const hasActions = actions && actions.length > 0;
   const isSelectedValue = typeof isSelected === 'function' ? isSelected(component) : isSelected;
   const isDraggable = Boolean(dragHandleProps);
+  const styles = useStyles({ isSelected: isSelectedValue });
 
   return (
-    <div
-      className={classNames('componentTemplatesListItem', {
-        'componentTemplatesListItem--selected': isSelectedValue,
-      })}
-      data-test-subj="item"
-    >
+    <div css={styles.listItem} data-test-subj="item">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center">
             {isDraggable && (
               <EuiFlexItem>
                 <div {...dragHandleProps}>
-                  <EuiIcon type="grab" />
+                  <EuiIcon type="dragVertical" aria-hidden={true} />
                 </div>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false} data-test-subj="name">
               {/* <EuiText>{component.name}</EuiText> */}
-              <EuiLink onClick={() => onViewDetail(component)}>{component.name}</EuiLink>
+              <EuiLink onClick={() => onViewDetail(component)} disabled={isSelectedValue}>
+                {component.name}
+              </EuiLink>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="componentTemplatesListItem__contentIndicator">
+            <EuiFlexItem grow={false} css={styles.contentIndicator}>
               <TemplateContentIndicator
                 settings={component.hasSettings}
                 mappings={component.hasMappings}
                 aliases={component.hasAliases}
+                isDisabled={isSelectedValue}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -100,7 +136,7 @@ export const ComponentTemplatesListItem = ({
 
       {/* Check icon when selected */}
       {isSelectedValue && (
-        <EuiIcon className="componentTemplatesListItem__checkIcon" type="check" color="success" />
+        <EuiIcon css={styles.checkIcon} type="check" color="success" aria-hidden={true} />
       )}
     </div>
   );

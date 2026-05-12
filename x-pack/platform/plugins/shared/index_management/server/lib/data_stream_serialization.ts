@@ -10,10 +10,28 @@ import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
 import type { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
+const toLowercaseHealth = (status: EnhancedDataStreamFromEs['status']): Health => {
+  switch (status) {
+    case 'green':
+    case 'GREEN':
+      return 'green';
+    case 'yellow':
+    case 'YELLOW':
+      return 'yellow';
+    case 'red':
+    case 'RED':
+      return 'red';
+    case 'unknown':
+      return 'unknown';
+    case 'unavailable':
+      return 'unavailable';
+  }
+};
+
 export function deserializeDataStream(
   dataStreamFromEs: EnhancedDataStreamFromEs,
   isLogsdbEnabled: boolean,
-  failureStoreSettings?: { enabled?: string[] | string }
+  failureStoreSettings?: { enabled?: string[] | string; defaultRetentionPeriod?: string }
 ): DataStream {
   const {
     name,
@@ -35,6 +53,7 @@ export function deserializeDataStream(
     global_max_retention: globalMaxRetention,
     next_generation_managed_by: nextGenerationManagedBy,
     index_mode: indexMode,
+    failure_store: failureStore,
   } = dataStreamFromEs;
 
   const meteringStorageSize =
@@ -58,15 +77,16 @@ export function deserializeDataStream(
 
     if (matchesPattern) {
       // If matches pattern, enable unless explicitly disabled
-      const isExplicitlyDisabled = dataStreamFromEs?.failure_store?.enabled === false;
+      const isExplicitlyDisabled = failureStore?.enabled === false;
       failureStoreEnabled = !isExplicitlyDisabled;
     }
   }
 
   // If explicitly enabled in data stream config, always enable
-  if (dataStreamFromEs?.failure_store?.enabled === true) {
+  if (failureStore?.enabled === true) {
     failureStoreEnabled = true;
   }
+  const failureStoreLifecycle = failureStore?.lifecycle;
 
   return {
     name,
@@ -90,7 +110,7 @@ export function deserializeDataStream(
       })
     ),
     generation,
-    health: status.toLowerCase() as Health, // ES typically returns status in all-caps
+    health: toLowercaseHealth(status),
     indexTemplateName: template,
     ilmPolicyName,
     storageSize,
@@ -108,6 +128,14 @@ export function deserializeDataStream(
     },
     nextGenerationManagedBy,
     failureStoreEnabled,
+    failureStoreRetention: {
+      customRetentionPeriod:
+        failureStoreLifecycle?.enabled && failureStoreLifecycle?.data_retention
+          ? failureStoreLifecycle.data_retention
+          : undefined,
+      defaultRetentionPeriod: failureStoreSettings?.defaultRetentionPeriod,
+      retentionDisabled: failureStoreLifecycle?.enabled === false,
+    },
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)
         ? LOGSDB_INDEX_MODE

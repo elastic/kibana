@@ -12,6 +12,8 @@ import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { updateConnectorBodySchema } from '../../../../common/routes/connector/apis/update';
+import { createMockConnector } from '../../../application/connector/mocks';
+import Boom from '@hapi/boom';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
@@ -33,15 +35,12 @@ describe('updateConnectorRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector/{id}"`);
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -70,6 +69,7 @@ describe('updateConnectorRoute', () => {
         is_preconfigured: false,
         is_deprecated: false,
         is_system_action: false,
+        is_connector_type_deprecated: false,
       },
     });
 
@@ -102,15 +102,12 @@ describe('updateConnectorRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -147,15 +144,12 @@ describe('updateConnectorRoute', () => {
 
     const [, handler] = router.put.mock.calls[0];
 
-    const updateResult = {
+    const updateResult = createMockConnector({
       id: '1',
       actionTypeId: 'my-action-type-id',
       name: 'My name',
       config: { foo: true },
-      isPreconfigured: false,
-      isDeprecated: false,
-      isSystemAction: false,
-    };
+    });
 
     const actionsClient = actionsClientMock.create();
     actionsClient.update.mockResolvedValueOnce(updateResult);
@@ -188,6 +182,50 @@ describe('updateConnectorRoute', () => {
     };
     expect(() => updateConnectorBodySchema.validate(body)).toThrowErrorMatchingInlineSnapshot(
       `"[name]: value '' is not valid"`
+    );
+  });
+
+  it('rejects update when OAuth URLs fail allowedHosts validation (validation error)', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    updateConnectorRoute(router, licenseState);
+    const [, handler] = router.put.mock.calls[0];
+
+    const actionsClient = actionsClientMock.create();
+    const validationMessage =
+      'error validating connector type secrets: target url "https://not-allowed.example.com/token" is not added to the Kibana config xpack.actions.allowedHosts';
+    actionsClient.update.mockRejectedValueOnce(Boom.badRequest(validationMessage));
+
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      {
+        params: {
+          id: '1',
+        },
+        body: {
+          name: 'OAuth connector',
+          config: {},
+          secrets: {
+            authType: 'oauth_authorization_code',
+            authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+            tokenUrl: 'https://not-allowed.example.com/token',
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+          },
+        },
+      },
+      ['customError', 'forbidden', 'badRequest', 'notFound']
+    );
+
+    await expect(handler(context, req, res)).rejects.toEqual(
+      expect.objectContaining({
+        output: expect.objectContaining({
+          statusCode: 400,
+          payload: expect.objectContaining({
+            message: validationMessage,
+          }),
+        }),
+      })
     );
   });
 });

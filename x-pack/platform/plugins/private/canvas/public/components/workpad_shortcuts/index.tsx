@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import { withHandlers, compose } from 'react-recompose';
 import type { Props as WorkpadShortcutsProps } from './workpad_shortcuts';
 import { WorkpadShortcuts as Component } from './workpad_shortcuts';
@@ -25,13 +24,3 @@ export const WorkpadShortcuts = compose<WorkpadShortcutsProps, HandlerCreatorPro
   withHandlers(clipboardHandlerCreators),
   withHandlers(positionHandlerCreators)
 )(Component);
-
-WorkpadShortcuts.propTypes = {
-  pageId: PropTypes.string.isRequired,
-  selectedNodes: PropTypes.arrayOf(PropTypes.object),
-  elementLayer: PropTypes.func.isRequired,
-  insertNodes: PropTypes.func.isRequired,
-  removeNodes: PropTypes.func.isRequired,
-  selectToplevelNodes: PropTypes.func.isRequired,
-  commit: PropTypes.func.isRequired,
-};

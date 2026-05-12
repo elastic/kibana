@@ -105,7 +105,7 @@ Array [
     "type": "component_template",
   },
   Object {
-    "appLink": "",
+    "appLink": "/app/management/insightsAndAlerting/triggersActions/rules/create/template/sample_alerting_rule_template",
     "attributes": Object {
       "title": "Sample alerting rule template",
     },
@@ -199,6 +199,15 @@ Array [
     },
     "id": "sample_security_rule",
     "type": "security-rule",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {
+      "description": "Nginx availability SLO over the past 7 days",
+      "title": "SLO Template: Nginx Availability",
+    },
+    "id": "sample_slo_template",
+    "type": "slo_template",
   },
   Object {
     "appLink": "",

@@ -7,26 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { AppMenuActionsMenuPopover } from './run_app_menu_action';
 import { getAlertsAppMenuItem } from './get_alerts';
-import { discoverServiceMock } from '../../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
-import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { AppMenuExtensionParams } from '../../../../../context_awareness';
+import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../../build_services';
 
-const mount = (
+const getAlertsMenuItem = async ({
   dataView = dataViewMock,
   isEsqlMode = false,
-  authorizedRuleTypeIds = [ES_QUERY_ID]
-) => {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.actions.setDataView(dataView);
+  authorizedRuleTypeIds = [ES_QUERY_ID],
+  services = createDiscoverServicesMock(),
+  showCreateRuleV2,
+}: {
+  dataView?: DataView;
+  isEsqlMode?: boolean;
+  authorizedRuleTypeIds?: string[];
+  services?: DiscoverServices;
+  showCreateRuleV2?: boolean;
+} = {}): Promise<DiscoverAppMenuItemType> => {
+  const toolkit = getDiscoverInternalStateMock({ services });
+
+  await toolkit.initializeTabs();
+
+  await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+
+  const currentTab = toolkit.getCurrentTab();
 
   const discoverParamsMock: AppMenuExtensionParams = {
     dataView,
@@ -38,75 +52,172 @@ const mount = (
     },
   };
 
-  const alertsAppMenuItem = getAlertsAppMenuItem({
+  return getAlertsAppMenuItem({
     discoverParams: discoverParamsMock,
-    services: discoverServiceMock,
-    stateContainer,
+    services,
+    tabId: currentTab.id,
+    getState: toolkit.internalState.getState,
+    subscribe: (listener: () => void) => toolkit.internalState.subscribe(listener),
+    showCreateRuleV2,
   });
-
-  return mountWithIntl(
-    <AppMenuActionsMenuPopover
-      anchorElement={document.createElement('div')}
-      appMenuItem={alertsAppMenuItem}
-      services={discoverServiceMock}
-      onClose={jest.fn()}
-    />
-  );
 };
 
-describe('OpenAlertsPopover', () => {
+describe('getAlertsAppMenuItem', () => {
   describe('Authorized Rule Types', () => {
-    it('should render the manage alerts button if there is any authorized rule type', () => {
-      const component = mount(dataViewMock, false, ['anyAuthorizedRule']);
-      expect(findTestSubject(component, 'discoverManageAlertsButton').exists()).toBeTruthy();
+    it('should include the manage alerts button if there is any authorized rule type', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        authorizedRuleTypeIds: ['anyAuthorizedRule'],
+      });
+      const manageAlertsItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      expect(manageAlertsItem).toBeDefined();
     });
 
-    it('should render the create search threshold rule button if it is authorized', () => {
-      const component = mount();
-      expect(findTestSubject(component, 'discoverCreateAlertButton').exists()).toBeTruthy();
+    it('should include the create search threshold rule button if it is authorized', async () => {
+      const alertsMenuItem = await getAlertsMenuItem();
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem).toBeDefined();
     });
 
-    it('should not render the create search threshold rule button if it is not authorized', () => {
-      const component = mount(dataViewMock, false, []);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').exists()).toBeFalsy();
+    it('should not include the create search threshold rule button if it is not authorized', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        authorizedRuleTypeIds: [],
+      });
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem).toBeUndefined();
     });
   });
   describe('Dataview mode', () => {
-    it('should render with the create search threshold rule button disabled if the data view has no time field', () => {
-      const component = mount();
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeTruthy();
+    it('should have the create search threshold rule button disabled if the data view has no time field', async () => {
+      const alertsMenuItem = await getAlertsMenuItem();
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem?.disableButton).toBe(true);
     });
 
-    it('should render with the create search threshold rule button enabled if the data view has a time field', () => {
-      const component = mount(dataViewWithTimefieldMock);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
+    it('should have the create search threshold rule button enabled if the data view has a time field', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ dataView: dataViewWithTimefieldMock });
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem?.disableButton).toBe(false);
     });
 
-    it('should render the manage rules and connectors link', () => {
-      const component = mount();
-      expect(findTestSubject(component, 'discoverManageAlertsButton').exists()).toBeTruthy();
+    it('should include the manage rules and connectors link', async () => {
+      const alertsMenuItem = await getAlertsMenuItem();
+      const manageAlertsItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      expect(manageAlertsItem).toBeDefined();
     });
   });
 
   describe('ES|QL mode', () => {
-    it('should render with the create search threshold rule button enabled if the data view has no timeFieldName but at least one time field', () => {
-      const component = mount(dataViewMock, true);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
+    it('should have the create search threshold rule button enabled if the data view has no timeFieldName but at least one time field', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ dataView: dataViewMock, isEsqlMode: true });
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem?.disableButton).toBe(false);
     });
 
-    it('should render with the create search threshold rule button enabled if the data view has a time field', () => {
-      const component = mount(dataViewWithTimefieldMock, true);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeFalsy();
+    it('should have the create search threshold rule button enabled if the data view has a time field', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewWithTimefieldMock,
+        isEsqlMode: true,
+      });
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem?.disableButton).toBe(false);
     });
 
-    it('should render with the create search threshold rule button disabled if the data view has no time fields at all', () => {
-      const component = mount(dataViewWithNoTimefieldMock, true);
-      expect(findTestSubject(component, 'discoverCreateAlertButton').prop('disabled')).toBeTruthy();
+    it('should have the create search threshold rule button disabled if the data view has no time fields at all', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({
+        dataView: dataViewWithNoTimefieldMock,
+        isEsqlMode: true,
+      });
+      const createAlertItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(createAlertItem?.disableButton).toBe(true);
     });
 
-    it('should render the manage rules and connectors link', () => {
-      const component = mount();
-      expect(findTestSubject(component, 'discoverManageAlertsButton').exists()).toBeTruthy();
+    it('should include the manage rules and connectors link', async () => {
+      const alertsMenuItem = await getAlertsMenuItem();
+      const manageAlertsItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      expect(manageAlertsItem).toBeDefined();
+    });
+  });
+
+  describe('Manage rules and connectors link', () => {
+    it('should link to the unified rules page when rules app is registered', async () => {
+      const services = createDiscoverServicesMock();
+      (services.application.isAppRegistered as jest.Mock).mockReturnValue(true);
+      (services.application.getUrlForApp as jest.Mock).mockImplementation(
+        (appId: string) => `/app/${appId}`
+      );
+      const alertsMenuItem = await getAlertsMenuItem({ services });
+      const manageAlertsItem = alertsMenuItem.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      expect(manageAlertsItem?.href).toBe('/app/rules');
+    });
+  });
+
+  describe('v2 ES|QL rule row', () => {
+    it('should prepend the v2 row with order 0 when showCreateRuleV2 is true', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeDefined();
+      expect(v2Row?.order).toBe(0);
+      expect(v2Row?.testId).toBe('discoverCreateEsqlRuleV2Button');
+    });
+
+    it('should include a New badge on the v2 row', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row?.labelBadgeText).toBe('New');
+    });
+
+    it('should NOT include the v2 row when showCreateRuleV2 is false', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: false });
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should NOT include the v2 row when showCreateRuleV2 is undefined', async () => {
+      const alertsMenuItem = await getAlertsMenuItem();
+
+      const v2Row = alertsMenuItem.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeUndefined();
+    });
+
+    it('should place the v2 row before the search threshold rule', async () => {
+      const alertsMenuItem = await getAlertsMenuItem({ showCreateRuleV2: true });
+      const items = alertsMenuItem.items ?? [];
+
+      const v2Row = items.find((item) => item.id === 'create-esql-rule-v2');
+      const thresholdRow = items.find((item) => item.testId === 'discoverCreateAlertButton');
+
+      expect(v2Row).toBeDefined();
+      expect(thresholdRow).toBeDefined();
+      expect(v2Row!.order).toBeLessThan(thresholdRow!.order);
     });
   });
 });

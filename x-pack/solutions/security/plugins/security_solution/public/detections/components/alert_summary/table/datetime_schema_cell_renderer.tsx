@@ -12,7 +12,7 @@ import { getAlertFieldValueAsStringOrNumberOrNull } from '../../../utils/type_ut
 
 export interface DatetimeSchemaCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
   /**
@@ -23,7 +23,7 @@ export interface DatetimeSchemaCellRendererProps {
 
 /**
  * Renders the value of a field of type date (when the schema is 'datetime').
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  */
 export const DatetimeSchemaCellRenderer = memo(
   ({ alert, field }: DatetimeSchemaCellRendererProps) => {

@@ -9,12 +9,17 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getOr } from 'lodash/fp';
+import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import type { SearchHit } from '../../../../../common/search_strategy';
+import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
-import { isActiveTimeline } from '../../../../helpers';
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
@@ -65,7 +70,7 @@ export interface TakeActionDropdownProps {
   /**
    * The actual raw document object
    */
-  dataAsNestedObject?: Ecs;
+  dataAsNestedObject: Ecs;
   /**
    * Callback called when the popover closes
    */
@@ -102,6 +107,10 @@ export interface TakeActionDropdownProps {
    * Maintain backwards compatibility // TODO remove when possible
    */
   scopeId: string;
+  /**
+   * The raw ES search hit containing the full document source
+   */
+  searchHit: SearchHit;
 }
 
 /**
@@ -120,6 +129,7 @@ export const TakeActionDropdown = memo(
     refetchFlyoutData,
     onOsqueryClick,
     scopeId,
+    searchHit,
   }: TakeActionDropdownProps) => {
     // popover interaction
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -158,12 +168,30 @@ export const TakeActionDropdown = memo(
       [dataFormattedForFieldBrowser]
     );
 
+    const hit = useMemo(
+      () => buildDataTableRecord(searchHit as unknown as EsHitRecord),
+      [searchHit]
+    );
+
+    const isRemoteDocument = useMemo(
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      [hit]
+    );
+
     const isEvent = alertSummaryData.eventKind === 'event';
+    const isAlert = alertSummaryData.eventKind === 'signal';
 
     const isAgentEndpoint = useMemo(
       () => dataAsNestedObject?.agent?.type?.includes('endpoint'),
       [dataAsNestedObject]
     );
+
+    const isAlertSourceEndpoint = useMemo(() => {
+      const eventModules = getOr([], 'kibana.alert.original_event.module', dataAsNestedObject);
+      const kinds = getOr([], 'kibana.alert.original_event.kind', dataAsNestedObject);
+
+      return eventModules.includes('endpoint') && kinds.includes('alert');
+    }, [dataAsNestedObject]);
 
     // host isolation interaction
     const handleOnAddIsolationStatusClick = useCallback(
@@ -189,7 +217,7 @@ export const TakeActionDropdown = memo(
       [onAddExceptionTypeClick]
     );
     const { exceptionActionItems } = useAlertExceptionActions({
-      isEndpointAlert: Boolean(isAgentEndpoint),
+      isEndpointAlert: isAlertSourceEndpoint,
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
@@ -210,7 +238,7 @@ export const TakeActionDropdown = memo(
     );
 
     // alert status interaction
-    const { actionItems: statusActionItems } = useAlertsActions({
+    const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
       alertStatus: alertSummaryData.alertStatus,
       closePopover: closePopoverAndFlyout,
       eventId: alertSummaryData.eventId,
@@ -297,18 +325,12 @@ export const TakeActionDropdown = memo(
       ]
     );
 
-    // cases interaction
-    const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
-      scopeId as TableId
-    );
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData: dataAsNestedObject,
       nonEcsData:
         dataFormattedForFieldBrowser?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
       onSuccess: refetchFlyoutData,
-      isActiveTimelines: isActiveTimeline(scopeId),
-      isInDetections,
       refetch,
     });
 
@@ -318,19 +340,50 @@ export const TakeActionDropdown = memo(
       closePopoverHandler
     );
 
+    const { runWorkflowMenuItem: alertWorkflowMenuItem, runAlertWorkflowPanel } =
+      useRunAlertWorkflowPanel({
+        closePopover: closePopoverHandler,
+        ecsRowData: dataAsNestedObject,
+      });
+
+    const documents = useMemo(
+      () => [
+        {
+          _id: dataAsNestedObject._id,
+          _index: dataAsNestedObject._index ?? '',
+          ...(searchHit?._source ?? {}),
+        },
+      ],
+      [dataAsNestedObject._id, dataAsNestedObject._index, searchHit]
+    );
+
+    const { runWorkflowMenuItem: documentWorkflowMenuItem, runDocumentWorkflowPanel } =
+      useRunDocumentWorkflowPanel({
+        closePopover: closePopoverHandler,
+        documents,
+      });
+
     // items to render in the dropdown
     const items: AlertTableContextMenuItem[] = useMemo(
-      () => [
-        ...addToCaseActionItems,
-        ...alertsActionItems,
-        ...hostIsolationActionItems,
-        ...endpointResponseActionsConsoleItems,
-        ...(osqueryAvailable ? [osqueryActionItem] : []),
-        ...investigateInTimelineActionItems,
-      ],
+      () =>
+        isRemoteDocument
+          ? [...investigateInTimelineActionItems]
+          : [
+              ...addToCaseActionItems,
+              ...alertsActionItems,
+              ...(isAlert ? alertWorkflowMenuItem : documentWorkflowMenuItem),
+              ...hostIsolationActionItems,
+              ...endpointResponseActionsConsoleItems,
+              ...(osqueryAvailable ? [osqueryActionItem] : []),
+              ...investigateInTimelineActionItems,
+            ],
       [
         addToCaseActionItems,
         alertsActionItems,
+        isAlert,
+        isRemoteDocument,
+        alertWorkflowMenuItem,
+        documentWorkflowMenuItem,
         hostIsolationActionItems,
         endpointResponseActionsConsoleItems,
         osqueryAvailable,
@@ -341,12 +394,11 @@ export const TakeActionDropdown = memo(
 
     // panels rendered in the context menu
     const panels = [
-      {
-        id: 0,
-        items,
-      },
-      ...alertTagsPanels,
-      ...alertAssigneesPanels,
+      { id: 0, items },
+      ...(!isRemoteDocument ? alertTagsPanels : []),
+      ...(!isRemoteDocument ? (isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel) : []),
+      ...(!isRemoteDocument ? alertAssigneesPanels : []),
+      ...(!isRemoteDocument ? statusActionPanels : []),
     ];
 
     const takeActionButton = useMemo(
@@ -355,7 +407,7 @@ export const TakeActionDropdown = memo(
           data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID}
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopoverHandler}
         >
           {TAKE_ACTION}

@@ -524,6 +524,72 @@ describe('versioned', () => {
   });
 });
 
+describe('serverTiming', () => {
+  it('defaults to true in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      serverTiming: true,
+    });
+  });
+
+  it('defaults to false in production', () => {
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      serverTiming: false,
+    });
+  });
+
+  it('allows enabling in dev', () => {
+    expect(config.schema.validate({ serverTiming: true }, { dev: true })).toMatchObject({
+      serverTiming: true,
+    });
+  });
+
+  it('allows disabling in dev', () => {
+    expect(config.schema.validate({ serverTiming: false }, { dev: true })).toMatchObject({
+      serverTiming: false,
+    });
+  });
+
+  it('throws when trying to enable in production', () => {
+    expect(() => config.schema.validate({ serverTiming: true }, { dev: false })).toThrow();
+  });
+});
+
+describe('serverTimingElasticsearch', () => {
+  it('defaults to true in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      serverTimingElasticsearch: true,
+    });
+  });
+
+  it('defaults to false in production', () => {
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      serverTimingElasticsearch: false,
+    });
+  });
+
+  it('allows enabling in dev', () => {
+    expect(
+      config.schema.validate({ serverTimingElasticsearch: true }, { dev: true })
+    ).toMatchObject({
+      serverTimingElasticsearch: true,
+    });
+  });
+
+  it('allows disabling in dev', () => {
+    expect(
+      config.schema.validate({ serverTimingElasticsearch: false }, { dev: true })
+    ).toMatchObject({
+      serverTimingElasticsearch: false,
+    });
+  });
+
+  it('throws when trying to enable in production', () => {
+    expect(() =>
+      config.schema.validate({ serverTimingElasticsearch: true }, { dev: false })
+    ).toThrow();
+  });
+});
+
 describe('restrictInternalApis', () => {
   it('is allowed on serverless and traditional', () => {
     expect(() => config.schema.validate({ restrictInternalApis: false }, {})).not.toThrow();
@@ -546,6 +612,24 @@ describe('restrictInternalApis', () => {
     expect(
       config.schema.validate({ restrictInternalApis: undefined }, { traditional: true })
     ).toMatchObject({ restrictInternalApis: true });
+  });
+});
+
+describe('excludeRoutes', () => {
+  it('defaults to empty array', () => {
+    expect(config.schema.validate({}).excludeRoutes).toEqual([]);
+  });
+
+  it('accepts a list of paths', () => {
+    expect(config.schema.validate({ excludeRoutes: ['/api/status'] })).toMatchObject({
+      excludeRoutes: ['/api/status'],
+    });
+  });
+
+  it('rejects entries without a leading slash', () => {
+    expect(() => config.schema.validate({ excludeRoutes: ['api/status'] })).toThrow(
+      'must start with a slash'
+    );
   });
 });
 
@@ -677,12 +761,12 @@ describe('http2 protocol', () => {
 });
 
 describe('prototypeHardening', () => {
-  it('defaults to false', () => {
-    expect(config.schema.validate({}).prototypeHardening).toBe(false);
+  it('defaults to true', () => {
+    expect(config.schema.validate({}).prototypeHardening).toBe(true);
   });
 
-  it('can be set to true', () => {
-    expect(config.schema.validate({ prototypeHardening: true }).prototypeHardening).toBe(true);
+  it('can be set to false', () => {
+    expect(config.schema.validate({ prototypeHardening: false }).prototypeHardening).toBe(false);
   });
 });
 

@@ -1,0 +1,110 @@
+openapi: 3.0.0
+info:
+  title: Read Rule Execution Results API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/rules/{ruleId}/execution/results:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: ReadRuleExecutionResults
+      summary: Returns unified execution results for a given rule from the Alerting Framework's execute events in the Event Log.
+      tags:
+        - Rule Execution Log API
+      parameters:
+        - name: ruleId
+          in: path
+          required: true
+          description: Saved object ID of the rule to get execution results for.
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter:
+                  type: object
+                  description: >-
+                    Filtering criteria for execution results.
+                    If omitted, defaults to the last 2 hours (from: now-2h, to: now).
+                  properties:
+                    outcome:
+                      type: array
+                      items:
+                        $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionStatus'
+                      maxItems: 3
+                      default: []
+                      description: Filter by execution outcome (success, warning, failure). Empty = all outcomes.
+                    run_type:
+                      type: array
+                      items:
+                        $ref: '../../model/execution_run_type.schema.yaml#/components/schemas/RuleRunType'
+                      maxItems: 2
+                      default: []
+                      description: Filter by run type (standard, backfill). Empty = all run types.
+                    from:
+                      type: string
+                      format: date-time
+                      description: Start of the time range (executions that started within this range).
+                    to:
+                      type: string
+                      format: date-time
+                      description: End of the time range (executions that started within this range).
+                  required:
+                    - from
+                    - to
+                sort:
+                  type: object
+                  description: Sorting configuration for execution results.
+                  properties:
+                    field:
+                      $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResultSortField'
+                      default: execution_start
+                      description: Field to sort results by.
+                    order:
+                      $ref: '../../../model/sorting.schema.yaml#/components/schemas/SortOrder'
+                      default: desc
+                      description: Sort order (asc or desc).
+                page:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  description: Page number to return.
+                per_page:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 20
+                  description: Number of results per page.
+              required: []
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../model/unified_execution_result.schema.yaml#/components/schemas/UnifiedExecutionResult'
+                  total:
+                    type: integer
+                    description: Total number of results matching the filter.
+                  page:
+                    type: integer
+                    description: Current page number (echoed from request).
+                  per_page:
+                    type: integer
+                    description: Number of results per page (echoed from request).
+                required:
+                  - data
+                  - total
+                  - page
+                  - per_page

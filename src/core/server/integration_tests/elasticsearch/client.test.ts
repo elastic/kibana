@@ -9,7 +9,7 @@
 
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { ReplaySubject, firstValueFrom } from 'rxjs';
 
 import type { Root } from '@kbn/core-root-server-internal';
 import {
@@ -35,8 +35,8 @@ describe('elasticsearch clients', () => {
   });
 
   afterAll(async () => {
-    await kibanaServer.stop();
-    await esServer.stop();
+    await kibanaServer?.stop();
+    await esServer?.stop();
   });
 
   it('does not return deprecation warning when x-elastic-product-origin header is set', async () => {
@@ -60,15 +60,16 @@ describe('elasticsearch clients', () => {
   });
 });
 
-function createFakeElasticsearchServer() {
-  const server = http.createServer((req, res) => {
-    // Reply with a 200 and empty response by default (intentionally malformed response)
-    res.writeHead(200);
-    res.end();
+function createFakeElasticsearchServer(): Promise<http.Server> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      // Reply with a 200 and empty response by default (intentionally malformed response)
+      res.writeHead(200);
+      res.end();
+    });
+    server.on('error', reject);
+    server.listen(esTestConfig.getPort(), () => resolve(server));
   });
-  server.listen(esTestConfig.getPort());
-
-  return server;
 }
 
 describe('fake elasticsearch', () => {
@@ -77,8 +78,13 @@ describe('fake elasticsearch', () => {
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
-    kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
-    esServer = createFakeElasticsearchServer();
+    kibanaServer = createRootWithCorePlugins({
+      elasticsearch: {
+        healthCheck: { retry: 1 },
+      },
+      status: { allowAnonymous: true },
+    });
+    esServer = await createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();
@@ -87,8 +93,9 @@ describe('fake elasticsearch', () => {
 
     // give kibanaServer's status Observables enough time to bootstrap
     // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
+    // set healthCheckRetry to 1, for faster testing
     // see https://github.com/elastic/kibana/issues/129754
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   });
 
   afterAll(async () => {

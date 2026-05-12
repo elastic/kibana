@@ -10,9 +10,17 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ElasticsearchClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ExperimentalFeatures } from '../../common';
+import { getRulesMigrationTools } from '../../server/lib/siem_migrations/rules/task/agent/tools';
 import type { DashboardMigrationsRetriever } from '../../server/lib/siem_migrations/dashboards/task/retrievers';
 import { getDashboardMigrationAgent } from '../../server/lib/siem_migrations/dashboards/task/agent';
 import type { DashboardMigrationTelemetryClient } from '../../server/lib/siem_migrations/dashboards/task/dashboard_migrations_telemetry_client';
@@ -23,6 +31,8 @@ import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/r
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/task/util/esql_knowledge_base';
 import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
+import type { RuleMigrationsDataClient } from '../../server/lib/siem_migrations/rules/data/rule_migrations_data_client';
+import { getBuildAgent } from '../../server/lib/detection_engine/ai_rule_creation/agent/build_agent_graph';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -36,19 +46,24 @@ const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
 const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
 const dashboardMigrationsRetriever = {} as DashboardMigrationsRetriever;
 
-const createLlmInstance = () => {
-  return mockLlm;
-};
+const createLlmInstance = () => ({
+  ...mockLlm,
+  bindTools: () => null,
+});
 
 async function getSiemRuleMigrationGraph(logger: Logger): Promise<Drawable> {
-  const model = createLlmInstance() as ChatModel;
+  const model = createLlmInstance() as unknown as ChatModel;
   const telemetryClient = {} as RuleMigrationTelemetryClient;
+  const tools = getRulesMigrationTools('some_migration_id', {
+    rulesClient: {} as unknown as RuleMigrationsDataClient,
+  });
   const graph = getRuleMigrationAgent({
     model,
     esqlKnowledgeBase,
     ruleMigrationsRetriever,
     logger,
     telemetryClient,
+    tools,
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -64,6 +79,10 @@ async function getSiemDashboardMigrationGraph(logger: Logger): Promise<Drawable>
     dashboardMigrationsRetriever,
     logger,
     telemetryClient,
+    inference: {} as InferenceServerStart,
+    request: {} as KibanaRequest,
+    connectorId: 'test-connector-id',
+    experimentalFeatures: {} as unknown as ExperimentalFeatures,
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -76,6 +95,20 @@ async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
     logger,
     request: {} as unknown as KibanaRequest,
     createLlmInstance: (() => ({ bindTools: () => null })) as unknown as CreateLlmInstance,
+  });
+  return graph.getGraphAsync({ xray: true });
+}
+
+async function getAiRuleCreationGraph(logger: Logger): Promise<Drawable> {
+  const graph = await getBuildAgent({
+    model: mockLlm,
+    esClient: {} as unknown as ElasticsearchClient,
+    connectorId: 'test-connector-id',
+    inference: {} as unknown as InferenceServerStart,
+    logger,
+    request: {} as unknown as KibanaRequest,
+    savedObjectsClient: {} as unknown as SavedObjectsClientContract,
+    rulesClient: {} as unknown as RulesClient,
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -113,5 +146,9 @@ export const draw = async () => {
   await drawGraph({
     getGraphAsync: getSiemDashboardMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/dashboard_migration_agent_graph.png',
+  });
+  await drawGraph({
+    getGraphAsync: getAiRuleCreationGraph,
+    outputFilename: '../../docs/ai_rule_creation/img/ai_rule_creation_graph.png',
   });
 };

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -10,9 +10,13 @@
     "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
-    "../../../../../typings/index.d.ts"
+    "../../../../../typings/index.d.ts",
+    "test/scout/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
+    "@kbn/scout",
+    "@kbn/core-http-common",
     "@kbn/core",
     "@kbn/ui-actions-plugin",
     "@kbn/share-plugin",
@@ -58,8 +62,15 @@
     "@kbn/logging",
     "@kbn/core-execution-context-server",
     "@kbn/data-service-server",
-    "@kbn/css-utils",
-    "@kbn/core-elasticsearch-client-server-mocks"
+    "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/field-formats-common",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/cps",
+    "@kbn/cps-utils",
+    "@kbn/apm-utils",
+    "@kbn/std",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/css-utils"
   ],
   "exclude": ["target/**/*"]
 }

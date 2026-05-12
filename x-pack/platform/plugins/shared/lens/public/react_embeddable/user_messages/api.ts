@@ -6,33 +6,31 @@
  */
 
 import type { Adapters } from '@kbn/inspector-plugin/common';
+import type {
+  UserMessagesGetter,
+  UserMessage,
+  FramePublicAPI,
+  SharingSavedObjectProps,
+  LensPublicCallbacks,
+  VisualizationContextHelper,
+  LensInternalApi,
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,
   handleMessageOverwriteFromConsumer,
 } from '../../app_plugin/get_application_user_messages';
 import { getDatasourceLayers } from '../../state_management/utils';
-import type {
-  UserMessagesGetter,
-  UserMessage,
-  FramePublicAPI,
-  SharingSavedObjectProps,
-} from '../../types';
 import {
   getActiveDatasourceIdFromDoc,
   getActiveVisualizationIdFromDoc,
   getInitialDataViewsObject,
 } from '../../utils';
-import type {
-  LensPublicCallbacks,
-  LensEmbeddableStartServices,
-  VisualizationContextHelper,
-  LensApi,
-  LensInternalApi,
-} from '../types';
 import { getLegacyURLConflictsMessage, hasLegacyURLConflict } from './checks';
 import { getSearchWarningMessages } from '../../utils';
 import { addLog } from '../logger';
+import type { LensEmbeddableStartServices } from '../types';
 
 function getUpdatedState(
   getVisualizationContext: VisualizationContextHelper['getVisualizationContext'],
@@ -99,7 +97,8 @@ export function buildUserMessagesHelpers(
   internalApi: LensInternalApi,
   { coreStart, data, visualizationMap, datasourceMap, spaces }: LensEmbeddableStartServices,
   onBeforeBadgesRender: LensPublicCallbacks['onBeforeBadgesRender'],
-  metaInfo?: SharingSavedObjectProps
+  metaInfo?: SharingSavedObjectProps,
+  getConsumerMessages?: () => UserMessage[]
 ): {
   getUserMessages: UserMessagesGetter;
   addUserMessages: (messages: UserMessage[]) => void;
@@ -145,6 +144,7 @@ export function buildUserMessagesHelpers(
         visualizationState: {
           state: activeVisualizationState,
           activeId: activeVisualizationId,
+          selectedLayerId: null,
         },
         visualization: activeVisualization,
         activeDatasource,
@@ -202,8 +202,26 @@ export function buildUserMessagesHelpers(
       }) ?? []),
       ...(activeVisualization?.getUserMessages?.(activeVisualizationState, {
         frame: framePublicAPI,
+        setState: (newStateOrUpdater) => {
+          const newVisState =
+            typeof newStateOrUpdater === 'function'
+              ? newStateOrUpdater(activeVisualizationState)
+              : newStateOrUpdater;
+          internalApi.updateAttributes({
+            ...activeAttributes,
+            state: {
+              ...activeAttributes.state,
+              visualization: newVisState,
+            },
+          });
+        },
       }) ?? [])
     );
+
+    const consumerMessages = getConsumerMessages?.() ?? [];
+
+    // When an internal error occurs (block chart rendering), the consumer message is not displayed.
+    userMessages.push(...consumerMessages);
 
     return handleMessageOverwriteFromConsumer(
       filterAndSortUserMessages(

@@ -20,6 +20,7 @@ export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
   host?: string;
+  isPackagedEnvironment?: boolean;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -100,7 +101,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       // If the request data contains multiple data objects (e.g. bulk request)
       // ES only accepts it if each object is on a single line
       // Therefore, we need to remove all new line characters from each data object
-      const unformattedData = req.data.map((body) => body.replaceAll('\n', ''));
+      const unformattedData = req.data.map((body) => body.replace(/[\r\n]/g, ''));
 
       let data = collapseLiteralStrings(unformattedData.join('\n'));
       if (data) {
@@ -117,6 +118,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           data,
           asResponse: true,
           host: args.host,
+          isPackagedEnvironment: args.isPackagedEnvironment,
         });
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);

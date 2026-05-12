@@ -27,16 +27,10 @@ export const esqlValidationErrorMessage = (message: string) =>
     defaultMessage: 'Error validating ES|QL: "{message}"',
   });
 
-export const ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.esqlValidation.missingMetadataOperatorInQueryError',
+export const ESQL_MISSING_ID_FIELD_WARNING = i18n.translate(
+  'xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldWarning',
   {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`,
-  }
-);
-
-export const ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldInQueryError',
-  {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
+    defaultMessage:
+      'ES|QL query does not return the _id metadata field. This may result in duplicate alerts. Try adding "METADATA _id" to your FROM command and ensure _id is not excluded by KEEP or DROP commands.',
   }
 );

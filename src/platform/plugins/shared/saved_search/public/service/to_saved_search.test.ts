@@ -10,7 +10,7 @@
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import type { SavedSearchByValueAttributes } from './types';
+import type { SavedSearchByValueAttributes } from '../../common';
 import { byValueToSavedSearch } from './to_saved_search';
 import type { DiscoverSessionTab } from '../../server';
 
@@ -32,16 +32,19 @@ describe('toSavedSearch', () => {
           columns: ['message', 'extension'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
     ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
+      description: '',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -59,16 +62,19 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "message",
           "extension",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
@@ -125,6 +131,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",
@@ -162,16 +169,19 @@ describe('toSavedSearch', () => {
           columns: ['my', 'tab', 'columns'],
           grid: {},
           hideChart: false,
+          hideTable: false,
           isTextBasedQuery: false,
         },
       },
     ];
     const attributes: SavedSearchByValueAttributes = {
       title: 'saved-search-title',
+      description: '',
       sort: [['@timestamp', 'desc']],
       columns: ['message', 'extension'],
       grid: {},
       hideChart: false,
+      hideTable: false,
       isTextBasedQuery: false,
       kibanaSavedObjectMeta: {
         searchSourceJSON: '{}',
@@ -189,17 +199,20 @@ describe('toSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "my",
           "tab",
           "columns",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
         "managed": false,
@@ -257,6 +270,7 @@ describe('toSavedSearch', () => {
               ],
               "grid": Object {},
               "hideChart": false,
+              "hideTable": false,
               "isTextBasedQuery": false,
               "kibanaSavedObjectMeta": Object {
                 "searchSourceJSON": "{}",

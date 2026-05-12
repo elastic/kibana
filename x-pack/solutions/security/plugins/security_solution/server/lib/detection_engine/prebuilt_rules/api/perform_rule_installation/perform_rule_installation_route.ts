@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   PERFORM_RULE_INSTALLATION_URL,
   PerformRuleInstallationRequestBody,
@@ -29,7 +30,7 @@ export const performRuleInstallationRoute = (
       path: PERFORM_RULE_INSTALLATION_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_ALL],
         },
       },
       options: {

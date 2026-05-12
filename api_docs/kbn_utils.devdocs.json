@@ -27,10 +27,14 @@
           "Readable",
           ")[], options: ",
           "TransformOptions",
-          " | undefined) => ",
+          "<",
+          "Transform",
+          "> | undefined) => ",
           "PassThrough"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +51,10 @@
               ")[]"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -62,10 +69,15 @@
             ],
             "signature": [
               "TransformOptions",
-              " | undefined"
+              "<",
+              "Transform",
+              "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream_providers.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TransformOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -91,6 +103,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,13 +115,16 @@
             "tags": [],
             "label": "initial",
             "description": [
-              "The initial value that subsequent\nitems will concat with"
+              "The initial value that subsequent"
             ],
             "signature": [
               "T | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/concat_stream.ts",
+            "lineNumber": 34,
+            "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -127,6 +144,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/filter_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,6 +160,8 @@
               "(obj: T) => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/filter_stream.ts",
+            "lineNumber": 12,
+            "columnNumber": 39,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -165,6 +186,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/intersperse_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,6 +202,8 @@
               "string | Buffer"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/intersperse_stream.ts",
+            "lineNumber": 33,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -203,6 +228,8 @@
           "Readable"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/list_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,6 +246,8 @@
               "T | T[]"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/list_stream.ts",
+            "lineNumber": 19,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -239,6 +268,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/map_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -253,6 +284,8 @@
               "(value: T, i: number) => void"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/map_stream.ts",
+            "lineNumber": 12,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -276,6 +309,8 @@
           "[]]) => Promise<T>"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/promise_from_streams.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -294,6 +329,8 @@
               "[]]"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/promise_from_streams.ts",
+            "lineNumber": 34,
+            "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -318,6 +355,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/reduce_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -332,6 +371,8 @@
               "(value: any, chunk: T, enc: string) => T"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/reduce_stream.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -343,13 +384,16 @@
             "tags": [],
             "label": "initial",
             "description": [
-              "Initial value for the stream, if undefined\nthen the first chunk provided is used as the\ninitial value."
+              "Initial value for the stream, if undefined"
             ],
             "signature": [
               "T | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/reduce_stream.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -369,6 +413,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/replace_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -383,6 +429,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/replace_stream.ts",
+            "lineNumber": 12,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -398,6 +446,8 @@
               "string | Buffer"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/replace_stream.ts",
+            "lineNumber": 12,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -422,6 +472,8 @@
           "Transform"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/streams/split_stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -436,6 +488,49 @@
               "string | Uint8Array"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/streams/split_stream.ts",
+            "lineNumber": 31,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
+        "id": "def-server.loadJsonFile",
+        "type": "Function",
+        "tags": [],
+        "label": "loadJsonFile",
+        "description": [
+          "\nSynchronously reads and parses a JSON file at the given path.\n"
+        ],
+        "signature": [
+          "(path: string) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utils",
+            "id": "def-server.loadJsonFile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "Absolute path to the JSON file."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -457,6 +552,8 @@
           "(object: object) => string"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -471,6 +568,47 @@
               "object"
             ],
             "path": "src/platform/packages/shared/kbn-utils/src/json/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utils",
+        "id": "def-server.toValidIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "toValidIndexName",
+        "description": [
+          "Converts a given string into a valid Elasticsearch index name."
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-utils/src/index/to_valid_index_name.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/utils",
+            "id": "def-server.toValidIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-utils/src/index/to_valid_index_name.ts",
+            "lineNumber": 13,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -494,6 +632,8 @@
           "{ readonly data: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-utils/src/path/index.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

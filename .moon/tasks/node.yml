@@ -1,10 +1,31 @@
 $schema: https://moonrepo.dev/schemas/tasks.json
 
+inheritedBy:
+  toolchain: node
+
 fileGroups:
   sharedGlobals: [ ]
   default:
     - '**/*'
   production: [ ]
-  src:
-    - 'src/**/*'
 
+tasks:
+  # This task can be used to make a task depend on the source files in the workspace
+  source:
+    command: 'true'
+    inputs:
+      - '@group(src)'
+    options:
+      internal: true
+      runFromWorkspaceRoot: true
+
+  # This task can be used to make a task depend on the full upstream source files of a select project
+  source-upstream:
+    command: 'true'
+    inputs:
+      - '@group(src)'
+    deps:
+      - '^:source-upstream'
+    options:
+      internal: true
+      runFromWorkspaceRoot: true

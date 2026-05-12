@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type {
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
@@ -21,6 +21,7 @@ import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from './use_fetch_prebuilt_rules_deprecation_review_query';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
 export const PERFORM_SPECIFIC_RULES_INSTALLATION_KEY = [
@@ -49,6 +50,8 @@ export const usePerformSpecificRulesInstallMutation = (
     useInvalidateFetchPrebuiltRulesInstallReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
+  const invalidateFetchPrebuiltRulesDeprecationReview =
+    useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
   const { mutateAsync } = useBulkActionMutation();
 
   return useMutation<
@@ -70,6 +73,7 @@ export const usePerformSpecificRulesInstallMutation = (
         invalidateFetchPrebuiltRulesInstallReview();
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
+        invalidateFetchPrebuiltRulesDeprecationReview();
 
         const [response, , { enable }] = args;
 

@@ -5,32 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import type { IStorageClient, StorageSettings } from '@kbn/storage-adapter';
-import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { Streams } from '@kbn/streams-schema';
+import type { CoreSetup, IUiSettingsClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { LockManagerService } from '@kbn/lock-manager';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from '../../types';
-import type { AssetClient } from './assets/asset_client';
+import { createStreamsStorageClient } from './storage/streams_storage_client';
 import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
-import { migrateOnRead } from './helpers/migrate_on_read';
-import type { SystemClient } from './system/system_client';
-
-export const streamsStorageSettings = {
-  name: '.kibana_streams',
-  schema: {
-    properties: {
-      name: types.keyword(),
-      description: types.text(),
-      ingest: types.object({ enabled: false }),
-      group: types.object({ enabled: false }),
-    },
-  },
-} satisfies StorageSettings;
-
-export type StreamsStorageSettings = typeof streamsStorageSettings;
-export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, Streams.all.Definition>;
+import type { AttachmentClient } from './attachments/attachment_client';
+import type { FeatureClient } from './feature';
 
 export class StreamsService {
   constructor(
@@ -39,43 +22,44 @@ export class StreamsService {
     private readonly isDev: boolean
   ) {}
 
-  async getClientWithRequest({
-    request,
-    assetClient,
-    queryClient,
-    systemClient,
+  async getClient({
+    attachmentClient,
+    getQueryClient,
+    getFeatureClient,
+    esClient,
+    esClientAsInternalUser,
+    uiSettingsClient,
+    isSecurityEnabled,
   }: {
-    request: KibanaRequest;
-    assetClient: AssetClient;
-    queryClient: QueryClient;
-    systemClient: SystemClient;
+    attachmentClient: AttachmentClient;
+    getQueryClient?: () => Promise<QueryClient>;
+    getFeatureClient?: () => Promise<FeatureClient>;
+    esClient: ElasticsearchClient;
+    esClientAsInternalUser: ElasticsearchClient;
+    uiSettingsClient: IUiSettingsClient;
+    isSecurityEnabled: boolean;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
-    const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
-
-    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, Streams.all.Definition>(
-      scopedClusterClient.asInternalUser,
-      logger,
-      streamsStorageSettings,
-      {
-        migrateSource: migrateOnRead,
-      }
+    const isWiredStreamViewsEnabled = await uiSettingsClient.get<boolean>(
+      OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
     );
 
     return new StreamsClient({
-      assetClient,
-      queryClient,
-      systemClient,
+      attachmentClient,
+      getQueryClient,
       logger,
-      scopedClusterClient,
+      getFeatureClient,
+      esClient,
+      esClientAsInternalUser,
       lockManager: new LockManagerService(this.coreSetup, logger),
-      storageClient: storageAdapter.getClient(),
-      request,
+      storageClient: createStreamsStorageClient(esClientAsInternalUser, logger),
       isServerless,
+      isSecurityEnabled,
+      isWiredStreamViewsEnabled,
       isDev: this.isDev,
     });
   }

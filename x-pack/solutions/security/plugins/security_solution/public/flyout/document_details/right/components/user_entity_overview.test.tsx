@@ -4,20 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
+import { USER_PREVIEW_BANNER, UserEntityOverview } from './user_entity_overview';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
+  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
-  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
-  ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
+  ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -30,14 +31,15 @@ import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const userName = 'user';
+const identityFields = { 'user.name': userName };
 const domain = 'n54bg2lfc7';
 const lastSeen = '2022-04-08T18:35:45.064Z';
 const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
 const from = '2022-04-05T12:00:00.000Z';
-const to = '2022-04-08T12:00:00.;000Z';
+const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
 const userData = { user: { domain: [domain] } };
-const riskLevel = [{ user: { risk: { calculated_level: 'Medium' } } }];
+const riskLevel = [{ user: { risk: { calculated_level: 'Moderate' } } }];
 
 const panelContextValue = {
   ...mockContextValue,
@@ -48,6 +50,14 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 jest.mock('../../../../common/lib/kibana');
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -94,7 +104,7 @@ const renderUserEntityOverview = () =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={panelContextValue}>
-        <UserEntityOverview userName={userName} />
+        <UserEntityOverview userName={userName} identityFields={identityFields} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -114,7 +124,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId } = renderUserEntityOverview();
 
       expect(getByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).toHaveTextContent(domain);
-      expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Medium');
+      expect(getByTestId(ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID)).toHaveTextContent('Moderate');
     });
 
     it('should render correctly if returned data is null', () => {
@@ -159,7 +169,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
+            <UserEntityOverview userName={userName} identityFields={identityFields} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -174,7 +184,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
+            <UserEntityOverview userName={userName} identityFields={identityFields} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -189,7 +199,7 @@ describe('<UserEntityOverview />', () => {
       const { getByTestId } = render(
         <TestProviders>
           <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} />
+            <UserEntityOverview userName={userName} identityFields={identityFields} />
           </DocumentDetailsContext.Provider>
         </TestProviders>
       );
@@ -201,6 +211,8 @@ describe('<UserEntityOverview />', () => {
           userName,
           scopeId: mockContextValue.scopeId,
           banner: USER_PREVIEW_BANNER,
+          contextID: mockContextValue.scopeId,
+          entityId: undefined,
         },
       });
     });

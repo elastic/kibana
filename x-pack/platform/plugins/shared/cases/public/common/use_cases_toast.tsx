@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -25,6 +25,8 @@ import { generateCaseViewPath } from './navigation';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
+  CASE_ALERT_SUCCESS_OBSERVABLES_TEXT,
+  CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
@@ -32,11 +34,12 @@ import {
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 import { TruncatedText } from '../components/truncated_text';
+import type { ObservablePost } from '../../common/types/api';
 
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
-    if (attachment.type === AttachmentType.alert) {
+    if (attachment.type === AttachmentType.alert && `alertId` in attachment) {
       // alertId might be an array
       if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
         alertsCount += attachment.alertId.length;
@@ -82,14 +85,23 @@ function getToastContent({
   if (content !== undefined) {
     return content;
   }
+
+  let toastContent;
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === AttachmentType.alert && theCase.settings.syncAlerts) {
-        return CASE_ALERT_SUCCESS_SYNC_TEXT;
+      if (attachment.type === AttachmentType.alert) {
+        if (theCase.settings.syncAlerts && theCase.settings.extractObservables) {
+          toastContent = CASE_ALERT_SUCCESS_SYNC_AND_EXTRACT_TEXT;
+        } else if (theCase.settings.syncAlerts) {
+          toastContent = CASE_ALERT_SUCCESS_SYNC_TEXT;
+        } else if (theCase.settings.extractObservables) {
+          toastContent = CASE_ALERT_SUCCESS_OBSERVABLES_TEXT;
+        }
       }
     }
   }
-  return undefined;
+
+  return toastContent;
 }
 
 const isServerError = (error: Error | ServerError): error is ServerError =>
@@ -123,11 +135,13 @@ export const useCasesToast = () => {
       showSuccessAttach: ({
         theCase,
         attachments,
+        observables,
         title,
         content,
       }: {
         theCase: CaseUI;
         attachments?: CaseAttachmentsWithoutOwner;
+        observables?: ObservablePost[];
         title?: string;
         content?: string;
       }) => {
@@ -170,11 +184,11 @@ export const useCasesToast = () => {
           toasts.addError(getError(error), { title: getErrorMessage(error), ...opts });
         }
       },
-      showSuccessToast: (title: string) => {
-        toasts.addSuccess({ title, className: 'eui-textBreakWord' });
+      showSuccessToast: (title: string, text?: ToastInputFields['text']) => {
+        toasts.addSuccess({ title, text, className: 'eui-textBreakWord' });
       },
-      showDangerToast: (title: string) => {
-        toasts.addDanger({ title, className: 'eui-textBreakWord' });
+      showDangerToast: (title: string, text?: string) => {
+        toasts.addDanger({ title, text, className: 'eui-textBreakWord' });
       },
       showInfoToast: (title: string, text?: string) => {
         toasts.addInfo({

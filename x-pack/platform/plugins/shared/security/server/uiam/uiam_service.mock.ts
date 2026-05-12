@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { UiamServicePublic } from './uiam_service';
+import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
+
+export const uiamServiceMock = {
+  create: (): jest.Mocked<UiamServicePublic> => ({
+    getAuthenticationHeaders: jest.fn().mockImplementation((accessToken: string) => ({
+      authorization: `Bearer ${accessToken}`,
+      [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+    })),
+    getClientAuthentication: jest.fn(),
+    refreshSessionTokens: jest
+      .fn()
+      .mockResolvedValue({ accessToken: 'new-access', refreshToken: 'new-refresh' }),
+    invalidateSessionTokens: jest.fn().mockResolvedValue(undefined),
+    grantApiKey: jest.fn().mockResolvedValue({
+      id: 'mock-api-key-id',
+      key: 'mock-api-key-value',
+      description: 'mock-api-key-name',
+    }),
+    exchangeOAuthToken: jest.fn().mockResolvedValue('mock-ephemeral-token'),
+    revokeApiKey: jest.fn().mockResolvedValue(undefined),
+    convertApiKeys: jest.fn().mockResolvedValue({ results: [] }),
+    createOAuthClient: jest.fn().mockResolvedValue({
+      id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    }),
+    listOAuthClients: jest.fn().mockResolvedValue({ clients: [] }),
+    updateOAuthClient: jest.fn().mockResolvedValue({
+      id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+    }),
+    revokeOAuthClient: jest.fn().mockResolvedValue({
+      id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      revoked: true,
+    }),
+    listOAuthConnections: jest.fn().mockResolvedValue({ connections: [] }),
+    updateOAuthConnection: jest.fn().mockResolvedValue({
+      id: 'mock-connection-id',
+      client_id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      name: 'mock-connection-name',
+    }),
+    revokeOAuthConnection: jest.fn().mockResolvedValue({
+      id: 'mock-connection-id',
+      client_id: 'mock-client-id',
+      resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+      revoked: true,
+    }),
+  }),
+};

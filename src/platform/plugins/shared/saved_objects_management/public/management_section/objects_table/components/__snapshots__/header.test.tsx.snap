@@ -19,7 +19,7 @@ exports[`Header should render normally 1`] = `
     Array [
       <EuiButtonEmpty
         data-test-subj="exportAllObjects"
-        iconType="exportAction"
+        iconType="upload"
         onClick={[Function]}
         size="s"
       >
@@ -35,7 +35,7 @@ exports[`Header should render normally 1`] = `
       </EuiButtonEmpty>,
       <EuiButtonEmpty
         data-test-subj="importObjects"
-        iconType="importAction"
+        iconType="download"
         onClick={[Function]}
         size="s"
       >

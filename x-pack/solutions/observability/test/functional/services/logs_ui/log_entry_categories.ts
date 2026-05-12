@@ -18,7 +18,7 @@ export function LogEntryCategoriesPageProvider({ getPageObjects, getService }: F
     },
 
     async getNoDataScreen(): Promise<WebElementWrapper> {
-      return await testSubjects.find('noDataPage');
+      return await testSubjects.find('kbnNoDataPage');
     },
 
     async getSetupScreen(): Promise<WebElementWrapper> {

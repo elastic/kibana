@@ -1,0 +1,155 @@
+# Continuous KI (Knowledge Indicator) extraction workflow.
+#
+# Runs on a schedule and orchestrates feature identification across managed streams:
+#   1. Fetches eligible streams from the _eligible API endpoint (respects
+#      interval, exclusions, concurrency).
+#   2. Schedules ALL candidate streams, confirming each reaches in_progress
+#      before moving to the next.
+#   3. Polls each stream sequentially until it reaches a terminal state
+#      (completed/failed), then captures the result.
+#
+# Values below (timeouts, intervals, defaults) must stay in sync with the
+# constants in common/constants.ts — see continuous_extraction_workflow.test.ts.
+
+version: "1"
+name: ".streams-continuous-ki-extraction"
+description: "This workflow is used by the system and should not be modified."
+settings:
+  # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
+  timeout: "9m"
+  # Only one instance of this workflow runs at a time; overlapping triggers are dropped.
+  concurrency:
+    key: streams-continuous-ki-extraction
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "10m"
+inputs:
+  - name: maxScheduledStreams
+    type: number
+    default: 5
+    description: "Max streams to schedule per run; remaining eligible streams are skipped."
+  - name: lookbackHours
+    type: number
+    default: 24
+    description: "Hours of data to sample when identifying KIs."
+  - name: extractionIntervalHours
+    type: number
+    description: "Override for the min hours between extractions per stream. When omitted the Advanced Setting is used."
+  - name: excludedStreamPatterns
+    type: string
+    description: "Override for the comma-separated exclude patterns. When omitted the Advanced Setting is used."
+steps:
+  # Step 1: Fetch eligible streams from the classification endpoint.
+  - name: get_eligible
+    type: kibana.request
+    with:
+      method: GET
+      path: |-
+        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}
+        {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
+        {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
+      use_server_info: true
+      headers:
+        x-elastic-internal-origin: "kibana"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+
+  # Step 2: Only proceed if there are candidates to schedule.
+  - name: has_candidates
+    type: if
+    condition: "steps.get_eligible.output.candidates[0].streamName:*"
+    steps:
+      # Phase 1: Schedule all candidate streams, confirming each reaches in_progress.
+      - name: schedule_all
+        type: foreach
+        foreach: "${{ steps.get_eligible.output.candidates }}"
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: schedule_task
+            type: kibana.request
+            with:
+              method: POST
+              path: "/internal/streams/{{ foreach.item.streamName }}/features/_task"
+              use_server_info: true
+              headers:
+                x-elastic-internal-origin: "kibana"
+              body:
+                action: "schedule"
+                from: "${{ steps.get_eligible.output.timeRange.from }}"
+                to: "${{ steps.get_eligible.output.timeRange.to }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: "5s"
+                strategy: exponential
+          - name: await_in_progress
+            type: while
+            condition: "steps.verify_status.output.status:not_started"
+            steps:
+              - name: verify_status
+                type: kibana.request
+                with:
+                  method: GET
+                  path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
+                  use_server_info: true
+                  headers:
+                    x-elastic-internal-origin: "kibana"
+              - name: if_not_started_delay
+                type: if
+                condition: "steps.verify_status.output.status:not_started"
+                steps:
+                  - name: startup_delay
+                    type: wait
+                    with:
+                      duration: "1s"
+
+      # Phase 2: Poll each stream until it reaches a terminal state.
+      - name: collect_results
+        type: foreach
+        foreach: "${{ steps.get_eligible.output.candidates }}"
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: poll_task
+            type: while
+            condition: "steps.check_status.output.status:in_progress"
+            steps:
+              - name: check_status
+                type: kibana.request
+                with:
+                  method: GET
+                  path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
+                  use_server_info: true
+                  headers:
+                    x-elastic-internal-origin: "kibana"
+                on-failure:
+                  retry:
+                    max-attempts: 3
+                    delay: "5s"
+                    strategy: exponential
+              # Only wait if the task is still running; skip the delay on terminal status.
+              - name: if_poll_delay
+                type: if
+                condition: "steps.check_status.output.status:in_progress"
+                steps:
+                  - name: poll_delay
+                    type: wait
+                    with:
+                      duration: "5s"
+          # Capture the final task result for this stream.
+          - name: task_result
+            type: data.set
+            with:
+              streamName: "{{ foreach.item.streamName }}"
+              status: "${{ steps.check_status.output.status }}"
+              durationMs: "${{ steps.check_status.output.durationMs }}"
+              features: "${{ steps.check_status.output.features }}"
+              iterations: "${{ steps.check_status.output.iterations }}"
+              totalTokensUsed: "${{ steps.check_status.output.totalTokensUsed }}"

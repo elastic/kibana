@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobType } from '../../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 import { useEnabledFeatures } from '../../contexts/ml';
 
@@ -27,6 +27,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
   return showNodeInfo ? (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.title"
@@ -48,6 +49,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
   ) : (
     <>
       <EuiCallOut
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.ml.jobsAwaitingNodeWarning.serverless.title"

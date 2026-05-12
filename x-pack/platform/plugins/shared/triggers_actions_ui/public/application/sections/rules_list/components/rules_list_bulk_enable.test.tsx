@@ -7,7 +7,7 @@
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   act,
   cleanup,
@@ -108,6 +108,10 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 });
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });

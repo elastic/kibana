@@ -7,20 +7,20 @@
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { Suspense, lazy } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { SLOPublicPluginsStart } from '../../..';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLORepositoryClient } from '../../../types';
-import type { EmbeddableSloProps } from './types';
+import type { AlertsCustomState } from './types';
 
 export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginsStart: SLOPublicPluginsStart,
   sloClient: SLORepositoryClient,
-  initialState?: EmbeddableSloProps
-): Promise<EmbeddableSloProps> {
+  initialState?: AlertsCustomState
+): Promise<AlertsCustomState> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
@@ -51,7 +51,7 @@ export async function openSloConfiguration(
                 <Suspense fallback={<EuiSkeletonText />}>
                   <LazySloConfiguration
                     initialInput={initialState}
-                    onCreate={(update: EmbeddableSloProps) => {
+                    onCreate={(update: AlertsCustomState) => {
                       flyoutSession.close();
                       resolve(update);
                     }}

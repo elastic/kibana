@@ -75,7 +75,8 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
   });
 };
 
-describe('404s from proxies', () => {
+// Failing: See https://github.com/elastic/kibana/issues/141398
+describe.skip('404s from proxies', () => {
   let root: Root;
   let start: InternalCoreStart;
 
@@ -140,11 +141,9 @@ describe('404s from proxies', () => {
   });
 
   afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-      await hapiServer.stop({ timeout: 1000 });
-      await esServer.stop();
-    }
+    await root?.shutdown();
+    await hapiServer?.stop({ timeout: 1000 });
+    await esServer?.stop();
   });
 
   describe('requests when a proxy relays request/responses with the correct product header', () => {

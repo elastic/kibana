@@ -10,11 +10,13 @@ import React, { useState, type FC, useEffect, useMemo, useCallback, useRef } fro
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { get, isEqual } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import type {
   AnomaliesTableData,
   ExplorerJob,
@@ -28,6 +30,9 @@ import { mlTableService } from '../../services/table_service';
 import { getColumns } from './anomalies_table_columns';
 import { RuleEditorFlyout } from '../rule_editor';
 import type { FocusTrapProps } from '../../util/create_focus_trap_props';
+import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from './build_alert_params_from_anomaly';
+import type { CustomRuleEditorSource } from '../../../../common/constants/usage_collection';
 
 interface AnomaliesTableProps {
   bounds?: TimeRangeBounds;
@@ -36,6 +41,10 @@ interface AnomaliesTableProps {
   influencerFilter?: (fieldName: string, fieldValue: string, action: FilterAction) => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
   selectedJobs: ExplorerJob[];
+  telemetrySource: Extract<
+    CustomRuleEditorSource,
+    'explorer_anomalies_table' | 'single_metric_viewer_anomalies_table'
+  >;
 }
 
 interface AnomaliesTableState {
@@ -58,7 +67,15 @@ export const getDefaultAnomaliesTableState = (): AnomaliesTableState => ({
 });
 
 export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
-  ({ bounds, tableData, filter, influencerFilter, sourceIndicesWithGeoFields, selectedJobs }) => {
+  ({
+    bounds,
+    tableData,
+    filter,
+    influencerFilter,
+    sourceIndicesWithGeoFields,
+    selectedJobs,
+    telemetrySource,
+  }) => {
     const [tableState, updateTableState] = usePageUrlState<AnomaliesTablePageUrlState>(
       'mlAnomaliesTable',
       getDefaultAnomaliesTableState()
@@ -80,6 +97,11 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
       ((anomaly: MlAnomaliesTableRecordExtended, focusTrapProps: FocusTrapProps) => void) | null
     >(null);
 
+    const [alertFlyoutVisible, setAlertFlyoutVisible] = useState(false);
+    const [alertFlyoutParams, setAlertFlyoutParams] = useState<
+      Partial<MlAnomalyDetectionAlertParams> | undefined
+    >();
+
     const {
       services: { mlServices },
     } = useMlKibana();
@@ -95,6 +117,12 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
 
     const handleUnsetShowFunction = useCallback(() => {
       setShowRuleEditorFlyout(null);
+    }, []);
+
+    const handleShowAnomalyAlertFlyout = useCallback((anomaly: MlAnomaliesTableRecordExtended) => {
+      const initialParams = buildAlertParamsFromAnomaly(anomaly);
+      setAlertFlyoutParams(initialParams);
+      setAlertFlyoutVisible(true);
     }, []);
 
     useEffect(
@@ -255,7 +283,8 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
           toggleRow,
           filter,
           influencerFilter,
-          sourceIndicesWithGeoFields
+          sourceIndicesWithGeoFields,
+          handleShowAnomalyAlertFlyout
         ),
       [
         bounds,
@@ -272,6 +301,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
         tableData.jobIds,
         tableData.showViewSeriesLink,
         toggleRow,
+        handleShowAnomalyAlertFlyout,
       ]
     );
 
@@ -317,7 +347,14 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
         <RuleEditorFlyout
           setShowFunction={handleSetShowFunction}
           unsetShowFunction={handleUnsetShowFunction}
+          telemetrySource={telemetrySource}
         />
+        {alertFlyoutVisible && alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => setAlertFlyoutVisible(false)}
+            initialParams={alertFlyoutParams}
+          />
+        )}
         <EuiInMemoryTable
           className="eui-textBreakWord"
           items={tableData.anomalies}
@@ -332,6 +369,9 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
           rowProps={getRowProps}
           data-test-subj="mlAnomaliesTable"
           onTableChange={onTableChange}
+          tableCaption={i18n.translate('xpack.ml.anomaliesTable.tableCaption', {
+            defaultMessage: 'Anomalies detected for the selected jobs',
+          })}
         />
       </>
     );

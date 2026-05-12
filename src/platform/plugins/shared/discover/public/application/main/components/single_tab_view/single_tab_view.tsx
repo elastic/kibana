@@ -7,24 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import useMount from 'react-use/lib/useMount';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import useLatest from 'react-use/lib/useLatest';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import { getDiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverAppState } from '../../state_management/redux';
+import { getDataStateContainer } from '../../state_management/discover_data_state_container';
 import {
   RuntimeStateProvider,
   internalStateActions,
+  createTabActionInjector,
+  selectTab,
   useInternalStateDispatch,
   useInternalStateSelector,
   useRuntimeState,
   useCurrentTabRuntimeState,
   useCurrentTabSelector,
   useCurrentTabAction,
+  TabInitializationStatus,
 } from '../../state_management/redux';
 import type {
   CustomizationCallback,
@@ -36,13 +41,12 @@ import {
   getConnectedCustomizationService,
 } from '../../../../customizations';
 import { NoDataPage } from './no_data_page';
-import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { DiscoverMainApp } from './main_app';
-import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
+import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -50,16 +54,8 @@ export interface SingleTabViewProps {
   urlStateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  searchSessionManager: DiscoverSearchSessionManager;
 }
-
-interface SessionInitializationState {
-  showNoDataPage: boolean;
-}
-
-type InitializeSingleSession = (options?: {
-  dataViewSpec?: DataViewSpec | undefined;
-  defaultUrlState?: DiscoverAppState;
-}) => Promise<SessionInitializationState>;
 
 export const SingleTabView = ({
   customizationContext,
@@ -67,92 +63,90 @@ export const SingleTabView = ({
   urlStateStorage,
   internalState,
   runtimeStateManager,
+  searchSessionManager,
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
 
-  const initializationState = useInternalStateSelector((state) => state.initializationState);
+  const appInitializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
-  const currentStateContainer = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.stateContainer$
-  );
-  const currentCustomizationService = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.customizationService$
-  );
-  const scopedProfilesManager = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.scopedProfilesManager$
-  );
-  const scopedEbtManager = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.scopedEbtManager$
-  );
-  const currentDataView = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.currentDataView$
-  );
+  const currentTabInitializationState = useCurrentTabSelector((tab) => tab.initializationState);
+  const currentDataStateContainer = useCurrentTabRuntimeState((tab) => tab.dataStateContainer$);
+  const currentCustomizationService = useCurrentTabRuntimeState((tab) => tab.customizationService$);
+  const scopedProfilesManager = useCurrentTabRuntimeState((tab) => tab.scopedProfilesManager$);
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
+  const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
-  const [initializeTabState, initializeTab] = useAsyncFunction<InitializeSingleSession>(
-    async ({ dataViewSpec, defaultUrlState } = {}) => {
-      const stateContainer = getDiscoverStateContainer({
-        tabId: currentTabId,
-        services,
-        customizationContext,
-        stateStorageContainer: urlStateStorage,
-        internalState,
-        runtimeStateManager,
-      });
+  const initializeTab = useLatest(
+    async ({
+      dataViewSpec,
+      defaultUrlState,
+      esqlControls,
+    }: {
+      dataViewSpec?: DataViewSpec | undefined;
+      defaultUrlState?: DiscoverAppState;
+      esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
+    } = {}) => {
+      const injectCurrentTab = createTabActionInjector(currentTabId);
+      const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
       const customizationService = await getConnectedCustomizationService({
-        stateContainer,
         customizationCallbacks,
+        internalState,
+        injectCurrentTab,
+        getCurrentTab,
+        runtimeStateManager,
+        stateStorage: urlStateStorage,
+        services,
       });
 
-      return dispatch(
+      const dataStateContainer = getDataStateContainer({
+        services,
+        searchSessionManager,
+        internalState,
+        runtimeStateManager,
+        injectCurrentTab,
+        getCurrentTab,
+      });
+
+      dispatch(
         initializeSingleTab({
           initializeSingleTabParams: {
-            stateContainer,
             customizationService,
+            dataStateContainer,
             dataViewSpec,
+            esqlControls,
             defaultUrlState,
           },
         })
       );
-    },
-    currentStateContainer && currentCustomizationService
-      ? { loading: false, value: { showNoDataPage: false } }
-      : { loading: true }
+    }
   );
 
-  useMount(() => {
-    if (!currentStateContainer || !currentCustomizationService) {
+  useEffect(() => {
+    if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NotStarted) {
       const historyLocationState = services.getScopedHistory<
         MainHistoryLocationState & { defaultState?: DiscoverAppState }
       >()?.location.state;
 
-      initializeTab({
+      initializeTab.current({
         dataViewSpec: historyLocationState?.dataViewSpec,
+        esqlControls: historyLocationState?.esqlControls,
         defaultUrlState: historyLocationState?.defaultState,
       });
     }
-  });
+  }, [currentTabInitializationState.initializationStatus, initializeTab, services]);
 
-  if (initializeTabState.loading) {
-    return <BrandedLoadingIndicator />;
+  if (currentTabInitializationState.initializationStatus === TabInitializationStatus.Error) {
+    return <InitializationError error={currentTabInitializationState.error} />;
   }
 
-  if (initializeTabState.error) {
-    return <InitializationError error={initializeTabState.error} />;
-  }
-
-  if (initializeTabState.value.showNoDataPage) {
+  if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NoData) {
     return (
-      <HideTabsBar>
+      <HideTabsBar customizationContext={customizationContext}>
         <NoDataPage
-          {...initializationState}
+          {...appInitializationState}
           onDataViewCreated={async (dataViewUnknown) => {
             await dispatch(internalStateActions.loadDataViewList());
             dispatch(
@@ -162,36 +156,34 @@ export const SingleTabView = ({
               })
             );
             const dataView = dataViewUnknown as DataView;
-            initializeTab({
+            initializeTab.current({
               defaultUrlState: dataView.id
                 ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
                 : undefined,
             });
           }}
           onESQLNavigationComplete={() => {
-            initializeTab();
+            initializeTab.current();
           }}
         />
       </HideTabsBar>
     );
   }
 
-  if (!currentStateContainer || !currentCustomizationService || !currentDataView) {
+  if (!currentDataStateContainer || !currentCustomizationService || !currentDataView) {
     return <BrandedLoadingIndicator />;
   }
 
   return (
     <DiscoverCustomizationProvider value={currentCustomizationService}>
-      <DiscoverMainProvider value={currentStateContainer}>
-        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <ScopedServicesProvider
-            scopedProfilesManager={scopedProfilesManager}
-            scopedEBTManager={scopedEbtManager}
-          >
-            <DiscoverMainApp stateContainer={currentStateContainer} />
-          </ScopedServicesProvider>
-        </RuntimeStateProvider>
-      </DiscoverMainProvider>
+      <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+        <ScopedServicesProvider
+          scopedProfilesManager={scopedProfilesManager}
+          scopedEBTManager={scopedEbtManager}
+        >
+          <DiscoverMainApp />
+        </ScopedServicesProvider>
+      </RuntimeStateProvider>
     </DiscoverCustomizationProvider>
   );
 };

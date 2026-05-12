@@ -19,18 +19,21 @@ import type {
   SearchSessionsFindResponse,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
+  SearchSessionStatus,
+  SearchSessionRequestInfo,
 } from '../../../common/search';
 import type { SearchSessionsConfigSchema } from '../../config';
 
 export { SearchStatus } from '../../../common/search';
 
 export interface IScopedSearchSessionsClient {
-  getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;
-  trackId: (
+  getId: (
     request: IKibanaSearchRequest,
-    searchId: string,
-    options: ISearchOptions
-  ) => Promise<void>;
+    options: ISearchOptions,
+    skipRealmCheck?: boolean
+  ) => Promise<string>;
+  trackId: (searchId: string, options: ISearchOptions, skipRealmCheck?: boolean) => Promise<void>;
   getSearchIdMapping: (sessionId: string) => Promise<Map<string, string>>;
   save: (
     sessionId: string,
@@ -49,9 +52,15 @@ export interface IScopedSearchSessionsClient {
     expires: Date
   ) => Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>>;
   status: (sessionId: string) => Promise<SearchSessionStatusResponse>;
+  updateStatuses: (sessionIds: string[]) => Promise<SearchSessionStatusesResponse>;
   getConfig: () => SearchSessionsConfigSchema;
 }
 
 export interface ISearchSessionService {
   asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSearchSessionsClient;
+}
+
+export interface SessionStatus {
+  status: SearchSessionStatus;
+  searchStatuses?: SearchSessionRequestInfo[];
 }

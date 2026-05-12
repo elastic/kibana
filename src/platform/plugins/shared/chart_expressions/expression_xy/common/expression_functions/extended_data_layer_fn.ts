@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { validateAccessor } from '@kbn/chart-expressions-common';
 import type { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
-import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
+import { EXTENDED_DATA_LAYER, LayerTypes, XScaleTypes } from '../constants';
 import { getAccessors, normalizeTable, getShowLines } from '../helpers';
 import {
   validateLinesVisibilityForChartType,
@@ -41,9 +41,16 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
 
   const showLines = getShowLines(args);
 
+  const xScaleType =
+    table.columns.find((column) => column.id === accessors.xAccessor)?.meta.type === 'date'
+      ? XScaleTypes.TIME
+      : args.xScaleType;
+
   return {
     type: EXTENDED_DATA_LAYER,
     ...args,
+    xScaleType,
+    isHistogram: xScaleType === XScaleTypes.TIME || args.isHistogram,
     layerType: LayerTypes.DATA,
     ...accessors,
     table: normalizedTable,

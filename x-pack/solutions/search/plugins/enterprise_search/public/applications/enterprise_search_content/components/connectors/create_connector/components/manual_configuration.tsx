@@ -175,7 +175,7 @@ GET connector-${rawName}/_search
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="edit"
-      icon="console"
+      icon="commandLine"
       onClick={() => {
         closePopover();
       }}
@@ -202,7 +202,7 @@ GET connector-${rawName}/_search
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="share"
-      icon="console"
+      icon="commandLine"
       onClick={() => {
         setFlyoutContent('client');
         setIsFlyoutVisible(true);

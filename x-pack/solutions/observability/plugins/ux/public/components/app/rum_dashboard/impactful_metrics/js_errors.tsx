@@ -101,7 +101,7 @@ export function JSErrors() {
                 totalErrors
               ) : (
                 <EuiToolTip content={totalErrors}>
-                  <>{numeral(totalErrors).format('0 a')}</>
+                  <span tabIndex={0}>{numeral(totalErrors).format('0 a')}</span>
                 </EuiToolTip>
               )
             }
@@ -130,6 +130,9 @@ export function JSErrors() {
           ...pagination,
           totalItemCount: data?.totalErrorGroups ?? 0,
         }}
+        tableCaption={i18n.translate('xpack.ux.jsErrors.tableCaption', {
+          defaultMessage: 'JS errors',
+        })}
       />
     </>
   );

@@ -195,6 +195,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               valueOfSelected={entry.field}
               onChange={handleFieldUpdate}
               data-test-subj={getTestId('field')}
+              aria-label={ENTRY_PROPERTY_TITLES.field}
             />
           </ConditionEntryCell>
         </InputItem>
@@ -206,6 +207,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 onChange={handleOperatorUpdate}
                 valueOfSelected={entry.type}
                 data-test-subj={getTestId('operator')}
+                aria-label={ENTRY_PROPERTY_TITLES.operator}
               />
             ) : (
               <EuiFieldText

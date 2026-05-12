@@ -14,3 +14,11 @@ export const TASK_MANAGER_UNAVAILABLE_ERROR = i18n.translate(
       'Task Manager is unavailable, but is required by the risk engine. Please enable the taskManager plugin and try again.',
   }
 );
+
+export const ENTITY_ANALYTICS_V2_MODE_API_ERROR = i18n.translate(
+  'xpack.securitySolution.api.riskEngine.entityAnalyticsV2ModeApiError',
+  {
+    defaultMessage:
+      'This API is not available when Entity Store V2 is enabled. Use the Entity Store APIs instead.',
+  }
+);

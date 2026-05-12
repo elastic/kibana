@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
 import type { Shape } from '../../../canvas_plugin_src/renderers/shape';
 import { Popover } from '../popover';
@@ -35,11 +34,4 @@ export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLab
       {() => <ShapePicker onChange={onChange} shapes={shapes} />}
     </Popover>
   );
-};
-
-ShapePickerPopover.propTypes = {
-  ariaLabel: PropTypes.string,
-  onChange: PropTypes.func,
-  shapes: PropTypes.object.isRequired,
-  value: PropTypes.string,
 };

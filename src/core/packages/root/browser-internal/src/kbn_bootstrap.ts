@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import { i18n, setAvailableLocales } from '@kbn/i18n';
 import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { CoreSystem } from './core_system';
@@ -25,6 +25,8 @@ export async function __kbnBootstrap__() {
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
 
+  setAvailableLocales(injectedMetadata.i18n.availableLocales ?? []);
+
   let i18nError: Error | undefined;
   const apmSystem = new ApmSystem(
     injectedMetadata.apmConfig ?? undefined,
@@ -34,9 +36,11 @@ export async function __kbnBootstrap__() {
   await Promise.all([
     // eslint-disable-next-line no-console
     apmSystem.setup().catch(console.warn),
-    i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
-      i18nError = error;
-    }),
+    i18n.getIsInitialized()
+      ? Promise.resolve()
+      : i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
+          i18nError = error;
+        }),
   ]);
 
   const isDomStorageDisabled = () => {

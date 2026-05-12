@@ -97,13 +97,13 @@ export function TableSortSelect({
         label: i18nText.nameAscSort,
         column: 'attributes.title',
         direction: 'asc',
-        append: <EuiIcon type="sortUp" />,
+        append: <EuiIcon type="sortUp" aria-hidden={true} />,
       },
       {
         label: i18nText.nameDescSort,
         column: 'attributes.title',
         direction: 'desc',
-        append: <EuiIcon type="sortDown" />,
+        append: <EuiIcon type="sortDown" aria-hidden={true} />,
       },
     ];
 
@@ -114,7 +114,12 @@ export function TableSortSelect({
             column: customSortingOptions.field,
             label,
             direction,
-            append: direction === 'asc' ? <EuiIcon type="sortUp" /> : <EuiIcon type="sortDown" />,
+            append:
+              direction === 'asc' ? (
+                <EuiIcon type="sortUp" aria-hidden={true} />
+              ) : (
+                <EuiIcon type="sortDown" aria-hidden={true} />
+              ),
           };
         })
       );
@@ -160,13 +165,13 @@ export function TableSortSelect({
           label: i18nText.updatedAtDescSort,
           column: 'updatedAt',
           direction: 'desc',
-          append: <EuiIcon type="sortDown" />,
+          append: <EuiIcon type="sortDown" aria-hidden={true} />,
         },
         {
           label: i18nText.updatedAtAscSort,
           column: 'updatedAt',
           direction: 'asc',
-          append: <EuiIcon type="sortUp" />,
+          append: <EuiIcon type="sortUp" aria-hidden={true} />,
         },
       ]);
     }
@@ -174,7 +179,8 @@ export function TableSortSelect({
     return opts;
   });
 
-  const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
+  const selectedOptionLabel =
+    options.find(({ checked }) => checked === 'on')?.label ?? i18nText.nameAscSort;
 
   const panelHeaderCSS = css`
     border-bottom: ${euiTheme.border.thin};
@@ -192,7 +198,7 @@ export function TableSortSelect({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       isSelected={isPopoverOpen}
       onClick={togglePopOver}
@@ -236,6 +242,10 @@ export function TableSortSelect({
       panelPaddingSize="none"
       anchorPosition="downCenter"
       panelProps={{ css: { width: euiTheme.base * 18 } }}
+      aria-label={i18n.translate(
+        'contentManagement.tableList.listing.tableSortSelect.popoverAriaLabel',
+        { defaultMessage: 'Sort options' }
+      )}
     >
       <>
         <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>

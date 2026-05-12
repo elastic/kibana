@@ -16,6 +16,7 @@ import type { PackageList, PackageListItem, RegistryDataStream } from '@kbn/flee
 import type { SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { ArchiveIterator, ArchivePackage } from '@kbn/fleet-plugin/common/types';
 
 const createMockPackage = (overrides: Partial<PackageListItem> = {}): PackageListItem =>
   ({
@@ -49,6 +50,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
   const mockPackageService = packageServiceMock.create();
   const mockGetPackages = mockPackageService.asInternalUser.getPackages;
+  const mockGetFieldMetadata = mockPackageService.asInternalUser.getPackageFieldsMetadata;
   const dependencies = {
     packageService: mockPackageService,
   } as unknown as SiemMigrationsClientDependencies;
@@ -148,6 +150,39 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       );
     });
 
+    it('should return fields metadata if available', async () => {
+      const fieldsMetadata = { 'mock-package': { dataset: { name: 'field1' } } };
+      mockGetPackages.mockResolvedValue([
+        createMockPackage({
+          data_streams: [
+            { type: 'logs', dataset: 'logs.dataset', title: 'Logs' } as RegistryDataStream,
+          ],
+        }),
+      ]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+
+      // Mock getFieldsMetadata to return our test metadata
+      mockGetFieldMetadata.mockResolvedValue(fieldsMetadata);
+
+      await client.populate();
+
+      expect(mockGetFieldMetadata).toHaveBeenCalledWith({ packageName: 'mock-package' });
+      expect(esClientMock.bulk).toHaveBeenCalledWith(
+        {
+          refresh: 'wait_for',
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              doc: expect.objectContaining({
+                fields_metadata: fieldsMetadata,
+              }),
+              doc_as_upsert: true,
+            }),
+          ]),
+        },
+        { requestTimeout: 600000 }
+      );
+    });
+
     it('should call bulk with transformed logs packages', async () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
       esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
@@ -194,6 +229,164 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
     });
   });
 
+  describe('fetchPackageKnowledgeBase (via populate)', () => {
+    const mockGetPackage = mockPackageService.asInternalUser.getPackage;
+
+    const createArchiveIterator = (entries: Array<{ path: string; content: string }>) =>
+      ({
+        getPaths: jest.fn().mockResolvedValue(entries.map((e) => e.path)),
+        traverseEntries: jest.fn(
+          async (
+            onEntry: (entry: { path: string; buffer: Buffer | null }) => Promise<void>,
+            readBuffer?: (path: string) => boolean
+          ) => {
+            for (const entry of entries) {
+              if (!readBuffer || readBuffer(entry.path)) {
+                await onEntry({ path: entry.path, buffer: Buffer.from(entry.content, 'utf8') });
+              }
+            }
+          }
+        ),
+      } as unknown as ArchiveIterator);
+
+    beforeEach(() => {
+      mockGetPackages.mockResolvedValue([createMockPackage()]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+    });
+
+    const getKnowledgeBaseFromMockEsCall = (): string => {
+      const bulkCall = (esClientMock.bulk as jest.Mock).mock.calls[0];
+      const docOp = bulkCall[0].operations[1];
+      return docOp.doc.knowledge_base;
+    };
+
+    it('should include content from sample_event files', async () => {
+      mockGetPackage.mockResolvedValue({
+        packageInfo: {} as unknown as ArchivePackage,
+        archiveIterator: createArchiveIterator([
+          { path: 'pkg-1.0.0/data_stream/logs/sample_event.json', content: '{"host":"test"}' },
+        ]),
+      } as unknown as ReturnType<typeof mockGetPackage>);
+
+      await client.populate();
+
+      const kb = getKnowledgeBaseFromMockEsCall();
+      expect(kb).toContain('sample_event.json');
+      expect(kb).toContain('{"host":"test"}');
+    });
+
+    it('should include content from knowledge_base files', async () => {
+      mockGetPackage.mockResolvedValue({
+        packageInfo: {} as unknown as ArchivePackage,
+        archiveIterator: createArchiveIterator([
+          { path: 'pkg-1.0.0/docs/knowledge_base/readme.md', content: '# Integration docs' },
+        ]),
+      } as unknown as ReturnType<typeof mockGetPackage>);
+
+      await client.populate();
+
+      const kb = getKnowledgeBaseFromMockEsCall();
+      expect(kb).toContain('knowledge_base/readme.md');
+      expect(kb).toContain('# Integration docs');
+    });
+
+    it('should exclude files not matching path patterns', async () => {
+      mockGetPackage.mockResolvedValue({
+        packageInfo: {} as unknown as ArchivePackage,
+        archiveIterator: createArchiveIterator([
+          { path: 'pkg-1.0.0/manifest.yml', content: 'name: pkg' },
+          { path: 'pkg-1.0.0/data_stream/logs/sample_event.json', content: '{"ok":true}' },
+        ]),
+      } as unknown as ReturnType<typeof mockGetPackage>);
+
+      await client.populate();
+
+      const kb = getKnowledgeBaseFromMockEsCall();
+      expect(kb).not.toContain('manifest.yml');
+      expect(kb).not.toContain('name: pkg');
+      expect(kb).toContain('sample_event.json');
+    });
+
+    it('should include multiple files when within token budget', async () => {
+      mockGetPackage.mockResolvedValue({
+        packageInfo: {} as unknown as ArchivePackage,
+        archiveIterator: createArchiveIterator([
+          { path: 'pkg-1.0.0/data_stream/a/sample_event.json', content: '{"a":1}' },
+          { path: 'pkg-1.0.0/data_stream/b/sample_event.json', content: '{"b":2}' },
+        ]),
+      } as unknown as ReturnType<typeof mockGetPackage>);
+
+      await client.populate();
+
+      const kb = getKnowledgeBaseFromMockEsCall();
+      expect(kb).toContain('data_stream/a/sample_event.json');
+      expect(kb).toContain('data_stream/b/sample_event.json');
+    });
+
+    it('should truncate first file and skip subsequent files when token budget is exceeded', async () => {
+      // estimateTokens uses ~4 chars/token, so 80K tokens ≈ 320K chars.
+      // 325K chars ≈ 81.25K tokens which exceeds the 80K budget.
+      const largeContent = 'x'.repeat(325_000);
+      const smallContent = '{"event":"should be dropped"}';
+
+      mockGetPackage.mockResolvedValue({
+        packageInfo: {} as unknown as ArchivePackage,
+        archiveIterator: createArchiveIterator([
+          { path: 'pkg-1.0.0/docs/knowledge_base/large.md', content: largeContent },
+          { path: 'pkg-1.0.0/data_stream/a/sample_event.json', content: smallContent },
+        ]),
+      } as unknown as ReturnType<typeof mockGetPackage>);
+
+      await client.populate();
+
+      const kb = getKnowledgeBaseFromMockEsCall();
+      expect(kb).toContain('knowledge_base/large.md');
+      expect(kb).toContain('x'.repeat(320_000)); // truncated content
+      expect(kb).not.toContain('sample_event.json');
+      expect(kb).not.toContain('should be dropped');
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('token limit'));
+    });
+
+    it('should return empty string when getPackage throws', async () => {
+      mockGetPackage.mockRejectedValue(new Error('archive not found'));
+
+      await client.populate();
+
+      const kb = getKnowledgeBaseFromMockEsCall();
+      expect(kb).toBe('');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to fetch package archive')
+      );
+    });
+
+    it('should return empty string when packageService is unavailable', async () => {
+      // populate won't be called since getSecurityLogsPackages returns undefined
+      // Test processIntegration path directly by calling populate on a client
+      // that has packages but no packageService for archive
+      const clientWithPartialSvc = new RuleMigrationsDataIntegrationsClient(
+        getIndexName,
+        currentUser,
+        esScopedClientMock,
+        logger,
+        {
+          packageService: {
+            asInternalUser: {
+              getPackages: jest.fn().mockResolvedValue([createMockPackage()]),
+              getPackageFieldsMetadata: jest.fn().mockResolvedValue(undefined),
+              getPackage: jest.fn().mockResolvedValue(undefined),
+            },
+          },
+        } as unknown as SiemMigrationsClientDependencies
+      );
+
+      await clientWithPartialSvc.populate();
+
+      const bulkCall = (esClientMock.bulk as jest.Mock).mock.calls[0];
+      const docOp = bulkCall[0].operations[1];
+      expect(docOp.doc.knowledge_base).toBe('');
+    });
+  });
+
   describe('semanticSearch', () => {
     it('should return filtered integration results from search', async () => {
       const mockHits = [
@@ -228,16 +421,21 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       expect(esClientMock.search).toHaveBeenCalledWith({
         index: 'mock-index',
         query: {
-          bool: {
-            should: [
-              { semantic: { query, field: 'elser_embedding', boost: 1.5 } },
-              { multi_match: { query, fields: ['title^2', 'description'], boost: 3 } },
-            ],
-            filter: { exists: { field: 'data_streams' } },
+          function_score: {
+            query: {
+              bool: {
+                must: { semantic: { query, field: 'elser_embedding' } },
+                must_not: { ids: { values: ['splunk', 'elastic_security', 'ibm_qradar'] } },
+                filter: { exists: { field: 'data_streams' } },
+              },
+            },
+            functions: expect.any(Array),
+            score_mode: 'multiply' as const,
+            boost_mode: 'multiply' as const,
           },
         },
         size: 5,
-        min_score: 40,
+        min_score: 7,
       });
       expect(results).toHaveLength(1);
       expect(results[0].title).toBe('Integration 1');

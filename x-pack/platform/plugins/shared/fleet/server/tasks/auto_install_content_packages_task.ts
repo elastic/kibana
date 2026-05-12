@@ -5,12 +5,8 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import {
-  type CoreSetup,
-  type ElasticsearchClient,
-  type Logger,
-  SavedObjectsClient,
-} from '@kbn/core/server';
+import semverGt from 'semver/functions/gt';
+import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -31,7 +27,7 @@ import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -123,7 +119,7 @@ export class AutoInstallContentPackagesTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[AutoInstallContentPackagesTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[AutoInstallContentPackagesTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
@@ -145,12 +141,12 @@ export class AutoInstallContentPackagesTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const packageClient = packageService.asInternalUser;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const prerelease = await getPrereleaseFromSettings(soClient);
 
@@ -239,7 +235,8 @@ export class AutoInstallContentPackagesTask {
       this.discoveryMap!
     ).reduce((acc, [dataset, mapValue]) => {
       const packages = mapValue.packages.filter(
-        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
+        (pkg) =>
+          !installedPackagesMap[pkg.name] || semverGt(pkg.version, installedPackagesMap[pkg.name])
       );
       if (packages.length > 0) {
         acc[dataset] = { packages };
@@ -256,7 +253,8 @@ export class AutoInstallContentPackagesTask {
         if (
           mapValue.packages.every(
             (pkg) =>
-              installedPackagesMap[pkg.name] && installedPackagesMap[pkg.name] === pkg.version
+              installedPackagesMap[pkg.name] &&
+              !semverGt(pkg.version, installedPackagesMap[pkg.name])
           )
         ) {
           acc.push(dataset);
@@ -280,7 +278,7 @@ export class AutoInstallContentPackagesTask {
 
       if (hasData) {
         for (const { name, version } of packages) {
-          if (!installedPackagesMap[name] || installedPackagesMap[name] !== version) {
+          if (!installedPackagesMap[name] || semverGt(version, installedPackagesMap[name])) {
             packagesToInstall[name] = version;
           }
         }

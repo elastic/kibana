@@ -86,6 +86,7 @@ function StaleAlert({
     <>
       {isAlertStale?.isStale && (
         <EuiCallOut
+          announceOnMount
           data-test-subj="o11yAlertDetailsAlertStaleCallout"
           title={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.title', {
             defaultMessage: 'This alert may be stale',
@@ -109,7 +110,7 @@ function StaleAlert({
               data-test-subj="o11yAlertDetailsAlertStaleCalloutMarkAsUntrackedButton"
               color="warning"
               fill
-              iconType="eyeClosed"
+              iconType="eyeSlash"
               onClick={handleUntrackAlert}
             >
               {i18n.translate(

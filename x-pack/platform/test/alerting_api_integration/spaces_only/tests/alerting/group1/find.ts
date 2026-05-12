@@ -266,6 +266,132 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body.data[0].params.severity).to.eql('medium');
       });
 
+      it('should search by actions.params', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test connector',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: matchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'test',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, matchingAlert.id, 'rule', 'alerting');
+
+        const { body: nonMatchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'anothermessage',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, nonMatchingAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rules/_find?search=test&search_fields=actions.params`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        const foundRule = response.body.data[0];
+        expect(foundRule.id).to.equal(matchingAlert.id);
+        expect(foundRule.actions[0].params.message).to.eql('test');
+      });
+
+      it('should search by deeply nested fields under a nested ancestor (actions.params.message)', async () => {
+        const { body: createdConnector } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test connector for deep nesting',
+            connector_type_id: 'test.noop',
+            config: {},
+            secrets: {},
+          })
+          .expect(200);
+
+        const { body: matchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'deeplyNestedUniqueValue',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, matchingAlert.id, 'rule', 'alerting');
+
+        const { body: nonMatchingAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              actions: [
+                {
+                  group: 'default',
+                  id: createdConnector.id,
+                  params: {
+                    message: 'completelyDifferentValue',
+                  },
+                },
+              ],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, nonMatchingAlert.id, 'rule', 'alerting');
+
+        const response = await supertest.get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rules/_find?search=deeplyNestedUniqueValue&search_fields=actions.params.message`
+        );
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        const foundRule = response.body.data[0];
+        expect(foundRule.id).to.equal(matchingAlert.id);
+        expect(foundRule.actions[0].params.message).to.eql('deeplyNestedUniqueValue');
+      });
+
       it('should filter on parameters', async () => {
         const response = await supertest.get(
           `${getUrlPrefix(
@@ -310,7 +436,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request query.rule_type_ids]: definition for this key is missing',
+          message:
+            "[request query.rule_type_ids]: Additional properties are not allowed ('rule_type_ids' was unexpected)",
         });
       });
 
@@ -331,7 +458,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           statusCode: 400,
           error: 'Bad Request',
-          message: '[request query.consumers]: definition for this key is missing',
+          message:
+            "[request query.consumers]: Additional properties are not allowed ('consumers' was unexpected)",
         });
       });
     });

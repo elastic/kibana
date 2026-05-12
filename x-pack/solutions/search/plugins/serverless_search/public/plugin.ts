@@ -9,11 +9,11 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
-import { of } from 'rxjs';
-import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
-import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
+import { QueryClient, MutationCache, QueryCache } from '@kbn/react-query';
+import type { Subscription } from 'rxjs';
+import { combineLatest, map, of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { docLinks } from '../common/doc_links';
 import type {
   ServerlessSearchPluginSetup,
@@ -22,8 +22,7 @@ import type {
   ServerlessSearchPluginStartDependencies,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
-import { navigationTree } from './navigation_tree';
-import { SEARCH_HOMEPAGE_PATH } from './application/constants';
+import { createNavigationTree } from './navigation_tree';
 import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export class ServerlessSearchPlugin
@@ -35,6 +34,8 @@ export class ServerlessSearchPlugin
       ServerlessSearchPluginStartDependencies
     >
 {
+  private managementCardsSubscription?: Subscription;
+
   public setup(
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     setupDeps: ServerlessSearchPluginSetupDependencies
@@ -68,31 +69,6 @@ export class ServerlessSearchPlugin
 
     const homeTitle = i18n.translate('xpack.serverlessSearch.app.home.title', {
       defaultMessage: 'Home',
-    });
-
-    core.application.register({
-      id: 'serverlessElasticsearch',
-      title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
-        defaultMessage: 'Elasticsearch',
-      }),
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch/getting_started',
-      async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application/elasticsearch');
-        const [coreStart, services] = await core.getStartServices();
-        docLinks.setDocLinks(coreStart.docLinks.links);
-        coreStart.chrome.docTitle.change(homeTitle);
-        let user: AuthenticatedUser | undefined;
-        try {
-          const response = await coreStart.security.authc.getCurrentUser();
-          user = response;
-        } catch {
-          user = undefined;
-        }
-
-        return await renderApp(element, coreStart, { history, user, ...services }, queryClient);
-      },
     });
 
     core.application.register({
@@ -155,47 +131,57 @@ export class ServerlessSearchPlugin
     core: CoreStart,
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    const { serverless, management, indexManagement, security } = services;
-    serverless.setProjectHome(SEARCH_HOMEPAGE_PATH);
+    const { serverless, management, security } = services;
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
-    const navigationTree$ = of(navigationTree(core.application));
-    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
-    const extendCardNavDefinitions = serverless.getNavigationCards(
-      security.authz.isRoleManagementEnabled(),
-      aiAssistantIsEnabled
-        ? {
-            observabilityAiAssistantManagement: {
-              category: appCategories.OTHER,
-              title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
-                defaultMessage: 'AI Assistant',
-              }),
-              description: i18n.translate(
-                'xpack.serverlessSearch.aiAssistantManagementDescription',
-                {
-                  defaultMessage:
-                    'Manage knowledge base and control assistant behavior, including response language.',
-                }
-              ),
-              icon: 'sparkles',
-            },
-          }
-        : undefined
+    const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
+      map(([application, chatExperience]) => {
+        const showAiAssistant = chatExperience !== AIChatExperience.Agent;
+        return createNavigationTree({
+          ...application,
+          showAiAssistant,
+          showAlertingV2: Boolean(application.capabilities.alertingVTwo),
+        });
+      })
     );
+    serverless.initNavigation('es', navigationTree$);
 
-    management.setupCardsNavigation({
-      enabled: true,
-      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
-      extendCardNavDefinitions,
-    });
+    this.managementCardsSubscription = serverless
+      .getNavigationCards$(
+        security.authz.isRoleManagementEnabled(),
+        aiAssistantIsEnabled
+          ? {
+              observabilityAiAssistantManagement: {
+                category: appCategories.OTHER,
+                title: i18n.translate('xpack.serverlessSearch.aiAssistantManagementTitle', {
+                  defaultMessage: 'AI Assistant',
+                }),
+                description: i18n.translate(
+                  'xpack.serverlessSearch.aiAssistantManagementDescription',
+                  {
+                    defaultMessage:
+                      'Manage knowledge base and control assistant behavior, including response language.',
+                  }
+                ),
+                icon: 'sparkles',
+              },
+            }
+          : undefined
+      )
+      .subscribe((extendCardNavDefinitions) => {
+        management.setupCardsNavigation({
+          enabled: true,
+          hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+          extendCardNavDefinitions,
+        });
+      });
 
-    indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
-    indexManagement?.extensionsService.setIndexOverviewContent(
-      createIndexOverviewContent(core, services)
-    );
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.managementCardsSubscription?.unsubscribe();
+  }
 }

@@ -8,7 +8,7 @@
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
-import { merge, isPlainObject } from 'lodash';
+import { isPlainObject, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import { sha256 } from 'js-sha256';
@@ -17,6 +17,7 @@ import { copyAllowlistedFields, filterList } from './filterlists';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
 import type {
+  AnyObject,
   EnhancedAlertEvent,
   ESClusterInfo,
   ESLicense,
@@ -24,22 +25,22 @@ import type {
   ExtraInfo,
   ListTemplate,
   Nullable,
-  ResponseActionsRuleTelemetryTemplate,
+  PrebuiltRuleCustomizations,
   ResponseActionRules,
+  ResponseActionsRuleTelemetryTemplate,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
   TimelineTelemetryEvent,
   ValueListResponse,
-  AnyObject,
 } from './types';
 import type { TaskExecutionPeriod } from './task';
 import {
-  LIST_DETECTION_RULE_EXCEPTION,
-  LIST_ENDPOINT_EXCEPTION,
-  LIST_ENDPOINT_EVENT_FILTER,
-  LIST_TRUSTED_APPLICATION,
   DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
+  LIST_DETECTION_RULE_EXCEPTION,
+  LIST_ENDPOINT_EVENT_FILTER,
+  LIST_ENDPOINT_EXCEPTION,
+  LIST_TRUSTED_APPLICATION,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
 import { resolverEntity } from '../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
@@ -48,6 +49,8 @@ import {
   TelemetryLoggerImpl,
   tlog as telemetryLogger,
 } from './telemetry_logger';
+import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
+import { FUNCTIONAL_FIELD_MAP } from '../detection_engine/rule_management/constants';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -389,6 +392,29 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   return event;
 };
 
+export const processDetectionRuleCustomizations = (
+  event: TelemetryEvent
+): PrebuiltRuleCustomizations | undefined => {
+  const ruleSource = event['kibana.alert.rule.parameters']?.rule_source;
+  if (
+    !ruleSource ||
+    ruleSource.type === 'internal' ||
+    ruleSource.is_customized === false ||
+    ruleSource.customized_fields == null || // New fields might not appear on alert documents
+    ruleSource.has_base_version == null || // New fields might not appear on alert documents
+    ruleSource.has_base_version === false
+  ) {
+    return undefined; // Don't return anything if rule is not customized or base version doesn't exist
+  }
+  const numberOfFunctionalFields = ruleSource.customized_fields.filter(
+    (field) => FUNCTIONAL_FIELD_MAP[field.field_name as keyof RuleResponse]
+  ).length;
+  return {
+    customized_fields: ruleSource.customized_fields.map((fieldObj) => fieldObj.field_name),
+    num_functional_fields: numberOfFunctionalFields,
+  };
+};
+
 export const ranges = (
   taskExecutionPeriod: TaskExecutionPeriod,
   defaultIntervalInHours: number = 3
@@ -424,10 +450,7 @@ export class TelemetryTimelineFetcher {
     const eventId = event ? event['event.id'] : 'unknown';
     const alertUUID = event ? event['kibana.alert.uuid'] : 'unknown';
 
-    const entities = resolverEntity(
-      [{ _source: event } as estypes.SearchHit],
-      this.receiver.getExperimentalFeatures()
-    );
+    const entities = resolverEntity([{ _source: event } as estypes.SearchHit]);
 
     // Build Tree
     const tree = await this.receiver.buildProcessTree(
@@ -529,6 +552,14 @@ export function unflatten<T extends AnyObject = AnyObject>(object: AnyObject): T
     }
     return accum;
   }, {}) as T;
+}
+
+export function withErrorMessage(error?: Error, meta?: LogMeta): LogMeta {
+  return {
+    error,
+    error_message: error?.message,
+    ...(meta ?? {}),
+  } as LogMeta;
 }
 
 function _set(object: AnyObject, key: string, value: unknown) {

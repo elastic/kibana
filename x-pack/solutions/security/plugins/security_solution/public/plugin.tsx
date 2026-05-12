@@ -7,43 +7,52 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Subject, combineLatestWith } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  PluginInitializerContext,
   Plugin as IPlugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Logger } from '@kbn/logging';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import type { SecuritySolutionCellRendererFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import type {
+  SecuritySolutionAlertFlyoutFooterFeature,
+  SecuritySolutionAlertFlyoutHeaderTitleFeature,
+  SecuritySolutionAlertFlyoutOverviewTabFeature,
+  SecuritySolutionCellRendererFeature,
+  SecuritySolutionIOCFlyoutFooterFeature,
+  SecuritySolutionIOCFlyoutHeaderFeature,
+  SecuritySolutionIOCFlyoutOverviewTabFeature,
+} from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
-import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
   PluginSetup,
   PluginStart,
   SetupPlugins,
+  StartedSubPlugins,
   StartPlugins,
+  StartPluginsDependencies,
   StartServices,
   SubPlugins,
-  StartedSubPlugins,
-  StartPluginsDependencies,
 } from './types';
-import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations';
+import { ASSISTANT_MANAGEMENT_TITLE, SOLUTION_NAME } from './common/translations';
 
-import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
+import { APP_ICON_SOLUTION, APP_ID, APP_PATH, APP_UI_ID } from '../common/constants';
 
 import type { AppLinkItems } from './common/links';
 import {
-  applicationLinksUpdater,
   type ApplicationLinksUpdateParams,
+  applicationLinksUpdater,
 } from './app/links/application_links_updater';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
@@ -62,15 +71,28 @@ import { LazyCustomCriblExtension } from './security_integrations/cribl/componen
 import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
-import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint';
+import { getEventType } from './cases/attachments/event';
 import { isSecuritySolutionAccessible } from './helpers_access';
-import { generateAttachmentType } from './threat_intelligence/modules/cases/utils/attachments';
+import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
+import { defaultDeepLinks } from './app/links/default_deep_links';
+import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
+import {
+  registerAttachmentUiDefinitions,
+  registerEntityAnalyticsDashboardAttachment,
+  registerEntityAttachment,
+  registerRuleAttachment,
+} from './agent_builder/attachment_types';
+import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
+import { registerWorkflowSteps } from './workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
   private experimentalFeatures: ExperimentalFeatures;
   private contract: PluginContract;
   private services: PluginServices;
+  private logger: Logger;
+  private isServerless: boolean;
 
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
@@ -79,6 +101,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _subPlugins?: SubPlugins;
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
+  private _discoverFlyoutServicesPromise?: Promise<StartServices>;
+  private _startedSubPluginsPromise?: Promise<StartedSubPlugins>;
+  private _discoverFlyoutStorePromise?: Promise<SecurityAppStore>;
+  private _securityCanvasContextPromise?: Promise<SecurityCanvasEmbeddedBundle>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -86,12 +112,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       this.config.enableExperimental || []
     ).features;
     this.contract = new PluginContract(this.experimentalFeatures);
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    this.logger = initializerContext.logger.get(); // Initializes logger with name plugins.securitySolution
 
     this.services = new PluginServices(
       this.config,
       this.experimentalFeatures,
       this.contract,
-      initializerContext.env.packageInfo
+      initializerContext.env.packageInfo,
+      this.logger
     );
   }
 
@@ -101,15 +130,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ): PluginSetup {
     this.services.setup(core, plugins);
 
-    const { home, usageCollection, management, cases } = plugins;
+    const { home, usageCollection, management, cases, share, workflowsExtensions } = plugins;
     const { productFeatureKeys$ } = this.contract;
+
+    if (share) {
+      share.url.locators.create(new AIValueReportLocatorDefinition());
+    }
+
+    if (workflowsExtensions) {
+      registerWorkflowSteps(workflowsExtensions, core);
+    }
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {
       const { renderApp } = await this.lazyApplicationDependencies();
       const [coreStart, startPlugins] = await core.getStartServices();
 
-      const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+      const subPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
       const store = await this.store(coreStart, startPlugins, subPlugins);
 
       const services = await this.services.generateServices(coreStart, startPlugins, params);
@@ -125,6 +162,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
+      deepLinks: defaultDeepLinks,
       updater$: this.appUpdater$,
       visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
@@ -201,17 +239,26 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: 'securityAiAssistantManagement',
       title: ASSISTANT_MANAGEMENT_TITLE,
       hideFromSidebar: true,
+      hideFromGlobalSearch: !this.isServerless,
       order: 1,
       mount: async (params) => {
+        const [coreStart] = await core.getStartServices();
         const { renderApp, services, store } = await mountDependencies();
         const { ManagementSettings } = await this.lazyAssistantSettingsManagement();
+        const { RedirectIfUnauthorized } = await import(
+          './assistant/stack_management/redirect_if_unauthorized'
+        );
 
         return renderApp({
           ...params,
           services,
           store,
           usageCollection,
-          children: <ManagementSettings />,
+          children: (
+            <RedirectIfUnauthorized coreStart={coreStart}>
+              <ManagementSettings />
+            </RedirectIfUnauthorized>
+          ),
         });
       },
     });
@@ -236,14 +283,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
 
-    cases?.attachmentFramework.registerExternalReference(
-      getExternalReferenceAttachmentEndpointRegular()
-    );
+    if (!cases?.attachmentFramework) {
+      throw new Error(
+        'Security Solution requires the Cases setup contract to register security.event attachments'
+      );
+    }
 
-    const externalAttachmentType: ExternalReferenceAttachmentType = generateAttachmentType();
-    cases?.attachmentFramework?.registerExternalReference(externalAttachmentType);
+    cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
+    cases.attachmentFramework.registerUnified(getEventType());
 
-    this.registerDiscoverSharedFeatures(plugins);
+    this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
   }
@@ -252,6 +302,41 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.start(core, plugins);
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
+
+    if (plugins.agentBuilder?.attachments) {
+      registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
+      registerRuleAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        aiRuleCreation: this.services.aiRuleCreation,
+      });
+      registerEntityAnalyticsDashboardAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        searchSession: plugins.data.search.session,
+      });
+      registerEntityAttachment({
+        attachments: plugins.agentBuilder.attachments,
+        application: core.application,
+        agentBuilder: plugins.agentBuilder,
+        chrome: core.chrome,
+        experimentalFeatures: this.experimentalFeatures,
+        resolveSecurityCanvasContext: () =>
+          this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
+        searchSession: plugins.data.search.session,
+      });
+    }
+
+    // Enable CPS picker only for individual dashboard views (not the listing page).
+    // TODO: Remove this restriction once CPS is enabled across all Security Solution pages.
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
+      /security\/dashboards\/[^?]+/.test(location)
+        ? ProjectRoutingAccess.EDITABLE
+        : ProjectRoutingAccess.DISABLED
+    );
+
     return this.contract.getStartContract(core);
   }
 
@@ -259,18 +344,268 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
-  public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
+  private getDiscoverFlyoutServices(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>
+  ): Promise<StartServices> {
+    if (!this._discoverFlyoutServicesPromise) {
+      this._discoverFlyoutServicesPromise = core
+        .getStartServices()
+        .then(([coreStart, startPlugins]) =>
+          this.services.generateServices(coreStart, startPlugins)
+        );
+    }
+
+    return this._discoverFlyoutServicesPromise;
+  }
+
+  private ensureStartedSubPlugins(
+    coreStart: CoreStart,
+    startPlugins: StartPlugins
+  ): Promise<StartedSubPlugins> {
+    if (!this._startedSubPluginsPromise) {
+      this._startedSubPluginsPromise = this.startSubPlugins(
+        this.storage,
+        coreStart,
+        startPlugins
+      ).catch((e) => {
+        // allow retry on next call
+        this._startedSubPluginsPromise = undefined;
+        throw e;
+      });
+    }
+
+    return this._startedSubPluginsPromise;
+  }
+
+  private getDiscoverFlyoutStore(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>
+  ): Promise<SecurityAppStore> {
+    if (!this._discoverFlyoutStorePromise) {
+      this._discoverFlyoutStorePromise = core
+        .getStartServices()
+        .then(async ([coreStart, startPlugins]) => {
+          const startedSubPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
+          return this.store(coreStart, startPlugins, startedSubPlugins);
+        })
+        .catch((e) => {
+          // allow retry if something failed during lazy init
+          this._discoverFlyoutStorePromise = undefined;
+          throw e;
+        });
+    }
+
+    return this._discoverFlyoutStorePromise;
+  }
+
+  /**
+   * Lazily resolves the Redux store + flattened `StartServices` bundle used by
+   * `SecurityReduxEmbeddedProvider` on Agent Builder Canvas surfaces. Start-time work
+   * (sub-plugin bootstrap, services generation) is deferred until the user opens the canvas —
+   * the rest of Agent Builder and the label-only/inline paths must not pay that cost.
+   *
+   * Memoized in a class field so concurrent Preview clicks collapse to a single boot; the
+   * cache is cleared on failure so a retry can recover.
+   */
+  private getSecurityCanvasContext(
+    coreStart: CoreStart,
+    startPlugins: StartPluginsDependencies
+  ): Promise<SecurityCanvasEmbeddedBundle> {
+    if (!this._securityCanvasContextPromise) {
+      this._securityCanvasContextPromise = (async () => {
+        const startedSubPlugins = await this.ensureStartedSubPlugins(coreStart, startPlugins);
+        const [store, kibanaServices] = await Promise.all([
+          this.store(coreStart, startPlugins, startedSubPlugins),
+          this.services.generateServices(coreStart, startPlugins),
+        ]);
+        return { store, kibanaServices };
+      })().catch((e) => {
+        this._securityCanvasContextPromise = undefined;
+        throw e;
+      });
+    }
+    return this._securityCanvasContextPromise;
+  }
+
+  public async registerDiscoverSharedFeatures(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ) {
     const { discoverShared } = plugins;
     const discoverFeatureRegistry = discoverShared.features.registry;
+
     const cellRendererFeature: SecuritySolutionCellRendererFeature = {
       id: 'security-solution-cell-renderer',
       getRenderer: async () => {
-        const { getCellRendererForGivenRecord } = await this.getLazyDiscoverSharedDeps();
-        return getCellRendererForGivenRecord;
+        const [{ getCellRendererForGivenRecord }, services, store] = await Promise.all([
+          this.getLazyDiscoverSharedDeps(),
+          this.getDiscoverFlyoutServices(core),
+          this.getDiscoverFlyoutStore(core),
+        ]);
+        return getCellRendererForGivenRecord(services, store);
       },
     };
-
     discoverFeatureRegistry.register(cellRendererFeature);
+
+    const LazyAlertFlyoutOverviewTab = React.lazy(async () => {
+      const { AlertFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutOverviewTab };
+    });
+
+    const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
+      id: 'security-solution-alert-flyout-overview-tab',
+      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
+
+    const LazyAlertFlyoutHeader = React.lazy(async () => {
+      const { AlertFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutHeader };
+    });
+    const headerTitleFeature: SecuritySolutionAlertFlyoutHeaderTitleFeature = {
+      id: 'security-solution-alert-flyout-header-title',
+      renderHeader: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(headerTitleFeature);
+
+    const LazyAlertFlyoutFooter = React.lazy(async () => {
+      const { AlertFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: AlertFlyoutFooter };
+    });
+    const headerFooterFeature: SecuritySolutionAlertFlyoutFooterFeature = {
+      id: 'security-solution-alert-flyout-footer',
+      renderFooter: ({ hit, onAlertUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(headerFooterFeature);
+
+    const LazyIOCFlyoutOverviewTab = React.lazy(async () => {
+      const { IOCFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: IOCFlyoutOverviewTab };
+    });
+
+    const iocFlyoutOverviewTabFeature: SecuritySolutionIOCFlyoutOverviewTabFeature = {
+      id: 'security-solution-ioc-flyout-overview-tab',
+      render: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyIOCFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(iocFlyoutOverviewTabFeature);
+
+    const LazyIOCFlyoutFooter = React.lazy(async () => {
+      const { IOCFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: IOCFlyoutFooter };
+    });
+
+    const iocFlyoutFooterFeature: SecuritySolutionIOCFlyoutFooterFeature = {
+      id: 'security-solution-ioc-flyout-footer',
+      renderFooter: ({ hit }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyIOCFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(iocFlyoutFooterFeature);
+
+    const LazyIOCFlyoutHeader = React.lazy(async () => {
+      const { IOCFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: IOCFlyoutHeader };
+    });
+
+    const iocFlyoutHeaderFeature: SecuritySolutionIOCFlyoutHeaderFeature = {
+      id: 'security-solution-ioc-flyout-header',
+      renderHeader: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyIOCFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(iocFlyoutHeaderFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {
@@ -301,10 +636,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
+        kubernetes: new subPluginClasses.Kubernetes(),
         onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
+        cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
@@ -329,19 +666,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
+      cloudDefend: subPlugins.cloudDefend.start(this.isServerless),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
+      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
       timelines: subPlugins.timelines.start(),
-      entityAnalytics: subPlugins.entityAnalytics.start(
-        this.experimentalFeatures.riskScoringRoutesEnabled
-      ),
+      entityAnalytics: subPlugins.entityAnalytics.start(),
       siemMigrations: subPlugins.siemMigrations.start(this.experimentalFeatures),
       siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
@@ -425,7 +762,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       applicationLinksUpdater.update(appLinks, params);
     });
 
-    const filteredLinks = await getFilteredLinks(core, plugins);
+    const filteredLinks = await getFilteredLinks(core, plugins, this.experimentalFeatures);
     appLinksToUpdate$.next(filteredLinks);
   }
 

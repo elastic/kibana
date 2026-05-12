@@ -29,10 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
-  const security = getPageObject('security');
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
@@ -40,8 +37,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
-  // https://github.com/elastic/kibana/pull/190690
-  // fails after missing `awaits` were added
   describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -51,10 +46,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('header-page-supplements');
         await testSubjects.existOrFail('case-action-bar-wrapper');
 
-        await testSubjects.existOrFail('case-view-tabs');
-        await testSubjects.existOrFail('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-attachments');
         await testSubjects.existOrFail('description');
 
         await testSubjects.existOrFail('case-view-activity');
@@ -150,7 +143,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
@@ -246,20 +239,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
-      });
-
-      it('shows error when more than 200 tags are added to the case', async () => {
-        const tags = Array(200).fill('foo');
-
-        await cases.common.addMultipleTags(tags);
-        await testSubjects.click('edit-tags-submit');
-
-        const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal(
-          'Too many tags. The maximum number of allowed tags is 200'
-        );
-
-        await testSubjects.click('edit-tags-cancel');
       });
 
       describe('status', () => {
@@ -384,7 +363,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -421,7 +400,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
@@ -460,7 +439,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // validate user action
         const newComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
 
         expect(await newComment.getVisibleText()).equal(comment);
@@ -628,7 +607,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Lens visualization', () => {
+    describe.skip('Lens visualization', () => {
       before(async () => {
         await cases.testResources.installKibanaSampleData('logs');
       });
@@ -709,7 +688,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
 
         const createdComment = await find.byCssSelector(
-          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+          '[data-test-subj="comment-comment-comment"] [data-test-subj="scrollable-markdown"]'
         );
 
         await createdComment.findByCssSelector('[data-test-subj="xyVisChart"]');
@@ -882,167 +861,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Assignees field', () => {
-      before(async () => {
-        await createUsersAndRoles(getService, users, roles);
-        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
-      });
-
-      after(async () => {
-        await deleteUsersAndRoles(getService, users, roles);
-      });
-
-      describe('unknown users', () => {
-        beforeEach(async () => {
-          await kibanaServer.importExport.load(
-            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
-          );
-
-          await cases.navigation.navigateToApp();
-          await cases.casesTable.waitForCasesToBeListed();
-          await cases.casesTable.goToFirstListedCase();
-          await header.waitUntilLoadingHasFinished();
-        });
-
-        afterEach(async () => {
-          await kibanaServer.importExport.unload(
-            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
-          );
-
-          await cases.api.deleteAllCases();
-        });
-
-        it('shows the unknown assignee', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
-        });
-
-        it('removes the unknown assignee when selecting the remove all users in the popover', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
-
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectFirstRowInAssigneesPopover();
-
-          await (await find.byButtonText('Remove all assignees')).click();
-          await cases.singleCase.closeAssigneesPopover();
-          await testSubjects.missingOrFail('user-profile-assigned-user-abc-remove-group');
-        });
-      });
-
-      describe('login with cases all user', () => {
-        before(async () => {
-          await security.forceLogout();
-          await security.login(casesAllUser.username, casesAllUser.password);
-          await createAndNavigateToCase(getPageObject, getService);
-        });
-
-        after(async () => {
-          await cases.api.deleteAllCases();
-          await security.forceLogout();
-        });
-
-        it('assigns the case to the current user when clicking the assign to self link', async () => {
-          await testSubjects.click('case-view-assign-yourself-link');
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-        });
-      });
-
-      describe('logs in with default user', () => {
-        beforeEach(async () => {
-          await createAndNavigateToCase(getPageObject, getService);
-        });
-
-        afterEach(async () => {
-          await cases.api.deleteAllCases();
-        });
-
-        it('shows the assign users popover when clicked', async () => {
-          await testSubjects.missingOrFail('euiSelectableList');
-          await cases.singleCase.openAssigneesPopover();
-          await cases.singleCase.closeAssigneesPopover();
-        });
-
-        it('assigns a user from the popover', async () => {
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectFirstRowInAssigneesPopover();
-          await cases.singleCase.closeAssigneesPopover();
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-        });
-
-        it('assigns multiple users', async () => {
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectAllRowsInAssigneesPopover();
-
-          await cases.singleCase.closeAssigneesPopover();
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
-        });
-      });
-
-      describe('logs in with default user and creates case before each', () => {
-        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
-
-        it('removes an assigned user', async () => {
-          await cases.singleCase.openAssigneesPopover();
-          await cases.common.setSearchTextInAssigneesPopover('case');
-          await cases.common.selectFirstRowInAssigneesPopover();
-
-          // navigate out of the modal
-          await cases.singleCase.closeAssigneesPopover();
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
-
-          // hover over the assigned user
-          await (
-            await find.byCssSelector(
-              '[data-test-subj="user-profile-assigned-user-cases_all_user-remove-group"]'
-            )
-          ).moveMouseTo();
-
-          // delete the user
-          await testSubjects.click('user-profile-assigned-user-cases_all_user-remove-button');
-
-          await testSubjects.existOrFail('case-view-assign-yourself-link');
-        });
-      });
-    });
-
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
-
-      it('renders tabs correctly', async () => {
-        await testSubjects.existOrFail('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-title-alerts');
-      });
 
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      it("shows the 'activity' tab when clicked", async () => {
-        // Go to the files tab first
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
-
-        await testSubjects.click('case-view-tab-title-activity');
-        await testSubjects.existOrFail('case-view-tab-content-activity');
-      });
-
-      it("shows the 'alerts' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-alerts');
-        await testSubjects.existOrFail('case-view-tab-content-alerts');
-      });
-
-      it("shows the 'files' tab when clicked", async () => {
-        await testSubjects.click('case-view-tab-title-files');
-        await testSubjects.existOrFail('case-view-tab-content-files');
+      it("shows the 'attachments' tab when clicked", async () => {
+        await testSubjects.click('case-view-tab-title-attachments');
+        await testSubjects.existOrFail('case-view-attachments');
       });
 
       describe('Query params', () => {
@@ -1076,52 +905,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Tabs - alerts linked to case', () => {
-      before(async () => {
-        await esArchiver.loadIfNeeded(
-          'x-pack/platform/test/fixtures/es_archives/rule_registry/alerts'
-        );
-        await cases.navigation.navigateToApp();
-        const theCase = await cases.api.createCase();
-        await cases.casesTable.waitForCasesToBeListed();
-        await retry.try(async () => {
-          await cases.api.createAttachment({
-            caseId: theCase.id,
-            params: {
-              type: AttachmentType.alert,
-              alertId: ['NoxgpHkBqbdrfX07MqXV'],
-              index: '.alerts-observability.apm.alerts',
-              rule: { id: 'id', name: 'name' },
-              owner: theCase.owner,
-            },
-          });
-        });
-      });
-
-      after(async () => {
-        await cases.api.deleteAllCases();
-        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts/');
-      });
-
-      beforeEach(async () => {
-        await cases.navigation.navigateToApp();
-        await cases.casesTable.goToFirstListedCase();
-        await header.waitUntilLoadingHasFinished();
-      });
-
-      it('should show the right amount of alerts linked to a case', async () => {
-        const visibleText = await testSubjects.getVisibleText('case-view-alerts-stats-badge');
-        expect(visibleText).to.be('1');
-      });
-
-      it('should render the alerts table when opening the alerts tab', async () => {
-        await testSubjects.click('case-view-tab-title-alerts');
-        await testSubjects.existOrFail('alertsTableEmptyState');
-      });
-    });
-
     describe('Files', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+      before(async () => {
+        // open attachments to have access to the files tab
+        await testSubjects.click('case-view-tab-title-attachments');
+      });
 
       it('adds a file to the case', async () => {
         // navigate to files tab

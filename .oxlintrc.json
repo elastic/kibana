@@ -1,0 +1,311 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  // This config includes all the rules from the @kbn/eslint-config package.
+
+  "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
+
+  "categories": {
+    "correctness": "off"
+  },
+
+  "ignorePatterns": [
+    "**/.storybook/**",
+    "**/cypress/**",
+    "**/ftr_e2e/**",
+    "**/e2e/**",
+    "**/integration_tests/**",
+    "**/json_schemas/**"
+  ],
+
+  "rules": {
+    "@typescript-eslint/adjacent-overload-signatures": "error",
+    // "@typescript-eslint/array-type": "error",
+    "@typescript-eslint/consistent-type-assertions": "error",
+    // "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false,
+        "fixStyle": "separate-type-imports"
+      }
+    ],
+    "@typescript-eslint/explicit-member-accessibility": [
+      "error",
+      {
+        "accessibility": "off",
+        "overrides": {
+          "accessors": "explicit",
+          "constructors": "no-public",
+          "parameterProperties": "explicit"
+        }
+      }
+    ],
+    "@typescript-eslint/member-ordering": [
+      "error",
+      {
+        "default": ["public-static-field", "static-field", "instance-field"]
+      }
+    ],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "default",
+        "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "classMethod",
+        "filter": {
+          "regex": "^UNSAFE_",
+          "match": true
+        },
+        "prefix": ["UNSAFE_"],
+        "format": ["camelCase"]
+      },
+      {
+        "selector": "variable",
+        "format": [
+          "camelCase",
+          "UPPER_CASE", // e.g. const SOMETHING = ...
+          "PascalCase" // e.g. React.FunctionComponent =
+        ],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "variable",
+        "modifiers": ["destructured"],
+        "format": [
+          "camelCase",
+          "snake_case", // e.g. properties from ES response objects
+          "UPPER_CASE", // e.g. const SOMETHING = ...
+          "PascalCase" // e.g. React.FunctionComponent =
+        ],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "parameter",
+        "format": ["camelCase", "PascalCase", "snake_case"],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "function",
+        "format": [
+          "camelCase",
+          "PascalCase" // React.FunctionComponent =
+        ],
+        "leadingUnderscore": "allowSingleOrDouble",
+        "trailingUnderscore": "allowSingleOrDouble"
+      },
+      {
+        "selector": "typeLike",
+        "format": ["PascalCase", "UPPER_CASE"],
+        "leadingUnderscore": "allow",
+        "trailingUnderscore": "allow"
+      },
+      {
+        "selector": "enum",
+        "format": ["PascalCase", "UPPER_CASE", "camelCase"]
+      },
+      // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
+      // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
+      {
+        "selector": [
+          "classProperty",
+          "objectLiteralProperty",
+          "typeProperty",
+          "classMethod",
+          "objectLiteralMethod",
+          "typeMethod",
+          "accessor",
+          "enumMember"
+        ],
+        "format": null,
+        "modifiers": ["requiresQuotes"]
+      }
+    ],
+    "@typescript-eslint/no-empty-interface": "error",
+    // "@typescript-eslint/no-empty-object-type": "off",
+    "@typescript-eslint/no-extra-non-null-assertion": "error",
+    "@typescript-eslint/no-misused-new": "error",
+    "@typescript-eslint/no-namespace": "error",
+    "@typescript-eslint/no-restricted-types": [
+      "error",
+      {
+        "types": {
+          "SFC": "Use FC or FunctionComponent instead.",
+          "React.SFC": "Use React.FC instead.",
+          "StatelessComponent": "Use FunctionComponent instead.",
+          "React.StatelessComponent": "Use React.FunctionComponent instead."
+        }
+      }
+    ],
+    // "@typescript-eslint/no-shadow": "error",
+    "@typescript-eslint/no-undef": "error",
+    // "@typescript-eslint/no-unsafe-function-type": "error",
+    // "@typescript-eslint/no-unused-expressions": ["error", { "allowTaggedTemplates": true }],
+    // "@typescript-eslint/no-var-requires": "error",
+    // "@typescript-eslint/no-wrapper-object-types": "error",
+    "@typescript-eslint/prefer-function-type": "error",
+    // "@typescript-eslint/triple-slash-reference": [
+    //   "error",
+    //   {
+    //     "path": "never",
+    //     "types": "never",
+    //     "lib": "never"
+    //   }
+    // ],
+    "@typescript-eslint/unified-signatures": "error",
+    // "ban/ban": [
+    //   2,
+    //   { "name": ["describe", "only"], "message": "No exclusive suites." },
+    //   { "name": ["it", "only"], "message": "No exclusive tests." },
+    //   { "name": ["test", "only"], "message": "No exclusive tests." },
+    //   { "name": ["testSuggestions", "only"], "message": "No exclusive tests." },
+    //   { "name": ["testErrorsAndWarnings", "only"], "message": "No exclusive tests." }
+    // ],
+    "block-scoped-var": "error",
+    "camelcase": ["error", { "properties": "never", "allow": ["^UNSAFE_"] }],
+    "consistent-return": "error",
+    "constructor-super": "error",
+    "dot-notation": ["error", { "allowKeywords": true }],
+    // "eqeqeq": ["error", "always", { "null": "ignore" }],
+    // "eslint-comments/no-unused-disable": "error",
+    // "eslint-comments/no-unused-enable": "error",
+    "guard-for-in": "error",
+    // "import/default": "error",
+    // "import/export": "error",
+    // "import/named": "error",
+    // "import/namespace": "error",
+    // "import/no-default-export": "error",
+    // "import/no-duplicates": "error",
+    // "import/no-dynamic-require": "error",
+    // "import/no-named-as-default": "error",
+    // "import/no-named-as-default-member": "error",
+    "import/order": [
+      "error",
+      {
+        "groups": [["external", "builtin"], "internal", ["parent", "sibling", "index"]]
+      }
+    ],
+    "jest/no-focused-tests": "error",
+    // "jest/no-identical-title": "error",
+    "jsx-a11y/accessible-emoji": "error",
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/anchor-has-content": "error",
+    "jsx-a11y/aria-activedescendant-has-tabindex": "error",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/aria-proptypes": "error",
+    "jsx-a11y/aria-role": "error",
+    "jsx-a11y/aria-unsupported-elements": "error",
+    // "jsx-a11y/click-events-have-key-events": "error",
+    "jsx-a11y/heading-has-content": "error",
+    "jsx-a11y/html-has-lang": "error",
+    "jsx-a11y/iframe-has-title": "error",
+    "jsx-a11y/interactive-supports-focus": "error",
+    "jsx-a11y/label-has-associated-control": "error",
+    "jsx-a11y/media-has-caption": "error",
+    "jsx-a11y/mouse-events-have-key-events": "error",
+    "jsx-a11y/no-access-key": "error",
+    "jsx-a11y/no-distracting-elements": "error",
+    "jsx-a11y/no-interactive-element-to-noninteractive-role": "error",
+    "jsx-a11y/no-noninteractive-element-interactions": "error",
+    "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
+    "jsx-a11y/no-onchange": "error",
+    "jsx-a11y/no-redundant-roles": "error",
+    // "jsx-a11y/role-has-required-aria-props": "error",
+    // "jsx-a11y/role-supports-aria-props": "error",
+    "jsx-a11y/scope": "error",
+    "jsx-a11y/tabindex-no-positive": "error",
+    // "max-classes-per-file": ["error", 1],
+    // "mocha/handle-done-callback": "error",
+    // "mocha/no-exclusive-tests": "error",
+    // "new-cap": ["error", { "capIsNewExceptions": ["Private"] }],
+    // "no-bitwise": "error",
+    "no-caller": "error",
+    "no-cond-assign": "error",
+    // "no-console": "error",
+    "no-const-assign": "error",
+    "no-debugger": "error",
+    "no-empty": "error",
+    "no-eval": "error",
+    "no-extend-native": "error",
+    // "no-global-assign": "error",
+    "no-irregular-whitespace": "error",
+    "no-iterator": "error",
+    // "no-loop-func": "error",
+    // "no-multi-str": "error",
+    // "no-nested-ternary": "error",
+    // "no-new": "error",
+    "no-new-wrappers": "error",
+    // "no-path-concat": "error",
+    // "no-proto": "error",
+    "no-redeclare": "error",
+    // "no-restricted-globals": ["error", ...RESTRICTED_GLOBALS],
+    // "no-restricted-imports": [2, RESTRICTED_MODULES],
+    // "no-restricted-modules": [2, RESTRICTED_MODULES],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSEnumDeclaration[const=true]",
+        "message": "Do not use `const` with enum declarations"
+      }
+    ],
+    // "no-return-assign": "error",
+    "no-script-url": "error",
+    // "no-sequences": "error",
+    // "no-shadow": "error",
+    // "no-throw-literal": "error",
+    // "no-undef": "error",
+    "no-undef-init": "error",
+    "no-underscore-dangle": "error",
+    // "no-unsafe-finally": "error",
+    // "no-unsanitized/method": "error",
+    // "no-unsanitized/property": "error",
+    // "no-unused-expressions": "error",
+    "no-unused-labels": "error",
+    // "no-unused-vars": ["error"],
+    // "no-use-before-define": ["error", "nofunc"],
+    // "no-var": "error",
+    "no-with": "error",
+    "object-shorthand": "error",
+    "one-var": ["error", "never"],
+    // "prefer-const": "error",
+    // "prefer-object-spread": "error",
+    // "prefer-rest-params": "error",
+    // "radix": "error",
+    // "react-hooks/exhaustive-deps": "error",
+    // "react-hooks/rules-of-hooks": "error",
+    "react/jsx-no-duplicate-props": ["error"],
+    "react/jsx-no-undef": "error",
+    "react/jsx-pascal-case": "error",
+    "react/jsx-uses-react": "error",
+    "react/jsx-uses-vars": "error",
+    // "react/no-danger": "error",
+    "react/no-is-mounted": "error",
+    "react/no-multi-comp": ["error", { "ignoreStateless": true }],
+    "react/no-unescaped-entities": "error",
+    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
+    "react/no-will-update-set-state": "error",
+    "react/prefer-es6-class": ["error", "always"],
+    "react/prefer-stateless-function": ["error", { "ignorePureComponents": true }],
+    // "react/react-in-jsx-scope": "error",
+    "react/self-closing-comp": "error",
+    "spaced-comment": [
+      "error",
+      "always",
+      {
+        "exceptions": ["/"]
+      }
+    ],
+    "strict": ["error", "never"],
+    "use-isnan": "error"
+    // "valid-typeof": "error",
+    // "yoda": "off",
+  }
+}

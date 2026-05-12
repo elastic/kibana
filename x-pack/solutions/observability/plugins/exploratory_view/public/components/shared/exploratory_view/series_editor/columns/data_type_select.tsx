@@ -66,7 +66,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
           button={
             <EuiButton
               data-test-subj="o11yDataTypesSelectButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
@@ -91,7 +91,9 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       )}
       {series.dataType && (
         <EuiToolTip position="top" content={SELECT_DATA_TYPE_TOOLTIP}>
-          <EuiBadge>{currDataType?.label}</EuiBadge>
+          <EuiBadge data-test-subj="o11yDataTypeBadge" tabIndex={0}>
+            {currDataType?.label}
+          </EuiBadge>
         </EuiToolTip>
       )}
     </>

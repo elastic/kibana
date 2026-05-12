@@ -808,6 +808,7 @@ describe('isTrustedDeviceFieldAvailableForOs', () => {
       TrustedDeviceConditionEntryField.DEVICE_ID,
       TrustedDeviceConditionEntryField.MANUFACTURER,
       TrustedDeviceConditionEntryField.PRODUCT_ID,
+      TrustedDeviceConditionEntryField.PRODUCT_NAME,
     ];
 
     it.each(commonFields)(

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
@@ -26,6 +26,8 @@ export const Completed: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: new Date(),
+    executedBy: 'john.doe@example.com',
+    triggeredBy: 'manual',
   },
 };
 
@@ -33,6 +35,8 @@ export const Failed: Story = {
   args: {
     status: ExecutionStatus.FAILED,
     startedAt: new Date(),
+    executedBy: 'jane.smith@example.com',
+    triggeredBy: 'manual',
   },
 };
 
@@ -75,6 +79,8 @@ export const Selected: Story = {
   args: {
     status: ExecutionStatus.COMPLETED,
     startedAt: new Date(),
+    executedBy: 'admin@example.com',
+    triggeredBy: 'scheduled',
     selected: true,
   },
 };
@@ -83,6 +89,8 @@ export const RunningSelected: Story = {
   args: {
     status: ExecutionStatus.RUNNING,
     startedAt: new Date(),
+    executedBy: 'system',
+    triggeredBy: 'scheduled',
     selected: true,
   },
 };

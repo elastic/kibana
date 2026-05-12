@@ -79,6 +79,7 @@ export function Doc(props: DocProps) {
       <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
         {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             data-test-subj={`doc-msg-notFoundDataView`}
             iconType="warning"
@@ -93,6 +94,7 @@ export function Doc(props: DocProps) {
         )}
         {reqState === ElasticRequestState.NotFound && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             data-test-subj={`doc-msg-notFound`}
             iconType="warning"
@@ -112,6 +114,7 @@ export function Doc(props: DocProps) {
 
         {reqState === ElasticRequestState.Error && (
           <EuiCallOut
+            announceOnMount
             color="danger"
             data-test-subj={`doc-msg-error`}
             iconType="warning"
@@ -137,7 +140,7 @@ export function Doc(props: DocProps) {
         )}
 
         {reqState === ElasticRequestState.Loading && (
-          <EuiCallOut data-test-subj={`doc-msg-loading`}>
+          <EuiCallOut announceOnMount data-test-subj={`doc-msg-loading`}>
             <EuiLoadingSpinner size="m" />{' '}
             <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
           </EuiCallOut>

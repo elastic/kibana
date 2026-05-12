@@ -41,7 +41,7 @@ export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
     prefix: 'fileFlyout',
   });
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="m" aria-labelledby={titleId}>
+    <EuiFlyout ownFocus onClose={onClose} size="m" aria-labelledby={titleId} session="start">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={titleId}>{file.name}</h2>

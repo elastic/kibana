@@ -28,7 +28,7 @@ import type {
   IndexWarningType,
   ReindexStatusResponse,
 } from '@kbn/reindex-service-plugin/common';
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type {
   EnrichedDeprecationInfo,
   ReindexAction,
@@ -228,6 +228,7 @@ const WarningReadOnlyModalStep: React.FunctionComponent<WarningModalStepProps> =
         {warnings.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexModal.warningsStep.readonly.calloutTitle"

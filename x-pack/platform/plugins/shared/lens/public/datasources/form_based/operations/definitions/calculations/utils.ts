@@ -9,12 +9,15 @@ import { i18n } from '@kbn/i18n';
 import type { AstFunction } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { IndexPattern } from '../../../../../types';
-import type { LayerType } from '../../../../../../common/types';
-import type { TimeScaleUnit } from '../../../../../../common/expressions';
-import type { FormBasedLayer } from '../../../types';
+import type {
+  ReferenceBasedIndexPatternColumn,
+  IndexPattern,
+  LensLayerType,
+  TimeScaleUnit,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-common';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import type { FieldBasedOperationErrorMessage } from '..';
 import { operationDefinitionMap } from '..';
@@ -39,7 +42,28 @@ export const buildLabelFunction =
     );
   };
 
-export function checkForDataLayerType(layerType: LayerType, name: string) {
+/**
+ * Gets the effective label for a referenced column.
+ * Returns the custom label if set, otherwise computes the default label.
+ */
+export const getReferencedColumnLabel = (
+  refColumnId: string | undefined,
+  columns: Record<string, GenericIndexPatternColumn>,
+  indexPattern?: IndexPattern
+): string | undefined => {
+  if (!refColumnId) return undefined;
+  const refColumn = columns[refColumnId];
+  if (!refColumn) return undefined;
+
+  if (refColumn.customLabel) {
+    return refColumn.label;
+  }
+
+  const opDef = operationDefinitionMap[refColumn.operationType];
+  return opDef?.getDefaultLabel(refColumn, columns, indexPattern);
+};
+
+export function checkForDataLayerType(layerType: LensLayerType, name: string) {
   if (layerType === LayerTypes.REFERENCELINE) {
     return [
       i18n.translate('xpack.lens.indexPattern.calculations.layerDataType', {
@@ -166,7 +190,8 @@ export function dateBasedOperationToExpression(
   layer: FormBasedLayer,
   columnId: string,
   functionName: string,
-  additionalArgs: Record<string, unknown[]> = {}
+  additionalArgs: Record<string, unknown[]> = {},
+  indexPattern: IndexPattern
 ): AstFunction[] {
   const currentColumn = layer.columns[columnId] as unknown as ReferenceBasedIndexPatternColumn;
   const buckets = layer.columnOrder.filter((colId) => layer.columns[colId].isBucketed);
@@ -174,6 +199,14 @@ export function dateBasedOperationToExpression(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   )!;
   buckets.splice(dateColumnIndex, 1);
+
+  const effectiveLabel =
+    currentColumn.label ||
+    operationDefinitionMap[currentColumn.operationType].getDefaultLabel(
+      currentColumn,
+      layer.columns,
+      indexPattern
+    );
 
   return [
     {
@@ -183,7 +216,7 @@ export function dateBasedOperationToExpression(
         by: buckets,
         inputColumnId: [currentColumn.references[0]],
         outputColumnId: [columnId],
-        outputColumnName: [currentColumn.label],
+        outputColumnName: [effectiveLabel],
         ...additionalArgs,
       },
     },

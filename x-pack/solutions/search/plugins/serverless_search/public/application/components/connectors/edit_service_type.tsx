@@ -19,8 +19,9 @@ import {
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Connector as BaseConnector } from '@kbn/search-connectors';
 import { css } from '@emotion/react';
 
@@ -121,7 +122,7 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
-            iconType="beaker"
+            iconType="flask"
             color="hollow"
           >
             {i18n.translate(
@@ -227,14 +228,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         isLoading={isLoading}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         prepend={
-          <EuiIcon
-            type={
+          <EuiFormPrepend
+            iconLeft={
               connector.service_type
                 ? connectorTypes.find((conn) => conn.serviceType === connector.service_type)
                     ?.iconPath ?? ''
                 : 'plugs'
             }
-            size="l"
           />
         }
         singleSelection={{ asPlainText: true }}

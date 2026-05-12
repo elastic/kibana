@@ -509,7 +509,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visLine',
+            getIconForSavedObject: () => 'chartLine',
           },
         ]}
       />
@@ -727,7 +727,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
 
-    expect(wrapper.find(EuiInMemoryTable).prop('message')).toEqual(noItemsMessage);
+    expect(wrapper.find(EuiInMemoryTable).prop('noItemsMessage')).toEqual(noItemsMessage);
   });
 
   describe('pagination', () => {
@@ -963,7 +963,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visLine',
+            getIconForSavedObject: () => 'chartLine',
           },
         ]}
       >

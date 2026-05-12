@@ -5,5 +5,148 @@
  * 2.0.
  */
 
-export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
-export const OPBEANS_END_DATE = '2021-10-10T00:15:00.000Z';
+import type { KibanaRole } from '@kbn/scout-oblt';
+import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
+
+export const START_DATE = '2021-10-10T00:00:00.000Z';
+export const END_DATE = '2021-10-10T00:15:00.000Z';
+export const EXTENDED_TIMEOUT = 45000;
+
+export const SERVICE_OPBEANS_NODE = 'opbeans-node';
+export const SERVICE_OPBEANS_JAVA = 'opbeans-java';
+export const SERVICE_OPBEANS_RUM = 'opbeans-rum';
+
+export const SERVICE_MAP_KUERY_OPBEANS_JAVA = 'service.name: "opbeans-java"';
+export const SERVICE_MAP_KUERY_OPBEANS = 'service.name: opbeans*';
+export const DEPENDENCY_POSTGRESQL = 'postgresql';
+export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPENDENCY_POSTGRESQL}`;
+export const SERVICE_GO = 'service-go';
+export const SERVICE_NODE = 'service-node';
+export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
+export const PRODUCTION_ENVIRONMENT = 'production';
+export const METRICS_ENVIRONMENT = 'metrics';
+
+// Service map multi-environment test data
+export const SERVICE_MAP_TEST_SERVICE = 'service-map-test';
+export const SERVICE_MAP_TEST_ENVIRONMENT_PRODUCTION = 'production';
+export const SERVICE_MAP_TEST_ENVIRONMENT_STAGING = 'staging';
+export const SERVICE_MAP_TEST_ENVIRONMENT_DEVELOPMENT = 'development';
+
+export const SERVICE_OTEL_SENDOTLP = 'sendotlp-otel-native-synth';
+export const OTEL_INSTANCE_ID = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
+export const OTEL_TRANSACTION_NAME = 'parent-synth';
+
+export const SERVICE_EDOT_ADSERVICE = 'adservice-edot-synth';
+export const EDOT_INSTANCE_ID = 'da7a8507-53be-421c-8d77-984f12397213';
+export const EDOT_TRANSACTION_NAME = 'oteldemo.AdServiceEdotSynth/GetAds';
+export const EDOT_ERROR_MESSAGE = '[ResponseError] index_not_found_exception';
+
+export const SERVICE_AWS_LAMBDA = 'synth-python';
+export const SERVICE_AZURE_FUNCTIONS = 'synth-dotnet';
+export const SERVICE_MOBILE_ANDROID = 'synth-android';
+export const SERVICE_MOBILE_IOS = 'synth-ios';
+export const SERVICE_SYNTH_GO = 'synth-go-1';
+export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
+export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
+
+export { APM_METRICS_SERVICE_NAMES } from '@kbn/synthtrace/src/scenarios/helpers/apm_metrics_dashboards';
+
+export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
+export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';
+export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';
+// Error constants - based on opbeans synthtrace data
+export const ERROR_MESSAGE = '[MockError] Foo';
+export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
+export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
+
+// Trace waterfall flyout test services (distributed trace)
+export const SERVICE_WATERFALL_RUM = 'apm-waterfall-rum';
+export const SERVICE_WATERFALL_NODE = 'apm-waterfall-node';
+export const WATERFALL_RUM_TRANSACTION_NAME = 'GET /products';
+export const WATERFALL_NODE_TRANSACTION_NAME = 'GET /api/products';
+export const WATERFALL_NODE_DB_SPAN_NAME = 'SELECT * FROM products';
+
+// Span links test data dates
+export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
+export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';
+export const SPAN_LINKS_PRODUCER_INTERNAL_ONLY_END = '2022-01-01T00:01:00.000Z';
+export const SERVICE_SPAN_LINKS_PRODUCER_INTERNAL_ONLY = 'zzz-producer-internal-only';
+export const SERVICE_SPAN_LINKS_PRODUCER_EXTERNAL_ONLY = 'zzz-producer-external-only';
+export const SERVICE_SPAN_LINKS_PRODUCER_CONSUMER = 'zzz-producer-consumer';
+export const SERVICE_SPAN_LINKS_CONSUMER_MULTIPLE = 'zzz-consumer-multiple';
+
+// APM alert index constants
+export const APM_ALERTS_INDEX_PATTERN =
+  '.alerts-observability.apm.alerts-*,.internal.alerts-observability.apm.alerts-*';
+// Stateful uses rollover index with .internal prefix
+export const STATEFUL_APM_ALERTS_INDEX = '.internal.alerts-observability.apm.alerts-default-000001';
+// Serverless uses data stream without .internal prefix or numeric suffix
+export const SERVERLESS_APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
+
+// APM-specific role definitions matching authentication.ts
+export const APM_ROLES = {
+  apmAllPrivilegesWithoutWriteSettings: {
+    elasticsearch: {
+      cluster: ['manage_api_key'],
+      indices: [
+        {
+          names: ['apm-*'],
+          privileges: ['read', 'view_index_metadata'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: [],
+        feature: { apm: ['minimal_all'], ml: ['all'] },
+        spaces: ['*'],
+      },
+    ],
+  } as KibanaRole,
+
+  apmReadPrivilegesWithWriteSettings: {
+    elasticsearch: {
+      cluster: ['manage_api_key'],
+      indices: [
+        {
+          names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
+          privileges: ['read'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: [],
+        feature: {
+          apm: ['minimal_read', 'settings_save'],
+          advancedSettings: ['all'],
+          ml: ['all'],
+          savedObjectsManagement: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  } as KibanaRole,
+
+  apmMonitor: {
+    elasticsearch: {
+      cluster: ['monitor'],
+      indices: [
+        {
+          names: ['traces-apm*', 'logs-apm*', 'metrics-apm*', 'apm-*'],
+          privileges: ['monitor', 'read', 'view_index_metadata'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: [],
+        feature: {
+          apm: ['minimal_all', 'read', 'settings_save'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  } as KibanaRole,
+};

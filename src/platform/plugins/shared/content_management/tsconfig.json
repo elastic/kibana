@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -8,9 +8,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/es-query",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/item-buffer",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-api-server",
@@ -20,6 +17,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/object-versioning-utils",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

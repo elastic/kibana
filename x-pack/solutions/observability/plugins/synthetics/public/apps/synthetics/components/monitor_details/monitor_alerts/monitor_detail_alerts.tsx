@@ -14,6 +14,7 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_config';
 
 export const MONITOR_ALERTS_TABLE_ID = 'xpack.synthetics.monitor.alertTable';
 
@@ -25,6 +26,9 @@ export function MonitorDetailsAlerts() {
 
   const selectedLocation = useSelectedLocation();
   const { from, to } = useRefreshedRangeFromUrl();
+
+  // Configure the agent builder flyout with the monitor details
+  useMonitorAttachmentConfig();
 
   if (!selectedLocation) {
     return <EuiLoadingSpinner size="xl" />;
@@ -61,7 +65,7 @@ export function MonitorDetailsAlerts() {
                 ],
               },
             }}
-            initialPageSize={100}
+            pageSize={100}
             data-test-subj="monitorAlertsTable"
             renderActionsCell={AlertActions}
             showInspectButton

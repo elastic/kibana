@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -7,9 +7,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
-      "../../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-storybook-types"
     ]
   },
   "include": [
@@ -21,5 +19,6 @@
   ],
   "kbn_references": [
     "@kbn/core-chrome-layout-constants",
+    "@kbn/core-chrome-layout-utils",
   ]
 }

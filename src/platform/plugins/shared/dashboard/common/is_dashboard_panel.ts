@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
+import type { DashboardSection, DashboardPanel } from '../server';
 
+/**
+ * Type guard that checks if a widget is a {@link DashboardPanel}.
+ *
+ * @param widget - The widget to check, which can be either a {@link DashboardPanel} or {@link DashboardSection}.
+ * @returns `true` if the widget is a {@link DashboardPanel}, `false` otherwise.
+ */
 export const isDashboardPanel = (
-  widget: DashboardAttributes['panels'][number]
+  widget: DashboardPanel | DashboardSection
 ): widget is DashboardPanel => {
-  return 'panelConfig' in widget;
+  return 'config' in widget;
 };

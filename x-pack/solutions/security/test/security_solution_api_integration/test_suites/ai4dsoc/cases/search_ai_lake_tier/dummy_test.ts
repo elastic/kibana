@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         title: 'Case title 1',
         settings: {
           syncAlerts: true,
+          extractObservables: false,
         },
         connector: {
           id: '131d4448-abe0-4789-939d-8ef60680b498',

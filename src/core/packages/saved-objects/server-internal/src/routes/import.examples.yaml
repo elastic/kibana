@@ -3,35 +3,43 @@ requestBody:
     multipart/form-data:
       examples:
         importObjectsRequest:
+          summary: Import saved objects from an NDJSON file
           value:
             file: file.ndjson
 responses:
   '200':
-      content:
-        application/json:
-          examples:
-            importObjectsResponse:
-              summary: The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.
-              value:
-                {
-                  "successCount":1,
-                  "success":true,
-                  "successResults":[
-                    {
-                      "type":"index-pattern",
-                      "id":"90943e30-9a47-11e8-b64d-95841ca0b247",
-                      "meta":{
-                        "title":"Kibana Sample Data Logs","icon":"indexPatternApp"},
-                      "managed":false,
-                      "destinationId":"82d2760c-468f-49cf-83aa-b9a35b6a8943"
-                    }
-                  ]
-                }
+    content:
+      application/json:
+        examples:
+          importObjectsResponse:
+            summary: A successful import response
+            value:
+              successCount: 1
+              success: true
+              errors: []
+              successResults:
+                - type: dashboard
+                  id: example-dashboard-1
+                  managed: false
+                  destinationId: example-dashboard-1-copy
+  '400':
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: Invalid file extension .txt
 x-codeSamples:
-- lang: cURL
-  label: Import with createNewCopies
-  source: |
-    curl \
-      -X POST api/saved_objects/_import?createNewCopies=true
-      -H "kbn-xsrf: true"
-      --form file=@file.ndjson
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/saved_objects/_import?createNewCopies=true" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        --form file=@file.ndjson
+  - lang: Console
+    source: |
+      POST kbn://api/saved_objects/_import?createNewCopies=true

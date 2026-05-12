@@ -34,6 +34,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
     createIncidentUrl: 'https://coolsite.net/rest/api/2/issue',
     getIncidentResponseExternalTitleKey: 'key',
     hasAuth: true,
+    authType: 'webhook-authentication-basic',
     headers: { ['content-type']: 'application/json', ['kbn-xsrf']: 'abcd' },
     viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
     getIncidentUrl: 'https://coolsite.net/rest/api/2/issue/{{{external.system.id}}}',
@@ -119,6 +120,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: simulatorConfig,
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -134,6 +136,8 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: simulatorConfig,
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -165,6 +169,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: newConfig,
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -180,6 +185,8 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
           config: newConfig,
+          is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
@@ -202,7 +209,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 expect(resp.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `error validating action type config: [${field}]: expected value of type [string] but got [undefined]`,
+                  message: `error validating connector type config: ✖ Invalid input: expected string, received undefined\n  → at ${field}`,
                 });
               });
           });
@@ -233,7 +240,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error configuring cases webhook action: target url "http://casesWebhook.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error configuring cases webhook action: target url "http://casesWebhook.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -318,8 +325,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subAction]: expected value to equal [pushToService]',
+                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -337,8 +343,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                message: `error validating action params: ✖ Invalid input: expected object, received undefined\n  → at subActionParams`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -364,8 +369,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.incident.title`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -393,8 +397,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].commentId`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -421,8 +424,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message:
-                  'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
+                message: `error validating action params: ✖ Invalid input: expected string, received undefined\n  → at subActionParams.comments[0].comment`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -992,7 +994,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(/Connector must be a webhook or cases webhook/);
+        expect(result.message).to.match(/Connector must be one of the following types/);
       });
 
       after(() => {

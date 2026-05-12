@@ -8,11 +8,11 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiShowFor,
   EuiScreenReaderOnly,
+  EuiShowFor,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { OVERVIEW } from '../../app/translations';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -43,6 +43,10 @@ import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
+import {
+  filterAlertsFromIndexPatterns,
+  getAlertsIndexPatterns,
+} from '../../common/components/visualization_actions/utils';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -56,7 +60,7 @@ const OverviewComponent = () => {
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
   const {
     indicesExist: oldIndicesExist,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
     selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView();
 
@@ -71,6 +75,23 @@ const OverviewComponent = () => {
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
+
+  // Keep-list: patterns from the data view with alert-backing indices stripped
+  // out. Used by `EventCounts` to scope the Host/Network REST queries to event
+  // documents only. Remote event indices are preserved unchanged so that
+  // Cross-Project Search continues to work through the data view.
+  const eventIndexPatterns = useMemo(
+    () => filterAlertsFromIndexPatterns(selectedPatterns),
+    [selectedPatterns]
+  );
+
+  // Drop-list: only the alert-backing patterns from the data view. Passed to
+  // the Events histogram as `excludedPatterns` so the chart emits a negated
+  // `_index` filter (CPS-safe — does not allowlist the full scope).
+  const alertIndexPatterns = useMemo(
+    () => getAlertsIndexPatterns(selectedPatterns),
+    [selectedPatterns]
+  );
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -90,7 +111,7 @@ const OverviewComponent = () => {
   const {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
-  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+  const { hasAlertsRead } = useAlertsPrivileges();
   const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
 
   if (newDataViewPickerEnabled && status === 'pristine') {
@@ -107,10 +128,9 @@ const OverviewComponent = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
+              dataView={experimentalDataView}
               id={InputsModelId.global}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 
@@ -130,7 +150,7 @@ const OverviewComponent = () => {
 
               <EuiFlexItem grow={3}>
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
-                  {hasIndexRead && hasKibanaREAD && (
+                  {hasAlertsRead && (
                     <EuiFlexItem grow={false}>
                       <SignalsByCategory filters={filters} />
                       <EuiSpacer size="l" />
@@ -142,8 +162,9 @@ const OverviewComponent = () => {
                       deleteQuery={deleteQuery}
                       filters={filters}
                       from={from}
-                      dataViewSpec={oldSourcererDataView}
+                      dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
+                      excludedPatterns={alertIndexPatterns}
                       query={query}
                       queryType="overview"
                       to={to}
@@ -154,8 +175,8 @@ const OverviewComponent = () => {
                     <EventCounts
                       filters={filters}
                       from={from}
-                      indexNames={selectedPatterns}
-                      dataViewSpec={oldSourcererDataView}
+                      indexNames={eventIndexPatterns}
+                      dataViewSpec={oldSourcererDataViewSpec}
                       dataView={experimentalDataView}
                       query={query}
                       setQuery={setQuery}

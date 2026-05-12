@@ -18,6 +18,7 @@ import type {
 import { INITIAL_REST_VERSION } from '../../../constants';
 import { indexPatternsRuntimeResponseSchema } from '../../schema';
 import type { IndexPatternsRuntimeResponseType } from '../../route_types';
+import { toApiSpec } from '../util/to_api_spec';
 
 export const registerCreateScriptedFieldRoute = (
   router: IRouter,
@@ -30,6 +31,9 @@ export const registerCreateScriptedFieldRoute = (
     .post({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field',
       access: 'public',
+      summary: 'Create a scripted field',
+      description:
+        'Deprecated. Scripted fields are superseded by runtime fields. Use the runtime field endpoints instead.',
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -99,7 +103,9 @@ export const registerCreateScriptedFieldRoute = (
 
           const body: IndexPatternsRuntimeResponseType = {
             field: fieldObject.toSpec(),
-            index_pattern: await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } }),
+            index_pattern: toApiSpec(
+              await indexPattern.toSpec({ fieldParams: { fieldName: ['*'] } })
+            ),
           };
 
           return res.ok({

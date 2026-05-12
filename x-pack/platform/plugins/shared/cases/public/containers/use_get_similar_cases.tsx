@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { casesQueriesKeys } from './constants';
 import type { CasesSimilarResponseUI } from './types';
 import { useToasts } from '../common/lib/kibana';

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -7,9 +7,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop",
-      "../../../../../typings/emotion.d.ts"
+      "@kbn/ambient-storybook-types"
     ]
   },
   "include": [
@@ -33,20 +31,11 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/test-jest-helpers",
-    "@kbn/core-application-common",
     "@kbn/core-mount-utils-browser",
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-custom-branding-browser",
-    "@kbn/core-custom-branding-common",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
-    "@kbn/default-nav-analytics",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-management",
-    "@kbn/default-nav-devtools",
-    "@kbn/shared-ux-router",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-http-browser-internal",
     "@kbn/core-base-browser-internal",
     "@kbn/core-base-browser-mocks",
@@ -63,14 +52,18 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-user-profile-common",
     "@kbn/core-theme-browser-internal",
-    "@kbn/shared-ux-chrome-navigation",
-    "@kbn/core-chrome-navigation",
-    "@kbn/core-chrome-layout-components",
-    "@kbn/core-chrome-layout-constants",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-feature-flags-browser-mocks",
-    "@kbn/core-chrome-layout-feature-flags",
-    "@kbn/shared-ux-feedback-snippet"
+    "@kbn/core-chrome-feature-flags",
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-chrome-sidebar-internal",
+    "@kbn/core-chrome-sidebar-context",
+    "@kbn/core-chrome-sidebar",
+    "@kbn/core-chrome-browser-components",
+    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-internal-types",
+    "@kbn/use-observable",
+    "@kbn/react-kibana-context-env",
   ],
   "exclude": [
     "target/**/*",

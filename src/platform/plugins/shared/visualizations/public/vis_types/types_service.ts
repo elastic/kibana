@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { VisParams } from '@kbn/visualizations-common';
 import type { VisTypeAlias } from './vis_type_alias_registry';
 import { visTypeAliasRegistry } from './vis_type_alias_registry';
 import { BaseVisType } from './base_vis_type';
 import type { VisTypeDefinition } from './types';
 import type { VisGroups } from './vis_groups_enum';
-import type { VisParams } from '../../common';
 
 /**
  * Vis Types Service

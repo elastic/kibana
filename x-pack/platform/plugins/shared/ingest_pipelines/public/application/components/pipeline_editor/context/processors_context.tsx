@@ -15,6 +15,7 @@ import React, {
   useState,
   useRef,
 } from 'react';
+import { EuiLiveAnnouncer } from '@elastic/eui';
 
 import type { Processor } from '../../../../../common/types';
 
@@ -42,6 +43,7 @@ import { ProcessorRemoveModal, PipelineProcessorsItemTooltip, ProcessorForm } fr
 import { getValue } from '../utils';
 
 import { useTestPipelineContext } from './test_pipeline_context';
+import { applyPendingMoveA11yEffects, buildMoveAnnouncement } from './move_a11y';
 
 const PipelineProcessorsContext = createContext<ContextValue>({} as any);
 
@@ -65,6 +67,9 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   children,
 }) => {
   const initRef = useRef(false);
+  const pendingFocusProcessorIdRef = useRef<string | null>(null);
+  const pendingMoveAnnouncementRef = useRef<string | null>(null);
+  const announcementToggleRef = useRef(false);
 
   const [mode, setMode] = useState<EditorMode>(() => ({
     id: 'idle',
@@ -99,6 +104,14 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
   }, [deserializedResult, processorsDispatch]);
 
   const { onFailure: onFailureProcessors, processors } = processorsState;
+  const [moveAnnouncement, setMoveAnnouncement] = useState('');
+  const latestProcessorsRef = useRef(processors);
+  const latestOnFailureProcessorsRef = useRef(onFailureProcessors);
+
+  useEffect(() => {
+    latestProcessorsRef.current = processors;
+    latestOnFailureProcessorsRef.current = onFailureProcessors;
+  }, [processors, onFailureProcessors]);
 
   const [formState, setFormState] = useState<FormValidityState>({
     validate: () => Promise.resolve(true),
@@ -157,6 +170,13 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
             'copy_from',
             'field',
             'keep',
+            // input_output, target_field, and field_map are mutually exclusive inference processor
+            // options. We only mark them as known when editing an inference processor so that
+            // target_field (which is also used by other processor types) is not accidentally
+            // stripped from unknownOptions when editing those other processors.
+            ...(processorTypeAndOptions.type === 'inference'
+              ? ['input_output', 'target_field', 'field_map']
+              : []),
           ];
 
           // If the processor type is changed while editing, we need to ignore unkownOptions as they
@@ -201,9 +221,33 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     (action) => {
       switch (action.type) {
         case 'addProcessor':
-          setMode({ id: 'creatingProcessor', arg: { selector: action.payload.target } });
+          setMode({
+            id: 'creatingProcessor',
+            arg: { selector: action.payload.target, buttonRef: action.payload.buttonRef },
+          });
           break;
         case 'move':
+          {
+            const latestProcessors = latestProcessorsRef.current;
+            const latestOnFailureProcessors = latestOnFailureProcessorsRef.current;
+            const result = buildMoveAnnouncement({
+              source: action.payload.source,
+              destination: action.payload.destination,
+              processors: latestProcessors,
+              onFailureProcessors: latestOnFailureProcessors,
+            });
+
+            if (result) {
+              const { movedProcessorId, announcement } = result;
+              // Ensure repeated moves are still announced if the text is the same.
+              announcementToggleRef.current = !announcementToggleRef.current;
+              pendingMoveAnnouncementRef.current = `${announcement}${
+                announcementToggleRef.current ? '\u200B' : ''
+              }`;
+              pendingFocusProcessorIdRef.current = movedProcessorId;
+            }
+          }
+
           setMode({ id: 'idle' });
           processorsDispatch({
             type: 'moveProcessor',
@@ -220,6 +264,15 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
     },
     [processorsDispatch]
   );
+
+  useEffect(() => {
+    return applyPendingMoveA11yEffects({
+      modeId: mode.id,
+      pendingFocusProcessorIdRef,
+      pendingMoveAnnouncementRef,
+      setMoveAnnouncement,
+    });
+  }, [mode.id]);
 
   // Memoize the state object to ensure we do not trigger unnecessary re-renders and so
   // this object can be used safely further down the tree component tree.
@@ -247,7 +300,11 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
       }}
     >
       {children}
-
+      <div data-test-subj="pipelineProcessorsMoveAnnouncement">
+        <EuiLiveAnnouncer clearAfterMs={false} aria-live="assertive">
+          {moveAnnouncement}
+        </EuiLiveAnnouncer>
+      </div>
       {mode.id === 'movingProcessor' && (
         <PipelineProcessorsItemTooltip
           processor={getValue<ProcessorInternal>(mode.arg.selector, {
@@ -261,6 +318,7 @@ export const PipelineProcessorsContextProvider: FunctionComponent<Props> = ({
         <ProcessorForm
           isOnFailure={isOnFailureSelector(mode.arg.selector)}
           processor={mode.id === 'managingProcessor' ? mode.arg.processor : undefined}
+          buttonRef={mode.arg.buttonRef}
           onOpen={onFlyoutOpen}
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}

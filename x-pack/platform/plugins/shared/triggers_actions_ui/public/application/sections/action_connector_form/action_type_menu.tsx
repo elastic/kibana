@@ -7,12 +7,27 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiCard,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
+import {
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
@@ -35,6 +50,7 @@ interface RegisteredActionType {
   actionType: ActionType;
   name: string;
   isExperimental: boolean | undefined;
+  isDeprecated: boolean;
 }
 
 const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
@@ -106,12 +122,14 @@ export const ActionTypeMenu = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
-    .filter(
-      ([id, details]) =>
-        actionTypeRegistry.has(id) &&
-        details.enabledInConfig === true &&
-        !actionTypeRegistry.get(id).hideInUi
-    )
+    .filter(([id, details]) => {
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
+      const shouldHideInUi = actionTypeModel?.getHideInUi?.(
+        actionTypesIndex ? Object.values(actionTypesIndex) : []
+      );
+
+      return details.enabledInConfig === true && !shouldHideInUi;
+    })
     .map(([id, actionType]) => {
       const actionTypeModel = actionTypeRegistry.get(id);
       return {
@@ -120,6 +138,7 @@ export const ActionTypeMenu = ({
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
+        isDeprecated: actionType.isDeprecated,
       };
     });
 
@@ -132,10 +151,39 @@ export const ActionTypeMenu = ({
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
+      const isLLMConnector = isLLMConnectorTypeId(item.actionType.id);
+      const description = isLLMConnector ? (
+        <EuiFlexGroup
+          gutterSize="xs"
+          alignItems="center"
+          justifyContent="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{item.selectMessage}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={DEPRECATED_LLM_CONNECTOR_INFO}
+              data-test-subj={`${item.actionType.id}-deprecation-info`}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        item.selectMessage
+      );
       const card = (
         <EuiCard
           betaBadgeProps={
-            item.isExperimental
+            item.isDeprecated
+              ? {
+                  label: DEPRECATED_LABEL,
+                  tooltipContent: DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+                  color: 'warning',
+                }
+              : item.isExperimental
               ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
               : undefined
           }
@@ -144,7 +192,7 @@ export const ActionTypeMenu = ({
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
-          description={item.selectMessage}
+          description={description}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => {
             onActionTypeChange(item.actionType);
@@ -174,6 +222,7 @@ export const ActionTypeMenu = ({
   ) : (
     <div className="actConnectorsListGrid">
       <EuiSpacer size="s" />
+
       <EuiFlexGrid
         gutterSize="xl"
         columns={3}

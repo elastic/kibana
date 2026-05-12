@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { schema } from '@kbn/config-schema';
 
 import type { SettingsConfig } from '../../../common/settings/types';
@@ -16,7 +16,7 @@ const TEST_SETTINGS: SettingsConfig[] = [
   {
     name: 'test.foo',
     title: 'test',
-    description: 'test',
+    description: () => 'test',
     schema: z.boolean(),
     api_field: {
       name: 'test_foo',
@@ -25,11 +25,21 @@ const TEST_SETTINGS: SettingsConfig[] = [
   {
     name: 'test.foo.default_value',
     title: 'test',
-    description: 'test',
+    description: () => 'test',
     schema: z.string().default('test'),
     api_field: {
       name: 'test_foo_default_value',
     },
+  },
+  {
+    name: 'agent.internal',
+    title: 'test',
+    description: () => 'test',
+    schema: z.string(),
+    api_field: {
+      name: 'agent_internal',
+    },
+    type: 'yaml',
   },
 ];
 
@@ -44,7 +54,7 @@ describe('form_settings', () => {
             test_foo: 'not valid',
           },
         })
-      ).toThrowError(/Expected boolean, received string/);
+      ).toThrowError(/Invalid input: expected boolean, received string/);
 
       expect(() =>
         apiSchema.validate({
@@ -80,6 +90,21 @@ describe('form_settings', () => {
         },
       } as any);
       expect(res).toEqual({ 'test.foo.default_value': 'test' });
+    });
+
+    it('render yaml values for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          agent_internal: 'agent:\n  internal:\n    runtime:\n      default: otel',
+        },
+      } as any);
+      expect(res).toEqual({
+        'agent.internal': {
+          runtime: {
+            default: 'otel',
+          },
+        },
+      });
     });
   });
 });

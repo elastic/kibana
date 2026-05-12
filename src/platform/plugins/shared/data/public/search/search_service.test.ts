@@ -18,7 +18,11 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { SearchServiceSetupDependencies } from './search_service';
 import { SearchService } from './search_service';
 import type { ISearchStart } from './types';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { BackgroundSearchNotifier } from './session/background_search_notifier';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+
+jest.mock('./session/background_search_notifier');
+const BackgroundSearchNotifierMock = jest.mocked(BackgroundSearchNotifier);
 
 describe('Search service', () => {
   let searchService: SearchService;
@@ -61,18 +65,23 @@ describe('Search service', () => {
       } as unknown as SearchServiceSetupDependencies);
       data = searchService.start(mockCoreStart, {
         fieldFormats: {} as FieldFormatsStart,
-        indexPatterns: {} as DataViewsContract,
+        dataViews: {} as DataViewsContract,
         inspector: {} as InspectorStartContract,
         screenshotMode: screenshotModePluginMock.createStartContract(),
         scriptedFieldsEnabled: true,
-        share: {} as SharePluginStart,
+        share: sharePluginMock.createStartContract(),
       });
+    });
+
+    it('starts background search notifier polling', () => {
+      expect(BackgroundSearchNotifierMock.prototype.startPolling).toHaveBeenCalledTimes(1);
     });
 
     it('exposes proper contract', async () => {
       expect(data).toHaveProperty('aggs');
       expect(data).toHaveProperty('search');
       expect(data).toHaveProperty('showSearchSessionsFlyout');
+      expect(data).toHaveProperty('isBackgroundSearchEnabled');
       expect(data).toHaveProperty('showWarnings');
       expect(data).toHaveProperty('showError');
       expect(data).toHaveProperty('searchSource');

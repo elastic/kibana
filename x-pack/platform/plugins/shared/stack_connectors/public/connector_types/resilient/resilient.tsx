@@ -11,6 +11,7 @@ import type {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/resilient/constants';
 import type { ResilientConfig, ResilientSecrets, ResilientActionParams } from './types';
 
 export const DESC = i18n.translate('xpack.stackConnectors.components.resilient.selectMessageText', {
@@ -30,7 +31,7 @@ export function getConnectorType(): ConnectorTypeModel<
   ResilientActionParams
 > {
   return {
-    id: '.resilient',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: DESC,
     actionTypeTitle: TITLE,

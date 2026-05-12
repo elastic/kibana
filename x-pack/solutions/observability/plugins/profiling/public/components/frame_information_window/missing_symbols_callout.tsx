@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FrameType } from '@kbn/profiling-utils';
 import { getLanguageType } from '@kbn/profiling-utils';
-import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { AddDataTabs } from '../../views/add_data_view';
@@ -28,6 +27,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
   if (languageType === 'NATIVE') {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate(
           'xpack.profiling.frameInformationWindow.missingSymbols.native.title',
           { defaultMessage: 'Missing symbols' }
@@ -86,17 +86,6 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             'Symbols are not available because of an error in the unwinder for this language or an unknown error with the interpreter.',
         })}
       </p>
-      <EuiButton
-        data-test-subj="profilingMissingSymbolsCalloutReportAProblemButton"
-        href={PROFILING_FEEDBACK_LINK}
-        target="_blank"
-        color="warning"
-      >
-        {i18n.translate(
-          'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
-          { defaultMessage: 'Report a problem' }
-        )}
-      </EuiButton>
     </EuiCallOut>
   );
 }

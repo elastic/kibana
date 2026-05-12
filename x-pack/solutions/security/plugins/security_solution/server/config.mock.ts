@@ -13,7 +13,7 @@ import type { ConfigType } from './config';
 import { duration } from 'moment';
 
 export const createMockConfig = (): ConfigType => {
-  const enableExperimental: Array<keyof ExperimentalFeatures> = ['responseActionUploadEnabled'];
+  const enableExperimental: Array<keyof ExperimentalFeatures> = [];
 
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
@@ -31,6 +31,8 @@ export const createMockConfig = (): ConfigType => {
     alertMergeStrategy: 'missingFields',
     alertIgnoreFields: [],
     maxUploadResponseActionFileBytes: 26214400,
+    maxEndpointScriptFileSize: 26214400,
+    disableEndpointRuleAutoInstall: false,
     settings: getDefaultConfigSettings(),
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,

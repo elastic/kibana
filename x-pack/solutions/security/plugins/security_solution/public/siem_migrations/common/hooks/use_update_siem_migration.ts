@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import type { UpdateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -44,18 +44,21 @@ export function useUpdateSiemMigration<T extends MigrationType>(
   const { addSuccess, addError } = useAppToasts();
   const { siemMigrations } = useKibana().services;
 
-  const updateMigration = useMemo(
-    () =>
-      migrationType === 'rule'
-        ? siemMigrations?.rules?.api?.updateMigration
-        : siemMigrations?.dashboards?.api?.updateDashboardMigration,
+  const updateMigration = useCallback(
+    (params: UpdateMigrationArgs<T>) => {
+      if (migrationType === 'rule') {
+        return siemMigrations.rules.api.updateMigration(params);
+      } else {
+        return siemMigrations.dashboards.api.updateDashboardMigration(params);
+      }
+    },
     [siemMigrations, migrationType]
   );
 
   return useMutation<void, Error, UpdateMigrationArgs<T>>({
     mutationKey: ['siemMigration', migrationType, 'update'],
-    mutationFn: async ({ migrationId, body }) => {
-      return updateMigration({ migrationId, body });
+    mutationFn: async (params) => {
+      return updateMigration(params);
     },
     onSuccess: () => {
       addSuccess(UPDATE_MIGRATION_SUCCESS);

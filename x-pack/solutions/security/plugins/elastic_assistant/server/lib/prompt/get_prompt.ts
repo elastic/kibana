@@ -12,6 +12,8 @@ import {
   type PromptArray,
   type GetPromptsByGroupIdArgs,
 } from '@kbn/security-ai-prompts';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { localPrompts } from './local_prompt_object';
 
 export const getPromptsByGroupId = async (
@@ -23,3 +25,7 @@ export const getPromptsByGroupId = async (
 export const getPrompt = async (args: Omit<GetPromptArgs, 'localPrompts'>): Promise<string> => {
   return _getPrompt({ ...args, localPrompts });
 };
+
+export const getInferenceConnectorById =
+  (inference: InferenceServerStart, request: KibanaRequest) => (id: string) =>
+    inference.getConnectorById(id, request);

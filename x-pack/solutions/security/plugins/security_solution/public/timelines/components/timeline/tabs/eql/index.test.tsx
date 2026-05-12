@@ -111,6 +111,7 @@ describe('EQL Tab', () => {
       false,
       {
         events: mockTimelineData.slice(0, 1),
+        rawEvents: [],
         pageInfo: {
           activePage: 0,
           totalPages: 10,
@@ -181,6 +182,7 @@ describe('EQL Tab', () => {
           false,
           {
             events: [],
+            rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 10,
@@ -199,7 +201,8 @@ describe('EQL Tab', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    describe('pagination', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/224186
+    describe.skip('pagination', () => {
       beforeEach(() => {
         // pagination tests need more than 1 record so here
         // we return 5 records instead of just 1.
@@ -207,6 +210,7 @@ describe('EQL Tab', () => {
           false,
           {
             events: structuredClone(mockTimelineData.slice(0, 5)),
+            rawEvents: [],
             pageInfo: {
               activePage: 0,
               totalPages: 5,

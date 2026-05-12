@@ -37,7 +37,7 @@ import {
   getSpanFieldConfigurations,
   getTransactionFieldConfigurations,
 } from './field_configurations';
-import { useFetchTraceRootItemContext } from '../../doc_viewer_overview/hooks/use_fetch_trace_root_item';
+import { useFetchTraceRootSpanContext } from '../../doc_viewer_overview/hooks/use_fetch_trace_root_span';
 
 const spanFieldNames = [
   SPAN_ID,
@@ -65,15 +65,22 @@ const transactionFieldNames = [
 ];
 
 export interface AboutProps
-  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'> {
+  extends Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'> {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
 }
 
-export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: AboutProps) => {
+export const About = ({
+  hit,
+  dataView,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  columns,
+}: AboutProps) => {
   const isSpan = !isTransaction(hit);
   const flattenedHit = getFlattenedTraceDocumentOverview(hit);
-  const traceRootItem = useFetchTraceRootItemContext();
+  const traceRootSpan = useFetchTraceRootSpanContext();
 
   const aboutFieldConfigurations = useMemo(
     () => ({
@@ -94,7 +101,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
         duration={value as number}
         size="xs"
         parent={{
-          duration: traceRootItem?.item?.duration,
+          duration: traceRootSpan?.span?.duration,
           type: 'trace',
         }}
       />
@@ -112,6 +119,7 @@ export const About = ({ hit, dataView, filter, onAddColumn, onRemoveColumn }: Ab
         filter={filter}
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
+        columns={columns}
       />
     </EuiPanel>
   );

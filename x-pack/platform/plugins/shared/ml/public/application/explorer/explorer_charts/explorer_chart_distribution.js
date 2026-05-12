@@ -31,6 +31,8 @@ import { getTableItemClosestToTimestamp } from '../../../../common/util/anomalie
 
 import { LinksMenuUI } from '../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../components/rule_editor';
+import { MlAnomalyAlertFlyout } from '../../../alerting/ml_alerting_flyout';
+import { buildAlertParamsFromAnomaly } from '../../components/anomalies_table/build_alert_params_from_anomaly';
 import { formatValue } from '../../formatters/format_value';
 import {
   getChartType,
@@ -70,13 +72,20 @@ export class ExplorerChartDistribution extends React.Component {
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
     euiTheme: PropTypes.object.isRequired,
+    isEmbeddable: PropTypes.bool,
   };
 
   constructor(props) {
     super(props);
     this.chartScales = undefined;
     this.cursorStateSubscription = undefined;
-    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
+    this.state = {
+      popoverData: null,
+      popoverCoords: [0, 0],
+      showRuleEditorFlyout: () => {},
+      alertFlyoutVisible: false,
+      alertFlyoutParams: undefined,
+    };
   }
 
   componentDidMount() {
@@ -738,8 +747,16 @@ export class ExplorerChartDistribution extends React.Component {
     });
   };
 
+  handleShowAnomalyAlertFlyout = (anomaly) => {
+    const initialParams = buildAlertParamsFromAnomaly(anomaly);
+    this.setState({
+      alertFlyoutParams: initialParams,
+      alertFlyoutVisible: true,
+    });
+  };
+
   render() {
-    const { seriesConfig } = this.props;
+    const { seriesConfig, isEmbeddable } = this.props;
 
     if (typeof seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -748,13 +765,23 @@ export class ExplorerChartDistribution extends React.Component {
 
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
+    const telemetrySource = isEmbeddable
+      ? 'embeddable_distribution_chart'
+      : 'explorer_distribution_chart';
 
     return (
       <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={telemetrySource}
         />
+        {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
+          <MlAnomalyAlertFlyout
+            onCloseFlyout={() => this.setState({ alertFlyoutVisible: false })}
+            initialParams={this.state.alertFlyoutParams}
+          />
+        )}
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -764,6 +791,12 @@ export class ExplorerChartDistribution extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.distributionChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
@@ -780,6 +813,7 @@ export class ExplorerChartDistribution extends React.Component {
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
                 showRuleEditorFlyout={this.state.showRuleEditorFlyout}
+                showAnomalyAlertFlyout={this.handleShowAnomalyAlertFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />

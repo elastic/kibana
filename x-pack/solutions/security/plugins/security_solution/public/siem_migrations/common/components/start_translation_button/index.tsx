@@ -8,19 +8,20 @@
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import * as i18n from './translations';
+import type { MigrationStats } from '../../types';
 
 export interface StartTranslationButtonProps {
-  migrationId: string;
+  migrationStats: MigrationStats;
   isStopped: boolean;
-  startMigration: (migrationId: string) => void;
+  startMigration: (migrationStats: MigrationStats) => void;
   isStarting: boolean;
 }
 
 export const StartTranslationButton = React.memo<StartTranslationButtonProps>(
-  ({ migrationId, isStopped, startMigration, isStarting }) => {
+  ({ migrationStats, isStopped, startMigration, isStarting }) => {
     const onStartMigration = useCallback(() => {
-      startMigration(migrationId);
-    }, [migrationId, startMigration]);
+      startMigration(migrationStats);
+    }, [migrationStats, startMigration]);
 
     const text = useMemo(() => {
       if (isStopped) {
@@ -37,6 +38,7 @@ export const StartTranslationButton = React.memo<StartTranslationButtonProps>(
     return (
       <EuiButton
         data-test-subj={'startMigrationButton'}
+        aria-label={text}
         fill={!isStopped}
         onClick={onStartMigration}
         isLoading={isStarting}

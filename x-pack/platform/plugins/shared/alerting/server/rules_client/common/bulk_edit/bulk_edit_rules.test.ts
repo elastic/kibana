@@ -7,6 +7,7 @@
 
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  coreFeatureFlagsMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -34,6 +35,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RawRule } from '../../../types';
 import { RecoveredActionGroup, type BulkEditSkipReason } from '../../../types';
 import type { SavedObject } from '@kbn/core/server';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 
 jest.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -63,6 +65,7 @@ const rulesClientContext: RulesClientContext = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
+  cloneAPIKey: jest.fn(),
   logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -82,6 +85,8 @@ const rulesClientContext: RulesClientContext = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
   fieldsToExcludeFromPublicApi: [],
   minimumScheduleIntervalInMs: 0,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const MOCK_API_KEY_1 = Buffer.from('123:abc').toString('base64');
@@ -129,6 +134,7 @@ const existingDecryptedRule: SavedObject<RawRule> = {
     ...existingRule.attributes,
     apiKey: MOCK_API_KEY_1,
     apiKeyCreatedByUser: false,
+    uiamApiKey: 'uiam-key',
   },
 };
 
@@ -313,13 +319,13 @@ describe('bulkEditRules', () => {
     ).rejects.toThrow('More than 10000 rules matched for bulk edit');
   });
 
-  test('should throw error if no aggregation buckets found', async () => {
+  test('throws error if no aggregation buckets found', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: { alertTypeId: {} },
       saved_objects: [],
       per_page: 0,
       page: 0,
-      total: 1,
+      total: 0,
     });
     await expect(
       bulkEditRules(rulesClientContext, {
@@ -348,7 +354,7 @@ describe('bulkEditRules', () => {
   });
 
   test('should throw error if rule type is not authorized for user', async () => {
-    authorization.ensureAuthorized.mockImplementationOnce(() => {
+    authorization.bulkEnsureAuthorized.mockImplementationOnce(() => {
       throw new Error('Unauthorized');
     });
     await expect(
@@ -361,15 +367,14 @@ describe('bulkEditRules', () => {
       })
     ).rejects.toThrow('Unauthorized');
 
-    expect(authorization.ensureAuthorized).toHaveBeenLastCalledWith({
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenLastCalledWith({
+      ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
       operation: 'bulkEdit',
-      ruleTypeId: 'myType',
+      entity: 'rule',
     });
   });
 
-  test('should call ensureAuthorized once for each unique rule type and with the required permission from the method call', async () => {
+  test('should call bulkEnsureAuthorized once with all rule type consumer pairs and with the required permission from the method call', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       aggregations: {
         alertTypeId: {
@@ -392,18 +397,14 @@ describe('bulkEditRules', () => {
       auditAction: RuleAuditAction.BULK_EDIT,
     });
 
-    expect(authorization.ensureAuthorized).toHaveBeenCalledTimes(2);
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(1, {
-      consumer: 'myApp',
-      entity: 'rule',
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(authorization.bulkEnsureAuthorized).toHaveBeenCalledWith({
+      ruleTypeIdConsumersPairs: [
+        { ruleTypeId: 'myType', consumers: ['myApp'] },
+        { ruleTypeId: 'myOtherType', consumers: ['myApp'] },
+      ],
       operation: 'bulkEditParams',
-      ruleTypeId: 'myType',
-    });
-    expect(authorization.ensureAuthorized).toHaveBeenNthCalledWith(2, {
-      consumer: 'myApp',
       entity: 'rule',
-      operation: 'bulkEditParams',
-      ruleTypeId: 'myOtherType',
     });
   });
 
@@ -471,6 +472,66 @@ describe('bulkEditRules', () => {
     );
   });
 
+  test('should call bulkMarkApiKeysForInvalidation with UIAM API keys if there are any', async () => {
+    await bulkEditRules(rulesClientContext, {
+      name: `rulesClient.bulkEdit`,
+      updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+        rules.push(existingDecryptedRule);
+        apiKeysMap.set('1', {
+          oldApiKey: MOCK_API_KEY_1,
+          oldApiKeyCreatedByUser: false,
+          oldUiamApiKey: '111:essu_old-uia-key',
+        });
+      }),
+      shouldInvalidateApiKeys: true,
+      requiredAuthOperation: ReadOperations.BulkEditParams,
+      auditAction: RuleAuditAction.BULK_EDIT,
+    });
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: [MOCK_API_KEY_1, '111:essu_old-uia-key'],
+      },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
+  test('should invalidate the new keys when creation fails', async () => {
+    unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(new Error('Failed to save'));
+
+    try {
+      await bulkEditRules(rulesClientContext, {
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn().mockImplementation(({ apiKeysMap, rules }) => {
+          rules.push(existingDecryptedRule);
+          apiKeysMap.set('1', {
+            oldApiKey: MOCK_API_KEY_1,
+            oldApiKeyCreatedByUser: false,
+            oldUiamApiKey: '111:essu_old-uia-key',
+            newApiKey: 'new-api-key',
+            newUiamApiKey: '333:essu_new-uia-key',
+          });
+        }),
+        shouldInvalidateApiKeys: true,
+        requiredAuthOperation: ReadOperations.BulkEditParams,
+        auditAction: RuleAuditAction.BULK_EDIT,
+      });
+    } catch (e) {
+      /* expected */
+    }
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      {
+        apiKeys: ['333:essu_new-uia-key', 'new-api-key'],
+      },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+  });
+
   test('should return updated rules formatted for the public API', async () => {
     const result = await bulkEditRules(rulesClientContext, {
       name: `rulesClient.bulkEdit`,
@@ -524,6 +585,80 @@ describe('bulkEditRules', () => {
         { id: 'skip-5', name: 'skip-5', skip_reason: 'RULE_NOT_MODIFIED' as BulkEditSkipReason },
       ],
       total: 1,
+    });
+  });
+
+  describe('internally managed rule types', () => {
+    beforeEach(() => {
+      ruleTypeRegistry.list.mockReturnValue(
+        // @ts-expect-error: not all args are required for this test
+        new Map([
+          ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          [
+            'test.internal-rule-type-2',
+            { id: 'test.internal-rule-type-2', internallyManaged: true },
+          ],
+        ])
+      );
+
+      // @ts-expect-error: not all args are required for this test
+      authorization.getFindAuthorizationFilter.mockResolvedValue({
+        filter: nodeBuilder.and([
+          nodeBuilder.is('alert.attributes.alertTypeId', 'foo'),
+          nodeBuilder.is('alert.attributes.consumer', 'bar'),
+        ]),
+      });
+    });
+
+    it('should ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await bulkEditRules(rulesClientContext, {
+        filter: 'alert.attributes.tags: "APM"',
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn(),
+        requiredAuthOperation: WriteOperations.BulkEdit,
+        auditAction: RuleAuditAction.BULK_EDIT,
+        shouldInvalidateApiKeys: false,
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"((alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar)) AND NOT (alert.attributes.alertTypeId: test.internal-rule-type OR alert.attributes.alertTypeId: test.internal-rule-type-2))"`
+      );
+    });
+
+    it('should not ignore updates to internally managed rule types by default and combine all filters correctly', async () => {
+      await bulkEditRules(rulesClientContext, {
+        filter: 'alert.attributes.tags: "APM"',
+        name: `rulesClient.bulkEdit`,
+        updateFn: jest.fn(),
+        requiredAuthOperation: WriteOperations.BulkEdit,
+        auditAction: RuleAuditAction.BULK_EDIT,
+        shouldInvalidateApiKeys: false,
+        ignoreInternalRuleTypes: false,
+      });
+
+      const findFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+      const encryptedFindFilter =
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser.mock.calls[0][0]
+          .filter;
+
+      expect(toKqlExpression(findFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
+
+      expect(toKqlExpression(encryptedFindFilter)).toMatchInlineSnapshot(
+        `"(alert.attributes.tags: \\"APM\\" AND (alert.attributes.alertTypeId: foo AND alert.attributes.consumer: bar))"`
+      );
     });
   });
 });

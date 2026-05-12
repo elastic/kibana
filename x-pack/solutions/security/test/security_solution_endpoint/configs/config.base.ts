@@ -87,10 +87,15 @@ export const generateConfig = async ({
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
-        // this will be removed in 8.7 when the file upload feature is released
-        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
         ...kbnServerArgs,
       ],
+    },
+    uiSettings: {
+      ...baseConfig.get('uiSettings'),
+      globalDefaults: {
+        ...baseConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: true,
+      },
     },
     layout: {
       fixedHeaderHeight: 200,

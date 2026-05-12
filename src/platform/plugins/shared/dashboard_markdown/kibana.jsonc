@@ -3,20 +3,27 @@
   "id": "@kbn/dashboard-markdown",
   "owner": "@elastic/kibana-presentation",
   "description": "Dashboard markdown",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "dashboardMarkdown",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": [
       "contentManagement",
       "dataViews",
       "embeddable",
+      "expressions",
       "uiActions",
       "dashboard",
       "data",
       "charts",
       "dataViewFieldEditor",
       "visualizations",
+      "kibanaUtils"
     ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

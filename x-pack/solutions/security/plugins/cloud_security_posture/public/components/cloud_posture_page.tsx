@@ -5,13 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { NoDataPageProps } from '@kbn/kibana-react-plugin/public';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
+import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data';
+import { NoDataPage } from '@kbn/shared-ux-page-no-data';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CspLoadingState } from './csp_loading_state';
 
@@ -44,44 +42,33 @@ export const isCommonError = (error: unknown): error is CommonError => {
 };
 
 export interface CspNoDataPageProps {
-  pageTitle: NoDataPageProps['pageTitle'];
-  docsLink: NoDataPageProps['docsLink'];
-  actionHref: NoDataPageProps['actions']['elasticAgent']['href'];
-  actionTitle: NoDataPageProps['actions']['elasticAgent']['title'];
-  actionDescription: NoDataPageProps['actions']['elasticAgent']['description'];
-  testId: string;
+  docsLink: NoDataPageProps['action']['elasticAgent']['docsLink'];
+  actionHref: NoDataPageProps['action']['elasticAgent']['href'];
+  actionTitle: NoDataPageProps['action']['elasticAgent']['title'];
+  actionDescription: NoDataPageProps['action']['elasticAgent']['description'];
+  dataTestSubj: string;
+  buttonText: NoDataPageProps['action']['elasticAgent']['buttonText'];
 }
 
 export const CspNoDataPage = ({
-  pageTitle,
   docsLink,
   actionHref,
   actionTitle,
   actionDescription,
-  testId,
+  dataTestSubj,
+  buttonText,
 }: CspNoDataPageProps) => {
   return (
     <NoDataPage
-      data-test-subj={testId}
-      css={css`
-        > :nth-child(3) {
-          display: block;
-          margin: auto;
-          width: 450px;
-        }
-      `}
-      pageTitle={pageTitle}
-      solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
-        defaultMessage: 'Cloud Security Posture',
-      })}
-      docsLink={docsLink}
-      logo="logoSecurity"
-      actions={{
+      action={{
         elasticAgent: {
+          docsLink,
           href: actionHref,
-          isDisabled: !actionHref,
+          buttonIsDisabled: !actionHref,
           title: actionTitle,
           description: actionDescription,
+          'data-test-subj': dataTestSubj,
+          buttonText,
         },
       }}
     />
@@ -133,17 +120,13 @@ const defaultErrorRenderer = (error: unknown) => (
 export const defaultNoDataRenderer = () => (
   <FullSizeCenteredPage>
     <NoDataPage
-      data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
-      pageTitle={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.pageTitle', {
-        defaultMessage: 'No data found',
-      })}
-      solution={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.solutionNameLabel', {
-        defaultMessage: 'Cloud Security Posture',
-      })}
-      // TODO: Add real docs link once we have it
-      docsLink={'https://www.elastic.co/guide/index.html'}
-      logo={'logoSecurity'}
-      actions={{}}
+      action={{
+        elasticAgent: {
+          'data-test-subj': DEFAULT_NO_DATA_TEST_SUBJECT,
+          // TODO: Add real docs link once we have it
+          docsLink: 'https://www.elastic.co/guide/index.html',
+        },
+      }}
     />
   </FullSizeCenteredPage>
 );

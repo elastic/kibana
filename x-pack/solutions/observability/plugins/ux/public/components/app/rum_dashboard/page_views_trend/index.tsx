@@ -16,7 +16,7 @@ export function PageViewsTrend() {
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   return (
-    <div className="pageViewsChart">
+    <div data-test-subj="uxPageViewsChart" className="pageViewsChart">
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xs">

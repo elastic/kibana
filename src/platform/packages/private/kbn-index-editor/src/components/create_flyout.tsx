@@ -12,16 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { FC } from 'react';
 import React, { Suspense, lazy } from 'react';
-import { distinctUntilChanged, from, skip, takeUntil } from 'rxjs';
+import { combineLatest, first, skip } from 'rxjs';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
+import { isPlaceholderColumn } from '../utils';
 
 export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentContext) {
-  const {
-    http,
-    overlays,
-    application: { currentAppId$ },
-    ...startServices
-  } = deps.coreStart;
+  const { http, overlays, ...startServices } = deps.coreStart;
 
   const indexUpdateService = deps.indexUpdateService;
 
@@ -30,6 +26,23 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
     indexUpdateService.setIndexName(props.indexName);
   }
   indexUpdateService.setIndexCreated(props.doesIndexExist);
+
+  // Track telemetry event when flyout is opened
+  if (props.doesIndexExist) {
+    combineLatest([
+      indexUpdateService.totalHits$.pipe(skip(1)), // skip initial value
+      indexUpdateService.dataTableColumns$,
+    ])
+      .pipe(first())
+      .subscribe(([docCount, columns]) => {
+        deps.indexEditorTelemetryService.trackFlyoutOpened({
+          docCount,
+          fieldCount: columns.filter((c) => !isPlaceholderColumn(c.name)).length,
+        });
+      });
+  } else {
+    deps.indexEditorTelemetryService.trackFlyoutOpened({ docCount: 0, fieldCount: 0 });
+  }
 
   const LazyFlyoutContent = lazy(async () => {
     const { FlyoutContent } = await import('./flyout_content');
@@ -55,23 +68,18 @@ export function createFlyout(deps: FlyoutDeps, props: EditLookupIndexContentCont
       ownFocus: true,
       onClose: onFlyoutClose,
       size: 'l',
+      outsideClickCloses: false,
     }
   );
 
-  indexUpdateService.completed$.subscribe(({ indexName, isIndexCreated }) => {
+  indexUpdateService.completed$.subscribe(({ indexName, isIndexCreated, indexHasNewFields }) => {
     props.onClose?.({
       indexName,
       indexCreatedDuringFlyout: props.doesIndexExist ? false : isIndexCreated,
+      indexHasNewFields,
     });
     flyoutSession.close();
   });
-
-  // Close the flyout when user navigates out of the current plugin
-  currentAppId$
-    .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-    .subscribe(() => {
-      flyoutSession.close();
-    });
 }
 
 const LoadingContents: FC = () => (

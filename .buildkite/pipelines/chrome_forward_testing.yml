@@ -17,6 +17,15 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+  - command: .buildkite/scripts/steps/store_cache.sh
+    label: Store Cache for build
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    agents:
+      machineType: n2-highcpu-8
+      diskSizeGb: 95
+
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
@@ -49,7 +58,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     env:
       # Unit-tests don't depend on Chrome's versions, integration tests , so we don't need to run those
       LIMIT_CONFIG_TYPE: 'functional'
@@ -61,16 +70,16 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2-standard-4
     key: build_scout_tests
-    timeout_in_minutes: 10
-    depends_on:
-      - build
+    timeout_in_minutes: 15
     env:
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
         - exit_status: '*'
@@ -98,7 +107,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 2
+    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'
@@ -108,11 +117,12 @@ steps:
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 10
+    parallelism: 11
     retry:
       automatic:
         - exit_status: '-1'
@@ -122,11 +132,12 @@ steps:
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
@@ -154,7 +165,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -182,7 +193,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -196,7 +207,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -252,7 +263,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -266,7 +277,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 7
     retry:
       automatic:
         - exit_status: '-1'
@@ -294,7 +305,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
@@ -322,7 +333,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 1
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
@@ -364,7 +375,7 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 3
+    parallelism: 5
     retry:
       automatic:
         - exit_status: '-1'
@@ -374,11 +385,12 @@ steps:
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 110
       preemptible: true
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 9
     retry:
       automatic:
         - exit_status: '-1'
@@ -387,7 +399,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -401,7 +414,8 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     agents:
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -416,11 +430,12 @@ steps:
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
+      diskSizeGb: 120
     depends_on:
       - build
-    timeout_in_minutes: 60
-    parallelism: 20
+    timeout_in_minutes: 75
+    parallelism: 22
     retry:
       automatic:
         - exit_status: '-1'
@@ -430,10 +445,11 @@ steps:
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
-      machineType: n2-standard-4
+      machineType: n2-highmem-4
+      diskSizeGb: 120
     depends_on:
       - build
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
     retry:
       automatic:

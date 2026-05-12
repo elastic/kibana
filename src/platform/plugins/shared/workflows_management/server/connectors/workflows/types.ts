@@ -7,18 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { AlertHit } from '@kbn/alerting-plugin/server/types';
 import type { Logger } from '@kbn/core/server';
+import type { TriggerType } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
 import type { ExecutorParamsSchema } from './schema';
 
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
+export type ExecutorParams = z.infer<typeof ExecutorParamsSchema>;
 export type WorkflowsActionParamsType = ExecutorParams;
+
+export interface AlertStates {
+  new: boolean;
+  ongoing: boolean;
+  recovered: boolean;
+}
 
 export interface RunWorkflowParams {
   workflowId: string;
   spaceId: string;
-  alerts?: any[];
-  inputs?: Record<string, unknown>;
+  summaryMode?: boolean;
+  alertStates?: AlertStates;
+  inputs: {
+    event: {
+      alerts: AlertHit[];
+      rule: {
+        id: string;
+        name: string;
+        tags: string[];
+        consumer: string;
+        producer: string;
+        ruleTypeId: string;
+      };
+      ruleUrl?: string;
+      spaceId: string;
+    };
+  };
   [key: string]: unknown;
 }
 
@@ -34,8 +57,30 @@ export interface WorkflowExecutionResponse {
   status: string;
 }
 
+export interface ScheduleWorkflowParams {
+  workflowId: string;
+  spaceId: string;
+  inputs: {
+    event: {
+      alerts: AlertHit[];
+      rule: {
+        id: string;
+        name: string;
+        tags: string[];
+        consumer: string;
+        producer: string;
+        ruleTypeId: string;
+      };
+      ruleUrl?: string;
+      spaceId: string;
+    };
+  };
+  triggeredBy?: TriggerType | undefined;
+}
+
 export interface ExternalService {
   runWorkflow: (params: RunWorkflowParams) => Promise<WorkflowExecutionResponse>;
+  scheduleWorkflow: (params: ScheduleWorkflowParams) => Promise<string>;
 }
 
 export interface ExternalServiceApiHandlerArgs {

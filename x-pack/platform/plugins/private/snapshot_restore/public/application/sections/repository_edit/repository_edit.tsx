@@ -166,6 +166,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       {isManagedRepository ? (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="info"

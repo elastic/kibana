@@ -40,6 +40,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,7 +62,10 @@
               }
             ],
             "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/exit_full_screen_button.tsx",
+            "lineNumber": 25,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -83,6 +88,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/services.tsx",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -99,6 +106,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/src/services.tsx",
+            "lineNumber": 40,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,6 +128,8 @@
           "\nProps for the service-enabled `ExitFullScreenButton` component."
         ],
         "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -135,6 +146,8 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -153,6 +166,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -175,6 +190,8 @@
           "KibanaDependencies"
         ],
         "path": "src/platform/packages/shared/shared-ux/button/exit_full_screen/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

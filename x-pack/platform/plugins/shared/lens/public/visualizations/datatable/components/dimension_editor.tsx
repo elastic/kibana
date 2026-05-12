@@ -7,37 +7,69 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup, EuiComboBox, htmlIdGenerator } from '@elastic/eui';
+import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import {
-  CUSTOM_PALETTE,
-  applyPaletteParams,
+  DEFAULT_COLOR_MAPPING_CONFIG,
   canCreateCustomMatch,
   getFallbackDataBounds,
 } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { getOriginalId } from '@kbn/transpose-utils';
 import type { KbnPalettes } from '@kbn/palettes';
+import type {
+  VisualizationDimensionEditorProps,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import { DatatableInspectorTables } from '../../../../common/expressions';
-import type { VisualizationDimensionEditorProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
 
-import {
-  defaultPaletteParams,
-  findMinMaxByColumnId,
-  getAccessorType,
-} from '../../../shared_components';
+import { getAccessorType } from '../../../shared_components';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
-import { getColumnAlignment } from '../utils';
+import { getColumnAlignment, getDataBoundsForAccessor, getColorByValuePalette } from '../utils';
 import type { FormatFactory } from '../../../../common/types';
 import { getDatatableColumn } from '../../../../common/expressions/impl/datatable/utils';
 
 const idPrefix = htmlIdGenerator()();
 
 type ColumnType = DatatableVisualizationState['columns'][number];
+
+const dynamicColorModeOptions: Array<EuiComboBoxOptionOption<ColumnType['colorMode']>> = [
+  {
+    id: `${idPrefix}none`,
+    value: 'none',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
+      defaultMessage: 'None',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
+  },
+  {
+    id: `${idPrefix}cell`,
+    value: 'cell',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
+      defaultMessage: 'Cell',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
+  },
+  {
+    id: `${idPrefix}badge`,
+    value: 'badge',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.badge', {
+      defaultMessage: 'Badge',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_badge',
+  },
+  {
+    id: `${idPrefix}text`,
+    value: 'text',
+    label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
+      defaultMessage: 'Text',
+    }),
+    'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
+  },
+];
 
 function updateColumn(
   state: DatatableVisualizationState,
@@ -90,7 +122,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const allowCustomMatch = canCreateCustomMatch(columnMeta);
   const datasource = frame.datasourceLayers?.[localState.layerId];
 
-  const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+  const { isNumeric, isCategory: isBucketable } = getAccessorType(
+    datasource,
+    accessor,
+    columnMeta?.type
+  );
   const showColorByTerms = isBucketable;
   const showDynamicColoringFeature = isBucketable || isNumeric;
   const currentAlignment = getColumnAlignment(column, isNumeric);
@@ -98,33 +134,35 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   const hasDynamicColoring = currentColorMode !== 'none';
   const visibleColumnsCount = localState.columns.filter((c) => !c.hidden).length;
 
-  const hasTransposedColumn = localState.columns.some(({ isTransposed }) => isTransposed);
-  const columnsToCheck = hasTransposedColumn
-    ? currentData?.columns.filter(({ id }) => getOriginalId(id) === accessor).map(({ id }) => id) ||
-      []
-    : [accessor];
-  const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-  const currentMinMax = minMaxByColumnId.get(accessor) ?? getFallbackDataBounds();
+  const selectedDynamicColorModeOption =
+    dynamicColorModeOptions.find((option) => option.value === currentColorMode) ??
+    dynamicColorModeOptions[0];
 
-  const activePalette: PaletteOutput<CustomPaletteParams> = {
-    type: 'palette',
-    name: showColorByTerms ? 'default' : defaultPaletteParams.name,
-    ...column?.palette,
-    params: { ...column?.palette?.params },
-  };
-  // need to tell the helper that the colorStops are required to display
-  const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
+  const currentMinMax =
+    getDataBoundsForAccessor(accessor, currentData, localState.columns) ?? getFallbackDataBounds();
 
-  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
-    activePalette.params.stops = applyPaletteParams(
-      props.paletteService,
-      activePalette,
-      currentMinMax
-    );
+  let activePalette: PaletteOutput<CustomPaletteParams>;
+
+  if (showColorByTerms) {
+    // Terms coloring uses the existing palette or the 'default' categorical palette
+    activePalette = {
+      type: 'palette',
+      name: column?.palette?.name ?? 'default',
+    };
+  } else {
+    // Value coloring uses the existing palette or the 'positive' color by value palette
+    activePalette = getColorByValuePalette(props.paletteService, currentMinMax, column?.palette);
   }
 
+  // Check if a legacy palette is used for terms coloring instead of a color mapping
+  const isLegacyTermsMode =
+    showColorByTerms &&
+    !column.colorMapping &&
+    Boolean(column.palette) &&
+    !column.palette?.params?.stops?.length;
+
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -178,51 +216,36 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               defaultMessage: 'Color by value',
             })}
           >
-            <EuiButtonGroup
-              isFullWidth
-              legend={i18n.translate('xpack.lens.table.dynamicColoring.label', {
+            <EuiComboBox
+              fullWidth
+              compressed
+              isClearable={false}
+              aria-label={i18n.translate('xpack.lens.table.dynamicColoring.label', {
                 defaultMessage: 'Color by value',
               })}
               data-test-subj="lnsDatatable_dynamicColoring_groups"
-              buttonSize="compressed"
-              options={[
-                {
-                  id: `${idPrefix}none`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.none', {
-                    defaultMessage: 'None',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_none',
-                },
-                {
-                  id: `${idPrefix}cell`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.cell', {
-                    defaultMessage: 'Cell',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_cell',
-                },
-                {
-                  id: `${idPrefix}text`,
-                  label: i18n.translate('xpack.lens.table.dynamicColoring.text', {
-                    defaultMessage: 'Text',
-                  }),
-                  'data-test-subj': 'lnsDatatable_dynamicColoring_groups_text',
-                },
-              ]}
-              idSelected={`${idPrefix}${currentColorMode}`}
-              onChange={(id) => {
-                const newMode = id.replace(idPrefix, '') as ColumnType['colorMode'];
+              singleSelection={{ asPlainText: true }}
+              options={dynamicColorModeOptions}
+              selectedOptions={[selectedDynamicColorModeOption]}
+              onChange={(choices) => {
+                const newMode = choices[0]?.value;
+                if (!newMode) {
+                  return;
+                }
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };
-                if (!column?.palette && newMode !== 'none') {
-                  params.palette = {
-                    ...activePalette,
-                    params: {
-                      ...activePalette.params,
-                      // that's ok, at first open we're going to throw them away and recompute
-                      stops: displayStops,
-                    },
-                  };
+
+                if (newMode !== 'none') {
+                  if (showColorByTerms) {
+                    if (!column?.colorMapping) {
+                      params.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
+                    }
+                  } else {
+                    if (!column?.palette) {
+                      params.palette = activePalette;
+                    }
+                  }
                 }
 
                 // clear up when switching to no coloring
@@ -239,19 +262,26 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
             (showColorByTerms ? (
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
-                colorMapping={column.colorMapping}
-                palette={activePalette}
+                colorMapping={
+                  isLegacyTermsMode
+                    ? undefined
+                    : column.colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG
+                }
+                palette={isLegacyTermsMode ? activePalette : undefined}
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
                   updateColumnState(accessor, { palette, colorMapping: undefined });
                 }}
                 setColorMapping={(colorMapping) => {
-                  updateColumnState(accessor, { colorMapping });
+                  updateColumnState(accessor, {
+                    colorMapping,
+                    ...(colorMapping != null ? { palette: undefined } : {}),
+                  });
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
-                categories={getColorCategories(currentData?.rows, accessor, [null])}
+                categories={getColorCategories(currentData?.rows, [accessor], [null])}
                 formatter={formatter}
                 allowCustomMatch={allowCustomMatch}
               />
@@ -341,7 +371,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
           />
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }
 

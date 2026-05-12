@@ -260,10 +260,75 @@ paths:
                   }
       responses:
         '200':
-          description: A successful response.
-          # content:
-          #   application/json:
-          #     examples:
+          description: >
+            A successful response.
+            The response may include a `warnings` array when the monitor configuration has non-critical issues.
+            For example, if a browser monitor specifies a timeout but has no private locations configured, a warning is returned indicating the timeout will have no effect.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    description: >
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: "#/components/schemas/monitorWarning"
+              examples:
+                postSyntheticMonitorsResponseWithWarning:
+                  summary: Response with warning
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+        '400':
+          description: >
+            Bad request.
+            For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: Bad Request
+                  message:
+                    type: string
+                    example: Browser Monitor timeout is invalid
+                  attributes:
+                    type: object
+                    properties:
+                      details:
+                        type: string
+                        example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+              examples:
+                invalidBrowserTimeout:
+                  summary: Invalid browser timeout
+                  description: A 400 error when a browser monitor timeout is below 30 seconds.
+                  value: |-
+                    {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "Browser Monitor timeout is invalid",
+                      "attributes": {
+                        "details": "Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds."
+                      }
+                    }
   /api/synthetics/monitors/{id}:
     delete:
       summary: Delete a monitor
@@ -281,6 +346,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          description: OK
     get:
       summary: Get a monitor
       operationId: get-synthetic-monitor
@@ -295,6 +363,7 @@ paths:
             type: string
       responses:
         '200':
+          description: A successful response.
           content:
             application/json:
               schema:
@@ -441,6 +510,43 @@ paths:
                     "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
                     "locations": ["united_kingdom"]
                   }
+      responses:
+        '200':
+          description: >
+            A successful response.
+            The response may include a `warnings` array when the monitor configuration has non-critical issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    description: >
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: "#/components/schemas/monitorWarning"
+              examples:
+                putSyntheticMonitorResponseWithWarning:
+                  summary: Response with warning
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "For browser monitors, timeout is only supported on private locations. Browser monitor \"Example journey\" specifies a timeout and is running on public locations: \"public-1, public-2\". The timeout will have no effect on these locations.",
+                          "publicLocationIds": ["public-1", "public-2"]
+                        }
+                      ]
+                    }
+        '400':
+          description: >
+            Bad request.
+            For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
   /api/synthetics/monitors/_bulk_delete:
     post:
       summary: Delete monitors
@@ -475,6 +581,7 @@ paths:
                   }
       responses:
         '200':
+          description: A successful response.
           content:
             application/json:
               schema:
@@ -669,6 +776,9 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        "200":
+          description: OK
     get:
       summary: Get a parameter
       operationId: get-parameter
@@ -781,7 +891,7 @@ paths:
                       "tags": ["authentication", "security", "updated"]
                     }
   /api/synthetics/params/_bulk_delete:
-    delete:
+    post:
       summary: Delete parameters
       operationId: delete-parameters
       description: >
@@ -796,7 +906,7 @@ paths:
           application/json:
             schema:
               type: object
-              property:
+              properties:
                 ids:
                   description: An array of parameter IDs to delete.
                   type: array
@@ -988,6 +1098,9 @@ paths:
             type: string
             minLength: 1
             maxLength: 1024
+      responses:
+        "200":
+          description: OK
     get:
       summary: Get a private location
       operationId: get-private-location
@@ -1264,6 +1377,26 @@ components:
           description: >
             The monitor timeout in seconds.
             The monitor will fail if it doesn't complete within this time.
+
+
+            For browser monitors, the minimum timeout is 30 seconds.
+            Browser monitor timeouts are only applied when the monitor runs on private locations.
+            If a browser monitor specifies a timeout but has no private locations configured, the timeout will have no effect and a warning will be returned in the response.
+    monitorWarning:
+      title: Monitor warning
+      type: object
+      properties:
+        monitorId:
+          type: string
+          description: The monitor ID associated with the warning.
+        message:
+          type: string
+          description: A human-readable warning message.
+        publicLocationIds:
+          type: array
+          items:
+            type: string
+          description: The public location IDs associated with the warning.
     browserMonitorFields:
       title: Browser monitor fields
       allOf: # Combines the common fields schema with the browser monitor-specific details
@@ -1295,6 +1428,8 @@ components:
             synthetics_args:
               type: array
               description: Synthetics agent CLI arguments.
+              items:
+                type: string
             type:
               type: string
               description: The monitor type.
@@ -1308,7 +1443,7 @@ components:
           required:
             - type
             - url
-          additionalproperties: true
+          additionalProperties: true
           properties:
             check:
               type: object
@@ -1506,7 +1641,6 @@ components:
     getParameterResponse:
       title: Get parameter response
       type: object
-      required:
       properties:
         description:
           type: string

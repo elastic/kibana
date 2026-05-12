@@ -2,7 +2,7 @@
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table 1`] = `
 .c1 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -46,7 +46,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 
   .c4 .euiPagination::before {
     bottom: 0;
-    color: #515761;
+    color: #1D2A3E;
     content: '\\2026';
     font-size: 14px;
     padding: 5px 8px;
@@ -100,7 +100,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                         aria-hidden="true"
                         class="euiButtonIcon__icon"
                         color="inherit"
-                        data-euiicon-type="arrowDown"
+                        data-euiicon-type="chevronSingleDown"
                       />
                     </button>
                   </div>
@@ -118,6 +118,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                       </span>
                       <span
                         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                        id="generated-id-wrapper"
                       >
                         <span
                           color="subdued"
@@ -218,680 +219,689 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
     class="euiBasicTable c2"
     data-test-subj="paginated-basic-table"
   >
-    <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
-      id="__table_generated-id"
-      tabindex="-1"
+    <div
+      class="emotion-euiContainerCSS"
     >
-      <caption
-        class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-      />
-      <thead>
-        <tr>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_node.dnsName_0"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Registered domain"
-                  >
-                    Registered domain
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-          <th
-            aria-sort="descending"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_node.queryCount_1"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-            >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Total queries"
-                  >
-                    Total queries
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_node.uniqueDomains_2"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Unique domains"
-                  >
-                    Unique domains
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_node.dnsBytesIn_3"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="DNS bytes in"
-                  >
-                    DNS bytes in
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-          <th
-            aria-sort="none"
-            class="euiTableHeaderCell emotion-euiTableHeaderCell"
-            data-test-subj="tableHeaderCell_node.dnsBytesOut_4"
-            role="columnheader"
-            scope="col"
-          >
-            <span
-              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-            >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="DNS bytes out"
-                  >
-                    DNS bytes out
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
-            </span>
-          </th>
-        </tr>
-      </thead>
-      <tbody
-        class="css-0"
+      <table
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+        id="__table_generated-id"
+        tabindex="-1"
       >
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+        <caption
+          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+        />
+        <thead>
+          <tr>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.dnsName_0"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
+              >
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Registered domain"
+                    >
+                      Registered domain
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              aria-sort="descending"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.queryCount_1"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
+              >
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Total queries"
+                    >
+                      Total queries
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.uniqueDomains_2"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
+              >
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Unique domains"
+                    >
+                      Unique domains
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.dnsBytesIn_3"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
+              >
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="DNS bytes in"
+                    >
+                      DNS bytes in
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+            <th
+              aria-sort="none"
+              class="euiTableHeaderCell emotion-euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_node.dnsBytesOut_4"
+              role="columnheader"
+              scope="col"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
+              >
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="DNS bytes out"
+                    >
+                      DNS bytes out
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody
+          class="css-0"
         >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              nflxvideo.net
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                nflxvideo.net
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                52
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                21
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                2.9KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                12.3KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              52
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                apple.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                75
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                20
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                2.6KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                30.9KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              21
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                googlevideo.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                38
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                19
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1.8KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                15.9KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              2.9KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                netflix.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1532
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                12
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                59.1KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                213.1KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              12.3KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                samsungcloudsolution.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                31
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                8
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1.4KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                11.4KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              apple.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                doubleclick.net
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                35
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                7
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1.5KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                14KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              75
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                digitalocean.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                35
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                6
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                2KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                4KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              20
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                samsungelectronics.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                89
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                6
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                3.8KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                35.7KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              2.6KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                google.com
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                23
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                5
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                896B
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+            >
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                7.9KB
+              </div>
+            </td>
+          </tr>
+          <tr
+            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
           >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              30.9KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              >
+                samsungcloudsolution.net
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              googlevideo.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                30
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              38
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                5
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              19
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                1.5KB
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
             >
-              1.8KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              15.9KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              netflix.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              1532
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              12
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              59.1KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              213.1KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              samsungcloudsolution.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              31
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              8
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              1.4KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              11.4KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              doubleclick.net
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              35
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              7
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              1.5KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              14KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              digitalocean.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              35
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              6
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              2KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              4KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              samsungelectronics.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              89
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              6
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              3.8KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              35.7KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              google.com
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              23
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              5
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              896B
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              7.9KB
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-        >
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-            >
-              samsungcloudsolution.net
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              30
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              5
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              1.5KB
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-          >
-            <div
-              class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
-            >
-              11.2KB
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+              <div
+                class="euiTableCellContent emotion-euiTableCellContent-right-wrapText"
+              >
+                11.2KB
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
   <div
-    class="euiFlexGroup c3 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    class="euiFlexGroup c3 emotion-euiFlexGroup-m-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -909,13 +919,13 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
           >
             <span
-              class="eui-textTruncate euiButtonEmpty__text"
+              class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
             >
               Rows per page: 10
             </span>
             <span
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </span>
         </button>
@@ -925,6 +935,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       class="euiFlexItem c4 emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >
@@ -947,7 +958,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowLeft"
+            data-euiicon-type="chevronSingleLeft"
           />
         </button>
         <ul
@@ -968,7 +979,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   1
                 </span>
@@ -988,7 +999,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   2
                 </span>
@@ -1008,7 +1019,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   3
                 </span>
@@ -1028,7 +1039,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   4
                 </span>
@@ -1048,7 +1059,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                 >
                   5
                 </span>
@@ -1067,7 +1078,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
             aria-hidden="true"
             class="euiButtonIcon__icon"
             color="inherit"
-            data-euiicon-type="arrowRight"
+            data-euiicon-type="chevronSingleRight"
           />
         </button>
       </nav>

@@ -33,13 +33,14 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { QuickLensJobCreator } from '../../../application/jobs/new_job/job_from_lens';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 import type { CreateState } from '../../../application/jobs/new_job/job_from_dashboard';
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
 import { basicJobValidation } from '../../../../common/util/job_utils';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { useMlFromLensKibanaContext } from './context';
 
 export interface CreateADJobParams {
@@ -337,7 +338,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
               <EuiButtonEmpty
                 onClick={createADJobInWizard}
                 size="s"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 data-test-subj={`mlLensLayerCreateWithWizardButton_${layerIndex}`}
               >
@@ -359,7 +360,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
           >
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <EuiIcon type="checkInCircleFilled" color="success" />
+                <EuiIcon aria-hidden={true} type="checkCircleFill" color="success" />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -417,7 +418,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {state === STATE.SAVE_FAILED && createError !== null ? (
         <>
           <EuiSpacer />
-          <EuiCallOut color="danger" title={createError.text}>
+          <EuiCallOut announceOnMount color="danger" title={createError.text}>
             {createError.errorText}
           </EuiCallOut>
         </>
@@ -425,7 +426,7 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
       {incomingCreateError ? (
         <>
           <EuiSpacer />
-          <EuiCallOut color="danger" title={incomingCreateError.text}>
+          <EuiCallOut announceOnMount color="danger" title={incomingCreateError.text}>
             {incomingCreateError.errorText}
           </EuiCallOut>
         </>

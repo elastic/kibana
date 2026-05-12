@@ -14,9 +14,9 @@ import { VisGroups } from '../../vis_types';
 import type { GroupSelectionProps } from './group_selection';
 import { GroupSelection } from './group_selection';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { VisParams } from '../../../common';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { VisParams } from '@kbn/visualizations-common';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {
@@ -128,6 +128,7 @@ describe('GroupSelection', () => {
     renderGroupSelectionComponent();
     expect(screen.queryByRole('tab', { name: /legacy/i })).toBeNull();
     expect(screen.queryByRole('tab', { name: /recommended/i })).toBeNull();
+    expect(screen.queryByText(/^0$/)).not.toBeInTheDocument();
   });
 
   it('should render tabs and the aggBased group card if an aggBased group vis is registered', async () => {

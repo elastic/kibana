@@ -20,6 +20,8 @@ import {
   htmlIdGenerator,
   keys,
   useEuiTheme,
+  EuiFormPrepend,
+  EuiFormAppend,
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
@@ -28,8 +30,8 @@ import {
   NewBucketButton,
 } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
+import type { RangeTypeLens } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import type { RangeTypeLens } from './ranges';
 import { isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
@@ -92,6 +94,9 @@ export const RangePopover = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.lens.indexPattern.ranges.popoverAriaLabel', {
+        defaultMessage: 'Range editor',
+      })}
       display="block"
       ownFocus
       isOpen={isOpen}
@@ -117,7 +122,7 @@ export const RangePopover = ({
               }}
               append={
                 <EuiToolTip content={lteTooltipContent}>
-                  <EuiText size="s">{lteAppendLabel}</EuiText>
+                  <EuiFormAppend label={lteAppendLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               onKeyDown={({ key }: React.KeyboardEvent<HTMLInputElement>) => {
@@ -132,7 +137,7 @@ export const RangePopover = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="sortRight" color="subdued" />
+            <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
@@ -155,7 +160,7 @@ export const RangePopover = ({
               }}
               prepend={
                 <EuiToolTip content={ltTooltipContent}>
-                  <EuiText size="s">{ltPrependLabel}</EuiText>
+                  <EuiFormPrepend label={ltPrependLabel} tabIndex={0} />
                 </EuiToolTip>
               }
               compressed
@@ -260,7 +265,7 @@ export const AdvancedRangeEditor = ({
       labelAppend={
         <EuiText size="xs">
           <EuiLink color="danger" onClick={onToggleEditor}>
-            <EuiIcon size="s" type="cross" color="danger" />{' '}
+            <EuiIcon size="s" type="cross" color="danger" aria-hidden={true} />{' '}
             {i18n.translate('xpack.lens.indexPattern.ranges.customRangesRemoval', {
               defaultMessage: 'Remove custom ranges',
             })}

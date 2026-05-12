@@ -6,16 +6,18 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { EsDeprecationLogsTestBed } from './es_deprecation_logs.helpers';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+
 import { setupESDeprecationLogsPage } from './es_deprecation_logs.helpers';
-import { setupEnvironment } from '../helpers';
 import type { DeprecationLoggingStatus } from '../../../common/types';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
 } from '../../../common/constants';
-import { advanceTime } from '../helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { advanceTime } from '../helpers/time_manipulation';
 // Once the logs team register the kibana locators in their app, we should be able
 // to remove this mock and follow a similar approach to how discover link is tested.
 // See: https://github.com/elastic/kibana/issues/104855
@@ -35,107 +37,114 @@ const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
 });
 
 describe('ES deprecation logs flyout', () => {
-  let testBed: EsDeprecationLogsTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+
+  const openFlyoutLoggingEnabled = async () => {
+    const openFlyoutLink = await screen.findByTestId('viewDetailsLink');
+    // DiscoverExternalLinks loads the data view asynchronously on mount; await the button so the
+    // state update is wrapped by RTL async utilities (prevents act warnings).
+    await screen.findByTestId('viewDiscoverLogsButton');
+    fireEvent.click(openFlyoutLink);
+    await screen.findByTestId('flyoutTitle');
+    // External links are rendered only after DiscoverExternalLinks loads the data view asynchronously.
+    // Await the link so the mount-time state update is wrapped by RTL's async utilities (prevents act warnings).
+    await screen.findByTestId('viewDiscoverLogs');
+  };
+
+  const openFlyoutLoggingDisabled = async () => {
+    const openFlyoutLink = await screen.findByTestId('enableLogsLink');
+    fireEvent.click(openFlyoutLink);
+    await screen.findByTestId('flyoutTitle');
+  };
+
+  const closeFlyout = async () => {
+    fireEvent.click(screen.getByTestId('closeEsDeprecationLogs'));
+    await waitFor(() => {
+      expect(screen.queryByTestId('flyoutTitle')).toBeNull();
+    });
+  };
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
 
     httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
     httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(true));
-    testBed = await setupESDeprecationLogsPage(httpSetup);
-    testBed.component.update();
+    httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
   });
   test('opens flyout with logging enabled', async () => {
-    const { exists, actions, find } = testBed;
+    await setupESDeprecationLogsPage(httpSetup);
+    await openFlyoutLoggingEnabled();
 
-    await actions.clickOpenFlyoutLoggingEnabled();
+    expect(screen.getByTestId('flyoutTitle')).toHaveTextContent('Elasticsearch deprecation logs');
+    expect(await screen.findByTestId('noWarningsCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('closeEsDeprecationLogs')).toBeInTheDocument();
+    expect(screen.getByTestId('resetLastStoredDate')).toBeInTheDocument();
+    expect(screen.getByTestId('deprecationLogsDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('deprecationLoggingToggle')).toBeInTheDocument();
+    expect(screen.getByTestId('viewDiscoverLogs')).toBeInTheDocument();
+    expect(screen.getByTestId('apiCompatibilityNoteTitle')).toBeInTheDocument();
 
-    expect(exists('flyoutTitle')).toBe(true);
-    expect(find('flyoutTitle').text()).toContain('Elasticsearch deprecation logs');
-    expect(exists('noWarningsCallout')).toBe(true);
-    expect(exists('closeEsDeprecationLogs')).toBe(true);
-    expect(exists('resetLastStoredDate')).toBe(true);
-    expect(exists('deprecationLogsDescription')).toBe(true);
-    expect(exists('deprecationLoggingToggle')).toBe(true);
-    expect(exists('viewDiscoverLogs')).toBe(true);
-    expect(exists('apiCompatibilityNoteTitle')).toBe(true);
-
-    await actions.clickCloseFlyout();
-
-    expect(exists('flyoutTitle')).toBe(false);
+    await closeFlyout();
   });
   test('opens flyout with logging disabled', async () => {
     httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(false));
-    await act(async () => {
-      testBed = await setupESDeprecationLogsPage(httpSetup);
-    });
+    httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
 
-    const { exists, component, actions, find } = testBed;
+    await setupESDeprecationLogsPage(httpSetup);
+    await openFlyoutLoggingDisabled();
 
-    component.update();
+    expect(screen.getByTestId('flyoutTitle')).toHaveTextContent('Elasticsearch deprecation logs');
+    expect(screen.queryByTestId('noWarningsCallout')).toBeNull();
+    expect(screen.queryByTestId('hasWarningsCallout')).toBeNull();
+    expect(screen.getByTestId('deprecationLogsDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('deprecationLoggingToggle')).toBeInTheDocument();
+    expect(screen.queryByTestId('viewDiscoverLogs')).toBeNull();
+    expect(screen.queryByTestId('apiCompatibilityNoteTitle')).toBeNull();
+    expect(screen.getByTestId('closeEsDeprecationLogs')).toBeInTheDocument();
+    expect(screen.queryByTestId('resetLastStoredDate')).toBeNull();
 
-    await actions.clickOpenFlyoutLoggingDisabled();
-
-    expect(exists('flyoutTitle')).toBe(true);
-    expect(find('flyoutTitle').text()).toContain('Elasticsearch deprecation logs');
-    expect(exists('noWarningsCallout')).toBe(false);
-    expect(exists('hasWarningsCallout')).toBe(false);
-    expect(exists('deprecationLogsDescription')).toBe(true);
-    expect(exists('deprecationLoggingToggle')).toBe(true);
-    expect(exists('viewDiscoverLogs')).toBe(false);
-    expect(exists('apiCompatibilityNoteTitle')).toBe(false);
-    expect(exists('closeEsDeprecationLogs')).toBe(true);
-    expect(exists('resetLastStoredDate')).toBe(false);
-
-    await actions.clickCloseFlyout();
-
-    expect(exists('flyoutTitle')).toBe(false);
+    await closeFlyout();
   });
   describe('banner', () => {
     test('shows success callout if no warnings', async () => {
-      const { exists, actions, find } = testBed;
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingEnabled();
 
-      await actions.clickOpenFlyoutLoggingEnabled();
-
-      expect(exists('noWarningsCallout')).toBe(true);
-      expect(find('noWarningsCallout').text()).toContain('No deprecation issues');
+      const noWarningsCallout = await screen.findByTestId('noWarningsCallout');
+      expect(noWarningsCallout).toHaveTextContent('No deprecation issues');
     });
     test('shows callout with the number of warnings', async () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
       });
 
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup);
-      });
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingEnabled();
 
-      const { exists, component, actions, find } = testBed;
-
-      component.update();
-      await actions.clickOpenFlyoutLoggingEnabled();
-
-      expect(exists('hasWarningsCallout')).toBe(true);
-      expect(find('hasWarningsCallout').text()).toContain('10');
+      const hasWarningsCallout = await screen.findByTestId('hasWarningsCallout');
+      expect(hasWarningsCallout).toHaveTextContent('10');
     });
   });
 
   describe('Flyout - Toggle log writing and collecting', () => {
     test('toggles deprecation logging', async () => {
-      const { find, actions } = testBed;
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingEnabled();
 
-      await actions.clickOpenFlyoutLoggingEnabled();
+      const toggle = screen.getByTestId('deprecationLoggingToggle');
+      expect(toggle).toHaveAttribute('aria-checked', 'true');
 
-      expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(true);
+      fireEvent.click(toggle);
 
-      await actions.clickDeprecationToggle();
-
-      expect(httpSetup.put).toHaveBeenLastCalledWith(
-        `/api/upgrade_assistant/deprecation_logging`,
-        expect.objectContaining({ body: JSON.stringify({ isEnabled: false }) })
-      );
+      await waitFor(() => {
+        expect(httpSetup.put).toHaveBeenLastCalledWith(
+          `/api/upgrade_assistant/deprecation_logging`,
+          expect.objectContaining({ body: JSON.stringify({ isEnabled: false }) })
+        );
+      });
     });
 
     test('handles network error when updating logging state', async () => {
@@ -147,45 +156,37 @@ describe('ES deprecation logs flyout', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(false));
       httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
 
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup);
-      });
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingDisabled();
 
-      const { exists, actions, component } = testBed;
+      fireEvent.click(screen.getByTestId('deprecationLoggingToggle'));
 
-      component.update();
-
-      await actions.clickOpenFlyoutLoggingDisabled();
-
-      await actions.clickDeprecationToggle();
-
-      expect(exists('updateLoggingError')).toBe(true);
+      expect(await screen.findByTestId('updateLoggingError')).toBeInTheDocument();
     });
 
     test('does not show external links and deprecations count when toggle is disabled', async () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(false));
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup);
-      });
+      httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(getLoggingResponse(false));
 
-      const { exists, actions, component } = testBed;
-      component.update();
-      await actions.clickOpenFlyoutLoggingDisabled();
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingDisabled();
 
-      expect(exists('externalLinksTitle')).toBe(false);
-      expect(exists('apiCompatibilityNoteTitle')).toBe(false);
+      expect(screen.queryByTestId('externalLinksTitle')).toBeNull();
+      expect(screen.queryByTestId('apiCompatibilityNoteTitle')).toBeNull();
     });
   });
 
   describe('analyze logs', () => {
     test('has a link to see logs in discover app', async () => {
-      const { exists, find, actions } = testBed;
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingEnabled();
 
-      await actions.clickOpenFlyoutLoggingEnabled();
+      const href = (screen.getByTestId('viewDiscoverLogs') as HTMLAnchorElement).getAttribute(
+        'href'
+      );
+      expect(href).not.toBeNull();
 
-      expect(exists('viewDiscoverLogs')).toBe(true);
-
-      const decodedUrl = decodeURIComponent(find('viewDiscoverLogs').props().href);
+      const decodedUrl = decodeURIComponent(href!);
       expect(decodedUrl).toContain('discoverUrl');
       [
         '"language":"kuery"',
@@ -204,7 +205,7 @@ describe('ES deprecation logs flyout', () => {
   });
 
   describe('reset counter', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       httpRequestsMockHelpers.setDeleteLogsCacheResponse('ok');
     });
 
@@ -213,25 +214,18 @@ describe('ES deprecation logs flyout', () => {
         count: 10,
       });
 
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup);
-      });
-
-      const { exists, actions, component } = testBed;
-
-      component.update();
-
-      await actions.clickOpenFlyoutLoggingEnabled();
-      expect(exists('hasWarningsCallout')).toBe(true);
-      expect(exists('resetLastStoredDate')).toBe(true);
+      await setupESDeprecationLogsPage(httpSetup);
+      await openFlyoutLoggingEnabled();
+      await screen.findByTestId('hasWarningsCallout');
+      await screen.findByTestId('resetLastStoredDate');
 
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 0,
       });
 
-      await actions.clickResetButton();
+      fireEvent.click(screen.getByTestId('resetLastStoredDate'));
 
-      expect(exists('noWarningsCallout')).toBe(true);
+      expect(await screen.findByTestId('noWarningsCallout')).toBeInTheDocument();
     });
 
     test('Shows a toast if deleting cache fails', async () => {
@@ -246,58 +240,54 @@ describe('ES deprecation logs flyout', () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 10 });
 
       const addDanger = jest.fn();
-      await act(async () => {
-        testBed = await setupESDeprecationLogsPage(httpSetup, {
-          services: {
-            core: {
-              notifications: {
-                toasts: {
-                  addDanger,
-                },
+      await setupESDeprecationLogsPage(httpSetup, {
+        services: {
+          core: {
+            notifications: {
+              toasts: {
+                addDanger,
               },
             },
           },
-        });
+        },
       });
 
-      const { exists, actions, component } = testBed;
-
-      component.update();
-
-      await actions.clickOpenFlyoutLoggingEnabled();
+      await openFlyoutLoggingEnabled();
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({ count: 0 });
 
-      await actions.clickResetButton();
+      fireEvent.click(screen.getByTestId('resetLastStoredDate'));
 
       // The toast should always be shown if the delete logs cache fails.
-      expect(addDanger).toHaveBeenCalled();
+      await waitFor(() => expect(addDanger).toHaveBeenCalled());
       // Even though we changed the response of the getLogsCountResponse, when the
       // deleteLogsCache fails the getLogsCount api should not be called and the
       // status of the callout should remain the same it initially was.
-      expect(exists('hasWarningsCallout')).toBe(true);
+      expect(await screen.findByTestId('hasWarningsCallout')).toBeInTheDocument();
     });
 
     describe('Poll for logs count', () => {
       beforeEach(async () => {
-        jest.useFakeTimers({ legacyFakeTimers: true });
+        jest.useFakeTimers();
 
         // First request should make the step be complete
         httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
           count: 0,
         });
 
-        testBed = await setupESDeprecationLogsPage(httpSetup);
+        await setupESDeprecationLogsPage(httpSetup);
       });
 
-      afterEach(() => {
+      afterEach(async () => {
+        await act(async () => {
+          await jest.runOnlyPendingTimersAsync();
+        });
+        jest.clearAllTimers();
         jest.useRealTimers();
       });
 
       test('success state is followed by an error state', async () => {
-        const { exists, actions } = testBed;
-
-        await actions.clickOpenFlyoutLoggingEnabled();
-        expect(exists('resetLastStoredDate')).toBe(true);
+        await openFlyoutLoggingEnabled();
+        expect(await screen.findByTestId('resetLastStoredDate')).toBeInTheDocument();
 
         // second request will error
         const error = {
@@ -309,9 +299,8 @@ describe('ES deprecation logs flyout', () => {
 
         // Resolve the polling timeout.
         await advanceTime(DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS);
-        testBed.component.update();
 
-        expect(exists('errorCallout')).toBe(true);
+        expect(await screen.findByTestId('errorCallout')).toBeInTheDocument();
       });
     });
   });

@@ -43,28 +43,50 @@ function collectAllStepNames(steps: WorkflowYaml['steps']): string[] {
 }
 
 /**
+ * Extracts the fallback steps array from an on-failure block, if present.
+ */
+function getOnFailureFallbackSteps(
+  obj: { 'on-failure'?: { fallback?: unknown } } | undefined
+): WorkflowYaml['steps'] | undefined {
+  const fallback = obj?.['on-failure']?.fallback;
+  return Array.isArray(fallback) ? (fallback as WorkflowYaml['steps']) : undefined;
+}
+
+/**
  * Helper function to collect step names from nested structures
  */
-function collectNestedStepNames(step: any): string[] {
+function collectNestedStepNames(step: unknown): string[] {
   const stepNames: string[] = [];
 
+  const s = step as {
+    steps?: unknown;
+    else?: unknown;
+    branches?: Array<{ steps?: unknown }>;
+    'on-failure'?: { fallback?: unknown };
+  };
+
   // Handle steps property (foreach, if, atomic, merge)
-  if (step.steps && Array.isArray(step.steps)) {
-    stepNames.push(...collectAllStepNames(step.steps));
+  if (s.steps && Array.isArray(s.steps)) {
+    stepNames.push(...collectAllStepNames(s.steps as WorkflowYaml['steps']));
   }
 
   // Handle else branch for if steps
-  if (step.else && Array.isArray(step.else)) {
-    stepNames.push(...collectAllStepNames(step.else));
+  if (s.else && Array.isArray(s.else)) {
+    stepNames.push(...collectAllStepNames(s.else as WorkflowYaml['steps']));
   }
 
   // Handle branches for parallel steps
-  if (step.branches && Array.isArray(step.branches)) {
-    for (const branch of step.branches) {
+  if (s.branches && Array.isArray(s.branches)) {
+    for (const branch of s.branches) {
       if (branch.steps && Array.isArray(branch.steps)) {
-        stepNames.push(...collectAllStepNames(branch.steps));
+        stepNames.push(...collectAllStepNames(branch.steps as WorkflowYaml['steps']));
       }
     }
+  }
+
+  const fallbackSteps = getOnFailureFallbackSteps(s);
+  if (fallbackSteps) {
+    stepNames.push(...collectAllStepNames(fallbackSteps));
   }
 
   return stepNames;
@@ -75,6 +97,14 @@ function collectNestedStepNames(step: any): string[] {
  */
 export function validateStepNameUniqueness(workflow: WorkflowYaml): StepNameValidationResult {
   const stepNames = collectAllStepNames(workflow.steps);
+
+  const workflowLevelFallback = getOnFailureFallbackSteps(
+    workflow.settings as { 'on-failure'?: { fallback?: unknown } } | undefined
+  );
+  if (workflowLevelFallback) {
+    stepNames.push(...collectAllStepNames(workflowLevelFallback));
+  }
+
   const stepNameCounts = new Map<string, number>();
   const errors: StepNameValidationError[] = [];
 

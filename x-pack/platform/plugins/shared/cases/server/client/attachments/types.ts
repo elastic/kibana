@@ -8,12 +8,14 @@
 import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
+import type { AttachmentType } from '../../../common';
 import type {
-  BulkCreateAttachmentsRequest,
-  AttachmentPatchRequest,
-  AttachmentRequest,
+  BulkCreateAttachmentsRequestV2,
+  AttachmentPatchRequestV2,
+  AttachmentRequestV2,
   FindAttachmentsQueryParams,
 } from '../../../common/types/api';
+import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -26,12 +28,14 @@ export interface AddArgs {
   /**
    * The attachment values.
    */
-  comment: AttachmentRequest;
+  comment: AttachmentRequestV2;
+  mode?: AttachmentMode;
 }
 
 export interface BulkCreateArgs {
   caseId: string;
-  attachments: BulkCreateAttachmentsRequest;
+  attachments: BulkCreateAttachmentsRequestV2;
+  mode?: AttachmentMode;
 }
 
 /**
@@ -67,9 +71,9 @@ export interface DeleteArgs {
    */
   caseID: string;
   /**
-   * The attachment ID to delete
+   * The attachment saved object id to delete
    */
-  attachmentID: string;
+  savedObjectId: string;
 }
 
 /**
@@ -84,6 +88,7 @@ export interface FindCommentsArgs {
    * Optional parameters for filtering the returned attachments
    */
   findQueryParams?: FindAttachmentsQueryParams;
+  mode?: AttachmentMode;
 }
 
 /**
@@ -94,6 +99,7 @@ export interface GetAllArgs {
    * The case ID to retrieve all attachments for
    */
   caseID: string;
+  mode?: AttachmentMode;
 }
 
 export interface GetArgs {
@@ -104,23 +110,32 @@ export interface GetArgs {
   /**
    * The ID of the attachment to retrieve
    */
-  attachmentID: string;
+  savedObjectId: string;
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }
 
 export interface BulkGetArgs {
   caseID: string;
   /**
-   * The ids of the attachments
+   * The saved object ids of the attachments
    */
-  attachmentIDs: string[];
+  savedObjectIds: string[];
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }
 
-export interface GetAllAlertsAttachToCase {
+export interface GetAllDocumentsAttachedToCase {
   /**
    * The ID of the case to retrieve the alerts from
    */
   caseId: string;
   filter?: KueryNode;
+  attachmentTypes?: AttachmentType[];
 }
 
 /**
@@ -134,7 +149,11 @@ export interface UpdateArgs {
   /**
    * The full attachment request with the fields updated with appropriate values
    */
-  updateRequest: AttachmentPatchRequest;
+  updateRequest: AttachmentPatchRequestV2;
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }
 
 export interface HapiReadableStream extends Readable {
@@ -168,4 +187,8 @@ export interface AddFileArgs {
    * An observable that can be used to abort the upload at any time.
    */
   $abort?: ReplaySubject<unknown>;
+  /**
+   * Intermediate mode to specific the response format
+   */
+  mode?: AttachmentMode;
 }

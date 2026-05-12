@@ -19,14 +19,14 @@ describe('executeRegexRulesTask', () => {
   const phoneRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
-    entityClass: 'PHONE',
+    entityClass: 'MISC',
     pattern: '\\d{3}-\\d{3}-\\d{4}',
   };
 
   const zeroLengthRule: RegexAnonymizationRule = {
     type: 'RegExp',
     enabled: true,
-    entityClass: 'BOUNDARY',
+    entityClass: 'LOC',
     pattern: 'a*', // Can match zero or more 'a's (including zero-length matches)
   };
 
@@ -69,7 +69,7 @@ describe('executeRegexRulesTask', () => {
       start: 30,
       end: 42,
       matchValue: '555-123-4567',
-      class_name: 'PHONE',
+      class_name: 'MISC',
     });
   });
 

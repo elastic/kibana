@@ -6,101 +6,129 @@
  */
 
 import {
-  type CreateDefaultDataViewDependencies,
   createDefaultDataView,
+  type CreateDefaultDataViewDependencies,
 } from './create_default_data_view';
 import { initDataView } from '../../sourcerer/store/model';
 import * as helpersAccess from '../../helpers_access';
-import * as createSourcererDataViewModule from '../../sourcerer/containers/create_sourcerer_data_view';
+import * as initializationApi from '../../common/components/initialization/api';
 import {
-  DEFAULT_ALERT_DATA_VIEW_ID,
-  DEFAULT_DATA_VIEW_ID,
-  DETECTION_ENGINE_INDEX_URL,
-} from '../../../common/constants';
+  INITIALIZATION_FLOW_SECURITY_DATA_VIEWS,
+  INITIALIZATION_FLOW_STATUS_READY,
+  INITIALIZATION_FLOW_STATUS_ERROR,
+} from '../../../common/api/initialization';
 
 jest.mock('../../helpers_access');
-jest.mock('../../sourcerer/containers/create_sourcerer_data_view');
+jest.mock('../../common/components/initialization/api');
 
-const mockUiSettings = {
-  get: jest.fn(),
-};
-
-const mockDataViewService = {};
-
-const mockSpaces = {
-  getActiveSpace: jest.fn(),
-};
-
-const mockHttp = {
-  fetch: jest.fn(),
-};
+const mockHttp = {};
 
 const mockApplication = {
   capabilities: {},
 };
 
-const defaultDeps = {
-  http: mockHttp,
-  application: mockApplication,
-  uiSettings: mockUiSettings,
-  dataViewService: mockDataViewService,
-  spaces: mockSpaces,
-} as unknown as CreateDefaultDataViewDependencies;
+const defaultDeps: CreateDefaultDataViewDependencies = {
+  http: mockHttp as CreateDefaultDataViewDependencies['http'],
+  application: mockApplication as CreateDefaultDataViewDependencies['application'],
+};
+
+const mockPayload = {
+  defaultDataView: { id: 'dv-default', title: 'default-title', patternList: ['logs-*'] },
+  alertDataView: { id: 'dv-alert', title: 'alert-title', patternList: ['.alerts-*'] },
+  kibanaDataViews: [{ id: 'dv-default', title: 'default-title', patternList: ['logs-*'] }],
+  signalIndexName: '.siem-signals-default',
+};
 
 describe('createDefaultDataView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUiSettings.get.mockReturnValue(['pattern-*']);
-    mockSpaces.getActiveSpace.mockResolvedValue({ id: 'space1' });
     (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(true);
-    mockHttp.fetch.mockResolvedValue({ name: 'signal-index', index_mapping_outdated: false });
-    (createSourcererDataViewModule.createSourcererDataView as jest.Mock).mockResolvedValue({
-      defaultDataView: { id: 'dv1', title: 'title1' },
-      alertDataView: { id: 'dv2', title: 'title2' },
-      kibanaDataViews: [{ id: 'dv1', title: 'title1' }],
+    (initializationApi.initializeSecuritySolution as jest.Mock).mockResolvedValue({
+      flows: {
+        [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: {
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: mockPayload,
+        },
+      },
     });
   });
 
-  it('returns default values if skip is true', async () => {
+  it('returns default values when skip=true without calling the API', async () => {
     const result = await createDefaultDataView({ ...defaultDeps, skip: true });
-    expect(result.kibanaDataViews).toEqual([]);
+
+    expect(initializationApi.initializeSecuritySolution).not.toHaveBeenCalled();
     expect(result.defaultDataView).toEqual(initDataView);
+    expect(result.kibanaDataViews).toEqual([]);
     expect(result.signal).toEqual({ name: null, index_mapping_outdated: null });
   });
 
-  it('fetches signal index and creates data views when user has access', async () => {
-    const result = await createDefaultDataView(defaultDeps);
-    expect(helpersAccess.hasAccessToSecuritySolution).toHaveBeenCalledWith(
-      mockApplication.capabilities
-    );
-    expect(mockHttp.fetch).toHaveBeenCalledWith(DETECTION_ENGINE_INDEX_URL, expect.any(Object));
-    expect(createSourcererDataViewModule.createSourcererDataView).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: { patternList: ['pattern-*', 'signal-index'] },
-        dataViewService: mockDataViewService,
-        dataViewId: `${DEFAULT_DATA_VIEW_ID}-space1`,
-        alertDataViewId: `${DEFAULT_ALERT_DATA_VIEW_ID}-space1`,
-        signalIndexName: 'signal-index',
-      })
-    );
-    expect(result.defaultDataView).toMatchObject({ id: 'dv1', title: 'title1' });
-    expect(result.alertDataView).toMatchObject({ id: 'dv2', title: 'title2' });
-    expect(result.kibanaDataViews[0]).toMatchObject({ id: 'dv1', title: 'title1' });
-    expect(result.signal).toEqual({ name: 'signal-index', index_mapping_outdated: false });
-  });
+  it('calls the initialization endpoint with security-data-views flow', async () => {
+    await createDefaultDataView(defaultDeps);
 
-  it('does not fetch signal index if user has no access', async () => {
-    (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(false);
-    const result = await createDefaultDataView(defaultDeps);
-    expect(mockHttp.fetch).not.toHaveBeenCalled();
-    expect(result.signal).toEqual({ name: null, index_mapping_outdated: null });
-  });
-
-  it('returns error in defaultDataView if an exception is thrown', async () => {
-    (createSourcererDataViewModule.createSourcererDataView as jest.Mock).mockImplementation(() => {
-      throw new Error('fail');
+    expect(initializationApi.initializeSecuritySolution).toHaveBeenCalledWith({
+      http: mockHttp,
+      flows: [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS],
     });
+  });
+
+  it('maps the payload into sourcerer model shape on success', async () => {
     const result = await createDefaultDataView(defaultDeps);
+
+    expect(result.defaultDataView).toMatchObject(mockPayload.defaultDataView);
+    expect(result.alertDataView).toMatchObject(mockPayload.alertDataView);
+    expect(result.kibanaDataViews[0]).toMatchObject(mockPayload.kibanaDataViews[0]);
+    expect(result.signal).toEqual({ name: '.siem-signals-default', index_mapping_outdated: null });
+  });
+
+  it('includes attackDataView in the result when the payload contains it', async () => {
+    const attackDataView = { id: 'dv-attack', title: 'attack-title', patternList: ['.attack-*'] };
+    (initializationApi.initializeSecuritySolution as jest.Mock).mockResolvedValue({
+      flows: {
+        [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: {
+          status: INITIALIZATION_FLOW_STATUS_READY,
+          payload: { ...mockPayload, attackDataView },
+        },
+      },
+    });
+
+    const result = await createDefaultDataView(defaultDeps);
+
+    expect(result.attackDataView).toMatchObject(attackDataView);
+  });
+
+  it('does not call the API when the user has no access to Security Solution', async () => {
+    (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(false);
+
+    const result = await createDefaultDataView(defaultDeps);
+
+    expect(initializationApi.initializeSecuritySolution).not.toHaveBeenCalled();
+    expect(result.defaultDataView.error).toBeDefined();
+    expect(result.kibanaDataViews).toEqual([]);
+  });
+
+  it('sets error on all data views when the flow returns status=error', async () => {
+    (initializationApi.initializeSecuritySolution as jest.Mock).mockResolvedValue({
+      flows: {
+        [INITIALIZATION_FLOW_SECURITY_DATA_VIEWS]: {
+          status: INITIALIZATION_FLOW_STATUS_ERROR,
+          error: 'initialization failed',
+        },
+      },
+    });
+
+    const result = await createDefaultDataView(defaultDeps);
+
+    expect(result.defaultDataView.error).toBeDefined();
+    expect(result.kibanaDataViews).toEqual([]);
+  });
+
+  it('sets error on all data views when the API call throws', async () => {
+    (initializationApi.initializeSecuritySolution as jest.Mock).mockRejectedValue(
+      new Error('network error')
+    );
+
+    const result = await createDefaultDataView(defaultDeps);
+
     expect(result.defaultDataView.error).toBeInstanceOf(Error);
     expect(result.kibanaDataViews).toEqual([]);
   });

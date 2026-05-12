@@ -13,35 +13,15 @@ import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/ser
 import type { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { Frequency } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import type {
+  RawDoc,
+  SearchResults,
+  DeprecatedConcreteTaskInstance,
+  SerializedConcreteTaskInstance,
+} from './test_utils';
+import { scheduleTask, currentTasks } from './test_utils';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
-
-export interface RawDoc {
-  _id: string;
-  _source: any;
-  _type?: string;
-}
-export interface SearchResults {
-  hits: {
-    hits: RawDoc[];
-  };
-}
-
-type DeprecatedConcreteTaskInstance = Omit<ConcreteTaskInstance, 'schedule'> & {
-  interval: string;
-};
-
-type SerializedConcreteTaskInstance<State = string, Params = string> = Omit<
-  ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
-> & {
-  state: State;
-  params: Params;
-  scheduledAt: string;
-  startedAt: string | null;
-  retryAt: string | null;
-  runAt: string;
-};
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -49,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
@@ -85,15 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
       // clean up after last test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
-
-    function currentTasks<State = unknown, Params = unknown>(): Promise<{
-      docs: Array<SerializedConcreteTaskInstance<State, Params>>;
-    }> {
-      return supertest
-        .get('/api/sample_tasks')
-        .expect(200)
-        .then((response) => response.body);
-    }
 
     function currentTask<State = unknown, Params = unknown>(
       task: string
@@ -144,20 +116,6 @@ export default function ({ getService }: FtrProviderContext) {
         );
     }
 
-    function scheduleTask(
-      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
-    ): Promise<SerializedConcreteTaskInstance> {
-      return supertest
-        .post('/api/sample_tasks/schedule')
-        .set('kbn-xsrf', 'xxx')
-        .send({ task })
-        .expect(200)
-        .then((response: { body: SerializedConcreteTaskInstance }) => {
-          log.debug(`Task Scheduled: ${response.body.id}`);
-          return response.body;
-        });
-    }
-
     function scheduleTaskWithApiKey(
       task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
     ): Promise<SerializedConcreteTaskInstance> {
@@ -172,11 +130,25 @@ export default function ({ getService }: FtrProviderContext) {
         });
     }
 
-    function runTaskSoon(task: { id: string }) {
+    function scheduleTaskWithFakeRequest(
+      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
+    ): Promise<SerializedConcreteTaskInstance> {
+      return supertest
+        .post('/api/sample_tasks/schedule_with_fake_request')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then((response: { body: SerializedConcreteTaskInstance }) => {
+          log.debug(`Task Scheduled: ${response.body.id}`);
+          return response.body;
+        });
+    }
+
+    function runTaskSoon(task: { id: string }, force: boolean = false) {
       return supertest
         .post('/api/sample_tasks/run_soon')
         .set('kbn-xsrf', 'xxx')
-        .send({ task })
+        .send({ task, force })
         .expect(200)
         .then((response) => response.body);
     }
@@ -199,7 +171,18 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    function bulkUpdateSchedules(taskIds: string[], schedule: { interval: string }) {
+    function bulkUpdateSchedules(
+      taskIds: string[],
+      schedule:
+        | { interval: string }
+        | {
+            rrule: {
+              freq: number;
+              interval: number;
+              tzid: string;
+            };
+          }
+    ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
         .set('kbn-xsrf', 'xxx')
@@ -208,7 +191,48 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
 
-    function scheduleTaskIfNotExists(task: Partial<ConcreteTaskInstance>) {
+    function bulkUpdateSchedulesWithApiKey(
+      taskIds: string[],
+      schedule:
+        | { interval: string }
+        | {
+            rrule: {
+              freq: number;
+              interval: number;
+              tzid: string;
+            };
+          },
+      regenerateApiKey: boolean = false
+    ) {
+      return supertest
+        .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, schedule, regenerateApiKey })
+        .expect(200)
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
+    }
+
+    function bulkUpdateSchedulesWithFakeRequest(
+      taskIds: string[],
+      schedule:
+        | { interval: string }
+        | {
+            rrule: {
+              freq: number;
+              interval: number;
+              tzid: string;
+            };
+          }
+    ) {
+      return supertest
+        .post('/api/sample_tasks/bulk_update_schedules_with_fake_request')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, schedule })
+        .expect(200)
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
+    }
+
+    function ensureTaskScheduled(task: Partial<ConcreteTaskInstance>) {
       return supertest
         .post('/api/sample_tasks/ensure_scheduled')
         .set('kbn-xsrf', 'xxx')
@@ -238,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
     ) {
       // wait for task to start running and stall on waitForParams
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const tasks = (await currentTasks(supertest)).docs;
         expect(getTaskById(tasks, taskId).status).to.eql('running');
       });
 
@@ -249,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     }
     it('should schedule a task with rrule', async () => {
-      const dailyTask = await scheduleTask({
+      const dailyTask = await scheduleTask(supertest, {
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
         schedule: { rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 } },
@@ -273,11 +297,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should schedule a task with rrule with fixed time', async () => {
-      const dailyTask = await scheduleTask({
+      const dailyTask = await scheduleTask(supertest, {
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
         schedule: {
-          rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1, byhour: [15], byminute: [27] },
+          rrule: {
+            freq: Frequency.DAILY,
+            tzid: 'UTC',
+            interval: 1,
+            byhour: [15],
+            byminute: [27],
+          },
         },
         params: {},
       });
@@ -298,9 +328,10 @@ export default function ({ getService }: FtrProviderContext) {
       const now = new Date();
       const todayDay = now.getUTCDate();
       const todayMonth = now.getUTCMonth();
+      const todayYear = now.getUTCFullYear();
       // set a start date for 2 days from now
       const startDate = moment(now).add(2, 'days').toDate();
-      const dailyTask = await scheduleTask({
+      const dailyTask = await scheduleTask(supertest, {
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
         schedule: {
@@ -323,6 +354,52 @@ export default function ({ getService }: FtrProviderContext) {
 
         const runAtDay = runAt.getUTCDate();
         const runAtMonth = runAt.getUTCMonth();
+        const runAtYear = runAt.getUTCFullYear();
+        if (todayMonth === runAtMonth) {
+          expect(runAtDay >= todayDay + 2).to.be(true);
+        } else if (todayMonth < runAtMonth || todayYear < runAtYear) {
+          log.info(`todayMonth: ${todayMonth}, runAtMonth: ${runAtMonth}`);
+        } else {
+          throw new Error(
+            `Unexpected result: todayMonth:[${todayMonth}] > runAtMonth:[${runAtMonth}]`
+          );
+        }
+        expect(runAt.getUTCHours()).to.be(15);
+        expect(runAt.getUTCMinutes()).to.be(27);
+      });
+
+      // should not run immediately as the task is scheduled to run at 15:27 UTC
+      expect((await historyDocs()).length).to.eql(0);
+    });
+
+    it('should schedule a task with rrule with hourly frequency', async () => {
+      const now = new Date();
+      const todayDay = now.getUTCDate();
+      const todayMonth = now.getUTCMonth();
+      // set a start date for 2 days from now
+      const startDate = moment(now).add(2, 'days').toDate();
+      const hourlyTask = await scheduleTask(supertest, {
+        id: 'sample-recurring-task-id',
+        taskType: 'sampleRecurringTask',
+        schedule: {
+          rrule: {
+            dtstart: startDate.toISOString(),
+            freq: Frequency.HOURLY,
+            tzid: 'UTC',
+            interval: 4,
+            byminute: [27],
+          },
+        },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(hourlyTask.id);
+        expect(task.status).to.be('idle');
+        const runAt = new Date(task.runAt);
+
+        const runAtDay = runAt.getUTCDate();
+        const runAtMonth = runAt.getUTCMonth();
         if (todayMonth === runAtMonth) {
           expect(runAtDay >= todayDay + 2).to.be(true);
         } else if (todayMonth < runAtMonth) {
@@ -332,7 +409,6 @@ export default function ({ getService }: FtrProviderContext) {
             `Unexpected result: todayMonth:[${todayMonth}] > runAtMonth:[${runAtMonth}]`
           );
         }
-        expect(runAt.getUTCHours()).to.be(15);
         expect(runAt.getUTCMinutes()).to.be(27);
       });
 
@@ -363,7 +439,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should support middleware', async () => {
       const historyItem = random(1, 100);
 
-      const scheduledTask = await scheduleTask({
+      const scheduledTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: '30m' },
         params: { historyItem },
@@ -373,7 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks<{ count: number }>()).docs;
+        const [task] = (await currentTasks<{ count: number }>(supertest)).docs;
         log.debug(`Task found: ${task.id}`);
         log.debug(`Task status: ${task.status}`);
         log.debug(`Task state: ${JSON.stringify(task.state, null, 2)}`);
@@ -389,7 +465,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should remove non-recurring tasks after they complete', async () => {
-      await scheduleTask({
+      await scheduleTask(supertest, {
         taskType: 'sampleTask',
         params: {},
       });
@@ -397,12 +473,12 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const history = await historyDocs();
         expect(history.length).to.eql(1);
-        expect((await currentTasks()).docs).to.eql([]);
+        expect((await currentTasks(supertest)).docs).to.eql([]);
       });
     });
 
     it('should remove recurring task if task requests deletion', async () => {
-      await scheduleTask({
+      await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskThatDeletesItself',
         schedule: { interval: '1s' },
         params: {},
@@ -411,12 +487,12 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const history = await historyDocs();
         expect(history.length).to.eql(5);
-        expect((await currentTasks()).docs).to.eql([]);
+        expect((await currentTasks(supertest)).docs).to.eql([]);
       });
     });
 
     it('should use a given ID as the task document ID', async () => {
-      const result = await scheduleTask({
+      const result = await scheduleTask(supertest, {
         id: 'test-task-for-sample-task-plugin-to-test-task-manager',
         taskType: 'sampleTask',
         params: {},
@@ -426,7 +502,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow a task with a given ID to be scheduled multiple times', async () => {
-      const result = await scheduleTaskIfNotExists({
+      const result = await ensureTaskScheduled({
         id: 'test-task-to-reschedule-in-task-manager',
         taskType: 'sampleTask',
         params: {},
@@ -434,7 +510,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(result.id).to.be('test-task-to-reschedule-in-task-manager');
 
-      const rescheduleResult = await scheduleTaskIfNotExists({
+      const rescheduleResult = await ensureTaskScheduled({
         id: 'test-task-to-reschedule-in-task-manager',
         taskType: 'sampleTask',
         params: {},
@@ -444,7 +520,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reschedule if task errors', async () => {
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         params: { failWith: 'Dangit!!!!!' },
       });
@@ -461,7 +537,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should schedule the retry of recurring tasks to run at the next schedule when they time out', async () => {
       const intervalInMinutes = 30;
       const intervalInMilliseconds = intervalInMinutes * 60 * 1000;
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskWhichHangs',
         schedule: { interval: `${intervalInMinutes}m` },
         params: {},
@@ -483,7 +559,7 @@ export default function ({ getService }: FtrProviderContext) {
       const nextRunMilliseconds = random(60000, 200000);
       const count = random(1, 20);
 
-      const originalTask = await scheduleTask({
+      const originalTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         params: { nextRunMilliseconds },
         state: { count },
@@ -504,7 +580,7 @@ export default function ({ getService }: FtrProviderContext) {
       const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;
 
-      const originalTask = await scheduleTask({
+      const originalTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: `${interval}m` },
         params: {},
@@ -513,7 +589,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks<{ count: number }>()).docs;
+        const [task] = (await currentTasks<{ count: number }>(supertest)).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
@@ -525,7 +601,7 @@ export default function ({ getService }: FtrProviderContext) {
       const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;
 
-      const originalTask = await scheduleTask({
+      const originalTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         interval: `${interval}m`,
         params: {},
@@ -534,7 +610,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
 
-        const [task] = (await currentTasks<{ count: number }>()).docs;
+        const [task] = (await currentTasks<{ count: number }>(supertest)).docs;
         expect(task.attempts).to.eql(0);
         expect(task.state.count).to.eql(1);
 
@@ -583,17 +659,102 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
+      // api key should still exist
       expect(
         queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
           return apiKey.id === result.userScope?.apiKeyId;
         }).length
-      ).eql(0);
+      ).eql(1);
 
-      expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
+      // api_key_to_invalidate saved object should be created
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(response.hits.hits.length).to.eql(1);
+        expect((response.hits?.hits?.[0]._source as any).api_key_to_invalidate?.apiKeyId).to.eql(
+          result.userScope?.apiKeyId
+        );
+      });
+
+      // wait for the api_key_to_invalidate saved object to be older than the invalidation removalDelay (1s)
+      await delay(1000);
+
+      // run the api key invalidation task
+      await supertest
+        .post('/api/invalidate_api_key_task/run_soon')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // api key should be invalidated
+      await retry.try(async () => {
+        queryResult = await supertest
+          .post('/internal/security/api_key/_query')
+          .send({})
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === result.userScope?.apiKeyId;
+          }).length
+        ).eql(0);
+
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
+      });
+    });
+
+    it('should schedule tasks with fake request if request is provided', async () => {
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      await scheduleTaskWithFakeRequest({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
+
+      expect(result.apiKey).not.empty();
+      expect(result.userScope?.apiKeyCreatedByUser).to.be(true);
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // should be one new api key generated in the route
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // api key should not have been invalidated when the task was deleted
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
     });
 
     it('should return a task run result when asked to run a task now', async () => {
-      const originalTask = await scheduleTask({
+      const originalTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: `30m` },
         params: {},
@@ -605,7 +766,7 @@ export default function ({ getService }: FtrProviderContext) {
           1
         );
 
-        const [task] = (await currentTasks<{ count: number }>()).docs.filter(
+        const [task] = (await currentTasks<{ count: number }>(supertest)).docs.filter(
           (taskDoc) => taskDoc.id === originalTask.id
         );
 
@@ -620,7 +781,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: originalTask.id,
       });
 
-      expect(runSoonResult).to.eql({ id: originalTask.id });
+      expect(runSoonResult).to.eql({ id: originalTask.id, forced: false });
 
       await retry.try(async () => {
         expect(
@@ -628,7 +789,7 @@ export default function ({ getService }: FtrProviderContext) {
             .length
         ).to.eql(2);
 
-        const [task] = (await currentTasks<{ count: number }>()).docs.filter(
+        const [task] = (await currentTasks<{ count: number }>(supertest)).docs.filter(
           (taskDoc) => taskDoc.id === originalTask.id
         );
         expect(task.state.count).to.eql(2);
@@ -640,7 +801,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should only run as many instances of a task as its maxConcurrency will allow', async () => {
       // should run as there's only one and maxConcurrency on this TaskType is 1
-      const firstWithSingleConcurrency = await scheduleTask({
+      const firstWithSingleConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTaskWithSingleConcurrency',
         params: {
           waitForEvent: 'releaseFirstWaveOfTasks',
@@ -649,13 +810,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       // should run as there's only two and maxConcurrency on this TaskType is 2
       const [firstLimitedConcurrency, secondLimitedConcurrency] = await Promise.all([
-        scheduleTask({
+        scheduleTask(supertest, {
           taskType: 'sampleTaskWithLimitedConcurrency',
           params: {
             waitForEvent: 'releaseFirstWaveOfTasks',
           },
         }),
-        scheduleTask({
+        scheduleTask(supertest, {
           taskType: 'sampleTaskWithLimitedConcurrency',
           params: {
             waitForEvent: 'releaseSecondWaveOfTasks',
@@ -670,7 +831,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // should not run as there one running and maxConcurrency on this TaskType is 1
-      const secondWithSingleConcurrency = await scheduleTask({
+      const secondWithSingleConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTaskWithSingleConcurrency',
         params: {
           waitForEvent: 'releaseSecondWaveOfTasks',
@@ -678,7 +839,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // should not run as there are two running and maxConcurrency on this TaskType is 2
-      const thirdWithLimitedConcurrency = await scheduleTask({
+      const thirdWithLimitedConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTaskWithLimitedConcurrency',
         params: {
           waitForEvent: 'releaseSecondWaveOfTasks',
@@ -686,7 +847,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // schedule a task that should get picked up before the two blocked tasks
-      const taskWithUnlimitedConcurrency = await scheduleTask({
+      const taskWithUnlimitedConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         params: {},
       });
@@ -723,7 +884,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should only run as many instances of a task as its shared maxConcurrency will allow', async () => {
       // should run as maxConcurrency on this taskType is 1
-      const firstWithSharedConcurrency = await scheduleTask({
+      const firstWithSharedConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTaskSharedConcurrencyType1',
         params: {
           waitForEvent: 'releaseFirstWaveOfTasks',
@@ -735,7 +896,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // should not run as there is a task with shared concurrency running
-      const secondWithSharedConcurrency = await scheduleTask({
+      const secondWithSharedConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTaskSharedConcurrencyType2',
         params: {
           waitForEvent: 'releaseSecondWaveOfTasks',
@@ -743,7 +904,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // schedule a task that should get picked up before the blocked task
-      const taskWithUnlimitedConcurrency = await scheduleTask({
+      const taskWithUnlimitedConcurrency = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         params: {},
       });
@@ -781,8 +942,48 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should return a task run error result when asked to run a task that is actually running even with force parameter', async () => {
+      const longRunningTask = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '30m' },
+        params: {
+          waitForParams: true,
+        },
+      });
+
+      // tell the task to wait for the 'runSoonHasBeenAttempted' event
+      await provideParamsToTasksWaitingForParams(longRunningTask.id, {
+        waitForEvent: 'runSoonHasBeenAttempted',
+      });
+
+      await retry.try(async () => {
+        const docs = await historyDocs();
+        expect(
+          docs.filter((taskDoc) => taskDoc._source.taskId === longRunningTask.id).length
+        ).to.eql(1);
+
+        const task = await currentTask(longRunningTask.id);
+        expect(task.status).to.eql('running');
+      });
+
+      await ensureTasksIndexRefreshed();
+
+      // force runSoon
+      const runSoonResult = await runTaskSoon(
+        {
+          id: longRunningTask.id,
+        },
+        true
+      );
+
+      expect(runSoonResult).to.eql({
+        id: longRunningTask.id,
+        error: `Error: Failed to run task "${longRunningTask.id}" as it is currently running and cannot be forced`,
+      });
+    });
+
     it('should return a task run error result when trying to run a task now which is already running', async () => {
-      const longRunningTask = await scheduleTask({
+      const longRunningTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: '30m' },
         params: {
@@ -820,7 +1021,7 @@ export default function ({ getService }: FtrProviderContext) {
       // finish first run by emitting 'runSoonHasBeenAttempted' event
       await releaseTasksWaitingForEventToComplete('runSoonHasBeenAttempted');
       await retry.try(async () => {
-        const tasks = (await currentTasks<{ count: number }>()).docs;
+        const tasks = (await currentTasks<{ count: number }>(supertest)).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
 
         const task = await currentTask(longRunningTask.id);
@@ -836,12 +1037,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
-      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
+      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id, forced: false });
     });
 
     it('should disable and reenable task and run it when runSoon = true', async () => {
       const historyItem = random(1, 100);
-      const scheduledTask = await scheduleTask({
+      const scheduledTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: '1h' },
         params: { historyItem },
@@ -883,7 +1084,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should disable and reenable task and not run it when runSoon = false', async () => {
       const historyItem = random(1, 100);
-      const scheduledTask = await scheduleTask({
+      const scheduledTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: '1h' },
         params: { historyItem },
@@ -921,6 +1122,37 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should update schedule for existing task when calling ensureScheduled with a different schedule', async () => {
+      // schedule the task
+      const taskId = 'sample-recurring-task-id';
+      await scheduleTask(supertest, {
+        id: taskId,
+        taskType: 'sampleRecurringTask',
+        schedule: { interval: '1d' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+        const task = await currentTask(taskId);
+        expect(task.schedule?.interval).to.eql('1d');
+        expect(task.status).to.eql('idle');
+      });
+
+      // call ensureScheduled with a different schedule
+      await ensureTaskScheduled({
+        id: taskId,
+        taskType: 'sampleRecurringTask',
+        params: {},
+        schedule: { interval: '5m' },
+      });
+
+      await retry.try(async () => {
+        const task = await currentTask(taskId);
+        expect(task.schedule?.interval).to.eql('5m');
+      });
+    });
+
     function expectReschedule(
       originalRunAt: number,
       task: SerializedConcreteTaskInstance<any, any>,
@@ -938,13 +1170,13 @@ export default function ({ getService }: FtrProviderContext) {
        * If we begin testing with multiple Kibana instacnes in Parallel this will likely become flaky.
        * If you end up here because the test is flaky, this might be why.
        */
-      const fastTask = await scheduleTask({
+      const fastTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: `1s` },
         params: {},
       });
 
-      const longRunningTask = await scheduleTask({
+      const longRunningTask = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: `1s` },
         params: {
@@ -953,14 +1185,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const tasks = (await currentTasks<{ count: number }>()).docs;
+        const tasks = (await currentTasks<{ count: number }>(supertest)).docs;
         expect(getTaskById(tasks, fastTask.id).state.count).to.eql(2);
       });
 
       await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
 
       await retry.try(async () => {
-        const tasks = (await currentTasks<{ count: number }>()).docs;
+        const tasks = (await currentTasks<{ count: number }>(supertest)).docs;
 
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
@@ -968,26 +1200,26 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should delete the task if it is still running but maxAttempts has been reached', async () => {
-      await scheduleTask({
+      await scheduleTask(supertest, {
         taskType: 'sampleOneTimeTaskThrowingError',
         params: {},
       });
 
       await retry.try(async () => {
-        const results = (await currentTasks()).docs;
+        const results = (await currentTasks(supertest)).docs;
         expect(results.length).to.eql(0);
       });
     });
 
     it('should continue claiming recurring task even if maxAttempts has been reached', async () => {
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskTimingOut',
         schedule: { interval: '1s' },
         params: {},
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
+        const [scheduledTask] = (await currentTasks(supertest)).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(['claiming', 'running'].includes(scheduledTask.status)).to.be(true);
         expect(scheduledTask.attempts).to.be.greaterThan(3);
@@ -995,7 +1227,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should fail to schedule recurring task with timeout override', async () => {
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskTimingOut',
         schedule: { interval: '1s' },
         timeoutOverride: '30s',
@@ -1006,7 +1238,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow timeout override for ad hoc tasks', async () => {
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleAdHocTaskTimingOut',
         timeoutOverride: '30s',
         params: {},
@@ -1020,7 +1252,7 @@ export default function ({ getService }: FtrProviderContext) {
       // document was indexed. presence of indexed document means the task
       // timeout override was respected
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
+        const [scheduledTask] = (await currentTasks(supertest)).docs;
         expect(scheduledTask?.id).to.eql(task.id);
       });
 
@@ -1034,13 +1266,13 @@ export default function ({ getService }: FtrProviderContext) {
     it('should bulk update schedules for multiple tasks', async () => {
       const initialTime = Date.now();
       const tasks = await Promise.all([
-        scheduleTask({
+        scheduleTask(supertest, {
           taskType: 'sampleTask',
           schedule: { interval: '1h' },
           params: {},
         }),
 
-        scheduleTask({
+        scheduleTask(supertest, {
           taskType: 'sampleTask',
           schedule: { interval: '5m' },
           params: {},
@@ -1075,7 +1307,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const updatedTasks = (await currentTasks()).docs;
+        const updatedTasks = (await currentTasks(supertest)).docs;
 
         updatedTasks.forEach((task) => {
           expect(task.schedule).to.eql({ interval: '3h' });
@@ -1087,9 +1319,398 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should bulk update schedules tasks with API keys if request is provided', async () => {
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      const scheduledTask = await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+        schedule: { interval: '1d' },
+      });
+
+      // wait for the task to run once
+      const result = await retry.try(async () => {
+        const res = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
+        expect(res.apiKey).not.empty();
+        expect(res.schedule).to.eql({ interval: '1d' });
+        expect(res.state.count).to.be(1);
+        return res;
+      });
+
+      // test that a new api key was created and matches the api key id for this task
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+      // update the schedule for this task with a request
+      const updates = await bulkUpdateSchedulesWithApiKey([scheduledTask.id], { interval: '5s' });
+      expect(updates.tasks.length).to.be(1);
+      expect(updates.errors.length).to.be(0);
+
+      // Verify the task runs successfully with the new schedule
+      await retry.try(async () => {
+        const task = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
+
+        expect(task.state.count).to.be(2);
+        expect(task.schedule).to.eql({ interval: '5s' });
+
+        // test that the api key for the task still matches
+        expect(
+          queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+            return apiKey.id === task.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
+        expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+      });
+    });
+
+    it('should bulk update schedules tasks with regenerated API keys if request and regenerate api key flag are provided', async () => {
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      const scheduledTask = await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+        schedule: { interval: '1d' },
+      });
+
+      // wait for the task to run once
+      const result = await retry.try(async () => {
+        const res = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
+        expect(res.apiKey).not.empty();
+        expect(res.schedule).to.eql({ interval: '1d' });
+        expect(res.state.count).to.be(1);
+        return res;
+      });
+
+      // test that a new api key was created and matches the api key id for this task
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+      // update the schedule for this task with a request
+      const updates = await bulkUpdateSchedulesWithApiKey(
+        [scheduledTask.id],
+        { interval: '5s' },
+        true // regenerateApiKey
+      );
+      expect(updates.tasks.length).to.be(1);
+      expect(updates.errors.length).to.be(0);
+
+      // verify the task runs successfully with the new schedule
+      let updatedApiKey: string | undefined;
+      await retry.try(async () => {
+        const task = await currentTask<{ count: number }>(
+          'test-task-for-sample-task-plugin-to-test-task-api-key'
+        );
+
+        expect(task.state.count).to.be(2);
+        expect(task.schedule).to.eql({ interval: '5s' });
+        updatedApiKey = task.userScope?.apiKeyId;
+      });
+
+      // api_key_to_invalidate saved object should be created for the old api key
+      await retry.try(async () => {
+        const response = await es.search({
+          index: '.kibana_task_manager',
+          size: 100,
+          query: {
+            term: {
+              type: 'api_key_to_invalidate',
+            },
+          },
+        });
+
+        expect(
+          response.hits?.hits?.filter((hit: any) => {
+            return hit._source.api_key_to_invalidate?.apiKeyId === result.userScope?.apiKeyId;
+          }).length
+        ).eql(1);
+      });
+
+      // test that a new api key was created on update and matches the api key id for this task
+      const updatedQueryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      // test that the api key for the task is updated
+      expect(
+        updatedQueryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === updatedApiKey;
+        }).length
+      ).eql(1);
+      expect(updatedQueryResult.body.apiKeys.length).eql(apiKeysLength + 2);
+    });
+
+    it('should bulk update schedules tasks with fake request if request is provided', async () => {
+      const tasks = await Promise.all([
+        scheduleTaskWithFakeRequest({
+          id: 'test-task-1',
+          taskType: 'sampleTask',
+          schedule: { interval: '1d' },
+          params: {},
+        }),
+
+        scheduleTaskWithFakeRequest({
+          id: 'test-task-2',
+          taskType: 'sampleTask',
+          schedule: { interval: '5d' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      // wait for the tasks to both run once
+      await retry.try(async () => {
+        const res1 = await currentTask<{ count: number }>('test-task-1');
+        const res2 = await currentTask<{ count: number }>('test-task-2');
+
+        expect(res1.apiKey).not.empty();
+        expect(res1.schedule).to.eql({ interval: '1d' });
+        expect(res1.state.count).to.be(1);
+
+        expect(res2.apiKey).not.empty();
+        expect(res2.schedule).to.eql({ interval: '5d' });
+        expect(res2.state.count).to.be(1);
+      });
+
+      // update the schedules for thes task with a request
+      const updates = await bulkUpdateSchedulesWithFakeRequest(taskIds, { interval: '5s' });
+      expect(updates.tasks.length).to.be(2);
+      expect(updates.errors.length).to.be(0);
+
+      // Verify the tasks run successfully with the new schedule
+      await retry.try(async () => {
+        const res1 = await currentTask<{ count: number }>('test-task-1');
+        const res2 = await currentTask<{ count: number }>('test-task-2');
+
+        expect(res1.state.count).to.be(2);
+        expect(res1.schedule).to.eql({ interval: '5s' });
+
+        expect(res2.state.count).to.be(2);
+        expect(res2.schedule).to.eql({ interval: '5s' });
+      });
+    });
+
+    it('should bulk update schedules for multiple tasks with interval, using rrule', async () => {
+      const rruleScheduleExample24h = {
+        rrule: {
+          freq: 3, // Daily
+          interval: 1,
+          tzid: 'UTC',
+        },
+      };
+      const initialTime = Date.now();
+      const tasks = await Promise.all([
+        scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: { interval: '1h' },
+          params: {},
+        }),
+
+        scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: { interval: '5m' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+
+        // second task to be scheduled in 5m
+        expect(Date.parse((await currentTask(tasks[1].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(5, 'minutes').asMilliseconds()
+        );
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules(taskIds, rruleScheduleExample24h);
+
+        expect(updates.tasks.length).to.be(2);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks(supertest)).docs;
+
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql(rruleScheduleExample24h);
+          expect(
+            Date.parse(task.scheduledAt) + moment.duration(24, 'hours').asMilliseconds()
+          ).to.be(Date.parse(task.runAt));
+        });
+      });
+    });
+
+    it('should bulk update schedules using every rrule field', async () => {
+      const rruleScheduleExample = {
+        rrule: {
+          freq: 3, // Daily
+          interval: 1,
+          tzid: 'UTC',
+          byweekday: ['MO'],
+          byhour: [20],
+          byminute: [30],
+        },
+      };
+      const initialTime = Date.now();
+      const tasks = await Promise.all([
+        scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: { interval: '1h' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules(taskIds, rruleScheduleExample);
+
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks(supertest)).docs;
+
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql(rruleScheduleExample);
+        });
+      });
+    });
+
+    it('should bulk update schedules for multiple tasks with rrule, using interval', async () => {
+      const rruleScheduleExample24h = {
+        rrule: {
+          freq: 3, // Daily
+          interval: 1,
+          tzid: 'UTC',
+        },
+      };
+      const initialTime = Date.now();
+      const tasks = await Promise.all([
+        scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: rruleScheduleExample24h,
+          params: {},
+        }),
+
+        scheduleTask(supertest, {
+          taskType: 'sampleTask',
+          schedule: rruleScheduleExample24h,
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+
+        // second task to be scheduled in 5m
+        expect(Date.parse((await currentTask(tasks[1].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(5, 'minutes').asMilliseconds()
+        );
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules(taskIds, { interval: '2d' });
+
+        expect(updates.tasks.length).to.be(2);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks(supertest)).docs;
+
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql({ interval: '2d' });
+          // should be scheduled to run in 24 hours
+          expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
+            moment.duration(48, 'hours').asMilliseconds()
+          );
+        });
+      });
+    });
+
     it('should not bulk update schedules for task in running status', async () => {
       // this task should be in running status for 60s until it will be time outed
-      const longRunningTask = await scheduleTask({
+      const longRunningTask = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskWhichHangs',
         schedule: { interval: '1h' },
         params: {},
@@ -1128,14 +1749,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should set status of recurring task back to idle when schedule interval is greater than timeout', async () => {
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskTimingOut',
         schedule: { interval: '1d' },
         params: {},
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
+        const [scheduledTask] = (await currentTasks(supertest)).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.status).to.be('running');
         expect(scheduledTask.startedAt).not.to.be(null);
@@ -1143,7 +1764,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
+        const [scheduledTask] = (await currentTasks(supertest)).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.status).to.be('idle');
         expect(scheduledTask.startedAt).to.be(null);
@@ -1152,14 +1773,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should disable a task that returns shouldDisableTask: true', async () => {
-      const task = await scheduleTask({
+      const task = await scheduleTask(supertest, {
         taskType: 'sampleRecurringTaskDisablesItself',
         schedule: { interval: '1d' },
         params: {},
       });
 
       await retry.try(async () => {
-        const [scheduledTask] = (await currentTasks()).docs;
+        const [scheduledTask] = (await currentTasks(supertest)).docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.status).to.be('running');
         expect(scheduledTask.startedAt).not.to.be(null);
@@ -1167,12 +1788,31 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const currTasks = await currentTasks();
+        const currTasks = await currentTasks(supertest);
 
         const [scheduledTask] = currTasks.docs;
         expect(scheduledTask.id).to.eql(task.id);
         expect(scheduledTask.status).to.be('idle');
         expect(scheduledTask.enabled).to.be(false);
+      });
+    });
+
+    it('should update the retryAt of a long running task to be now + 5m', async () => {
+      const task = await scheduleTask(supertest, {
+        taskType: 'sampleLongRunningRecurringTask',
+        schedule: { interval: `1d` },
+        params: {},
+      });
+
+      const now = Date.now();
+
+      await retry.try(async () => {
+        const scheduledTask = await currentTask(task.id);
+        const retryAt = Date.parse(scheduledTask.retryAt!);
+        expect(isNaN(retryAt)).to.be(false);
+
+        expect(retryAt).to.be.greaterThan(now + 5 * 60 * 1000);
+        expect(retryAt).to.be.lessThan(now + 6.5 * 60 * 1000);
       });
     });
   });

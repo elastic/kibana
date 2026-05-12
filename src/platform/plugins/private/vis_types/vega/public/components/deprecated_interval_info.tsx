@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { VegaSpec } from '../data_model/types';
@@ -27,9 +28,13 @@ export const DeprecatedHistogramIntervalInfo = () => (
         values={{
           dateHistogramDoc: (
             <EuiButtonIcon
-              iconType="popout"
+              iconType="external"
               href={getDocLinks().links.aggs.date_histogram}
               target="_blank"
+              aria-label={i18n.translate(
+                'visTypeVega.deprecatedHistogramIntervalInfo.dateHistogramDocAriaLabel',
+                { defaultMessage: 'Open date histogram documentation' }
+              )}
             />
           ),
         }}

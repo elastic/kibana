@@ -27,8 +27,41 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
 
   Rx.merge(
     observeLines(logsProc.stdout!).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
-    observeLines(logsProc.stderr!).pipe(tap((line) => log.error(`[docker:${name}] ${line}`))) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
+    observeLines(logsProc.stderr!).pipe(
+      tap((line) => {
+        // Check if this is actually an error or just info/debug written to stderr
+        if (isActualError(line)) {
+          log.error(`[docker:${name}] ${line}`);
+        } else {
+          log.info(`[docker:${name}] ${line}`);
+        }
+      })
+    ) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
   ).subscribe(logLine$);
 
   return logLine$.asObservable();
+}
+
+/**
+ * Check if a log line from stderr is actually an error or just info/debug written to stderr
+ */
+export function isActualError(line: string): boolean {
+  try {
+    const parsed = JSON.parse(line);
+    // If it's JSON with a log.level field, check if it's an error/warning level
+    if (parsed['log.level']) {
+      const level = parsed['log.level'].toLowerCase();
+      return level === 'error' || level === 'fatal' || level === 'severe';
+    }
+    // If it has a level field (alternative format)
+    if (parsed.level) {
+      const level = parsed.level.toLowerCase();
+      return level === 'error' || level === 'fatal' || level === 'severe';
+    }
+  } catch (e) {
+    // Not JSON, treat as potential error since it's on stderr
+    return true;
+  }
+  // JSON but no log level field, treat as info
+  return false;
 }

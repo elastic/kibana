@@ -64,6 +64,7 @@ describe('Detections Usage and Metrics', () => {
       mlClient = mlServicesMock.createSetupContract();
       savedObjectsClient = savedObjectsClientMock.create();
       mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
+      mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValue([]);
     });
 
     it('returns zeroed counts if calls are empty', async () => {
@@ -110,6 +111,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -139,6 +141,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -192,6 +195,29 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 1,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
+          ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
     });
@@ -232,6 +258,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -261,6 +288,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -313,6 +341,28 @@ describe('Detections Usage and Metrics', () => {
             customized: 0,
             enabled: 1,
             disabled: 0,
+          },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
           },
         },
       });
@@ -354,6 +404,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -383,6 +434,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -436,6 +488,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 1,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -476,6 +550,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -505,6 +580,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -558,6 +634,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 1,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -570,7 +668,7 @@ describe('Detections Usage and Metrics', () => {
       savedObjectsClient.find.mockResolvedValueOnce(
         getMockRuleSearchResponse(
           true /* immutable (elastic) */,
-          true /* customized */,
+          false /* customized */,
           false /* enabled */
         )
       );
@@ -598,6 +696,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -609,7 +708,7 @@ describe('Detections Usage and Metrics', () => {
               cases_count_total: 1,
               created_on: '2021-03-23T17:15:59.634Z',
               elastic_rule: true,
-              is_customized: true,
+              is_customized: false,
               enabled: false,
               rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
               rule_name: 'Azure Diagnostic Settings Deletion',
@@ -627,6 +726,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -660,6 +760,20 @@ describe('Detections Usage and Metrics', () => {
               response_actions: initialResponseActionsUsage,
             },
             elastic_customized_total: {
+              alerts: 0,
+              cases: 0,
+              disabled: 0,
+              enabled: 0,
+              legacy_notifications_enabled: 0,
+              legacy_notifications_disabled: 0,
+              notifications_enabled: 0,
+              notifications_disabled: 0,
+              legacy_investigation_fields: 0,
+              alert_suppression: initialAlertSuppression,
+              has_exceptions: 0,
+              response_actions: initialResponseActionsUsage,
+            },
+            elastic_noncustomized_total: {
               alerts: 3400,
               cases: 1,
               disabled: 1,
@@ -679,6 +793,28 @@ describe('Detections Usage and Metrics', () => {
             customized: 0,
             enabled: 0,
             disabled: 0,
+          },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
           },
         },
       });
@@ -720,6 +856,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -749,6 +886,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -802,6 +940,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 0,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 0,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 0,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -842,6 +1002,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -871,6 +1032,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -923,6 +1085,28 @@ describe('Detections Usage and Metrics', () => {
             customized: 0,
             enabled: 0,
             disabled: 0,
+          },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
           },
         },
       });
@@ -964,6 +1148,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -993,6 +1178,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -1046,6 +1232,28 @@ describe('Detections Usage and Metrics', () => {
             enabled: 0,
             disabled: 0,
           },
+          elastic_detection_rule_customization_status: {
+            alert_suppression: 0,
+            anomaly_threshold: 0,
+            data_view_id: 0,
+            description: 1,
+            filters: 0,
+            from: 0,
+            index: 0,
+            interval: 0,
+            investigation_fields: 0,
+            name: 1,
+            new_terms_fields: 0,
+            note: 0,
+            query: 0,
+            risk_score: 0,
+            severity: 0,
+            setup: 0,
+            tags: 1,
+            threat_query: 0,
+            threshold: 0,
+            timeline_id: 0,
+          },
         },
       });
     });
@@ -1075,6 +1283,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -1127,6 +1336,29 @@ describe('Detections Usage and Metrics', () => {
             },
           },
           elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+          elastic_detection_rule_customization_status: {
+            name: 0,
+            description: 0,
+            risk_score: 0,
+            severity: 0,
+            timeline_id: 0,
+            note: 0,
+            investigation_fields: 0,
+            tags: 0,
+            interval: 0,
+            from: 0,
+            setup: 0,
+            query: 0,
+            index: 0,
+            data_view_id: 0,
+            filters: 0,
+            alert_suppression: 0,
+            threshold: 0,
+            threat_query: 0,
+            anomaly_threshold: 0,
+            new_terms_fields: 0,
+          },
+          ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
     });
@@ -1156,6 +1388,7 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          ...getInitialDetectionMetrics().detection_rules,
           spaces_usage: {
             rules_in_spaces: [1],
             total: 1,
@@ -1185,6 +1418,7 @@ describe('Detections Usage and Metrics', () => {
               has_response_actions: false,
               has_response_actions_endpoint: false,
               has_response_actions_osquery: false,
+              ai_created: false,
             },
           ],
           detection_rule_usage: {
@@ -1247,6 +1481,29 @@ describe('Detections Usage and Metrics', () => {
             },
           },
           elastic_detection_rule_upgrade_status: getInitialRuleUpgradeStatus(),
+          elastic_detection_rule_customization_status: {
+            name: 0,
+            description: 0,
+            risk_score: 0,
+            severity: 0,
+            timeline_id: 0,
+            note: 0,
+            investigation_fields: 0,
+            tags: 0,
+            interval: 0,
+            from: 0,
+            setup: 0,
+            query: 0,
+            index: 0,
+            data_view_id: 0,
+            filters: 0,
+            alert_suppression: 0,
+            threshold: 0,
+            threat_query: 0,
+            anomaly_threshold: 0,
+            new_terms_fields: 0,
+          },
+          ai_created_rules: { total: 0, enabled: 0, disabled: 0 },
         },
       });
     });
@@ -1345,6 +1602,78 @@ describe('Detections Usage and Metrics', () => {
         );
         expect(result).toHaveProperty(
           'detection_rules.detection_rule_usage.threat_match_custom.has_does_not_match_condition',
+          0
+        );
+      });
+    });
+
+    describe('deprecated rules', () => {
+      let detectionsMetricsParams: Parameters<typeof getDetectionsMetrics>[0];
+      beforeEach(() => {
+        esClient.search.mockResponseOnce(getEventLogAllRules());
+        esClient.search.mockResponseOnce(getEventLogElasticRules());
+        esClient.search.mockResponseOnce(getElasticLogCustomRules());
+        esClient.search.mockResponseOnce(getMockRuleAlertsResponse(0));
+        savedObjectsClient.find.mockResolvedValueOnce(getMockRuleSearchResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getMockAlertCaseCommentsResponse());
+        savedObjectsClient.find.mockResolvedValueOnce(getEmptySavedObjectResponse());
+        mockPrebuiltRuleAssetsClient.fetchLatestVersions.mockResolvedValueOnce([]);
+
+        const logger = loggingSystemMock.createLogger();
+        detectionsMetricsParams = {
+          eventLogIndex: '',
+          signalsIndex: '',
+          esClient,
+          savedObjectsClient,
+          logger,
+          mlClient,
+          legacySignalsIndex: '',
+        };
+      });
+
+      it('counts deprecated assets that match installed Elastic rules', async () => {
+        mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValueOnce([
+          {
+            rule_id: '5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
+            version: 4,
+            deprecated: true,
+            name: 'Azure Diagnostic Settings Deletion',
+          },
+        ]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_deprecated_status.total',
+          1
+        );
+      });
+
+      it('ignores deprecated assets that are not installed', async () => {
+        mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValueOnce([
+          {
+            rule_id: 'not-installed-rule-id',
+            version: 1,
+            deprecated: true,
+            name: 'Some Deprecated Rule',
+          },
+        ]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_deprecated_status.total',
+          0
+        );
+      });
+
+      it('returns zero when there are no deprecated assets', async () => {
+        mockPrebuiltRuleAssetsClient.fetchDeprecatedRules.mockResolvedValueOnce([]);
+
+        const result = await getDetectionsMetrics(detectionsMetricsParams);
+
+        expect(result).toHaveProperty(
+          'detection_rules.elastic_detection_rule_deprecated_status.total',
           0
         );
       });

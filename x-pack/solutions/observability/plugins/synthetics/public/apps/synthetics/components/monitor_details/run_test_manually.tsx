@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -13,6 +12,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsSettingsContext } from '../../contexts';
@@ -66,7 +66,7 @@ export const RunTestManuallyContextItem = () => {
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            {testInProgress ? <EuiLoadingSpinner size="s" /> : <EuiIcon type="beaker" size="s" />}
+            {testInProgress ? <EuiLoadingSpinner size="s" /> : <EuiIcon type="flask" size="s" />}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{<span>{RUN_TEST_LABEL}</span>}</EuiFlexItem>
         </EuiFlexGroup>

@@ -19,7 +19,10 @@ interface Props {
 
 const MiniAttackChainComponent: React.FC<Props> = ({ attackDiscovery }) => {
   const { euiTheme } = useEuiTheme();
-  const tactics = useMemo(() => getTacticMetadata(attackDiscovery), [attackDiscovery]);
+  const tactics = useMemo(
+    () => getTacticMetadata(attackDiscovery.mitreAttackTactics),
+    [attackDiscovery]
+  );
   const detectedTactics = useMemo(() => tactics.filter((tactic) => tactic.detected), [tactics]);
 
   const detectedTacticsList = useMemo(

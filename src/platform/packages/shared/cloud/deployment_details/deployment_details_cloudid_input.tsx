@@ -44,12 +44,18 @@ const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPopover
+          aria-label={i18n.translate('cloud.deploymentDetails.cloudIdHelpPopover.ariaLabel', {
+            defaultMessage: 'Cloud ID help',
+          })}
           button={
             <EuiButtonIcon
               iconType="question"
               onClick={() => {
                 setIsPopoverOpen(true);
               }}
+              aria-label={i18n.translate('cloud.deploymentDetails.cloudIdHelpButton.ariaLabel', {
+                defaultMessage: 'Show Cloud ID help',
+              })}
             />
           }
           isOpen={isPopoverOpen}
@@ -89,7 +95,15 @@ export const DeploymentDetailsCloudIdInput: FC<{ cloudId: string; learnMoreUrl: 
         <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={cloudId}>
             {(copy) => (
-              <EuiButtonIcon onClick={copy} iconType="copyClipboard" display="base" size="m" />
+              <EuiButtonIcon
+                onClick={copy}
+                iconType="copy"
+                display="base"
+                size="m"
+                aria-label={i18n.translate('cloud.deploymentDetails.copyCloudIdButton.ariaLabel', {
+                  defaultMessage: 'Copy Cloud ID',
+                })}
+              />
             )}
           </EuiCopy>
         </EuiFlexItem>

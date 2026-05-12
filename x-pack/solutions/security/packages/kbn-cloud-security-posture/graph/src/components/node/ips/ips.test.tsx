@@ -6,100 +6,136 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   GRAPH_IPS_TEXT_ID,
   GRAPH_IPS_PLUS_COUNT_ID,
-  GRAPH_IPS_TOOLTIP_CONTENT_ID,
-  GRAPH_IPS_TOOLTIP_IP_ID,
+  GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
+  GRAPH_IPS_BUTTON_ID,
+  GRAPH_IPS_VALUE_ID,
 } from '../../test_ids';
-import { Ips, MAX_IPS_IN_TOOLTIP } from './ips';
+import { Ips } from './ips';
 
 describe('Ips', () => {
+  const mockOnIpClick = jest.fn();
+
+  beforeEach(() => {
+    mockOnIpClick.mockClear();
+  });
+
   test('renders nothing when input array is empty', () => {
     const { container } = render(<Ips ips={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
-  test('renders a single IP correctly', () => {
+  test('renders a single IP correctly without onIpClick', () => {
     const testIp = '192.168.1.1';
     render(<Ips ips={[testIp]} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIp}`);
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIp);
+    expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
+  });
+
+  test('renders a single IP correctly with onIpClick', () => {
+    const testIps = ['192.168.1.1'];
+    render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
+
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_BUTTON_ID)).toHaveTextContent(testIps[0]);
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
+  });
+
+  test('renders multiple IPs with a counter when onIpClick is not provided', () => {
+    const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
+    render(<Ips ips={testIps} />);
+
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIps[0]);
+    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent('+2');
+    expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
+  });
+
+  test('renders multiple IPs with a counter when onIpClick is provided', () => {
+    const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
+    render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
+
+    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent('IP:');
+    expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIps[0]);
+    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).toHaveTextContent('+2');
     expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_ID)).not.toBeInTheDocument();
   });
 
-  test('renders multiple IPs with a counter', () => {
-    const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
-    render(<Ips ips={testIps} />);
+  test('renders aria-label in focusable button for single IP when onIpClick is provided', () => {
+    const testIps = ['192.168.1.1'];
+    render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-    expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-    expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent('+2');
+    const popoverButton = screen.getByTestId(GRAPH_IPS_BUTTON_ID);
+    expect(popoverButton).toHaveAccessibleName('Show IP address details');
   });
 
-  test('renders aria-label in focusable button', () => {
+  test('renders aria-label in counter button for multiple IPs', () => {
     const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
-    render(<Ips ips={testIps} />);
+    render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-    const tooltipButton = screen.getByRole('button');
-    expect(tooltipButton).toHaveAccessibleName('Show IP address details');
+    const counterButton = screen.getByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID);
+    expect(counterButton).toHaveAccessibleName('Show IP address details');
   });
 
-  describe('tooltip', () => {
-    test('does not render tooltip for a single IP', async () => {
-      const testIps = ['192.168.1.1'];
-      render(<Ips ips={testIps} />);
+  describe('click behavior', () => {
+    describe('single IP', () => {
+      test('clicking single IP button calls onIpClick prop when provided', async () => {
+        const testIp = '192.168.1.1';
+        render(<Ips ips={[testIp]} onIpClick={mockOnIpClick} />);
 
-      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
-      await userEvent.hover(screen.getByTestId(GRAPH_IPS_TEXT_ID));
+        const ipButton = screen.getByTestId(GRAPH_IPS_BUTTON_ID);
+        await userEvent.click(ipButton);
 
-      await waitFor(() => {
-        expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
+        expect(mockOnIpClick).toHaveBeenCalledTimes(1);
+      });
+
+      test('single IP button is not clickable when onIpClick is not provided', async () => {
+        const testIp = '192.168.1.1';
+        render(<Ips ips={[testIp]} />);
+
+        // When onIpClick is not provided, single IP should render as text, not button
+        expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIp);
       });
     });
 
-    test('renders tooltip with multiple unique IPs', async () => {
-      const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
-      render(<Ips ips={testIps} />);
+    describe('multiple IPs', () => {
+      test('first IP is rendered as text (not clickable) when there are multiple IPs', () => {
+        const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
+        render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
-      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-      await userEvent.hover(screen.getByTestId(GRAPH_IPS_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.getByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
+        // First IP should be plain text, not a button
+        expect(screen.queryByTestId(GRAPH_IPS_BUTTON_ID)).not.toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_VALUE_ID)).toHaveTextContent(testIps[0]);
       });
 
-      const tooltipIps = screen.getAllByTestId(GRAPH_IPS_TOOLTIP_IP_ID).map((ip) => ip.textContent);
-      expect(tooltipIps).toEqual(testIps);
+      test('clicking counter button calls onIpClick when provided', async () => {
+        const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
+        render(<Ips ips={testIps} onIpClick={mockOnIpClick} />);
 
-      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toHaveTextContent(
-        'Open full details in flyout'
-      );
-    });
+        const counterButton = screen.getByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID);
+        await userEvent.click(counterButton);
 
-    test('renders tooltip with max number of unique IPs', async () => {
-      const baseIp = '192.168.1.';
-      const testIps = [];
-      for (let i = 1; i <= MAX_IPS_IN_TOOLTIP + 1; i++) {
-        testIps.push(`${baseIp}${i}`);
-      }
-
-      render(<Ips ips={testIps} />);
-
-      expect(screen.queryByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).not.toBeInTheDocument();
-      expect(screen.getByTestId(GRAPH_IPS_TEXT_ID)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-      await userEvent.hover(screen.getByTestId(GRAPH_IPS_TEXT_ID));
-
-      await waitFor(() => {
-        expect(screen.getByTestId(GRAPH_IPS_TOOLTIP_CONTENT_ID)).toBeInTheDocument();
+        expect(mockOnIpClick).toHaveBeenCalledTimes(1);
       });
 
-      const tooltipIps = screen.getAllByTestId(GRAPH_IPS_TOOLTIP_IP_ID).map((ip) => ip.textContent);
+      test('counter is rendered as text (not clickable) when onIpClick is not provided', () => {
+        const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
+        render(<Ips ips={testIps} />);
 
-      expect(tooltipIps).toHaveLength(MAX_IPS_IN_TOOLTIP);
-      expect(tooltipIps).toEqual(testIps.slice(0, MAX_IPS_IN_TOOLTIP));
+        expect(screen.queryByTestId(GRAPH_IPS_PLUS_COUNT_BUTTON_ID)).not.toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toBeInTheDocument();
+        expect(screen.getByTestId(GRAPH_IPS_PLUS_COUNT_ID)).toHaveTextContent('+2');
+      });
     });
   });
 });

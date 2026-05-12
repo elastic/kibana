@@ -34,8 +34,6 @@ export const AgentActivityBadge: React.FunctionComponent<{
         onClick={onClick}
         onClickAriaLabel="Open the Agent activity flyout"
         iconType="warning"
-        iconOnClick={onClick}
-        iconOnClickAriaLabel="Open the Agent activity flyout"
         data-test-subj="agentActivityBadge"
       >
         <FormattedMessage

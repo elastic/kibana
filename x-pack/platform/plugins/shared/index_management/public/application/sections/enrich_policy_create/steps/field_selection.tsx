@@ -97,9 +97,12 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
   const { draft, updateDraft, updateCompletionState } = useCreatePolicyContext();
 
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchFields = async () => {
       setIsLoading(true);
       const { data } = await getFieldsFromIndices(draft.sourceIndices as string[]);
+      if (isCancelled) return;
       setIsLoading(false);
 
       if (data?.commonFields?.length) {
@@ -120,6 +123,10 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
     };
 
     fetchFields();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [draft.sourceIndices]);
 
   const { form } = useForm({
@@ -158,6 +165,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
       {!isLoading && hasSelectedMultipleIndices && matchFieldOptions.length === 0 && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.idxMgmt.enrichPolicyCreate.noCommonFieldsFoundError', {
               defaultMessage: 'No common fields',
             })}
@@ -256,7 +264,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
           <EuiButton
             color="primary"
             iconSide="left"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             data-test-subj="backButton"
             onClick={onBack}
           >
@@ -272,7 +280,7 @@ export const FieldSelectionStep = ({ onBack, onNext }: Props) => {
             fill
             color="primary"
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             disabled={form.isValid === false}
             data-test-subj="nextButton"
             onClick={onSubmit}

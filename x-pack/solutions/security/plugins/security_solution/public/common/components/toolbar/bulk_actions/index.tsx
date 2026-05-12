@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 
@@ -17,6 +18,8 @@ interface OwnProps {
   onSelectAll: () => void;
   onClearSelection: () => void;
   bulkActionItems: AlertTableContextMenuItem[];
+  bulkActionPanels: EuiContextMenuPanelDescriptor[];
+  closePopoverRef?: React.MutableRefObject<() => void>;
 }
 
 const BulkActionsContainer = styled.div`
@@ -36,6 +39,8 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
   onSelectAll,
   onClearSelection,
   bulkActionItems,
+  bulkActionPanels,
+  closePopoverRef,
 }) => {
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -47,11 +52,11 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
     setIsActionsPopoverOpen(false);
   }, [setIsActionsPopoverOpen]);
 
-  const closeIfPopoverIsOpen = useCallback(() => {
-    if (isActionsPopoverOpen) {
-      setIsActionsPopoverOpen(false);
+  useEffect(() => {
+    if (closePopoverRef) {
+      closePopoverRef.current = closeActionPopover;
     }
-  }, [isActionsPopoverOpen]);
+  }, [closePopoverRef, closeActionPopover]);
 
   const toggleSelectAll = useCallback(() => {
     if (!showClearSelection) {
@@ -67,15 +72,13 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
         id: 0,
         items: bulkActionItems,
       },
+      ...bulkActionPanels,
     ],
-    [bulkActionItems]
+    [bulkActionItems, bulkActionPanels]
   );
 
   return (
-    <BulkActionsContainer
-      onClick={closeIfPopoverIsOpen}
-      data-test-subj="bulk-actions-button-container"
-    >
+    <BulkActionsContainer data-test-subj="bulk-actions-button-container">
       <EuiPopover
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
@@ -85,7 +88,7 @@ const BulkActionsComponent: React.FC<OwnProps> = ({
             aria-label="selectedShowBulkActions"
             data-test-subj="selectedShowBulkActionsButton"
             size="xs"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="primary"
             onClick={toggleIsActionOpen}

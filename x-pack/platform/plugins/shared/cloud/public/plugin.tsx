@@ -11,13 +11,14 @@ import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import type { KibanaProductTier, KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { ELASTICSEARCH_CONFIG_ROUTE } from '../common/constants';
 import { decodeCloudId, type DecodedCloudId } from '../common/decode_cloud_id';
 import { parseOnboardingSolution } from '../common/parse_onboarding_default_solution';
-import type { ElasticsearchConfigType } from '../common/types';
+import type { CloudDataAttributes, ElasticsearchConfigType } from '../common/types';
 import type { CloudSetup, CloudStart, PublicElasticsearchConfigType } from './types';
 import { CloudUrlsService } from './urls';
 import { getSupportUrl } from './utils';
@@ -37,6 +38,7 @@ export interface CloudConfigType {
   users_and_roles_url?: string;
   performance_url?: string;
   trial_end_date?: string;
+  isSaasContainer?: boolean;
   is_elastic_staff_owned?: boolean;
   onboarding?: {
     default_solution?: string;
@@ -71,13 +73,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   public setup(core: CoreSetup): CloudSetup {
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
 
-    const {
-      id,
-      cname,
-      trial_end_date: trialEndDate,
-      is_elastic_staff_owned: isElasticStaffOwned,
-      csp,
-    } = this.config;
+    const { id, cname, is_elastic_staff_owned: isElasticStaffOwned, csp } = this.config;
 
     let decodedId: DecodedCloudId | undefined;
     if (id) {
@@ -95,9 +91,10 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       csp,
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
-      trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
+      trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
+      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },
@@ -120,11 +117,25 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
   public start(coreStart: CoreStart): CloudStart {
     coreStart.chrome.setHelpSupportUrl(getSupportUrl(this.config));
+
+    // Deployment name is only available in ECH
+    if (this.isCloudEnabled && !this.isServerlessEnabled) {
+      coreStart.http
+        .get<CloudDataAttributes>('/internal/cloud/solution', { version: '1' })
+        .then((response) => {
+          const deploymentName = response?.resourceData?.deployment?.name;
+          if (deploymentName) {
+            (coreStart.chrome as InternalChromeStart)?.project?.setKibanaName(deploymentName);
+          }
+        })
+        .catch(() => {});
+    }
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
@@ -156,6 +167,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -181,5 +193,18 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         elasticsearchUrl: undefined,
       };
     }
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    if (this.config.trial_end_date) {
+      const endDateMs = new Date(this.config.trial_end_date).getTime();
+      if (!Number.isNaN(endDateMs)) {
+        return Date.now() <= endDateMs;
+      } else {
+        this.logger.error('cloud.trial_end_date config value could not be parsed.');
+      }
+    }
+    return false;
   }
 }

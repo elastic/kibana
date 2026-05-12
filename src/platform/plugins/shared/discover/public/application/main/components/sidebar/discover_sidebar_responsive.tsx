@@ -55,8 +55,12 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     originatingApp: PLUGIN_ID,
     localStorageKeyPrefix: 'discover',
     compressed: true,
-    showSidebarToggleButton: true,
+    showSidebarToggleButton: false,
     disableFieldsExistenceAutoFetching: true,
+    shouldKeepAdHocDataViewImmutable: true,
+    buttonPropsToTriggerFlyout: {
+      'data-test-subj': 'discover-sidebar-fields-button',
+    },
     buttonAddFieldVariant: 'toolbar',
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
@@ -131,7 +135,10 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -159,6 +166,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
+  const chromeStyle = useObservable(services.core.chrome.getChromeStyle$(), 'classic');
   const isEsqlMode = useIsEsqlMode();
   const {
     fieldListVariant,
@@ -182,7 +190,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
-  const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
+  const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -283,24 +291,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [setUnifiedFieldListSidebarContainerApi, scheduleFieldsExistenceInfoFetchRef]
   );
 
-  const closeDataViewEditor = useRef<() => void | undefined>();
-
-  useEffect(() => {
-    const cleanup = () => {
-      if (closeDataViewEditor?.current) {
-        closeDataViewEditor?.current();
-      }
-    };
-    return () => {
-      // Make sure to close the editor when unmounting
-      cleanup();
-    };
-  }, []);
-
-  const setDataViewEditorRef = useCallback((ref: () => void | undefined) => {
-    closeDataViewEditor.current = ref;
-  }, []);
-
   const { dataViewEditor } = services;
 
   const canEditDataView =
@@ -310,19 +300,12 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const createNewDataView = useMemo(
     () =>
       canEditDataView
-        ? () => {
-            const ref = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                onDataViewCreated(dataView);
-              },
-            });
-            if (setDataViewEditorRef) {
-              setDataViewEditorRef(ref);
-            }
+        ? (dataView: DataView) => {
+            onDataViewCreated(dataView);
             closeFieldListFlyout?.();
           }
         : undefined,
-    [canEditDataView, dataViewEditor, setDataViewEditorRef, onDataViewCreated, closeFieldListFlyout]
+    [canEditDataView, onDataViewCreated, closeFieldListFlyout]
   );
 
   const searchBarCustomization = useDiscoverCustomization('search_bar');
@@ -342,7 +325,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <DataViewPicker
           currentDataViewId={selectedDataView.id}
           adHocDataViews={adHocDataViews}
-          managedDataViews={managedDataViews}
           savedDataViews={savedDataViews}
           onChangeDataView={onChangeDataView}
           onAddField={createField}
@@ -360,7 +342,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     selectedDataView,
     CustomDataViewPicker,
     adHocDataViews,
-    managedDataViews,
     savedDataViews,
     onChangeDataView,
     createField,
@@ -407,13 +388,33 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [dispatch, setFieldListUiState]
   );
 
+  const fieldListExistingFieldsInfoUiState = useCurrentTabSelector(
+    (state) => state.uiState.fieldListExistingFieldsInfo
+  );
+  const setFieldListExistingFieldsInfoUiState = useCurrentTabAction(
+    internalStateActions.setFieldListExistingFieldsInfoUiState
+  );
+  const onInitialExistingFieldsInfoChange = useCallback(
+    (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo']) => {
+      dispatch(
+        setFieldListExistingFieldsInfoUiState({
+          fieldListExistingFieldsInfo: newUiState,
+        })
+      );
+    },
+    [dispatch, setFieldListExistingFieldsInfoUiState]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       css={css`
         height: 100%;
         display: ${isSidebarCollapsed ? 'none' : 'flex'};
-        background-color: ${euiTheme.colors.body};
+        // Make Discover's field list background distinguished for the "new chrome"
+        background-color: ${chromeStyle === 'project'
+          ? euiTheme.colors.backgroundBasePlain
+          : euiTheme.colors.body};
       `}
     >
       <EuiFlexItem>
@@ -439,6 +440,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             workspaceSelectedFieldNames={columns}
             initialState={fieldListUiState}
             onInitialStateChange={onInitialStateChange}
+            initialExistingFieldsInfo={fieldListExistingFieldsInfoUiState}
+            onInitialExistingFieldsInfoChange={onInitialExistingFieldsInfoChange}
           />
         ) : null}
       </EuiFlexItem>

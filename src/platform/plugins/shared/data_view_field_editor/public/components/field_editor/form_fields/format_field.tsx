@@ -15,7 +15,11 @@ import { useFieldEditorContext } from '../../field_editor_context';
 import { FormatSelectEditor } from '../../field_format_editor';
 import type { FieldFormInternal } from '../field_editor';
 
-export const FormatField = () => {
+interface Props {
+  disabled?: boolean;
+}
+
+export const FormatField = ({ disabled }: Props) => {
   const { uiSettings, fieldFormats, fieldFormatEditors } = useFieldEditorContext();
   const isMounted = useRef(false);
   const [{ type }] = useFormData<FieldFormInternal>({ watch: ['name', 'type'] });
@@ -52,6 +56,7 @@ export const FormatField = () => {
             {isSubmitted && errors.length > 0 && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   title={errors.map((err) => err.message)}
                   color="danger"
                   iconType="cross"
@@ -70,6 +75,7 @@ export const FormatField = () => {
               onError={setFormatError}
               value={value}
               key={typeValue.join(', ')}
+              disabled={disabled}
             />
           </>
         );

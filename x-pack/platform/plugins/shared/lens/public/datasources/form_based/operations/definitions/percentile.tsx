@@ -18,9 +18,9 @@ import type {
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { memoize } from 'lodash';
-import type { ValueFormatConfig } from '../../../../../common';
+import type { PercentileIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -30,19 +30,10 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import type { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey, groupByKey } from './get_group_by_key';
-
-export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof PERCENTILE_ID;
-  params: {
-    percentile: number;
-    format?: ValueFormatConfig;
-  };
-}
 
 const DEFAULT_PERCENTILE_VALUE = 95;
 const ALLOWED_DECIMAL_DIGITS = 4;
@@ -214,9 +205,11 @@ export const percentileOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.timeShift) return;
-    return `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`;
+    return {
+      template: `PERCENTILE(${esql.col(column.sourceField)}, ${column.params.percentile})`,
+    };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(

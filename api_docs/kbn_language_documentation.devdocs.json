@@ -30,6 +30,8 @@
           "React.NamedExoticComponent<DocumentationFlyoutProps> & { readonly type: ({ searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationFlyoutProps) => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_flyout/index.tsx",
+        "lineNumber": 133,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -45,7 +47,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -62,6 +67,8 @@
           "React.NamedExoticComponent<DocumentationInlineProps> & { readonly type: ({ searchInDescription, height }: DocumentationInlineProps) => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_inline/index.tsx",
+        "lineNumber": 95,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -77,7 +84,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -94,6 +104,8 @@
           "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationPopoverProps) => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/index.tsx",
+        "lineNumber": 90,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -109,7 +121,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -126,6 +141,8 @@
           "React.NamedExoticComponent<DocumentationProps> & { readonly type: ({ language, sections, searchInDescription, linkToDocumentation, }: DocumentationProps) => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/popover_content.tsx",
+        "lineNumber": 296,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -141,7 +158,10 @@
               "P"
             ],
             "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -157,6 +177,8 @@
         "label": "LanguageDocumentationSections",
         "description": [],
         "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,9 +190,12 @@
             "label": "groups",
             "description": [],
             "signature": [
-              "{ label: string; description?: string | undefined; items: { label: string; description?: JSX.Element | undefined; }[]; }[]"
+              "DocumentationGroup",
+              "[]"
             ],
             "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -185,6 +210,8 @@
               "JSX.Element"
             ],
             "path": "src/platform/packages/private/kbn-language-documentation/src/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

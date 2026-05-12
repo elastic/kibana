@@ -86,10 +86,9 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
 
   const defaultAlertActions = useMemo(
     () => (
-      <DefaultAlertActions
+      <DefaultAlertActions<{}>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
-        isAlertDetailsEnabled={false}
         resolveRulePagePath={(alertRuleId) =>
           alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
         }
@@ -150,7 +149,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
               color="text"
               data-test-subj="alertsTableRowActionMore"
               display="empty"
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               onClick={toggleActionsPopover}
               size="s"
             />

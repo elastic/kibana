@@ -16,7 +16,11 @@ import type { ScriptedFieldItem } from '../../types';
 interface DeleteScritpedFieldConfirmationModalProps {
   field: ScriptedFieldItem;
   hideDeleteConfirmationModal: (
-    event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
+    event?:
+      | React.KeyboardEvent<HTMLDivElement>
+      | React.MouseEvent<HTMLButtonElement>
+      | MouseEvent
+      | TouchEvent
   ) => void;
   deleteField: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }

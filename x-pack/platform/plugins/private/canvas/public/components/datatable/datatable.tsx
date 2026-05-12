@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPagination } from '@elastic/eui';
 import moment from 'moment';
 import { Paginate } from '../paginate';
@@ -34,13 +34,13 @@ const getIcon = (type: DatatableColumnType | null) => {
       icon = 'calendar';
       break;
     case 'boolean':
-      icon = 'invert';
+      icon = 'contrast';
       break;
     default:
       icon = 'question';
   }
 
-  return <EuiIcon type={icon} color="subdued" />;
+  return <EuiIcon type={icon} color="subdued" aria-hidden={true} />;
 };
 
 const getColumnName = (col: DatatableColumn) => (typeof col === 'string' ? col : col.name);
@@ -102,17 +102,17 @@ export const Datatable: FC<Props> = ({
         </div>
         {paginate && (
           <div className="canvasDataTable__footer">
-            <EuiPagination pageCount={totalPages} activePage={pageNumber} onPageClick={setPage} />
+            <EuiPagination
+              aria-label={i18n.translate('xpack.canvas.canvasDatatable.pagination.ariaLabel', {
+                defaultMessage: 'Data table pages',
+              })}
+              pageCount={totalPages}
+              activePage={pageNumber}
+              onPageClick={setPage}
+            />
           </div>
         )}
       </div>
     )}
   </Paginate>
 );
-
-Datatable.propTypes = {
-  datatable: PropTypes.object.isRequired,
-  paginate: PropTypes.bool,
-  perPage: PropTypes.number,
-  showHeader: PropTypes.bool,
-};

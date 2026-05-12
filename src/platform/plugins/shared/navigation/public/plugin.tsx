@@ -30,8 +30,6 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
-import { registerNavigationEventTypes } from './analytics';
-
 export class NavigationPublicPlugin
   implements
     Plugin<
@@ -44,20 +42,14 @@ export class NavigationPublicPlugin
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
   private readonly stop$ = new ReplaySubject<void>(1);
-  private coreStart?: CoreStart;
+  private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
+  private chrome?: InternalChromeStart;
+  private activeSolutionId: SolutionId | null = null;
   private isSolutionNavEnabled = false;
-  private isCloudTrialUser = false;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
-    registerNavigationEventTypes(core);
-
-    const cloudTrialEndDate = deps.cloud?.trialEndDate;
-    if (cloudTrialEndDate) {
-      this.isCloudTrialUser = cloudTrialEndDate.getTime() > Date.now();
-    }
-
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -69,24 +61,17 @@ export class NavigationPublicPlugin
     core: CoreStart,
     depsStart: NavigationPublicStartDependencies
   ): NavigationPublicStart {
-    this.coreStart = core;
-
     const { unifiedSearch, cloud, spaces } = depsStart;
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
     const chrome = core.chrome as InternalChromeStart;
+    this.chrome = chrome;
     const activeSpace$: Observable<Space | undefined> = spaces?.getActiveSpace$() ?? of(undefined);
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.isSolutionNavEnabled = spaces?.isSolutionViewEnabled ?? false;
 
-    /*
-     *
-     *  This helps clients of navigation to create
-     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
-     *
-     *  Useful in creating multiple stateful SearchBar in the same app without affecting
-     *  global filters
-     *
-     * */
+    /**
+     * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+     */
     const createCustomTopNav = (
       /*
        * Custom instance of unified search if it needs to be overridden
@@ -125,8 +110,17 @@ export class NavigationPublicPlugin
 
     return {
       ui: {
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         TopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        /**
+         * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+         */
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {
@@ -150,12 +144,16 @@ export class NavigationPublicPlugin
     this.stop$.next();
   }
 
-  private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
-    if (!this.coreStart) throw new Error('coreStart is not available');
-    const { project } = this.coreStart.chrome as InternalChromeStart;
-    project.updateSolutionNavigations({
-      [solutionNavigation.id]: solutionNavigation,
-    });
+  private addSolutionNavigation(def: AddSolutionNavigationArg) {
+    this.solutionNavDefinitions.set(def.id, def);
+    this.tryInitNavigation();
+  }
+
+  private tryInitNavigation() {
+    if (!this.activeSolutionId || !this.chrome) return;
+    const def = this.solutionNavDefinitions.get(this.activeSolutionId);
+    if (!def) return;
+    this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$);
   }
 
   private initiateChromeStyleAndSideNav(
@@ -168,14 +166,11 @@ export class NavigationPublicPlugin
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
       chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
-
-      if (isProjectNav) {
-        chrome.sideNav.setIsFeedbackBtnVisible(!this.isCloudTrialUser);
-      }
     }
 
     if (isProjectNav && solutionView !== 'classic') {
-      chrome.project.changeActiveSolutionNavigation(solutionView!);
+      this.activeSolutionId = solutionView as SolutionId;
+      this.tryInitNavigation();
     }
   }
 

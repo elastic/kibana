@@ -8,48 +8,107 @@
  */
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { type PropsWithChildren, useMemo, useState } from 'react';
+import React, { type PropsWithChildren, type ReactNode, useMemo, useState } from 'react';
 import {
   type CombinedRuntimeState,
   InternalStateProvider,
   RuntimeStateProvider,
+  RuntimeStateManagerProvider,
   CurrentTabProvider,
+  selectTabRuntimeState,
+  useRuntimeState,
 } from '../application/main/state_management/redux';
 import {
   DiscoverCustomizationProvider,
   type DiscoverCustomizationService,
 } from '../customizations';
-import { DiscoverMainProvider } from '../application/main/state_management/discover_state_provider';
 import { type ScopedProfilesManager } from '../context_awareness';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from './services';
-import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartPortalsRenderer } from '../application/main/components/chart';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ScopedDiscoverEBTManager } from '../ebt_manager';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
+import { type InternalStateMockToolkit } from './discover_state.mock';
+import { from } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
-export const DiscoverTestProvider = ({
-  services: originalServices,
-  stateContainer,
-  customizationService,
-  runtimeState,
-  scopedProfilesManager: originalScopedProfilesManager,
-  scopedEbtManager: originalScopedEbtManager,
-  currentTabId: originalCurrentTabId,
-  usePortalsRenderer,
-  children,
-}: PropsWithChildren<{
+export type DiscoverTestProviderProps = PropsWithChildren<{
   services?: DiscoverServices;
-  stateContainer?: DiscoverStateContainer;
+  internalState?: InternalStateMockToolkit['internalState'];
+  runtimeStateManager?: InternalStateMockToolkit['runtimeStateManager'];
   customizationService?: DiscoverCustomizationService;
   scopedProfilesManager?: ScopedProfilesManager;
   scopedEbtManager?: ScopedDiscoverEBTManager;
   runtimeState?: CombinedRuntimeState;
   currentTabId?: string;
   usePortalsRenderer?: boolean;
-}>) => {
+}>;
+
+export type DiscoverToolkitTestProviderProps = PropsWithChildren<{
+  toolkit: InternalStateMockToolkit;
+  usePortalsRenderer?: boolean;
+}>;
+
+/**
+ * Similar to {@link DiscoverTestProvider} but accepts an {@link InternalStateMockToolkit}
+ * returned by `getDiscoverInternalStateMock`, which is generally preferred for component tests.
+ */
+export const DiscoverToolkitTestProvider = ({
+  toolkit,
+  usePortalsRenderer,
+  children,
+}: DiscoverToolkitTestProviderProps) => {
+  const [internalState$] = useState(() => from(toolkit.internalState));
+  const internalState = useObservable(internalState$, toolkit.internalState.getState());
+  const currentTabId = internalState.tabs.unsafeCurrentId;
+  const currentTabRuntimeState = selectTabRuntimeState(toolkit.runtimeStateManager, currentTabId);
+  const customizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
+  const adHocDataViews = useRuntimeState(toolkit.runtimeStateManager.adHocDataViews$);
+  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
+  const runtimeState = useMemo<CombinedRuntimeState | undefined>(
+    () => (currentDataView ? { adHocDataViews, currentDataView } : undefined),
+    [adHocDataViews, currentDataView]
+  );
+  const scopedProfilesManager = useRuntimeState(currentTabRuntimeState.scopedProfilesManager$);
+  const scopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
+
+  return (
+    <DiscoverTestProvider
+      services={toolkit.services}
+      internalState={toolkit.internalState}
+      runtimeStateManager={toolkit.runtimeStateManager}
+      customizationService={customizationService}
+      scopedProfilesManager={scopedProfilesManager}
+      scopedEbtManager={scopedEbtManager}
+      runtimeState={runtimeState}
+      currentTabId={currentTabId}
+      usePortalsRenderer={usePortalsRenderer}
+    >
+      {children}
+    </DiscoverTestProvider>
+  );
+};
+
+/**
+ * A test provider that wraps Discover components with necessary contexts.
+ * - When `internalState` and `runtimeStateManager` are provided, includes full Redux state management.
+ * - When they're omitted, provides only basic services (Kibana context, query client, scoped services).
+ * **Prefer {@link DiscoverToolkitTestProvider} for component tests requiring full state management.**
+ */
+export const DiscoverTestProvider = ({
+  services: originalServices,
+  internalState,
+  runtimeStateManager,
+  customizationService,
+  runtimeState,
+  scopedProfilesManager: originalScopedProfilesManager,
+  scopedEbtManager: originalScopedEbtManager,
+  currentTabId,
+  usePortalsRenderer,
+  children,
+}: DiscoverTestProviderProps) => {
   const [queryClient] = useState(() => new QueryClient());
   const services = useMemo(
     () => originalServices ?? createDiscoverServicesMock(),
@@ -65,9 +124,9 @@ export const DiscoverTestProvider = ({
       services.profilesManager.createScopedProfilesManager({ scopedEbtManager }),
     [originalScopedProfilesManager, scopedEbtManager, services.profilesManager]
   );
-  const currentTabId = originalCurrentTabId ?? stateContainer?.getCurrentTab().id;
 
-  children = (
+  // Per-tab providers - these should be inside CurrentTabProvider
+  let content: ReactNode = (
     <ScopedServicesProvider
       scopedProfilesManager={scopedProfilesManager}
       scopedEBTManager={scopedEbtManager}
@@ -77,43 +136,41 @@ export const DiscoverTestProvider = ({
   );
 
   if (runtimeState) {
-    children = <RuntimeStateProvider {...runtimeState}>{children}</RuntimeStateProvider>;
-  }
-
-  if (stateContainer) {
-    children = <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>;
-  }
-
-  if (currentTabId && !usePortalsRenderer) {
-    children = <CurrentTabProvider currentTabId={currentTabId}>{children}</CurrentTabProvider>;
+    content = <RuntimeStateProvider {...runtimeState}>{content}</RuntimeStateProvider>;
   }
 
   if (customizationService) {
-    children = (
+    content = (
       <DiscoverCustomizationProvider value={customizationService}>
-        {children}
+        {content}
       </DiscoverCustomizationProvider>
     );
   }
 
-  if (stateContainer && usePortalsRenderer) {
-    children = (
-      <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
-        {children}
+  // CurrentTabProvider - either via ChartPortalsRenderer or directly
+  if (usePortalsRenderer && runtimeStateManager) {
+    content = (
+      <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
+        {content}
       </ChartPortalsRenderer>
     );
+  } else if (currentTabId) {
+    content = <CurrentTabProvider currentTabId={currentTabId}>{content}</CurrentTabProvider>;
   }
 
-  if (stateContainer) {
-    children = (
-      <InternalStateProvider store={stateContainer.internalState}>{children}</InternalStateProvider>
+  // Add Redux state providers when state managers are provided
+  if (internalState && runtimeStateManager) {
+    content = (
+      <RuntimeStateManagerProvider value={runtimeStateManager}>
+        <InternalStateProvider store={internalState}>{content}</InternalStateProvider>
+      </RuntimeStateManagerProvider>
     );
   }
 
   return (
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>{content}</QueryClientProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

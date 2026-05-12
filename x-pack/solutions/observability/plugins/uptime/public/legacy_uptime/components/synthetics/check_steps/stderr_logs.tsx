@@ -124,7 +124,7 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
+          <EuiCallOut announceOnMount title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
             <p>{summaryMessage}</p>
           </EuiCallOut>
         </>
@@ -142,6 +142,7 @@ export const StdErrorLogs = ({
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );

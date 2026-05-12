@@ -3,15 +3,21 @@ info:
   version: '1'
   title: Asset Criticality CSV Upload Schema
 paths:
-  /internal/asset_criticality/upload_csv:
+  /internal/asset_criticality/upload_csv_v2:
     post:
       x-labels: [ess, serverless]
       x-internal: true
       x-codegen-enabled: true
-      operationId: InternalUploadAssetCriticalityRecords
-      summary: Deprecated internal API which Uploads a CSV file containing asset criticality data
-      deprecated: true
+      operationId: InternalUploadAssetCriticalityV2Csv
+      summary: Internal API which Uploads a CSV file containing asset criticality data for the V2 entity store.
+      description: |
+        Uploads a CSV file to assign asset criticality.
+
+        CSV must contain header row with "type" and "criticality_level" columns, in addition to ECS fields used to match entities in the entity store (e.g. "host.name", "user.id", "user.email").
+
+        Each row will match up to 10,000 entities.
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -25,29 +31,43 @@ paths:
                 - file
       responses:
         '200':
-          description: Bulk upload successful
+          description: Upload successful
           content:
             application/json:
               schema:
                 type: object
                 example:
-                  errors:
-                    - message: 'Invalid ID field'
-                      index: 0
-                  stats:
-                    successful: 1
-                    failed: 1
-                    total: 2
+                  successful: 1
+                  failed: 1
+                  unmatched: 1
+                  total: 3
+                  items:
+                    - status: 'success'
+                      matchedEntities: 1
+                    - status: 'failure'
+                      matchedEntities: 0
+                      error: 'Invalid criticality level value'
+                    - status: 'unmatched'
+                      matchedEntities: 0
                 properties:
-                  errors:
+                  successful:
+                    type: integer
+                  failed:
+                    type: integer
+                  total:
+                    type: integer
+                  unmatched:
+                    type: integer
+                  items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/AssetCriticalityCsvUploadErrorItem'
-                  stats:
-                    $ref: '#/components/schemas/AssetCriticalityCsvUploadStats'
+                      $ref: '#/components/schemas/AssetCriticalityCsvUploadV2ResponseItem'
                 required:
-                  - errors
-                  - stats
+                  - successful
+                  - failed
+                  - total
+                  - unmatched
+                  - items
         '413':
           description: File too large
   /api/asset_criticality/upload_csv:
@@ -123,3 +143,20 @@ components:
         - successful
         - failed
         - total
+
+    AssetCriticalityCsvUploadV2ResponseItem:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - unmatched
+        matchedEntities:
+          type: integer
+        error:
+          type: string
+      required:
+        - status
+        - matchedEntities

@@ -10,14 +10,17 @@
 import type * as React from 'react';
 import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
 import { i18n } from '@kbn/i18n';
+import type { IconType } from '@elastic/eui';
 import type { Action, ActionDefinition, ActionMenuItemProps } from './action';
 import { getNotifications } from '../services';
 
 /**
  * @internal
  */
-export class ActionInternal<Context extends object = object>
-  implements Action<Context>, Presentable<Context>
+export class ActionInternal<
+  Context extends object = object,
+  ActionExtension extends object = object
+> implements Action<Context, ActionExtension>, Presentable<Context>
 {
   public readonly id: string;
   public readonly type: string;
@@ -25,27 +28,34 @@ export class ActionInternal<Context extends object = object>
   public readonly MenuItem?: React.FC<ActionMenuItemProps<any>>;
   public readonly grouping?: PresentableGrouping<Context>;
   public readonly showNotification?: boolean;
-  public readonly disabled?: boolean;
 
+  public readonly isDisabled: Action<Context>['isDisabled'];
+  public readonly getDisabledStateChangesSubject?: Action<Context>['getDisabledStateChangesSubject'];
   public readonly getCompatibilityChangesSubject?: Action<Context>['getCompatibilityChangesSubject'];
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
 
-  constructor(public readonly definition: ActionDefinition<Context>) {
+  public readonly extension?: ActionExtension;
+
+  constructor(public readonly definition: ActionDefinition<Context, ActionExtension>) {
     this.id = this.definition.id;
     this.type = this.definition.type || '';
     this.order = this.definition.order || 0;
     this.MenuItem = this.definition.MenuItem;
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
-    this.disabled = this.definition.disabled;
+    this.isDisabled = this.definition.isDisabled;
     this.errorLogged = false;
+    this.extension = this.definition.extension;
 
     if (this.definition.getCompatibilityChangesSubject) {
       this.getCompatibilityChangesSubject = definition.getCompatibilityChangesSubject;
     }
     if (this.definition.couldBecomeCompatible) {
       this.couldBecomeCompatible = definition.couldBecomeCompatible;
+    }
+    if (this.definition.getDisabledStateChangesSubject) {
+      this.getDisabledStateChangesSubject = definition.getDisabledStateChangesSubject;
     }
   }
 
@@ -62,7 +72,7 @@ export class ActionInternal<Context extends object = object>
     }
   }
 
-  public getIconType(context: Context): string | undefined {
+  public getIconType(context: Context): IconType | undefined {
     if (!this.definition.getIconType) return undefined;
     return this.definition.getIconType(context);
   }

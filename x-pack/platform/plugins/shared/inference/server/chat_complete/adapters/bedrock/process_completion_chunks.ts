@@ -22,14 +22,14 @@ import type {
   MessageStopEvent,
 } from '@aws-sdk/client-bedrock-runtime';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
 import { isMessageStopChunk, type CompletionChunk, type MessageStopChunk } from './types';
-export function processCompletionChunks() {
+
+export function processCompletionChunks(model?: string) {
   return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext(chunkBody: CompletionChunk) {
         if (isTokenCountCompletionChunk(chunkBody)) {
-          return emitTokenCountEvent(subscriber, chunkBody);
+          return emitTokenCountEvent(subscriber, chunkBody, model);
         }
 
         let completionChunk = '';
@@ -129,12 +129,12 @@ function isOfType<T extends ConverseCompletionChunk['body']>(
   return type === expectedType;
 }
 
-export function processConverseCompletionChunks() {
+export function processConverseCompletionChunks(model?: string) {
   return (source: Observable<ConverseCompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext({ type, body: chunkBody }: ConverseCompletionChunk) {
         if (type === 'metadata' && isConverseStreamMetadataEvent(chunkBody)) {
-          return emitTokenCountEvent(subscriber, chunkBody);
+          return emitTokenCountEvent(subscriber, chunkBody, model);
         }
 
         let completionChunk = '';
@@ -231,7 +231,8 @@ const isConverseStreamMetadataEvent = (
 
 function emitTokenCountEvent(
   subscriber: Subscriber<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>,
-  chunk: MessageStopChunk | ConverseStreamMetadataEvent
+  chunk: MessageStopChunk | ConverseStreamMetadataEvent,
+  model?: string
 ) {
   let inputTokenCount = 0;
   let outputTokenCount = 0;
@@ -253,5 +254,6 @@ function emitTokenCountEvent(
       prompt: inputTokenCount,
       total: inputTokenCount + outputTokenCount,
     },
+    ...(model ? { model } : {}),
   });
 }

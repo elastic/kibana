@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RuleGroup } from '../../model';
@@ -32,7 +33,7 @@ const rules = [new AllRule(), new AnyRule()];
 const exceptRules = [new ExceptAllRule(), new ExceptAnyRule()];
 
 export const RuleGroupTitle = (props: Props) => {
-  if (props.readOnly === undefined) props.readOnly = false;
+  const readOnly = props.readOnly ?? false;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -71,17 +72,27 @@ export const RuleGroupTitle = (props: Props) => {
 
   const ruleButton = (
     <EuiLink
-      disabled={props.readOnly}
+      disabled={readOnly}
       onClick={() => setIsMenuOpen(!isMenuOpen)}
       data-test-subj="ruleGroupTitle"
     >
       {props.rule.getDisplayTitle()}
-      {props.readOnly === false && <EuiIcon type="arrowDown" />}
+      {readOnly === false && <EuiIcon type="chevronSingleDown" />}
     </EuiLink>
   );
 
   const ruleTypeSelector = (
-    <EuiPopover button={ruleButton} isOpen={isMenuOpen} closePopover={() => setIsMenuOpen(false)}>
+    <EuiPopover
+      button={ruleButton}
+      isOpen={isMenuOpen}
+      closePopover={() => setIsMenuOpen(false)}
+      aria-label={i18n.translate(
+        'xpack.security.management.editRoleMapping.ruleGroupTitlePopoverAriaLabel',
+        {
+          defaultMessage: 'Change rule group type',
+        }
+      )}
+    >
       <EuiContextMenuPanel
         items={availableRuleTypes.map((rt, index) => {
           const isSelected = rt.getDisplayTitle() === props.rule.getDisplayTitle();

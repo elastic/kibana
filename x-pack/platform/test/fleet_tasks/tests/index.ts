@@ -8,7 +8,9 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Fleet packages test', function () {
+  describe('Fleet tasks', function () {
     loadTestFile(require.resolve('./automatic_upgrades'));
+    loadTestFile(require.resolve('./version_specific_policy_assignment'));
+    loadTestFile(require.resolve('./unenroll_inactive_agents'));
   });
 }

@@ -12,6 +12,8 @@
         "label": "OverlayBannersStart",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/banners.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -40,14 +44,17 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint }"
+                  "{@link MountPoint}"
                 ],
                 "signature": [
                   "MountPoint",
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 22,
+                "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -64,13 +71,30 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 22,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a unique identifier for the given banner to be used with {@link OverlayBannersStart.remove } and\n{@link OverlayBannersStart.replace }"
+              "a unique identifier for the given banner to be used with ",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.remove",
+                "text": "OverlayBannersStart.remove"
+              },
+              " and\n",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.replace",
+                "text": "OverlayBannersStart.replace"
+              }
             ]
           },
           {
@@ -86,6 +110,8 @@
               "(id: string) => boolean"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -96,12 +122,14 @@
                 "tags": [],
                 "label": "id",
                 "description": [
-                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add }"
+                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add}"
                 ],
                 "signature": [
                   "string"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 30,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -126,6 +154,8 @@
               "<HTMLElement>, priority?: number | undefined) => string"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -136,12 +166,14 @@
                 "tags": [],
                 "label": "id",
                 "description": [
-                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add }"
+                  "the unique identifier for the banner returned by {@link OverlayBannersStart.add}"
                 ],
                 "signature": [
                   "string | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 41,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -153,14 +185,17 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint }"
+                  "{@link MountPoint}"
                 ],
                 "signature": [
                   "MountPoint",
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 41,
+                "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -177,13 +212,30 @@
                   "number | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/banners.ts",
+                "lineNumber": 41,
+                "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               }
             ],
             "returnComment": [
-              "a new identifier for the given banner to be used with {@link OverlayBannersStart.remove } and\n{@link OverlayBannersStart.replace }"
+              "a new identifier for the given banner to be used with ",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.remove",
+                "text": "OverlayBannersStart.remove"
+              },
+              " and\n",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.replace",
+                "text": "OverlayBannersStart.replace"
+              }
             ]
           },
           {
@@ -197,6 +249,8 @@
               "() => JSX.Element"
             ],
             "path": "src/core/packages/overlays/browser/src/banners.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -215,6 +269,8 @@
           "\nAPIs to open and manage fly-out dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -227,7 +283,7 @@
             ],
             "label": "open",
             "description": [
-              "\nOpens a flyout panel with the given mount point inside. You can use\n`close()` on the returned FlyoutRef to close the flyout.\n"
+              "\nOpens a flyout panel with the given mount point inside. Calling `open` for multiple flyouts replaces the current flyout.\nYou can use `close()` on the returned FlyoutRef to close the flyout.\n"
             ],
             "signature": [
               "(mount: ",
@@ -238,6 +294,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/flyout.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -248,14 +306,17 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint } - Mounts the children inside a flyout panel"
+                  "{@link MountPoint} - Mounts the children inside a flyout panel"
                 ],
                 "signature": [
                   "MountPoint",
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -266,14 +327,17 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link OverlayFlyoutOpenOptions } - options for the flyout"
+                  "{@link OverlayFlyoutOpenOptions} - options for the flyout"
                 ],
                 "signature": [
                   "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayFlyoutOpenOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -291,6 +355,8 @@
         "label": "OverlayModalConfirmOptions",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/modal.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -305,6 +371,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,6 +387,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -333,6 +403,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,6 +419,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,6 +435,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -375,6 +451,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -389,6 +467,8 @@
               "\"cancel\" | \"confirm\" | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -403,6 +483,8 @@
               "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -417,6 +499,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -433,6 +517,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -447,6 +533,8 @@
         "label": "OverlayModalOpenOptions",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/modal.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -461,6 +549,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,6 +565,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,6 +581,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -503,6 +597,8 @@
               "string | number | boolean | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -517,6 +613,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -533,6 +631,8 @@
           "\nAPIs to open and manage modal dialogs.\n"
         ],
         "path": "src/core/packages/overlays/browser/src/modal.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -556,6 +656,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -566,14 +668,17 @@
                 "tags": [],
                 "label": "mount",
                 "description": [
-                  "{@link MountPoint } - Mounts the children inside the modal"
+                  "{@link MountPoint} - Mounts the children inside the modal"
                 ],
                 "signature": [
                   "MountPoint",
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -584,14 +689,17 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link OverlayModalOpenOptions } - options for the modal"
+                  "{@link OverlayModalOpenOptions} - options for the modal"
                 ],
                 "signature": [
                   "OverlayModalOpenOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalOpenOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -615,6 +723,8 @@
               " | undefined) => Promise<boolean>"
             ],
             "path": "src/core/packages/overlays/browser/src/modal.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -625,7 +735,7 @@
                 "tags": [],
                 "label": "message",
                 "description": [
-                  "{@link MountPoint } - string or mountpoint to be used a the confirm message body"
+                  "{@link MountPoint} - string or mountpoint to be used a the confirm message body"
                 ],
                 "signature": [
                   "string | ",
@@ -633,6 +743,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -644,14 +756,17 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "{@link OverlayModalConfirmOptions } - options for the confirm modal"
+                  "{@link OverlayModalConfirmOptions} - options for the confirm modal"
                 ],
                 "signature": [
                   "OverlayModalConfirmOptions",
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalConfirmOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -669,6 +784,8 @@
         "label": "OverlayStart",
         "description": [],
         "path": "src/core/packages/overlays/browser/src/overlays.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -679,12 +796,20 @@
             "tags": [],
             "label": "banners",
             "description": [
-              "{@link OverlayBannersStart}"
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart",
+                "text": "OverlayBannersStart"
+              }
             ],
             "signature": [
               "OverlayBannersStart"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -695,7 +820,7 @@
             "tags": [],
             "label": "openFlyout",
             "description": [
-              "{@link OverlayFlyoutStart#open}"
+              "OverlayFlyoutStart#open"
             ],
             "signature": [
               "(mount: ",
@@ -706,6 +831,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -722,7 +849,10 @@
                   "UnmountCallback"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -737,7 +867,10 @@
                       "T"
                     ],
                     "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                    "lineNumber": 22,
+                    "columnNumber": 64,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false
                   }
                 ]
@@ -754,7 +887,68 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/flyout.ts",
+                "lineNumber": 27,
+                "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayFlyoutOpenOptions",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-overlays-browser",
+            "id": "def-public.OverlayStart.openSystemFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "openSystemFlyout",
+            "description": [
+              "Opens a system flyout that integrates with EUI Flyout Manager"
+            ],
+            "signature": [
+              "(content: React.ReactElement<any>, options?: ",
+              "OverlaySystemFlyoutOpenOptions",
+              " | undefined) => ",
+              "OverlayRef"
+            ],
+            "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlayStart.openSystemFlyout.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any>"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 48,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlayStart.openSystemFlyout.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "OverlaySystemFlyoutOpenOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 48,
+                "columnNumber": 37,
+                "deprecated": false,
+                "docsReferencedTypeName": "OverlaySystemFlyoutOpenOptions",
                 "trackAdoption": false
               }
             ]
@@ -766,7 +960,7 @@
             "tags": [],
             "label": "openModal",
             "description": [
-              "{@link OverlayModalStart#open}"
+              "OverlayModalStart#open"
             ],
             "signature": [
               "(mount: ",
@@ -777,6 +971,8 @@
               "OverlayRef"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -793,7 +989,10 @@
                   "UnmountCallback"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -808,7 +1007,10 @@
                       "T"
                     ],
                     "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
+                    "lineNumber": 22,
+                    "columnNumber": 64,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false
                   }
                 ]
@@ -825,7 +1027,10 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 50,
+                "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalOpenOptions",
                 "trackAdoption": false
               }
             ]
@@ -837,7 +1042,7 @@
             "tags": [],
             "label": "openConfirm",
             "description": [
-              "{@link OverlayModalStart#openConfirm}"
+              "OverlayModalStart#openConfirm"
             ],
             "signature": [
               "(message: string | ",
@@ -847,6 +1052,8 @@
               " | undefined) => Promise<boolean>"
             ],
             "path": "src/core/packages/overlays/browser/src/overlays.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -864,6 +1071,8 @@
                   "<HTMLElement>"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -879,10 +1088,97 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/overlays/browser/src/modal.ts",
+                "lineNumber": 59,
+                "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalConfirmOptions",
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-overlays-browser",
+        "id": "def-public.OverlaySystemFlyoutStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "OverlaySystemFlyoutStart",
+        "description": [
+          "\nAPIs to open and manage fly-out dialogs.\n"
+        ],
+        "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-overlays-browser",
+            "id": "def-public.OverlaySystemFlyoutStart.open",
+            "type": "Function",
+            "tags": [
+              "return"
+            ],
+            "label": "open",
+            "description": [
+              "\nOpens a flyout panel with given React element inside. Calling `open` for multiple flyouts allows history navigation.\nYou can use `close()` on the returned FlyoutRef to close the flyout.\n"
+            ],
+            "signature": [
+              "(content: React.ReactElement<any>, options?: ",
+              "OverlaySystemFlyoutOpenOptions",
+              " | undefined) => ",
+              "OverlayRef"
+            ],
+            "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlaySystemFlyoutStart.open.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "content",
+                "description": [
+                  "React.ReactElement - Renders the content inside a flyout panel"
+                ],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 48,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-overlays-browser",
+                "id": "def-public.OverlaySystemFlyoutStart.open.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "{@link EuiFlyoutProps} - options for the flyout"
+                ],
+                "signature": [
+                  "OverlaySystemFlyoutOpenOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+                "lineNumber": 48,
+                "columnNumber": 37,
+                "deprecated": false,
+                "docsReferencedTypeName": "OverlaySystemFlyoutOpenOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -900,13 +1196,38 @@
         "signature": [
           "Omit<",
           "EuiFlyoutProps",
-          "<\"div\"> | ",
+          "<\"div\" | \"nav\"> | ",
           "EuiFlyoutResizableProps",
-          ", \"onResize\" | \"onClose\"> & { onClose?: ((flyout: ",
+          ", \"onClose\" | \"onResize\" | \"session\"> & { onClose?: ((flyout: ",
           "OverlayRef",
-          ") => void) | undefined; isResizable?: boolean | undefined; }"
+          ") => void) | undefined; session?: \"never\" | undefined; resizable?: boolean | undefined; isResizable?: boolean | undefined; }"
         ],
         "path": "src/core/packages/overlays/browser/src/flyout.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-overlays-browser",
+        "id": "def-public.OverlaySystemFlyoutOpenOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "OverlaySystemFlyoutOpenOptions",
+        "description": [
+          "\nOptions for opening a system flyout."
+        ],
+        "signature": [
+          "Omit<",
+          "OverlayFlyoutOpenOptions",
+          ", \"session\"> & { session?: \"start\" | \"never\" | \"inherit\" | undefined; title?: string | undefined; flyoutMenuProps?: ",
+          "EuiFlyoutMenuProps",
+          " | undefined; }"
+        ],
+        "path": "src/core/packages/overlays/browser/src/system_flyout.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

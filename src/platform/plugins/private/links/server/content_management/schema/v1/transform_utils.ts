@@ -10,11 +10,12 @@
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import type { LinksItem } from '../../../../common/content_management';
-import type { LinksState, StoredLinksState } from './types';
+import type { Link, LinksState, StoredLink, StoredLinksState } from './types';
 import {
   extractReferences,
   injectReferences,
 } from '../../../../common/embeddable/transforms/references';
+import { getOptions } from '../../../../common/embeddable/transforms/get_options';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -29,12 +30,23 @@ export function savedObjectToItem(
   savedObject: SavedObject<StoredLinksState> | PartialSavedObject<StoredLinksState>
 ): LinksItem | PartialLinksItem {
   const { references, attributes, ...rest } = savedObject;
-  const links = injectReferences(savedObject.attributes.links ?? [], savedObject.references);
+
+  const links = injectReferences(
+    transformLegacyLinks<StoredLink[]>(attributes.links ?? []),
+    savedObject.references
+  );
+
   return {
     ...rest,
     attributes: {
       ...attributes,
-      links,
+      links: links.map(
+        (link) =>
+          ({
+            ...link,
+            ...(link.options && { options: getOptions(link.type, link.options) }),
+          } as Link)
+      ),
     },
     references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
@@ -44,7 +56,8 @@ export function itemToAttributes(state: LinksState): {
   attributes: StoredLinksState;
   references: Reference[];
 } {
-  const { links, references } = extractReferences(state.links ?? []);
+  const transformedLinks = transformLegacyLinks<Link[]>(state.links ?? []);
+  const { links, references } = extractReferences(transformedLinks ?? []);
   return {
     attributes: {
       ...state,
@@ -53,3 +66,14 @@ export function itemToAttributes(state: LinksState): {
     references,
   };
 }
+
+// 9.3.0 state stored links with an `order` property instead of deriving their
+// order from their array position
+const transformLegacyLinks = <T extends Link[] | StoredLink[]>(
+  links: Array<T[number] & { order?: number; id?: string }>
+) =>
+  links
+    .sort((linkA, linkB) => {
+      return (linkA.order ?? 0) - (linkB.order ?? 0);
+    })
+    .map(({ order, id, ...link }) => link) as T;

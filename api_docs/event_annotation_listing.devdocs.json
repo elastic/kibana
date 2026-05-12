@@ -16,6 +16,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +32,10 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/index.tsx",
+            "lineNumber": 15,
+            "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -54,7 +59,7 @@
             "section": "def-common.EventAnnotationConfig",
             "text": "EventAnnotationConfig"
           },
-          ") => ",
+          ", isDarkMode?: boolean) => ",
           {
             "pluginId": "@kbn/visualization-ui-components",
             "scope": "public",
@@ -64,6 +69,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,6 +91,26 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "eventAnnotationListing",
+            "id": "def-public.getAnnotationAccessor.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDarkMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-event-annotation-components/components/get_annotation_accessor.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -118,6 +145,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,7 +168,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -173,6 +205,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,7 +228,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -228,6 +265,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -249,7 +288,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EventAnnotationConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -277,9 +319,11 @@
             "section": "def-common.AvailableAnnotationIcon",
             "text": "AvailableAnnotationIcon"
           },
-          "; label: string; icon?: string | React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined; shouldRotate?: boolean | undefined; }[]"
+          "; label: string; icon?: string | React.ComponentType | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -291,7 +335,12 @@
         "tags": [],
         "label": "defaultAnnotationColor",
         "description": [],
+        "signature": [
+          "\"#2B394F\""
+        ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -304,9 +353,11 @@
         "label": "defaultAnnotationRangeColor",
         "description": [],
         "signature": [
-          "\"#F04E981A\""
+          "\"#2B394F1A\""
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-common/util.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -324,6 +375,8 @@
         "void"
       ],
       "path": "src/platform/plugins/private/event_annotation_listing/public/plugin.ts",
+      "lineNumber": 46,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

@@ -6,7 +6,7 @@
  */
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -30,7 +30,11 @@ import { createMemoryHistory } from 'history';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import type { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AdditionalContext,
+  AlertDetailsNavigation,
+  RenderContext,
+} from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -62,14 +66,17 @@ const { ObservabilityAIAssistantContextualInsight } =
 
 const prependMock = jest.fn().mockImplementation((args) => args);
 mockKibana.services.http.basePath.prepend = prependMock;
+mockKibana.services.application.getUrlForApp.mockImplementation(
+  (appId: string, { path }: { path?: string } = {}) => `/app/${appId}${path ? `${path}` : ''}`
+);
 
 const config: ConfigSchema = {
   unsafe: {
     alertDetails: {
       uptime: { enabled: false },
     },
-    managedOtlpServiceUrl: '',
   },
+  managedOtlpServiceUrl: '',
 };
 
 const getFormatterMock = jest.fn();
@@ -123,6 +130,11 @@ describe('ObservabilityActions component', () => {
       },
     });
 
+    const alertDetailsNavigation: AlertDetailsNavigation = {
+      appId: 'observability',
+      getPath: (alertId: string) => `/alerts/${encodeURIComponent(alertId)}`,
+    };
+
     const props: Pick<
       ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>,
       | 'tableId'
@@ -134,8 +146,8 @@ describe('ObservabilityActions component', () => {
       | 'cveProps'
       | 'clearSelection'
       | 'observabilityRuleTypeRegistry'
-      | 'openAlertInFlyout'
       | 'refresh'
+      | 'alertDetailsNavigation'
     > = {
       tableId: pageId,
       config,
@@ -146,8 +158,8 @@ describe('ObservabilityActions component', () => {
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      openAlertInFlyout: jest.fn(),
       refresh,
+      alertDetailsNavigation,
     };
 
     const services = {
@@ -220,7 +232,7 @@ describe('ObservabilityActions component', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
-        '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
+        '/app/rules/rule/06f53080-0f91-11ed-9d86-013908b232ef'
       );
     });
   });

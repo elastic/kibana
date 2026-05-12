@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, fireEvent } from '@testing-library/react';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { useMonitorName } from '../../hooks/use_monitor_name';
@@ -33,6 +32,14 @@ jest.mock('../../../../hooks/use_kibana_space', () => ({
 
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('renders correctly', async () => {
     jest.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
@@ -232,11 +239,14 @@ describe('MonitorEditPage', () => {
 
       const inputField = getByTestId('syntheticsMonitorConfigName');
       fireEvent.focus(inputField);
-      await userEvent.type(inputField, 'any value'); // Hook is made to return duplicate error as true
+      fireEvent.change(inputField, { target: { value: 'any value' } }); // Hook is made to return duplicate error as true
       fireEvent.blur(inputField);
 
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
       if (nameAlreadyExists) {
-        await waitFor(() => getByText('Monitor name already exists'));
+        expect(getByText('Monitor name already exists')).toBeInTheDocument();
       } else {
         expect(queryByText('Monitor name already exists')).not.toBeInTheDocument();
       }

@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export * as connectorsSpecs from './src/all_specs';
+export type * from './src/connector_spec';
+
+export * as authTypeSpecs from './src/all_auth_types';
+export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
+export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
+
+export { getConnectorSpec } from './src/get_connector_spec';
+export { isToolAction } from './src/connector_spec';
+export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
+
+export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';
+export type { ConnectorAuthorizationReason } from './src/errors';

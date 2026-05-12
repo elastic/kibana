@@ -21,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiIconTip,
   EuiText,
-  EuiFormLabel,
   EuiSuperSelect,
   EuiBadge,
   EuiErrorBoundary,
@@ -30,6 +29,7 @@ import {
   useEuiTheme,
   EuiCallOut,
   EuiSwitch,
+  EuiFormPrepend,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {
@@ -347,11 +347,14 @@ export const ActionTypeForm = ({
       }
       const res: { errors: IErrorObject } = await actionTypeRegistry
         .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
+        ?.validateParams(
+          actionItem.params,
+          actionConnector && 'config' in actionConnector ? actionConnector.config : undefined
+        );
       setActionParamsErrors(res);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionItem, disableErrorMessages]);
+  }, [actionItem, disableErrorMessages, actionConnector]);
 
   const [queryError, setQueryError] = useState<string | null>(null);
   useEffect(() => {
@@ -409,20 +412,6 @@ export const ActionTypeForm = ({
     setActionFrequencyProperty('summary', summary, index);
   };
 
-  const actionNotifyWhen = (
-    <RuleActionsNotifyWhen
-      frequency={actionItem.frequency}
-      throttle={actionThrottle}
-      throttleUnit={actionThrottleUnit}
-      hasAlertsMappings={hasAlertsMappings}
-      onChange={onActionFrequencyChange}
-      showMinimumThrottleWarning={showMinimumThrottleWarning}
-      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
-      notifyWhenSelectOptions={notifyWhenSelectOptions}
-      onUseDefaultMessage={() => setUseDefaultMessage(true)}
-    />
-  );
-
   const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
@@ -446,6 +435,24 @@ export const ActionTypeForm = ({
   const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
 
   const showActionAlertsFilter = ruleType?.hasAlertsMappings || producerId === AlertConsumers.SIEM;
+
+  const isRecoveredActionGroup =
+    !!selectedActionGroup?.id && selectedActionGroup.id === ruleType?.recoveryActionGroup?.id;
+
+  const actionNotifyWhen = (
+    <RuleActionsNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      hasAlertsMappings={hasAlertsMappings}
+      onChange={onActionFrequencyChange}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
+      isRecoveredActionGroup={isRecoveredActionGroup}
+    />
+  );
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -500,14 +507,15 @@ export const ActionTypeForm = ({
             {!hideNotifyWhen && <EuiSpacer size="s" />}
             <EuiSuperSelect
               prepend={
-                <EuiFormLabel
-                  htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
-                    defaultMessage="Run when"
-                  />
-                </EuiFormLabel>
+                <EuiFormPrepend
+                  inputId={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                  label={
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
+                      defaultMessage="Run when"
+                    />
+                  }
+                />
               }
               fullWidth
               id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
@@ -599,7 +607,7 @@ export const ActionTypeForm = ({
                   {warning ? (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut size="s" color="warning" title={warning} />
+                      <EuiCallOut announceOnMount size="s" color="warning" title={warning} />
                     </>
                   ) : null}
                 </Suspense>
@@ -734,7 +742,7 @@ export const ActionTypeForm = ({
           }
           extraAction={
             <EuiButtonIcon
-              iconType="minusInCircle"
+              iconType="minusCircle"
               color="danger"
               className="actAccordionActionForm__extraAction"
               aria-label={i18n.translate(

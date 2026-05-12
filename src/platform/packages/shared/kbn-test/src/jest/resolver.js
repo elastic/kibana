@@ -77,6 +77,13 @@ module.exports = (request, options) => {
     });
   }
 
+  if (request === 'zod' || request === 'zod/v4') {
+    return resolve.sync('zod/v4/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

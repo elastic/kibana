@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/dataset-quality-plugin",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/kibana-management"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -27,14 +27,13 @@
       "kibanaReact",
       "kibanaUtils",
       "lens",
+      "licensing",
       "share",
-      "taskManager",
       "triggersActionsUi",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "alerting",
-      "telemetry",
-      "usageCollection",
     ],
     "requiredBundles": [
       "charts",

@@ -8,178 +8,435 @@
  */
 
 import { AppMenuRegistry } from './app_menu_registry';
-import type { AppMenuActionSubmenuSecondary, AppMenuSubmenuActionCustom } from './types';
-import { AppMenuActionType } from './types';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '../../types';
 
 describe('AppMenuRegistry', () => {
-  it('should initialize correctly', () => {
-    const appMenuRegistry = initializeAppMenuRegistry();
-    expect(appMenuRegistry.isActionRegistered('action-1')).toBe(true);
-    expect(appMenuRegistry.isActionRegistered('action-2')).toBe(true);
-    expect(appMenuRegistry.isActionRegistered('action-3')).toBe(true);
-    expect(appMenuRegistry.isActionRegistered('action-3-1')).toBe(true);
-    expect(appMenuRegistry.isActionRegistered('action-3-2')).toBe(true);
-    expect(appMenuRegistry.isActionRegistered('action-n')).toBe(false);
-    expect(appMenuRegistry.getSortedItems()).toHaveLength(3);
+  let registry: AppMenuRegistry;
+
+  beforeEach(() => {
+    registry = new AppMenuRegistry();
   });
 
-  it('should allow to register custom actions', () => {
-    const appMenuRegistry = initializeAppMenuRegistry();
-    expect(appMenuRegistry.isActionRegistered('action-custom')).toBe(false);
+  describe('registerItem', () => {
+    it('should register a single menu item', () => {
+      const item: DiscoverAppMenuItemType = {
+        id: 'test-item',
+        order: 1,
+        label: 'Test Item',
+        iconType: 'magnify',
+        testId: 'testItem',
+        run: jest.fn(),
+      };
 
-    appMenuRegistry.registerCustomAction({
-      id: 'action-custom',
-      type: AppMenuActionType.custom,
-      controlProps: {
-        label: 'Action Custom',
-        onClick: jest.fn(),
-      },
+      registry.registerItem(item);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0]).toEqual(item);
     });
 
-    appMenuRegistry.registerCustomAction({
-      id: 'action-custom-submenu',
-      type: AppMenuActionType.custom,
-      label: 'Action Custom Submenu',
-      actions: [
+    it('should update an existing item with the same ID', () => {
+      const item1: DiscoverAppMenuItemType = {
+        id: 'test-item',
+        order: 1,
+        label: 'Test Item 1',
+        iconType: 'magnify',
+        run: jest.fn(),
+      };
+
+      const item2: DiscoverAppMenuItemType = {
+        id: 'test-item',
+        order: 2,
+        label: 'Test Item 2',
+        iconType: 'bell',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(item1);
+      registry.registerItem(item2);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0]).toEqual(item2);
+    });
+  });
+
+  describe('registerItems', () => {
+    it('should register multiple items at once', () => {
+      const items: DiscoverAppMenuItemType[] = [
         {
-          id: 'action-custom-submenu-1',
-          type: AppMenuActionType.custom,
-          controlProps: {
-            label: 'Action Custom Submenu 1',
-            onClick: jest.fn(),
-          },
+          id: 'item-1',
+          order: 1,
+          label: 'Item 1',
+          iconType: 'magnify',
+          run: jest.fn(),
         },
-      ],
+        {
+          id: 'item-2',
+          order: 2,
+          label: 'Item 2',
+          iconType: 'warning',
+          run: jest.fn(),
+        },
+        {
+          id: 'item-3',
+          order: 3,
+          label: 'Item 3',
+          iconType: 'bell',
+          run: jest.fn(),
+        },
+      ];
+
+      registry.registerItems(items);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(3);
     });
-
-    expect(appMenuRegistry.isActionRegistered('action-custom')).toBe(true);
-    expect(appMenuRegistry.isActionRegistered('action-custom-submenu')).toBe(true);
-    expect(appMenuRegistry.getSortedItems()).toHaveLength(5);
-
-    appMenuRegistry.registerCustomAction({
-      id: 'action-custom-extra',
-      type: AppMenuActionType.custom,
-      controlProps: {
-        label: 'Action Custom Extra',
-        onClick: jest.fn(),
-      },
-    });
-
-    // should limit the number of custom items
-    const items = appMenuRegistry.getSortedItems();
-    expect(items).toHaveLength(5);
-    expect(items).toMatchSnapshot();
   });
 
-  it('should allow to register custom actions under submenu', () => {
-    const appMenuRegistry = initializeAppMenuRegistry();
-    expect(appMenuRegistry.isActionRegistered('action-custom')).toBe(false);
+  describe('setPrimaryActionItem', () => {
+    it('should set the primary action item', () => {
+      const primaryItem = {
+        id: 'primary',
+        label: 'Primary',
+        iconType: 'save',
+        run: jest.fn(),
+        testId: 'primaryButton',
+      };
 
-    let items = appMenuRegistry.getSortedItems();
-    let submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
-    expect(items).toHaveLength(3);
-    expect(submenuItem.actions).toHaveLength(2);
+      registry.setPrimaryActionItem(primaryItem);
 
-    appMenuRegistry.registerCustomActionUnderSubmenu('action-3', {
-      id: 'action-custom',
-      type: AppMenuActionType.custom,
-      order: 101,
-      controlProps: {
-        label: 'Action Custom',
-        onClick: jest.fn(),
-      },
+      const config = registry.getAppMenuConfig();
+      expect(config.primaryActionItem).toEqual(primaryItem);
     });
 
-    expect(appMenuRegistry.isActionRegistered('action-custom')).toBe(true);
+    it('should allow updating the primary action item', () => {
+      const primaryItem1 = {
+        id: 'primary',
+        label: 'Primary 1',
+        iconType: 'save',
+        run: jest.fn(),
+      };
 
-    items = appMenuRegistry.getSortedItems();
-    expect(items).toHaveLength(3);
+      const primaryItem2 = {
+        id: 'primary',
+        label: 'Primary 2',
+        iconType: 'save',
+        run: jest.fn(),
+      };
 
-    // calling it again should not add a duplicate
-    items = appMenuRegistry.getSortedItems();
-    expect(items).toHaveLength(3);
+      registry.setPrimaryActionItem(primaryItem1);
+      registry.setPrimaryActionItem(primaryItem2);
 
-    submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
-    expect(submenuItem.actions).toHaveLength(3);
-    expect(items).toMatchSnapshot();
+      const config = registry.getAppMenuConfig();
+      expect(config.primaryActionItem).toEqual(primaryItem2);
+    });
   });
 
-  it('should allow to override actions under submenu', () => {
-    const appMenuRegistry = initializeAppMenuRegistry();
+  describe('registerPopoverItem', () => {
+    it('should register a popover item under a parent menu item', () => {
+      const parentItem: DiscoverAppMenuItemType = {
+        id: 'parent',
+        order: 1,
+        label: 'Parent',
+        iconType: 'warning',
+        items: [],
+      };
 
-    let items = appMenuRegistry.getSortedItems();
-    expect(items).toHaveLength(3);
+      const popoverItem: DiscoverAppMenuPopoverItem = {
+        id: 'child-1',
+        order: 1,
+        label: 'Child 1',
+        iconType: 'bell',
+        run: jest.fn(),
+      };
 
-    let submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
-    const existingSecondaryActionId = submenuItem.actions[0].id;
-    expect(submenuItem.actions).toHaveLength(2);
+      registry.registerItem(parentItem);
+      registry.registerPopoverItem('parent', popoverItem);
 
-    expect(appMenuRegistry.isActionRegistered(existingSecondaryActionId)).toBe(true);
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'parent');
 
-    const customAction: AppMenuSubmenuActionCustom = {
-      id: existingSecondaryActionId, // using the same id to override the action with a custom one
-      type: AppMenuActionType.custom,
-      controlProps: {
-        label: 'Action Custom',
-        onClick: jest.fn(),
-      },
-    };
-    appMenuRegistry.registerCustomActionUnderSubmenu('action-3', customAction);
+      expect(parent?.items).toBeDefined();
+      expect(parent?.items).toHaveLength(1);
+      expect(parent?.items?.[0]).toEqual(popoverItem);
+    });
+  });
 
-    expect(appMenuRegistry.isActionRegistered(existingSecondaryActionId)).toBe(true);
+  describe('registerCustomItem', () => {
+    it('should register a custom menu item', () => {
+      const customItem: DiscoverAppMenuItemType = {
+        id: 'custom-item',
+        order: 1,
+        label: 'Custom Item',
+        iconType: 'flask',
+        testId: 'customItem',
+        run: jest.fn(),
+      };
 
-    items = appMenuRegistry.getSortedItems();
-    submenuItem = items.find((item) => item.id === 'action-3') as AppMenuActionSubmenuSecondary;
-    expect(submenuItem.actions).toHaveLength(2);
-    expect(submenuItem.actions.find((item) => item.id === existingSecondaryActionId)).toBe(
-      customAction
-    );
-    expect(items).toMatchSnapshot();
+      registry.registerCustomItem(customItem);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0]).toEqual(customItem);
+    });
+
+    it('should update an existing custom item with the same ID', () => {
+      const customItem1: DiscoverAppMenuItemType = {
+        id: 'custom-item',
+        order: 1,
+        label: 'Custom Item 1',
+        iconType: 'flask',
+        run: jest.fn(),
+      };
+
+      const customItem2: DiscoverAppMenuItemType = {
+        id: 'custom-item',
+        order: 2,
+        label: 'Custom Item 2',
+        iconType: 'bolt',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(customItem1);
+      registry.registerCustomItem(customItem2);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(1);
+      expect(config.items?.[0]).toEqual(customItem2);
+    });
+
+    it('should limit custom items to CUSTOM_ITEMS_LIMIT', () => {
+      const customItem1: DiscoverAppMenuItemType = {
+        id: 'custom-1',
+        order: 1,
+        label: 'Custom 1',
+        iconType: 'flask',
+        run: jest.fn(),
+      };
+
+      const customItem2: DiscoverAppMenuItemType = {
+        id: 'custom-2',
+        order: 2,
+        label: 'Custom 2',
+        iconType: 'bolt',
+        run: jest.fn(),
+      };
+
+      const customItem3: DiscoverAppMenuItemType = {
+        id: 'custom-3',
+        order: 3,
+        label: 'Custom 3',
+        iconType: 'brush',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(customItem1);
+      registry.registerCustomItem(customItem2);
+      registry.registerCustomItem(customItem3);
+
+      const config = registry.getAppMenuConfig();
+      // Should only include the first 2 items due to CUSTOM_ITEMS_LIMIT
+      expect(config.items).toHaveLength(AppMenuRegistry.CUSTOM_ITEMS_LIMIT);
+      expect(config.items?.[0].id).toBe('custom-1');
+      expect(config.items?.[1].id).toBe('custom-2');
+    });
+
+    it('should merge custom items with regular items', () => {
+      const regularItem: DiscoverAppMenuItemType = {
+        id: 'regular-item',
+        order: 2,
+        label: 'Regular Item',
+        iconType: 'magnify',
+        run: jest.fn(),
+      };
+
+      const customItem: DiscoverAppMenuItemType = {
+        id: 'custom-item',
+        order: 1,
+        label: 'Custom Item',
+        iconType: 'flask',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(regularItem);
+      registry.registerCustomItem(customItem);
+
+      const config = registry.getAppMenuConfig();
+      expect(config.items).toHaveLength(2);
+    });
+  });
+
+  describe('registerCustomPopoverItem', () => {
+    it('should register a popover item under a custom parent menu item', () => {
+      const parentItem: DiscoverAppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'flask',
+        items: [],
+      };
+
+      const popoverItem: DiscoverAppMenuPopoverItem = {
+        id: 'custom-child-1',
+        order: 1,
+        label: 'Custom Child 1',
+        iconType: 'bell',
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(parentItem);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      expect(parent?.items).toBeDefined();
+      expect(parent?.items).toHaveLength(1);
+      expect(parent?.items?.[0]).toEqual(popoverItem);
+    });
+
+    it('should handle registering custom popover items before parent exists', () => {
+      const popoverItem: DiscoverAppMenuPopoverItem = {
+        id: 'custom-child-1',
+        order: 1,
+        label: 'Custom Child 1',
+        run: jest.fn(),
+      };
+
+      // Register popover item first
+      registry.registerCustomPopoverItem('custom-parent', popoverItem);
+
+      const parentItem: DiscoverAppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'flask',
+        items: [],
+      };
+
+      // Then register parent
+      registry.registerCustomItem(parentItem);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      // The second registerCustomItem should overwrite the parent, losing the popover items
+      expect(parent?.items).toEqual([]);
+    });
+
+    it('should handle multiple custom popover items with same order', () => {
+      const parentItem: DiscoverAppMenuItemType = {
+        id: 'custom-parent',
+        order: 1,
+        label: 'Custom Parent',
+        iconType: 'flask',
+        items: [],
+      };
+
+      const popoverItem1: DiscoverAppMenuPopoverItem = {
+        id: 'custom-child-1',
+        label: 'Custom Child 1',
+        order: 1,
+        run: jest.fn(),
+      };
+
+      const popoverItem2: DiscoverAppMenuPopoverItem = {
+        id: 'custom-child-2',
+        label: 'Custom Child 2',
+        order: 1,
+        run: jest.fn(),
+      };
+
+      registry.registerCustomItem(parentItem);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem1);
+      registry.registerCustomPopoverItem('custom-parent', popoverItem2);
+
+      const config = registry.getAppMenuConfig();
+      const parent = config.items?.find((item) => item.id === 'custom-parent');
+
+      expect(parent?.items).toHaveLength(2);
+      // Both items have same order, so they should maintain insertion order
+      expect(parent?.items?.[0].id).toBe('custom-child-1');
+      expect(parent?.items?.[1].id).toBe('custom-child-2');
+    });
+  });
+
+  describe('getAppMenuConfig', () => {
+    it('should return complete AppMenuConfig with all components', () => {
+      const item1: DiscoverAppMenuItemType = {
+        id: 'item-1',
+        order: 1,
+        label: 'Item 1',
+        iconType: 'magnify',
+        run: jest.fn(),
+      };
+
+      const item2: DiscoverAppMenuItemType = {
+        id: 'item-2',
+        order: 2,
+        label: 'Item 2',
+        iconType: 'share',
+        items: [],
+      };
+
+      const popoverItem: DiscoverAppMenuPopoverItem = {
+        id: 'popover-1',
+        order: 1,
+        label: 'Popover 1',
+        run: jest.fn(),
+      };
+
+      const primaryItem = {
+        id: 'primary',
+        label: 'Save',
+        iconType: 'save',
+        run: jest.fn(),
+      };
+
+      registry.registerItems([item1, item2]);
+      registry.registerPopoverItem('item-2', popoverItem);
+      registry.setPrimaryActionItem(primaryItem);
+
+      const config = registry.getAppMenuConfig();
+
+      expect(config.items).toHaveLength(2);
+      expect(config.primaryActionItem).toEqual(primaryItem);
+
+      const item2Config = config.items?.find((item) => item.id === 'item-2');
+      expect(item2Config?.items).toHaveLength(1);
+    });
+
+    it('should return empty items array when no items registered', () => {
+      const config = registry.getAppMenuConfig();
+
+      expect(config.items).toEqual([]);
+      expect(config.primaryActionItem).toBeUndefined();
+    });
+
+    it('should include both regular and custom items', () => {
+      const regularItem: DiscoverAppMenuItemType = {
+        id: 'regular',
+        order: 2,
+        label: 'Regular',
+        iconType: 'magnify',
+        run: jest.fn(),
+      };
+
+      const customItem: DiscoverAppMenuItemType = {
+        id: 'custom',
+        order: 1,
+        label: 'Custom',
+        iconType: 'flask',
+        run: jest.fn(),
+      };
+
+      registry.registerItem(regularItem);
+      registry.registerCustomItem(customItem);
+
+      const config = registry.getAppMenuConfig();
+
+      expect(config.items).toHaveLength(2);
+    });
   });
 });
-
-function initializeAppMenuRegistry() {
-  return new AppMenuRegistry([
-    {
-      id: 'action-1',
-      type: AppMenuActionType.primary,
-      controlProps: {
-        label: 'Action 1',
-        iconType: 'bell',
-        onClick: jest.fn(),
-      },
-    },
-    {
-      id: 'action-2',
-      type: AppMenuActionType.secondary,
-      controlProps: {
-        label: 'Action 2',
-        onClick: jest.fn(),
-      },
-    },
-    {
-      id: 'action-3',
-      type: AppMenuActionType.secondary,
-      label: 'Action 3',
-      actions: [
-        {
-          id: 'action-3-1',
-          type: AppMenuActionType.secondary,
-          controlProps: {
-            label: 'Action 3.1',
-            iconType: 'heart',
-            onClick: jest.fn(),
-          },
-        },
-        {
-          id: 'action-3-2',
-          type: AppMenuActionType.secondary,
-          controlProps: {
-            label: 'Action 3.2',
-            onClick: jest.fn(),
-          },
-        },
-      ],
-    },
-  ]);
-}

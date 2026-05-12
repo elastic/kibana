@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DerivativeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { DerivativeIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensApiDifferencesOperation,
   LensApiFieldMetricOperations,
@@ -16,12 +16,11 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
 export function fromDifferencesAPItoLensState(
-  options: LensApiDifferencesOperation,
-  ref: { id: string; field: string; label: string }
+  options: LensApiDifferencesOperation
 ): DerivativeIndexPatternColumn {
   return {
     operationType: 'differences',
-    references: [ref.id],
+    references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
     params: {
       ...(options.format ? { format: fromFormatAPIToLensState(options.format) } : {}),

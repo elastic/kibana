@@ -16,7 +16,12 @@
 import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_EXTENDED_FIELDS,
+  CASE_EXTENDED_FIELDS_LABELS,
+  CASE_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
@@ -56,6 +61,7 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import type { ConfigType } from '../../config';
 
 const createUpdateSOResponse = ({
   connector,
@@ -168,6 +174,7 @@ describe('CasesService', () => {
     log: mockLogger,
     persistableStateAttachmentTypeRegistry,
     unsecuredSavedObjectsClient,
+    config: {} as ConfigType,
   });
 
   let service: CasesService;
@@ -242,6 +249,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -250,6 +258,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -323,6 +332,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 30,
@@ -333,6 +343,7 @@ describe('CasesService', () => {
             "title": "Super Bad Security Issue",
             "total_alerts": 10,
             "total_comments": 5,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -589,9 +600,11 @@ describe('CasesService', () => {
           originalCase: {} as CaseSavedObjectTransformed,
         });
 
-        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(
-          `Object {}`
-        );
+        expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+          Object {
+            "total_observables": 0,
+          }
+        `);
         const updateOptions = unsecuredSavedObjectsClient.update.mock
           .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
         expect(updateOptions.references).toBeUndefined();
@@ -615,6 +628,7 @@ describe('CasesService', () => {
               "name": "none",
               "type": ".none",
             },
+            "total_observables": 0,
           }
         `);
       });
@@ -910,6 +924,7 @@ describe('CasesService', () => {
             "observables": Array [],
             "owner": "securitySolution",
             "settings": Object {
+              "extractObservables": true,
               "syncAlerts": true,
             },
             "severity": 0,
@@ -920,6 +935,8 @@ describe('CasesService', () => {
             "title": "Super Bad Security Issue",
             "total_alerts": 0,
             "total_comments": 0,
+            "total_events": 0,
+            "total_observables": 0,
             "updated_at": "2019-11-25T21:54:48.952Z",
             "updated_by": Object {
               "email": "testemail@elastic.co",
@@ -1131,6 +1148,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": true,
                     "syncAlerts": true,
                   },
                   "severity": 10,
@@ -1141,6 +1159,8 @@ describe('CasesService', () => {
                   "title": "Super Bad Security Issue",
                   "total_alerts": 0,
                   "total_comments": 0,
+                  "total_events": 0,
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -1414,7 +1434,9 @@ describe('CasesService', () => {
 
         expect(res).toMatchInlineSnapshot(`
           Object {
-            "attributes": Object {},
+            "attributes": Object {
+              "total_events": -1,
+            },
           }
         `);
       });
@@ -1765,6 +1787,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "medium",
@@ -1773,6 +1796,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2265,6 +2289,7 @@ describe('CasesService', () => {
      * - connector
      * - external_service
      * - category
+     * - settings
      *
      * The following fields can be undefined:
      * - total_alerts
@@ -2280,13 +2305,19 @@ describe('CasesService', () => {
       'category',
       'customFields',
       'observables',
+      'total_observables',
+      'settings',
       'incremental_id',
+      'settings',
       'total_alerts',
       'total_comments',
       'in_progress_at',
       'time_to_acknowledge',
       'time_to_resolve',
-      'time_to_investigate'
+      'time_to_investigate',
+      'template',
+      CASE_EXTENDED_FIELDS,
+      CASE_EXTENDED_FIELDS_LABELS
     );
 
     describe('getCaseIdsByAlertId', () => {
@@ -2390,6 +2421,7 @@ describe('CasesService', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2398,6 +2430,7 @@ describe('CasesService', () => {
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -2494,6 +2527,7 @@ describe('CasesService', () => {
                 "observables": Array [],
                 "owner": "securitySolution",
                 "settings": Object {
+                  "extractObservables": false,
                   "syncAlerts": true,
                 },
                 "severity": "low",
@@ -2502,6 +2536,7 @@ describe('CasesService', () => {
                   "defacement",
                 ],
                 "title": "Super Bad Security Issue",
+                "total_observables": 0,
                 "updated_at": "2019-11-25T21:54:48.952Z",
                 "updated_by": Object {
                   "email": "testemail@elastic.co",
@@ -2589,6 +2624,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2597,6 +2633,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2684,6 +2721,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2692,6 +2730,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2792,6 +2831,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2800,6 +2840,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2850,6 +2891,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -2858,6 +2900,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -2954,6 +2997,7 @@ describe('CasesService', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": false,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -2962,6 +3006,7 @@ describe('CasesService', () => {
                 "defacement",
               ],
               "title": "Super Bad Security Issue",
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -3074,6 +3119,7 @@ describe('CasesService', () => {
                   "observables": Array [],
                   "owner": "securitySolution",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": true,
                   },
                   "severity": "low",
@@ -3082,6 +3128,7 @@ describe('CasesService', () => {
                     "defacement",
                   ],
                   "title": "Super Bad Security Issue",
+                  "total_observables": 0,
                   "updated_at": "2019-11-25T21:54:48.952Z",
                   "updated_by": Object {
                     "email": "testemail@elastic.co",
@@ -3500,6 +3547,63 @@ describe('CasesService', () => {
           unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
 
         expect((persistedAttributes as CaseAttributes).incremental_id).toBeUndefined();
+      });
+    });
+
+    describe('getCaseIdsByAttachmentSearch', () => {
+      const namespaces = ['default'];
+      const search = 'awesome case';
+
+      const mockEmptySearchResponse = () => {
+        // The SO mock doesn't include `search` by default, so wire it up here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (unsecuredSavedObjectsClient as any).search = jest
+          .fn()
+          .mockResolvedValue({ hits: { hits: [] } });
+      };
+
+      it('uses match_phrase for cases-comments.comment so multi-word searches require an exact phrase', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, ['cases-comments.comment']);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match_phrase: { 'cases-comments.comment': search } },
+        ]);
+      });
+
+      it('uses match (not match_phrase) for keyword identifier fields like alertId and eventId', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases-comments.alertId',
+          'cases-comments.eventId',
+        ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match: { 'cases-comments.alertId': search } },
+          { match: { 'cases-comments.eventId': search } },
+        ]);
+      });
+
+      it('mixes match_phrase for comment and match for keyword fields when both are searched', async () => {
+        mockEmptySearchResponse();
+
+        await service.getCaseIdsByAttachmentSearch(namespaces, search, [
+          'cases-comments.alertId',
+          'cases-comments.comment',
+        ]);
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const searchCall = (unsecuredSavedObjectsClient as any).search.mock.calls[0][0];
+        expect(searchCall.query.bool.should).toEqual([
+          { match: { 'cases-comments.alertId': search } },
+          { match_phrase: { 'cases-comments.comment': search } },
+        ]);
       });
     });
   });

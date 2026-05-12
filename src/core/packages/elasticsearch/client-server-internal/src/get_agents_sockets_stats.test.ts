@@ -8,15 +8,14 @@
  */
 
 import { Socket } from 'net';
-import type { Agent } from 'http';
-import { IncomingMessage } from 'http';
+import type { Agent, ClientRequest } from 'http';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 import { getHttpAgentMock, getHttpsAgentMock } from './get_agents_sockets_stats.test.mocks';
 
 jest.mock('net');
 
 const mockSocket = new Socket();
-const mockIncomingMessage = new IncomingMessage(mockSocket);
+const mockClientRequest = {} as unknown as ClientRequest;
 
 describe('getAgentsSocketsStats()', () => {
   it('extracts aggregated stats from the specified agents', () => {
@@ -30,7 +29,7 @@ describe('getAgentsSocketsStats()', () => {
         node3: [mockSocket, mockSocket, mockSocket, mockSocket],
       },
       requests: {
-        node1: [mockIncomingMessage, mockIncomingMessage],
+        node1: [mockClientRequest, mockClientRequest],
       },
     });
 
@@ -43,7 +42,7 @@ describe('getAgentsSocketsStats()', () => {
         node3: [mockSocket, mockSocket, mockSocket, mockSocket],
       },
       requests: {
-        node4: [mockIncomingMessage, mockIncomingMessage, mockIncomingMessage, mockIncomingMessage],
+        node4: [mockClientRequest, mockClientRequest, mockClientRequest, mockClientRequest],
       },
     });
 

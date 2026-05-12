@@ -20,7 +20,7 @@ import {
   type SavedObjectsServiceSetup,
   type StartServicesAccessor,
 } from '@kbn/core/server';
-import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
+import { errorContent } from '@kbn/core-saved-objects-server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
@@ -31,7 +31,7 @@ import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_nam
 import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
 import type { EncryptedSavedObjectsService } from '../crypto';
 
-export { normalizeNamespace };
+export { normalizeNamespace, SavedObjectsEncryptionExtension };
 export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions };
 
 interface SetupSavedObjectsParams {

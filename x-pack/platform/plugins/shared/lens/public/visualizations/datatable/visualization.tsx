@@ -7,74 +7,142 @@
 
 import React from 'react';
 
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import type { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ThemeServiceStart } from '@kbn/core/public';
-import type { PaletteRegistry, PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { CUSTOM_PALETTE, applyPaletteParams, getOverridePaletteStops } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
+import {
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  getFallbackDataBounds,
+  getOverridePaletteStops,
+  hasPaletteStops,
+} from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import {
+  type Datatable,
+  buildExpression,
+  buildExpressionFunction,
+} from '@kbn/expressions-plugin/common';
 import { getSortingCriteria } from '@kbn/sort-predicates';
-import { DataGridDensity } from '@kbn/unified-data-table';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
-  SuggestionRequest,
-  Visualization,
-  VisualizationSuggestion,
   DatasourceLayers,
+  FormBasedPersistedState,
   Suggestion,
-} from '../../types';
-import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
-import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import type { FormatFactory, LayerType } from '../../../common/types';
-import { RowHeightMode } from '../../../common/types';
+  SuggestionRequest,
+  VisualizationSuggestion,
+  DatatableVisualizationState,
+  Visualization,
+  UserMessage,
+} from '@kbn/lens-common';
+import {
+  DEFAULT_HEADER_ROW_HEIGHT,
+  DEFAULT_ROW_HEIGHT_LINES,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_ROW_HEIGHT_MODE,
+  LENS_DATAGRID_DENSITY,
+} from '@kbn/lens-common';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
+import type { FormatFactory } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
   type ColumnState,
-  type SortingState,
-  type PagingState,
   type CollapseExpressionFunction,
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { DataTableToolbar } from './components/toolbar';
-import {
-  DEFAULT_HEADER_ROW_HEIGHT,
-  DEFAULT_HEADER_ROW_HEIGHT_LINES,
-  DEFAULT_ROW_HEIGHT_LINES,
-} from './components/constants';
-import {
-  defaultPaletteParams,
-  findMinMaxByColumnId,
-  getPaletteDisplayColors,
-  getAccessorType,
-} from '../../shared_components';
+import { getPaletteDisplayColors, getAccessorType } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
-import { getSimpleColumnType } from './components/table_actions';
 import { convertToRuntimeState } from './runtime_state';
-
-export interface DatatableVisualizationState {
-  columns: ColumnState[];
-  layerId: string;
-  layerType: LayerType;
-  sorting?: SortingState;
-  rowHeight?: RowHeightMode;
-  headerRowHeight?: RowHeightMode;
-  rowHeightLines?: number;
-  headerRowHeightLines?: number;
-  paging?: PagingState;
-  density?: DataGridDensity;
-}
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import {
+  DatatableAppearanceSettings,
+  getSimpleColumnType,
+  TableDimensionDataExtraEditor,
+  TableDimensionEditor,
+  TableDimensionEditorAdditionalSection,
+} from './components';
+import { DATATABLE_COLOR_MISMATCH } from '../../user_messages_ids';
+import {
+  hasIncompatibleColorConfig,
+  getDataBoundsForAccessor,
+  getColorDefaults,
+  getColorByValuePalette,
+} from './utils';
 
 const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
 });
+
+/**
+ * When a categorical column carries a value-based palette (with stops) but no colorMapping,
+ * strip the palette and fall back to the default categorical color mapping.
+ * When it already has a colorMapping, keep it and just drop the value-based palette.
+ */
+function reconcileCategoricalColumn(column: ColumnState): ColumnState {
+  const { palette, colorMapping } = column;
+  const hasValueBasedPalette = hasPaletteStops(palette);
+  const needsTransition = hasValueBasedPalette || (palette != null && colorMapping != null);
+  if (!needsTransition) return column;
+
+  return {
+    ...column,
+    palette: undefined,
+    colorMapping: colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG,
+  };
+}
+
+/**
+ * When a numeric column carries a colorMapping, strip it and ensure a valid value-based palette.
+ * Also fixes palettes incompatible with numeric coloring:
+ *  - categorical-only palettes (canDynamicColoring=false) are replaced with the default
+ *  - legacy palettes without stops get stops computed from the data bounds
+ */
+function reconcileNumericColumn(
+  column: ColumnState,
+  currentData: Datatable | undefined,
+  stateColumns: ColumnState[],
+  paletteMap: Map<string, { canDynamicColoring?: boolean }>,
+  paletteSvc: PaletteRegistry
+): ColumnState {
+  const { palette, colorMapping } = column;
+
+  if (colorMapping) {
+    const dataBounds =
+      getDataBoundsForAccessor(column.columnId, currentData, stateColumns) ??
+      getFallbackDataBounds();
+    return {
+      ...column,
+      colorMapping: undefined,
+      palette: palette ?? getColorByValuePalette(paletteSvc, dataBounds),
+    };
+  }
+
+  if (!palette) return column;
+
+  const paletteEntry = paletteMap.get(palette.name);
+  if (!paletteEntry) return column;
+
+  const hasStops = hasPaletteStops(palette);
+  const needsStopsComputed = !paletteEntry.canDynamicColoring || !hasStops;
+  if (!needsStopsComputed) return column;
+
+  const dataBounds =
+    getDataBoundsForAccessor(column.columnId, currentData, stateColumns) ?? getFallbackDataBounds();
+  const basePalette = paletteEntry.canDynamicColoring ? palette : undefined;
+  return {
+    ...column,
+    palette: getColorByValuePalette(paletteSvc, dataBounds, basePalette),
+  };
+}
 
 export const getDatatableVisualization = ({
   paletteService,
@@ -132,6 +200,7 @@ export const getDatatableVisualization = ({
       columns: [],
       layerId: addNewLayer(),
       layerType: LayerTypes.DATA,
+      showRowNumbers: true,
     };
   },
 
@@ -141,6 +210,8 @@ export const getDatatableVisualization = ({
 
   onDatasourceUpdate(state, frame) {
     const datasource = frame?.datasourceLayers?.[state.layerId];
+    const currentData =
+      frame?.activeData?.[state.layerId] ?? frame?.activeData?.[DatatableInspectorTables.Default];
     const paletteMap = new Map(
       paletteService
         .getAll()
@@ -148,45 +219,23 @@ export const getDatatableVisualization = ({
         .map((p) => [p.id, p])
     );
 
-    const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
+    // Normalize column color configuration when the underlying column type changes
     const columns = state.columns.map((column) => {
-      const accessor = column.columnId;
-      const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
-      if (column.palette && (isNumeric || isBucketable)) {
-        const showColorByTerms = isBucketable;
-        const currentData = frame?.activeData?.[state.layerId];
-        const palette = paletteMap.get(column.palette?.name ?? '');
-        const columnsToCheck = hasTransposedColumn
-          ? currentData?.columns
-              .filter(({ id }) => getOriginalId(id) === accessor)
-              .map(({ id }) => id) || []
-          : [accessor];
-        const minMaxByColumnId = findMinMaxByColumnId(columnsToCheck, currentData);
-        const dataBounds = minMaxByColumnId.get(accessor);
-        if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
-          const newPalette: PaletteOutput<CustomPaletteParams> = {
-            type: 'palette',
-            name: defaultPaletteParams.name,
-          };
-          return {
-            ...column,
-            palette: {
-              ...newPalette,
-              params: {
-                stops: applyPaletteParams(paletteService, newPalette, dataBounds),
-              },
-            },
-          };
-        }
-      }
+      const { columnId, palette, colorMapping } = column;
+      const hasColorConfig = palette != null || colorMapping != null;
+      if (!hasColorConfig) return column;
 
-      return column;
+      const { isNumeric, isCategory: isCategorical } = getAccessorType(datasource, columnId);
+      const isColorable = isNumeric || isCategorical;
+      if (!isColorable) return column;
+
+      if (isCategorical) {
+        return reconcileCategoricalColumn(column);
+      }
+      return reconcileNumericColumn(column, currentData, state.columns, paletteMap, paletteService);
     });
 
-    return {
-      ...state,
-      columns,
-    };
+    return { ...state, columns };
   },
 
   getSuggestions({
@@ -254,7 +303,9 @@ export const getDatatableVisualization = ({
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
         score: forceSuggestion ? 1 : (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
-          ...(state || {}),
+          ...(state || {
+            showRowNumbers: true,
+          }),
           layerId: table.layerId,
           layerType: LayerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
@@ -295,6 +346,35 @@ export const getDatatableVisualization = ({
       return { groups: [] };
     }
     const isTextBasedLanguage = datasource?.isTextBasedLanguage();
+    const currentData =
+      frame.activeData?.[state.layerId] ?? frame.activeData?.[DatatableInspectorTables.Default];
+
+    const getResolvedDisplayColors = (accessor: string) => {
+      const { palette, colorMapping } = columnMap[accessor] ?? {};
+      const columnMeta = getDatatableColumn(currentData, accessor)?.meta;
+      const { isCategory: isBucketable } = getAccessorType(datasource, accessor, columnMeta?.type);
+      const dataBounds =
+        getDataBoundsForAccessor(accessor, currentData, state.columns) ?? getFallbackDataBounds();
+      const hasColorConfigMismatch = hasIncompatibleColorConfig({
+        colorByTerms: isBucketable,
+        palette,
+        colorMapping,
+      });
+      const needsDefaults = !palette && !colorMapping;
+
+      const { palette: resolvedPalette, colorMapping: resolvedColorMapping } =
+        hasColorConfigMismatch || needsDefaults
+          ? getColorDefaults({ colorByTerms: isBucketable, paletteService, dataBounds })
+          : { palette, colorMapping };
+
+      return getPaletteDisplayColors(
+        paletteService,
+        palettes,
+        theme.darkMode,
+        resolvedPalette,
+        resolvedColorMapping
+      );
+    };
 
     return {
       groups: [
@@ -325,20 +405,8 @@ export const getDatatableVisualization = ({
               return datasource!.getOperationForColumnId(c)?.isBucketed && !column?.isTransposed;
             })
             .map((accessor) => {
-              const {
-                colorMode = 'none',
-                palette,
-                colorMapping,
-                hidden,
-                collapseFn,
-              } = columnMap[accessor] ?? {};
-              const stops = getPaletteDisplayColors(
-                paletteService,
-                palettes,
-                theme.darkMode,
-                palette,
-                colorMapping
-              );
+              const { colorMode = 'none', hidden, collapseFn } = columnMap[accessor] ?? {};
+              const stops = getResolvedDisplayColors(accessor);
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -419,19 +487,8 @@ export const getDatatableVisualization = ({
               return !operation?.isBucketed;
             })
             .map((accessor) => {
-              const {
-                colorMode = 'none',
-                palette,
-                colorMapping,
-                hidden,
-              } = columnMap[accessor] ?? {};
-              const stops = getPaletteDisplayColors(
-                paletteService,
-                palettes,
-                theme.darkMode,
-                palette,
-                colorMapping
-              );
+              const { colorMode = 'none', hidden } = columnMap[accessor] ?? {};
+              const stops = getResolvedDisplayColors(accessor);
               const hasColoring = colorMode !== 'none' && stops.length > 0;
 
               return {
@@ -443,7 +500,7 @@ export const getDatatableVisualization = ({
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
           isMetricDimension: true,
-          requiredMinDimensionCount: 1,
+          requiredMinDimensionCount: isTextBasedLanguage ? 0 : 1,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
         },
@@ -594,7 +651,7 @@ export const getDatatableVisualization = ({
             // rewrite colors and stops as two distinct arguments
             colors: stops?.map(({ color }) => color),
             stops:
-              column.palette?.params?.name === RowHeightMode.custom
+              column.palette?.params?.name === LENS_ROW_HEIGHT_MODE.custom
                 ? stops?.map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
@@ -612,6 +669,9 @@ export const getDatatableVisualization = ({
             isTransposable = Boolean(column?.isMetric || inMetricDimension);
           }
 
+          // Pass through palette/colorMapping as-is without defaults.
+          // Defaults are applied at render time (table_basic.tsx) where we have
+          // access to actual data type and bounds for correct default calculation.
           const datatableColumnFn = buildExpressionFunction<DatatableColumnFn>(
             'lens_datatable_column',
             {
@@ -623,12 +683,13 @@ export const getDatatableVisualization = ({
               transposable: isTransposable,
               alignment: column.alignment,
               colorMode: canColor ? column.colorMode ?? 'none' : 'none',
-              palette: !canColor
-                ? undefined
-                : paletteService
-                    // The by value palette is a pseudo custom palette that is only custom from params level
-                    .get(colorByTerms ? column.palette?.name || CUSTOM_PALETTE : CUSTOM_PALETTE)
-                    .toExpression(paletteParams),
+              palette:
+                !canColor || !column.palette
+                  ? undefined
+                  : paletteService
+                      // The by value palette is a pseudo custom palette that is only custom from params level
+                      .get(colorByTerms ? column.palette.name : CUSTOM_PALETTE)
+                      .toExpression(paletteParams),
               colorMapping:
                 canColor && column.colorMapping ? JSON.stringify(column.colorMapping) : undefined,
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
@@ -642,12 +703,13 @@ export const getDatatableVisualization = ({
         }),
       sortingColumnId: state.sorting?.columnId || '',
       sortingDirection: state.sorting?.direction || 'none',
-      fitRowToContent: state.rowHeight === RowHeightMode.auto,
+      fitRowToContent: state.rowHeight === LENS_ROW_HEIGHT_MODE.auto,
       headerRowHeight: state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT,
       rowHeightLines: state.rowHeightLines ?? DEFAULT_ROW_HEIGHT_LINES,
       headerRowHeightLines: state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
-      density: state.density ?? DataGridDensity.NORMAL,
+      density: state.density ?? LENS_DATAGRID_DENSITY.NORMAL,
+      showRowNumbers: state.showRowNumbers,
     }).toAst();
 
     return {
@@ -688,8 +750,8 @@ export const getDatatableVisualization = ({
     }, []);
   },
 
-  ToolbarComponent(props) {
-    return <DataTableToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: DatatableAppearanceSettings }} />;
   },
 
   onEditAction(state, event) {
@@ -803,6 +865,121 @@ export const getDatatableVisualization = ({
         rows,
       },
     ];
+  },
+
+  getUserMessages(state, { frame, setState }): UserMessage[] {
+    const warnings: UserMessage[] = [];
+    const { datasourceLayers, activeData } = frame;
+    const datasource = datasourceLayers?.[state.layerId];
+    const currentData =
+      activeData?.[state.layerId] ?? activeData?.[DatatableInspectorTables.Default];
+
+    if (!datasource || !currentData || state.columns.length === 0) {
+      return warnings;
+    }
+
+    const mismatchedColumnLabels: string[] = [];
+
+    const normalizedColumns = state.columns.map((column) => {
+      const { colorMode, palette, colorMapping } = column;
+
+      if (!colorMode || colorMode === 'none') {
+        return column;
+      }
+
+      const columnMeta = getDatatableColumn(currentData, column.columnId)?.meta;
+      const { isCategory: isBucketable } = getAccessorType(
+        datasource,
+        column.columnId,
+        columnMeta?.type
+      );
+
+      if (
+        hasIncompatibleColorConfig({
+          colorByTerms: isBucketable,
+          palette,
+          colorMapping,
+        })
+      ) {
+        const operation = datasource.getOperationForColumnId(column.columnId);
+        mismatchedColumnLabels.push(operation?.label ?? column.columnId);
+
+        const dataBounds =
+          getDataBoundsForAccessor(column.columnId, currentData, state.columns) ??
+          getFallbackDataBounds();
+
+        const { palette: resolvedPalette, colorMapping: resolvedColorMapping } = getColorDefaults({
+          colorByTerms: isBucketable,
+          paletteService,
+          dataBounds,
+        });
+
+        const fixedColumn = {
+          ...column,
+          palette: resolvedPalette,
+          colorMapping: resolvedColorMapping,
+        };
+        if (fixedColumn.palette == null) delete fixedColumn.palette;
+        if (fixedColumn.colorMapping == null) delete fixedColumn.colorMapping;
+        return fixedColumn;
+      }
+
+      return column;
+    });
+
+    const hasChanges = normalizedColumns.some(
+      (col, i) =>
+        col.colorMapping !== state.columns[i].colorMapping ||
+        col.palette !== state.columns[i].palette
+    );
+
+    const fixedState = hasChanges ? { ...state, columns: normalizedColumns } : undefined;
+
+    if (mismatchedColumnLabels.length > 0) {
+      const columnList = mismatchedColumnLabels.map((label) => `"${label}"`).join(', ');
+
+      warnings.push({
+        uniqueId: DATATABLE_COLOR_MISMATCH,
+        severity: 'warning',
+        shortMessage: i18n.translate(
+          'xpack.lens.datatableVisualization.colorMismatchShortMessage',
+          {
+            defaultMessage:
+              '{count, plural, one {Incompatible colors in one column} other {Incompatible colors in {count} columns}}',
+            values: { count: mismatchedColumnLabels.length },
+          }
+        ),
+        longMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.lens.datatableVisualization.colorMismatchLongMessage"
+              defaultMessage="Color settings in {count, plural, one {column} other {columns}} {columnList} are incompatible and have been temporarily disabled. Fix the issue to update the colors automatically, or edit the color configuration manually."
+              values={{
+                count: mismatchedColumnLabels.length,
+                columnList: <strong>{columnList}</strong>,
+              }}
+            />
+            {setState && fixedState && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiLink
+                  data-test-subj="lensFixColorMismatchAction"
+                  onClick={() => setState(fixedState)}
+                >
+                  {i18n.translate('xpack.lens.datatableVisualization.colorMismatchFixActionLabel', {
+                    defaultMessage: 'Fix color configuration',
+                  })}
+                </EuiLink>
+              </>
+            )}
+          </>
+        ),
+        fixableInEditor: true,
+        displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+      });
+    }
+
+    return warnings;
   },
 
   getVisualizationInfo(state) {

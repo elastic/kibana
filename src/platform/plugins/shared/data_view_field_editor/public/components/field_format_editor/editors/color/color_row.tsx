@@ -49,12 +49,14 @@ export const ColorRow = ({
   const { range, regex, boolean, text, background } = color;
 
   const getInputByFieldType = () => {
-    if (fieldType === 'boolean')
+    if (fieldType === 'boolean') {
+      const booleanLabel = i18n.translate('indexPatternFieldEditor.color.booleanLabel', {
+        defaultMessage: 'Boolean',
+      });
       return (
         <EuiSelect
-          prepend={i18n.translate('indexPatternFieldEditor.color.booleanLabel', {
-            defaultMessage: 'Boolean',
-          })}
+          prepend={booleanLabel}
+          aria-label={booleanLabel}
           options={[
             { value: 'true', text: 'true' },
             { value: 'false', text: 'false' },
@@ -71,12 +73,15 @@ export const ColorRow = ({
           }}
         />
       );
-    if (fieldType === 'string')
+    }
+    if (fieldType === 'string') {
+      const patternLabel = i18n.translate('indexPatternFieldEditor.color.patternLabel', {
+        defaultMessage: 'Pattern',
+      });
       return (
         <EuiFieldText
-          prepend={i18n.translate('indexPatternFieldEditor.color.patternLabel', {
-            defaultMessage: 'Pattern',
-          })}
+          prepend={patternLabel}
+          aria-label={patternLabel}
           value={regex}
           data-test-subj={`colorEditorKeyPattern ${index}`}
           onChange={(e) => {
@@ -89,11 +94,14 @@ export const ColorRow = ({
           }}
         />
       );
+    }
+    const rangeLabel = i18n.translate('indexPatternFieldEditor.color.rangeLabel', {
+      defaultMessage: 'Range',
+    });
     return (
       <EuiFieldText
-        prepend={i18n.translate('indexPatternFieldEditor.color.rangeLabel', {
-          defaultMessage: 'Range',
-        })}
+        prepend={rangeLabel}
+        aria-label={rangeLabel}
         value={range}
         data-test-subj={`colorEditorKeyRange ${index}`}
         onChange={(e) => {
@@ -126,7 +134,7 @@ export const ColorRow = ({
           button={
             <EuiButton
               minWidth="false"
-              iconType="lettering"
+              iconType="text"
               color="text"
               onClick={() => {}}
               aria-label={i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
@@ -140,7 +148,7 @@ export const ColorRow = ({
                 aria-label={text}
                 color={text}
                 size="l"
-                type="stopFilled"
+                type="stopFill"
                 data-test-subj="buttonColorSwatchIcon"
               />
             </EuiButton>
@@ -163,7 +171,7 @@ export const ColorRow = ({
           button={
             <EuiButton
               minWidth="false"
-              iconType="color"
+              iconType="paintBucket"
               color="text"
               onClick={() => {}}
               aria-label={i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
@@ -177,7 +185,7 @@ export const ColorRow = ({
                 aria-label={background}
                 color={background}
                 size="l"
-                type="stopFilled"
+                type="stopFill"
                 data-test-subj="buttonColorSwatchIcon"
               />
             </EuiButton>

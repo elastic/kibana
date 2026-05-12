@@ -2,6 +2,7 @@
 
 exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   data-test-subj="importSavedObjectsFlyout"
   onClose={[MockFunction]}
   size="s"
@@ -12,7 +13,9 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        id="generated-id"
+      >
         <MemoizedFormattedMessage
           defaultMessage="Import saved objects"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
@@ -26,6 +29,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         size="s"
       />
       <EuiCallOut
+        announceOnMount={true}
         color="warning"
         data-test-subj="importSavedObjectsConflictsWarning"
         iconType="question"
@@ -111,6 +115,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
         }
       }
       searchFormat="eql"
+      tableCaption="Conflicting data views"
       tableLayout="fixed"
     />
   </EuiFlyoutBody>
@@ -269,6 +274,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
 
 exports[`Flyout should render import step 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   data-test-subj="importSavedObjectsFlyout"
   onClose={[MockFunction]}
   size="s"
@@ -279,7 +285,9 @@ exports[`Flyout should render import step 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
+      <h2
+        id="generated-id"
+      >
         <MemoizedFormattedMessage
           defaultMessage="Import saved objects"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"

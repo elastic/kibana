@@ -32,6 +32,8 @@
           "() => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/sample_data_tab.tsx",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -53,6 +55,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+        "lineNumber": 93,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,6 +73,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+            "lineNumber": 95,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +98,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,6 +116,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+            "lineNumber": 50,
+            "columnNumber": 85,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,59 +129,7 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/home-sample-data-tab",
-        "id": "def-common.DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
-        "description": [
-          "\nTest Subject name for the Demo Environment button."
-        ],
-        "signature": [
-          "\"goToDemoEnvButton\""
-        ],
-        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/home-sample-data-tab",
-        "id": "def-common.DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
-        "description": [
-          "\nTest Subject name for the sample data accordion button."
-        ],
-        "signature": [
-          "\"showSampleDataAccordion\""
-        ],
-        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/home-sample-data-tab",
-        "id": "def-common.DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
-        "type": "string",
-        "tags": [],
-        "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
-        "description": [
-          "\nTest Subject name for the sample data accordion button."
-        ],
-        "signature": [
-          "\"showSampleDataButton\""
-        ],
-        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

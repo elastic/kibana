@@ -15,6 +15,7 @@ export {
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
+  isFilterWithAggregations,
 } from './inventory_models';
 
 export {
@@ -44,6 +45,7 @@ export {
   METRICS_EXPLORER_API_MAX_METRICS,
   TIMESTAMP,
   HOST_NAME,
+  HOST_HOSTNAME,
   CONTAINER_ID,
   KUBERNETES_POD_UID,
   HOST_OS_NAME,
@@ -53,7 +55,7 @@ export {
   METRICSET_MODULE,
   METRICSET_NAME,
   DATASTREAM_DATASET,
-  OS_NAME,
+  OS_TYPE,
   SYSTEM_INTEGRATION,
   HOST_METRICS_RECEIVER_OTEL,
 } from './constants';

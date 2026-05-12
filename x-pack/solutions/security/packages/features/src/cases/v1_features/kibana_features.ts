@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { BaseKibanaFeatureConfig } from '../../types';
 import { APP_ID, CASES_FEATURE_ID, CASES_FEATURE_ID_V3 } from '../../constants';
 import type { CasesFeatureParams } from '../types';
@@ -41,7 +40,6 @@ export const getCasesBaseKibanaFeature = ({
     ),
     order: 1200,
     category: DEFAULT_APP_CATEGORIES.security,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [CASES_FEATURE_ID, 'kibana'],
     catalogue: [APP_ID],
     cases: [APP_ID],
@@ -58,6 +56,7 @@ export const getCasesBaseKibanaFeature = ({
           createComment: [APP_ID],
           reopenCase: [APP_ID],
           assign: [APP_ID],
+          manageTemplates: [APP_ID],
         },
         savedObject: {
           all: [...savedObjects.files],
@@ -68,13 +67,20 @@ export const getCasesBaseKibanaFeature = ({
           ...uiCapabilities.default.createComment,
           ...uiCapabilities.default.reopenCase,
           ...uiCapabilities.default.assignCase,
+          ...uiCapabilities.default.manageTemplates,
         ],
         replacedBy: {
           default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
               feature: CASES_FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+              privileges: [
+                'minimal_all',
+                'create_comment',
+                'case_reopen',
+                'cases_assign',
+                'cases_manage_templates',
+              ],
             },
           ],
         },

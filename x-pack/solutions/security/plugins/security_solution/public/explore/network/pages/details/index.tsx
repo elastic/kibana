@@ -13,15 +13,16 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elasti
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import { buildEsQuery } from '@kbn/es-query';
-import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../../common/search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -36,7 +37,7 @@ import { IpOverview } from '../../components/details';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { PageLoader } from '../../../../common/components/page_loader';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
-import { useNetworkDetails, ID } from '../../containers/details';
+import { ID, useNetworkDetails } from '../../containers/details';
 import { useKibana } from '../../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../../common/lib/helpers';
 import { inputsSelectors } from '../../../../common/store';
@@ -57,12 +58,7 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -83,8 +79,8 @@ const NetworkDetailsComponent: React.FC = () => {
   );
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
@@ -114,13 +110,13 @@ const NetworkDetailsComponent: React.FC = () => {
   const {
     indicesExist: oldIndicesExist,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
   const indicesExist = newDataViewPickerEnabled
     ? experimentalDataView.hasMatchedIndices()
@@ -138,7 +134,7 @@ const NetworkDetailsComponent: React.FC = () => {
         buildEsQuery(
           newDataViewPickerEnabled
             ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataView),
+            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
           [query],
           [...networkDetailsFilter, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -152,7 +148,7 @@ const NetworkDetailsComponent: React.FC = () => {
     globalFilters,
     networkDetailsFilter,
     newDataViewPickerEnabled,
-    oldSourcererDataView,
+    oldSourcererDataViewSpec,
     query,
     uiSettings,
   ]);
@@ -201,8 +197,8 @@ const NetworkDetailsComponent: React.FC = () => {
   const indexPattern = useMemo(() => {
     return newDataViewPickerEnabled
       ? experimentalDataView || { title: '', fields: [] }
-      : dataViewSpecToViewBase(oldSourcererDataView);
-  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView]);
+      : dataViewSpecToViewBase(oldSourcererDataViewSpec);
+  }, [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataViewSpec]);
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -214,10 +210,9 @@ const NetworkDetailsComponent: React.FC = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              dataView={experimentalDataView}
               id={InputsModelId.global}
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
 
@@ -239,7 +234,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   }}
                   mode={CellActionsMode.HOVER_DOWN}
                   visibleCellActions={5}
-                  triggerId={SecurityCellActionsTrigger.DEFAULT}
+                  triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
                 >
                   {ip}
                 </SecurityCellActions>
@@ -266,7 +261,7 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
-              scopeId={SourcererScopeName.explore}
+              scopeId={PageScope.explore}
             />
 
             <EuiHorizontalRule />
@@ -284,7 +279,7 @@ const NetworkDetailsComponent: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
-                      entityFilter={entityFilter}
+                      entityFilter={{ ...entityFilter, field: 'destination.ip', value: ip }}
                       signalIndexName={signalIndexName}
                       additionalFilters={additionalFilters}
                     />

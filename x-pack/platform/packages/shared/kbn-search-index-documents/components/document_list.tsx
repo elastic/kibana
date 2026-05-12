@@ -124,7 +124,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             aria-label={i18n.translate(
               'xpack.searchIndexDocuments.documentList.paginationAriaLabel',
               {
-                defaultMessage: 'Pagination for document list',
+                defaultMessage: 'Document lists pagination',
               }
             )}
             pageCount={pageCount}
@@ -142,7 +142,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                 <EuiButtonEmpty
                   data-telemetry-id={`${dataTelemetryIdPrefix}-documents-docsPerPage`}
                   size="s"
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   iconSide="right"
                   onClick={() => {
                     setIsPopoverOpen(true);
@@ -226,6 +226,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <EuiSpacer />
       {meta.totalItemCount > 9999 && (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={
             <FormattedMessage
@@ -236,7 +237,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               }}
             />
           }
-          iconType="search"
+          iconType="magnify"
         >
           <p>
             <FormattedMessage

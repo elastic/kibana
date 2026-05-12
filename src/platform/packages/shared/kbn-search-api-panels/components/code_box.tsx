@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiThemeProvider,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -29,7 +30,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import type { LanguageDefinition } from '../types';
-import './code_box.scss';
+import * as Styles from './styles';
 
 interface CodeBoxProps {
   languages?: LanguageDefinition[];
@@ -62,17 +63,17 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
+  const selectLangDescriptionId = useId();
 
-  const getAriaLabel = (name: string) =>
-    consoleTitle
-      ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
-          defaultMessage: '{context} {languageName}',
-          values: { context: consoleTitle, languageName: name },
-        })
-      : i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectLabel', {
-          defaultMessage: 'Select a programming language for the code snippet {languageName}',
-          values: { languageName: name },
-        });
+  const selectLanguageDescription = consoleTitle
+    ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
+        defaultMessage: '{context}',
+        values: { context: consoleTitle },
+      })
+    : i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectLabel', {
+        defaultMessage: 'Select a programming language for the code snippet',
+      });
 
   const getCopyButtonAriaLabel = consoleTitle
     ? i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyAriaLabel', {
@@ -109,11 +110,14 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   const button = selectedLanguage ? (
     <EuiThemeProvider colorMode="dark">
+      <span id={selectLangDescriptionId} className="euiScreenReaderOnly" aria-hidden="true">
+        {selectLanguageDescription}
+      </span>
       <EuiButtonEmpty
-        aria-label={getAriaLabel(selectedLanguage.name)}
         color="text"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="left"
+        aria-describedby={selectLangDescriptionId}
         onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       >
         {selectedLanguage.name}
@@ -123,7 +127,11 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   return (
     <EuiThemeProvider colorMode="dark">
-      <EuiPanel paddingSize="xs" className="codeBoxPanel" data-test-subj="codeBlockControlsPanel">
+      <EuiPanel
+        paddingSize="xs"
+        css={Styles.codeBoxPanel(euiTheme)}
+        data-test-subj="codeBlockControlsPanel"
+      >
         {showTopBar && (
           <>
             <EuiFlexGroup
@@ -152,7 +160,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
                   {(copy) => (
                     <EuiButtonEmpty
                       color="text"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       size="s"
                       onClick={copy}
                       aria-label={getCopyButtonAriaLabel}
@@ -184,7 +192,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           fontSize="m"
           language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
           overflowHeight={500}
-          className="codeBoxCodeBlock"
+          css={Styles.codeBoxCodeBlock}
         >
           {codeSnippet}
         </EuiCodeBlock>

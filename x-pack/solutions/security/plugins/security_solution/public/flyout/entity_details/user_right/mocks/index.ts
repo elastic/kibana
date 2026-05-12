@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { ManagedUserData } from '../../shared/hooks/use_managed_user';
 import {
   ManagedUserDatasetKey,
   type ManagedUserFields,
   type ManagedUserHits,
 } from '../../../../../common/search_strategy/security_solution/users/managed_details';
-import type { ManagedUserData } from '../types';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import type { UserEntity } from '../../../../../common/api/entity_analytics';
 
 const anomaly = mockAnomalies.anomalies[0];
 
@@ -52,20 +53,6 @@ export const mockObservedUser: ObservedEntityData<UserItem> = {
   },
 };
 
-export const mockOktaUserFields: ManagedUserFields = {
-  '@timestamp': ['2023-11-16T13:42:23.074Z'],
-  'event.dataset': [ManagedUserDatasetKey.OKTA],
-  'user.profile.last_name': ['Okta last name'],
-  'user.profile.first_name': ['Okta first name'],
-  'user.profile.mobile_phone': ['1234567'],
-  'user.profile.job_title': ['Okta Unit tester'],
-  'user.geo.city_name': ["A'dam"],
-  'user.geo.country_iso_code': ['NL'],
-  'user.id': ['00ud9ohoh9ww644Px5d7'],
-  'user.email': ['okta.test.user@elastic.co'],
-  'user.name': ['okta.test.user@elastic.co'],
-};
-
 export const mockEntraUserFields: ManagedUserFields = {
   '@timestamp': ['2023-11-16T13:42:23.074Z'],
   'event.dataset': [ManagedUserDatasetKey.ENTRA],
@@ -88,6 +75,27 @@ export const managedUserDetails: ManagedUserHits = {
 
 export const mockManagedUserData: ManagedUserData = {
   data: managedUserDetails,
-  isLoading: false,
-  isIntegrationEnabled: true,
+};
+
+export const mockEntityRecord: UserEntity = {
+  '@timestamp': '2024-01-15T10:00:00.000Z',
+  entity: {
+    id: 'test-entity-id-abc123',
+    name: 'test-user-name',
+    type: 'user',
+    lifecycle: {
+      first_seen: '2023-01-01T00:00:00.000Z',
+      last_activity: '2024-01-15T10:00:00.000Z',
+    },
+  },
+  user: {
+    name: 'test-user-name',
+    id: ['1234', '321'],
+    domain: ['test domain'],
+    full_name: ['Test User'],
+    email: ['test-user@example.com'],
+  },
+  asset: {
+    criticality: 'medium_impact',
+  },
 };

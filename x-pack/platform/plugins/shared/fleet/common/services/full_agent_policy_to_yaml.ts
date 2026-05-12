@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { dump } from 'js-yaml';
-
 import type { FullAgentPolicy } from '../types';
+
+import type { YamlModule } from './yaml_utils';
+import { createYamlKeysSorter, toYaml } from './yaml_utils';
 
 const POLICY_KEYS_ORDER = [
   'id',
@@ -30,33 +31,21 @@ const POLICY_KEYS_ORDER = [
 
 export const fullAgentPolicyToYaml = (
   policy: FullAgentPolicy,
-  toYaml: typeof dump,
+  yaml: YamlModule,
   apiKey?: string
 ): string => {
-  const yaml = toYaml(policy, {
-    skipInvalid: true,
-    sortKeys: _sortYamlKeys,
-  });
-  const formattedYml = apiKey ? replaceApiKey(yaml, apiKey) : yaml;
+  const sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER, yaml);
+  const yamlText = toYaml(
+    policy,
+    { sortMapEntries: sortYamlKeys, strict: false, schema: 'yaml-1.1' },
+    yaml
+  );
+  const formattedYml = apiKey ? replaceApiKey(yamlText, apiKey) : yamlText;
 
   if (!policy?.secret_references?.length) return formattedYml;
 
   return _formatSecrets(policy.secret_references, formattedYml);
 };
-
-export function _sortYamlKeys(keyA: string, keyB: string) {
-  const indexA = POLICY_KEYS_ORDER.indexOf(keyA);
-  const indexB = POLICY_KEYS_ORDER.indexOf(keyB);
-  if (indexA >= 0 && indexB < 0) {
-    return -1;
-  }
-
-  if (indexA < 0 && indexB >= 0) {
-    return 1;
-  }
-
-  return indexA - indexB;
-}
 
 function _formatSecrets(
   secretRefs: NonNullable<FullAgentPolicy['secret_references']>,

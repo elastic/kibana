@@ -19,7 +19,7 @@ const querySchema = schema.object({
   timeFrom: schema.number(),
   timeTo: schema.number(),
   functionName: schema.string(),
-  serviceNames: schema.arrayOf(schema.string()),
+  serviceNames: schema.arrayOf(schema.string(), { maxSize: 10 }),
 });
 
 type QuerySchemaType = TypeOf<typeof querySchema>;

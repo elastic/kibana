@@ -110,6 +110,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary: *' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_successful',
@@ -122,6 +123,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         field: RECORDS_FIELD,
         columnFilter: { language: 'kuery', query: 'summary.down: 0' },
+        emptyAsNull: false,
       },
       {
         id: 'monitor_errors',
@@ -134,7 +136,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
-        formula: `unique_count(state.id, kql='${FINAL_SUMMARY_KQL} and monitor.status: "down"')`,
+        formula: `unique_count(state.id, kql='monitor.status: "down"')`,
         format: 'number',
       },
       {
@@ -149,8 +151,9 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         format: 'number',
         columnFilter: {
           language: 'kuery',
-          query: 'summary.status: down and summary.final_attempt: true',
+          query: 'summary.status: down',
         },
+        emptyAsNull: false,
       },
     ],
     labels: FieldLabels,

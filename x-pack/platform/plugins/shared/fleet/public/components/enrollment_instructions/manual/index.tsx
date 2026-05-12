@@ -7,18 +7,20 @@
 
 import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
 import { PLATFORM_WITH_INSTALL_SERVERS, type EXTENDED_PLATFORM_TYPE } from '../../../hooks';
-import type { DownloadSource, FleetProxy } from '../../../types';
+import type { DownloadSource, ProxyConfig, FleetServerHost } from '../../../types';
 
 function getFleetServerHostsEnrollArgs({
   apiKey,
   fleetServerHost,
+  fleetServerHostConfig,
   fleetProxy,
   showInstallServers,
   platform,
 }: {
   apiKey: string;
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetServerHostConfig?: FleetServerHost;
+  fleetProxy?: ProxyConfig;
   showInstallServers?: boolean;
   platform: EXTENDED_PLATFORM_TYPE;
 }) {
@@ -34,9 +36,17 @@ function getFleetServerHostsEnrollArgs({
     showInstallServers && PLATFORM_WITH_INSTALL_SERVERS.includes(platform)
       ? ' --install-servers'
       : '';
+  const agentCAArg = fleetServerHostConfig?.ssl?.agent_certificate_authorities
+    ? ` --certificate-authorities=${fleetServerHostConfig.ssl.agent_certificate_authorities.join(
+        ','
+      )}`
+    : '';
+  const agentCertArg = fleetServerHostConfig?.ssl?.agent_certificate
+    ? ` --elastic-agent-cert=${fleetServerHostConfig.ssl.agent_certificate} --elastic-agent-cert-key=PATH_TO_ELASTIC_AGENT_CERT_KEY`
+    : '';
   return `--url=${
     fleetServerHost || `FLEET_SERVER_HOST`
-  } --enrollment-token=${apiKey}${proxyArgs}${showInstallServersArgs}`;
+  } --enrollment-token=${apiKey}${proxyArgs}${showInstallServersArgs}${agentCAArg}${agentCertArg}`;
 }
 
 export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
@@ -44,7 +54,7 @@ export const getDownloadBaseUrl = (downloadSource?: DownloadSource) => {
   return source.endsWith('/') ? source.substring(0, source.length - 1) : source;
 };
 
-export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => {
+export const getDownloadSourceProxyArgs = (downloadSourceProxy?: ProxyConfig) => {
   const windows = `${downloadSourceProxy?.url ? `-Proxy "${downloadSourceProxy.url}"` : ''} ${
     downloadSourceProxy?.proxy_headers
       ? `-Headers @{${Object.entries(downloadSourceProxy.proxy_headers)
@@ -75,6 +85,7 @@ export const getDownloadSourceProxyArgs = (downloadSourceProxy?: FleetProxy) => 
 export const ManualInstructions = ({
   apiKey,
   fleetServerHost,
+  fleetServerHostConfig,
   fleetProxy,
   downloadSource,
   downloadSourceProxy,
@@ -86,9 +97,10 @@ export const ManualInstructions = ({
 }: {
   apiKey: string;
   fleetServerHost: string;
-  fleetProxy?: FleetProxy;
+  fleetServerHostConfig?: FleetServerHost;
+  fleetProxy?: ProxyConfig;
   downloadSource?: DownloadSource;
-  downloadSourceProxy?: FleetProxy;
+  downloadSourceProxy?: ProxyConfig;
   agentVersion: string;
   gcpProjectId?: string;
   gcpOrganizationId?: string;
@@ -99,6 +111,7 @@ export const ManualInstructions = ({
     return getFleetServerHostsEnrollArgs({
       apiKey,
       fleetServerHost,
+      fleetServerHostConfig,
       platform,
       fleetProxy,
       showInstallServers,
@@ -141,7 +154,9 @@ cd elastic-agent-${agentVersion}-windows-x86_64
 
   const windowsMSICommand = `$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-x86_64.msi -OutFile elastic-agent-${agentVersion}-windows-x86_64.msi ${windowsDownloadSourceProxyArgs}
-.\\elastic-agent.msi --% INSTALLARGS="${getEnrollArgsByPlatForm('windows_msi')}"`;
+.\\elastic-agent-${agentVersion}-windows-x86_64.msi --% INSTALLARGS="${getEnrollArgsByPlatForm(
+    'windows_msi'
+  )}"`;
 
   const linuxDebAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-arm64.deb ${curlDownloadSourceProxyArgs}
 sudo ${debOrRpmWithInstallServers}dpkg -i elastic-agent-${agentVersion}-arm64.deb

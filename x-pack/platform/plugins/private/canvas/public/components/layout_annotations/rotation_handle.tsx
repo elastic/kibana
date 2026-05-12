@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -29,8 +28,3 @@ export const RotationHandle: FC<Props> = ({ transformMatrix, zoomScale = 1 }) =>
     />
   </div>
 );
-
-RotationHandle.propTypes = {
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  zoomScale: PropTypes.number,
-};

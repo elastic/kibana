@@ -162,6 +162,7 @@ describe('Data table columns', function () {
           onResize: () => {},
           columnsCellActions: [[cellAction]],
           cellActionsHandling: 'append',
+          hideFilteringOnComputedColumns: false,
         });
         expect(actual[0].cellActions).toEqual([
           expect.any(Function),

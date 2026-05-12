@@ -108,10 +108,13 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
+            size="s"
             onClick={togglePopoverAndLoad}
-            data-test-subj="savedViews-openPopover"
+            data-test-subj={`savedViews-openPopover-${
+              isFetchingCurrentView ? 'loading' : 'loaded'
+            }`}
             buttonRef={openPopoverButtonRef}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             color="text"
             isLoading={isFetchingCurrentView}

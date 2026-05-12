@@ -5,16 +5,15 @@
  * 2.0.
  */
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import type { PaletteRegistry } from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { CustomizablePalette, CUSTOM_PALETTE, applyPaletteParams } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
-import type { LegacyMetricState } from '../../../common/types';
+import type { LegacyMetricState, VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
-import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
 
 const idPrefix = htmlIdGenerator()();
@@ -41,23 +40,24 @@ export function MetricDimensionEditor(
     max: Math.max(firstRow[accessor] * 2, firstRow[accessor] === 0 ? 100 : 0),
   };
 
-  const activePalette = state?.palette || {
-    type: 'palette',
-    name: defaultPaletteParams.name,
-    params: {
-      ...defaultPaletteParams,
-      stops: undefined,
-      colorStops: undefined,
-      rangeMin: currentMinMax.min,
-      rangeMax: (currentMinMax.max * 3) / 4,
-    },
-  };
+  const activePalette =
+    state?.palette ||
+    ({
+      type: 'palette',
+      name: defaultPaletteParams.name,
+      params: {
+        ...defaultPaletteParams,
+        stops: undefined,
+        colorStops: undefined,
+        rangeMin: currentMinMax.min,
+        rangeMax: (currentMinMax.max * 3) / 4,
+      },
+    } satisfies PaletteOutput<CustomPaletteParams>);
 
-  // need to tell the helper that the colorStops are required to display
   const stops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -106,11 +106,10 @@ export function MetricDimensionEditor(
                 ...activePalette,
                 params: {
                   ...activePalette.params,
-                  // align this initial computation with same format for default
-                  // palettes in the panel. This to avoid custom computation issue with metric
-                  // fake data range
+                  // align this initial computation with same format for default palettes in the panel. This to avoid custom computation issue with metric fake data range
                   stops: stops.map((v, i, array) => ({
                     ...v,
+                    // Note: these stops are the lower bound of the color stop for bwc. This is normally incorrect.
                     stop: currentMinMax.min + (i === 0 ? 0 : array[i - 1].stop),
                   })),
                 },
@@ -169,6 +168,6 @@ export function MetricDimensionEditor(
           </PalettePanelContainer>
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }

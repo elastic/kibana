@@ -27,7 +27,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
-import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../../common/constants/locator';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management';
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
@@ -145,6 +145,10 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const [headerRestrictWidth, setHeaderRestrictWidth] = useState<number | undefined>(undefined);
     const [wrapHeader, setWrapHeader] = useState<boolean>(false);
 
+    const maxInlineSizeStyles = css`
+      max-inline-size: 100%;
+    `;
+
     useEffect(() => {
       const subscriptions = new Subscription();
 
@@ -232,7 +236,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeaderSection>
-          <EuiPageHeaderSection>
+          <EuiPageHeaderSection css={maxInlineSizeStyles}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               {isRightSectionMounted ? (
                 <EuiFlexItem grow={false}>
@@ -240,7 +244,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
                 </EuiFlexItem>
               ) : null}
               {activeRoute.enableDatePicker ? (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
                   <DatePickerWrapper isLoading={isLoading} width="full" />
                 </EuiFlexItem>
               ) : null}
@@ -255,6 +259,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
       isLoading,
       isRightSectionMounted,
       leftHeaderPortalNode,
+      maxInlineSizeStyles,
       rightHeaderPortalNode,
       wrapHeader,
     ]);

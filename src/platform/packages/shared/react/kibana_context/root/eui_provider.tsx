@@ -79,9 +79,19 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
+const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll'; // hardcoding from @kbn/core-chrome-layout-constants to avoid package dependency
+const FLYOUT_CONTAINER_SELECTOR = `#${APP_MAIN_SCROLL_CONTAINER_ID}`;
+
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
     includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+    container: FLYOUT_CONTAINER_SELECTOR,
+  },
+  EuiPopover: {
+    repositionOnScroll: true,
+  },
+  EuiToolTip: {
+    repositionOnScroll: true,
   },
 };
 

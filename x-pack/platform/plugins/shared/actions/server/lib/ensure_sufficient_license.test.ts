@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { ActionType } from '../types';
 import { ensureSufficientLicense } from './ensure_sufficient_license';
+import { getConnectorType } from '../fixtures';
 
-const sampleActionType: ActionType = {
+const sampleActionType: ActionType = getConnectorType({
   id: 'test',
   name: 'test',
-  minimumLicenseRequired: 'basic',
-  supportedFeatureIds: ['alerting'],
-  validate: {
-    config: { schema: schema.object({}) },
-    secrets: { schema: schema.object({}) },
-    params: { schema: schema.object({}) },
-  },
-  async executor({ actionId }) {
-    return { status: 'ok', actionId };
-  },
-};
+});
 
 describe('ensureSufficientLicense()', () => {
   it('throws for licenses below gold', () => {

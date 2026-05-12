@@ -162,6 +162,18 @@ describe('When invoking Trusted Devices Schema', () => {
       expect(() => body.validate(createNewTrustedDevice({ entries: [] }))).toThrow();
     });
 
+    it('should not accept more than 250 entries', () => {
+      expect(() =>
+        body.validate(
+          createNewTrustedDevice({
+            entries: Array(251).fill(
+              createConditionEntry({ field: TrustedDeviceConditionEntryField.DEVICE_ID })
+            ),
+          })
+        )
+      ).toThrow();
+    });
+
     describe('when `entries` are defined', () => {
       it('should validate `entry.field` is required', () => {
         const { field, ...entry } = createConditionEntry();
@@ -189,6 +201,9 @@ describe('When invoking Trusted Devices Schema', () => {
           TrustedDeviceConditionEntryField.DEVICE_ID,
           TrustedDeviceConditionEntryField.MANUFACTURER,
           TrustedDeviceConditionEntryField.PRODUCT_ID,
+          TrustedDeviceConditionEntryField.PRODUCT_NAME,
+          TrustedDeviceConditionEntryField.DEVICE_TYPE,
+          TrustedDeviceConditionEntryField.MANUFACTURER_ID,
         ].forEach((field) => {
           const bodyMsg = createNewTrustedDevice({
             entries: [createConditionEntry({ field, value: 'test-value' })],
@@ -287,6 +302,26 @@ describe('When invoking Trusted Devices Schema', () => {
       it('should reject policy effect scope without policies array', () => {
         const bodyMsg = createNewTrustedDevice({
           effectScope: { type: 'policy' },
+        });
+        expect(() => body.validate(bodyMsg)).toThrow();
+      });
+
+      it('should accept a policy effectScope with up to 1000 policies', () => {
+        const bodyMsg = createNewTrustedDevice({
+          effectScope: {
+            type: 'policy',
+            policies: Array(1000).fill('policy-id'),
+          },
+        });
+        expect(() => body.validate(bodyMsg)).not.toThrow();
+      });
+
+      it('should not accept a policy effectScope with more than 1000 policies', () => {
+        const bodyMsg = createNewTrustedDevice({
+          effectScope: {
+            type: 'policy',
+            policies: Array(1001).fill('policy-id'),
+          },
         });
         expect(() => body.validate(bodyMsg)).toThrow();
       });

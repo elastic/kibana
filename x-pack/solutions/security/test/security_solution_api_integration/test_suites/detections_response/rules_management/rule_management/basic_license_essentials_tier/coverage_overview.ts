@@ -13,6 +13,7 @@ import {
   CoverageOverviewRuleSource,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -23,7 +24,6 @@ import {
   createNonSecurityRule,
   deleteAllPrebuiltRuleAssets,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { getCoverageOverview } from '../../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -244,6 +244,169 @@ export default ({ getService }: FtrProviderContext): void => {
                 [expectedRule.id]: {
                   activity: 'disabled',
                   name: 'rule-2',
+                },
+              },
+            });
+          });
+
+          it('returns partial matches on rule name (when using a single term)', async () => {
+            const expectedRule1 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                name: 'Linux SMP aarch64 GNU/Linux',
+              })
+            );
+            const expectedRule2 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'Windows 10 x64:IA32-e' })
+            );
+            const expectedRule3 = await createRule(
+              supertest,
+              log,
+              // here
+              getCustomQueryRuleParams({ rule_id: 'rule-3', name: 'iOS Darwin x64:IA32-e' })
+            );
+
+            const body1 = await getCoverageOverview(supertest, {
+              search_term: 'win',
+            });
+
+            expect(body1).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule2.id, expectedRule3.id],
+              rules_data: {
+                [expectedRule2.id]: {
+                  activity: 'disabled',
+                  name: 'Windows 10 x64:IA32-e',
+                },
+                [expectedRule3.id]: {
+                  activity: 'disabled',
+                  name: 'iOS Darwin x64:IA32-e',
+                },
+              },
+            });
+
+            const body2 = await getCoverageOverview(supertest, {
+              search_term: '64:IA',
+            });
+
+            expect(body2).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule2.id, expectedRule3.id],
+              rules_data: {
+                [expectedRule2.id]: {
+                  activity: 'disabled',
+                  name: 'Windows 10 x64:IA32-e',
+                },
+                [expectedRule3.id]: {
+                  activity: 'disabled',
+                  name: 'iOS Darwin x64:IA32-e',
+                },
+              },
+            });
+
+            const body3 = await getCoverageOverview(supertest, {
+              search_term: 'GNU/Linux',
+            });
+
+            expect(body3).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule1.id],
+              rules_data: {
+                [expectedRule1.id]: {
+                  activity: 'disabled',
+                  name: 'Linux SMP aarch64 GNU/Linux',
+                },
+              },
+            });
+          });
+
+          it('returns exact term matches on rule name (when using multiple terms)', async () => {
+            const expectedRule1 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-1',
+                name: 'User-Agent rule1',
+              })
+            );
+
+            const expectedRule2 = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({
+                rule_id: 'rule-2',
+                name: 'User Agent rule2',
+              })
+            );
+
+            const body1 = await getCoverageOverview(supertest, {
+              search_term: 'User-Agent rule1',
+            });
+
+            expect(body1).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule1.id],
+              rules_data: {
+                [expectedRule1.id]: {
+                  activity: 'disabled',
+                  name: 'User-Agent rule1',
+                },
+              },
+            });
+
+            const body2 = await getCoverageOverview(supertest, {
+              search_term: 'User Agent rule2',
+            });
+
+            expect(body2).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule2.id],
+              rules_data: {
+                [expectedRule2.id]: {
+                  activity: 'disabled',
+                  name: 'User Agent rule2',
+                },
+              },
+            });
+
+            const body3 = await getCoverageOverview(supertest, {
+              search_term: 'User Agent rule',
+            });
+
+            expect(body3).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [],
+              rules_data: {},
+            });
+          });
+
+          it('returns special character matches on rule name', async () => {
+            await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'Rule name without backslash' })
+            );
+            const expectedRule = await createRule(
+              supertest,
+              log,
+              getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'Rule name with backslash(\\)' })
+            );
+
+            const body = await getCoverageOverview(supertest, {
+              search_term: 'backslash(\\)',
+            });
+
+            expect(body).to.eql({
+              coverage: {},
+              unmapped_rule_ids: [expectedRule.id],
+              rules_data: {
+                [expectedRule.id]: {
+                  activity: 'disabled',
+                  name: 'Rule name with backslash(\\)',
                 },
               },
             });

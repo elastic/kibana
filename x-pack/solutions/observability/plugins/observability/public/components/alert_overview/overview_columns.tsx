@@ -14,13 +14,82 @@ import type { AlertStatus } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
 import { Tooltip as CaseTooltip } from '@kbn/cases-components';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_outside_comparator';
 import type { NavigateToCaseView } from '../../hooks/use_case_view_navigation';
 import { formatCase } from './helpers/format_cases';
 import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
-import { Groups } from '../alert_sources/groups';
+import { ALERT_SOURCES_ELEMENT, Groups } from '../alert_sources/groups';
 import type { Group } from '../../../common/typings';
+
+/**
+ * Formats a comparator string for display.
+ * Converts NOT_BETWEEN and OUTSIDE_RANGE to 'NOT BETWEEN', otherwise returns uppercase.
+ */
+const formatComparator = (comparator: string): string => {
+  if (comparator === COMPARATORS.NOT_BETWEEN || comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE) {
+    return 'NOT BETWEEN';
+  }
+  if (comparator === COMPARATORS.BETWEEN_INCLUSIVE) {
+    return 'BETWEEN (INCLUSIVE)';
+  }
+  if (comparator === COMPARATORS.NOT_BETWEEN_INCLUSIVE) {
+    return 'NOT BETWEEN (INCLUSIVE)';
+  }
+  return comparator.toUpperCase();
+};
+
+/**
+ * Renders threshold rows for a list of criteria.
+ * Combines alert threshold and warning threshold into one line when warning threshold exists.
+ */
+const renderThresholdRows = (ruleCriteria: FlyoutThresholdData[]): React.ReactElement => {
+  return (
+    <div>
+      {ruleCriteria.map((criteria, index) => {
+        const { threshold, comparator, warningThreshold, warningComparator } = criteria;
+        const formattedComparator = formatComparator(comparator);
+        // threshold is typed as string[] but is actually a string at runtime
+        const thresholdStr = Array.isArray(threshold) ? threshold.join(' AND ') : threshold;
+
+        let thresholdText = i18n.translate(
+          'xpack.observability.alertFlyout.overviewTab.thresholdAlert',
+          {
+            defaultMessage: '{comparator} {threshold}',
+            values: {
+              comparator: formattedComparator,
+              threshold: thresholdStr,
+            },
+          }
+        );
+
+        if (warningThreshold && warningComparator) {
+          const formattedWarningComparator = formatComparator(warningComparator);
+          thresholdText = i18n.translate(
+            'xpack.observability.alertFlyout.overviewTab.thresholdWithWarning',
+            {
+              defaultMessage:
+                'Alert when {comparator} {threshold}, Warning when {warningComparator} {warningThreshold}',
+              values: {
+                comparator: formattedComparator,
+                threshold: thresholdStr,
+                warningComparator: formattedWarningComparator,
+                warningThreshold,
+              },
+            }
+          );
+        }
+
+        return (
+          <EuiText size="s" key={`${thresholdStr}-${index}`}>
+            <h4>{thresholdText}</h4>
+          </EuiText>
+        );
+      })}
+    </div>
+  );
+};
 
 interface AlertOverviewField {
   id: string;
@@ -38,6 +107,7 @@ export const ColumnIDs = {
   RULE_NAME: 'rule_name',
   RULE_TYPE: 'rule_type',
   CASES: 'cases',
+  WORKFLOW_TAGS: 'workflow_tags',
 } as const;
 
 export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
@@ -68,11 +138,14 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           if (!groups.length) return <>{'-'}</>;
           const alertEnd = meta?.alertEnd;
           const timeRange = meta?.timeRange;
+          const alertRuleTypeId = meta?.alertRuleTypeId;
           return (
             <div>
               <Groups
                 groups={groups}
                 timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+                alertRuleTypeId={alertRuleTypeId}
+                element={ALERT_SOURCES_ELEMENT.ALERT_FLYOUT}
               />
             </div>
           );
@@ -111,12 +184,13 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               })}
               {ruleCriteria.length > 1 && (
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   title={i18n.translate(
                     'xpack.observability.columns.euiCallOut.multipleConditionsLabel',
                     { defaultMessage: 'Multiple conditions' }
                   )}
-                  iconType="alert"
+                  iconType="warning"
                 />
               )}
             </div>
@@ -124,26 +198,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
 
         case ColumnIDs.THRESHOLD:
           if (!ruleCriteria) return <>{'-'}</>;
-          return (
-            <div>
-              {ruleCriteria.map((criteria, criticalIndex) => {
-                const { threshold, comparator } = criteria;
-                let formattedComparator = comparator.toUpperCase();
-                if (
-                  comparator === COMPARATORS.NOT_BETWEEN ||
-                  comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE
-                ) {
-                  // No need for i18n as we are using the enum value, we only need a space.
-                  formattedComparator = 'NOT BETWEEN';
-                }
-                return (
-                  <EuiText size="s" key={`${threshold}-${criticalIndex}`}>
-                    <h4>{`${formattedComparator} ${threshold}`}</h4>
-                  </EuiText>
-                );
-              })}
-            </div>
-          );
+          return renderThresholdRows(ruleCriteria);
 
         case ColumnIDs.RULE_TYPE:
           const ruleType = value as string;
@@ -169,6 +224,10 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               </CaseTooltip>,
             ];
           });
+        case ColumnIDs.WORKFLOW_TAGS:
+          const workflowTags = value as string[];
+          if (!workflowTags || !workflowTags.length) return <>{'-'}</>;
+          return <TagsList tags={workflowTags} ignoreEmpty color="default" />;
         default:
           return <>{'-'}</>;
       }

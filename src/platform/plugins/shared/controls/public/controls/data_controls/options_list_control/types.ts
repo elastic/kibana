@@ -9,58 +9,66 @@
 
 import type { Subject } from 'rxjs';
 
-import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
-import type { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
 import type {
   OptionsListSelection,
   OptionsListSortingType,
-  OptionsListSuggestions,
-} from '../../../../common/options_list';
+  DataControlState,
+  OptionsListDSLControlState,
+} from '@kbn/controls-schemas';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type {
+  HasType,
+  HasUniqueId,
+  PublishesUnsavedChanges,
+  PublishingSubject,
+} from '@kbn/presentation-publishing';
+import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 import type { DataControlApi, PublishesField } from '../types';
-import type { SelectionsState } from './selections_manager';
-import type { DefaultDataControlState } from '../../../../common';
-import type { TemporaryState } from './temporay_state_manager';
 import type { EditorState } from './editor_state_manager';
+import type { SelectionsState } from './selections_manager';
+import type { TemporaryState } from './temporay_state_manager';
+import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
-export type OptionsListControlApi = DataControlApi & {
-  setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
-};
-
-interface PublishesOptions {
-  availableOptions$: PublishingSubject<OptionsListSuggestions | undefined>;
-  invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
-  totalCardinality$: PublishingSubject<number>;
-}
+export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
+  DataControlApi &
+  PublishesUnsavedChanges & {
+    setSelectedOptions: (options: OptionsListSelection[]) => void;
+    clearSelections: () => void;
+    hasSelections$: PublishingSubject<boolean | undefined>;
+  };
 
 /**
  * A type consisting of only the properties that the options list control puts into state managers
  * and then passes to the UI component. Excludes any managed state properties that don't end up being used
  * by the component
  */
-export type OptionsListComponentState = Pick<DefaultDataControlState, 'fieldName'> &
+export type OptionsListComponentState = Pick<DataControlState, 'field_name'> &
   SelectionsState &
   EditorState &
-  TemporaryState & {
+  TemporaryState<OptionsListSelection> & {
     sort: OptionsListSortingType | undefined;
   };
 
-type PublishesOptionsListComponentState = SubjectsOf<OptionsListComponentState>;
-type OptionsListComponentStateSetters = Partial<SettersOf<OptionsListComponentState>> &
-  SettersOf<Pick<OptionsListComponentState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+type PublishesDSLOptionsListComponentState = SubjectsOf<
+  /**
+   * For API consistency, we continue to refer to the control's label as `title`; however, to avoid
+   * being impacted by default embeddable title handling, we switch to `label` for the implementation
+   */
+  Omit<OptionsListComponentState, 'title'> & { label: string }
+>;
+type DSLOptionsListComponentStateSetters = SettersOf<OptionsListComponentState>;
 
-export type OptionsListComponentApi = PublishesField &
-  PublishesOptions &
-  PublishesOptionsListComponentState &
-  Pick<PublishesTitle, 'title$'> &
-  OptionsListComponentStateSetters & {
-    deselectOption: (key: string | undefined) => void;
-    makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
+export type DSLOptionsListComponentApi = HasType &
+  HasUniqueId &
+  PublishesField &
+  OptionsListPublishesOptions<OptionsListSelection> &
+  PublishesDSLOptionsListComponentState &
+  DataControlApi &
+  DSLOptionsListComponentStateSetters &
+  OptionsListSelectionsApi & {
     loadMoreSubject: Subject<void>;
-    selectAll: (keys: string[]) => void;
-    deselectAll: (keys: string[]) => void;
-    defaultTitle$?: PublishingSubject<string | undefined>;
-    uuid: string;
-    parentApi: {
-      allowExpensiveQueries$: PublishingSubject<boolean>;
-    };
   };
+
+export interface OptionsListCustomStrings {
+  invalidSelectionsLabel?: string;
+}

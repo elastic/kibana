@@ -13,10 +13,35 @@ const { UndiciInstrumentation } = require('@opentelemetry/instrumentation-undici
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 
-require('../../../../../../../src/setup_node_env');
-// we send an empty process.argv argument, as playwright uses the same --config
-// flag as kibana, leading it to not read from kibana.{dev.}yml
-require('../../../../../../../src/cli/apm')('playwright', []);
+require('@kbn/setup-node-env');
+
+// Build synthetic argv from the TRACING_EXPORTERS env var when set.
+// This allows CI (and local users) to configure trace exporters without a kibana.dev.yml.
+// The argv overrides take priority over kibana.dev.yml via applyConfigOverrides.
+const argv = [];
+const tracingExporters = process.env.TRACING_EXPORTERS;
+if (tracingExporters) {
+  JSON.parse(tracingExporters); // validate parseable JSON; throws early if malformed
+
+  // CI sets ELASTIC_APM_ACTIVE=true globally. The APM config loader merges env vars
+  // after Kibana config (CLI args), so the env var would override our --elastic.apm.active=false.
+  // Override the env vars here so getConfigFromEnv doesn't re-enable APM.
+  process.env.ELASTIC_APM_ACTIVE = 'false';
+  process.env.ELASTIC_APM_CONTEXT_PROPAGATION_ONLY = 'false';
+
+  argv.push(
+    '--elastic.apm.active=false',
+    '--elastic.apm.contextPropagationOnly=false',
+    '--telemetry.enabled=true',
+    '--telemetry.tracing.enabled=true',
+    '--telemetry.tracing.sample_rate=1',
+    `--telemetry.tracing.exporters=${tracingExporters}`
+  );
+}
+
+// we send an empty process.argv argument (or our synthetic overrides), as playwright
+// uses the same --config flag as kibana, leading it to not read from kibana.{dev.}yml
+require('../../../../../../../src/cli/kibana/apm')('playwright', argv);
 
 registerInstrumentations({
   instrumentations: [

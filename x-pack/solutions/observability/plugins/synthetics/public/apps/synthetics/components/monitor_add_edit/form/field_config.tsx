@@ -52,6 +52,7 @@ import {
   FieldPassword,
   Checkbox,
   ComboBox,
+  LocationsComboBox,
   Select,
   Switch,
   Source,
@@ -205,7 +206,7 @@ export const MONITOR_TYPE_CONFIG = {
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
     link: 'https://elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'online',
+    icon: 'wifi',
     beta: false,
   },
   [FormMonitorType.TCP]: {
@@ -223,7 +224,7 @@ export const MONITOR_TYPE_CONFIG = {
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'online',
+    icon: 'wifi',
     beta: false,
   },
   [FormMonitorType.ICMP]: {
@@ -241,7 +242,7 @@ export const MONITOR_TYPE_CONFIG = {
         'A lightweight API check to validate the availability of a web service or endpoint.',
     }),
     link: 'https://www.elastic.co/guide/en/observability/current/synthetics-lightweight.html',
-    icon: 'online',
+    icon: 'wifi',
     beta: false,
   },
 };
@@ -428,7 +429,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: ComboBox,
+    component: LocationsComboBox,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -1345,7 +1346,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.throttlingDisabled.label"
         defaultMessage="Connection profile ( {icon} Important information about throttling: {link})"
         values={{
-          icon: <EuiIcon type="alert" color="warning" size="s" />,
+          icon: <EuiIcon type="warning" color="warning" size="s" />,
           link: (
             <EuiLink
               data-test-subj="syntheticsFIELDNoticeLink"

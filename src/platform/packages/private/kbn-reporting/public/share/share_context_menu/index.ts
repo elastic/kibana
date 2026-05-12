@@ -11,8 +11,10 @@ import type * as Rx from 'rxjs';
 
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
+import type { SharingData } from '@kbn/share-plugin/public';
 
 import type { ReportingAPIClient } from '../../reporting_api_client';
+import type { ClientConfigType } from '../../types';
 
 export type StartServices = [
   Pick<
@@ -29,6 +31,8 @@ export type StartServices = [
 export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
   startServices$: Rx.Observable<StartServices>;
+  csvConfig?: ClientConfigType['csv'];
+  isServerless?: boolean;
 }
 
 export interface ExportPanelShareOpts {
@@ -38,13 +42,8 @@ export interface ExportPanelShareOpts {
   startServices$: Rx.Observable<StartServices>;
 }
 
-export interface ReportingSharingData {
-  title: string;
+export interface ReportingSharingData extends SharingData {
   reportingDisabled?: boolean;
-  locatorParams: {
-    id: string;
-    params: unknown;
-  };
 }
 
 export interface JobParamsProviderOptions {

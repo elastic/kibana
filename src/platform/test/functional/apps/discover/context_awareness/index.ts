@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     loadTestFile(require.resolve('./_framework'));
     loadTestFile(require.resolve('./_telemetry'));
+    loadTestFile(require.resolve('./_profile_state'));
     loadTestFile(require.resolve('./extensions/_get_row_indicator_provider'));
     loadTestFile(require.resolve('./extensions/_get_row_additional_leading_controls'));
     loadTestFile(require.resolve('./extensions/_get_doc_viewer'));
@@ -49,8 +50,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./extensions/_get_default_app_state'));
     loadTestFile(require.resolve('./extensions/_get_additional_cell_actions'));
     loadTestFile(require.resolve('./extensions/_get_app_menu'));
-    loadTestFile(require.resolve('./extensions/_get_render_app_wrapper'));
     loadTestFile(require.resolve('./extensions/_get_default_ad_hoc_data_views'));
+    loadTestFile(require.resolve('./extensions/_get_default_esql_query'));
     loadTestFile(require.resolve('./extensions/_get_pagination_config'));
     loadTestFile(require.resolve('./extensions/_get_recommended_fields'));
   });

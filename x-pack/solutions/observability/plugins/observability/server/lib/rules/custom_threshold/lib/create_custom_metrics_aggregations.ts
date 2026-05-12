@@ -6,6 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
@@ -20,7 +21,8 @@ export const createCustomMetricsAggregations = (
   customMetrics: CustomThresholdExpressionMetric[],
   currentTimeFrame: { start: number; end: number },
   timeFieldName: string,
-  equation?: string
+  equation?: string,
+  dataView?: DataViewBase
 ) => {
   const bucketsPath: { [id: string]: string } = {};
   const metricAggregations = customMetrics.reduce((acc, metric) => {
@@ -33,11 +35,25 @@ export const createCustomMetricsAggregations = (
         ...acc,
         [key]: {
           filter: metric.filter
-            ? toElasticsearchQuery(fromKueryExpression(metric.filter))
+            ? toElasticsearchQuery(fromKueryExpression(metric.filter), dataView)
             : { match_all: {} },
         },
       };
     }
+    if (aggregation === Aggregators.MED) {
+      bucketsPath[metric.name] = key;
+      return {
+        ...acc,
+        [key]: {
+          percentiles: {
+            field: metric.field,
+            percents: [50],
+            keyed: true,
+          },
+        },
+      };
+    }
+
     if (aggregation === Aggregators.P95 || aggregation === Aggregators.P99) {
       bucketsPath[metric.name] = key;
       return {

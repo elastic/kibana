@@ -76,9 +76,15 @@ export function SaveDashboardModal({
   );
 
   const isEditMode = !!currentDashboard?.id;
+  const selectDashboardLabel = i18n.translate(
+    'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+    {
+      defaultMessage: 'Select dashboard',
+    }
+  );
 
   const options = allAvailableDashboards?.map((dashboardItem) => ({
-    label: dashboardItem.attributes.title,
+    label: dashboardItem.data.title,
     value: dashboardItem.id,
     disabled:
       serviceDashboards?.some(
@@ -167,9 +173,8 @@ export function SaveDashboardModal({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
-            placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
-              defaultMessage: 'Select dashboard',
-            })}
+            placeholder={selectDashboardLabel}
+            aria-label={selectDashboardLabel}
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selectedDashboard}

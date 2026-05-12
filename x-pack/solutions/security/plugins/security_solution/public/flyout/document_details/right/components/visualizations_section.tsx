@@ -7,17 +7,21 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { AnalyzerPreviewContainer } from './analyzer_preview_container';
-import { SessionPreviewContainer } from './session_preview_container';
-import { ExpandableSection } from './expandable_section';
-import { VISUALIZATIONS_TEST_ID } from './test_ids';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
+import { AnalyzerPreviewContainer } from '../../../../flyout_v2/document/components/analyzer_preview_container';
+import { SessionPreviewContainer } from '../../../../flyout_v2/document/components/session_preview_container';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
+import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
+import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
+import {
+  VISUALIZATION_SECTION_TEST_ID,
+  VISUALIZATION_SECTION_TITLE,
+} from '../../../../flyout_v2/document/components/visualizations_section';
 
 const KEY = 'visualizations';
 
@@ -25,40 +29,70 @@ const KEY = 'visualizations';
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(() => {
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
-  const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
-    useDocumentDetailsContext();
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
+  const {
+    dataAsNestedObject,
+    getFieldsData,
+    dataFormattedForFieldBrowser,
+    isRulePreview,
+    eventId,
+    indexName,
+    scopeId,
+    isPreviewMode,
+    searchHit,
+  } = useDocumentDetailsContext();
 
-  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   // Decide whether to show the graph preview or not
-  const { hasGraphRepresentation } = useGraphPreview({
+  const { hasGraphData } = useGraphPreview({
     getFieldsData,
     ecsData: dataAsNestedObject,
     dataFormattedForFieldBrowser,
   });
 
-  const shouldShowGraphPreview = useMemo(
-    () => graphVisualizationEnabled && hasGraphRepresentation,
-    [graphVisualizationEnabled, hasGraphRepresentation]
-  );
+  const { navigateToAnalyzer } = useNavigateToAnalyzer({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
+    isPreviewMode,
+  });
+  const { navigateToSessionView } = useNavigateToSessionView({
+    eventId,
+    indexName,
+    isFlyoutOpen: true,
+    scopeId,
+    isPreviewMode,
+  });
 
   return (
     <ExpandableSection
       expanded={expanded}
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.right.visualizations.sectionTitle"
-          defaultMessage="Visualizations"
-        />
-      }
-      localStorageKey={KEY}
-      data-test-subj={VISUALIZATIONS_TEST_ID}
+      title={VISUALIZATION_SECTION_TITLE}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
+      data-test-subj={VISUALIZATION_SECTION_TEST_ID}
     >
-      <SessionPreviewContainer />
+      <SessionPreviewContainer
+        hit={hit}
+        disableNavigation={isRulePreview}
+        showIcon={!isPreviewMode}
+        onShowSessionView={navigateToSessionView}
+      />
       <EuiSpacer />
-      <AnalyzerPreviewContainer />
-      {shouldShowGraphPreview && (
+      <AnalyzerPreviewContainer
+        hit={hit}
+        onShowAnalyzer={navigateToAnalyzer}
+        shouldUseAncestor={isRulePreview}
+        showIcon={!isPreviewMode}
+        disableNavigation={isRulePreview}
+      />
+      {hasGraphData && (
         <>
           <EuiSpacer />
           <GraphPreviewContainer />

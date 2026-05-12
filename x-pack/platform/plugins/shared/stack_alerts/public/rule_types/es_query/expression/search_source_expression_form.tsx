@@ -20,6 +20,7 @@ import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common'
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
+  convertFieldSpecToFieldOption,
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
@@ -37,7 +38,7 @@ import type {
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
+import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
@@ -119,7 +120,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         ruleParams.size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields: ruleParams.sourceFields,
+      // The sourceFields param is ignored
+      sourceFields: [],
     }
   );
 
@@ -132,7 +134,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onSelectDataView = useCallback((newDataView: DataView) => {
     dispatch({ type: 'index', payload: newDataView });
-    dispatch({ type: 'sourceFields', payload: undefined });
     setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
@@ -238,12 +239,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeExcludeHitsFromPreviousRun = useCallback(
     (exclude: boolean) => dispatch({ type: 'excludeHitsFromPreviousRun', payload: exclude }),
-    []
-  );
-
-  const onChangeSourceFields = useCallback(
-    (selectedSourceFields: SourceField[]) =>
-      dispatch({ type: 'sourceFields', payload: selectedSourceFields }),
     []
   );
 
@@ -394,8 +389,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
-        onChangeSourceFields={onChangeSourceFields}
-        sourceFields={ruleConfiguration.sourceFields}
       />
       <EuiSpacer />
     </Fragment>

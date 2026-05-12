@@ -21,6 +21,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../../../../plugin';
+import { ApiKeyType } from '../../../../task_runner/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -46,6 +47,10 @@ describe('createRuleRoute', () => {
     },
     enableFrameworkAlerts: true,
     cancelAlertsOnRuleTimeout: true,
+    ruleChangeTracking: {
+      enabled: false,
+      scope: ['security'] as string[],
+    },
     rules: {
       minimumScheduleInterval: {
         value: '1m',
@@ -60,6 +65,7 @@ describe('createRuleRoute', () => {
           max: 1000,
         },
       },
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: {
       enabled: true,
@@ -68,7 +74,7 @@ describe('createRuleRoute', () => {
     maintenanceWindow: {
       enabled: true,
     },
-  };
+  } as const;
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
@@ -267,7 +273,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": undefined,
           },
@@ -387,7 +392,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -508,7 +512,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -629,7 +632,6 @@ describe('createRuleRoute', () => {
             ],
             "throttle": "30s",
           },
-          "isFlappingEnabled": true,
           "options": Object {
             "id": "custom-id",
           },
@@ -809,7 +811,6 @@ describe('createRuleRoute', () => {
               ],
               "throttle": "30s",
             },
-            "isFlappingEnabled": true,
             "options": Object {
               "id": undefined,
             },
@@ -948,14 +949,9 @@ describe('createRuleRoute', () => {
         ['ok']
       );
 
-      await handler(context, req, res);
-
-      expect(res.badRequest).toHaveBeenCalledWith({
-        body: {
-          message:
-            'Cannot create rule of type "test.internal-rule-type" because it is internally managed.',
-        },
-      });
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
     });
   });
 });

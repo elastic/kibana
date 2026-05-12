@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { isEqual, noop } from 'lodash';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -19,15 +21,14 @@ import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiCallOut, euiBreakpoint } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { euiBreakpoint } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { LensAppState, LensAppServices } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../common/constants';
-import type { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import type { LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
-import type { LensAppState } from '../state_management';
 import {
   setState,
   useLensSelector,
@@ -46,6 +47,7 @@ import { changeIndexPattern } from '../state_management/lens_slice';
 import type { ShareableConfiguration } from './share_action';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -68,7 +70,7 @@ function getSaveButtonMeta({
             defaultMessage: 'Save and return',
           }),
       emphasize: true,
-      iconType: contextFromEmbeddable ? 'save' : 'checkInCircleFilled',
+      iconType: contextFromEmbeddable ? 'save' : 'checkCircleFill',
       testId: 'lnsApp_saveAndReturnButton',
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
@@ -309,6 +311,7 @@ function getLensTopNavConfig(options: {
 export const LensTopNavMenu = ({
   setHeaderActionMenu,
   initialInput,
+  incomingState,
   indicateNoData,
   lensInspector,
   setIsSaveModalVisible,
@@ -316,12 +319,9 @@ export const LensTopNavMenu = ({
   runSave,
   onAppLeave,
   redirectToOrigin,
-  datasourceMap,
-  visualizationMap,
   title,
   goBackToOriginatingApp,
   contextOriginatingApp,
-  initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
   indexPatternService,
@@ -342,9 +342,10 @@ export const LensTopNavMenu = ({
     dataViews: dataViewsService,
   } = useKibana<LensAppServices>().services;
 
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
+
   const {
     isSaveable,
-    isLinkedToOriginatingApp,
     query,
     activeData,
     savedQuery,
@@ -394,7 +395,6 @@ export const LensTopNavMenu = ({
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
-  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
@@ -491,7 +491,6 @@ export const LensTopNavMenu = ({
     return () => {
       // Make sure to close the editors when unmounting
       closeFieldEditor.current?.();
-      closeDataViewEditor.current?.();
     };
   }, []);
 
@@ -575,16 +574,22 @@ export const LensTopNavMenu = ({
   const adHocDataViews = indexPatterns.filter((pattern) => !pattern.isPersisted());
 
   const topNavConfig = useMemo(() => {
-    const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
-    const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
+    const showReplaceInDashboard = Boolean(
+      !initialInput?.ref_id && contextFromEmbeddable && initialContext?.embeddableId
+    );
+    const showReplaceInCanvas =
+      initialContext?.originatingApp === 'canvas' && !initialInput?.ref_id;
+
+    const isComingFromDashboardView =
+      incomingState?.originatingApp &&
+      incomingState.originatingApp !== 'visualize' &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/');
 
     const showSaveAndReturn =
-      !(showReplaceInDashboard || showReplaceInCanvas) &&
-      (isLinkedToOriginatingApp || Boolean(initialContextIsEmbedded));
+      !(showReplaceInDashboard || showReplaceInCanvas) && Boolean(isComingFromDashboardView);
 
     const hasData = Boolean(activeData && Object.keys(activeData).length);
     const csvEnabled = Boolean(isSaveable && hasData);
@@ -665,22 +670,7 @@ export const LensTopNavMenu = ({
           }),
           config: {
             link: {
-              draftModeCallOut: (
-                <EuiCallOut
-                  color="warning"
-                  title={
-                    <FormattedMessage
-                      id="xpack.lens.app.shareModal.draftModeCallout.title"
-                      defaultMessage="Unsaved changes"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
-                    defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
-                  />
-                </EuiCallOut>
-              ),
+              draftModeCallOut: true,
               delegatedShareUrlHandler: async () => {
                 const { shareableUrl, savedObjectURL } = getShareURL(
                   shortUrlService,
@@ -703,64 +693,13 @@ export const LensTopNavMenu = ({
             integration: {
               export: {
                 csvDownloadLens: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate(
-                        'xpack.lens.app.exports.csvDownloadLens.warning.title',
-                        {
-                          defaultMessage: 'Unsaved changes',
-                        }
-                      )}
-                    >
-                      {i18n.translate(
-                        'xpack.lens.app.exports.csvDownloadLens.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage:
-                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 imageReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('xpack.lens.app.exports.imageReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'xpack.lens.app.exports.imageReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage:
-                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
                 pdfReports: {
-                  draftModeCallOut: (
-                    <EuiCallOut
-                      color="warning"
-                      iconType="warning"
-                      title={i18n.translate('xpack.lens.app.exports.pdfReports.warning.title', {
-                        defaultMessage: 'Unsaved changes',
-                      })}
-                    >
-                      {i18n.translate(
-                        'xpack.lens.app.exports.pdfReports.postURLWatcherMessage.unsavedChanges',
-                        {
-                          defaultMessage:
-                            'The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first.',
-                        }
-                      )}
-                    </EuiCallOut>
-                  ),
+                  draftModeCallOut: true,
                 },
               },
             },
@@ -835,14 +774,12 @@ export const LensTopNavMenu = ({
                         })
                       : ''),
                   newCopyOnSave: false,
-                  isTitleDuplicateConfirmed: false,
                   returnToOrigin: true,
                   ...(contextFromEmbeddable && { newDescription: initialContext.description }),
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
-                  onTitleDuplicate: noop, // Title can never change from this action
                 },
                 {
-                  saveToLibrary: Boolean(initialInput?.savedObjectId),
+                  saveToLibrary: Boolean(initialInput?.ref_id),
                 }
               );
             }
@@ -866,7 +803,7 @@ export const LensTopNavMenu = ({
           },
         },
         cancel: {
-          visible: Boolean(isLinkedToOriginatingApp),
+          visible: Boolean(isComingFromDashboardView),
           execute: () => {
             if (redirectToOrigin) {
               redirectToOrigin();
@@ -918,12 +855,11 @@ export const LensTopNavMenu = ({
         },
       },
     });
-    return [...(additionalMenuEntries || []), ...baseMenuEntries];
+    return (additionalMenuEntries || []).concat(baseMenuEntries);
   }, [
     initialContext,
-    initialInput?.savedObjectId,
-    isLinkedToOriginatingApp,
-    initialContextIsEmbedded,
+    initialInput?.ref_id,
+    incomingState,
     activeData,
     isSaveable,
     application,
@@ -987,7 +923,7 @@ export const LensTopNavMenu = ({
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBased',
+                newDatasourceId: LENS_DATASOURCE_ID.TEXT_BASED,
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -1107,32 +1043,24 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          if (isOnTextBasedMode) {
-            dispatch(
-              switchAndCleanDatasource({
-                newDatasourceId: 'formBased',
-                visualizationId: visualization?.activeId,
-                currentIndexPatternId: dataView?.id,
-              })
-            );
-          }
-          dispatchChangeIndexPattern(dataView);
-          setCurrentIndexPattern(dataView);
+  const createNewDataView = useCallback(
+    async (dataView: DataView) => {
+      if (dataView.id) {
+        if (isOnTextBasedMode) {
+          dispatch(
+            switchAndCleanDatasource({
+              newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+              visualizationId: visualization?.activeId,
+              currentIndexPatternId: dataView?.id,
+            })
+          );
         }
-      },
-      allowAdHocDataView: true,
-    });
-  }, [
-    dataViewEditor,
-    dispatch,
-    dispatchChangeIndexPattern,
-    isOnTextBasedMode,
-    visualization?.activeId,
-  ]);
+        dispatchChangeIndexPattern(dataView);
+        setCurrentIndexPattern(dataView);
+      }
+    },
+    [dispatch, dispatchChangeIndexPattern, isOnTextBasedMode, visualization?.activeId]
+  );
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (dataViewSpec: DataViewSpec) => {
@@ -1143,7 +1071,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -1179,7 +1107,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'formBased',
+            newDatasourceId: LENS_DATASOURCE_ID.FORM_BASED,
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })

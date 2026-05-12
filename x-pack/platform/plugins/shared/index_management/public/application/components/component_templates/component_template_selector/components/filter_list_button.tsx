@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiSelectable } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectable,
+  useEuiTheme,
+} from '@elastic/eui';
 
 interface Filter {
   name: string;
@@ -23,8 +30,31 @@ export interface Filters {
   [key: string]: Filter;
 }
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    container: css`
+      box-shadow: none;
+      height: ${euiTheme.size.xxl}; /* Align the height with the search input height */
+
+      &,
+      & > :first-child .euiFilterButton {
+        /* EUI specificity override */
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      &::after {
+        border: ${euiTheme.border.thin};
+      }
+    `,
+  };
+};
+
 export function FilterListButton({ onChange, filters }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const styles = useStyles();
 
   const activeFilters = Object.values(filters).filter((v) => (v as Filter).checked === 'on');
 
@@ -41,6 +71,8 @@ export function FilterListButton({ onChange, filters }: Props) {
     label: (item as Filter).name,
     checked: (item as Filter).checked,
     'data-test-subj': 'filterItem',
+    'aria-selected': (item as Filter).checked === 'on',
+    'aria-label': (item as Filter).name,
   }));
 
   const toggleFilter = (filter: string) => {
@@ -58,7 +90,7 @@ export function FilterListButton({ onChange, filters }: Props) {
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
       numFilters={Object.keys(filters).length}
@@ -74,7 +106,7 @@ export function FilterListButton({ onChange, filters }: Props) {
   );
 
   return (
-    <EuiFilterGroup className="componentTemplates__filterListButton">
+    <EuiFilterGroup css={styles.container}>
       <EuiPopover
         ownFocus
         button={button}
@@ -82,6 +114,7 @@ export function FilterListButton({ onChange, filters }: Props) {
         closePopover={closePopover}
         panelPaddingSize="none"
         data-test-subj="filterList"
+        aria-label="Filter component templates"
       >
         <EuiSelectable
           allowExclusions

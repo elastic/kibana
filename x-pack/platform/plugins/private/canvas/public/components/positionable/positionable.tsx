@@ -7,7 +7,6 @@
 
 import type { FC, ReactElement, CSSProperties } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -40,11 +39,4 @@ export const Positionable: FC<Props> = ({ children, transformMatrix, width, heig
       {childNode}
     </div>
   );
-};
-
-Positionable.propTypes = {
-  children: PropTypes.element.isRequired,
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  width: PropTypes.number.isRequired,
-  height: PropTypes.number.isRequired,
 };

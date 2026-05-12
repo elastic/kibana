@@ -125,7 +125,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                             aria-hidden="true"
                             class="euiButtonIcon__icon"
                             color="inherit"
-                            data-euiicon-type="arrowDown"
+                            data-euiicon-type="chevronSingleDown"
                           />
                         </button>
                       </div>
@@ -143,6 +143,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                           </span>
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               color="subdued"
@@ -190,206 +191,178 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         class="euiBasicTable c3"
         data-test-subj="paginated-basic-table"
       >
-        <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
-          id="__table_generated-id"
-          tabindex="-1"
+        <div
+          class="emotion-euiContainerCSS"
         >
-          <caption
-            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-          />
-          <thead>
-            <tr>
-              <th
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_node.host.name_0"
-                role="columnheader"
-                scope="col"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Host"
-                  >
-                    Host
-                  </span>
-                </div>
-              </th>
-              <th
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_node.host.firstSeen_1"
-                role="columnheader"
-                scope="col"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="First seen"
-                  >
-                    First seen
-                  </span>
-                </div>
-              </th>
-              <th
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_node.host.os_2"
-                role="columnheader"
-                scope="col"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="OS"
-                  >
-                    OS
-                  </span>
-                </div>
-              </th>
-              <th
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_node.host.version_3"
-                role="columnheader"
-                scope="col"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                    title="Version"
-                  >
-                    Version
-                  </span>
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            class="css-0"
+          <table
+            class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+            id="__table_generated-id"
+            tabindex="-1"
           >
-            <tr
-              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+            <caption
+              class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+            />
+            <thead>
+              <tr>
+                <th
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_node.host.name_0"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Host"
+                    >
+                      Host
+                    </span>
+                  </div>
+                </th>
+                <th
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_node.host.firstSeen_1"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="First seen"
+                    >
+                      First seen
+                    </span>
+                  </div>
+                </th>
+                <th
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_node.host.os.name_2"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Operating system"
+                    >
+                      Operating system
+                    </span>
+                  </div>
+                </th>
+                <th
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_node.host.os.version_3"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                      title="Version"
+                    >
+                      Version
+                    </span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              class="css-0"
             >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+              <tr
+                class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
                 >
-                  <span
-                    class=""
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    —
-                  </span>
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                    elrond.elstc.co
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    2018-12-06T15:40:53.319Z
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    Ubuntu
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  >
+                    18.04.1 LTS (Bionic Beaver)
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
                 >
-                  <span
-                    class=""
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    —
-                  </span>
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                    siem-kibana
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
                 >
-                  <span
-                    class=""
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    —
-                  </span>
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                    2018-12-07T14:12:38.560Z
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
                 >
-                  <span
-                    class=""
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    —
-                  </span>
-                </div>
-              </td>
-            </tr>
-            <tr
-              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                    Debian GNU/Linux
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
                 >
-                  <span
-                    class=""
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                   >
-                    —
-                  </span>
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-                >
-                  <span
-                    class=""
-                  >
-                    —
-                  </span>
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-                >
-                  <span
-                    class=""
-                  >
-                    —
-                  </span>
-                </div>
-              </td>
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-                >
-                  <span
-                    class=""
-                  >
-                    —
-                  </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                    9 (stretch)
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+        class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -407,13 +380,13 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="eui-textTruncate euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                 >
                   Rows per page: 1
                 </span>
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>
@@ -423,6 +396,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
           class="euiFlexItem c4 emotion-euiFlexItem-growZero"
         >
           <nav
+            aria-label="Table pagination"
             class="euiPagination emotion-euiPagination"
             data-test-subj="numberedPagination"
           >
@@ -445,7 +419,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="arrowLeft"
+                data-euiicon-type="chevronSingleLeft"
               />
             </button>
             <ul
@@ -466,7 +440,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       1
                     </span>
@@ -486,7 +460,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       2
                     </span>
@@ -506,7 +480,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       3
                     </span>
@@ -526,7 +500,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       4
                     </span>
@@ -546,7 +520,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       5
                     </span>
@@ -572,7 +546,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                     class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                     >
                       10
                     </span>
@@ -591,7 +565,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                 aria-hidden="true"
                 class="euiButtonIcon__icon"
                 color="inherit"
-                data-euiicon-type="arrowRight"
+                data-euiicon-type="chevronSingleRight"
               />
             </button>
           </nav>

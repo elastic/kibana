@@ -9,6 +9,11 @@ import Boom from '@hapi/boom';
 
 import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import { getRuleTemplateSo } from '../../../../data/rule_template';
+import {
+  RuleTemplateAuditAction,
+  ruleTemplateAuditEvent,
+} from '../../../../rules_client/common/audit_events';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 import type { RulesClientContext } from '../../../../rules_client/types';
 
@@ -35,25 +40,37 @@ export async function getRuleTemplate(
   });
 
   try {
-    const authzResult = await context.authorization.getAllAuthorizedRuleTypes({
-      authorizationEntity: AlertingAuthorizationEntity.Rule,
-      operations: [ReadOperations.Get],
+    await context.authorization.ensureAuthorizedByRuleType({
+      ruleTypeId: result.attributes.ruleTypeId,
+      operation: ReadOperations.Get,
+      entity: AlertingAuthorizationEntity.Rule,
+      consumerRequiredPrivilege: 'read',
     });
-    let isAuthorized = false;
-    const authorizedConsumers =
-      authzResult.authorizedRuleTypes.get(result.attributes.ruleTypeId)?.authorizedConsumers ?? {};
-    for (const authorizedConsumer of Object.values(authorizedConsumers)) {
-      if (authorizedConsumer.read) {
-        isAuthorized = true;
-        break;
-      }
-    }
-    if (!isAuthorized) {
-      throw Boom.forbidden(`Unauthorized to get "${result.attributes.ruleTypeId}" RuleTemplate`);
-    }
   } catch (error) {
+    context.auditLogger?.log(
+      ruleTemplateAuditEvent({
+        action: RuleTemplateAuditAction.GET,
+        savedObject: {
+          type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+          id,
+          name: result.attributes.name,
+        },
+        error,
+      })
+    );
     throw error;
   }
+
+  context.auditLogger?.log(
+    ruleTemplateAuditEvent({
+      action: RuleTemplateAuditAction.GET,
+      savedObject: {
+        type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+        id,
+        name: result.attributes.name,
+      },
+    })
+  );
 
   return transformRawRuleTemplateToRuleTemplate({
     id: result.id,

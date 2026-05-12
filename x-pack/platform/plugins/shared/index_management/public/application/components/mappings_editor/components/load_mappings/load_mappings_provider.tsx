@@ -204,7 +204,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
         onClick={() =>
           setTotalErrorsToDisplay(showingAllErrors ? MAX_ERRORS_TO_DISPLAY : state.errors!.length)
         }
-        iconType={showingAllErrors ? 'arrowUp' : 'arrowDown'}
+        iconType={showingAllErrors ? 'chevronSingleUp' : 'chevronSingleDown'}
       >
         {showingAllErrors
           ? i18n.translate('xpack.idxMgmt.mappingsEditor.hideErrorsButtonLabel', {
@@ -261,6 +261,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
           ) : (
             <>
               <EuiCallOut
+                announceOnMount
                 title={i18nTexts.validationErrors.title}
                 iconType="warning"
                 color="warning"

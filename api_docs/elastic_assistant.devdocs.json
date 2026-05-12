@@ -22,6 +22,8 @@
           "\nInterfaces for registering tools to be used by the elastic assistant"
         ],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 273,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,6 +35,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 278,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,6 +48,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 279,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -55,6 +61,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 280,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -66,6 +74,8 @@
             "label": "sourceRegister",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 281,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -88,6 +98,8 @@
               ") => boolean"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -108,7 +120,10 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+                "lineNumber": 282,
+                "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "AssistantToolParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -138,6 +153,8 @@
               ", any, any> | null>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 283,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -158,7 +175,10 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+                "lineNumber": 283,
+                "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "AssistantToolParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -176,6 +196,8 @@
         "label": "AssistantToolParams",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 292,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -190,6 +212,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 293,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -205,6 +229,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 294,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -216,9 +242,11 @@
             "label": "anonymizationFields",
             "description": [],
             "signature": [
-              "{ id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined"
+              "{ id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 295,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +268,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 296,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,6 +281,8 @@
             "label": "isEnabledKnowledgeBase",
             "description": [],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 297,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -265,6 +297,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 298,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -285,6 +319,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 299,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,6 +335,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 300,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -310,7 +348,11 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -390,39 +432,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
+              "; helpers: ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -448,26 +460,46 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; cancelReindex: { (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
+              ">; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CancelReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -676,7 +708,27 @@
               "FieldCapsResponse",
               ">; }; fleet: ",
               "default",
-              "; getScript: { (this: That, params: ",
+              "; getReindex: { (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; }; getScript: { (this: That, params: ",
               "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -820,29 +872,49 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
+              "default",
+              "; listReindex: { (this: That, params?: ",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "ListReindexResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "ListReindexResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
-              "default",
-              "; logstash: ",
+              "ListReindexResponse",
+              ">; }; logstash: ",
               "default",
               "; mget: { <TDocument = unknown>(this: That, params?: ",
               "MgetRequest",
@@ -979,6 +1051,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -1130,6 +1204,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
               "<TDocument, TAggregations>>; }; searchApplication: ",
               "default",
               "; searchMvt: { (this: That, params: ",
@@ -1299,6 +1399,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 301,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1314,6 +1416,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 302,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1328,6 +1432,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 303,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1345,6 +1451,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 304,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1366,6 +1474,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 305,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1380,6 +1490,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 306,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1400,6 +1512,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 307,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1411,24 +1525,29 @@
             "label": "onNewReplacements",
             "description": [],
             "signature": [
-              "((newReplacements: Zod.objectOutputType<{}, Zod.ZodString, \"strip\">) => void) | undefined"
+              "((newReplacements: { [x: string]: string; }) => void) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 308,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "elasticAssistant",
                 "id": "def-server.AssistantToolParams.onNewReplacements.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "newReplacements",
                 "description": [],
                 "signature": [
-                  "Zod.objectOutputType<{}, Zod.ZodString, \"strip\">"
+                  "{ [x: string]: string; }"
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+                "lineNumber": 308,
+                "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Replacements",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1438,14 +1557,16 @@
           {
             "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.replacements",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "replacements",
             "description": [],
             "signature": [
-              "Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined"
+              "{ [x: string]: string; } | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 309,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1458,9 +1579,11 @@
             "description": [],
             "signature": [
               "KibanaRequest",
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; connectorName?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"incompatible_antivirus\" | \"noisy_process_tree\" | \"policy_response_failure\"; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
+              "<unknown, unknown, { subAction: any; actionTypeId: string; replacements: { [x: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider: any; defaultSystemPromptId?: string | undefined; model?: string | undefined; }; size: number; subAction: any; connectorName?: string | undefined; end?: string | undefined; filter?: { [x: string]: unknown; } | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: { [x: string]: string; } | undefined; start?: string | undefined; } | { endpointIds: string[]; insightType: any; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider: any; defaultSystemPromptId?: string | undefined; model?: string | undefined; }; subAction: any; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: { [x: string]: string; } | undefined; }, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 310,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1475,6 +1598,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 317,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1490,6 +1615,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 318,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1506,6 +1633,8 @@
               ">) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 319,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1522,6 +1651,8 @@
         "label": "ElasticAssistantPluginSetupDependencies",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1542,6 +1673,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1562,6 +1695,31 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginSetupDependencies.cloud",
+            "type": "Object",
+            "tags": [],
+            "label": "cloud",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "cloud",
+                "scope": "server",
+                "docId": "kibCloudPluginApi",
+                "section": "def-server.CloudSetup",
+                "text": "CloudSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1582,6 +1740,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,7 +1766,7 @@
               "SavedObjectsClientContract",
               ", request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; kqlQueryString: string | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; kqlQueryString: string | null; }>, spaceId: string, state?: ",
               "AnomalyDetectionRuleState",
               " | undefined) => Promise<{ payload: ",
               "AnomalyDetectionAlertPayload",
@@ -1618,6 +1778,8 @@
               "TrainedModelsProvider"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1638,6 +1800,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1658,6 +1822,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1679,6 +1845,31 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginSetupDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginSetup",
+                "text": "SearchInferenceEndpointsPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1693,6 +1884,8 @@
         "label": "ElasticAssistantPluginStartDependencies",
         "description": [],
         "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+        "lineNumber": 150,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1713,6 +1906,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1733,6 +1928,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1753,6 +1950,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1773,6 +1972,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1794,6 +1995,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1814,6 +2017,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1834,6 +2039,8 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,6 +2061,31 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.searchInferenceEndpoints",
+            "type": "Object",
+            "tags": [],
+            "label": "searchInferenceEndpoints",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "searchInferenceEndpoints",
+                "scope": "server",
+                "docId": "kibSearchInferenceEndpointsPluginApi",
+                "section": "def-server.SearchInferenceEndpointsPluginStart",
+                "text": "SearchInferenceEndpointsPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1874,6 +2106,8 @@
         "The plugin setup interface"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+      "lineNumber": 86,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1894,6 +2128,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 88,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1911,6 +2147,8 @@
         "The plugin start interface"
       ],
       "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+      "lineNumber": 91,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1933,6 +2171,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 93,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1955,6 +2195,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 97,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -1965,7 +2207,15 @@
           "tags": [],
           "label": "registerFeatures",
           "description": [
-            "\nRegister features to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct features are available. See {@link getPluginNameFromRequest} for more details.\n"
+            "\nRegister features to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct features are available. See ",
+            {
+              "pluginId": "elasticAssistant",
+              "scope": "server",
+              "docId": "kibElasticAssistantPluginApi",
+              "section": "def-server.getPluginNameFromRequest",
+              "text": "getPluginNameFromRequest"
+            },
+            " for more details.\n"
           ],
           "signature": [
             "(pluginName: string, features: Partial<",
@@ -1979,6 +2229,8 @@
             ">) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 101,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1995,6 +2247,8 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 110,
+              "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2020,7 +2274,10 @@
                 ">"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 110,
+              "columnNumber": 42,
               "deprecated": false,
+              "docsReferencedTypeName": "Partial",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2047,6 +2304,8 @@
             }
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 111,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2061,6 +2320,8 @@
                 "Name of the plugin to get the features for"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
+              "lineNumber": 17,
+              "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2073,7 +2334,15 @@
           "tags": [],
           "label": "registerTools",
           "description": [
-            "\nRegister tools to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct tools are selected. See {@link getPluginNameFromRequest} for more details.\n"
+            "\nRegister tools to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct tools are selected. See ",
+            {
+              "pluginId": "elasticAssistant",
+              "scope": "server",
+              "docId": "kibElasticAssistantPluginApi",
+              "section": "def-server.getPluginNameFromRequest",
+              "text": "getPluginNameFromRequest"
+            },
+            " for more details.\n"
           ],
           "signature": [
             "(pluginName: string, tools: ",
@@ -2087,6 +2356,8 @@
             "[]) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 116,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2103,6 +2374,8 @@
                 "string"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 125,
+              "columnNumber": 19,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2127,6 +2400,8 @@
                 "[]"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 125,
+              "columnNumber": 39,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2155,6 +2430,8 @@
             "[]"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 126,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -2172,6 +2449,8 @@
                 "string | string[]"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/services/app_context.ts",
+              "lineNumber": 16,
+              "columnNumber": 35,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -2192,6 +2471,8 @@
             ", callback: Function) => void"
           ],
           "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "lineNumber": 131,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2206,7 +2487,10 @@
                 "CallbackIds"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 136,
+              "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "CallbackIds",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -2221,7 +2505,10 @@
                 "Function"
               ],
               "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "lineNumber": 136,
+              "columnNumber": 47,
               "deprecated": false,
+              "docsReferencedTypeName": "Function",
               "trackAdoption": false,
               "isRequired": true
             }

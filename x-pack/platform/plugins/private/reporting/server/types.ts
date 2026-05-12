@@ -6,12 +6,13 @@
  */
 
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { ReportSource, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -39,19 +40,33 @@ import type {
   RawNotification,
   RawScheduledReport,
 } from './saved_objects/scheduled_report/schemas/latest';
+import type {
+  GenerateSystemReportRequestParams,
+  HandleResponseFunc,
+} from './routes/common/request_handler/generate_system_report_request_handler';
 
 /**
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
+  /**
+   * Process a user request to generate a report
+   * that requires accessing system indices as an internal user.
+   * Plugins should encapsulate the use of this function with their own authorization checks.
+   */
+  handleGenerateSystemReportRequest: (
+    path: string,
+    requestParams: GenerateSystemReportRequestParams,
+    handleResponseFunc: HandleResponseFunc
+  ) => Promise<IKibanaResponse>;
 }
 
 /**
  * Plugin Start Contract
  */
 export type ReportingStart = ReportingSetup;
-export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
+export type ReportingUser = AuthenticatedUser | undefined;
 
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
@@ -59,6 +74,7 @@ export interface ReportingSetupDeps {
   actions: ActionsPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
+  licensing: LicensingPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   taskManager: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
@@ -138,10 +154,19 @@ export interface ListScheduledReportApiJSON {
   title: RawScheduledReport['title'];
 }
 
+export type ScheduledReportApiJson = ListScheduledReportApiJSON;
+
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
 
 export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
+}
+
+export interface ScheduledReportTemplateVariables {
+  title: string;
+  filename: string;
+  objectType: string;
+  date?: string;
 }

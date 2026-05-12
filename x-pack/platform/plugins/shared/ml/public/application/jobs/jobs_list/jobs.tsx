@@ -6,13 +6,13 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { JobsListView } from './components/jobs_list_view';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
 import { MlPageHeader } from '../../components/page_header';
@@ -61,7 +61,10 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
     },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
-  getMlNodeCount(mlApi);
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+  }, [mlApi]);
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
@@ -72,12 +75,23 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
       <MlPageHeader
         wrapHeader
         rightSideItems={[
-          <SuppliedConfigurationsButton />,
-          <AnomalyDetectionSettingsButton />,
-          <SynchronizeSavedObjectsButton refreshJobs={refreshList} />,
-          <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />,
-          <ImportJobsFlyout isDisabled={!canCreateJob} onImportComplete={refreshList} />,
-          <NewJobButton size="m" />,
+          <SuppliedConfigurationsButton key="supplied-configurations-button" />,
+          <AnomalyDetectionSettingsButton key="anomaly-detection-settings-button" />,
+          <SynchronizeSavedObjectsButton
+            key="synchronize-saved-objects-button"
+            refreshJobs={refreshList}
+          />,
+          <ExportJobsFlyout
+            key="export-jobs-flyout"
+            isDisabled={!canCreateJob}
+            currentTab={'anomaly-detector'}
+          />,
+          <ImportJobsFlyout
+            key="import-jobs-flyout"
+            isDisabled={!canCreateJob}
+            onImportComplete={refreshList}
+          />,
+          <NewJobButton key="new-job-button" size="m" />,
         ]}
       >
         <PageTitle

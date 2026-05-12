@@ -14,7 +14,7 @@ import type { FieldMetadataPlain } from '..';
  * See https://www.elastic.co/docs/reference/ecs/ecs-otel-alignment-details for full reference.
  */
 export function getOtelFieldName(fieldMetadata: FieldMetadataPlain): string {
-  const ecsFieldName = fieldMetadata.name;
+  const ecsFieldName = fieldMetadata.flat_name || fieldMetadata.name;
   if (ecsFieldName === '@timestamp') {
     return `@timestamp`; // Special case for `@timestamp` field which should be kept as is.
   }

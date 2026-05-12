@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// TODO: Remove the eslint-disable comments to use the proper types.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import dagre, { graphlib } from '@dagrejs/dagre';
-import type { WorkflowYaml } from '@kbn/workflows';
 import { Position } from '@xyflow/react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { getTriggerLabel } from '../../../shared/lib/graph_utils';
 
 export type NodeType =
@@ -18,11 +21,21 @@ export type NodeType =
   | 'parallel'
   | 'action'
   | 'foreach'
+  | 'while'
   | 'atomic'
   | 'http'
   | 'trigger';
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
+export const flowNodeTypes = [
+  'if',
+  'merge',
+  'parallel',
+  'foreach',
+  'while',
+  'atomic',
+  'http',
+  'trigger',
+];
 
 export function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

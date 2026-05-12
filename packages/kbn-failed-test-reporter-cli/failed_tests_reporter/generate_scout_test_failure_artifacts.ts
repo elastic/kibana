@@ -9,10 +9,10 @@
 
 import Path from 'path';
 
-import globby from 'globby';
-import fs from 'fs';
-import { createHash } from 'crypto';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createHash } from 'crypto';
+import fs from 'fs';
+import globby from 'globby';
 import type { BuildkiteMetadata } from './buildkite_metadata';
 
 const SCOUT_TEST_FAILURE_DIR_PATTERN = '.scout/reports/scout-playwright-test-failures-*';
@@ -41,7 +41,8 @@ export async function generateScoutTestFailureArtifacts({
     const summaryFilePath = Path.join(dirPath, SUMMARY_REPORT_FILENAME);
     // Check if summary JSON exists
     if (!fs.existsSync(summaryFilePath)) {
-      throw new Error(`Summary file not found in: ${dirPath}`);
+      log.info(`Summary file not found in: ${dirPath}, skipping artifact generation`);
+      continue;
     }
 
     const summaryData: Array<{ name: string; htmlReportFilename: string }> = JSON.parse(
@@ -53,7 +54,7 @@ export async function generateScoutTestFailureArtifacts({
       const htmlFilePath = Path.join(dirPath, htmlReportFilename);
       const failureHTML = fs.readFileSync(htmlFilePath, 'utf-8');
 
-      const hash = createHash('md5').update(name).digest('hex'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+      const hash = createHash('sha256').update(name).digest('hex');
       const filenameBase = `${
         process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
       }${hash}`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KueryNode } from '@kbn/es-query';
-import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '@kbn/kql/public/components/typeahead/suggestions_component';
 import { alertMappings } from '@kbn/alerting-plugin/common';
 import { get } from 'lodash';
 

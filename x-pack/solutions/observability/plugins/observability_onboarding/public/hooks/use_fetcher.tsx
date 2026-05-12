@@ -50,18 +50,18 @@ const createAutoAbortedClient = (
   addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): AutoAbortedObservabilityClient => {
   return ((endpoint, options) => {
-    return callObservabilityOnboardingApi(endpoint, {
-      ...options,
-      signal,
-    } as any)
-      .catch((err) => {
+    const callApi = callObservabilityOnboardingApi as unknown as (
+      ...args: unknown[]
+    ) => Promise<unknown>;
+    return callApi(endpoint, { ...options, signal })
+      .catch((err: { body?: { attributes?: unknown } }) => {
         addInspectorRequest({
           status: FETCH_STATUS.FAILURE,
           data: err.body?.attributes,
         });
         throw err;
       })
-      .then((response) => {
+      .then((response: unknown) => {
         addInspectorRequest({
           data: response,
           status: FETCH_STATUS.SUCCESS,
@@ -79,7 +79,7 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
 
 export function useFetcher<TReturn>(
   fn: (callApi: AutoAbortedObservabilityClient) => TReturn,
-  fnDeps: any[],
+  fnDeps: React.DependencyList,
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;

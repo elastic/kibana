@@ -9,24 +9,26 @@ import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import moment from 'moment';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
 import {
   getCustomQueryRuleParams,
   getSimpleMlRule,
   getSimpleRule,
   getThresholdRuleForAlertTesting,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
 
@@ -43,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should not support export action', async () => {
       await createRule(supertest, log, getSimpleRule());
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.export },
@@ -61,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const testRule = getSimpleRule(ruleId);
       await createRule(supertest, log, testRule);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.delete },
@@ -78,14 +80,14 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that rule wasn't deleted
-      await securitySolutionApi.readRule({ query: { rule_id: ruleId } }).expect(200);
+      await detectionsApi.readRule({ query: { rule_id: ruleId } }).expect(200);
     });
 
     it('should handle enable action', async () => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.enable },
@@ -102,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates have not been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
       expect(ruleBody.enabled).toBe(false);
@@ -112,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.disable },
@@ -129,7 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates have not been persisted
-      const { body: ruleBody } = await securitySolutionApi
+      const { body: ruleBody } = await detectionsApi
         .readRule({ query: { rule_id: ruleId } })
         .expect(200);
       expect(ruleBody.enabled).toBe(true);
@@ -140,7 +142,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleToDuplicate = getSimpleRule(ruleId);
       await createRule(supertest, log, ruleToDuplicate);
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: { dry_run: true },
           body: { action: BulkActionTypeEnum.disable },
@@ -157,9 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the rule wasn't duplicated
-      const { body: rulesResponse } = await securitySolutionApi
-        .findRules({ query: {} })
-        .expect(200);
+      const { body: rulesResponse } = await detectionsApi.findRules({ query: {} }).expect(200);
 
       expect(rulesResponse.total).toBe(1);
     });
@@ -170,7 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const tags = ['tag1', 'tag2'];
         await createRule(supertest, log, { ...getSimpleRule(ruleId), tags });
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -195,7 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         // Check that the updates have not been persisted
-        const { body: ruleBody } = await securitySolutionApi
+        const { body: ruleBody } = await detectionsApi
           .readRule({ query: { rule_id: ruleId } })
           .expect(200);
         expect(ruleBody.tags).toEqual(tags);
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
           it(`should return error if ${editAction} action is applied to machine learning rule`, async () => {
             const mlRule = await createRule(supertest, log, getSimpleMlRule());
 
-            const { body } = await securitySolutionApi
+            const { body } = await detectionsApi
               .performRulesBulkAction({
                 query: { dry_run: true },
                 body: {
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -318,7 +318,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -438,7 +438,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -477,7 +477,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -535,7 +535,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const endDate = moment();
         const startDate = endDate.clone().subtract(1, 'h');
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -580,7 +580,7 @@ export default ({ getService }: FtrProviderContext): void => {
           getThresholdRuleForAlertTesting(['*'], 'ruleId')
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -627,7 +627,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: true },
             body: {
@@ -662,6 +662,265 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
           status_code: 500,
+        });
+      });
+    });
+
+    describe('RBAC', () => {
+      describe('@skipInServerless with rules_read_custom_highlighted_fields_all user role', () => {
+        const role = ROLES.rules_read_custom_highlighted_fields_all;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+
+        it('should allow dry run bulk setting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: ruleId })
+          );
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.set_investigation_fields,
+                  value: { field_names: ['host.name', 'user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+        });
+
+        it('should allow dry run bulk adding investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.add_investigation_fields,
+                  value: { field_names: ['user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+        });
+
+        it('should allow dry run bulk deleting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name', 'user.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis.performRulesBulkAction({
+            query: { dry_run: true },
+            body: {
+              ids: [createdRule.id],
+              action: BulkActionTypeEnum.edit,
+              [BulkActionTypeEnum.edit]: [
+                {
+                  type: BulkActionEditTypeEnum.delete_investigation_fields,
+                  value: { field_names: ['user.name'] },
+                },
+              ],
+            },
+          });
+
+          expect(body.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+        });
+      });
+
+      describe('@skipInServerless without rules_read_custom_highlighted_fields_all user role', () => {
+        const role = ROLES.rules_read_investigation_guide_all;
+
+        beforeEach(async () => {
+          await createUserAndRole(getService, role);
+        });
+
+        afterEach(async () => {
+          await deleteUserAndRole(getService, role);
+        });
+
+        it('should fail dry run bulk setting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: ruleId })
+          );
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis
+            .performRulesBulkAction({
+              query: { dry_run: true },
+              body: {
+                ids: [createdRule.id],
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.set_investigation_fields,
+                    value: { field_names: ['host.name', 'user.name'] },
+                  },
+                ],
+              },
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
+            err_code: 'USER_INSUFFICIENT_RULE_PRIVILEGES',
+            message: 'User does not have permission to edit custom highlighted fields',
+            status_code: 500,
+            rules: [
+              {
+                id: createdRule.id,
+                name: createdRule.name,
+              },
+            ],
+          });
+        });
+
+        it('should fail dry run bulk adding investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis
+            .performRulesBulkAction({
+              query: { dry_run: true },
+              body: {
+                ids: [createdRule.id],
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.add_investigation_fields,
+                    value: { field_names: ['user.name'] },
+                  },
+                ],
+              },
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
+            err_code: 'USER_INSUFFICIENT_RULE_PRIVILEGES',
+            message: 'User does not have permission to edit custom highlighted fields',
+            status_code: 500,
+            rules: [
+              {
+                id: createdRule.id,
+                name: createdRule.name,
+              },
+            ],
+          });
+        });
+
+        it('should fail dry run bulk deleting investigation_fields', async () => {
+          const ruleId = 'ruleId';
+          const createdRule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: { field_names: ['host.name', 'user.name'] },
+          });
+
+          const restrictedUser = { username: role, password: 'changeme' };
+          const restrictedApis = detectionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis
+            .performRulesBulkAction({
+              query: { dry_run: true },
+              body: {
+                ids: [createdRule.id],
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.delete_investigation_fields,
+                    value: { field_names: ['user.name'] },
+                  },
+                ],
+              },
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).toEqual({
+            failed: 1,
+            skipped: 0,
+            succeeded: 0,
+            total: 1,
+          });
+          expect(body.attributes.errors[0]).toEqual({
+            err_code: 'USER_INSUFFICIENT_RULE_PRIVILEGES',
+            message: 'User does not have permission to edit custom highlighted fields',
+            status_code: 500,
+            rules: [
+              {
+                id: createdRule.id,
+                name: createdRule.name,
+              },
+            ],
+          });
         });
       });
     });

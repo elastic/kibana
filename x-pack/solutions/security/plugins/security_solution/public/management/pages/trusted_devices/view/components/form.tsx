@@ -35,6 +35,12 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
+import { useGetTrustedDeviceSuggestions } from '../../hooks/use_get_trusted_device_suggestions';
+import { useFetchIndex } from '../../../../../common/containers/source';
+import {
+  DEVICE_EVENTS_INDEX_PATTERN,
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+} from '../../../../../../common/endpoint/constants';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
@@ -62,14 +68,17 @@ interface ValidationResult {
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
   {
+    key: 'windows-mac',
     label: OPERATING_SYSTEM_WINDOWS_AND_MAC,
     value: [OperatingSystem.WINDOWS, OperatingSystem.MAC],
   },
   {
+    key: 'windows',
     label: OS_TITLES[OperatingSystem.WINDOWS],
     value: [OperatingSystem.WINDOWS],
   },
   {
+    key: 'mac',
     label: OS_TITLES[OperatingSystem.MAC],
     value: [OperatingSystem.MAC],
   },
@@ -170,11 +179,12 @@ const ConditionsSection = memo<{
   currentEntry: ExceptionListItemSchema['entries'][0];
   handleFieldChange: (value: string) => void;
   handleOperatorChange: (value: string) => void;
-  handleValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleValueChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
   handleValueBlur: () => void;
   disabled: boolean;
   visitedFields: Record<string, boolean>;
   validationResult: ValidationResult;
+  indexExists: boolean;
 }>(
   ({
     getTestId,
@@ -188,11 +198,22 @@ const ConditionsSection = memo<{
     disabled,
     visitedFields,
     validationResult,
+    indexExists,
   }) => {
     // Get field options based on selected OS
     const availableFieldOptions = useMemo(() => {
       return getFieldOptionsForOs(selectedOs);
     }, [selectedOs]);
+
+    const suggestionsEnabled = !disabled && indexExists;
+
+    const { data: suggestions = [], isLoading: isLoadingSuggestions } =
+      useGetTrustedDeviceSuggestions({
+        field: currentEntry.field || '',
+        enabled: suggestionsEnabled,
+      });
+
+    const showSuggestionsLoading = suggestionsEnabled && isLoadingSuggestions;
 
     return (
       <>
@@ -246,7 +267,7 @@ const ConditionsSection = memo<{
               <EuiFormRow label="Field">
                 <EuiSuperSelect
                   options={availableFieldOptions}
-                  valueOfSelected={currentEntry.field || TrustedDeviceConditionEntryField.USERNAME}
+                  valueOfSelected={currentEntry.field || TrustedDeviceConditionEntryField.DEVICE_ID}
                   onChange={handleFieldChange}
                   data-test-subj={getTestId('fieldSelect')}
                   disabled={disabled}
@@ -266,12 +287,27 @@ const ConditionsSection = memo<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow label="Value">
-                <EuiFieldText
-                  value={('value' in currentEntry ? currentEntry.value : '') || ''}
+                <EuiComboBox
+                  placeholder="Enter or select value"
+                  singleSelection={{ asPlainText: true }}
+                  options={suggestions.map((suggestion, idx) => ({
+                    label: suggestion,
+                    key: `${suggestion}-${idx}`,
+                  }))}
+                  selectedOptions={
+                    'value' in currentEntry && currentEntry.value
+                      ? [{ label: String(currentEntry.value) }]
+                      : []
+                  }
                   onChange={handleValueChange}
                   onBlur={handleValueBlur}
+                  onCreateOption={(searchValue) => {
+                    handleValueChange([{ label: searchValue }]);
+                  }}
+                  isLoading={showSuggestionsLoading}
                   data-test-subj={getTestId('valueField')}
-                  disabled={disabled}
+                  isDisabled={disabled}
+                  isClearable={false}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -284,36 +320,45 @@ const ConditionsSection = memo<{
 ConditionsSection.displayName = 'ConditionsSection';
 
 const getFieldOptionsForOs = (osTypes: OsTypeArray) => {
-  const commonFields = [
-    {
-      value: TrustedDeviceConditionEntryField.HOST,
-      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
-    },
+  const allFields = [
     {
       value: TrustedDeviceConditionEntryField.DEVICE_ID,
       inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_ID],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.DEVICE_TYPE,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.DEVICE_TYPE],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.HOST,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.HOST],
     },
     {
       value: TrustedDeviceConditionEntryField.MANUFACTURER,
       inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER],
     },
     {
+      value: TrustedDeviceConditionEntryField.MANUFACTURER_ID,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.MANUFACTURER_ID],
+    },
+    {
       value: TrustedDeviceConditionEntryField.PRODUCT_ID,
       inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_ID],
+    },
+    {
+      value: TrustedDeviceConditionEntryField.PRODUCT_NAME,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.PRODUCT_NAME],
     },
   ];
 
   if (isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)) {
-    return [
-      {
-        value: TrustedDeviceConditionEntryField.USERNAME,
-        inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
-      },
-      ...commonFields,
-    ];
+    allFields.push({
+      value: TrustedDeviceConditionEntryField.USERNAME,
+      inputDisplay: CONDITION_FIELD_TITLE[TrustedDeviceConditionEntryField.USERNAME],
+    });
   }
 
-  return commonFields;
+  return allFields;
 };
 
 const OPERATOR_OPTIONS = [
@@ -321,12 +366,22 @@ const OPERATOR_OPTIONS = [
   { value: 'match', inputDisplay: OPERATOR_TITLES.matches },
 ];
 
+const DEVICE_EVENTS_INDEX_NAMES = [DEVICE_EVENTS_INDEX_PATTERN];
+
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
     const [hasUserSelectedOs, setHasUserSelectedOs] = useState<boolean>(false);
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     const getTestId = useTestIdGenerator('trustedDevices-form');
+
+    const [isIndexLoading, { indexPatterns }] = useFetchIndex(
+      DEVICE_EVENTS_INDEX_NAMES,
+      true,
+      ENDPOINT_FIELDS_SEARCH_STRATEGY
+    );
+
+    const hasIndexWithFields = !isIndexLoading && indexPatterns?.fields?.length > 0;
 
     const [visitedFields, setVisitedFields] = useState<Record<string, boolean>>({});
 
@@ -463,15 +518,15 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         setHasUserSelectedOs(true);
         setHasFormChanged(true);
 
-        let fieldToUse = currentEntry?.field || TrustedDeviceConditionEntryField.USERNAME;
+        let fieldToUse = currentEntry?.field || TrustedDeviceConditionEntryField.DEVICE_ID;
         let shouldResetValue = false;
 
-        // If current field is USERNAME but USERNAME is not available for new OS selection, reset to HOST
+        // If current field is USERNAME but USERNAME is not available for new OS selection, reset to DEVICE_ID
         if (
           fieldToUse === TrustedDeviceConditionEntryField.USERNAME &&
           !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)
         ) {
-          fieldToUse = TrustedDeviceConditionEntryField.HOST;
+          fieldToUse = TrustedDeviceConditionEntryField.DEVICE_ID;
           shouldResetValue = true;
         }
 
@@ -504,7 +559,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const updateConditionField = useCallback(
       (updates: Record<string, string>) => {
         const currentEntry = currentItem.entries?.[0] || {
-          field: TrustedDeviceConditionEntryField.USERNAME,
+          field: TrustedDeviceConditionEntryField.DEVICE_ID,
           operator: 'included',
           type: 'match',
           value: '',
@@ -523,9 +578,10 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
     const handleFieldChange = useCallback(
       (value: string) => {
-        updateConditionField({ field: value });
+        updateConditionField({ field: value, value: '' });
+        updateVisitedFields({ entries: false });
       },
-      [updateConditionField]
+      [updateConditionField, updateVisitedFields]
     );
 
     const handleOperatorChange = useCallback(
@@ -537,8 +593,9 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleValueChange = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        updateConditionField({ value: event.target.value });
+      (options: Array<EuiComboBoxOptionOption<string>>) => {
+        const value = options.length > 0 ? options[0].label : '';
+        updateConditionField({ value });
       },
       [updateConditionField]
     );
@@ -569,7 +626,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         return entry;
       }
       return {
-        field: TrustedDeviceConditionEntryField.USERNAME,
+        field: TrustedDeviceConditionEntryField.DEVICE_ID,
         operator: 'included' as const,
         type: 'match' as const,
         value: '',
@@ -613,6 +670,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           disabled={disabled}
           visitedFields={visitedFields}
           validationResult={validationResult}
+          indexExists={hasIndexWithFields}
         />
 
         {showAssignmentSection ? (

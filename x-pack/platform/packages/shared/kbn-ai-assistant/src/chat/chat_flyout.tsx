@@ -20,6 +20,8 @@ import type { Conversation, Message } from '@kbn/observability-ai-assistant-plug
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { ApplicationStart } from '@kbn/core/public';
+import { navigateToModelManagementApp } from '@kbn/observability-ai-assistant-plugin/public';
 import { useConversationKey } from '../hooks/use_conversation_key';
 import { useConversationList } from '../hooks/use_conversation_list';
 import { useCurrentUser } from '../hooks/use_current_user';
@@ -160,6 +162,11 @@ export function ChatFlyout({
     setConversationId(id || undefined);
   };
 
+  const navigateToModelManagementAppHandler = (application: ApplicationStart) => {
+    onClose();
+    navigateToModelManagementApp(application);
+  };
+
   return isOpen ? (
     <ObservabilityAIAssistantMultipaneFlyoutContext.Provider
       value={{
@@ -179,6 +186,7 @@ export function ChatFlyout({
             marginTop: breakpoint === 'xs' ? euiTheme.size.xs : euiTheme.size.s,
           },
         }}
+        focusTrapProps={{ returnFocus: false }}
         paddingSize="m"
         pushAnimation
         minWidth={SIDEBAR_WIDTH}
@@ -306,6 +314,7 @@ export function ChatFlyout({
               refreshConversations={refreshConversations}
               updateDisplayedConversation={updateDisplayedConversation}
               onConversationDuplicate={onConversationDuplicate}
+              navigateToModelManagementApp={navigateToModelManagementAppHandler}
             />
           </EuiFlexItem>
 

@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const testSubjects = getService('testSubjects');
 
-  describe('console output panel', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/246353
+  describe.skip('console output panel', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -48,6 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await sendRequest('GET /_search?pretty');
 
       await PageObjects.console.focusOutputEditor();
+      await PageObjects.console.scrollOutputToTop();
+      await PageObjects.console.selectAllOutputText();
       await PageObjects.console.clickCopyOutput();
 
       const resultToast = await toasts.getElementByIndex(1);

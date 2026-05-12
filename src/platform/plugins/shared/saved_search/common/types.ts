@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import type {
   ISearchSource,
   RefreshInterval,
@@ -51,6 +52,7 @@ export interface SavedSearchAttributes {
   description: string;
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
@@ -68,11 +70,17 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabs: DiscoverSessionTabSchema[];
 }
+
+export type SavedSearchByValueAttributes = SavedSearchAttributes & {
+  /** @deprecated References are now extracted/injected by server transforms */
+  references?: Reference[];
+};
 
 /** @internal **/
 export type { SortOrder } from '@kbn/discover-utils';
@@ -106,6 +114,7 @@ export interface DiscoverSessionTab {
   columns: string[];
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   serializedSearchSource: SerializedSearchSourceFields;
@@ -119,8 +128,10 @@ export interface DiscoverSessionTab {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
 }
 
 export interface DiscoverSession {

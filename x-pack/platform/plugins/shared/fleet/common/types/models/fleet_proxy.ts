@@ -22,3 +22,7 @@ export interface NewFleetProxy extends BaseFleetProxy {
 export interface FleetProxy extends NewFleetProxy {
   id: string;
 }
+
+export type ProxyConfig = Pick<FleetProxy, 'url'> & {
+  proxy_headers?: FleetProxy['proxy_headers'];
+};

@@ -14,15 +14,15 @@ import {
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
-import { SloDefinitionClient } from './slo_definition_client';
-import type { SLORepository } from './slo_repository';
+import { SLODefinitionClient } from './slo_definition_client';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 describe('SLODefinitionClient', () => {
   let esClientMock: ElasticsearchClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
-  let mockRepository: jest.Mocked<SLORepository>;
-  let sloDefinitionClient: SloDefinitionClient;
+  let mockRepository: jest.Mocked<SLODefinitionRepository>;
+  let sloDefinitionClient: SLODefinitionClient;
 
   jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 
@@ -31,7 +31,7 @@ describe('SLODefinitionClient', () => {
     loggerMock = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
 
-    sloDefinitionClient = new SloDefinitionClient(mockRepository, esClientMock, loggerMock);
+    sloDefinitionClient = new SLODefinitionClient(mockRepository, esClientMock, loggerMock);
   });
 
   describe('happy path', () => {

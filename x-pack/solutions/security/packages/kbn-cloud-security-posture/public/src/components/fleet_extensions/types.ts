@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
 import type {
   NewPackagePolicy,
-  NewPackagePolicyInput,
   PackageInfo,
+  SINGLE_ACCOUNT,
+  ORGANIZATION_ACCOUNT,
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
-import type {
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
-} from '@kbn/cloud-security-posture-common';
+
 import type {
   AWS_SETUP_FORMAT,
   AZURE_SETUP_FORMAT,
   AWS_PROVIDER,
   GCP_PROVIDER,
   AZURE_PROVIDER,
+  CLOUD_CONNECTOR_TYPE,
 } from './constants';
 
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
@@ -33,6 +29,7 @@ export interface CloudProviderConfig {
   enableOrganization?: boolean;
   getStartedPath: string;
   enabled?: boolean;
+  cloudConnectorEnabledVersion?: string;
 }
 
 export type AwsInputs =
@@ -65,7 +62,6 @@ export interface CloudSetupConfig {
   namespaceSupportEnabled?: boolean;
   overviewPath: string;
   getStartedPath: string;
-  cloudConnectorEnabledVersion: string;
   showCloudTemplates: boolean;
   providers: {
     aws: AwsCloudProviderConfig;
@@ -84,29 +80,15 @@ export type UpdatePolicy = ({
   isExtensionLoaded?: boolean;
 }) => void;
 
-export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
-  packageInfo: PackageInfo;
-  templateName: string;
-}
-
 export interface GetAwsCredentialTypeConfigParams {
   setupTechnology: SetupTechnology | undefined;
   optionId: string;
   showCloudConnectors: boolean;
   provider: CloudProviders;
+  packageInfo?: PackageInfo;
 }
 
-export type CloudConnectorType = 'cloud_connectors';
+export type CloudConnectorType = typeof CLOUD_CONNECTOR_TYPE;
 
 export type CredentialsType = Extract<
   AwsCredentialsType,
@@ -119,7 +101,7 @@ export type AwsSetupFormat =
   | typeof AWS_SETUP_FORMAT.CLOUD_FORMATION
   | typeof AWS_SETUP_FORMAT.MANUAL;
 
-export type AwsAccountType = typeof AWS_SINGLE_ACCOUNT | typeof AWS_ORGANIZATION_ACCOUNT;
+export type AwsAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;
 export type AwsCredentialsType =
   | CloudConnectorType
   | 'assume_role'
@@ -129,7 +111,11 @@ export type AwsCredentialsType =
   | 'cloud_formation';
 
 // GCP types
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json' | 'credentials-none';
+export type GcpCredentialsType =
+  | 'credentials-file'
+  | 'credentials-json'
+  | 'credentials-none'
+  | 'cloud_connectors';
 
 export type GcpCredentialsTypeFieldMap = {
   [key in GcpCredentialsType]: string[];
@@ -150,6 +136,7 @@ export type AzureSetupFormat =
   | typeof AZURE_SETUP_FORMAT.MANUAL;
 
 export type AzureCredentialsType =
+  | 'cloud_connectors'
   | 'arm_template'
   | 'manual' // TODO: remove for stack version 8.13
   | 'service_principal_with_client_secret'
@@ -157,4 +144,4 @@ export type AzureCredentialsType =
   | 'service_principal_with_client_username_and_password'
   | 'managed_identity';
 
-export type AzureAccountType = typeof AZURE_SINGLE_ACCOUNT | typeof AZURE_ORGANIZATION_ACCOUNT;
+export type AzureAccountType = typeof SINGLE_ACCOUNT | typeof ORGANIZATION_ACCOUNT;

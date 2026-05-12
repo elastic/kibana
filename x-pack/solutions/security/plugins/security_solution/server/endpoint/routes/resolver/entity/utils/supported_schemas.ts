@@ -6,8 +6,12 @@
  */
 
 import _ from 'lodash';
-import type { ExperimentalFeatures } from '../../../../../../common';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
+import {
+  CORE_SECURITY_MODULES,
+  MICROSOFT_DEFENDER_MODULES,
+  getSecurityModuleDatasets,
+} from './security_modules';
 
 interface SupportedSchema {
   /**
@@ -31,29 +35,11 @@ interface SupportedSchema {
  * implementation to something similar to how row renderers is implemented.
  */
 
-export const getSupportedSchemas = (
-  experimentalFeatures: ExperimentalFeatures | undefined
-): SupportedSchema[] => {
-  const sentinelOneDataInAnalyzerEnabled = experimentalFeatures?.sentinelOneDataInAnalyzerEnabled;
-  const crowdstrikeDataInAnalyzerEnabled = experimentalFeatures?.crowdstrikeDataInAnalyzerEnabled;
-  const jamfDataInAnalyzerEnabled = experimentalFeatures?.jamfDataInAnalyzerEnabled;
+export const getSupportedSchemas = (): SupportedSchema[] => {
+  const securityModules = [...CORE_SECURITY_MODULES, ...MICROSOFT_DEFENDER_MODULES];
 
-  const supportedFileBeatDataSets = [
-    ...(sentinelOneDataInAnalyzerEnabled
-      ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
-      : []),
-    ...(crowdstrikeDataInAnalyzerEnabled
-      ? ['crowdstrike.falcon', 'crowdstrike.fdr', 'crowdstrike.alert']
-      : []),
-    ...(jamfDataInAnalyzerEnabled
-      ? [
-          'jamf_protect.telemetry',
-          'jamf_protect.alerts',
-          'jamf_protect.web-threat-events',
-          'jamf_protect.web-traffic-events',
-        ]
-      : []),
-  ];
+  // Get all supported filebeat datasets for the active modules
+  const supportedFileBeatDataSets = getSecurityModuleDatasets(securityModules);
 
   return [
     {

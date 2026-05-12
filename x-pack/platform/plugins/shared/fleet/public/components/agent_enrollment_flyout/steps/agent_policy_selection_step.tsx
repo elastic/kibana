@@ -14,10 +14,12 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import type { AgentPolicy } from '../../../types';
 
 import { SelectCreateAgentPolicy } from '../agent_policy_select_create';
+import { MinAgentVersionCallout } from '../min_agent_version_callout';
 
 export const AgentPolicySelectionStep = ({
   agentPolicies,
   selectedPolicy,
+  selectedPolicyId,
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
@@ -26,6 +28,7 @@ export const AgentPolicySelectionStep = ({
 }: {
   agentPolicies: AgentPolicy[];
   selectedPolicy?: AgentPolicy;
+  selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   selectedApiKeyId?: string;
   setSelectedAPIKeyId?: (key?: string) => void;
@@ -40,7 +43,7 @@ export const AgentPolicySelectionStep = ({
       <>
         <SelectCreateAgentPolicy
           agentPolicies={agentPolicies}
-          selectedPolicyId={selectedPolicy?.id}
+          selectedPolicyId={selectedPolicyId}
           setSelectedPolicyId={setSelectedPolicyId}
           withKeySelection={setSelectedAPIKeyId ? true : false}
           selectedApiKeyId={selectedApiKeyId}
@@ -48,6 +51,9 @@ export const AgentPolicySelectionStep = ({
           refreshAgentPolicies={refreshAgentPolicies}
           excludeFleetServer={excludeFleetServer}
         />
+        {selectedPolicy?.min_agent_version != null && (
+          <MinAgentVersionCallout minVersion={selectedPolicy.min_agent_version} />
+        )}
       </>
     ),
   };

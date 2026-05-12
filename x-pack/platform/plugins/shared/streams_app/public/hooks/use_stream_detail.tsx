@@ -8,13 +8,15 @@
 import React from 'react';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import { Streams } from '@kbn/streams-schema';
+import { getSegments, Streams } from '@kbn/streams-schema';
 import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
-import { getAncestorsAndSelf, getSegments } from '@kbn/streams-schema';
+import { getAncestorsAndSelf } from '@kbn/streams-schema';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 import { useStreamsAppBreadcrumbs } from './use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from './use_streams_app_params';
 import { useKibana } from './use_kibana';
+import { StreamNotFoundPrompt } from '../components/stream_not_found_prompt';
 
 export interface StreamDetailContextProviderProps {
   name: string;
@@ -43,10 +45,12 @@ export function StreamDetailContextProvider({
       },
     },
   } = useKibana();
+  const canManageInUi = typeof canManage === 'boolean' ? canManage : false;
   const {
     value: definition,
     loading,
     refresh,
+    error,
   } = useStreamsAppFetch(
     async ({ signal }) => {
       return streamsRepositoryClient
@@ -58,27 +62,36 @@ export function StreamDetailContextProvider({
             },
           },
         })
-        .then((response) => {
+        .then((response): Streams.all.GetResponse => {
           if (Streams.ingest.all.GetResponse.is(response)) {
+            // Replicated streams (via CCR) can still have Kibana-side metadata edited
+            // (description, dashboards, queries, rules) but not ingest-level settings.
+            const isReplicated = response.replicated === true;
             return {
               ...response,
               privileges: {
                 ...response.privileges,
                 // restrict the manage privilege by the Elasticsearch-level data-stream specific privilege and the Kibana-level UI privilege
                 // the UI should only enable manage features if the user has privileges on both levels for the current stream
-                manage: response.privileges.manage && canManage,
+                manage: response.privileges.manage && canManageInUi,
+                lifecycle: response.privileges.lifecycle && !isReplicated,
+                simulate: response.privileges.simulate && !isReplicated,
               },
             };
           }
 
-          if (Streams.GroupStream.GetResponse.is(response)) {
+          if (Streams.QueryStream.GetResponse.is(response)) {
             return response;
           }
 
-          throw new Error('Stream detail only supports Ingest streams and Group streams.');
+          throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },
-    [streamsRepositoryClient, name, canManage]
+    [streamsRepositoryClient, name, canManageInUi],
+    {
+      shouldSuppressFetchErrorToast: (err: Error) =>
+        isHttpFetchError(err) && err.body?.statusCode === 404,
+    }
   );
 
   const {
@@ -91,9 +104,15 @@ export function StreamDetailContextProvider({
     }
     // Build breadcrumbs for each segment in the hierarchy for wired streams
     const ids = getAncestorsAndSelf(key);
-    const segments = getSegments(key);
-    return ids.map((id, idx) => ({
-      title: segments[idx],
+
+    // Helper to get the display name for a stream ID in the breadcrumb
+    const getBreadcrumbTitle = (id: string): string => {
+      const segments = getSegments(id);
+      return segments[segments.length - 1];
+    };
+
+    return ids.map((id) => ({
+      title: getBreadcrumbTitle(id),
       path: `/{key}`,
       params: { path: { key: id } },
     }));
@@ -112,6 +131,10 @@ export function StreamDetailContextProvider({
         <EuiLoadingSpinner size="xxl" />
       </EuiFlexGroup>
     );
+  }
+
+  if (!definition && error && isHttpFetchError(error) && error.body?.statusCode === 404) {
+    return <StreamNotFoundPrompt streamName={name} />;
   }
 
   if (!definition) {

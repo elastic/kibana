@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
@@ -19,10 +19,12 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupRenderer,
+  type ControlPanelsState,
+  type ControlGroupRendererApi,
+} from '@kbn/control-group-renderer';
 import { css } from '@emotion/react';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -99,18 +101,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
     });
   }
 
-  start(core: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
+  start(_: CoreStart, plugins: DiscoverCustomizationExamplesStartPlugins) {
     this.customizationCallback = ({ customizations, stateContainer }) => {
-      customizations.set({
-        id: 'top_nav',
-        defaultMenu: {
-          newItem: { disabled: true },
-          openItem: { disabled: true },
-          alertsItem: { disabled: true },
-          inspectItem: { disabled: true },
-        },
-      });
-
       customizations.set({
         id: 'search_bar',
         CustomDataViewPicker: () => {
@@ -127,23 +119,23 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
           }, []);
 
-          const currentSavedSearch = useObservable(
-            stateContainer.savedSearchState.getCurrent$(),
-            stateContainer.savedSearchState.getState()
-          );
-
           return (
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'discoverCustomizationExamples.logsViewSelectorAriaLabel',
+                  { defaultMessage: 'Logs view selector' }
+                )}
                 button={
                   <EuiButton
+                    size="s"
                     iconType="arrowDown"
                     iconSide="right"
                     fullWidth
                     onClick={togglePopover}
                     data-test-subj="logsViewSelectorButton"
                   >
-                    {currentSavedSearch.title ?? 'None selected'}
+                    {'None selected'}
                   </EuiButton>
                 }
                 isOpen={isPopoverOpen}
@@ -159,8 +151,13 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                       title: 'Saved logs views',
                       items: savedSearches.map((savedSearch) => ({
                         name: savedSearch.attributes.title,
-                        onClick: () => stateContainer.actions.onOpenSavedSearch(savedSearch.id),
-                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                        onClick: () =>
+                          stateContainer.internalState.dispatch(
+                            stateContainer.internalActions.openDiscoverSession({
+                              discoverSessionId: savedSearch.id,
+                            })
+                          ),
+                        icon: 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
                           ''
@@ -178,11 +175,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             ControlGroupRendererApi | undefined
           >();
           const stateStorage = stateContainer.stateStorage;
-          const currentTabId = stateContainer.getCurrentTab().id;
-          const dataView = useObservable(
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()
-          );
+          const currentDataView$ = stateContainer.getCurrentTabDataView$();
+          const dataView = useObservable(currentDataView$, undefined);
 
           useEffect(() => {
             if (!controlGroupAPI) {
@@ -200,9 +194,13 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 stateStorage.set('controlPanels', input.initialChildControlState);
             });
 
-            const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.actions.fetchData();
-            });
+            const filterSubscription = controlGroupAPI.appliedFilters$.subscribe(
+              (newFilters = []) => {
+                stateContainer.internalState.dispatch(
+                  stateContainer.injectCurrentTab(stateContainer.internalActions.fetchData)({})
+                );
+              }
+            );
 
             return () => {
               stateSubscription.unsubscribe();
@@ -246,9 +244,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
                   if (!panels) {
                     builder.addOptionsListControl(initialState, {
-                      dataViewId: dataView?.id!,
+                      data_view_id: dataView?.id!,
                       title: fieldToFilterOn.name.split('.')[0],
-                      fieldName: fieldToFilterOn.name,
+                      field_name: fieldToFilterOn.name,
                       grow: false,
                       width: 'small',
                     });
@@ -261,32 +259,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     },
                   };
                 }}
-                filters={stateContainer.appState.get().filters ?? []}
+                filters={stateContainer.getCurrentTab().appState.filters ?? []}
               />
             </EuiFlexItem>
           );
-        },
-      });
-
-      customizations.set({
-        id: 'flyout',
-        size: 650,
-        title: 'Example custom flyout',
-        actions: {
-          getActionItems: () =>
-            Array.from({ length: 5 }, (_, i) => {
-              const index = i + 1;
-              return {
-                id: `action-item-${index}`,
-                enabled: true,
-                label: `Action ${index}`,
-                iconType: ['faceHappy', 'faceNeutral', 'faceSad', 'infinity', 'bell'].at(
-                  i
-                ) as IconType,
-                dataTestSubj: `customActionItem${index}`,
-                onClick: () => alert(index),
-              };
-            }),
         },
       });
 

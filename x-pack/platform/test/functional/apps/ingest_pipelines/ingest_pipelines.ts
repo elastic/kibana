@@ -42,7 +42,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
+  // Failing: See https://github.com/elastic/kibana/issues/256809
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
@@ -56,10 +58,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Loads the app', async () => {
-      log.debug('Checking for section heading to say Ingest Pipelines.');
+      log.debug('Checking for section heading to say Ingest pipelines.');
 
       const headingText = await pageObjects.ingestPipelines.sectionHeadingText();
-      expect(headingText).to.be('Ingest Pipelines');
+      expect(headingText).to.be('Ingest pipelines');
     });
 
     describe('Pipelines list', () => {
@@ -174,31 +176,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const baseUrl = await browser.getCurrentUrl();
         await browser.navigateTo(baseUrl + '?pipeline=' + TEST_PIPELINE_NAME);
 
-        const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
-        expect(flyoutExists).to.be(true);
+        await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TEST_PIPELINE_NAME);
       });
 
       describe('Pipelines tree', () => {
         it('Displays the structure tree in the details flyout if the pipeline has Pipeline processors', async () => {
-          const baseUrl = await browser.getCurrentUrl();
-          await browser.navigateTo(baseUrl + '?pipeline=' + TREE_PIPELINE_NAME);
+          await pageObjects.ingestPipelines.openPipelineDetailsByName(TREE_PIPELINE_NAME);
 
-          const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
-          expect(flyoutExists).to.be(true);
-
-          const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
-          expect(treeExists).to.be(true);
+          await retry.waitFor('pipeline tree panel to exist', async () => {
+            return await pageObjects.ingestPipelines.pipelineTreeExists();
+          });
+          expect(await pageObjects.ingestPipelines.pipelineTreeExists()).to.be(true);
         });
 
         it("Doesn't display the structure tree in the details flyout if the pipeline has no Pipeline processors", async () => {
-          const baseUrl = await browser.getCurrentUrl();
-          await browser.navigateTo(baseUrl + '?pipeline=' + TEST_PIPELINE_NAME);
+          await pageObjects.ingestPipelines.openPipelineDetailsByName(TEST_PIPELINE_NAME);
 
-          const flyoutExists = await pageObjects.ingestPipelines.detailsFlyoutExists();
-          expect(flyoutExists).to.be(true);
-
-          const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
-          expect(treeExists).to.be(false);
+          await retry.waitFor('pipeline tree panel to not exist', async () => {
+            return !(await pageObjects.ingestPipelines.pipelineTreeExists());
+          });
+          expect(await pageObjects.ingestPipelines.pipelineTreeExists()).to.be(false);
 
           const pipelineTreeNodesExist = await pageObjects.ingestPipelines.pipelineTreeNodesExist([
             TREE_PIPELINE_NAME,
@@ -211,6 +208,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const baseUrl = await browser.getCurrentUrl();
           await browser.navigateTo(baseUrl + '?pipeline=' + TREE_PIPELINE_NAME);
 
+          // Wait for the details flyout to load with the expected pipeline
+          await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TREE_PIPELINE_NAME);
+
           const treeExists = await pageObjects.ingestPipelines.pipelineTreeExists();
           expect(treeExists).to.be(true);
 
@@ -218,6 +218,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(detailsPanelTitle).to.be(TREE_PIPELINE_NAME);
 
           await pageObjects.ingestPipelines.clickTreeNode(TEST_PIPELINE_NAME);
+
+          // Wait for the details panel to update with the new pipeline
+          await pageObjects.ingestPipelines.waitForDetailsFlyoutTitle(TEST_PIPELINE_NAME);
 
           // The details panel should have changed
           detailsPanelTitle = await pageObjects.ingestPipelines.getDetailsFlyoutTitle();

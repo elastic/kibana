@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableSavedSearch } from '../../common/types';
+import type { SerializableSavedSearch, SavedSearchByValueAttributes } from '../../common/types';
 import { convertToSavedSearch } from '../../common/service/get_saved_searches';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
-import type { SavedSearch, SavedSearchByValueAttributes } from './types';
+import type { SavedSearch } from './types';
 
 export interface SavedSearchUnwrapMetaInfo {
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
@@ -32,10 +32,11 @@ export const byValueToSavedSearch = async <
   serializable?: Serialized
 ): Promise<ReturnType> => {
   const { sharingSavedObjectProps, managed } = result.metaInfo ?? {};
-
+  const { references, ...attributes } = result.attributes;
   return await convertToSavedSearch(
     {
-      ...splitReferences(result.attributes),
+      attributes,
+      references: references ?? [],
       savedSearchId: undefined,
       sharingSavedObjectProps,
       managed,
@@ -43,16 +44,4 @@ export const byValueToSavedSearch = async <
     createGetSavedSearchDeps(services),
     serializable
   );
-};
-
-const splitReferences = (attributes: SavedSearchByValueAttributes) => {
-  const { references, ...attrs } = attributes;
-
-  return {
-    references,
-    attributes: {
-      ...attrs,
-      description: attrs.description ?? '',
-    },
-  };
 };

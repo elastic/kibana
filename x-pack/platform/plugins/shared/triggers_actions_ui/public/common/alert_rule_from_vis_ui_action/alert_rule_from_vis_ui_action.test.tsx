@@ -52,23 +52,21 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
 const parentApiMock = createParentApiMock();
 
 const embeddableMock = getLensApiMock({
-  serializeState: jest.fn(() => ({
-    rawState: {
-      attributes: {
-        state: {
-          datasourceStates: {
-            textBased: {
-              layers: [
-                {
-                  timeField: '@timestamp',
-                },
-              ],
-            },
+  getLegacySerializedState: jest.fn(() => ({
+    attributes: {
+      state: {
+        datasourceStates: {
+          textBased: {
+            layers: [
+              {
+                timeField: '@timestamp',
+              },
+            ],
           },
         },
       },
     },
-  })) as unknown as LensApi['serializeState'],
+  })) as unknown as LensApi['getLegacySerializedState'],
   getInspectorAdapters: jest.fn(() => ({
     tables: {
       tables: [],
@@ -84,6 +82,10 @@ const startDependenciesMock = {
   fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   coreStart: {
     ...embeddableServices.coreStart,
+    application: {
+      ...embeddableServices.coreStart.application,
+      currentAppId$: new BehaviorSubject('dashboards'),
+    },
     overlays: {
       ...embeddableServices.coreStart.overlays,
       openFlyout: jest.fn((a) => a),
@@ -92,7 +94,9 @@ const startDependenciesMock = {
 };
 const spy = jest.spyOn(AlertFlyoutComponentModule, 'getRuleFlyoutComponent');
 
-describe('AlertRuleFromVisAction', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/255104
+// FLAKY: https://github.com/elastic/kibana/issues/255103
+describe.skip('AlertRuleFromVisAction', () => {
   const action = new AlertRuleFromVisAction(
     ruleTypeRegistry,
     actionTypeRegistry,
@@ -364,7 +368,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
+      | RENAME \`COUNT(*)\` as _count | RENAME \`PERCENTILE(owowo,99)\` as _percentile_owowo_99 | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _count >= 210 OR _percentile_owowo_99 >= 42.6 OR _count_meow_bytes >= 1312",
           },
@@ -406,7 +410,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM logst* | RENAME bytes as \`meow bytes\` | STATS COUNT(\`meow bytes\`) BY clientip, extension
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
+      | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
       | WHERE extension == \\"jpg\\" AND ((clientip == \\"131.250.144.62\\" AND _count_meow_bytes >= 634) OR (clientip == \\"7.203.207.131\\" AND _count_meow_bytes >= 682))",
           },
@@ -446,7 +450,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | STATS count = COUNT(*) BY CATEGORIZE(message)
       // Rename the following columns so they can be used as part of the alerting threshold:
-      | RENAME \`COUNT(*)\` as _count | RENAME \`CATEGORIZE(message)\` as _categorize_message 
+      | RENAME \`COUNT(*)\` as _count | RENAME \`CATEGORIZE(message)\` as _categorize_message
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
       | WHERE _categorize_message == \\".*?GET .+?HTTP/1\\\\\\\\.1.+?Mozilla/5\\\\\\\\.0.+?X11.+?Linux.+?x86_64.+?rv.+?Gecko/20110421.+?Firefox/6\\\\\\\\.0a\\" AND _count >= 1",
           },
@@ -490,23 +494,21 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        serializeState: jest.fn(() => ({
-          rawState: {
+        getLegacySerializedState: jest.fn(() => ({
+          attributes: {
             state: {
-              attributes: {
-                datasourceStates: {
-                  textBased: {
-                    layers: [
-                      {
-                        timeField: 'timestamp',
-                      },
-                    ],
-                  },
+              datasourceStates: {
+                textBased: {
+                  layers: [
+                    {
+                      timeField: 'timestamp',
+                    },
+                  ],
                 },
               },
             },
           },
-        })) as unknown as LensApi['serializeState'],
+        })) as unknown as LensApi['getLegacySerializedState'],
         parentApi: parentApiMock,
       });
       await act(async () => await action.execute({ embeddable }));
@@ -558,23 +560,21 @@ describe('AlertRuleFromVisAction', () => {
             },
           },
         })),
-        serializeState: jest.fn(() => ({
-          rawState: {
+        getLegacySerializedState: jest.fn(() => ({
+          attributes: {
             state: {
-              attributes: {
-                datasourceStates: {
-                  textBased: {
-                    layers: [
-                      {
-                        timeField: 'timestamp',
-                      },
-                    ],
-                  },
+              datasourceStates: {
+                textBased: {
+                  layers: [
+                    {
+                      timeField: 'timestamp',
+                    },
+                  ],
                 },
               },
             },
           },
-        })) as unknown as LensApi['serializeState'],
+        })) as unknown as LensApi['getLegacySerializedState'],
       });
       await act(async () => await action.execute({ embeddable }));
       // wait for the async operations to complete

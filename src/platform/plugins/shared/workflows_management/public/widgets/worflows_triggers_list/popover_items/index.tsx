@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
 import {
-  EuiPopover,
-  EuiBadgeGroup,
   EuiBadge,
-  EuiPopoverTitle,
+  EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
 
 export interface PopoverItemsProps<T> {
   renderItem: (item: T, index: number, items: T[]) => React.JSX.Element;
@@ -59,7 +59,7 @@ const PopoverWrapper: React.FC<React.ComponentProps<typeof EuiBadgeGroup>> = (pr
 };
 
 /**
- * Component to render list of items in popover, wicth configurabe number of display items by default
+ * Component to render list of items in popover, which has a configurable number of display items by default
  * @param items - array of items to render
  * @param renderItem - render function that render item, arguments: item, index, items[]
  * @param popoverTitle - title of popover
@@ -101,6 +101,7 @@ const PopoverItemsComponent = <T extends unknown>({
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestPrefix}DisplayPopover`}
+        aria-label={popoverTitle ?? popoverButtonTitle}
         button={
           <EuiBadge
             iconType={popoverButtonIcon}

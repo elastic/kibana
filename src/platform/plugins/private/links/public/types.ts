@@ -17,11 +17,11 @@ import type {
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import type { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-publishing';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/dashboard-plugin/server';
 
 import type {
   LINKS_EMBEDDABLE_TYPE,
@@ -47,6 +47,7 @@ export type LinksApi = HasType<typeof LINKS_EMBEDDABLE_TYPE> &
   HasLibraryTransforms<LinksByReferenceState, LinksByValueState>;
 
 export type ResolvedLink = Link & {
+  id: string;
   title: string;
   label?: string;
   description?: string;
@@ -55,5 +56,6 @@ export type ResolvedLink = Link & {
 
 export interface DashboardItem {
   id: string;
-  attributes: Pick<DashboardAttributes, 'title' | 'description' | 'timeRestore'>;
+  title: DashboardState['title'];
+  description?: DashboardState['description'];
 }

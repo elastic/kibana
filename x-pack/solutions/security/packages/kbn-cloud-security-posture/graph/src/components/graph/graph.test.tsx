@@ -61,7 +61,7 @@ const renderGraphPreview = (props: GraphProps) =>
 
 describe('<Graph />', () => {
   describe('basic rendering', () => {
-    it('should render empty graph', () => {
+    it('should render empty graph', async () => {
       const { container } = renderGraphPreview({
         nodes: [],
         edges: [],
@@ -69,11 +69,14 @@ describe('<Graph />', () => {
       });
 
       expect(container).not.toBeNull();
-      const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
-      expect(nodes).toHaveLength(0);
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(0);
+      });
     });
 
-    it('should render hexagon node', () => {
+    it('should render hexagon node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -87,12 +90,14 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const nodeEl = container.querySelector('[data-id="1"]');
-      expect(nodeEl).not.toBeNull();
-      expect(nodeEl).toHaveTextContent('Node 1');
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="1"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Node 1');
+      });
     });
 
-    it('should render label node', () => {
+    it('should render label node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -106,12 +111,34 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const nodeEl = container.querySelector('[data-id="2"]');
-      expect(nodeEl).not.toBeNull();
-      expect(nodeEl).toHaveTextContent('Node 2');
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="2"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Node 2');
+      });
     });
 
-    it('should render 2 nodes connected', () => {
+    it('should render relationship node', async () => {
+      const { container } = renderGraphPreview({
+        nodes: [
+          {
+            id: 'rel1',
+            label: 'Owns',
+            shape: 'relationship',
+          },
+        ],
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const nodeEl = container.querySelector('[data-id="rel1"]');
+        expect(nodeEl).not.toBeNull();
+        expect(nodeEl).toHaveTextContent('Owns');
+      });
+    });
+
+    it('should render 2 nodes connected', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
@@ -138,13 +165,15 @@ describe('<Graph />', () => {
         interactive: false,
       });
 
-      const srcNodeEl = container.querySelector('[data-id="1"]');
-      expect(srcNodeEl).not.toBeNull();
-      expect(srcNodeEl).toHaveTextContent('Node 1');
+      await waitFor(() => {
+        const srcNodeEl = container.querySelector('[data-id="1"]');
+        expect(srcNodeEl).not.toBeNull();
+        expect(srcNodeEl).toHaveTextContent('Node 1');
 
-      const targetNodeEl = container.querySelector('[data-id="2"]');
-      expect(targetNodeEl).not.toBeNull();
-      expect(targetNodeEl).toHaveTextContent('Node 2');
+        const targetNodeEl = container.querySelector('[data-id="2"]');
+        expect(targetNodeEl).not.toBeNull();
+        expect(targetNodeEl).toHaveTextContent('Node 2');
+      });
 
       // TODO: Fix this test (currently it is not rendered in xyflow version 12) https://github.com/xyflow/xyflow/issues/716#issuecomment-2414721074
       // const edgeEl = container.querySelector('[data-id="a(1)-b(2)"]');
@@ -566,6 +595,63 @@ describe('<Graph />', () => {
       });
     });
 
+    it('should center on origin relationship nodes for entity origin scenario', async () => {
+      const props = {
+        nodes: [
+          { id: 'originEntity', label: 'Origin Entity', color: 'primary', shape: 'ellipse' },
+          { id: 'target1', label: 'Target 1', color: 'primary', shape: 'hexagon' },
+          { id: 'target2', label: 'Target 2', color: 'primary', shape: 'rectangle' },
+          { id: 'rel-owns', label: 'Owns', shape: 'relationship', isOrigin: true },
+          {
+            id: 'rel-communicates',
+            label: 'Communicates with',
+            shape: 'relationship',
+            isOrigin: true,
+          },
+          { id: 'rel-depends', label: 'Depends on', shape: 'relationship' },
+        ] as NodeViewModel[],
+        edges: [
+          { id: 'e1', source: 'originEntity', target: 'rel-owns', color: 'primary' },
+          { id: 'e2', source: 'originEntity', target: 'rel-communicates', color: 'primary' },
+          { id: 'e3', source: 'rel-owns', target: 'target1', color: 'primary' },
+          { id: 'e4', source: 'rel-communicates', target: 'target2', color: 'primary' },
+          { id: 'e5', source: 'target1', target: 'rel-depends', color: 'primary' },
+        ] as EdgeViewModel[],
+        interactive: true,
+      };
+
+      const { container, rerender } = render(
+        <TestProviders>
+          <Graph {...props} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(6);
+      });
+
+      const newNodes: NodeViewModel[] = [
+        { id: 'target1a', label: 'Target 1a', color: 'primary', shape: 'diamond' },
+      ];
+
+      rerender(
+        <TestProviders>
+          <Graph {...props} nodes={[...props.nodes, ...newNodes]} />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('.react-flow__nodes .react-flow__node')).toHaveLength(7);
+      });
+
+      await waitFor(() => {
+        expect(mockFitView).toHaveBeenCalledWith({
+          ...fitViewOptions,
+          nodes: [{ id: newNodes[0].id }],
+        });
+      });
+    });
+
     it('should handle mixed valid and invalid node IDs', async () => {
       const onCenterGraphAfterRefresh = jest
         .fn()
@@ -616,6 +702,80 @@ describe('<Graph />', () => {
           ...fitViewOptions,
           nodes: [{ id: 'entity1' }],
         });
+      });
+    });
+  });
+
+  describe('interactive class', () => {
+    const testNodes: NodeViewModel[] = [
+      {
+        id: 'entity1',
+        label: 'Entity Node',
+        color: 'primary',
+        shape: 'hexagon',
+      },
+      {
+        id: 'label1',
+        label: 'Label Node',
+        color: 'primary',
+        shape: 'label',
+      },
+    ];
+
+    it('should add non-interactive class to nodes when interactive is false', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).toHaveClass('non-interactive');
+        });
+      });
+    });
+
+    it('should not add non-interactive class to nodes when interactive is true', async () => {
+      const { container } = renderGraphPreview({
+        nodes: testNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__node');
+        expect(nodes.length).toBeGreaterThan(0);
+
+        nodes.forEach((node) => {
+          expect(node).not.toHaveClass('non-interactive');
+        });
+      });
+    });
+
+    it('should add non-interactive class to relationship nodes when interactive is false', async () => {
+      const nodesWithRelationship: NodeViewModel[] = [
+        ...testNodes,
+        {
+          id: 'rel1',
+          label: 'Owns',
+          shape: 'relationship',
+        },
+      ];
+
+      const { container } = renderGraphPreview({
+        nodes: nodesWithRelationship,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        const relationshipNode = container.querySelector('[data-id="rel1"]');
+        expect(relationshipNode).not.toBeNull();
+        expect(relationshipNode).toHaveClass('non-interactive');
       });
     });
   });

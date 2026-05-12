@@ -10,11 +10,13 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class FleetAgentsOverviewPage {
   page: Page;
 
+  private readonly addMenuButton: Locator;
   private readonly addAgentCTA: Locator;
   private readonly createNewAgentPolicyLink: Locator;
   private readonly createPolicyButton: Locator;
   private readonly agentPolicyDescription: Locator;
   private readonly enrollInFleetRadioButton: Locator;
+  private readonly codeBlockPlatformSelectorButton: Locator;
   private readonly enrollmentCodeBlock: Locator;
   private readonly enrollmentCopyButton: Locator;
   private readonly confirmedAgentEnrollmentCallout: Locator;
@@ -23,11 +25,13 @@ export class FleetAgentsOverviewPage {
   constructor(page: Page) {
     this.page = page;
 
+    this.addMenuButton = this.page.getByTestId('addAgentMenuButton');
     this.addAgentCTA = this.page.getByTestId('addAgentButton');
     this.createNewAgentPolicyLink = this.page.getByTestId('createNewAgentPolicyLink');
     this.createPolicyButton = this.page.getByTestId('createPolicyBtn');
     this.agentPolicyDescription = this.page.getByTestId('agentPolicyDescription');
     this.enrollInFleetRadioButton = this.page.getByTestId('agentFlyoutManagedRadioButtons');
+    this.codeBlockPlatformSelectorButton = this.page.getByTestId('platformSelectorExtended');
     this.enrollmentCodeBlock = this.page.getByTestId('enrollmentInstructionsCodeBlock');
     this.enrollmentCopyButton = this.page.getByTestId('euiCodeBlockCopy');
     this.confirmedAgentEnrollmentCallout = this.page.getByTestId('ConfirmAgentEnrollmentCallOut');
@@ -35,6 +39,7 @@ export class FleetAgentsOverviewPage {
   }
 
   public async clickAddAgentCTA() {
+    await this.addMenuButton.click();
     await this.addAgentCTA.click();
   }
 
@@ -59,6 +64,14 @@ export class FleetAgentsOverviewPage {
 
   public async selectEnrollInFleet() {
     await this.enrollInFleetRadioButton.click();
+  }
+
+  public async clickCodeBlockPlatformSelectorButton() {
+    await this.codeBlockPlatformSelectorButton.click();
+  }
+
+  public async selectPlatform(platform: string) {
+    await this.page.getByText(platform).click();
   }
 
   public async assertVisibilityCodeBlock() {

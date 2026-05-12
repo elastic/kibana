@@ -44,7 +44,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';
@@ -52,6 +52,7 @@ import type { WithEuiThemeProps } from '@elastic/eui/src/services/theme';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { GenericComboBox } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -60,17 +61,13 @@ import {
 } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 import { FilterBadgeGroup } from '../../filter_badge/filter_badge_group';
-import {
-  MIDDLE_TRUNCATION_PROPS,
-  SINGLE_SELECTION_AS_TEXT_PROPS,
-  flattenFilters,
-} from './lib/helpers';
+import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
+import { flattenFilters } from '../lib/flatten_filters';
 import {
   filterBadgeStyle,
   filterPreviewLabelStyle,
   filtersBuilderMaxHeightCss,
 } from './filter_editor.styles';
-import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 const editorFormStyle = css({ padding: euiThemeVars.euiSizeM });
 
@@ -277,6 +274,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                   onChange={this.onCustomLabelChange}
                   placeholder={strings.getAddCustomLabel()}
                   fullWidth
+                  compressed
                 />
               </EuiFormRow>
             </div>
@@ -295,6 +293,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                     onClick={this.onSubmit}
                     isDisabled={!this.isFilterValid()}
                     data-test-subj="saveFilter"
+                    size="s"
                   >
                     {this.props.mode === 'add'
                       ? strings.getAddButtonLabel()
@@ -306,6 +305,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                     flush="right"
                     onClick={this.props.onCancel}
                     data-test-subj="cancelSaveFilter"
+                    size="s"
                   >
                     <FormattedMessage
                       id="unifiedSearch.filter.filterEditor.cancelButtonLabel"
@@ -351,7 +351,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             placeholder={strings.getSelectDataView()}
             options={this.state.indexPatterns}
             selectedOptions={selectedDataView ? [selectedDataView] : []}
-            getLabel={(indexPattern) => indexPattern?.getName()}
+            getLabel={(indexPattern) =>
+              indexPattern?.getName?.() ?? indexPattern?.name ?? indexPattern?.title ?? ''
+            }
             onChange={this.onIndexPatternChange}
             isClearable={false}
             data-test-subj="filterIndexPatternsSelect"
@@ -419,7 +421,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
                   id="unifiedSearch.filter.filterBar.preview"
                   defaultMessage="{icon} Preview"
                   values={{
-                    icon: <EuiIcon type="inspect" size="s" />,
+                    icon: <EuiIcon type="inspect" size="s" aria-hidden={true} />,
                   }}
                 />
               </strong>
@@ -573,7 +575,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       return;
     }
 
-    const newIndex = index || this.state.indexPatterns[0].id!;
+    const newIndex = index || this.state.indexPatterns[0]?.id || this.state.indexPatterns[0]?.title;
     try {
       const body = JSON.parse(queryDsl);
       return buildCustomFilter(newIndex, body, disabled, negate, customLabel || null, $state.store);

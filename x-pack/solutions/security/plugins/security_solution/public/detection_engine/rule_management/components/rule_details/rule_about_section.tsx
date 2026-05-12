@@ -25,7 +25,7 @@ import type {
   Threats,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import type {
   BuildingBlockType,
   RuleResponse,
@@ -103,7 +103,10 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
         content={severityMappingItem.field}
         data-test-subj={`severityOverrideField-${severityMappingItem.value}`}
       >
-        <span data-test-subj="severityOverrideField">{`${severityMappingItem.field}:`}</span>
+        <span
+          tabIndex={0}
+          data-test-subj="severityOverrideField"
+        >{`${severityMappingItem.field}:`}</span>
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>
@@ -111,7 +114,7 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
         content={severityMappingItem.value}
         data-test-subj={`severityOverrideValue-${severityMappingItem.value}`}
       >
-        <OverrideValueColumn>
+        <OverrideValueColumn tabIndex={0}>
           <span data-test-subj="severityOverrideValue">
             {defaultToEmptyTag(severityMappingItem.value)}
           </span>
@@ -119,7 +122,7 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={'sortRight'} />
+      <EuiIcon type={'sortRight'} aria-label="Sort right" />
     </EuiFlexItem>
     <EuiFlexItem>
       <SeverityBadge
@@ -151,13 +154,13 @@ export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingI
         content={riskScoreMappingItem.field}
         data-test-subj={`riskScoreOverrideField-${riskScoreMappingItem.value}`}
       >
-        <span data-test-subj="riskScoreOverridePropertyFieldName">
+        <span tabIndex={0} data-test-subj="riskScoreOverridePropertyFieldName">
           {riskScoreMappingItem.field}
         </span>
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={'sortRight'} />
+      <EuiIcon type={'sortRight'} aria-label="Sort right" />
     </EuiFlexItem>
     <EuiFlexItem data-test-subj="riskScoreOverridePropertyOverride">{ALERT_RISK_SCORE}</EuiFlexItem>
   </EuiFlexGroup>
@@ -512,7 +515,7 @@ export const RuleAboutSection = ({
   });
 
   return (
-    <div>
+    <div className="eui-xScroll">
       <EuiSpacer size="m" />
       <EuiDescriptionList
         type={descriptionListProps.type ?? 'column'}

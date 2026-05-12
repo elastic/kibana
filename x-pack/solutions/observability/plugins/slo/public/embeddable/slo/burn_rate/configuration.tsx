@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormAppend,
   EuiFormRow,
   EuiIconTip,
   EuiTitle,
@@ -24,16 +25,16 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { SloSelector } from '../alerts/slo_selector';
-import type { EmbeddableProps } from './types';
+import type { BurnRateCustomState } from './types';
 
 interface Props {
-  onCreate: (props: EmbeddableProps) => void;
+  onCreate: (state: BurnRateCustomState) => void;
   onCancel: () => void;
 }
 
 interface SloConfig {
-  sloId: string;
-  sloInstanceId: string;
+  slo_id: string;
+  slo_instance_id: string;
 }
 
 export function Configuration({ onCreate, onCancel }: Props) {
@@ -49,10 +50,10 @@ export function Configuration({ onCreate, onCancel }: Props) {
   const isValid = !!selectedSlo && isDurationValid;
 
   const onConfirmClick = () => {
-    if (isValid) {
+    if (isValid && selectedSlo) {
       onCreate({
-        sloId: selectedSlo.sloId,
-        sloInstanceId: selectedSlo.sloInstanceId,
+        slo_id: selectedSlo.slo_id,
+        slo_instance_id: selectedSlo.slo_instance_id,
         duration,
       });
     }
@@ -75,10 +76,10 @@ export function Configuration({ onCreate, onCancel }: Props) {
             <SloSelector
               singleSelection={true}
               hasError={hasError}
-              onSelected={(slo) => {
-                setHasError(slo === undefined);
-                if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+              onSelected={(slos) => {
+                setHasError(slos === undefined);
+                if (slos?.[0]) {
+                  setSelectedSlo(slos[0]);
                 }
               }}
             />
@@ -98,16 +99,18 @@ export function Configuration({ onCreate, onCancel }: Props) {
                 onChange={(e) => setDuration(e.target.value)}
                 isInvalid={!isDurationValid}
                 append={
-                  <EuiIconTip
-                    content={i18n.translate(
-                      'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
-                      {
-                        defaultMessage:
-                          'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
-                      }
-                    )}
-                    type="question"
-                  />
+                  <EuiFormAppend>
+                    <EuiIconTip
+                      content={i18n.translate(
+                        'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
+                        {
+                          defaultMessage:
+                            'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
+                        }
+                      )}
+                      type="question"
+                    />
+                  </EuiFormAppend>
                 }
               />
             </EuiFormRow>

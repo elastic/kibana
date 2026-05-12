@@ -9,12 +9,12 @@ import type { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/serv
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 import type { Logger } from '@kbn/logging';
-import { CrowdstrikeApiDoNotValidateResponsesSchema } from '../../../common/crowdstrike/schema';
+import { CrowdstrikeApiDoNotValidateResponsesSchema } from '@kbn/connector-schemas/crowdstrike';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
   CrowdstrikeGetTokenResponse,
-} from '../../../common/crowdstrike/types';
+} from '@kbn/connector-schemas/crowdstrike';
 
 export class CrowdStrikeTokenManager {
   private connectorToken: ConnectorToken | null = null;
@@ -45,7 +45,7 @@ export class CrowdStrikeTokenManager {
     const now = new Date();
     now.setSeconds(now.getSeconds() - 5); // 5-second safety margin
 
-    const isExpired = token.expiresAt < now.toISOString();
+    const isExpired = token.expiresAt ? token.expiresAt < now.toISOString() : true;
 
     if (isExpired) {
       this.logger.debug(`Cached access token expired at [${token.expiresAt}]`);

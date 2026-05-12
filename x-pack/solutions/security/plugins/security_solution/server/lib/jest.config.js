@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/server/lib'],
   coverageDirectory:
@@ -16,7 +16,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/server/lib/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../__mocks__/module_name_map'),
-  globals: {
-    Uint8Array: Uint8Array,
+  haste: {
+    throwOnModuleCollision: false,
   },
 };

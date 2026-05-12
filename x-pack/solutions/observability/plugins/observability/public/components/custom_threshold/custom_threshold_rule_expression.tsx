@@ -10,13 +10,14 @@ import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCheckbox,
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiRadioGroup,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -40,10 +41,12 @@ import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { useKibana } from '../../utils/kibana_react';
 import {
   Aggregators,
   type CustomThresholdSearchSourceFields,
+  type NoDataBehavior,
 } from '../../../common/custom_threshold_rule/types';
 import type { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import type { AlertContextMeta, AlertParams, MetricExpression } from './types';
@@ -58,10 +61,10 @@ const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = 
   'disableFilter',
 ];
 
-type Props = Omit<
+export type CustomThresholdRuleExpressionProps = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
->;
+> & { kql: KqlPluginStart };
 
 export const defaultExpression: MetricExpression = {
   comparator: COMPARATORS.GREATER_THAN,
@@ -72,16 +75,121 @@ export const defaultExpression: MetricExpression = {
     },
   ],
   threshold: [100],
-  timeSize: 1,
+  timeSize: 5,
   timeUnit: 'm',
 };
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
 
+const convertToMinutes = (timeWindowSize: number, timeWindowUnit: TimeUnitChar): number => {
+  switch (timeWindowUnit) {
+    case 's':
+      return timeWindowSize / 60;
+    case 'm':
+      return timeWindowSize;
+    case 'h':
+      return timeWindowSize * 60;
+    case 'd':
+      return timeWindowSize * 60 * 24;
+    default:
+      return timeWindowSize;
+  }
+};
+
+const RECOMMENDED_TIMESIZE_WARNING = i18n.translate(
+  'xpack.observability.common.expressionItems.forTheLast.recommendedTimeSizeError',
+  {
+    defaultMessage: 'Minimum 5 minutes recommended',
+  }
+);
+
+const getNoDataBehaviorOptions = (hasGroupBy: boolean) => [
+  {
+    id: 'recover',
+    label: (
+      <>
+        {i18n.translate('xpack.observability.customThreshold.rule.noDataBehavior.recover', {
+          defaultMessage: 'Recover active alerts',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.observability.customThreshold.rule.recoverHelpText', {
+            defaultMessage:
+              "Recover any active alerts when data isn't returned for the specified conditions. New alerts won't be created for the missing data.",
+          })}
+        />
+      </>
+    ),
+  },
+  {
+    id: 'alertOnNoData',
+    label: (
+      <>
+        {i18n.translate('xpack.observability.customThreshold.rule.noDataBehavior.alertOnNoData', {
+          defaultMessage: 'Alert me about the missing data',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={
+            hasGroupBy
+              ? i18n.translate('xpack.observability.customThreshold.rule.groupDisappearHelpText', {
+                  defaultMessage:
+                    'Get a "no data" alert when a previously detected group stops returning data. This option is not suitable for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
+                })
+              : i18n.translate('xpack.observability.customThreshold.rule.noDataHelpText', {
+                  defaultMessage:
+                    'Get a "no data" alert when data isn\'t returned during the rule execution period or if the rule does not successfully query Elasticsearch.',
+                })
+          }
+        />
+      </>
+    ),
+  },
+  {
+    id: 'remainActive',
+    label: (
+      <>
+        {i18n.translate('xpack.observability.customThreshold.rule.noDataBehavior.remainActive', {
+          defaultMessage: 'Do nothing',
+        })}{' '}
+        <EuiIconTip
+          size="s"
+          type="question"
+          color="subdued"
+          content={i18n.translate('xpack.observability.customThreshold.rule.remainActiveHelpText', {
+            defaultMessage:
+              'Keep active alerts in their current state, and do not create new alerts for the missing data.',
+          })}
+        />
+      </>
+    ),
+  },
+];
+
+export const getNoDataBehaviorValue = (
+  ruleParams: AlertParams,
+  hasGroupBy: boolean
+): NoDataBehavior => {
+  if (ruleParams.noDataBehavior) {
+    return ruleParams.noDataBehavior;
+  }
+
+  // Derive from legacy params for backwards compatibility
+  if (hasGroupBy) {
+    return ruleParams.alertOnGroupDisappear ? 'alertOnNoData' : 'recover';
+  }
+
+  return ruleParams.alertOnNoData ? 'alertOnNoData' : 'recover';
+};
+
 // eslint-disable-next-line import/no-default-export
-export default function Expressions(props: Props) {
-  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+export default function Expressions(props: CustomThresholdRuleExpressionProps) {
+  const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData, kql } = props;
   const {
     data,
     dataViews,
@@ -97,7 +205,7 @@ export default function Expressions(props: Props) {
     [ruleParams.groupBy]
   );
 
-  const [timeSize, setTimeSize] = useState<number | undefined>(1);
+  const [timeSize, setTimeSize] = useState<number | undefined>(5);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
@@ -106,10 +214,7 @@ export default function Expressions(props: Props) {
   const [paramsError, setParamsError] = useState<SavedObjectNotFound>();
   const [paramsWarning, setParamsWarning] = useState<string>();
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
-  const [isNoDataChecked, setIsNoDataChecked] = useState<boolean>(
-    (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
-      (!hasGroupBy && !!ruleParams.alertOnNoData)
-  );
+
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -117,6 +222,9 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+
+  const isTimeSizeBelowRecommended =
+    timeSize && timeUnit ? convertToMinutes(timeSize, timeUnit) < 5 : false;
 
   const initSearchSource = async (resetDataView: boolean, thisData: DataPublicPluginStart) => {
     let initialSearchConfiguration = resetDataView ? undefined : ruleParams.searchConfiguration;
@@ -205,16 +313,9 @@ export default function Expressions(props: Props) {
       preFillGroupBy();
     }
 
-    if (typeof ruleParams.alertOnNoData === 'undefined') {
-      preFillAlertOnNoData();
+    if (typeof ruleParams.noDataBehavior === 'undefined') {
+      setRuleParams('noDataBehavior', getNoDataBehaviorValue(ruleParams, hasGroupBy));
     }
-    if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      preFillAlertOnGroupDisappear();
-    }
-    setIsNoDataChecked(
-      (hasGroupBy && !!ruleParams.alertOnGroupDisappear) ||
-        (!hasGroupBy && !!ruleParams.alertOnNoData)
-    );
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSelectDataView = useCallback(
@@ -368,12 +469,9 @@ export default function Expressions(props: Props) {
 
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
-      const hasGroup = !!group && group.length > 0;
       setRuleParams('groupBy', group && group.length ? group : '');
-      setRuleParams('alertOnGroupDisappear', hasGroup && isNoDataChecked);
-      setRuleParams('alertOnNoData', !hasGroup && isNoDataChecked);
     },
-    [setRuleParams, isNoDataChecked]
+    [setRuleParams]
   );
 
   const emptyError = useMemo(() => {
@@ -383,6 +481,14 @@ export default function Expressions(props: Props) {
       timeWindowSize: [],
     };
   }, []);
+
+  const forLastExpressionErrors = useMemo(() => {
+    return {
+      aggField: [],
+      timeSizeUnit: [],
+      timeWindowSize: isTimeSizeBelowRecommended ? [RECOMMENDED_TIMESIZE_WARNING] : [],
+    };
+  }, [isTimeSizeBelowRecommended]);
 
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
@@ -435,24 +541,6 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
-  const preFillAlertOnNoData = useCallback(() => {
-    const md = metadata;
-    if (md && typeof md.currentOptions?.alertOnNoData !== 'undefined') {
-      setRuleParams('alertOnNoData', md.currentOptions.alertOnNoData);
-    } else {
-      setRuleParams('alertOnNoData', false);
-    }
-  }, [metadata, setRuleParams]);
-
-  const preFillAlertOnGroupDisappear = useCallback(() => {
-    const md = metadata;
-    if (md && typeof md.currentOptions?.alertOnGroupDisappear !== 'undefined') {
-      setRuleParams('alertOnGroupDisappear', md.currentOptions.alertOnGroupDisappear);
-    } else {
-      setRuleParams('alertOnGroupDisappear', false);
-    }
-  }, [metadata, setRuleParams]);
-
   if (!paramsError && !searchSource) {
     return (
       <>
@@ -467,6 +555,7 @@ export default function Expressions(props: Props) {
       {!!paramsWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
               {
@@ -492,7 +581,12 @@ export default function Expressions(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       {paramsError && !triggerResetDataView ? (
-        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          data-test-subj="thresholdRuleExpressionError"
+        >
           <p>
             {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
               defaultMessage: 'Error fetching search source',
@@ -551,7 +645,7 @@ export default function Expressions(props: Props) {
       <EuiSpacer size="s" />
       <SearchBar
         appName="Custom threshold rule"
-        iconType="search"
+        iconType="magnify"
         indexPatterns={dataView ? [dataView] : undefined}
         allowSavingQueries
         showQueryInput
@@ -594,6 +688,7 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                kql={kql}
                 title={
                   ruleParams.criteria.length === 1 ? (
                     <FormattedMessage
@@ -625,10 +720,11 @@ export default function Expressions(props: Props) {
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
+        errors={forLastExpressionErrors}
         onChangeWindowSize={updateTimeSize}
         onChangeWindowUnit={updateTimeUnit}
         display="fullWidth"
+        isTimeSizeBelowRecommended={isTimeSizeBelowRecommended}
       />
 
       <EuiSpacer size="m" />
@@ -638,7 +734,7 @@ export default function Expressions(props: Props) {
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -673,59 +769,27 @@ export default function Expressions(props: Props) {
           }}
         />
       </EuiFormRow>
-      <EuiSpacer size="s" />
-      <EuiCheckbox
-        id="metrics-alert-group-disappear-toggle"
-        data-test-subj="thresholdRuleAlertOnNoDataCheckbox"
-        label={
-          <>
-            {i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.alertOnGroupDisappear',
-              {
-                defaultMessage: "Alert me if there's no data",
-              }
-            )}{' '}
-            <EuiIconTip
-              type="question"
-              color="subdued"
-              content={
-                hasGroupBy
-                  ? i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger a no data alert if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText',
-                      {
-                        defaultMessage:
-                          'Enable this to trigger a no data alert if the condition(s) do not report any data over the expected time period, or if the alert fails to query Elasticsearch',
-                      }
-                    )
-              }
-            />
-          </>
-        }
-        checked={isNoDataChecked}
-        onChange={(e) => {
-          const checked = e.target.checked;
-          setIsNoDataChecked(checked);
-          if (!checked) {
-            setRuleParams('alertOnGroupDisappear', false);
-            setRuleParams('alertOnNoData', false);
-          } else {
-            if (hasGroupBy) {
-              setRuleParams('alertOnGroupDisappear', true);
-              setRuleParams('alertOnNoData', false);
-            } else {
-              setRuleParams('alertOnGroupDisappear', false);
-              setRuleParams('alertOnNoData', true);
-            }
-          }
-        }}
-      />
+      <EuiSpacer size="m" />
+      <EuiPanel color="subdued">
+        <EuiRadioGroup
+          name="noDataBehavior"
+          legend={{
+            children: (
+              <span>
+                {i18n.translate('xpack.observability.customThreshold.rule.noDataBehaviorLabel', {
+                  defaultMessage: 'If there is no data',
+                })}
+              </span>
+            ),
+          }}
+          options={getNoDataBehaviorOptions(hasGroupBy)}
+          idSelected={getNoDataBehaviorValue(ruleParams, hasGroupBy)}
+          onChange={(id) => {
+            setRuleParams('noDataBehavior', id as NoDataBehavior);
+          }}
+          data-test-subj="thresholdRuleAlertOnNoDataRadioGroup"
+        />
+      </EuiPanel>
       <EuiSpacer size="m" />
     </>
   );

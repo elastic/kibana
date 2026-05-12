@@ -36,10 +36,20 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   }
 );
 
+export const SHOW_EVENT_TOOLTIP = i18n.translate('xpack.cases.caseView.showEventTooltip', {
+  defaultMessage: 'Show event details',
+});
+
 export const MULTIPLE_ALERTS_COMMENT_LABEL_TITLE = (totalAlerts: number) =>
   i18n.translate('xpack.cases.caseView.generatedAlertCommentLabelTitle', {
     values: { totalAlerts },
     defaultMessage: 'added {totalAlerts} alerts from',
+  });
+
+export const MULTIPLE_EVENTS_COMMENT_LABEL_TITLE = (totalEvents: number) =>
+  i18n.translate('xpack.cases.caseView.generatedEventCommentLabelTitle', {
+    values: { totalEvents },
+    defaultMessage: 'added {totalEvents} events',
   });
 
 export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
@@ -134,8 +144,55 @@ export const CUSTOM_FIELDS = i18n.translate('xpack.cases.caseView.userActions.cu
   defaultMessage: 'Custom Fields',
 });
 
+export const OBSERVABLES = i18n.translate('xpack.cases.caseView.userActions.observables', {
+  defaultMessage: 'Observables',
+});
+
 export const USER_ACTION_EDITED = (type: string) =>
   i18n.translate('xpack.cases.caseView.userActions.edited', {
     values: { type },
     defaultMessage: `Edited "{type}"`,
+  });
+
+export const UPDATED_TEMPLATE_FIELDS = i18n.translate(
+  'xpack.cases.caseView.userActions.updatedTemplateFields',
+  {
+    defaultMessage: 'updated template fields',
+  }
+);
+
+export const SET_TEMPLATE_FIELD_LABEL = (fieldName: string, value: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.setTemplateFieldLabel', {
+    defaultMessage: 'set {fieldName} to {value}',
+    values: { fieldName, value },
+  });
+
+export const SET_TEMPLATE_FIELD_LABEL_PREFIX = (fieldName: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.setTemplateFieldLabelPrefix', {
+    defaultMessage: 'set {fieldName} to',
+    values: { fieldName },
+  });
+
+export const EXTENDED_FIELDS = i18n.translate('xpack.cases.caseView.userActions.extendedFields', {
+  defaultMessage: 'Template Fields',
+});
+
+export const APPLIED_TEMPLATE = i18n.translate('xpack.cases.caseView.userActions.appliedTemplate', {
+  defaultMessage: 'Applied Template',
+});
+
+export const APPLIED_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.appliedTemplateLabel',
+  { defaultMessage: 'applied template' }
+);
+
+export const REMOVED_TEMPLATE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.removedTemplateLabel',
+  { defaultMessage: 'removed applied template' }
+);
+
+export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
+  i18n.translate('xpack.cases.caseView.userActions.status.syncedAlertsWithCloseReason', {
+    values: { count },
+    defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });

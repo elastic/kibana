@@ -139,6 +139,19 @@ export const createTestHarness = () => {
         },
       });
 
+      // Even after `/api/status` reports ready, other APIs (like Saved Objects import/export) can briefly return 503
+      // while Kibana finishes transitioning out of preboot / completes startup tasks.
+      await waitForTrue({
+        predicate: async () => {
+          const response = await getSupertest(
+            root,
+            'get',
+            '/api/saved_objects/_find?type=config&per_page=1'
+          ).send();
+          return response.status === 200;
+        },
+      });
+
       started = true;
     },
 
@@ -152,8 +165,8 @@ export const createTestHarness = () => {
       if (stopped)
         throw new Error(`SavedObjectTestHarness already stopped! Cannot call stop again`);
 
-      await root.shutdown();
-      await esServer.stop();
+      await root?.shutdown();
+      await esServer?.stop();
       stopped = true;
     },
 

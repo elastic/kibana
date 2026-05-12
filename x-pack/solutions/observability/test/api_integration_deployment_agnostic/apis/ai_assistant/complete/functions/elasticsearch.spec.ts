@@ -11,8 +11,8 @@ import {
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { LlmProxy } from '../../utils/create_llm_proxy';
 import { createLlmProxy } from '../../utils/create_llm_proxy';
 import {

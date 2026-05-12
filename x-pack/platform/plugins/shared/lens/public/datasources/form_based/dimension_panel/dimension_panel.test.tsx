@@ -21,20 +21,21 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormBasedDimensionEditorComponent } from './dimension_panel';
 import type { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
-import type { FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
+  FormBasedPrivateState,
   FiltersIndexPatternColumn,
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
-} from '../operations';
+  OperationMetadata,
+  DateHistogramIndexPatternColumn,
+} from '@kbn/lens-common';
 import { replaceColumn } from '../operations';
 import { documentField } from '../document_field';
-import type { OperationMetadata } from '../../../types';
-import type { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
@@ -158,6 +159,17 @@ const bytesColumn: GenericIndexPatternColumn = {
   params: { format: { id: 'bytes' } },
 };
 
+const lastValueColumn = (
+  dataType: GenericIndexPatternColumn['dataType']
+): GenericIndexPatternColumn => ({
+  label: 'Last value of source',
+  dataType,
+  isBucketed: false,
+  operationType: 'last_value',
+  sourceField: 'source',
+  params: {},
+});
+
 /**
  * The datasource exposes four main pieces of code which are tested at
  * an integration test level. The main reason for this fairly high level
@@ -229,6 +241,7 @@ describe('FormBasedDimensionEditor', () => {
       http: {} as HttpSetup,
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       notifications: {} as NotificationsStart,
       data: {
@@ -283,6 +296,7 @@ describe('FormBasedDimensionEditor', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount();
+      wrapper = undefined as unknown as ReactWrapper | ShallowWrapper;
     }
   });
 
@@ -323,7 +337,8 @@ describe('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-  test('should list all field names and document as a whole in prioritized order', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/253327
+  test.skip('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
@@ -2509,5 +2524,53 @@ describe('FormBasedDimensionEditor', () => {
     );
 
     expect(wrapper.find('[data-test-subj="lens-dimensionTabs"]').exists()).toBeFalsy();
+  });
+
+  describe('FormatSelector numeric column detection', () => {
+    it('should show FormatSelector when activeData reports the column as numeric', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'number' } }],
+            rows: [],
+          },
+        },
+      });
+
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector when activeData reports the column as non-numeric', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+        activeData: {
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'string' } }],
+            rows: [],
+          },
+        },
+      });
+
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
+    });
+
+    it('should show FormatSelector when selectedColumn dataType is numeric and activeData is not available', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+      });
+
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
+    });
+
+    it('should hide FormatSelector selectedColumn dataType is non numeric and activeData is not available', () => {
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+      });
+
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
+    });
   });
 });

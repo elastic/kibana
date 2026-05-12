@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -31,7 +30,7 @@ const styles = {
   `,
 };
 
-export const AddProcessorButton: FunctionComponent<Props> = (props) => {
+export const AddProcessorButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   const { onClick, renderButtonAsLink } = props;
   const {
     state: { editor },
@@ -43,8 +42,9 @@ export const AddProcessorButton: FunctionComponent<Props> = (props) => {
         data-test-subj="addProcessorButton"
         disabled={editor.mode.id !== 'idle'}
         iconSide="left"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onClick}
+        buttonRef={ref}
       >
         {addProcessorButtonLabel}
       </EuiButtonEmpty>
@@ -57,8 +57,9 @@ export const AddProcessorButton: FunctionComponent<Props> = (props) => {
       css={styles.button}
       disabled={editor.mode.id !== 'idle'}
       onClick={onClick}
+      buttonRef={ref}
     >
       {addProcessorButtonLabel}
     </EuiButton>
   );
-};
+});

@@ -23,6 +23,7 @@ export interface TranslateSplToEsqlInput {
   description: string;
   inlineQuery: string;
   indexPattern: string;
+  knowledgeBase?: string;
 }
 export interface TranslateSplToEsqlOutput {
   esqlQuery?: string;
@@ -45,6 +46,7 @@ export const getTranslateSplToEsql: NodeHelperCreator<
       splunk_query: JSON.stringify(splunkQuery, null, 2),
       index_pattern: input.indexPattern,
       task_description: input.taskDescription,
+      index_knowledge_base: input.knowledgeBase,
     });
     const response = await esqlKnowledgeBase.translate(prompt);
 

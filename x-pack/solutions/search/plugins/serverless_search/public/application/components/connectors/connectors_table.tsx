@@ -144,7 +144,7 @@ export const ConnectorsTable: React.FC = () => {
       name: connectedLabel,
       render: (status: ConnectorStatus) =>
         status === ConnectorStatus.CONNECTED ? (
-          <EuiIcon aria-label={connectedLabel} color="success" type="checkInCircleFilled" />
+          <EuiIcon aria-label={connectedLabel} color="success" type="checkCircleFill" />
         ) : (
           <EuiBadge>
             {i18n.translate('xpack.serverlessSearch.connectors.notConnectedLabel', {
@@ -158,7 +158,7 @@ export const ConnectorsTable: React.FC = () => {
       name: configuredLabel,
       render: (status: ConnectorStatus) =>
         [ConnectorStatus.CONNECTED, ConnectorStatus.CONFIGURED].includes(status) ? (
-          <EuiIcon aria-label={configuredLabel} color="success" type="checkInCircleFilled" />
+          <EuiIcon aria-label={configuredLabel} color="success" type="checkCircleFill" />
         ) : (
           <EuiBadge>
             {i18n.translate('xpack.serverlessSearch.connectors.notConfiguredLabel', {
@@ -242,6 +242,12 @@ export const ConnectorsTable: React.FC = () => {
             data-test-subj="serverlessSearchConnectorsTableSelect"
             onChange={(e) => setFilter(e.currentTarget.value as Filter)}
             options={filterOptions}
+            aria-label={i18n.translate(
+              'xpack.serverlessSearch.connectorsTable.filterSelect.ariaLabel',
+              {
+                defaultMessage: 'Filter',
+              }
+            )}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -281,6 +287,9 @@ export const ConnectorsTable: React.FC = () => {
           pageSize,
           totalItemCount: data?.connectors.length ?? 0,
         }}
+        tableCaption={i18n.translate('xpack.serverlessSearch.connectorsTable.tableCaption', {
+          defaultMessage: 'Connectors table',
+        })}
       />
     </>
   );

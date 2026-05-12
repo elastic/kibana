@@ -23,7 +23,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.drop",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "drop",
         "description": [
           "\nAppends a `DROP` command to the ESQL composer pipeline.\n"
@@ -39,8 +41,11 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
-        "deprecated": false,
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -55,7 +60,10 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/drop.ts",
+            "lineNumber": 19,
+            "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -69,7 +77,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.evaluate",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "evaluate",
         "description": [
           "\nAppends an `EVAL` command to the ESQL composer pipeline.\n"
@@ -85,8 +95,11 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
-        "deprecated": false,
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -101,7 +114,10 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -118,7 +134,10 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/eval.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -132,7 +151,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.from",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "from",
         "description": [],
         "signature": [
@@ -140,8 +161,76 @@
           "QueryPipeline"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
-        "deprecated": false,
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_generate_discover_link/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_generate_discover_link/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/common/create_trace_context_where_clause.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/common/create_trace_context_where_clause.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/get_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/get_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/similar_spans/get_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/similar_spans/get_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/create_span_links_where_clauses.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/create_span_links_where_clauses.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -154,7 +243,10 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+            "lineNumber": 46,
+            "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -166,7 +258,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.keep",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "keep",
         "description": [
           "\nAppends a `KEEP` command to the ESQL composer pipeline.\n"
@@ -182,8 +276,11 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
-        "deprecated": false,
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -198,7 +295,10 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/keep.ts",
+            "lineNumber": 19,
+            "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -212,7 +312,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.limit",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "limit",
         "description": [
           "\nAppends a `LIMIT` command to the ESQL composer pipeline.\n"
@@ -228,8 +330,11 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
-        "deprecated": false,
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -244,6 +349,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/limit.ts",
+            "lineNumber": 19,
+            "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -258,7 +365,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.rename",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "rename",
         "description": [
           "\nAppends an `RENAME` command to the ESQL composer pipeline.\n"
@@ -274,8 +383,11 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
-        "deprecated": false,
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -290,7 +402,10 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -307,7 +422,10 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/rename.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -319,9 +437,75 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
+        "id": "def-common.replaceParameters",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "replaceParameters",
+        "description": [],
+        "signature": [
+          "(queryAst: ",
+          "ESQLAstQueryExpression",
+          ", params: ",
+          "Params",
+          "<string> | undefined) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.replaceParameters.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "queryAst",
+            "description": [],
+            "signature": [
+              "ESQLAstQueryExpression"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "lineNumber": 18,
+            "columnNumber": 35,
+            "deprecated": false,
+            "docsReferencedTypeName": "ESQLAstQueryExpression",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-composer",
+            "id": "def-common.replaceParameters.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Params",
+              "<string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.ts",
+            "lineNumber": 18,
+            "columnNumber": 69,
+            "deprecated": false,
+            "docsReferencedTypeName": "Params",
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.sort",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "sort",
         "description": [
           "\nAppends a `SORT` command to the ESQL composer pipeline.\n"
@@ -337,8 +521,20 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
-        "deprecated": false,
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -351,7 +547,10 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -366,7 +565,10 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -394,6 +596,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -408,6 +612,8 @@
               "SortArgs[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 36,
+            "columnNumber": 22,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -434,6 +640,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -448,6 +656,8 @@
               "SortArgs | TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -463,6 +673,8 @@
               "SortArgs | TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -478,6 +690,8 @@
               "SortArgs[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -490,7 +704,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.stats",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "stats",
         "description": [
           "\nAppends a `STATS` command to the ESQL composer pipeline.\n"
@@ -506,8 +722,20 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
-        "deprecated": false,
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/similar_errors_occurrences_chart/index.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -522,7 +750,10 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -539,7 +770,10 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/stats.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -553,7 +787,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.timeseries",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "timeseries",
         "description": [],
         "signature": [
@@ -561,8 +797,20 @@
           "QueryPipeline"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
-        "deprecated": false,
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "infra",
+            "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics_in_discover_callout/index.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/solutions/observability/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics_in_discover_callout/index.tsx"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -575,7 +823,10 @@
               "(string | string[])[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts",
+            "lineNumber": 39,
+            "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -587,7 +838,9 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.where",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "where",
         "description": [
           "\nAppends a `WHERE` command to the ESQL composer pipeline.\n"
@@ -603,8 +856,112 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
-        "deprecated": false,
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_generate_discover_link/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_generate_discover_link/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_generate_discover_link/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/errors/get_columns.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/errors/get_columns.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/common/create_trace_context_where_clause.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/common/create_trace_context_where_clause.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/common/create_trace_context_where_clause.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/similar_spans/get_esql_query.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/similar_spans/get_esql_query.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/similar_spans/get_esql_query.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/create_span_links_where_clauses/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/span_links/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/trace_waterfall/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/observability/traces/components/trace_waterfall/index.tsx"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/sub_components/similar_errors/get_esql_query/index.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
+          },
+          {
+            "plugin": "unifiedDocViewer",
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/hooks/use_discover_link_and_esql_query/use_discover_link_and_esql_query.test.ts"
+          }
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
@@ -619,7 +976,10 @@
               "TQuery"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TQuery",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -636,7 +996,10 @@
               "TParams | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/where.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TParams",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -653,12 +1016,17 @@
         "parentPluginId": "@kbn/esql-composer",
         "id": "def-common.SortOrder",
         "type": "Enum",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SortOrder",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/sort.ts",
-        "deprecated": false,
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [],
         "initialIsOpen": false
       }
     ],
@@ -677,6 +1045,8 @@
           "Query"
         ],
         "path": "src/platform/packages/shared/kbn-esql-composer/src/types.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -692,7 +1062,10 @@
               "Query"
             ],
             "path": "src/platform/packages/shared/kbn-esql-composer/src/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "Query",
             "trackAdoption": false
           }
         ],

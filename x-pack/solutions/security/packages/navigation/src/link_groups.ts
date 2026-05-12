@@ -14,11 +14,12 @@ export interface SecurityLinkGroupDefinition {
 
 export const SecurityLinkGroup: Record<SecurityGroupName, SecurityLinkGroupDefinition> =
   Object.freeze({
+    [SecurityGroupName.alertDetections]: { title: i18nStrings.alertDetections.title },
     [SecurityGroupName.rules]: { title: i18nStrings.rules.title },
     [SecurityGroupName.explore]: { title: i18nStrings.explore.title },
     [SecurityGroupName.investigations]: { title: i18nStrings.investigations.title },
     [SecurityGroupName.assets]: { title: i18nStrings.assets.title },
     [SecurityGroupName.entityAnalytics]: { title: i18nStrings.entityAnalytics.title },
     [SecurityGroupName.machineLearning]: { title: i18nStrings.ml.title },
-    [SecurityGroupName.launchpad]: { title: i18nStrings.launchpad.title },
+    [SecurityGroupName.launchpad]: { title: i18nStrings.launchPad.title },
   });

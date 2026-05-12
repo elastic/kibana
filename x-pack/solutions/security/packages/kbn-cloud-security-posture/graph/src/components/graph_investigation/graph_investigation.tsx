@@ -17,53 +17,103 @@ import { Panel } from '@xyflow/react';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { Graph, isEntityNode, type NodeProps } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
+import { useIpPopover } from '../node/ips/ips';
+import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
+import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
+import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
+import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
-import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
-import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
-import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
+import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from '../filters/search_filters';
+import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
+import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
-import { isLabelNode, showErrorToast } from '../utils';
+import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { GRAPH_SCOPE_ID } from '../constants';
+import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
-  dataViewId,
-  searchFilters,
-  setSearchFilters,
-  nodeDetailsClickHandler,
+  scopeId,
+  onOpenEventPreview,
+  onOpenNetworkPreview,
 }: {
-  dataViewId: string;
-  searchFilters: Filter[];
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  nodeDetailsClickHandler?: (node: NodeProps) => void;
+  scopeId: string;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 }) => {
-  const nodeExpandPopover = useEntityNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
+  const [currentIps, setCurrentIps] = useState<string[]>([]);
+  const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
+  const [currentEventAnalysis, setCurrentEventAnalysis] = useState<DocumentAnalysisOutput | null>(
+    null
   );
-  const labelExpandPopover = useLabelNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
+  const [currentEventText, setCurrentEventText] = useState<string>('');
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
+  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
+  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
+  const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
+  const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
 
   const openPopoverCallback = useCallback(
     (cb: Function, ...args: unknown[]) => {
-      [nodeExpandPopover, labelExpandPopover].forEach(({ actions: { closePopover } }) => {
-        closePopover();
-      });
+      [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover].forEach(
+        ({ actions: { closePopover } }) => {
+          closePopover();
+        }
+      );
       cb(...args);
     },
-    [nodeExpandPopover, labelExpandPopover]
+    [nodeExpandPopover, labelExpandPopover, ipPopover, countryFlagsPopover, eventPopover]
   );
 
-  return { nodeExpandPopover, labelExpandPopover, openPopoverCallback };
+  const createIpClickHandler = useCallback(
+    (ips: string[]) => (e: React.MouseEvent<HTMLElement>) => {
+      if (!onOpenNetworkPreview) return;
+
+      // For single IP, open preview panel directly
+      if (ips.length === 1) {
+        onOpenNetworkPreview(ips[0], GRAPH_SCOPE_ID);
+      } else {
+        // For multiple IPs, show popover
+        setCurrentIps(ips);
+        openPopoverCallback(ipPopover.onIpClick, e);
+      }
+    },
+    [setCurrentIps, openPopoverCallback, ipPopover.onIpClick, onOpenNetworkPreview]
+  );
+
+  const createCountryClickHandler = useCallback(
+    (countryCodes: string[]) => (e: React.MouseEvent<HTMLElement>) => {
+      setCurrentCountryCodes(countryCodes);
+      openPopoverCallback(countryFlagsPopover.onCountryClick, e);
+    },
+    [setCurrentCountryCodes, openPopoverCallback, countryFlagsPopover.onCountryClick]
+  );
+
+  const createEventClickHandler = useCallback(
+    (analysis: DocumentAnalysisOutput, text: string) =>
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentEventAnalysis(analysis);
+        setCurrentEventText(text);
+        openPopoverCallback(eventPopover.onEventClick, e);
+      },
+    [setCurrentEventAnalysis, setCurrentEventText, openPopoverCallback, eventPopover.onEventClick]
+  );
+
+  return {
+    nodeExpandPopover,
+    labelExpandPopover,
+    ipPopover,
+    countryFlagsPopover,
+    eventPopover,
+    openPopoverCallback,
+    createIpClickHandler,
+    createCountryClickHandler,
+    createEventClickHandler,
+  };
 };
 
 const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
@@ -83,6 +133,12 @@ const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
 
 export interface GraphInvestigationProps {
   /**
+   * Unique identifier for this graph instance, used to scope filter state.
+   * When multiple graphs are open simultaneously, each should have a distinct scopeId.
+   */
+  scopeId: string;
+
+  /**
    * The initial state to use for the graph investigation view.
    */
   initialState: {
@@ -98,8 +154,9 @@ export interface GraphInvestigationProps {
 
     /**
      * The origin events for the graph investigation view.
+     * Optional - may be empty when opening from entity flyout.
      */
-    originEventIds: Array<{
+    originEventIds?: Array<{
       /**
        * The ID of the origin event.
        */
@@ -112,15 +169,37 @@ export interface GraphInvestigationProps {
     }>;
 
     /**
+     * Entity IDs for fetching relationships from entity store.
+     * isOrigin indicates whether this entity is the center/origin of the graph.
+     */
+    entityIds?: Array<{
+      /**
+       * The ID of the entity.
+       */
+      id: string;
+
+      /**
+       * Whether this entity is the origin of the graph (for centering).
+       */
+      isOrigin: boolean;
+    }>;
+
+    /**
      * The initial timerange for the graph investigation view.
      */
     timeRange: TimeRange;
   };
 
   /**
-   * Callback when show event preview is clicked.
+   * Callback when "show entity/event preview" is clicked.
    */
   onOpenEventPreview?: (node: NodeViewModel) => void;
+
+  /**
+   * Callback when IP address is clicked to open network preview panel.
+   * If not provided, multi-IP popover will be shown.
+   */
+  onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
 
   /**
    * Whether to show investigate in timeline action button. Defaults value is false.
@@ -150,13 +229,27 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
+    scopeId,
+    initialState: {
+      indexPatterns,
+      dataView,
+      originEventIds,
+      entityIds,
+      timeRange: initialTimeRange,
+    },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
     onOpenEventPreview,
+    onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
+    const emptyEntityIds = useMemo(() => [], []);
+
+    const { searchFilters, setSearchFilters, entityIdsForApi, pinnedEuids } = useGraphFilters(
+      scopeId,
+      entityIds ?? emptyEntityIds,
+      dataView?.id ?? ''
+    );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -172,7 +265,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       const hasKqlQuery = query.query.trim() !== '';
 
-      if (originEventIds.length > 0) {
+      if (originEventIds && originEventIds.length > 0) {
         if (!hasKqlQuery || searchFilters.length > 0) {
           filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
             return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
@@ -198,7 +291,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           [kquery],
           [...searchFilters],
           getEsQueryConfig(uiSettings as Parameters<typeof getEsQueryConfig>[0])
-        );
+        ) as EsQuery;
       } catch (err) {
         notifications?.toasts.addError(err, {
           title: i18n.translate(
@@ -220,6 +313,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
+          entityIds: entityIdsForApi,
+          pinnedIds: pinnedEuids,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -236,33 +331,41 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
-    const nodeDetailsClickHandler = useCallback(
-      (node: NodeProps) => {
-        onOpenEventPreview?.(node.data);
-      },
-      [onOpenEventPreview]
-    );
-
-    const { nodeExpandPopover, labelExpandPopover, openPopoverCallback } = useGraphPopovers({
-      dataViewId: dataView?.id ?? '',
-      searchFilters,
-      setSearchFilters,
-      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+    const {
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+      eventPopover,
+      openPopoverCallback,
+      createIpClickHandler,
+      createCountryClickHandler,
+      createEventClickHandler,
+    } = useGraphPopovers({
+      scopeId,
+      onOpenEventPreview,
+      onOpenNetworkPreview,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(nodeExpandPopover.onNodeExpandButtonClick, ...args);
     const labelExpandButtonClickHandler = (...args: unknown[]) =>
       openPopoverCallback(labelExpandPopover.onNodeExpandButtonClick, ...args);
-    const isPopoverOpen = [nodeExpandPopover, labelExpandPopover].some(
-      ({ state: { isOpen } }) => isOpen
-    );
+    const isPopoverOpen = [
+      nodeExpandPopover,
+      labelExpandPopover,
+      ipPopover,
+      countryFlagsPopover,
+      eventPopover,
+    ].some(({ state: { isOpen } }) => isOpen);
 
-    const { originEventIdsSet, originAlertIdsSet } = useMemo(() => {
+    const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
       const alertIds = new Set<string>();
+      const entityIdsWithOrigin = new Set<string>();
 
-      originEventIds.forEach(({ id, isAlert }) => {
+      // Add origin event IDs (for centering when opening from events flyout)
+      originEventIds?.forEach(({ id, isAlert }) => {
         if (isAlert) {
           alertIds.add(id);
         } else {
@@ -270,21 +373,57 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }
       });
 
+      // Add entity IDs that are marked as origin (for centering when opening from entity flyout)
+      entityIds?.forEach(({ id, isOrigin }) => {
+        if (isOrigin) {
+          entityIdsWithOrigin.add(id);
+        }
+      });
+
       return {
         originEventIdsSet: eventIds,
         originAlertIdsSet: alertIds,
+        originEntityIdsSet: entityIdsWithOrigin,
       };
-    }, [originEventIds]);
+    }, [originEventIds, entityIds]);
+
+    // Build a map of relationship node IDs to their source entities (from edges)
+    // This allows us to determine if a relationship node is connected to an origin entity
+    const relationshipNodeSources = useMemo(() => {
+      const sourcesMap = new Map<string, string[]>();
+      data?.edges?.forEach((edge) => {
+        // Check if target is a relationship node by checking if it starts with 'rel('
+        if (edge.target.startsWith('rel(')) {
+          const sources = sourcesMap.get(edge.target) || [];
+          sources.push(edge.source);
+          sourcesMap.set(edge.target, sources);
+        }
+      });
+      return sourcesMap;
+    }, [data?.edges]);
 
     const nodes = useMemo(() => {
       return (
         data?.nodes.map((node) => {
           if (isEntityNode(node)) {
+            const nodeIps = node.ips || [];
+            const nodeCountryCodes = node.countryCodes || [];
             return {
               ...node,
               expandButtonClick: nodeExpandButtonClickHandler,
+              ipClickHandler: createIpClickHandler(nodeIps),
+              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
             };
           } else if (isLabelNode(node)) {
+            const nodeIps = node.ips || [];
+            const nodeCountryCodes = node.countryCodes || [];
+            const numEvents = node.uniqueEventsCount ?? 0;
+            const numAlerts = node.uniqueAlertsCount ?? 0;
+            const analysis = analyzeDocuments({
+              uniqueEventsCount: numEvents,
+              uniqueAlertsCount: numAlerts,
+            });
+            const text = node.label ? node.label : node.id;
             const docEventIds: string[] =
               'documentsData' in node && Array.isArray(node.documentsData)
                 ? node.documentsData.flatMap((d) => (d.event ? d.event.id : []))
@@ -294,6 +433,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
               isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
+              ipClickHandler: createIpClickHandler(nodeIps),
+              countryClickHandler: createCountryClickHandler(nodeCountryCodes),
+              eventClickHandler: createEventClickHandler(analysis, text),
+            };
+          } else if (isRelationshipNode(node)) {
+            // Check if any source entity connected to this relationship node is an origin
+            const sources = relationshipNodeSources.get(node.id) || [];
+            const isOrigin = sources.some((sourceId) => originEntityIdsSet.has(sourceId));
+            return {
+              ...node,
+              ...(isOrigin && { isOrigin }),
             };
           }
 
@@ -301,11 +451,17 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data?.nodes, originEventIdsSet, originAlertIdsSet]);
+    }, [
+      data?.nodes,
+      originEventIdsSet,
+      originAlertIdsSet,
+      originEntityIdsSet,
+      relationshipNodeSources,
+    ]);
 
     const searchFilterCounter = useMemo(() => {
       const filtersCount = searchFilters
-        .filter((filter) => !filter.meta.disabled)
+        .filter((filter) => filter.meta && !filter.meta.disabled)
         .reduce((sum, filter) => {
           if (isCombinedFilter(filter)) {
             return sum + filter.meta.params.length;
@@ -321,6 +477,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const searchWarningMessage =
       searchFilters.filter(
         (filter) =>
+          filter.meta &&
           !filter.meta.disabled &&
           filter.meta.negate &&
           filter.meta.controlledBy === CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER
@@ -411,6 +568,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         </EuiFlexGroup>
         <nodeExpandPopover.PopoverComponent />
         <labelExpandPopover.PopoverComponent />
+        <ipPopover.PopoverComponent />
+        <countryFlagsPopover.PopoverComponent />
+        <eventPopover.PopoverComponent />
       </>
     );
   }

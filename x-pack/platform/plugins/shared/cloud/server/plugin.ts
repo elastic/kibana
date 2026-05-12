@@ -122,6 +122,11 @@ export interface CloudSetup {
     defaultSolution?: SolutionId;
   };
   /**
+   * `true` when running on ECE (Elastic Cloud Enterprise).
+   * `false` or `undefined` on ESS or self-managed.
+   */
+  isEce?: boolean;
+  /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
    */
@@ -166,6 +171,10 @@ export interface CloudSetup {
      */
     organizationInTrial?: boolean;
   };
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
 }
 
 /**
@@ -188,15 +197,23 @@ export interface CloudStart {
    * @example `https://cloud.elastic.co` (on the ESS production environment)
    */
   baseUrl?: string;
+  /**
+   * Method to retrieve if the organization is in trial.
+   */
+  isInTrial: () => boolean;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   private readonly config: CloudConfigType;
   private readonly logger: Logger;
+  private readonly trialEndDate: Date | undefined;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<CloudConfigType>();
     this.logger = this.context.logger.get();
+    this.trialEndDate = this.config.trial_end_date
+      ? new Date(this.config.trial_end_date)
+      : undefined;
   }
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
@@ -265,8 +282,12 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                         ),
                       })
                     ),
-                    // Can be added in the future if needed:
-                    // deployment: schema.maybe(schema.object({})),
+                    deployment: schema.maybe(
+                      schema.object({
+                        id: schema.maybe(schema.string()),
+                        name: schema.maybe(schema.string()),
+                      })
+                    ),
                   })
                 ),
               },
@@ -360,7 +381,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
-      trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
+      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
+      trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {
         url: this.config.apm?.url,
@@ -381,6 +403,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         productTier,
         organizationInTrial: this.config.serverless?.in_trial,
       },
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -388,6 +411,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     return {
       ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
+      isInTrial: this.isInTrial.bind(this),
     };
   }
 
@@ -398,5 +422,20 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       baseUrl,
       projectsUrl,
     };
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    if (this.trialEndDate !== undefined) {
+      if (this.config.trial_end_date) {
+        const endDateMs = this.trialEndDate.getTime();
+        if (!Number.isNaN(endDateMs)) {
+          return Date.now() <= endDateMs;
+        } else {
+          this.logger.error('cloud.trial_end_date config value could not be parsed.');
+        }
+      }
+    }
+    return false;
   }
 }

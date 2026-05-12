@@ -11,7 +11,7 @@ import {
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsIndexDataProvider } from '../utils';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -22,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
@@ -55,6 +56,12 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+
+        await supertest
+          .post(`/api/fleet/setup`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
 
         const { body: agentPolicyResponse } = await supertestWithoutAuth
           .post(`/api/fleet/agent_policies`)

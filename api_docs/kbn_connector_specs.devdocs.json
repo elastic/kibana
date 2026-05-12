@@ -1,0 +1,3345 @@
+{
+  "id": "@kbn/connector-specs",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorAuthorizationError",
+        "type": "Class",
+        "tags": [],
+        "label": "ConnectorAuthorizationError",
+        "description": [
+          "\nStructured error thrown when a connector fails to authorize, and should\nspecifically be used to signal that the connector requires user re-authorization."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorAuthorizationError",
+            "text": "ConnectorAuthorizationError"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorAuthorizationError.authMethod",
+            "type": "string",
+            "tags": [],
+            "label": "authMethod",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorAuthorizationError.reason",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "signature": [
+              "\"no_token\" | \"token_expired\" | \"refresh_token_expired\" | \"token_revoked\" | \"refresh_failed\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorAuthorizationError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ConnectorAuthorizationError.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    authMethod,\n    reason,\n    message,\n  }",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                "lineNumber": 31,
+                "columnNumber": 6,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ConnectorAuthorizationError.Unnamed.$1.authMethod",
+                    "type": "string",
+                    "tags": [],
+                    "label": "authMethod",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                    "lineNumber": 32,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ConnectorAuthorizationError.Unnamed.$1.reason",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "reason",
+                    "description": [],
+                    "signature": [
+                      "\"no_token\" | \"token_expired\" | \"refresh_token_expired\" | \"token_revoked\" | \"refresh_failed\""
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                    "lineNumber": 33,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ConnectorAuthorizationError.Unnamed.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+                    "lineNumber": 34,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.createI18nKeys",
+        "type": "Function",
+        "tags": [],
+        "label": "createI18nKeys",
+        "description": [],
+        "signature": [
+          "(connectorId: string) => { metadata: (key: string) => string; config: (key: string) => string; secrets: (key: string) => string; actions: (actionName: string, key: string) => string; validation: (key: string) => string; test: (key: string) => string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.createI18nKeys.$1",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 36,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.getActionNames",
+        "type": "Function",
+        "tags": [],
+        "label": "getActionNames",
+        "description": [],
+        "signature": [
+          "(connector: ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorSpec",
+            "text": "ConnectorSpec"
+          },
+          ") => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 302,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.getActionNames.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ConnectorSpec",
+                "text": "ConnectorSpec"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 302,
+            "columnNumber": 32,
+            "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSpec",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.getConnectorSpec",
+        "type": "Function",
+        "tags": [],
+        "label": "getConnectorSpec",
+        "description": [
+          "\nReturns the ConnectorSpec for a given connector type ID, or undefined if not found."
+        ],
+        "signature": [
+          "(connectorTypeId: string) => ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorSpec",
+            "text": "ConnectorSpec"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/get_connector_spec.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.getConnectorSpec.$1",
+            "type": "string",
+            "tags": [],
+            "label": "connectorTypeId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/get_connector_spec.ts",
+            "lineNumber": 16,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.isConnectorAuthorizationError",
+        "type": "Function",
+        "tags": [],
+        "label": "isConnectorAuthorizationError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => error is ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorAuthorizationError",
+            "text": "ConnectorAuthorizationError"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.isConnectorAuthorizationError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.isToolAction",
+        "type": "Function",
+        "tags": [],
+        "label": "isToolAction",
+        "description": [],
+        "signature": [
+          "(connector: ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorSpec",
+            "text": "ConnectorSpec"
+          },
+          ", actionName: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 306,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.isToolAction.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ConnectorSpec",
+                "text": "ConnectorSpec"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 306,
+            "columnNumber": 30,
+            "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSpec",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.isToolAction.$2",
+            "type": "string",
+            "tags": [],
+            "label": "actionName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 306,
+            "columnNumber": 56,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.normalizeAuthorizationHeaderValue",
+        "type": "Function",
+        "tags": [],
+        "label": "normalizeAuthorizationHeaderValue",
+        "description": [
+          "\nOAuth token responses often use `token_type: \"bearer\"` (lowercase). If the stored header begins\nwith `bearer ` (after trim), rewrites the scheme to `Bearer `; otherwise returns the trimmed value."
+        ],
+        "signature": [
+          "(value: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_authz_code_and_ears_helpers.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.normalizeAuthorizationHeaderValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_authz_code_and_ears_helpers.ts",
+            "lineNumber": 14,
+            "columnNumber": 51,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.requiresCredentials",
+        "type": "Function",
+        "tags": [],
+        "label": "requiresCredentials",
+        "description": [],
+        "signature": [
+          "(auth: { method: string; }) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 294,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.requiresCredentials.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "auth",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 294,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.requiresCredentials.$1.method",
+                "type": "string",
+                "tags": [],
+                "label": "method",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 294,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.supportsStreaming",
+        "type": "Function",
+        "tags": [],
+        "label": "supportsStreaming",
+        "description": [],
+        "signature": [
+          "(connector: ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ConnectorSpec",
+            "text": "ConnectorSpec"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 298,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.supportsStreaming.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ConnectorSpec",
+                "text": "ConnectorSpec"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 298,
+            "columnNumber": 35,
+            "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSpec",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ActionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 206,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.client",
+            "type": "Function",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "AxiosInstance"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ActionContext.client.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "AxiosRequestConfig",
+                  "<D>"
+                ],
+                "path": "node_modules/axios/index.d.ts",
+                "lineNumber": 650,
+                "columnNumber": 44,
+                "deprecated": false,
+                "docsReferencedTypeName": "AxiosRequestConfig",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.connectorUsageCollector",
+            "type": "Unknown",
+            "tags": [],
+            "label": "connectorUsageCollector",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionContext.secrets",
+            "type": "Object",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ActionDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.ActionDefinition",
+            "text": "ActionDefinition"
+          },
+          "<TInput, TOutput, TError>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 195,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.isTool",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTool",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.input",
+            "type": "Object",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<TInput, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TInput, unknown>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.output",
+            "type": "Object",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<TOutput, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TOutput, unknown>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<TError, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TError, unknown>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 199,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.handler",
+            "type": "Function",
+            "tags": [],
+            "label": "handler",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ActionContext",
+                "text": "ActionContext"
+              },
+              ", input: TInput) => Promise<TOutput>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ActionDefinition.handler.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/connector-specs",
+                    "scope": "common",
+                    "docId": "kibKbnConnectorSpecsPluginApi",
+                    "section": "def-common.ActionContext",
+                    "text": "ActionContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 200,
+                "columnNumber": 13,
+                "deprecated": false,
+                "docsReferencedTypeName": "ActionContext",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ActionDefinition.handler.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "TInput"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 200,
+                "columnNumber": 33,
+                "deprecated": false,
+                "docsReferencedTypeName": "TInput",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 201,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.actionGroup",
+            "type": "string",
+            "tags": [],
+            "label": "actionGroup",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ActionDefinition.supportsStreaming",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supportsStreaming",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 203,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthContext",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthContext.getCustomHostSettings",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomHostSettings",
+            "description": [],
+            "signature": [
+              "(url: string) => Readonly<{ ssl?: Readonly<{ verificationMode?: \"none\" | \"full\" | \"certificate\" | undefined; certificateAuthoritiesFiles?: string | string[] | undefined; certificateAuthoritiesData?: string | undefined; } & {}> | undefined; smtp?: Readonly<{ ignoreTLS?: boolean | undefined; requireTLS?: boolean | undefined; } & {}> | undefined; } & { url: string; }> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthContext.getCustomHostSettings.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 103,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthContext.getToken",
+            "type": "Function",
+            "tags": [],
+            "label": "getToken",
+            "description": [],
+            "signature": [
+              "(opts: ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.GetTokenOpts",
+                "text": "GetTokenOpts"
+              },
+              ") => Promise<string | null>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthContext.getToken.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/connector-specs",
+                    "scope": "common",
+                    "docId": "kibKbnConnectorSpecsPluginApi",
+                    "section": "def-common.GetTokenOpts",
+                    "text": "GetTokenOpts"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 104,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "GetTokenOpts",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthContext.proxySettings",
+            "type": "Object",
+            "tags": [],
+            "label": "proxySettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/actions-utils",
+                "scope": "common",
+                "docId": "kibKbnActionsUtilsPluginApi",
+                "section": "def-common.ProxySettings",
+                "text": "ProxySettings"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthContext.sslSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "sslSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/actions-utils",
+                "scope": "common",
+                "docId": "kibKbnActionsUtilsPluginApi",
+                "section": "def-common.SSLSettings",
+                "text": "SSLSettings"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthTypeDef",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthTypeDef",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 251,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.defaults",
+            "type": "Object",
+            "tags": [],
+            "label": "defaults",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 253,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeDef.overrides",
+            "type": "Object",
+            "tags": [],
+            "label": "overrides",
+            "description": [],
+            "signature": [
+              "{ meta?: Record<string, Record<string, unknown>> | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 254,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthTypeSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthTypeSpec",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.AuthTypeSpec",
+            "text": "AuthTypeSpec"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.normalizeSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "normalizeSchema",
+            "description": [],
+            "signature": [
+              "((defaults?: Record<string, unknown> | undefined) => ",
+              "ZodObject",
+              "<Record<string, ",
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>>, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.normalizeSchema.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "defaults",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 115,
+                "columnNumber": 22,
+                "deprecated": false,
+                "docsReferencedTypeName": "Record",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.configure",
+            "type": "Function",
+            "tags": [],
+            "label": "configure",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.AuthContext",
+                "text": "AuthContext"
+              },
+              ", axiosInstance: ",
+              "AxiosInstance",
+              ", secret: T) => Promise<",
+              "AxiosInstance",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/connector-specs",
+                    "scope": "common",
+                    "docId": "kibKbnConnectorSpecsPluginApi",
+                    "section": "def-common.AuthContext",
+                    "text": "AuthContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 116,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "AuthContext",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "axiosInstance",
+                "description": [],
+                "signature": [
+                  "AxiosInstance"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 116,
+                "columnNumber": 33,
+                "deprecated": false,
+                "docsReferencedTypeName": "AxiosInstance",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.AuthTypeSpec.configure.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "secret",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 116,
+                "columnNumber": 63,
+                "deprecated": false,
+                "docsReferencedTypeName": "T",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.AuthTypeSpec.authMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "authMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.AuthMode",
+                "text": "AuthMode"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorMetadata",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.docsUrl",
+            "type": "string",
+            "tags": [],
+            "label": "docsUrl",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.minimumLicense",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "minimumLicense",
+            "description": [],
+            "signature": [
+              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.isTechnicalPreview",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTechnicalPreview",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorMetadata.supportedFeatureIds",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedFeatureIds",
+            "description": [],
+            "signature": [
+              "(\"endpointSecurity\" | \"alerting\" | \"cases\" | \"uptime\" | \"siem\" | \"generativeAIForSecurity\" | \"generativeAIForObservability\" | \"generativeAIForSearchPlayground\" | \"workflows\" | \"agentBuilder\")[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorPolicies",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorPolicies",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 183,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorPolicies.rateLimit",
+            "type": "Object",
+            "tags": [],
+            "label": "rateLimit",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.RateLimitPolicy",
+                "text": "RateLimitPolicy"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 184,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorPolicies.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.PaginationPolicy",
+                "text": "PaginationPolicy"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorPolicies.retry",
+            "type": "Object",
+            "tags": [],
+            "label": "retry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.RetryPolicy",
+                "text": "RetryPolicy"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 186,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorPolicies.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ErrorPolicy",
+                "text": "ErrorPolicy"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 187,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorPolicies.streaming",
+            "type": "Object",
+            "tags": [],
+            "label": "streaming",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.StreamingPolicy",
+                "text": "StreamingPolicy"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorSpec",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 259,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ConnectorMetadata",
+                "text": "ConnectorMetadata"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 260,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.auth",
+            "type": "Object",
+            "tags": [],
+            "label": "auth",
+            "description": [],
+            "signature": [
+              "{ types: (string | ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.AuthTypeDef",
+                "text": "AuthTypeDef"
+              },
+              ")[]; headers?: Record<string, ",
+              "AxiosHeaderValue",
+              "> | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 262,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodObject",
+              "<",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodLooseShape, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 269,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.validateUrls",
+            "type": "Object",
+            "tags": [],
+            "label": "validateUrls",
+            "description": [],
+            "signature": [
+              "{ fields?: string[] | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 271,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.policies",
+            "type": "Object",
+            "tags": [],
+            "label": "policies",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ConnectorPolicies",
+                "text": "ConnectorPolicies"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 275,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any, any, any>; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 278,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.test",
+            "type": "Object",
+            "tags": [],
+            "label": "test",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ConnectorTest",
+                "text": "ConnectorTest"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 280,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.transformations",
+            "type": "Object",
+            "tags": [],
+            "label": "transformations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.Transformations",
+                "text": "Transformations"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 282,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorSpec.skill",
+            "type": "string",
+            "tags": [],
+            "label": "skill",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 287,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorTest",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorTest",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 238,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorTest.handler",
+            "type": "Function",
+            "tags": [],
+            "label": "handler",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.ActionContext",
+                "text": "ActionContext"
+              },
+              ") => Promise<{ [key: string]: unknown; ok: boolean; message?: string | undefined; }>"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ConnectorTest.handler.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/connector-specs",
+                    "scope": "common",
+                    "docId": "kibKbnConnectorSpecsPluginApi",
+                    "section": "def-common.ActionContext",
+                    "text": "ActionContext"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 239,
+                "columnNumber": 13,
+                "deprecated": false,
+                "docsReferencedTypeName": "ActionContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ConnectorTest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 244,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.EarsGetTokenOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "EarsGetTokenOpts",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.EarsGetTokenOpts.authType",
+            "type": "string",
+            "tags": [],
+            "label": "authType",
+            "description": [],
+            "signature": [
+              "\"ears\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.EarsGetTokenOpts.provider",
+            "type": "string",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.EarsGetTokenOpts.scope",
+            "type": "string",
+            "tags": [],
+            "label": "scope",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ErrorPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "ErrorPolicy",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ErrorPolicy.classifyError",
+            "type": "Function",
+            "tags": [],
+            "label": "classifyError",
+            "description": [],
+            "signature": [
+              "((error: { status?: number | undefined; message?: string | undefined; }) => \"unknown\" | \"user\" | \"system\") | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.ErrorPolicy.classifyError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 172,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ErrorPolicy.classifyError.$1.status",
+                    "type": "number",
+                    "tags": [],
+                    "label": "status",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                    "lineNumber": 172,
+                    "columnNumber": 29,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.ErrorPolicy.classifyError.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                    "lineNumber": 172,
+                    "columnNumber": 46,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ErrorPolicy.userErrorCodes",
+            "type": "Array",
+            "tags": [],
+            "label": "userErrorCodes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.ErrorPolicy.systemErrorCodes",
+            "type": "Array",
+            "tags": [],
+            "label": "systemErrorCodes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 174,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.OAuthGetTokenOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "OAuthGetTokenOpts",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.authType",
+            "type": "string",
+            "tags": [],
+            "label": "authType",
+            "description": [],
+            "signature": [
+              "\"oauth\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.tokenUrl",
+            "type": "string",
+            "tags": [],
+            "label": "tokenUrl",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.scope",
+            "type": "string",
+            "tags": [],
+            "label": "scope",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.clientId",
+            "type": "string",
+            "tags": [],
+            "label": "clientId",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.clientSecret",
+            "type": "string",
+            "tags": [],
+            "label": "clientSecret",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.additionalFields",
+            "type": "Object",
+            "tags": [],
+            "label": "additionalFields",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.tokenEndpointAuthMethod",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "tokenEndpointAuthMethod",
+            "description": [],
+            "signature": [
+              "\"client_secret_post\" | \"client_secret_basic\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.accessTokenPath",
+            "type": "string",
+            "tags": [],
+            "label": "accessTokenPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.tokenTypePath",
+            "type": "string",
+            "tags": [],
+            "label": "tokenTypePath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.OAuthGetTokenOpts.tokenType",
+            "type": "string",
+            "tags": [],
+            "label": "tokenType",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.PaginationPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaginationPolicy",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 146,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.strategy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strategy",
+            "description": [],
+            "signature": [
+              "\"none\" | \"cursor\" | \"offset\" | \"link_header\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.parameterLocation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "parameterLocation",
+            "description": [],
+            "signature": [
+              "\"body\" | \"headers\" | \"query_params\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.resultPath",
+            "type": "string",
+            "tags": [],
+            "label": "resultPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.cursorParam",
+            "type": "string",
+            "tags": [],
+            "label": "cursorParam",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.cursorPath",
+            "type": "string",
+            "tags": [],
+            "label": "cursorPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.offsetParam",
+            "type": "string",
+            "tags": [],
+            "label": "offsetParam",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.limitParam",
+            "type": "string",
+            "tags": [],
+            "label": "limitParam",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.linkHeaderName",
+            "type": "string",
+            "tags": [],
+            "label": "linkHeaderName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.pageSizeParam",
+            "type": "string",
+            "tags": [],
+            "label": "pageSizeParam",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.PaginationPolicy.defaultPageSize",
+            "type": "number",
+            "tags": [],
+            "label": "defaultPageSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.RateLimitPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "RateLimitPolicy",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 138,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RateLimitPolicy.strategy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strategy",
+            "description": [],
+            "signature": [
+              "\"status_code\" | \"header\" | \"response_body\""
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RateLimitPolicy.codes",
+            "type": "Array",
+            "tags": [],
+            "label": "codes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RateLimitPolicy.remainingHeader",
+            "type": "string",
+            "tags": [],
+            "label": "remainingHeader",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RateLimitPolicy.resetHeader",
+            "type": "string",
+            "tags": [],
+            "label": "resetHeader",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RateLimitPolicy.bodyPath",
+            "type": "string",
+            "tags": [],
+            "label": "bodyPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.RetryPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "RetryPolicy",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RetryPolicy.retryOnStatusCodes",
+            "type": "Array",
+            "tags": [],
+            "label": "retryOnStatusCodes",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RetryPolicy.customRetryCondition",
+            "type": "Function",
+            "tags": [],
+            "label": "customRetryCondition",
+            "description": [],
+            "signature": [
+              "((error: { status?: number | undefined; message?: string | undefined; response?: unknown; }) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.RetryPolicy.customRetryCondition.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 161,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.RetryPolicy.customRetryCondition.$1.status",
+                    "type": "number",
+                    "tags": [],
+                    "label": "status",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                    "lineNumber": 162,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.RetryPolicy.customRetryCondition.$1.message",
+                    "type": "string",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                    "lineNumber": 163,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.RetryPolicy.customRetryCondition.$1.response",
+                    "type": "Unknown",
+                    "tags": [],
+                    "label": "response",
+                    "description": [],
+                    "signature": [
+                      "unknown"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                    "lineNumber": 164,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RetryPolicy.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RetryPolicy.backoffStrategy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "backoffStrategy",
+            "description": [],
+            "signature": [
+              "\"linear\" | \"fixed\" | \"exponential\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.RetryPolicy.initialDelay",
+            "type": "number",
+            "tags": [],
+            "label": "initialDelay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.StreamingPolicy",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamingPolicy",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 177,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.StreamingPolicy.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.StreamingPolicy.mechanism",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mechanism",
+            "description": [],
+            "signature": [
+              "\"sse\" | \"chunked\" | \"websocket\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 179,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.StreamingPolicy.parser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "parser",
+            "description": [],
+            "signature": [
+              "\"text\" | \"custom\" | \"json\" | \"ndjson\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.TemplateRendering",
+        "type": "Interface",
+        "tags": [],
+        "label": "TemplateRendering",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 218,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.TemplateRendering.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.TemplateRendering.format",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "format",
+            "description": [],
+            "signature": [
+              "\"custom\" | \"mustache\" | \"handlebars\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.TemplateRendering.escaping",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "escaping",
+            "description": [],
+            "signature": [
+              "\"none\" | \"html\" | \"markdown\" | \"json\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 221,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.Transformations",
+        "type": "Interface",
+        "tags": [],
+        "label": "Transformations",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 224,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.Transformations.templates",
+            "type": "Object",
+            "tags": [],
+            "label": "templates",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/connector-specs",
+                "scope": "common",
+                "docId": "kibKbnConnectorSpecsPluginApi",
+                "section": "def-common.TemplateRendering",
+                "text": "TemplateRendering"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.Transformations.serializeRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "serializeRequest",
+            "description": [],
+            "signature": [
+              "((data: unknown) => unknown) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 226,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.Transformations.serializeRequest.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 226,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.Transformations.deserializeResponse",
+            "type": "Function",
+            "tags": [],
+            "label": "deserializeResponse",
+            "description": [],
+            "signature": [
+              "((data: unknown) => unknown) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 227,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.Transformations.deserializeResponse.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+                "lineNumber": 227,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.Transformations.interceptors",
+            "type": "Object",
+            "tags": [],
+            "label": "interceptors",
+            "description": [],
+            "signature": [
+              "{ request?: ((config: unknown) => unknown) | undefined; response?: ((response: unknown) => unknown) | undefined; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.AuthMode",
+        "type": "Type",
+        "tags": [],
+        "label": "AuthMode",
+        "description": [],
+        "signature": [
+          "\"per-user\" | \"shared\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.ConnectorAuthorizationReason",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorAuthorizationReason",
+        "description": [],
+        "signature": [
+          "\"no_token\" | \"token_expired\" | \"refresh_token_expired\" | \"token_revoked\" | \"refresh_failed\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/errors/connector_authorization_error.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.EARS_AUTH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EARS_AUTH_ID",
+        "description": [],
+        "signature": [
+          "\"ears\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.GetTokenOpts",
+        "type": "Type",
+        "tags": [],
+        "label": "GetTokenOpts",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.OAuthGetTokenOpts",
+            "text": "OAuthGetTokenOpts"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.EarsGetTokenOpts",
+            "text": "EarsGetTokenOpts"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.NormalizedAuthType",
+        "type": "Type",
+        "tags": [],
+        "label": "NormalizedAuthType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/connector-specs",
+            "scope": "common",
+            "docId": "kibKbnConnectorSpecsPluginApi",
+            "section": "def-common.AuthTypeSpec",
+            "text": "AuthTypeSpec"
+          },
+          "<Record<string, unknown>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.OAUTH_AUTHORIZATION_CODE_AUTH_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OAUTH_AUTHORIZATION_CODE_AUTH_ID",
+        "description": [],
+        "signature": [
+          "\"oauth_authorization_code\""
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_authorization_code.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.EARS_PROVIDERS",
+        "type": "Object",
+        "tags": [],
+        "label": "EARS_PROVIDERS",
+        "description": [],
+        "signature": [
+          "readonly [\"google\", \"microsoft\", \"slack\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.RETRY_GATEWAY_ERRORS",
+        "type": "Object",
+        "tags": [],
+        "label": "RETRY_GATEWAY_ERRORS",
+        "description": [],
+        "signature": [
+          "readonly [502, 503, 504]"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 135,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.RETRY_RATE_LIMIT",
+        "type": "Object",
+        "tags": [],
+        "label": "RETRY_RATE_LIMIT",
+        "description": [],
+        "signature": [
+          "readonly [429, 503]"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 133,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.RETRY_SERVER_ERRORS",
+        "type": "Object",
+        "tags": [],
+        "label": "RETRY_SERVER_ERRORS",
+        "description": [],
+        "signature": [
+          "readonly [500, 502, 503, 504]"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 134,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.RETRY_TIMEOUT_AND_RATE_LIMIT",
+        "type": "Object",
+        "tags": [],
+        "label": "RETRY_TIMEOUT_AND_RATE_LIMIT",
+        "description": [],
+        "signature": [
+          "readonly [408, 429, 503]"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec.ts",
+        "lineNumber": 136,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/connector-specs",
+        "id": "def-common.UISchemas",
+        "type": "Object",
+        "tags": [],
+        "label": "UISchemas",
+        "description": [
+          "\nPre-configured schema types for common field patterns\nWHY: Reduces boilerplate for frequently used field types\nThese use Zod's built-in .meta() to attach UI metadata\n"
+        ],
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+        "lineNumber": 95,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.UISchemas.secret",
+            "type": "Function",
+            "tags": [],
+            "label": "secret",
+            "description": [
+              "/**\n   * Secret/password field - automatically masked in UI\n   * USED BY: All connectors with API keys/tokens (Slack, OpenAI, Jira, etc.)\n   * @example secrets: { apiKey: UISchemas.secret().describe(\"API Key\") }\n   */"
+            ],
+            "signature": [
+              "(placeholder?: string | undefined) => ",
+              "ZodString"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.UISchemas.secret.$1",
+                "type": "string",
+                "tags": [],
+                "label": "placeholder",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+                "lineNumber": 101,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.UISchemas.textarea",
+            "type": "Function",
+            "tags": [],
+            "label": "textarea",
+            "description": [
+              "/**\n   * Multi-line text field\n   * USED BY: Webhook, Slack (message body), Teams (message text)\n   * @example message: UISchemas.textarea({ rows: 5 }).describe(\"Message body\")\n   */"
+            ],
+            "signature": [
+              "(options?: { rows?: number | undefined; } | undefined) => ",
+              "ZodString"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.UISchemas.textarea.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+                "lineNumber": 113,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/connector-specs",
+                    "id": "def-common.UISchemas.textarea.$1.rows",
+                    "type": "number",
+                    "tags": [],
+                    "label": "rows",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+                    "lineNumber": 113,
+                    "columnNumber": 26,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.UISchemas.json",
+            "type": "Function",
+            "tags": [],
+            "label": "json",
+            "description": [
+              "/**\n   * JSON editor field with syntax highlighting\n   * USED BY: Webhook (body), OpenAI (functions), Slack (blocks)\n   * @example config: UISchemas.json().describe(\"Configuration object\")\n   */"
+            ],
+            "signature": [
+              "() => ",
+              "ZodString"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.UISchemas.code",
+            "type": "Function",
+            "tags": [],
+            "label": "code",
+            "description": [
+              "/**\n   * Code editor field\n   * USED BY: Tines (custom scripts), TheHive (case templates)\n   * @example script: UISchemas.code(\"javascript\").describe(\"Custom script\")\n   */"
+            ],
+            "signature": [
+              "(language: \"python\" | \"javascript\" | \"typescript\") => ",
+              "ZodString"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.UISchemas.code.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "language",
+                "description": [],
+                "signature": [
+                  "\"python\" | \"javascript\" | \"typescript\""
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+                "lineNumber": 134,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/connector-specs",
+            "id": "def-common.UISchemas.url",
+            "type": "Function",
+            "tags": [],
+            "label": "url",
+            "description": [
+              "/**\n   * URL field with validation\n   * USED BY: All webhook-based connectors (Webhook, Cases Webhook, Slack webhook)\n   * @example webhookUrl: UISchemas.url().describe(\"Webhook URL\")\n   */"
+            ],
+            "signature": [
+              "(placeholder?: string | undefined) => ",
+              "ZodURL"
+            ],
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/connector-specs",
+                "id": "def-common.UISchemas.url.$1",
+                "type": "string",
+                "tags": [],
+                "label": "placeholder",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
+                "lineNumber": 145,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -33,8 +33,6 @@ export const TagBadge: <T extends TagAttributes>(props: TagBadgeProps<T>) => Rea
             tagName: tag.name,
           },
         }),
-        iconOnClick: () => undefined,
-        iconOnClickAriaLabel: '',
       }
     : {};
 

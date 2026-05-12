@@ -21,6 +21,19 @@ interface GetTranslationResultNodeParams {
 
 export const getTranslationResultNode = (params: GetTranslationResultNodeParams): GraphNode => {
   return async (state) => {
+    if (state.parsed_panel.viz_type === 'markdown') {
+      const panelJSON = createMarkdownPanel(state.parsed_panel.query, state.parsed_panel);
+
+      return {
+        elastic_panel: panelJSON,
+        comments: [
+          generateAssistantComment(
+            `Successfully translated Markdown Panel: <b>${state.parsed_panel.title}</b>`
+          ),
+        ],
+        translation_result: MigrationTranslationResult.FULL,
+      };
+    }
     const query = state.esql_query;
     if (!query) {
       const message = 'SPL query unsupported or missing, cannot translate panel';
@@ -57,7 +70,12 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
       };
     }
 
-    const panelJSON = processPanel(panel, query, state.parsed_panel);
+    const panelJSON = processPanel(
+      panel,
+      query,
+      state.esql_query_columns ?? [],
+      state.parsed_panel
+    );
 
     return {
       elastic_panel: panelJSON,

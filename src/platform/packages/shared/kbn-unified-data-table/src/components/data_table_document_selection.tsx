@@ -34,6 +34,8 @@ import { DataTableCopyRowsAsText } from './data_table_copy_rows_as_text';
 import { DataTableCopyRowsAsJson } from './data_table_copy_rows_as_json';
 import { useControlColumn } from '../hooks/use_control_column';
 import type { CustomBulkActions } from '../types';
+import { styles as toolbarStyles } from './custom_toolbar/render_custom_toolbar';
+import { CopyAsTextFormat } from '../utils/copy_value_to_clipboard';
 
 export const SelectButton = (props: EuiDataGridCellValueElementProps) => {
   const { record, rowIndex } = useControlColumn(props);
@@ -190,21 +192,26 @@ export function DataTableDocumentToolbarBtn({
     return [
       // Custom bulk actions
       ...(customBulkActions
-        ? customBulkActions.map((bulkAction) => {
-            return (
-              <EuiContextMenuItem
-                data-test-subj={bulkAction['data-test-subj']}
-                key={bulkAction.key}
-                icon={bulkAction.icon}
-                onClick={() => {
-                  closePopover();
-                  bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
-                }}
-              >
-                {bulkAction.label}
-              </EuiContextMenuItem>
-            );
-          })
+        ? customBulkActions
+            .filter(
+              (bulkAction) =>
+                bulkAction.isAvailable?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
+            )
+            .map((bulkAction) => {
+              return (
+                <EuiContextMenuItem
+                  data-test-subj={bulkAction['data-test-subj']}
+                  key={bulkAction.key}
+                  icon={bulkAction.icon}
+                  onClick={() => {
+                    closePopover();
+                    bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
+                  }}
+                >
+                  {bulkAction.label}
+                </EuiContextMenuItem>
+              );
+            })
         : []),
       // Compare selected documents
       ...(enableComparisonMode && selectedDocsCount > 1
@@ -219,6 +226,16 @@ export function DataTableDocumentToolbarBtn({
       // Copy results to clipboard as text
       <DataTableCopyRowsAsText
         key="copyRowsAsText"
+        format={CopyAsTextFormat.tabular}
+        rows={rows}
+        toastNotifications={toastNotifications}
+        columns={columns}
+        onCompleted={closePopover}
+      />,
+      // Copy results to clipboard as markdown
+      <DataTableCopyRowsAsText
+        key="copyRowsAsMarkdown"
+        format={CopyAsTextFormat.markdown}
         rows={rows}
         toastNotifications={toastNotifications}
         columns={columns}
@@ -321,7 +338,7 @@ export function DataTableDocumentToolbarBtn({
       button={
         <EuiDataGridToolbarControl
           iconSide="left"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocsCount}
           data-test-subj="unifiedDataTableSelectionBtn"
@@ -366,12 +383,21 @@ export function DataTableDocumentToolbarBtn({
       gutterSize="none"
       wrap={false}
       className="unifiedDataTableToolbarControlGroup"
+      css={toolbarStyles.controlGroup}
     >
-      <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+      <EuiFlexItem
+        className="unifiedDataTableToolbarControlButton"
+        css={toolbarStyles.controlButton}
+        grow={false}
+      >
         {selectedRowsMenuButton}
       </EuiFlexItem>
       {shouldSuggestToSelectAll ? (
-        <EuiFlexItem className="unifiedDataTableToolbarControlButton" grow={false}>
+        <EuiFlexItem
+          className="unifiedDataTableToolbarControlButton"
+          css={toolbarStyles.controlButton}
+          grow={false}
+        >
           <EuiDataGridToolbarControl
             data-test-subj="dscGridSelectAllDocs"
             onClick={() => {
@@ -415,7 +441,7 @@ export const DataTableCompareToolbarBtn = ({
     <EuiContextMenuItem
       data-test-subj="unifiedDataTableCompareSelectedDocuments"
       disabled={isDisabled}
-      icon="diff"
+      icon="compare"
       onClick={() => {
         setIsCompareActive(true);
       }}

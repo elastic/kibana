@@ -6,26 +6,17 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { InterceptTriggerService } from './intercept_trigger';
 import { interceptTriggerRecordSavedObject } from '../saved_objects';
-import type { ISavedObjectsRepository } from '@kbn/core/server';
+import { API_USAGE_COUNTER_TYPE } from '../../common/constants';
+
+const usageCollectionSetupMock = createUsageCollectionSetupMock();
 
 describe('InterceptTriggerService', () => {
-  describe('#setup', () => {
-    it('invoking setup registers the backing saved object', () => {
-      const interceptTrigger = new InterceptTriggerService();
-
-      const coreSetupMock = coreMock.createSetup();
-
-      interceptTrigger.setup(coreSetupMock, {} as any, {
-        kibanaVersion: '9.1.0',
-      });
-
-      expect(coreSetupMock.savedObjects.registerType).toHaveBeenCalledWith(
-        interceptTriggerRecordSavedObject
-      );
-    });
-  });
+  const usageCounter = usageCollectionSetupMock.createUsageCounter('interceptsTriggerTest');
 
   describe('#start', () => {
     it('should return a specific of properties', () => {
@@ -42,22 +33,31 @@ describe('InterceptTriggerService', () => {
     });
 
     describe('registerTriggerDefinition', () => {
+      let interceptTrigger: InterceptTriggerService;
+
+      const coreSetupMock = coreMock.createSetup();
+      const coreStartMock = coreMock.createStart();
+
+      beforeEach(() => {
+        interceptTrigger = new InterceptTriggerService();
+        interceptTrigger.setup(coreSetupMock, {
+          logger: loggerMock.create(),
+          kibanaVersion: '8.0.0',
+          usageCollector: usageCounter,
+        });
+      });
+
+      afterEach(() => {
+        jest.clearAllMocks();
+      });
+
       it('would cause a creation invocation when a trigger with the same ID has not been registered', async () => {
-        const interceptTrigger = new InterceptTriggerService();
-
-        const coreSetupMock = coreMock.createSetup();
-        const coreStartMock = coreMock.createStart();
-
         const createSavedObjectFnMock = jest.fn(() => Promise.resolve());
 
         coreStartMock.savedObjects.createInternalRepository.mockReturnValue({
           create: createSavedObjectFnMock,
           get: jest.fn(() => Promise.resolve({ attributes: null })),
         } as unknown as ISavedObjectsRepository);
-
-        interceptTrigger.setup(coreSetupMock, {} as any, {
-          kibanaVersion: '8.0.0',
-        });
 
         const { registerTriggerDefinition } = interceptTrigger.start(coreStartMock);
 
@@ -77,14 +77,14 @@ describe('InterceptTriggerService', () => {
           },
           { id: triggerId }
         );
+
+        expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+          counterName: `productInterceptTriggerCreation:${triggerId}`,
+          counterType: API_USAGE_COUNTER_TYPE,
+        });
       });
 
-      it('would cause a update invocation when a trigger with the same ID is already registered', async () => {
-        const interceptTrigger = new InterceptTriggerService();
-
-        const coreSetupMock = coreMock.createSetup();
-        const coreStartMock = coreMock.createStart();
-
+      it('would cause an update invocation when an existing trigger has its interval configuration updated', async () => {
         const updateSavedObjectFnMock = jest.fn(() => Promise.resolve());
 
         coreStartMock.savedObjects.createInternalRepository.mockReturnValue({
@@ -99,10 +99,6 @@ describe('InterceptTriggerService', () => {
             })
           ),
         } as unknown as ISavedObjectsRepository);
-
-        interceptTrigger.setup(coreSetupMock, {} as any, {
-          kibanaVersion: '8.0.0',
-        });
 
         const { registerTriggerDefinition } = interceptTrigger.start(coreStartMock);
 
@@ -120,6 +116,11 @@ describe('InterceptTriggerService', () => {
             triggerAfter: expect.any(String),
           }
         );
+
+        expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+          counterName: `productInterceptTriggerUpdate:${triggerId}`,
+          counterType: API_USAGE_COUNTER_TYPE,
+        });
       });
     });
   });

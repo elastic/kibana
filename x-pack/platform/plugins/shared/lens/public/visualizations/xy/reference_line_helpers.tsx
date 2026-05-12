@@ -11,11 +11,11 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
+import type { DatasourceLayers, FramePublicAPI, Visualization } from '@kbn/lens-common';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type {
-  XYState,
+  XYVisualizationState,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   YAxisMode,
@@ -43,7 +43,7 @@ export interface ReferenceLineBase {
  */
 export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
   referenceLayers: T[],
-  state: XYState | undefined,
+  state: XYVisualizationState | undefined,
   datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): Array<T & { valid: boolean }> {
@@ -63,7 +63,7 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
  */
 export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   referenceLayers: T[],
-  state: XYState | undefined,
+  state: XYVisualizationState | undefined,
   datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): T[] {
@@ -262,7 +262,7 @@ function computeStaticValueForGroup(
 }
 
 export const getReferenceSupportedLayer = (
-  state?: XYState,
+  state?: XYVisualizationState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
 ) => {
   const referenceLineGroupIds = [
@@ -333,7 +333,7 @@ export const getReferenceSupportedLayer = (
   };
 };
 
-export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
+export const setReferenceDimension: Visualization<XYVisualizationState>['setDimension'] = ({
   prevState,
   layerId,
   columnId,
@@ -404,7 +404,7 @@ export const getReferenceConfiguration = ({
   layer,
   sortedAccessors,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];

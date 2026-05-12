@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { SetOptional } from 'type-fest';
 import { searchAlerts, type SearchAlertsParams } from '../apis/search_alerts/search_alerts';
@@ -49,6 +49,7 @@ export const useSearchAlertsQuery = ({
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
     minScore,
     trackScores,
+    projectRouting,
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
@@ -66,6 +67,7 @@ export const useSearchAlertsQuery = ({
         pageSize,
         minScore,
         trackScores,
+        projectRouting,
       }),
     refetchOnWindowFocus: false,
     context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
@@ -75,8 +77,6 @@ export const useSearchAlertsQuery = ({
     placeholderData: {
       total: -1,
       alerts: [],
-      oldAlertsData: [],
-      ecsAlertsData: [],
     },
   });
 };

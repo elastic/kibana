@@ -6,7 +6,7 @@ exports[`InTableSearchInput renders input 1`] = `
     class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-compressed-group"
   >
     <div
-      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
       style="--euiFormControlLeftIconsCount: 1;"
     >
       <div
@@ -18,7 +18,7 @@ exports[`InTableSearchInput renders input 1`] = `
           <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
-            data-euiicon-type="search"
+            data-euiicon-type="magnify"
           />
         </span>
       </div>
@@ -31,7 +31,7 @@ exports[`InTableSearchInput renders input 1`] = `
       />
     </div>
     <div
-      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append-compressed"
+      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-compressed"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -59,7 +59,7 @@ exports[`InTableSearchInput renders input 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowUp"
+              data-euiicon-type="chevronSingleUp"
             />
           </button>
         </div>
@@ -76,7 +76,7 @@ exports[`InTableSearchInput renders input 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </button>
         </div>
@@ -92,7 +92,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
     class="euiFormControlLayout euiFormControlLayout--group emotion-euiFormControlLayout-compressed-group"
   >
     <div
-      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup-appendOnly"
+      class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper-inGroup"
       style="--euiFormControlLeftIconsCount: 1; --euiFormControlRightIconsCount: 1;"
     >
       <div
@@ -104,7 +104,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
           <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
-            data-euiicon-type="search"
+            data-euiicon-type="magnify"
           />
         </span>
       </div>
@@ -126,7 +126,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
       </div>
     </div>
     <div
-      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-append-compressed"
+      class="euiFormControlLayout__append emotion-euiFormControlLayout__side-compressed"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
@@ -155,7 +155,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowUp"
+              data-euiicon-type="chevronSingleUp"
             />
           </button>
         </div>
@@ -173,7 +173,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
               aria-hidden="true"
               class="euiButtonIcon__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="chevronSingleDown"
             />
           </button>
         </div>

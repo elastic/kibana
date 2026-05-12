@@ -13,6 +13,7 @@
       "_sql/close"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-sql-clear-cursor",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-sql-clear-cursor",
     "availability": {
       "stack": true,
       "serverless": true

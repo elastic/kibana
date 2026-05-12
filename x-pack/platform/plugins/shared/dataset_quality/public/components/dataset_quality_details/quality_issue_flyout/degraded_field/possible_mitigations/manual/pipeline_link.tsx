@@ -7,25 +7,23 @@
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import {
   copyToClipboard,
-  EuiAccordion,
-  EuiButtonIcon,
   EuiFieldText,
-  EuiHorizontalRule,
+  EuiFormAppend,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
-  useGeneratedHtmlId,
+  EuiText,
 } from '@elastic/eui';
 import {
   manualMitigationCustomPipelineCopyPipelineNameAriaText,
+  manualMitigationCustomPipelineCopyPipelineNameSuccessText,
   manualMitigationCustomPipelineCreateEditPipelineLink,
   otherMitigationsCustomIngestPipeline,
 } from '../../../../../../../common/translations';
 import { useKibanaContextForPlugin } from '../../../../../../utils';
 import { useDatasetQualityDetailsState } from '../../../../../../hooks';
+import { MitigationAccordion } from '../mitigation_accordion';
 
 export function CreateEditPipelineLink({
   areIntegrationAssetsAvailable,
@@ -34,15 +32,12 @@ export function CreateEditPipelineLink({
 }) {
   const {
     services: {
+      notifications,
       share: {
         url: { locators },
       },
     },
   } = useKibanaContextForPlugin();
-
-  const accordionId = useGeneratedHtmlId({
-    prefix: otherMitigationsCustomIngestPipeline,
-  });
 
   const { datasetDetails } = useDatasetQualityDetailsState();
   const { type, name } = datasetDetails;
@@ -58,74 +53,65 @@ export function CreateEditPipelineLink({
   );
 
   const onClickHandler = useCallback(() => {
-    copyToClipboard(pipelineName);
-  }, [pipelineName]);
+    const copied = copyToClipboard(pipelineName);
+    if (copied) {
+      notifications.toasts.addSuccess(manualMitigationCustomPipelineCopyPipelineNameSuccessText);
+    }
+  }, [notifications.toasts, pipelineName]);
 
   return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={<EuiLink>{otherMitigationsCustomIngestPipeline}</EuiLink>}
-        paddingSize="none"
-        initialIsOpen={false}
-        data-test-subj="datasetQualityManualMitigationsPipelineAccordion"
-        arrowProps={{ color: 'primary' }}
-      >
-        <EuiHorizontalRule margin="s" />
-        <FormattedMessage
-          id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText1"
-          defaultMessage="{lineNumber} Copy the following pipeline name"
-          values={{
-            lineNumber: (
-              <strong>
-                {i18n.translate('xpack.datasetQuality.editPipeline.strong.Label', {
-                  defaultMessage: '1.',
-                })}
-              </strong>
-            ),
-          }}
-        />
-        <EuiSpacer size="m" />
-        <EuiFieldText
-          append={
-            <EuiButtonIcon
-              iconType="copy"
-              data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
-              onClick={onClickHandler}
+    <MitigationAccordion
+      title={otherMitigationsCustomIngestPipeline}
+      isLoading={false}
+      dataTestSubjPrefix="datasetQualityManualMitigationsPipeline"
+    >
+      <EuiText size="s">
+        <ol>
+          <li>
+            <FormattedMessage
+              id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText1"
+              defaultMessage="Copy the following pipeline name"
             />
-          }
-          readOnly={true}
-          aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
-          value={pipelineName}
-          data-test-subj="datasetQualityManualMitigationsPipelineName"
-          fullWidth
-        />
-        <EuiSpacer size="m" />
-        <FormattedMessage
-          id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText2"
-          defaultMessage="{lineNumber} Using the name you copied, {createEditPipelineLink}"
-          values={{
-            lineNumber: (
-              <strong>
-                {i18n.translate('xpack.datasetQuality.editPipeline.strong.Label', {
-                  defaultMessage: '2.',
-                })}
-              </strong>
-            ),
-            createEditPipelineLink: (
-              <EuiLink
-                data-test-subj="datasetQualityManualMitigationsPipelineLink"
-                data-test-url={pipelineUrl}
-                href={pipelineUrl}
-                target="_blank"
-              >
-                {manualMitigationCustomPipelineCreateEditPipelineLink}
-              </EuiLink>
-            ),
-          }}
-        />
-        <EuiSpacer size="m" />
-      </EuiAccordion>
-    </EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiFieldText
+              append={
+                <EuiFormAppend
+                  element="button"
+                  iconLeft="copy"
+                  onClick={onClickHandler}
+                  aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
+                  data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
+                />
+              }
+              readOnly
+              aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
+              value={pipelineName}
+              data-test-subj="datasetQualityManualMitigationsPipelineName"
+              fullWidth
+            />
+            <EuiSpacer size="m" />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText2"
+              defaultMessage="Using the name you copied, {createEditPipelineLink}"
+              values={{
+                createEditPipelineLink: (
+                  <EuiLink
+                    data-test-subj="datasetQualityManualMitigationsPipelineLink"
+                    data-test-url={pipelineUrl}
+                    href={pipelineUrl}
+                    target="_blank"
+                  >
+                    {manualMitigationCustomPipelineCreateEditPipelineLink}
+                  </EuiLink>
+                ),
+              }}
+            />
+            <EuiSpacer size="m" />
+          </li>
+        </ol>
+      </EuiText>
+    </MitigationAccordion>
   );
 }

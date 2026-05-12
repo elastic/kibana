@@ -15,20 +15,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
-import type { OverviewStatsEmbeddableCustomState } from '../../../../embeddables/stats_overview/stats_overview_embeddable_factory';
 import type { ClientPluginsStart } from '../../../../../plugin';
-import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../embeddables/constants';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
-import { selectOverviewState } from '../../../state';
+import type { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../common/embeddables/monitors_overview/constants';
+import { selectOverviewView } from '../../../state';
 import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
+import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/types';
 
 export const useAddToDashboard = ({
   type,
@@ -61,14 +56,14 @@ export const useAddToDashboard = ({
       const stateTransfer = embeddable.getStateTransfer();
 
       const state = {
-        serializedState: { rawState: embeddableInput },
+        serializedState: embeddableInput,
         type,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -101,7 +96,7 @@ export const AddToDashboard = ({
   asButton?: boolean;
   isLoading?: boolean;
 }) => {
-  const { view } = useSelector(selectOverviewState);
+  const view = useSelector(selectOverviewView);
 
   const { setDashboardAttachmentReady, MaybeSavedObjectSaveModalDashboard } = useAddToDashboard(
     type === SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE ? { type } : { type, embeddableInput: { view } }
@@ -139,7 +134,7 @@ export const AddToDashboard = ({
             <EuiButtonIcon
               color="text"
               data-test-subj="syntheticsEmbeddablePanelWrapperButton"
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               aria-label={i18n.translate(
                 'xpack.synthetics.embeddablePanelWrapper.shareButtonAriaLabel',

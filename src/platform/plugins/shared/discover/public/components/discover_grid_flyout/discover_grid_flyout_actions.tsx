@@ -26,7 +26,7 @@ import {
   useResizeObserver,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import type { FlyoutActionItem } from '../../customizations';
+import type { FlyoutActionItem } from './types';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
 
@@ -72,7 +72,7 @@ function FlyoutActions({
           <EuiButtonEmpty
             size="s"
             iconSize="s"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             flush="left"
             data-test-subj="docViewerMobileActionsButton"
@@ -137,7 +137,7 @@ function FlyoutActions({
               />
             </EuiToolTip>
           ) : (
-            <EuiToolTip content={action.helpText} delay="long">
+            <EuiToolTip content={action.helpText}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 size="s"
@@ -199,6 +199,9 @@ function FlyoutActionsPopover({
   return (
     <EuiPopover
       id="docViewerMoreFlyoutActions"
+      aria-label={i18n.translate('discover.grid.tableRow.moreFlyoutActionsPopoverAriaLabel', {
+        defaultMessage: 'More actions',
+      })}
       button={button}
       isOpen={isOpen}
       closePopover={closePopover}

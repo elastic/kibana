@@ -9,9 +9,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { EventEmitter } from 'events';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
+import { VisualizeConstants } from '@kbn/visualizations-common';
 import { getVisualizationInstance } from '../get_visualization_instance';
 import {
   getEditBreadcrumbs,
@@ -20,7 +22,6 @@ import {
   getEditServerlessBreadcrumbs,
 } from '../breadcrumbs';
 import type { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 import type { VisualizeInput } from '../../..';
@@ -35,7 +36,9 @@ export const useSavedVisInstance = (
   isChromeVisible: boolean | undefined,
   originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined,
-  embeddableInput?: VisualizeInput
+  embeddableInput?: VisualizeInput,
+  originatingPath?: string,
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[]
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -108,37 +111,40 @@ export const useSavedVisInstance = (
         const originatingAppName = originatingApp
           ? stateTransferService.getAppNameFromId(originatingApp)
           : undefined;
-        const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
+        const redirectToOrigin = originatingApp
+          ? () => navigateToApp(originatingApp, { path: originatingPath })
+          : () => history.push(VisualizeConstants.LANDING_PAGE_PATH);
 
         if (savedVis.id) {
+          const breadcrumbs = getEditBreadcrumbs(
+            {
+              originatingAppName,
+              incomingBreadcrumbs,
+              redirectToOrigin,
+            },
+            savedVis.title
+          );
           if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(
-              getEditServerlessBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-            );
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs(savedVis.title));
           } else {
-            chrome.setBreadcrumbs(
-              getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
-            );
+            chrome.setBreadcrumbs(breadcrumbs, {
+              project: { value: breadcrumbs, absolute: true },
+            });
           }
 
           chrome.docTitle.change(savedVis.title);
         } else {
+          const createBreadcrumbs = getCreateBreadcrumbs({
+            originatingAppName,
+            incomingBreadcrumbs,
+            redirectToOrigin,
+          });
           if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(
-              getCreateServerlessBreadcrumbs({
-                byValue: Boolean(originatingApp),
-                originatingAppName,
-                redirectToOrigin,
-              })
-            );
+            serverless.setBreadcrumbs(getCreateServerlessBreadcrumbs());
           } else {
-            chrome.setBreadcrumbs(
-              getCreateBreadcrumbs({
-                byValue: Boolean(originatingApp),
-                originatingAppName,
-                redirectToOrigin,
-              })
-            );
+            chrome.setBreadcrumbs(createBreadcrumbs, {
+              project: { value: createBreadcrumbs, absolute: true },
+            });
           }
         }
 
@@ -205,6 +211,8 @@ export const useSavedVisInstance = (
     state.savedVisInstance,
     state.visEditorController,
     embeddableInput,
+    incomingBreadcrumbs,
+    originatingPath,
   ]);
 
   useEffect(() => {

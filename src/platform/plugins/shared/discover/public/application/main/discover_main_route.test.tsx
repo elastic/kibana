@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -20,19 +19,9 @@ import { createCustomizationService } from '../../customizations/customization_s
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
-import { createRuntimeStateManager } from './state_management/redux';
-import { BehaviorSubject } from 'rxjs';
-import {
-  getRuntimeStateManagerMock,
-  getTabRuntimeStateMock,
-} from './state_management/redux/__mocks__/runtime_state.mocks';
-import { type DiscoverStateContainer } from './state_management/discover_state';
-import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -52,24 +41,14 @@ jest.mock('./components/single_tab_view/main_app', () => {
 
 const defaultRootProfileState: RootProfileState = {
   rootProfileLoading: false,
-  AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
   getDefaultAdHocDataViews: () => [],
+  getDefaultEsqlQuery: () => undefined,
 };
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
-jest.mock('../../context_awareness', () => {
-  const originalModule = jest.requireActual('../../context_awareness');
-  return {
-    ...originalModule,
-    useRootProfile: () => mockRootProfileState,
-  };
-});
-
-jest.mock('./state_management/redux/runtime_state', () => ({
-  ...jest.requireActual('./state_management/redux/runtime_state'),
-  createRuntimeStateManager: jest.fn(),
+jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
+  useRootProfile: () => mockRootProfileState,
 }));
-const mockCreateRuntimeStateManager = jest.mocked(createRuntimeStateManager);
 
 function getServicesMock(
   hasESData = true,
@@ -88,6 +67,7 @@ function getServicesMock(
     location: {
       state: locationState,
     },
+    replace: jest.fn(),
   });
   return discoverServiceMock;
 }
@@ -126,10 +106,6 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
-    mockCreateRuntimeStateManager.mockReturnValue({
-      adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-      tabs: { byId: {} },
-    });
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {
@@ -203,84 +179,5 @@ describe('DiscoverMainRoute', () => {
     setupComponent({ hasESData: true, hasUserDataView: true });
 
     expect(screen.getByLabelText('Loading')).toBeInTheDocument();
-  });
-
-  describe.each([
-    { hasChanged: false, id: undefined, description: "hasn't changed and is not saved" },
-    { hasChanged: true, id: undefined, description: 'has changed and is not saved' },
-    { hasChanged: false, id: '1234', description: "hasn't changed and is saved" },
-  ])('when $description', ({ hasChanged, id }) => {
-    it('should call the default action', () => {
-      // Given
-      const discoverStateContainer = getDiscoverStateMock();
-      discoverStateContainer.savedSearchState.getHasChanged$ = () =>
-        new BehaviorSubject(hasChanged);
-      discoverStateContainer.savedSearchState.getId = () => id;
-
-      const tabMock = getTabRuntimeStateMock({
-        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(
-          discoverStateContainer
-        ),
-      });
-
-      mockCreateRuntimeStateManager.mockReturnValue(
-        getRuntimeStateManagerMock({
-          tabs: { byId: { 'tab-mock': tabMock } },
-        })
-      );
-
-      const defaultFn = jest.fn();
-      const onAppLeave = jest
-        .fn()
-        .mockImplementation((callback: (actions: AppLeaveActionFactory) => void) => {
-          callback({
-            default: defaultFn,
-            confirm: jest.fn(),
-          });
-        });
-
-      // When
-      setupComponent({ onAppLeave });
-
-      // Then
-      expect(defaultFn).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('when there are unsaved changes', () => {
-    it('should call the confirm action', () => {
-      // Given
-      const discoverStateContainer = getDiscoverStateMock();
-      discoverStateContainer.savedSearchState.getHasChanged$ = () => new BehaviorSubject(true);
-      discoverStateContainer.savedSearchState.getId = () => '1234';
-
-      const tabMock = getTabRuntimeStateMock({
-        stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(
-          discoverStateContainer
-        ),
-      });
-
-      mockCreateRuntimeStateManager.mockReturnValue(
-        getRuntimeStateManagerMock({
-          tabs: { byId: { 'tab-mock': tabMock } },
-        })
-      );
-
-      const confirmFn = jest.fn();
-      const onAppLeave = jest
-        .fn()
-        .mockImplementation((callback: (actions: AppLeaveActionFactory) => void) => {
-          callback({
-            default: jest.fn(),
-            confirm: confirmFn,
-          });
-        });
-
-      // When
-      setupComponent({ onAppLeave });
-
-      // Then
-      expect(confirmFn).toHaveBeenCalledTimes(1);
-    });
   });
 });

@@ -18,10 +18,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldDescription } from '@kbn/field-utils';
+import { FieldDescription, FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { AddFieldFilterHandler } from '../../types';
+import type { AddFieldFilterHandler, GetCustomFieldType } from '../../types';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
@@ -30,6 +30,7 @@ export interface FieldPopoverHeaderProps {
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
+  getCustomFieldType?: GetCustomFieldType<DataViewField>;
   onAddBreakdownField?: (field: DataViewField | undefined) => void;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
@@ -38,6 +39,7 @@ export interface FieldPopoverHeaderProps {
   services?: {
     fieldsMetadata?: FieldsMetadataPublicStart;
   };
+  streamNames?: string[];
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
@@ -47,12 +49,14 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonAddFilterProps,
   buttonEditFieldProps,
   buttonDeleteFieldProps,
+  getCustomFieldType,
   onAddBreakdownField,
   onAddFieldToWorkspace,
   onAddFilter,
   onEditField,
   onDeleteField,
   services,
+  streamNames,
 }) => {
   if (!field) {
     return null;
@@ -90,9 +94,16 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     }
   );
 
+  const iconProps = getCustomFieldType
+    ? { type: getCustomFieldType(field) }
+    : getFieldIconProps(field);
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <FieldIcon {...iconProps} data-test-subj={`fieldPopoverHeader_icon-${field.name}`} />
+        </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiTitle size="xxs" data-test-subj="fieldPopoverHeader_fieldDisplayName">
             <h5 className="eui-textBreakWord">{field.displayName}</h5>
@@ -107,7 +118,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 data-test-subj={`fieldPopoverHeader_addField-${field.name}`}
                 aria-label={addFieldToWorkspaceTooltip}
                 {...(buttonAddFieldToWorkspaceProps || {})}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
@@ -122,7 +133,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
               <EuiButtonIcon
                 data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
                 aria-label={addBreakdownFieldTooltip}
-                iconType="visBarVerticalStacked"
+                iconType="chartBarVerticalStack"
                 onClick={() => {
                   closePopover();
                   onAddBreakdownField(field);
@@ -186,6 +197,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
         field={field}
         Wrapper={FieldDescriptionWrapper}
         fieldsMetadataService={services?.fieldsMetadata}
+        streamNames={streamNames}
       />
     </>
   );
@@ -194,7 +206,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
 const FieldDescriptionWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return (
     <>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       {children}
     </>
   );

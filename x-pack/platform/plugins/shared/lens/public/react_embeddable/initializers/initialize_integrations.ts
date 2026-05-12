@@ -10,49 +10,30 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
-import type { Reference } from '@kbn/content-management-utils';
-import {
-  SAVED_OBJECT_REF_NAME,
-  type HasSerializableState,
-  type SerializedPanelState,
-} from '@kbn/presentation-publishing';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
-import type { IntegrationCallbacks } from '../types';
-import { DOC_TYPE } from '../../../common/constants';
+import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
+import type {
+  LegacyLensStateApi,
+  LensByRefSerializedAPIConfig,
+  LensWireAPIConfig,
+} from '@kbn/lens-common-2';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { flattenAPIConfig } from '../../../common/transforms/utils';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
-function cleanupSerializedState({
-  rawState,
-  references,
-}: {
-  rawState: LensRuntimeState;
-  references: Reference[];
-}) {
-  const cleanedState = omit(rawState, 'searchSessionId');
-  return {
-    rawState: cleanedState,
-    references,
-  };
-}
-
-export function initializeIntegrations(
-  getLatestState: GetStateType,
-  serializeDynamicActions: (() => SerializedPanelState<DynamicActionsSerializedState>) | undefined,
-  { attributeService }: LensEmbeddableStartServices
-): {
+export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
     IntegrationCallbacks,
     | 'updateState'
     | 'updateAttributes'
     | 'updateDataViews'
-    | 'updateSavedObjectId'
+    | 'updateRefId'
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState;
+    Pick<HasSerializableState<LensWireAPIConfig>, 'serializeState'> &
+    LegacyLensStateApi;
 } {
   return {
     api: {
@@ -60,37 +41,33 @@ export function initializeIntegrations(
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: () => {
-        const currentState = getLatestState();
-        const cleanedState = cleanupSerializedState(
-          attributeService.extractReferences(currentState)
-        );
-        const { rawState: dynamicActionsState, references: dynamicActionsReferences } =
-          serializeDynamicActions?.() ?? {};
-        if (cleanedState.rawState.savedObjectId) {
-          const { savedObjectId, attributes, ...byRefState } = cleanedState.rawState;
+      serializeState: (): LensWireAPIConfig => {
+        const currentState = stripInheritedContext(getLatestState());
+
+        const { ref_id: refId, attributes, ...state } = currentState;
+        if (refId) {
           return {
-            rawState: {
-              ...byRefState,
-              ...dynamicActionsState,
-            },
-            references: [
-              ...cleanedState.references,
-              ...(dynamicActionsReferences ?? []),
-              {
-                name: SAVED_OBJECT_REF_NAME,
-                type: DOC_TYPE,
-                id: savedObjectId,
-              },
-            ],
+            ...state,
+            ref_id: refId,
+          } satisfies LensByRefSerializedAPIConfig;
+        }
+
+        return flattenAPIConfig(transformToApiConfig(currentState));
+      },
+      getLegacySerializedState: (): LensSerializedState => {
+        const currentState = getLatestState();
+        const { ref_id: refId, attributes, ...state } = currentState;
+
+        if (refId) {
+          return {
+            ...state,
+            ref_id: refId,
           };
         }
+
         return {
-          rawState: {
-            ...cleanedState.rawState,
-            ...dynamicActionsState,
-          },
-          references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
+          ...state,
+          attributes,
         };
       },
       // TODO: workout why we have this duplicated

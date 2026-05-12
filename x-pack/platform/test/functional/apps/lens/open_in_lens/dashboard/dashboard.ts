@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Convert to Lens action on dashboard', function describeIndexTests() {
     before(async () => {
       await dashboard.initTests();
-      await dashboard.gotoDashboardEditMode('legacy visualizations');
+      await dashboard.loadDashboardInEditMode('legacy visualizations');
     });
 
     it('should show notification in context menu if visualization can be converted', async () => {

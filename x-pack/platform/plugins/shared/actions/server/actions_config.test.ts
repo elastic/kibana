@@ -11,6 +11,8 @@ import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
+  MAX_EMAIL_BODY_LENGTH,
+  DEFAULT_EMAIL_BODY_LENGTH,
 } from '../common';
 import {
   getActionsConfigurationUtilities,
@@ -40,6 +42,16 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+  auth: {
+    oauth_authorization_code: {
+      rate_limits: {
+        authorize: { lookbackWindow: '1h', limit: 100 },
+        callback: { lookbackWindow: '1h', limit: 100 },
+      },
+    },
+    ears: { enabled: false },
+  },
+  ears: { enabled: false }, // legacy config
 };
 
 describe('ensureUriAllowed', () => {
@@ -573,6 +585,52 @@ describe('validateEmailAddresses()', () => {
   });
 });
 
+describe('getMaxEmailBodyLength() ', () => {
+  function getAcu(maxEmailBodyLength?: number) {
+    const actionsConfig =
+      maxEmailBodyLength == null
+        ? defaultActionsConfig
+        : {
+            ...defaultActionsConfig,
+            email: {
+              maximum_body_length: maxEmailBodyLength,
+            },
+          };
+
+    return getActionsConfigurationUtilities(actionsConfig);
+  }
+
+  test('default value is as expected', async () => {
+    const acu = getAcu();
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(DEFAULT_EMAIL_BODY_LENGTH);
+  });
+
+  test('value coerced to minimum of range if below', async () => {
+    const acu = getAcu(-100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value of 0 accepted', async () => {
+    const acu = getAcu(0);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(0);
+  });
+
+  test('value within range is passed through', async () => {
+    const acu = getAcu(100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(100);
+  });
+
+  test('value coerced to maximum of range if above', async () => {
+    const acu = getAcu(MAX_EMAIL_BODY_LENGTH + 100);
+    const actual = acu.getMaxEmailBodyLength();
+    expect(actual).toBe(MAX_EMAIL_BODY_LENGTH);
+  });
+});
+
 describe('getMaxAttempts()', () => {
   test('returns the maxAttempts defined in config', () => {
     const acu = getActionsConfigurationUtilities({
@@ -711,6 +769,86 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEarsUrl()', () => {
+  test('returns undefined when ears.url is not set in config', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEarsUrl()).toBeUndefined();
+  });
+
+  test('returns the configured URL when ears.url is set in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, url: 'https://ears.example.com' },
+      },
+      ears: { enabled: false, url: 'https://ears-legacy.example.com' }, // legacy config
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+
+  test('returns URL from auth.ears.url when only the new config key is set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+
+  test('falls back to legacy ears.url when auth.ears.url is not set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      ears: { enabled: false, url: 'https://ears.example.com' },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+});
+
+describe('isEarsEnabled()', () => {
+  test('returns false when neither config key is set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when auth.ears.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('falls back to legacy ears.enabled when auth.ears.enabled is not set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: undefined,
+      },
+      ears: { enabled: true },
+    });
+    expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('auth.ears.enabled takes precedence over legacy ears.enabled', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false },
+      },
+      ears: { enabled: true },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
   });
 });
 

@@ -12,9 +12,11 @@ import type {
   HttpFetchOptionsWithPath,
   HttpSetup,
   NotificationsStart,
+  OverlayStart,
   Toast,
 } from '@kbn/core/public';
 
+import { createSessionExpirationModal } from './session_expiration_modal';
 import { createSessionExpirationToast } from './session_expiration_toast';
 import type { SessionExpired } from './session_expired';
 import type { StartServices } from '..';
@@ -28,7 +30,8 @@ import {
 import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 
-export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
+export interface SessionState
+  extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended' | 'expirationReason'> {
   lastExtensionTime: number;
 }
 
@@ -48,6 +51,7 @@ export class SessionTimeout {
   private subscription?: Subscription;
 
   private warningToast?: Toast;
+  private warningModal?: ReturnType<OverlayStart['openModal']>;
 
   private stopActivityMonitor?: Function;
   private stopVisibilityMonitor?: Function;
@@ -60,6 +64,7 @@ export class SessionTimeout {
   constructor(
     private startServices: StartServices,
     private notifications: NotificationsStart,
+    private overlays: OverlayStart,
     private sessionExpired: Pick<SessionExpired, 'logout'>,
     private http: HttpSetup,
     private tenant: string
@@ -149,7 +154,7 @@ export class SessionTimeout {
     }
   };
 
-  private resetTimers = ({ lastExtensionTime, expiresInMs }: SessionState) => {
+  private resetTimers = ({ lastExtensionTime, expiresInMs, expirationReason }: SessionState) => {
     this.stopRefreshTimer = this.stopRefreshTimer?.();
     this.stopWarningTimer = this.stopWarningTimer?.();
     this.stopLogoutTimer = this.stopLogoutTimer?.();
@@ -173,10 +178,8 @@ export class SessionTimeout {
       const fetchSessionInMs = showWarningInMs - SESSION_CHECK_MS;
 
       // Schedule logout when session is about to expire
-      this.stopLogoutTimer = startTimer(
-        () => this.sessionExpired.logout(LogoutReason.SESSION_EXPIRED),
-        logoutInMs
-      );
+      const logoutReason = expirationReason ?? LogoutReason.SESSION_EXPIRED;
+      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(logoutReason), logoutInMs);
 
       // Hide warning if session has been extended
       if (showWarningInMs > 0) {
@@ -222,6 +225,7 @@ export class SessionTimeout {
     return (
       !this.isFetchingSessionInfo &&
       !this.warningToast &&
+      !this.warningModal &&
       Date.now() >
         lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS * Math.exp(this.consecutiveErrorCount)
     );
@@ -236,11 +240,12 @@ export class SessionTimeout {
       });
       this.consecutiveErrorCount = 0;
       if (sessionInfo) {
-        const { expiresInMs, canBeExtended } = sessionInfo;
+        const { expiresInMs, canBeExtended, expirationReason } = sessionInfo;
         const nextState: SessionState = {
           lastExtensionTime: Date.now(),
           expiresInMs,
           canBeExtended,
+          expirationReason,
         };
         this.sessionState$.next(nextState);
         if (this.channel) {
@@ -256,23 +261,26 @@ export class SessionTimeout {
   };
 
   private showWarning = () => {
-    if (!this.warningToast) {
-      const onExtend = async () => {
-        const { canBeExtended } = this.sessionState$.getValue();
-        if (canBeExtended) {
-          await this.fetchSessionInfo(true);
-        }
-      };
-      const onClose = () => {
-        this.hideWarning(true);
+    const { canBeExtended } = this.sessionState$.getValue();
+
+    const onExtend = async () => {
+      await this.fetchSessionInfo(true);
+    };
+
+    const onClose = () => {
+      this.hideWarning(true);
+
+      if (canBeExtended) {
         return onExtend();
-      };
-      const toast = createSessionExpirationToast(
-        this.startServices,
-        this.sessionState$,
-        onExtend,
-        onClose
+      }
+    };
+
+    if (canBeExtended && !this.warningModal) {
+      this.warningModal = this.overlays.openModal(
+        createSessionExpirationModal(this.startServices, this.sessionState$, onExtend, onClose)
       );
+    } else if (!canBeExtended && !this.warningToast) {
+      const toast = createSessionExpirationToast(this.startServices, this.sessionState$, onClose);
       this.warningToast = this.notifications.toasts.add(toast);
     }
   };
@@ -281,9 +289,15 @@ export class SessionTimeout {
     if (this.warningToast) {
       this.notifications.toasts.remove(this.warningToast);
       this.warningToast = undefined;
-      if (snooze) {
-        this.snoozedWarningState = this.sessionState$.getValue();
-      }
+    }
+
+    if (this.warningModal) {
+      this.warningModal.close();
+      this.warningModal = undefined;
+    }
+
+    if (snooze) {
+      this.snoozedWarningState = this.sessionState$.getValue();
     }
   };
 }

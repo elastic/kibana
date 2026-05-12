@@ -45,6 +45,8 @@ jest.mock('../app_context', () => ({
         }
       ),
     getTaskManagerStart: jest.fn(),
+    getCloud: jest.fn().mockReturnValue(null),
+    getConfig: jest.fn().mockReturnValue({}),
   },
 }));
 
@@ -305,6 +307,122 @@ describe('Outputs preconfiguration', () => {
         },
       ]
     `);
+    });
+
+    it('should include ECH agentless output when agentless is enabled in cloud environment', async () => {
+      // Mock the app context service for this test
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+        elasticsearchUrl: 'https://test-es.co:9200',
+      } as any);
+
+      // Mock the isAgentlessEnabled function by mocking getConfig
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { enabled: true },
+        agents: {
+          elasticsearch: {
+            hosts: ['http://localhost:9200'],
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: {
+            hosts: ['http://localhost:9200'],
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+      });
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({
+        id: 'fleet-default-output',
+        name: 'default',
+        type: 'elasticsearch',
+        is_default: true,
+        is_default_monitoring: true,
+        is_preconfigured: true,
+      });
+      expect(result[1]).toMatchObject({
+        id: 'es-agentless-output',
+        name: 'Internal output for agentless',
+        type: 'elasticsearch',
+        hosts: ['https://test-es.co:9200'],
+        ca_sha256: 'test-ca-sha256',
+        is_default: false,
+        is_default_monitoring: false,
+        is_preconfigured: true,
+      });
+
+      // Restore original mocks
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+    });
+
+    it('should not include ECH agentless output when agentless is disabled', async () => {
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+      } as any);
+
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { enabled: false },
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('fleet-default-output');
+
+      // Restore original mocks
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
+    });
+
+    it('should not include ECH agentless output in serverless environment', async () => {
+      const originalGetCloud = appContextService.getCloud;
+      const originalGetConfig = appContextService.getConfig;
+
+      jest.mocked(appContextService.getCloud).mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: true,
+      } as any);
+
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        agentless: { enabled: true },
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      } as any);
+
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://localhost:9200'] },
+        },
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('fleet-default-output');
+
+      // Restore original mocks
+      jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
+      jest.mocked(appContextService.getConfig).mockImplementation(originalGetConfig);
     });
 
     it('should create a preconfigured ES output that does not exist', async () => {
@@ -925,6 +1043,66 @@ describe('Outputs preconfiguration', () => {
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
     });
 
+    it('should update output if preconfigured ES output exists and otel_exporter_config_yaml changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          otel_exporter_config_yaml: 'flush_interval: 10s',
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
+    it('should update output if preconfigured ES output exists and otel_disable_beatsauth changed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          otel_disable_beatsauth: true,
+        } as any,
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+    });
+
+    it('should not update output if preconfigured ES output exists and otel fields did not change', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          // neither otel field set — matches the existing mock which also has neither set
+        },
+      ]);
+
+      expect(mockedOutputService.create).not.toBeCalled();
+      expect(mockedOutputService.update).not.toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+    });
+
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1161,7 +1339,7 @@ describe('Outputs preconfiguration', () => {
 
         expect(mockedOutputService.delete).toBeCalled();
         expect(mockedOutputService.delete).toBeCalledTimes(1);
-        expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
+        expect(mockedOutputService.delete.mock.calls[0][0]).toEqual('output2');
       });
 
       it('should update default deleted preconfigured output', async () => {

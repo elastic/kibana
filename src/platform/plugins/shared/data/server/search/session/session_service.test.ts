@@ -12,17 +12,37 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
-import { createRequestHash } from './utils';
+import { faker } from '@faker-js/faker';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
 import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import * as updateSessionStatusModule from './status/update_session_status';
+import { createSearchSessionRequestInfoMock } from './mocks';
 
 const MAX_UPDATE_RETRIES = 3;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+const mockMinimalAuthUser = new Proxy(
+  {
+    username: 'my_username',
+    enabled: true,
+    authentication_provider: { type: 'basic', name: 'basic1' },
+  } as any,
+  {
+    get(target, prop) {
+      if (prop === 'authentication_realm') {
+        throw new Error(
+          `Property "${String(prop)}" is not available for minimally authenticated users.`
+        );
+      }
+      return Reflect.get(target, prop);
+    },
+  }
+);
 
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -60,6 +80,9 @@ describe('SearchSessionService', () => {
     },
     references: [],
   };
+  const mockBulkGetResponse = {
+    saved_objects: [mockSavedObject],
+  };
 
   describe('Feature disabled', () => {
     beforeEach(async () => {
@@ -91,9 +114,10 @@ describe('SearchSessionService', () => {
     });
 
     it('trackId ignores', async () => {
-      await service.trackId({ savedObjectsClient }, mockUser1, { params: {} }, '123', {
+      await service.trackId({ savedObjectsClient }, mockUser1, '123', {
         sessionId: '321',
         strategy: MOCK_STRATEGY,
+        requestHash: faker.string.alpha(64),
       });
 
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
@@ -129,6 +153,7 @@ describe('SearchSessionService', () => {
   });
 
   describe('Feature enabled', () => {
+    let mockLogger: jest.Mocked<any>;
     beforeEach(async () => {
       savedObjectsClient = savedObjectsClientMock.create();
       const config: ConfigSchema = {
@@ -143,7 +168,7 @@ describe('SearchSessionService', () => {
           },
         },
       } as unknown as ConfigSchema;
-      const mockLogger: any = {
+      mockLogger = {
         debug: jest.fn(),
         warn: jest.fn(),
         error: jest.fn(),
@@ -282,7 +307,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -373,7 +398,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -565,7 +590,7 @@ describe('SearchSessionService', () => {
           per_page: 1,
           page: 0,
           statuses: {
-            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS },
+            [mockSavedObject.id]: { status: SearchSessionStatus.IN_PROGRESS, errors: [] },
           },
         };
         savedObjectsClient.find.mockResolvedValue(mockResponse);
@@ -690,9 +715,27 @@ describe('SearchSessionService', () => {
     });
 
     describe('trackId', () => {
+      it('logs error and returns if requestHash not provided', async () => {
+        const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
+          sessionId,
+          strategy: MOCK_STRATEGY,
+          // requestHash not provided
+        } as any);
+
+        expect(savedObjectsClient.update).not.toHaveBeenCalled();
+        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `SearchSessionService: trackId | Missing requestHash | sessionId: "${sessionId}" | searchId:"${searchId}"`
+          )
+        );
+      });
+
       it('updates the saved object if search session already exists', async () => {
-        const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
+        const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
 
         const mockUpdateSavedObject = {
@@ -700,10 +743,12 @@ describe('SearchSessionService', () => {
           attributes: {},
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
+          requestHash,
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -721,12 +766,13 @@ describe('SearchSessionService', () => {
       });
 
       it('passes retryOnConflict param to es', async () => {
-        const searchRequest = { params: {} };
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
-        await service.trackId({ savedObjectsClient }, mockUser1, searchRequest, searchId, {
+        await service.trackId({ savedObjectsClient }, mockUser1, searchId, {
           sessionId,
           strategy: MOCK_STRATEGY,
+          requestHash: faker.string.alpha(64),
         });
 
         expect(savedObjectsClient.update).toHaveBeenCalled();
@@ -739,16 +785,13 @@ describe('SearchSessionService', () => {
         const sessionId1 = 'sessiondId1';
         const sessionId2 = 'sessiondId2';
 
-        const searchRequest1 = { params: { 1: '1' } };
-        const requestHash1 = createRequestHash(searchRequest1.params);
+        const requestHash1 = faker.string.alpha(64);
         const searchId1 = 'searchId1';
 
-        const searchRequest2 = { params: { 2: '2' } };
-        const requestHash2 = createRequestHash(searchRequest2.params);
+        const requestHash2 = faker.string.alpha(64);
         const searchId2 = 'searchId1';
 
-        const searchRequest3 = { params: { 3: '3' } };
-        const requestHash3 = createRequestHash(searchRequest3.params);
+        const requestHash3 = faker.string.alpha(64);
         const searchId3 = 'searchId3';
 
         const mockUpdateSavedObject = {
@@ -756,19 +799,23 @@ describe('SearchSessionService', () => {
           attributes: {},
         };
         savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+        savedObjectsClient.get.mockResolvedValue(mockSavedObject);
 
         await Promise.all([
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest1, searchId1, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId1, {
             sessionId: sessionId1,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash1,
           }),
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest2, searchId2, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId2, {
             sessionId: sessionId1,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash2,
           }),
-          service.trackId({ savedObjectsClient }, mockUser1, searchRequest3, searchId3, {
+          service.trackId({ savedObjectsClient }, mockUser1, searchId3, {
             sessionId: sessionId2,
             strategy: MOCK_STRATEGY,
+            requestHash: requestHash3,
           }),
         ]);
 
@@ -809,6 +856,64 @@ describe('SearchSessionService', () => {
           },
         });
       });
+
+      describe('minimal auth user', () => {
+        it('throws by default', async () => {
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+          const mockUpdateSavedObject = {
+            ...mockSavedObject,
+            attributes: {},
+          };
+          savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+          savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+          await expect(
+            service.trackId({ savedObjectsClient }, mockMinimalAuthUser, searchId, {
+              sessionId,
+              strategy: MOCK_STRATEGY,
+              requestHash,
+            })
+          ).rejects.toThrow();
+
+          expect(savedObjectsClient.update).not.toHaveBeenCalled();
+          expect(mockLogger.debug).not.toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
+
+        it('works when auth realm check is skipped', async () => {
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+          const mockUpdateSavedObject = {
+            ...mockSavedObject,
+            attributes: {},
+          };
+          savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+          savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+          await expect(
+            service.trackId(
+              { savedObjectsClient },
+              mockMinimalAuthUser,
+              searchId,
+              {
+                sessionId,
+                strategy: MOCK_STRATEGY,
+                requestHash,
+              },
+              true // skipRealmCheck
+            )
+          ).resolves.not.toThrow();
+
+          expect(savedObjectsClient.update).toHaveBeenCalled();
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
+      });
     });
 
     describe('getId', () => {
@@ -829,7 +934,7 @@ describe('SearchSessionService', () => {
             isStored: false,
           })
         ).rejects.toMatchInlineSnapshot(
-          `[Error: Cannot get search ID from a session that is not stored]`
+          `[Error: Cannot get search ID from a search that is not stored]`
         );
       });
 
@@ -843,13 +948,13 @@ describe('SearchSessionService', () => {
             isRestore: false,
           })
         ).rejects.toMatchInlineSnapshot(
-          `[Error: Get search ID is only supported when restoring a session]`
+          `[Error: Get search ID is only supported when restoring a background search]`
         );
       });
 
       it('returns the search ID from the saved object ID mapping', async () => {
         const searchRequest = { params: {} };
-        const requestHash = createRequestHash(searchRequest.params);
+        const requestHash = faker.string.alpha(64);
         const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
         const mockSession = {
           ...mockSavedObject,
@@ -868,9 +973,88 @@ describe('SearchSessionService', () => {
           sessionId,
           isStored: true,
           isRestore: true,
+          requestHash,
         });
 
         expect(id).toBe(searchId);
+      });
+
+      describe('minimal auth user', () => {
+        it('throws by default', async () => {
+          const searchRequest = { params: {} };
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+          const mockSession = {
+            ...mockSavedObject,
+            attributes: {
+              ...mockSavedObject.attributes,
+              idMapping: {
+                [requestHash]: {
+                  id: searchId,
+                },
+              },
+            },
+          };
+          savedObjectsClient.get.mockResolvedValue(mockSession);
+
+          const getIdPromise = service.getId(
+            { savedObjectsClient },
+            mockMinimalAuthUser,
+            searchRequest,
+            {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              requestHash,
+            }
+          );
+
+          await expect(getIdPromise).rejects.toThrow();
+
+          expect(savedObjectsClient.update).not.toHaveBeenCalled();
+          expect(mockLogger.debug).not.toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
+
+        it('works with minimal auth user (no authentication_realm access)', async () => {
+          const searchRequest = { params: {} };
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+          const mockSession = {
+            ...mockSavedObject,
+            attributes: {
+              ...mockSavedObject.attributes,
+              idMapping: {
+                [requestHash]: {
+                  id: searchId,
+                },
+              },
+            },
+          };
+          savedObjectsClient.get.mockResolvedValue(mockSession);
+
+          const getIdPromise = service.getId(
+            { savedObjectsClient },
+            mockMinimalAuthUser,
+            searchRequest,
+            {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              requestHash,
+            },
+            true
+          );
+
+          await expect(getIdPromise).resolves.not.toThrow();
+
+          const id = await getIdPromise;
+          expect(id).toBe(searchId);
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
       });
     });
 
@@ -899,6 +1083,199 @@ describe('SearchSessionService', () => {
             "FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0" => "ese",
           }
         `);
+      });
+    });
+
+    describe('updateStatuses', () => {
+      describe('when the user does NOT have access to all sessions', () => {
+        it('should throw', async () => {
+          // Given
+          savedObjectsClient.bulkGet.mockResolvedValue(mockBulkGetResponse);
+
+          // When / Then
+          await expect(
+            service.updateStatuses(
+              { savedObjectsClient, asCurrentUserElasticsearchClient },
+              mockUser2,
+              [mockBulkGetResponse.saved_objects[0].id]
+            )
+          ).rejects.toThrow();
+        });
+      });
+
+      describe('when some sessions error out', () => {
+        it('should return the statuses for the sessions that did not error out', async () => {
+          // Given
+          const session1 = {
+            ...mockSavedObject,
+            id: 'session1',
+            attributes: {
+              ...mockSavedObject.attributes,
+              sessionId: 'session1',
+            },
+          };
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              session1,
+              {
+                id: 'error_object',
+                type: SEARCH_SESSION_TYPE,
+                error: { error: 'some error', message: 'some error', statusCode: 500 },
+              } as SavedObject,
+            ],
+          });
+          const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+          spy.mockResolvedValue({
+            status: SearchSessionStatus.COMPLETE,
+          });
+
+          // When
+          const statuses = await service.updateStatuses(
+            { savedObjectsClient, asCurrentUserElasticsearchClient },
+            mockUser1,
+            ['session1', 'session2']
+          );
+
+          // Then
+          expect(statuses).toEqual(
+            expect.objectContaining({
+              sessions: expect.objectContaining({
+                session1: expect.objectContaining({
+                  name: 'my_name',
+                  appId: 'my_app_id',
+                  locatorId: 'my_locator_id',
+                }),
+              }),
+              statuses: expect.objectContaining({
+                session1: expect.objectContaining({
+                  status: SearchSessionStatus.COMPLETE,
+                  errors: [],
+                }),
+              }),
+            })
+          );
+          expect(spy).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe('when there are no sessions', () => {
+        it('should return an empty map', async () => {
+          // Given
+          savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+
+          // When
+          const statuses = await service.updateStatuses(
+            { savedObjectsClient, asCurrentUserElasticsearchClient },
+            mockUser1,
+            []
+          );
+
+          // Then
+          expect(statuses).toEqual({
+            sessions: {},
+            statuses: {},
+          });
+        });
+      });
+
+      it('should return the statuses', async () => {
+        // Given
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              id: 'session1',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session1',
+              },
+            },
+            {
+              ...mockSavedObject,
+              id: 'session2',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session2',
+              },
+            },
+            {
+              ...mockSavedObject,
+              id: 'session3',
+              attributes: {
+                ...mockSavedObject.attributes,
+                sessionId: 'session3',
+              },
+            },
+          ],
+        });
+
+        const spy = jest.spyOn(updateSessionStatusModule, 'updateSessionStatus');
+
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.COMPLETE,
+        });
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.ERROR,
+          searchStatuses: [
+            createSearchSessionRequestInfoMock({
+              status: SearchStatus.ERROR,
+              error: { code: 500, message: 'Test errors' },
+            }),
+          ],
+        });
+        spy.mockResolvedValueOnce({
+          status: SearchSessionStatus.ERROR,
+          searchStatuses: [
+            createSearchSessionRequestInfoMock({
+              status: SearchStatus.ERROR,
+              error: { code: 500 },
+            }),
+          ],
+        });
+
+        // When
+        const res = await service.updateStatuses(
+          { savedObjectsClient, asCurrentUserElasticsearchClient },
+          mockUser1,
+          ['session1', 'session2', 'session3']
+        );
+
+        // Then
+        expect(res).toEqual({
+          sessions: {
+            session1: {
+              name: 'my_name',
+              appId: 'my_app_id',
+              restoreState: undefined,
+              locatorId: 'my_locator_id',
+            },
+            session2: {
+              name: 'my_name',
+              appId: 'my_app_id',
+              restoreState: undefined,
+              locatorId: 'my_locator_id',
+            },
+            session3: {
+              name: 'my_name',
+              appId: 'my_app_id',
+              restoreState: undefined,
+              locatorId: 'my_locator_id',
+            },
+          },
+          statuses: {
+            session1: { status: SearchSessionStatus.COMPLETE, errors: [] },
+            session2: {
+              status: SearchSessionStatus.ERROR,
+              errors: [
+                'Search status for search with id 1234 threw an error Test errors (statusCode: 500)',
+              ],
+            },
+            session3: {
+              status: SearchSessionStatus.ERROR,
+              errors: ['Search 1234 completed with a 500 status'],
+            },
+          },
+        });
       });
     });
   });

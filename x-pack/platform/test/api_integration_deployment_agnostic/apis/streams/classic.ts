@@ -10,7 +10,13 @@ import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { deleteStream, fetchDocument, indexDocument, putStream } from './helpers/requests';
+import {
+  deleteStream,
+  fetchDocument,
+  indexDocument,
+  putStream,
+  restoreDataStream,
+} from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -29,6 +35,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await esClient.indices.deleteDataStream({ name: 'logs-invalid_pipeline-default' });
+      await esClient.indices
+        .deleteDataStream({ name: 'logs-test_no_pipeline-default' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteDataStream({ name: 'logs-test_delete_no_pipeline-default' })
+        .catch(() => {});
     });
 
     describe('Classic streams processing', () => {
@@ -48,14 +60,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const classicStream = streams.find((stream) => stream.name === TEST_STREAM_NAME);
 
+        expect(classicStream).not.to.be(undefined);
         expect(classicStream).to.eql({
+          type: 'classic',
           name: TEST_STREAM_NAME,
           description: '',
+          updated_at: classicStream!.updated_at,
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
-            processing: { steps: [] },
+            processing: {
+              steps: [],
+              updated_at: (classicStream as Streams.ClassicStream.Definition).ingest.processing
+                .updated_at,
+            },
             classic: {},
+            failure_store: { inherit: {} },
           },
         } satisfies Streams.ClassicStream.Definition);
       });
@@ -69,7 +89,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   settings: {},
@@ -78,7 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       {
                         action: 'grok',
                         where: { always: {} },
-                        from: 'message',
+                        from: 'nested.message',
                         patterns: [
                           '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                         ],
@@ -86,6 +108,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     ],
                   },
                   classic: {},
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -117,8 +140,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(queries).to.eql([]);
 
         expect(stream).to.eql({
+          type: 'classic',
           name: TEST_STREAM_NAME,
           description: '',
+          updated_at: stream.updated_at,
+          query_streams: [],
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
@@ -126,15 +152,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               steps: [
                 {
                   action: 'grok',
-                  from: 'message',
+                  from: 'nested.message',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
                   where: { always: {} },
                 },
               ],
+              updated_at: stream.ingest.processing.updated_at,
             },
             classic: {},
+            failure_store: { inherit: {} },
           },
         } satisfies Streams.ClassicStream.Definition);
 
@@ -148,10 +176,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('Executes processing on classic streams', async () => {
+      it('Executes processing on classic streams with dotted field names', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
+          'nested.message': '2023-01-01T00:00:10.000Z error test',
         };
         const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
         expect(response.result).to.eql('created');
@@ -159,7 +187,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
+      });
+
+      it('Executes processing on classic streams with subobjects', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
           inner_timestamp: '2023-01-01T00:00:10.000Z',
           message2: 'test',
           log: {
@@ -175,12 +223,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
+                query_streams: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
                   settings: {},
                   classic: {},
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -189,6 +240,81 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.status).to.eql(200);
 
+        expect(response.body).to.have.property('acknowledged', true);
+      });
+
+      it('Allows removing processing even when write index has no default_pipeline configured', async () => {
+        const testStreamName = 'logs-test_no_pipeline-default';
+
+        // Ingest a document first to create the write index
+        await indexDocument(esClient, testStreamName, {
+          '@timestamp': new Date().toISOString(),
+          message: '2024-01-01T00:00:00.000Z INFO test message',
+        });
+
+        // Create a stream with processing steps
+        await putStream(apiClient, testStreamName, {
+          ...emptyAssets,
+          stream: {
+            type: 'classic',
+            description: '',
+            query_streams: [],
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
+                    patterns: ['%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:log.level}'],
+                  },
+                ],
+              },
+              settings: {},
+              classic: {},
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Manually remove the default_pipeline setting from the write index
+        // This simulates a scenario where the index setting was removed but
+        // the stream definition still has processing steps
+        const dataStreamInfo = await esClient.indices.getDataStream({
+          name: testStreamName,
+        });
+        const writeIndex = dataStreamInfo.data_streams[0].indices.at(-1)!.index_name;
+        await esClient.indices.putSettings({
+          index: writeIndex,
+          body: {
+            'index.default_pipeline': null,
+          },
+        });
+
+        // Now remove processing - this should not fail even though there's no pipeline to delete from
+        const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: { name: testStreamName },
+            body: {
+              ...emptyAssets,
+              stream: {
+                type: 'classic',
+                description: '',
+                query_streams: [],
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  classic: {},
+                  failure_store: { inherit: {} },
+                },
+              },
+            },
+          },
+        });
+
+        expect(response.status).to.eql(200);
         expect(response.body).to.have.property('acknowledged', true);
       });
 
@@ -218,7 +344,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: 'Should cause a failure due to invalid ingest pipeline',
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               settings: {},
@@ -241,6 +369,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               classic: {
                 field_overrides: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -249,12 +378,53 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           'logs-invalid_pipeline-default',
           body,
-          500
+          400
         );
-
-        expect((streamsResponse as any).message).to.contain('Failed to change state:');
         expect((streamsResponse as any).message).to.contain(
-          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
+          'Desired stream state is invalid: parse_exception'
+        );
+        expect((streamsResponse as any).message).to.contain(
+          "processor [set] doesn't support one or more provided configuration parameters [fail]"
+        );
+      });
+
+      it('fails to store invalid ingest pipeline script', async () => {
+        const body: Streams.ClassicStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            type: 'classic',
+            description: '',
+            query_streams: [],
+            ingest: {
+              lifecycle: { inherit: {} },
+              settings: {},
+              processing: {
+                steps: [
+                  {
+                    action: 'manual_ingest_pipeline',
+                    processors: [
+                      {
+                        script: {
+                          source: 'ctx.age = ', // invalid painless script
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              classic: {
+                field_overrides: {},
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        };
+        const streamsResponse = await putStream(apiClient, TEST_STREAM_NAME, body, 400);
+        expect((streamsResponse as any).message).to.contain(
+          'Desired stream state is invalid: script_exception'
+        );
+        expect((streamsResponse as any).message).to.contain(
+          'illegal_argument_exception: unexpected end of script'
         );
       });
     });
@@ -267,6 +437,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -279,6 +450,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     },
                   },
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -295,6 +467,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
@@ -310,6 +483,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       },
                     },
                   },
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -378,6 +552,95 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('Classic stream name validation', () => {
+      const validClassicStreamBody: Streams.ClassicStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          type: 'classic',
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      it('fails to create a classic stream with uppercase characters in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-UpperCase-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
+      it('fails to create a classic stream with spaces in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with space-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain spaces.'
+        );
+      });
+
+      it('fails to create a classic stream with asterisk in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with*asterisk-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "*".'
+        );
+      });
+
+      it('fails to create a classic stream with angle brackets in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with<brackets>-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "<", ">".'
+        );
+      });
+
+      it('fails to create a classic stream with question mark in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with?question-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "?".'
+        );
+      });
+
+      it('fails to create a classic stream with pipe in the name', async () => {
+        const response = await putStream(
+          apiClient,
+          'logs-with|pipe-default',
+          validClassicStreamBody,
+          400
+        );
+        expect((response as any).message).to.eql(
+          'Desired stream state is invalid: Stream name cannot contain "|".'
+        );
+      });
+    });
+
     describe('Classic streams sharing template/pipeline', () => {
       const TEMPLATE_NAME = 'my-shared-template';
       const FIRST_STREAM_NAME = 'mytest-first';
@@ -430,6 +693,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, FIRST_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -447,6 +711,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -464,7 +729,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
         expect(pipeline._meta?.managed_by).to.eql('streams');
-        expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-first@stream.processing');
+        expect(pipeline?.processors?.[0]?.pipeline?.name).to.eql('mytest-first@stream.processing');
       });
 
       it('Executes processing using the newly created ingest pipeline', async () => {
@@ -481,9 +746,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: '2023-01-01T00:00:10.000Z error test',
           inner_timestamp: '2023-01-01T00:00:10.000Z',
           message2: 'test',
-          log: {
-            level: 'error',
-          },
+          'log.level': 'error',
         });
       });
 
@@ -495,6 +758,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -512,6 +776,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -520,7 +785,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: `${TEMPLATE_NAME}-pipeline`,
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
-        expect(pipeline.processors?.map((processor) => processor.pipeline?.name)).to.eql([
+        expect(pipeline.processors?.map((proc) => proc?.pipeline?.name)).to.eql([
           'mytest-first@stream.processing',
           'mytest-second@stream.processing',
         ]);
@@ -530,12 +795,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, FIRST_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
               settings: {},
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -544,19 +811,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           id: `${TEMPLATE_NAME}-pipeline`,
         });
         const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
-        expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-second@stream.processing');
+
+        expect(pipeline?.processors?.[0]?.pipeline?.name).to.eql('mytest-second@stream.processing');
       });
 
       it('clears the pipeline when processing is removed from the second stream', async () => {
         await putStream(apiClient, SECOND_STREAM_NAME, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
               settings: {},
               classic: {},
+              failure_store: { inherit: {} },
             },
           },
         });
@@ -585,6 +855,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -629,6 +900,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               classic: {
                 field_overrides: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -662,6 +934,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: Streams.ClassicStream.UpsertRequest = {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
@@ -682,10 +955,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 ],
               },
-
               classic: {
                 field_overrides: {},
               },
+              failure_store: { inherit: {} },
             },
           },
         };
@@ -711,12 +984,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             body: {
               ...emptyAssets,
               stream: {
+                type: 'classic',
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },
                   settings: {},
                   classic: {},
+                  failure_store: { inherit: {} },
                 },
               },
             },
@@ -740,13 +1015,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should still be able to fetch the dashboards for the stream', async () => {
-        const getResponse = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
-          params: {
-            path: {
-              name: ORPHANED_STREAM_NAME,
+        const getResponse = await apiClient.fetch(
+          'GET /api/streams/{streamName}/attachments 2023-10-31',
+          {
+            params: {
+              path: {
+                streamName: ORPHANED_STREAM_NAME,
+              },
+              query: {
+                attachmentTypes: ['dashboard'],
+              },
             },
-          },
-        });
+          }
+        );
         expect(getResponse.status).to.eql(200);
       });
 
@@ -775,11 +1056,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(getStreamResponse.status).to.eql(404);
         const getDashboardsResponse = await apiClient.fetch(
-          'GET /api/streams/{name}/dashboards 2023-10-31',
+          'GET /api/streams/{streamName}/attachments 2023-10-31',
           {
             params: {
               path: {
-                name: 'non-existing-stream',
+                streamName: 'non-existing-stream',
+              },
+              query: {
+                attachmentTypes: ['dashboard'],
               },
             },
           }
@@ -817,7 +1101,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(Streams.ClassicStream.Definition.is(classicStream!.stream)).to.be(true);
       });
 
+      it('should allow restoring the backing data stream', async () => {
+        // Restore the backing data stream
+        const response = await restoreDataStream(apiClient, ORPHANED_STREAM_NAME);
+        expect(response).to.have.property('acknowledged', true);
+
+        // Verify the data stream was recreated
+        const dsResponse = await esClient.indices.getDataStream({ name: ORPHANED_STREAM_NAME });
+        expect(dsResponse.data_streams).to.have.length(1);
+        expect(dsResponse.data_streams[0].name).to.be(ORPHANED_STREAM_NAME);
+
+        // Verify data_stream_exists is now true
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+        expect(getResponse.body).to.have.property('data_stream_exists', true);
+      });
+
       it('should allow deleting', async () => {
+        // First delete the data stream again to test orphaned delete
+        await esClient.indices.deleteDataStream({
+          name: ORPHANED_STREAM_NAME,
+        });
+
         const response = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
@@ -826,6 +1137,57 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
         expect(response.status).to.eql(200);
+      });
+
+      it('should allow deleting a stream with processing when write index has no default_pipeline', async () => {
+        const testStreamName = 'logs-test_delete_no_pipeline-default';
+
+        // Ingest a document first to create the write index
+        await indexDocument(esClient, testStreamName, {
+          '@timestamp': new Date().toISOString(),
+          message: '2024-01-01T00:00:00.000Z',
+        });
+
+        // Create a stream with processing
+        await putStream(apiClient, testStreamName, {
+          ...emptyAssets,
+          stream: {
+            type: 'classic',
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
+                    patterns: ['%{TIMESTAMP_ISO8601:timestamp}'],
+                  },
+                ],
+              },
+              settings: {},
+              classic: {},
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        // Remove the default_pipeline setting from the write index
+        const dataStreamInfo = await esClient.indices.getDataStream({
+          name: testStreamName,
+        });
+        const writeIndex = dataStreamInfo.data_streams[0].indices.at(-1)!.index_name;
+        await esClient.indices.putSettings({
+          index: writeIndex,
+          body: {
+            'index.default_pipeline': null,
+          },
+        });
+
+        // Delete the stream - this should not fail even though there's no pipeline to delete from
+        const response = await deleteStream(apiClient, testStreamName);
+        expect(response).to.have.property('acknowledged', true);
       });
     });
   });

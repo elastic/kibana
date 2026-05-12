@@ -25,6 +25,7 @@ export type UnifiedDataTableRenderCustomToolbar = (
 ) => React.ReactElement;
 
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
+  saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }
@@ -33,6 +34,7 @@ export const internalRenderCustomToolbar = (
   props: RenderCustomToolbarProps
 ): React.ReactElement => {
   const {
+    saveToDashboardButton,
     leftSide,
     bottomSection,
     toolbarProps: {
@@ -137,6 +139,14 @@ export const internalRenderCustomToolbar = (
                       {fullScreenControl}
                     </div>
                   )}
+                  {Boolean(saveToDashboardButton) && (
+                    <div
+                      className="unifiedDataTableToolbarControlIconButton"
+                      css={styles.controlGroupIconButton}
+                    >
+                      {saveToDashboardButton}
+                    </div>
+                  )}
                 </div>
               </EuiFlexItem>
             )}
@@ -162,9 +172,11 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internal
  * Render custom element on the left side and all controls to the right
  */
 export const getRenderCustomToolbarWithElements = ({
+  saveToDashboardButton,
   leftSide,
   bottomSection,
 }: {
+  saveToDashboardButton?: React.ReactElement;
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
 }): UnifiedDataTableRenderCustomToolbar => {
@@ -174,55 +186,71 @@ export const getRenderCustomToolbarWithElements = ({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,
+      saveToDashboardButton,
     });
 };
 
-const styles = {
+export const styles = {
   toolbar: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
     }),
   controlButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '.euiDataGridToolbarControl': {
-        blockSize: euiTheme.size.xl,
-        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.backgroundBaseFormsControlDisabled}`,
-        borderRadius: euiTheme.border.radius.small,
+    euiTheme
+      ? css({
+          '.euiDataGridToolbarControl': {
+            blockSize: euiTheme.size.xl,
+            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.backgroundBaseFormsControlDisabled}`,
+            borderRadius: euiTheme.border.radius.small,
 
-        // making the icons larger than the default size
-        '& svg': {
-          inlineSize: euiTheme.size.base,
-          blockSize: euiTheme.size.base,
-        },
-      },
-    }),
+            // making the icons larger than the default size
+            '& svg': {
+              inlineSize: euiTheme.size.base,
+              blockSize: euiTheme.size.base,
+            },
+          },
+        })
+      : undefined, // for making unit tests pass
   controlGroup: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      position: 'relative',
-      overflow: 'hidden',
-      borderRadius: euiTheme.border.radius.small,
-      display: 'inline-flex',
-      alignItems: 'stretch',
-      flexDirection: 'row',
+    euiTheme
+      ? css({
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: euiTheme.border.radius.small,
+          display: 'inline-flex',
+          alignItems: 'stretch',
+          flexDirection: 'row',
 
-      '&::after': {
-        content: '""',
-        position: 'absolute',
-        inset: 0,
-        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-        borderRadius: 'inherit',
-        pointerEvents: 'none',
-      },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            borderRadius: 'inherit',
+            pointerEvents: 'none',
+          },
 
-      '& .unifiedDataTableToolbarControlIconButton .euiDataGridToolbarControl': {
-        borderRadius: 0,
-        border: 'none',
-      },
+          '& .unifiedDataTableToolbarControlIconButton .euiDataGridToolbarControl': {
+            borderRadius: 0,
+            border: 'none',
+          },
 
-      '& .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton': {
-        borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-      },
-    }),
+          '& .unifiedDataTableToolbarControlIconButton + .unifiedDataTableToolbarControlIconButton':
+            {
+              borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            },
+
+          '& .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl': {
+            borderRadius: 0,
+            border: 'none',
+          },
+
+          '& .unifiedDataTableToolbarControlButton + .unifiedDataTableToolbarControlButton': {
+            borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+            borderRadius: 0,
+          },
+        })
+      : undefined,
   controlGroupIconButton: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.euiToolTipAnchor .euiButtonIcon': {

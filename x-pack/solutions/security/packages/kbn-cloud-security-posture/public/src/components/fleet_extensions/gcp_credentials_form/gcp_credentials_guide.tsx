@@ -103,6 +103,18 @@ export const GoogleCloudShellCredentialsGuide = (props: {
             <EuiSpacer size="xs" />
             <li>
               <FormattedMessage
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.authorize"
+                defaultMessage="Click {authorizeButton} if prompted to authorize {googleCloudShell}"
+                values={{
+                  authorizeButton: <strong>{'Authorize'}</strong>,
+                  googleCloudShell: <strong>{'Google Cloud Shell'}</strong>,
+                }}
+                ignoreTag
+              />
+            </li>
+            <EuiSpacer size="xs" />
+            <li>
+              <FormattedMessage
                 id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.runCloudShellScript"
                 defaultMessage="Paste and run command in the {googleCloudShell} terminal"
                 values={{
@@ -115,7 +127,7 @@ export const GoogleCloudShellCredentialsGuide = (props: {
             <li>
               <FormattedMessage
                 id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudshell.guide.steps.copyJsonServiceKey"
-                defaultMessage="Run {catCommand} to view the service account key. Copy and paste Credentials JSON below"
+                defaultMessage="Run {catCommand} to view the service account key. Copy the entire output and paste into Credentials JSON below"
                 values={{
                   catCommand: <code>{'cat KEY_FILE.json'}</code>,
                 }}

@@ -203,7 +203,7 @@ export class FeatureProperties extends Component<Props, State> {
           const name = action.getDisplayName(actionContext);
           return {
             name: name ? name : action.id,
-            icon: iconType ? <EuiIcon type={iconType} /> : undefined,
+            icon: iconType ? <EuiIcon type={iconType} aria-hidden={true} /> : undefined,
             onClick: async () => {
               this.props.onCloseTooltip();
 
@@ -265,7 +265,7 @@ export class FeatureProperties extends Component<Props, State> {
         })}
         data-test-subj="mapTooltipCreateFilterButton"
       >
-        <EuiIcon type="filter" />
+        <EuiIcon type="filter" aria-hidden={true} />
       </EuiButtonEmpty>
     );
 
@@ -295,7 +295,7 @@ export class FeatureProperties extends Component<Props, State> {
             })}
             data-test-subj="mapTooltipMoreActionsButton"
           >
-            <EuiIcon type="arrowRight" />
+            <EuiIcon type="chevronSingleRight" aria-hidden={true} />
           </EuiButtonEmpty>
         </span>
       </td>
@@ -306,6 +306,7 @@ export class FeatureProperties extends Component<Props, State> {
     if (this.state.loadPropertiesErrorMsg) {
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.maps.tooltip.unableToLoadContentTitle', {
             defaultMessage: 'Unable to load tooltip content',
           })}

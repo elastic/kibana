@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { getSimplePreviewRule, getSimpleRulePreviewOutput } from '../../utils';
-import { deleteAllRules } from '../../../../config/services/detections_response';
 
 import { createUserAndRole, deleteUserAndRole } from '../../../../config/services/common';
 
@@ -105,12 +105,25 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should NOT be able to preview a rule', async () => {
-          await supertestWithoutAuth
+          // t1_analyst has Rules read but not preview index privileges; they get 200 with an error
+          // in the body (no longer 403, since we no longer call createEndpointList on this route).
+          const { body } = await supertestWithoutAuth
             .post(DETECTION_ENGINE_RULES_PREVIEW)
             .auth(role, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule())
-            .expect(403);
+            .expect(200);
+
+          const { logs } = getSimpleRulePreviewOutput(undefined, [
+            {
+              errors: [
+                'Missing "read" privileges for the ".preview.alerts-security.alerts" or ".internal.preview.alerts-security.alerts" indices. Without these privileges you cannot use the Rule Preview feature.',
+              ],
+              warnings: [],
+              duration: 0,
+            },
+          ]);
+          expect(body).to.eql({ logs });
         });
       });
 

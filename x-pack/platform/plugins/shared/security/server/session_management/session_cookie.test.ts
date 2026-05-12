@@ -133,10 +133,31 @@ describe('Session cookie', () => {
 
       expect(mockSessionStorageFactory.asScoped).toHaveBeenCalledWith(request);
       expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
-      expect(mockSessionStorage.set).toHaveBeenCalledWith({
-        ...sessionValue,
-        path: '/mock-base-path',
-      });
+      expect(mockSessionStorage.set).toHaveBeenCalledWith(
+        {
+          ...sessionValue,
+          path: '/mock-base-path',
+        },
+        undefined
+      );
+    });
+
+    it('properly sets value with both isSecure and sameSite options', async () => {
+      const sessionValue = sessionCookieMock.createValue();
+      const options = { isSecure: false, sameSite: 'None' as 'None' };
+
+      const request = httpServerMock.createKibanaRequest();
+      await sessionCookie.set(request, sessionValue, options);
+
+      expect(mockSessionStorageFactory.asScoped).toHaveBeenCalledWith(request);
+      expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.set).toHaveBeenCalledWith(
+        {
+          ...sessionValue,
+          path: '/mock-base-path',
+        },
+        options
+      );
     });
   });
 

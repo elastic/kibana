@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 import type {
   IndicesAlias,
@@ -16,7 +17,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStep } from '../../../common';
 import type { IndexSettings, IndexWarning, ReindexArgs } from '../../../common';
 import type { ReindexSavedObject } from './types';
 import type { CreateReindexOpArgs } from './reindex_actions';
@@ -135,7 +137,8 @@ export const reindexServiceFactory = (
   actions: ReindexActions,
   log: Logger,
   licensing: LicensingPluginStart,
-  kibanaVersion: Version
+  kibanaVersion: Version,
+  isServerless: boolean = false
 ): ReindexService => {
   // ------ Utility functions
   const cleanupChanges = async (reindexOp: ReindexSavedObject) => {
@@ -219,18 +222,34 @@ export const reindexServiceFactory = (
 
     // Backup the current settings to restore them after the reindex
     // https://github.com/elastic/kibana/issues/201605
+    // In serverless mode, index.number_of_replicas setting is not available
+    // Filter out undefined values to prevent them from overriding null in settingsToApply
+    const indexRefreshInterval = settings['index.refresh_interval'];
+    const indexNumberOfReplicas = settings['index.number_of_replicas'];
+
     const backupSettings = {
-      'index.number_of_replicas': settings['index.number_of_replicas'],
-      'index.refresh_interval': settings['index.refresh_interval'],
+      ...(indexRefreshInterval !== undefined && {
+        'index.refresh_interval': indexRefreshInterval,
+      }),
+      ...(!isServerless &&
+        indexNumberOfReplicas !== undefined && {
+          'index.number_of_replicas': indexNumberOfReplicas,
+        }),
     };
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const settings_override = {
-      ...newSettings,
-      // Reindexing optimizations
-      'index.number_of_replicas': 0,
-      'index.refresh_interval': -1,
-    };
+    const settings_override = isServerless
+      ? {
+          ...newSettings,
+          // Reindexing optimization (skip number_of_replicas in serverless mode)
+          'index.refresh_interval': -1,
+        }
+      : {
+          ...newSettings,
+          // Reindexing optimizations
+          'index.number_of_replicas': 0,
+          'index.refresh_interval': -1,
+        };
 
     let createIndex;
     try {
@@ -414,12 +433,18 @@ export const reindexServiceFactory = (
     const { newIndexName, backupSettings, indexName } = reindexOp.attributes;
 
     // Build settings to restore or remove
-    const settingsToApply: Record<string, any> = {
-      // Defaulting to null in case the original setting was empty to remove the setting.
-      'index.number_of_replicas': null,
-      'index.refresh_interval': null,
-      ...backupSettings,
-    };
+    // In serverless mode, index.number_of_replicas setting is not available
+    // Defaulting to null in case the original setting was empty to remove the setting.
+    const settingsToApply: IndicesIndexSettings = isServerless
+      ? {
+          'index.refresh_interval': null,
+          ...backupSettings,
+        }
+      : {
+          'index.number_of_replicas': null,
+          'index.refresh_interval': null,
+          ...backupSettings,
+        };
 
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = await actions.getFlatSettings(indexName);
@@ -541,10 +566,6 @@ export const reindexServiceFactory = (
             allow_restricted_indices: true,
             privileges: ['all'],
           },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
-          },
         ],
       });
 
@@ -586,7 +607,22 @@ export const reindexServiceFactory = (
     }) {
       const indexExists = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
-        throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
+        throw error.indexNotFound(
+          i18n.translate('xpack.reindexService.error.indexNotFound', {
+            defaultMessage: 'Index {indexName} does not exist in this cluster.',
+            values: { indexName },
+          })
+        );
+      }
+
+      const newIndexExists = await esClient.indices.exists({ index: newIndexName });
+      if (newIndexExists) {
+        throw error.indexAlreadyExists(
+          i18n.translate('xpack.reindexService.error.indexAlreadyExists', {
+            defaultMessage: 'The index {newIndexName} already exists. Please try again.',
+            values: { newIndexName },
+          })
+        );
       }
 
       const existingReindexOps = await actions.findReindexOperations(indexName);

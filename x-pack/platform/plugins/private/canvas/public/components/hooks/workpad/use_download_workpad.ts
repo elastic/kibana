@@ -10,7 +10,6 @@ import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
 import { useNotifyService } from '../../../services';
 import type { CanvasWorkpad } from '../../../../types';
-import type { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
 import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 const strings = {
@@ -18,13 +17,6 @@ const strings = {
     i18n.translate('xpack.canvas.error.downloadWorkpad.downloadFailureErrorMessage', {
       defaultMessage: "Couldn't download workpad",
     }),
-  getDownloadRenderedWorkpadFailureErrorMessage: () =>
-    i18n.translate(
-      'xpack.canvas.error.downloadWorkpad.downloadRenderedWorkpadFailureErrorMessage',
-      {
-        defaultMessage: "Couldn't download rendered workpad",
-      }
-    ),
 };
 
 export const useDownloadWorkpad = () => {
@@ -46,26 +38,8 @@ export const useDownloadWorkpad = () => {
   );
 };
 
-export const useDownloadRenderedWorkpad = () => {
-  const notifyService = useNotifyService();
-  const download = useDownloadWorkpadBlob();
-
-  return useCallback(
-    async (workpad: CanvasRenderedWorkpad) => {
-      try {
-        download(workpad, `canvas-embed-workpad-${workpad.name}-${workpad.id}`);
-      } catch (err) {
-        notifyService.error(err, {
-          title: strings.getDownloadRenderedWorkpadFailureErrorMessage(),
-        });
-      }
-    },
-    [notifyService, download]
-  );
-};
-
 const useDownloadWorkpadBlob = () => {
-  return useCallback((workpad: CanvasWorkpad | CanvasRenderedWorkpad, filename: string) => {
+  return useCallback((workpad: CanvasWorkpad, filename: string) => {
     const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
     fileSaver.saveAs(jsonBlob, `${filename}.json`);
   }, []);

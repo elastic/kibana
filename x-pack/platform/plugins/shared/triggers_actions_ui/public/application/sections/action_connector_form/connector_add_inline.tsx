@@ -200,7 +200,7 @@ export const AddConnectorInline = ({
         }
         extraAction={
           <EuiButtonIcon
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
@@ -237,7 +237,7 @@ export const AddConnectorInline = ({
             />
           )
         ) : (
-          <EuiCallOut title={noConnectorsLabel}>
+          <EuiCallOut announceOnMount title={noConnectorsLabel}>
             <p>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.connectorAddInline.unauthorizedToCreateForEmptyConnectors"

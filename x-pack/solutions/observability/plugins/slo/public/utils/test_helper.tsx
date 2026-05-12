@@ -14,7 +14,7 @@ import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plug
 import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +45,13 @@ const queryClient = new QueryClient({
 
 const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
+export const pluginContextDefaultValue = {
+  appMountParameters,
+  observabilityRuleTypeRegistry,
+  ObservabilityPageTemplate: KibanaPageTemplate,
+  sloClient,
+};
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
@@ -68,14 +75,7 @@ export const render = (component: React.ReactNode) => {
             },
           }}
         >
-          <PluginContext.Provider
-            value={{
-              appMountParameters,
-              observabilityRuleTypeRegistry,
-              ObservabilityPageTemplate: KibanaPageTemplate,
-              sloClient,
-            }}
-          >
+          <PluginContext.Provider value={pluginContextDefaultValue}>
             <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
           </PluginContext.Provider>
         </KibanaContextProvider>

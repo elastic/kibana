@@ -18,18 +18,13 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isObject } from 'lodash';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
+import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
-import { internalStateSlice } from '../internal_state';
-import {
-  fromSavedObjectTabToSavedSearch,
-  fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
-  fromTabStateToSavedObjectTab,
-} from '../tab_mapping_utils';
-import { appendAdHocDataViews, replaceAdHocDataViewWithId, setDataView } from './data_views';
-import { setTabs } from './tabs';
+import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
+import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
+import { resetDiscoverSession } from './reset_discover_session';
+import { TabInitializationStatus } from '../types';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -39,8 +34,6 @@ export interface SaveDiscoverSessionThunkParams {
   newCopyOnSave: boolean;
   newDescription: string;
   newTags: string[];
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
 }
 
 export const saveDiscoverSession = createInternalStateAsyncThunk(
@@ -52,8 +45,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       newTimeRestore,
       newDescription,
       newTags,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
     }: SaveDiscoverSessionThunkParams,
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
@@ -68,33 +59,43 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       }
     >();
 
+    let nextSelectedTabId = state.tabs.unsafeCurrentId;
+    const selectedTab = currentTabs.find((tab) => tab.id === state.tabs.unsafeCurrentId);
+
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
       currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-        const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
+        const currentDataView = tabRuntimeState?.currentDataView$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
 
-        let updatedTab: DiscoverSessionTab;
+        const updatedTab = cloneDeep(
+          fromTabStateToSavedObjectTab({
+            tab,
+            overridenTimeRestore: newTimeRestore,
+            currentDataView,
+            services,
+          })
+        );
 
-        if (tabStateContainer) {
-          updatedTab = cloneDeep({
-            ...fromSavedSearchToSavedObjectTab({
-              tab,
-              savedSearch: tabStateContainer.savedSearchState.getState(),
-              services,
-            }),
-            timeRestore: newTimeRestore,
-            timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
-            refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
-          });
-        } else {
-          updatedTab = cloneDeep(
-            fromTabStateToSavedObjectTab({
-              tab,
-              timeRestore: newTimeRestore,
-              services,
-            })
-          );
+        // For non-initialized tabs, assign the current time range of the selected tab
+        // if time restore is enabled and no time range was set yet for this tab
+        if (
+          tab.initializationState.initializationStatus === TabInitializationStatus.NotStarted &&
+          newTimeRestore &&
+          !updatedTab.timeRange &&
+          selectedTab?.globalState.timeRange
+        ) {
+          updatedTab.timeRange = selectedTab.globalState.timeRange;
+          updatedTab.refreshInterval = selectedTab.globalState.refreshInterval;
+        }
+
+        if (newCopyOnSave) {
+          // to avoid id conflicts, we need to assign a new id to the tab if we're copying a discover session
+          const newTabId = uuidv4();
+          if (tab.id === nextSelectedTabId) {
+            nextSelectedTabId = newTabId;
+          }
+          updatedTab.id = newTabId;
         }
 
         if (overriddenVisContextAfterInvalidation) {
@@ -153,6 +154,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
               discoverSessionTitle: newTitle,
             },
           }),
+          managed: false,
         };
 
         const dataView = await services.dataViews.create(newDataViewSpec);
@@ -163,6 +165,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         newDataViewSpec = {
           ...dataViewSpec,
           id: uuidv4(),
+          managed: false,
         };
 
         // Clear out the old data view since it's no longer needed
@@ -198,58 +201,17 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {
-      onTitleDuplicate,
       copyOnSave: newCopyOnSave,
-      isTitleDuplicateConfirmed,
     };
 
     const discoverSession = await services.savedSearch.saveDiscoverSession(saveParams, saveOptions);
 
     if (discoverSession) {
-      await Promise.all(
-        updatedTabs.map(async (tab) => {
-          dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId: tab.id }));
-
-          const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-          const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
-
-          if (!tabStateContainer) {
-            return;
-          }
-
-          const savedSearch = await fromSavedObjectTabToSavedSearch({
-            tab,
-            discoverSession,
-            services,
-          });
-          const dataView = savedSearch.searchSource.getField('index');
-
-          if (dataView) {
-            dispatch(setDataView({ tabId: tab.id, dataView }));
-          }
-
-          tabStateContainer.savedSearchState.set(savedSearch);
-          tabStateContainer.actions.undoSavedSearchChanges();
-          tabStateContainer.appState.resetInitialState();
-        })
-      );
-
-      const allTabs = discoverSession.tabs.map((tab) =>
-        fromSavedObjectTabToTabState({
-          tab,
-          existingTab: selectTab(state, tab.id),
-        })
-      );
-
-      dispatch(
-        setTabs({
-          allTabs,
-          selectedTabId: state.tabs.unsafeCurrentId,
-          recentlyClosedTabs: selectRecentlyClosedTabs(state),
-        })
-      );
+      await dispatch(
+        resetDiscoverSession({ updatedDiscoverSession: discoverSession, nextSelectedTabId })
+      ).unwrap();
     }
 
-    return { discoverSession };
+    return { discoverSession, nextSelectedTabId };
   }
 );

@@ -23,7 +23,7 @@ export const SourceDestination = (props) => {
         <SourceTooltip {...props}>{sourceName}</SourceTooltip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="arrowRight" size="s" />
+        <EuiIcon type="chevronSingleRight" size="s" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={targetTransportAddressContent} position="bottom">

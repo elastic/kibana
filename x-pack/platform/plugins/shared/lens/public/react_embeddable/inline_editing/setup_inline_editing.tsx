@@ -7,26 +7,27 @@
 
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import React from 'react';
-import type { EditLensConfigurationProps } from '../../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
-import { isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
-  LensEmbeddableStartServices,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-} from '../types';
+  LensDatasourceId,
+} from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import type { EditConfigPanelProps } from '../../app_plugin/shared/edit_on_the_fly/types';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
+import { isTextBasedLanguage } from '../helper';
 import type { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
 import { saveUserChartTypeToSessionStorage } from '../../chart_type_session_storage';
+import type { LensEmbeddableStartServices } from '../types';
 
 export function prepareInlineEditPanel(
   initialState: LensRuntimeState,
   getState: GetStateType,
-  updateState: (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => void,
+  updateState: (newState: Pick<LensRuntimeState, 'attributes' | 'ref_id'>) => void,
   { dataLoading$, isNewlyCreated$ }: Pick<LensInternalApi, 'dataLoading$' | 'isNewlyCreated$'>,
   panelManagementApi: PanelManagementApi,
   inspectorApi: LensInspectorAdapters,
@@ -58,9 +59,9 @@ export function prepareInlineEditPanel(
     closeFlyout,
     onApply,
     onCancel,
-    hideTimeFilterInfo,
+    applyButtonLabel,
   }: Partial<
-    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>
+    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'applyButtonLabel'>
   > = {}) {
     const currentState = getState();
     const isNewPanel = initialState.isNewPanel;
@@ -71,7 +72,7 @@ export function prepareInlineEditPanel(
       saveUserChartTypeToSessionStorage(attributes.visualizationType);
     }
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
-      'formBased') as EditLensConfigurationProps['datasourceId'];
+      LENS_DATASOURCE_ID.FORM_BASED) as LensDatasourceId;
 
     const { updatePanelState, updateSuggestion } = getStateManagementForInlineEditing(
       activeDatasourceId,
@@ -79,7 +80,7 @@ export function prepareInlineEditPanel(
       (attrs: TypedLensSerializedState['attributes'], resetId: boolean = false) => {
         updateState({
           attributes: attrs,
-          savedObjectId: resetId ? undefined : currentState.savedObjectId,
+          ref_id: resetId ? undefined : currentState.ref_id,
         });
       },
       visualizationMap,
@@ -87,8 +88,11 @@ export function prepareInlineEditPanel(
       startDependencies.data.query.filterManager.extract
     );
 
-    const updateByRefInput = (savedObjectId: LensRuntimeState['savedObjectId']) => {
-      updateState({ attributes, savedObjectId });
+    const updateByRefInput = (
+      refId: LensRuntimeState['ref_id'],
+      attrs: TypedLensSerializedState['attributes']
+    ) => {
+      updateState({ attributes: attrs, ref_id: refId });
     };
 
     if (attributes?.visualizationType == null) {
@@ -115,11 +119,10 @@ export function prepareInlineEditPanel(
         updateByRefInput={updateByRefInput}
         updatePanelState={updatePanelState}
         updateSuggestion={updateSuggestion}
-        datasourceId={activeDatasourceId}
         lensAdapters={inspectorApi.getInspectorAdapters()}
         dataLoading$={dataLoading$}
         panelId={uuid}
-        savedObjectId={currentState.savedObjectId}
+        savedObjectId={currentState.ref_id}
         navigateToLensEditor={
           canNavigateToFullEditor
             ? navigateToLensEditor(
@@ -132,7 +135,6 @@ export function prepareInlineEditPanel(
             : undefined
         }
         displayFlyoutHeader
-        canEditTextBasedQuery={isTextBasedLanguage(currentState)}
         isNewPanel={panelManagementApi.isNewPanel()}
         onCancel={() => {
           panelManagementApi.onStopEditing(
@@ -144,15 +146,23 @@ export function prepareInlineEditPanel(
           );
           onCancel?.();
         }}
-        onApply={(newAttributes) => {
-          panelManagementApi.onStopEditing(false, { ...getState(), attributes: newAttributes });
+        onApply={async (newAttributes) => {
+          let appliedAttributes = newAttributes;
           if (newAttributes.visualizationType != null) {
-            onApply?.(newAttributes);
+            const result = await onApply?.(newAttributes);
+            if (result) {
+              appliedAttributes = result;
+            }
           }
+          panelManagementApi.onStopEditing(false, {
+            ...getState(),
+            attributes: appliedAttributes,
+          });
+          return appliedAttributes;
         }}
-        hideTimeFilterInfo={hideTimeFilterInfo}
         isReadOnly={panelManagementApi.canShowConfig() && !panelManagementApi.isEditingEnabled()}
         parentApi={parentApi}
+        applyButtonLabel={applyButtonLabel}
       />
     );
   };

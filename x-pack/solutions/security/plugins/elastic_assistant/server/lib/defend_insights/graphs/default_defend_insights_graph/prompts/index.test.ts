@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 import type { DefendInsightsCombinedPrompts } from '.';
@@ -25,7 +23,6 @@ jest.mock('./policy_response_failure', () => ({
 
 describe('getDefendInsightsPrompt', () => {
   const mockArgs = {
-    actionsClient: {} as unknown as PublicMethodsOf<ActionsClient>,
     connector: undefined,
     connectorId: 'mock-connector-id',
     model: 'mock-model',
@@ -47,7 +44,7 @@ describe('getDefendInsightsPrompt', () => {
     (getIncompatibleAntivirusPrompt as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
-      type: DefendInsightType.Enum.incompatible_antivirus,
+      type: DefendInsightType.enum.incompatible_antivirus,
       ...mockArgs,
     });
 
@@ -69,7 +66,7 @@ describe('getDefendInsightsPrompt', () => {
     (getPolicyResponseFailurePrompt as jest.Mock).mockResolvedValue(mockResponse);
 
     const result = await getDefendInsightsPrompt({
-      type: DefendInsightType.Enum.policy_response_failure,
+      type: DefendInsightType.enum.policy_response_failure,
       ...mockArgs,
     });
 

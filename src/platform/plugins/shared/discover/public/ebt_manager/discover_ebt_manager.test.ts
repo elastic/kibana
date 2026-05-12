@@ -14,7 +14,14 @@ import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_regi
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
+import * as queryAnalysisUtils from './query_analysis_utils';
 import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
+import {
+  DiscoverInDashboardEventDataKeys,
+  DiscoverInDashboardEventName,
+} from './discover_in_dashboard_event_definition';
 
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
@@ -120,6 +127,53 @@ describe('DiscoverEBTManager', () => {
                 description:
                   "List of field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
               },
+            },
+          },
+        },
+      });
+
+      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
+        eventType: 'discover_in_dashboard',
+        schema: {
+          eventName: {
+            type: 'keyword',
+            _meta: {
+              description: 'The event name. Expected values: savedSession, tabSwitched',
+            },
+          },
+          dashboardId: {
+            type: 'keyword',
+            _meta: {
+              description: 'The unique dashboard identifier',
+              optional: true,
+            },
+          },
+          embeddablePanelId: {
+            type: 'keyword',
+            _meta: {
+              description: 'The embeddable panel instance identifier within the dashboard',
+              optional: true,
+            },
+          },
+          savedSessionId: {
+            type: 'keyword',
+            _meta: {
+              description: 'The discover session identifier (present for savedSession)',
+              optional: true,
+            },
+          },
+          tabSwitchedFromId: {
+            type: 'keyword',
+            _meta: {
+              description: 'Tab identifier switched from (present for tabSwitched)',
+              optional: true,
+            },
+          },
+          tabSwitchedToId: {
+            type: 'keyword',
+            _meta: {
+              description: 'Tab identifier switched to (present for tabSwitched)',
+              optional: true,
             },
           },
         },
@@ -930,6 +984,171 @@ describe('DiscoverEBTManager', () => {
         },
         ['profile1', 'profile2'],
       ]);
+    });
+  });
+
+  describe('trackQueryPerformanceEvent', () => {
+    it('should track query performance events', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent');
+
+      const requests: InspectedRequest[] = [
+        {
+          id: '0',
+          name: 'request 0',
+          startTime: 0,
+          status: RequestStatus.OK,
+          json: {
+            query: {
+              bool: {
+                must: [{ match_phrase: { message: 'foo bar' } }],
+              },
+            },
+          },
+        },
+        {
+          id: '1',
+          name: 'request 1',
+          startTime: 0,
+          status: RequestStatus.OK,
+          json: {
+            query: {
+              multi_match: {
+                query: 'test',
+                type: 'phrase',
+              },
+            },
+          },
+        },
+      ];
+
+      tracker.reportEvent(
+        {
+          queryRangeSeconds: 300,
+          requests,
+        },
+        {
+          meta: { foo: 'bar' },
+        }
+      );
+
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 2, // 1 match_phrase + 1 multi_match type=phrase
+        meta: {
+          foo: 'bar',
+          multi_match_types: ['match_phrase', 'phrase'],
+        },
+      });
+    });
+
+    it('should avoid re-analyzing the same request multiple times', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const analyzeSpy = jest.spyOn(queryAnalysisUtils, 'analyzeMultiMatchTypesRequest');
+
+      const request: InspectedRequest = {
+        id: '0',
+        name: 'test request',
+        startTime: 0,
+        status: RequestStatus.OK,
+        json: {
+          query: {
+            bool: {
+              must: [{ match_phrase: { message: 'foo bar' } }],
+            },
+          },
+        },
+      };
+
+      const tracker1 = scopedManager.trackQueryPerformanceEvent('testQueryEvent1');
+      tracker1.reportEvent({
+        queryRangeSeconds: 300,
+        requests: [request],
+      });
+
+      const tracker2 = scopedManager.trackQueryPerformanceEvent('testQueryEvent2');
+      tracker2.reportEvent({
+        queryRangeSeconds: 300,
+        requests: [request],
+      });
+
+      expect(analyzeSpy).toHaveBeenCalledTimes(1);
+
+      analyzeSpy.mockRestore();
+    });
+  });
+
+  describe('trackDiscoverToDashboardEvent', () => {
+    it('should track a savedSession event with the provided payload', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackDiscoverToDashboardEvent({
+        [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.savedSession,
+        [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: 'session-1',
+        [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: 'dashboard-1',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_in_dashboard', {
+        eventName: 'savedSession',
+        savedSessionId: 'session-1',
+        dashboardId: 'dashboard-1',
+      });
+    });
+
+    it('should track a tabSwitched event with the provided payload', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackDiscoverToDashboardEvent({
+        [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.tabSwitched,
+        [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: 'dashboard-1',
+        [DiscoverInDashboardEventDataKeys.EMBEDDABLE_PANEL_ID]: 'panel-1',
+        [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: 'session-1',
+        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_FROM_ID]: 'tab-1',
+        [DiscoverInDashboardEventDataKeys.TAB_SWITCHED_TO_ID]: 'tab-2',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_in_dashboard', {
+        eventName: 'tabSwitched',
+        dashboardId: 'dashboard-1',
+        embeddablePanelId: 'panel-1',
+        savedSessionId: 'session-1',
+        tabSwitchedFromId: 'tab-1',
+        tabSwitchedToId: 'tab-2',
+      });
     });
   });
 });

@@ -33,6 +33,7 @@ interface Props {
   onOpen: () => void;
   onClose: () => void;
   processor?: ProcessorInternal;
+  buttonRef?: React.RefObject<HTMLButtonElement | HTMLAnchorElement>;
 }
 
 const formOptions: FormOptions = {
@@ -48,6 +49,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
   onFormUpdate,
   onSubmit,
   onClose,
+  buttonRef,
   ...rest
 }) => {
   const { services } = useKibana();
@@ -138,6 +140,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         closeFlyout={onClose}
         resetProcessors={resetProcessors}
         handleSubmit={handleSubmit}
+        buttonRef={buttonRef}
       />
     );
   }
@@ -149,6 +152,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
       esDocsBasePath={services.documentation.getEsDocsBasePath()}
       closeFlyout={onClose}
       handleSubmit={handleSubmit}
+      buttonRef={buttonRef}
     />
   );
 };

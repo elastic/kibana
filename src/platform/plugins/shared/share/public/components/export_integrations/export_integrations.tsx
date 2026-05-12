@@ -33,8 +33,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
-import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import {
+  ShareProvider,
+  type IShareContext,
+  useShareTypeContext,
+  useShareContext,
+} from '../context';
+import type { ExportShareConfig, ExportShareDerivativesConfig, ShareContext } from '../../types';
+import { DraftModeCallout } from '../common/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -53,7 +59,7 @@ interface LayoutOptionsProps {
   printLayoutChange: (evt: EuiSwitchEvent) => void;
 }
 
-interface ManagedFlyoutProps {
+export interface ManagedExportFlyoutProps {
   exportIntegration: ExportShareConfig;
   intl: InjectedIntl;
   isDirty: boolean;
@@ -64,6 +70,12 @@ interface ManagedFlyoutProps {
   shareObjectTypeMeta: ReturnType<
     typeof useShareTypeContext<'integration', 'export'>
   >['objectTypeMeta'];
+  onSave?: () => Promise<void>;
+  isSaving?: boolean;
+  sharingData: {
+    [key: string]: unknown;
+  };
+  shareableUrlLocatorParams?: ShareContext['shareableUrlLocatorParams'];
 }
 
 function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
@@ -117,7 +129,7 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   );
 }
 
-function ManagedFlyout({
+export function ManagedExportFlyout({
   exportIntegration,
   intl,
   isDirty,
@@ -126,9 +138,22 @@ function ManagedFlyout({
   shareObjectTypeMeta,
   shareObjectType,
   shareObjectTypeAlias,
-}: ManagedFlyoutProps) {
+  onSave,
+  isSaving,
+  sharingData,
+}: ManagedExportFlyoutProps) {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
+
+  const totalHitsSizeWarning = useMemo(() => {
+    if (exportIntegration.config.renderTotalHitsSizeWarning) {
+      const totalHits: number = (sharingData.totalHits as number) || 0;
+      const warning = exportIntegration.config.renderTotalHitsSizeWarning(totalHits);
+      return warning ? <EuiFlexItem>{warning}</EuiFlexItem> : null;
+    }
+    return null;
+  }, [exportIntegration.config, sharingData.totalHits]);
+
   const getReport = useCallback(async () => {
     try {
       setIsCreatingExport(true);
@@ -142,7 +167,8 @@ function ManagedFlyout({
     }
   }, [exportIntegration.config, intl, onCloseFlyout, usePrintLayout]);
 
-  const DraftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
+  const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
+  const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
 
   return (
     <React.Fragment>
@@ -160,7 +186,7 @@ function ManagedFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="exportItemDetailsFlyoutBody">
         <EuiFlexGroup direction="column">
           <Fragment>
             {exportIntegration.config.renderLayoutOptionSwitch && (
@@ -213,10 +239,21 @@ function ManagedFlyout({
           </Fragment>
           <Fragment>{exportIntegration.config.generateAssetComponent}</Fragment>
           <Fragment>
-            {publicAPIEnabled && isDirty && DraftModeCallout && (
-              <EuiFlexItem>{DraftModeCallout}</EuiFlexItem>
+            {publicAPIEnabled && isDirty && draftModeCallout && (
+              <EuiFlexItem>
+                <DraftModeCallout
+                  {...draftModeCalloutContent}
+                  {...(onSave && {
+                    saveButtonProps: {
+                      onSave,
+                      isSaving,
+                    },
+                  })}
+                />
+              </EuiFlexItem>
             )}
           </Fragment>
+          <Fragment>{publicAPIEnabled && totalHitsSizeWarning}</Fragment>
         </EuiFlexGroup>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -249,6 +286,7 @@ function ManagedFlyout({
 }
 
 function ExportMenuPopover({ intl }: ExportMenuProps) {
+  const { onSave, isSaving } = useShareContext();
   const {
     onClose,
     anchorElement,
@@ -258,6 +296,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     objectType,
     objectTypeAlias,
     objectTypeMeta,
+    sharingData,
+    shareableUrlLocatorParams,
   } = useShareTypeContext('integration', 'export');
   const { shareMenuItems: exportDerivatives } = useShareTypeContext(
     'integration',
@@ -276,6 +316,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     id: string;
     group: keyof typeof selectionOptions.current;
   }>();
+
   const selectedMenuItem = useMemo<ExportShareConfig | ExportShareDerivativesConfig | null>(() => {
     let result: ExportShareConfig | ExportShareDerivativesConfig | null = null;
 
@@ -356,6 +397,9 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         panelProps={{
           'data-test-subj': 'exportPopoverPanel',
         }}
+        aria-label={i18n.translate('share.export.popoverAriaLabel', {
+          defaultMessage: 'Export options',
+        })}
       >
         <EuiListGroup flush>
           {exportIntegrations.map((menuItem) => (
@@ -402,13 +446,15 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             isolation: 'isolate', // ensures that tooltips within this flyout render as should
           })}
           ownFocus
-          maskProps={{
-            headerZindexLocation: 'above',
-          }}
+          container={null}
           ref={flyoutRef}
+          aria-label={i18n.translate('share.export.flyoutAriaLabel', {
+            defaultMessage: 'Export',
+          })}
           {...(selectedMenuItem?.groupId === 'exportDerivatives'
             ? selectedMenuItem.config.flyoutSizing || {}
             : {})}
+          session="start"
         >
           {/* TODO: remove this global style once https://github.com/elastic/eui/issues/8801 is resolved  */}
           <Global
@@ -421,7 +467,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             }}
           />
           {selectedMenuItemMeta!.group === 'export' ? (
-            <ManagedFlyout
+            <ManagedExportFlyout
               exportIntegration={selectedMenuItem as ExportShareConfig}
               shareObjectType={objectType}
               shareObjectTypeAlias={objectTypeAlias}
@@ -430,6 +476,10 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               publicAPIEnabled={publicAPIEnabled}
               intl={intl}
               onCloseFlyout={flyoutOnCloseHandler}
+              onSave={onSave}
+              isSaving={isSaving}
+              sharingData={sharingData}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
             />
           ) : (
             (selectedMenuItem as ExportShareDerivativesConfig)?.config.flyoutContent({

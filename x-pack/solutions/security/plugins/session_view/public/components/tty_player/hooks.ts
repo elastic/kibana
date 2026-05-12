@@ -7,7 +7,7 @@
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SearchAddon } from './xterm_search';
@@ -200,7 +200,7 @@ export const useXtermPlayer = ({
     const term = new Terminal({
       theme: {
         selectionBackground: colors.warning,
-        selectionForeground: colors.ink,
+        selectionForeground: colors.textInk,
         yellow: colors.warning,
       },
       fontFamily: font.familyCode,

@@ -13,7 +13,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { kibanaPackageJson } from '@kbn/repo-info';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import {
+  WorkflowInsightType,
+  WorkflowInsightActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+} from '../../../../common/endpoint/types/workflow_insights';
 
 import type { HostMetadata } from '../../../../common/endpoint/types';
 import type {
@@ -21,12 +27,6 @@ import type {
   SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 
-import {
-  ActionType,
-  Category,
-  SourceType,
-  TargetType,
-} from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointMetadataService } from '../metadata';
 import type { FileEventDoc } from './helpers';
 import {
@@ -61,20 +61,20 @@ function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): Securi
   const defaultInsight = {
     '@timestamp': moment(),
     message: 'This is a test message',
-    category: Category.Endpoint,
-    type: DefendInsightType.Enum.incompatible_antivirus,
+    category: WorkflowInsightCategory.enum.endpoint,
+    type: WorkflowInsightType.enum.incompatible_antivirus,
     source: {
-      type: SourceType.LlmConnector,
+      type: WorkflowInsightSourceType.enum['llm-connector'],
       id: 'openai-connector-id',
       data_range_start: moment(),
       data_range_end: moment(),
     },
     target: {
-      type: TargetType.Endpoint,
+      type: WorkflowInsightTargetType.enum.endpoint,
       ids: ['endpoint-1', 'endpoint-2'],
     },
     action: {
-      type: ActionType.Refreshed,
+      type: WorkflowInsightActionType.enum.refreshed,
       timestamp: moment(),
     },
     value: 'unique-key',
@@ -163,18 +163,18 @@ describe('helpers', () => {
     it('should build query with valid keys', () => {
       const searchParams: SearchParams = {
         ids: ['id1', 'id2'],
-        categories: [Category.Endpoint],
+        categories: [WorkflowInsightCategory.enum.endpoint],
         types: ['incompatible_antivirus'],
-        sourceTypes: [SourceType.LlmConnector],
+        sourceTypes: [WorkflowInsightSourceType.enum['llm-connector']],
         sourceIds: ['source1'],
         targetIds: ['target1'],
-        actionTypes: [ActionType.Refreshed],
+        actionTypes: [WorkflowInsightActionType.enum.refreshed],
       };
       const result = buildEsQueryParams(searchParams);
       expect(result).toEqual([
         { terms: { _id: ['id1', 'id2'] } },
         { terms: { categories: ['endpoint'] } },
-        { terms: { types: ['incompatible_antivirus'] } },
+        { terms: { type: ['incompatible_antivirus'] } },
         { nested: { path: 'source', query: { terms: { 'source.type': ['llm-connector'] } } } },
         { nested: { path: 'source', query: { terms: { 'source.id': ['source1'] } } } },
         { nested: { path: 'target', query: { terms: { 'target.ids': ['target1'] } } } },
@@ -199,7 +199,7 @@ describe('helpers', () => {
 
     it('should handle nested query for actionTypes', () => {
       const searchParams: SearchParams = {
-        actionTypes: [ActionType.Refreshed],
+        actionTypes: [WorkflowInsightActionType.enum.refreshed],
       };
       const result = buildEsQueryParams(searchParams);
       expect(result).toEqual([
@@ -372,7 +372,7 @@ describe('helpers', () => {
   describe('checkIfRemediationExists', () => {
     it('should return false for non-incompatible_antivirus types', async () => {
       const insight = getDefaultInsight({
-        type: 'other-type' as DefendInsightType,
+        type: 'other-type' as WorkflowInsightType,
       });
 
       // For non-incompatible_antivirus types, getHostMetadata should not be called.
@@ -402,7 +402,7 @@ describe('helpers', () => {
       };
 
       const insight = getDefaultInsight({
-        type: DefendInsightType.Enum.incompatible_antivirus,
+        type: WorkflowInsightType.enum.incompatible_antivirus,
         remediation: {
           exception_list_items: [
             {
@@ -457,7 +457,7 @@ describe('helpers', () => {
 
       // Here the entry field is not valid, so generateTrustedAppsFilter returns an empty string.
       const insight = getDefaultInsight({
-        type: DefendInsightType.Enum.incompatible_antivirus,
+        type: WorkflowInsightType.enum.incompatible_antivirus,
         remediation: {
           exception_list_items: [
             {

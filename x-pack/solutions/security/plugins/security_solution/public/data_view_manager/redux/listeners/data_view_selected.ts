@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import type { DataView, DataViewLazy, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { isEmpty } from 'lodash';
+import type { Logger } from '@kbn/logging';
+import type { CoreStart } from '@kbn/core/public';
 import type { RootState } from '../reducer';
 import { scopes } from '../reducer';
 import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
-import type { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
+import { getSelectedDataViewStorageKey } from './storage_keys';
 
 /**
  * Creates a Redux listener for handling data view selection logic in the data view manager.
@@ -27,12 +34,16 @@ import type { DataViewManagerScopeName } from '../../constants';
  * If a data view is successfully resolved, it dispatches an action to set it as selected for the current scope.
  * If an error occurs during fetching or creation, it dispatches an error action for the current scope.
  *
- * @param dependencies - The dependencies required for the listener, including the scope and DataViews service.
+ * @param dependencies - The dependencies required for the listener, including the scope, DataViews service, and storage.
  * @returns An object with the action creator and effect for Redux middleware.
  */
 export const createDataViewSelectedListener = (dependencies: {
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
+  spaces: SpacesPluginStart;
   dataViews: DataViewsServicePublic;
+  notifications: CoreStart['notifications'];
+  storage: Storage;
+  logger: Logger;
 }) => {
   return {
     actionCreator: selectDataViewAsync,
@@ -40,12 +51,21 @@ export const createDataViewSelectedListener = (dependencies: {
       action: ReturnType<typeof selectDataViewAsync>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
+      const logger = dependencies.logger;
+      const spaceId = (await dependencies.spaces.getActiveSpace()).id;
+      logger.debug(
+        `Data view selection requested for scope: ${
+          dependencies.scope
+        } with payload: ${JSON.stringify(action.payload)}`
+      );
       if (dependencies.scope !== action.payload.scope) {
         return;
       }
 
       // Cancel effects running for the current scope to prevent race conditions
       listenerApi.cancelActiveListeners();
+
+      logger.debug(`cancelActiveListeners called for scope: ${dependencies.scope}`);
 
       let dataViewByIdError: unknown;
       let adhocDataViewCreationError: unknown;
@@ -83,17 +103,41 @@ export const createDataViewSelectedListener = (dependencies: {
        */
       const cachedDataViewSpec = findCachedDataView(action.payload.id);
 
+      logger.debug(
+        `Cached data view lookup for id: ${action.payload.id} returned: ${
+          cachedDataViewSpec?.title ?? 'null'
+        }`
+      );
+
+      // If the data view is not found in the cache, attempt to fetch it by ID from the DataViews service.
+      // We wrap the dataViews.getDataViewLazy within a try catch because we've seen errors happening with conflicting ids in the saved object api
       if (!cachedDataViewSpec) {
         try {
           if (action.payload.id) {
             dataViewById = await dependencies.dataViews.getDataViewLazy(action.payload.id);
           }
         } catch (error: unknown) {
+          logger.error(`Error fetching data view by id ${action.payload.id}: ${error}`);
+          dependencies.notifications.toasts.addDanger({
+            title: 'Selected data view is unavailable',
+            text: `Unable to load data view ${
+              action.payload.id ? `"${action.payload.id}"` : ''
+            }. Using fallback selection when possible.`,
+          });
+
+          // This cleans local storage for the analyzer data view to prevent the error from happening again on page refresh.
+          if (action.payload.scope === PageScope.analyzer && action.payload.id) {
+            dependencies.storage.remove(
+              getSelectedDataViewStorageKey(spaceId, action.payload.scope)
+            );
+          }
           dataViewByIdError = error;
         }
       }
 
-      if (!dataViewById) {
+      // We attempt to create an ad-hoc data view if the data view by id lookup fails, and fallback patterns are provided.
+      if (!dataViewById && action.payload.fallbackPatterns?.length) {
+        logger.debug(`Data view by id lookup failed for id: ${action.payload.id}`);
         try {
           const title = action.payload.fallbackPatterns?.join(',') ?? '';
           if (!title.length) {
@@ -104,12 +148,19 @@ export const createDataViewSelectedListener = (dependencies: {
             id: `adhoc_${title}`,
             title,
           });
+          logger.debug(`Ad-hoc data view created with title: ${title}`);
           if (adHocDataView) {
             listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(adHocDataView));
           }
         } catch (error: unknown) {
+          logger.error(`Error creating ad-hoc data view: ${error}`);
           adhocDataViewCreationError = error;
         }
+      } else if (!dataViewById && !action.payload.fallbackPatterns?.length) {
+        // No need to create an ad-hoc data view if there are no fallback patterns
+        logger.debug(
+          `Skipping ad-hoc data view creation for scope ${dependencies.scope} because no fallback patterns were provided`
+        );
       }
 
       const resolvedIdToUse =
@@ -121,16 +172,33 @@ export const createDataViewSelectedListener = (dependencies: {
         // seem to depend on this, not sure if we want it.
         state.dataViewManager.shared.defaultDataViewId;
 
+      logger.debug(
+        `Data view resolved id to use for scope ${dependencies.scope}: ${resolvedIdToUse ?? 'null'}`
+      );
+
       const currentScopeActions = scopes[action.payload.scope].actions;
       if (resolvedIdToUse) {
         // NOTE: this skips data view selection if an override selection
         // has been dispatched
         if (listenerApi.signal.aborted) {
+          logger.debug(`Data view selection aborted for scope: ${dependencies.scope}`);
           return;
         }
 
+        logger.debug(`Setting selected data view for scope: ${dependencies.scope}`);
         listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
+        if (action.payload.scope === PageScope.analyzer) {
+          dependencies.storage.set(
+            getSelectedDataViewStorageKey(spaceId, action.payload.scope),
+            resolvedIdToUse
+          );
+        }
       } else if (dataViewByIdError || adhocDataViewCreationError) {
+        logger.error(
+          `Data view selection error for scope ${dependencies.scope}: ${
+            dataViewByIdError || adhocDataViewCreationError
+          }`
+        );
         const err = dataViewByIdError || adhocDataViewCreationError;
         listenerApi.dispatch(
           currentScopeActions.dataViewSelectionError(

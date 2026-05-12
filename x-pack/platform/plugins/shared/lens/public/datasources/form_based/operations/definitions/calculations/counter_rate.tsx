@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { COUNTER_RATE_ID, COUNTER_RATE_NAME } from '@kbn/lens-formula-docs';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import type { FormBasedLayer } from '../../../types';
+import type { CounterRateIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import {
   buildLabelFunction,
   getErrorsForDateReference,
@@ -36,11 +32,6 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
-
-export type CounterRateIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: typeof COUNTER_RATE_ID;
-  };
 
 export const counterRateOperation: OperationDefinition<
   CounterRateIndexPatternColumn,
@@ -82,8 +73,8 @@ export const counterRateOperation: OperationDefinition<
       column.timeShift
     );
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate', {}, indexPattern);
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];

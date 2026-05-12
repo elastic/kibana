@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data processing - error handling and recovery',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-      await apiServices.streams.enable();
+    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
@@ -27,8 +27,8 @@ test.describe(
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
       await logsSynthtraceEsClient.clean();
-      await apiServices.streams.disable();
     });
 
     test('should handle network failures during a processor creation', async ({
@@ -36,28 +36,36 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.streams.clickAddProcessor();
-      await pageObjects.streams.fillFieldInput('message');
+      await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
 
+      await pageObjects.streams.waitForModifiedFieldsDetection();
+
       // Simulate network failure
-      await page.route('**/streams/**/_ingest', (route) => {
+      await page.route('**/streams/**/_ingest', async (route) => {
         // Abort the request to simulate a network failure
-        route.abort();
+        await route.abort();
       });
 
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
+      // The review modal may or may not appear depending on whether detected fields
+      // have mapping-affecting changes. Use conditional confirmation.
+      await pageObjects.streams.confirmChangesInReviewModalIfPresent();
 
       // Should show error and stay in creating state
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText("An issue occurred saving processors' changes")).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe(
+        "An issue occurred saving processors' changes."
+      );
+      await pageObjects.toasts.closeAll();
 
       // Restore network and retry
-      await page.route('**/streams/**/_ingest', (route) => {
-        route.continue();
+      await page.route('**/streams/**/_ingest', async (route) => {
+        await route.continue();
       });
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModalIfPresent();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
@@ -69,11 +77,17 @@ test.describe(
     }) => {
       // Create a processor first
       await pageObjects.streams.clickAddProcessor();
-      await pageObjects.streams.fillFieldInput('message');
+      await pageObjects.streams.fillProcessorFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
-      await pageObjects.streams.saveProcessorsListChanges();
-      await pageObjects.streams.closeToasts();
+
+      await pageObjects.streams.waitForModifiedFieldsDetection();
+
+      await pageObjects.streams.saveStepsListChanges();
+      // The review modal may or may not appear depending on whether detected fields
+      // have mapping-affecting changes. Use conditional confirmation.
+      await pageObjects.streams.confirmChangesInReviewModalIfPresent();
+      await pageObjects.toasts.closeAll();
 
       // Edit the processor
       await pageObjects.streams.clickEditProcessor(0);
@@ -81,27 +95,29 @@ test.describe(
       await pageObjects.streams.clickSaveProcessor();
 
       // Simulate network failure
-      await page.route('**/streams/**/_ingest', (route) => {
+      await page.route('**/streams/**/_ingest', async (route) => {
         // Abort the request to simulate a network failure
-        route.abort();
+        await route.abort();
       });
 
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should show error and return to editing state
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText("An issue occurred saving processors' changes")).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe(
+        "An issue occurred saving processors' changes."
+      );
+      await pageObjects.toasts.closeAll();
 
       // Restore network and retry
-      await page.route('**/streams/**/_ingest', (route) => {
-        route.continue();
+      await page.route('**/streams/**/_ingest', async (route) => {
+        await route.continue();
       });
-      await pageObjects.streams.saveProcessorsListChanges();
+      await pageObjects.streams.saveStepsListChanges();
 
       // Should succeed
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText("Stream's processors updated")).toBeVisible();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe("Stream's processors updated");
     });
   }
 );

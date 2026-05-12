@@ -10,4 +10,5 @@ import { getPrivilegedMonitorUsersIndex } from '../../../../../../../common/enti
 export const getPrivilegedUsersEsqlCount = (
   namespace: string
 ) => `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
-      | STATS count = COUNT_DISTINCT(user.name)`;
+      | WHERE user.is_privileged == true
+      | STATS count = COUNT(*)`;

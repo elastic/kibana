@@ -149,7 +149,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <EuiButton
             {...reactRouterNavigate(history, linkToAddPolicy())}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="createPolicyButton"
           >
             <FormattedMessage
@@ -170,6 +170,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
         {!isSlmRunning ? (
           <Fragment>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.slmWarningTitle"

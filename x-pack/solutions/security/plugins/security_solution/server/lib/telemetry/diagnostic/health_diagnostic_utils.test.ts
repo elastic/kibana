@@ -5,16 +5,43 @@
  * 2.0.
  */
 
+import { generateKeyPairSync } from 'crypto';
 import { intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
-import { shouldExecute, applyFilterlist, fieldNames } from './health_diagnostic_utils';
-import { Action } from './health_diagnostic_service.types';
+import {
+  shouldExecute,
+  applyFilterlist,
+  fieldNames,
+  mergeByPriority,
+} from './health_diagnostic_utils';
+import {
+  Action,
+  QueryType,
+  type HealthDiagnosticQueryV1,
+  type HealthDiagnosticQueryV2,
+  type ParseFailureQuery,
+} from './health_diagnostic_service.types';
 
 describe('Security Solution - Health Diagnostic Queries - utils', () => {
   describe('applyFilterlist', () => {
     const mockSalt = 'test-salt';
+    let publicKey: string;
+
+    beforeAll(() => {
+      const keyPair = generateKeyPairSync('rsa', {
+        modulusLength: 4096,
+        publicKeyEncoding: {
+          type: 'spki',
+          format: 'pem',
+        },
+        privateKeyEncoding: {
+          type: 'pkcs8',
+          format: 'pem',
+        },
+      });
+      publicKey = keyPair.publicKey;
+    });
 
     beforeEach(() => {
-      // Mock crypto.subtle for consistent testing
       Object.defineProperty(global, 'crypto', {
         value: {
           subtle: {
@@ -25,6 +52,20 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
         },
         writable: true,
       });
+    });
+
+    test('should keep fields marked with KEEP action in flat doc', async () => {
+      const data = [{ 'kibana.alert.rule.name': 'Endpoint Security (Elastic Defend)' }];
+      const rules = {
+        'user.name': Action.KEEP,
+        'kibana.alert.rule.name': Action.KEEP,
+      };
+
+      const result = await applyFilterlist(data, rules, mockSalt);
+
+      expect(result).toEqual([
+        { kibana: { alert: { rule: { name: 'Endpoint Security (Elastic Defend)' } } } },
+      ]);
     });
 
     test('should keep fields marked with KEEP action', async () => {
@@ -96,31 +137,6 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result[0] as any).meta.host.ip).not.toBe('192.168.1.1');
-    });
-
-    test('should handle arrays of documents', async () => {
-      const data = [
-        [
-          { user: 'alice', token: 'abc123' },
-          { user: 'bob', token: 'xyz789' },
-        ],
-      ];
-      const rules = {
-        user: Action.KEEP,
-        token: Action.MASK,
-      };
-
-      const result = await applyFilterlist(data, rules, mockSalt);
-
-      expect(result).toHaveLength(1);
-      expect(Array.isArray(result[0])).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const docs = result[0] as any[];
-      expect(docs).toHaveLength(2);
-      expect(docs[0].user).toBe('alice');
-      expect(docs[1].user).toBe('bob');
-      expect(docs[0].token).not.toBe('abc123');
-      expect(docs[1].token).not.toBe('xyz789');
     });
 
     test('should handle arrays of complex documents', async () => {
@@ -301,30 +317,6 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       ]);
     });
 
-    test('should handle mixed document types', async () => {
-      const data = [
-        { type: 'user', name: 'john', password: 'secret' },
-        [{ type: 'admin', name: 'admin', token: 'admin123' }],
-      ];
-      const rules = {
-        name: Action.KEEP,
-        password: Action.MASK,
-        token: Action.MASK,
-      };
-
-      const result = await applyFilterlist(data, rules, mockSalt);
-
-      expect(result).toHaveLength(2);
-      expect(result[0]).toMatchObject({ name: 'john' });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result[0] as any).password).not.toBe('secret');
-      expect(Array.isArray(result[1])).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const adminDocs = result[1] as any[];
-      expect(adminDocs[0].name).toBe('admin');
-      expect(adminDocs[0].token).not.toBe('admin123');
-    });
-
     test('should handle numeric and boolean values', async () => {
       const data = [
         {
@@ -352,6 +344,146 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result[0] as any).sensitiveId).not.toBe('12345');
+    });
+
+    test('should encrypt fields marked with ENCRYPT action', async () => {
+      const data = [{ user: { name: 'john', password: 'secret123' } }];
+      const rules = {
+        'user.name': Action.KEEP,
+        'user.password': Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        user: {
+          name: 'john',
+          password: expect.any(String),
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const encryptedPassword = (result[0] as any).user.password;
+      expect(encryptedPassword).not.toBe('secret123');
+
+      expect(encryptedPassword).toMatch(/^v1:[^:]+:[^:]+:[^:]+:[^:]+:[^:]+$/);
+      const parts = encryptedPassword.split(':');
+      expect(parts[0]).toBe('v1');
+      expect(parts[1]).toBe('test-key-id');
+    });
+
+    test('should handle mixed KEEP, MASK, and ENCRYPT actions', async () => {
+      const data = [
+        {
+          user: { name: 'john', email: 'john@example.com', ssn: '123-45-6789' },
+          system: { ip: '192.168.1.1' },
+        },
+      ];
+      const rules = {
+        'user.name': Action.KEEP,
+        'user.email': Action.MASK,
+        'user.ssn': Action.ENCRYPT,
+        'system.ip': Action.KEEP,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      expect(result).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = result[0] as any;
+
+      expect(doc.user.name).toBe('john');
+      expect(doc.system.ip).toBe('192.168.1.1');
+
+      expect(doc.user.email).not.toBe('john@example.com');
+      expect(typeof doc.user.email).toBe('string');
+
+      expect(doc.user.ssn).not.toBe('123-45-6789');
+      expect(doc.user.ssn).toMatch(/^v1:[^:]+:[^:]+:[^:]+:[^:]+:[^:]+$/);
+    });
+
+    test('should throw error when ENCRYPT action used without encryptionKeyId', async () => {
+      const data = [{ user: { password: 'secret' } }];
+      const rules = {
+        'user.password': Action.ENCRYPT,
+      };
+
+      await expect(applyFilterlist(data, rules, mockSalt)).rejects.toThrow(
+        'encryptionKeyId is required when filterlist contains encrypt actions'
+      );
+    });
+
+    test('should throw error when public key not found for encryptionKeyId', async () => {
+      const data = [{ user: { password: 'secret' } }];
+      const rules = {
+        'user.password': Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'nonexistent-key' };
+      const encryptionPublicKeys = { 'other-key': publicKey };
+
+      await expect(
+        applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys)
+      ).rejects.toThrow('Public key not found for encryptionKeyId: nonexistent-key');
+    });
+
+    test('should encrypt nested fields', async () => {
+      const data = [
+        {
+          meta: {
+            host: {
+              name: 'server1',
+              credentials: { username: 'admin', token: 'abc123' },
+            },
+          },
+        },
+      ];
+      const rules = {
+        'meta.host.name': Action.KEEP,
+        'meta.host.credentials.username': Action.ENCRYPT,
+        'meta.host.credentials.token': Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      expect(result).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = result[0] as any;
+
+      expect(doc.meta.host.name).toBe('server1');
+      expect(doc.meta.host.credentials.username).toMatch(/^v1:/);
+      expect(doc.meta.host.credentials.token).toMatch(/^v1:/);
+      expect(doc.meta.host.credentials.username).not.toBe('admin');
+      expect(doc.meta.host.credentials.token).not.toBe('abc123');
+    });
+
+    test('should use same encrypted DEK for all fields in a query execution', async () => {
+      const data = [{ field1: 'value1', field2: 'value2', field3: 'value3' }];
+      const rules = {
+        field1: Action.ENCRYPT,
+        field2: Action.ENCRYPT,
+        field3: Action.ENCRYPT,
+      };
+      const query = { encryptionKeyId: 'test-key-id' };
+      const encryptionPublicKeys = { 'test-key-id': publicKey };
+
+      const result = await applyFilterlist(data, rules, mockSalt, query, encryptionPublicKeys);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = result[0] as any;
+
+      const dek1 = doc.field1.split(':')[2];
+      const dek2 = doc.field2.split(':')[2];
+      const dek3 = doc.field3.split(':')[2];
+
+      expect(dek1).toBe(dek2);
+      expect(dek2).toBe(dek3);
     });
   });
 
@@ -508,6 +640,104 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
         'user.name',
         'user.roles[]',
       ]);
+    });
+  });
+
+  describe('mergeByPriority', () => {
+    const makeV1 = (id: string): HealthDiagnosticQueryV1 => ({
+      version: 1,
+      id,
+      name: `query-${id}`,
+      index: 'test-index',
+      type: QueryType.DSL,
+      query: '{"query":{"match_all":{}}}',
+      scheduleCron: '5m',
+      filterlist: { 'user.name': Action.KEEP },
+      enabled: true,
+    });
+
+    const makeV2 = (id: string): HealthDiagnosticQueryV2 => ({
+      version: 2,
+      id,
+      name: `query-${id}`,
+      integrations: ['endpoint.*'],
+      type: QueryType.DSL,
+      query: '{"query":{"match_all":{}}}',
+      scheduleCron: '5m',
+      filterlist: { 'user.name': Action.KEEP },
+      enabled: true,
+    });
+
+    const makeParseFailure = (id?: string): ParseFailureQuery => ({
+      ...(id !== undefined ? { id } : {}),
+      name: 'bad-query',
+      _raw: { version: 99 },
+    });
+
+    test('returns v2 queries unchanged when v1 is empty', () => {
+      const v2 = [makeV2('a'), makeV2('b')];
+      expect(mergeByPriority([], v2)).toEqual(v2);
+    });
+
+    test('returns v1 queries unchanged when v2 is empty', () => {
+      const v1 = [makeV1('a'), makeV1('b')];
+      expect(mergeByPriority(v1, [])).toEqual(v1);
+    });
+
+    test('returns empty array when both inputs are empty', () => {
+      expect(mergeByPriority([], [])).toEqual([]);
+    });
+
+    test('returns all queries when there is no id overlap', () => {
+      const v1 = [makeV1('a'), makeV1('b')];
+      const v2 = [makeV2('c'), makeV2('d')];
+      const result = mergeByPriority(v1, v2);
+      expect(result).toHaveLength(4);
+      const ids = result.map((q) => (q as { id: string }).id);
+      expect(ids).toContain('a');
+      expect(ids).toContain('b');
+      expect(ids).toContain('c');
+      expect(ids).toContain('d');
+    });
+
+    test('v2 version wins when both artifacts contain the same id', () => {
+      const v1Query = makeV1('shared-id');
+      const v2Query = makeV2('shared-id');
+      const result = mergeByPriority([v1Query], [v2Query]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(v2Query);
+    });
+
+    test('queries with the same name but different ids are both returned', () => {
+      const v1Query: HealthDiagnosticQueryV1 = { ...makeV1('id-1'), name: 'same-name' };
+      const v2Query: HealthDiagnosticQueryV2 = { ...makeV2('id-2'), name: 'same-name' };
+      const result = mergeByPriority([v1Query], [v2Query]);
+      expect(result).toHaveLength(2);
+    });
+
+    test('ParseFailureQuery with id participates in dedup (v2 wins)', () => {
+      const v1Failure = makeParseFailure('conflict-id');
+      const v2Query = makeV2('conflict-id');
+      const result = mergeByPriority([v1Failure], [v2Query]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toBe(v2Query);
+    });
+
+    test('ParseFailureQuery without id is always included', () => {
+      const v2 = [makeV2('a')];
+      const failure = makeParseFailure();
+      const result = mergeByPriority([failure], v2);
+      expect(result).toHaveLength(2);
+      expect(result).toContain(failure);
+    });
+
+    test('multiple id-less ParseFailureQueries are all included', () => {
+      const f1 = makeParseFailure();
+      const f2 = makeParseFailure();
+      const result = mergeByPriority([f1], [f2]);
+      expect(result).toHaveLength(2);
+      expect(result).toContain(f1);
+      expect(result).toContain(f2);
     });
   });
 

@@ -18,10 +18,11 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
   props: Omit<ChartSwitchProps, 'onChartSelect'>
 ) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
+  const visualizationMap = props.filteredVisualizationMap;
   const visualization = useLensSelector(selectVisualization);
 
   const { icon, label } = (visualization.activeId &&
-    props.visualizationMap[visualization.activeId]?.getDescription(
+    visualizationMap[visualization.activeId]?.getDescription(
       visualization.state,
       props.layerId
     )) || {
@@ -33,6 +34,9 @@ export const ChartSwitchPopover = memo(function ChartSwitchPopover(
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.lens.configPanel.chartSwitchPopoverAriaLabel', {
+        defaultMessage: 'Chart type popover',
+      })}
       css={css`
         display: flex;
       `}

@@ -35,3 +35,11 @@ components:
         - closed
         - acknowledged
         - in-progress
+
+    AlertStatusExceptClosed:
+      description: The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
+      type: string
+      enum:
+        - open
+        - acknowledged
+        - in-progress

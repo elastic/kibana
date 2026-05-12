@@ -14,6 +14,7 @@ import styled from '@emotion/styled';
 import { EuiButton } from '@elastic/eui';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { PageScope } from '../../../data_view_manager/constants';
 import { APP_UI_ID, DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
@@ -36,7 +37,6 @@ import * as i18n from '../../pages/translations';
 import { SecurityPageName } from '../../../app/types';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
 const DEFAULT_STACK_BY = NO_BREAKDOWN_STACK_BY_VALUE;
 
@@ -56,8 +56,15 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery'> {
   queryType: 'topN' | 'overview';
   showSpacer?: boolean;
   hideQueryToggle?: boolean;
-  sourcererScopeId?: SourcererScopeName;
+  sourcererScopeId?: PageScope;
   applyGlobalQueriesAndFilters?: boolean;
+  /**
+   * Additional drop-list of index patterns layered on top of the histogram's
+   * allowlist as a negated `_index` filter (e.g. alert-backing indices).
+   * Forwarded to the Lens embeddable as `excludedPatterns` and CPS-expanded
+   * downstream so it covers both local and remote-prefixed `_index` values.
+   */
+  excludedPatterns?: string[];
 }
 
 const getHistogramOption = (fieldName: string): MatrixHistogramOption => ({
@@ -89,6 +96,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
   to,
   hideQueryToggle = false,
   applyGlobalQueriesAndFilters,
+  excludedPatterns,
 }) => {
   const uniqueQueryId = useMemo(() => `${ID}-${queryType}`, [queryType]);
 
@@ -196,6 +204,7 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       chartHeight={CHART_HEIGHT}
       hideQueryToggle={hideQueryToggle}
       applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
+      excludedPatterns={excludedPatterns}
     />
   );
 };

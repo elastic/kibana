@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { appContextService } from '../..';
 
-import { compileTemplate } from './agent';
+import { compileTemplate, mergeCompiledTemplates } from './agent';
 
 jest.mock('../../app_context');
 
@@ -22,6 +22,29 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 let mockedLogger: jest.Mocked<Logger>;
+
+function getMockedMetaVariable() {
+  return {
+    package: {
+      name: 'test-package',
+      title: 'Test Package',
+      version: '1.0.0',
+    },
+    stream: {
+      id: 'stream-id',
+      data_stream: {
+        dataset: 'dataset.name',
+        type: 'logs',
+      },
+    },
+    input: {
+      id: 'input-id',
+    },
+    agent: {
+      version: '9.3.0',
+    },
+  };
+}
 
 describe('compileTemplate', () => {
   beforeEach(() => {
@@ -62,7 +85,7 @@ multi_text_field:
       multi_text: { type: 'text', value: ['1234', 'foo', 'bar'] },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'log',
       paths: ['/usr/local/var/log/nginx/access.log'],
@@ -113,7 +136,7 @@ foo: bar
       nullfield: { type: 'yaml' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'redis/metrics',
       metricsets: ['key'],
@@ -167,7 +190,7 @@ pcap: false
         tags: { value: ['foo', 'bar', 'forwarded'] },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         paths: ['/usr/local/var/log/nginx/access.log'],
@@ -186,7 +209,7 @@ pcap: false
         tags: { value: ['foo', 'bar'] },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         paths: ['/usr/local/var/log/nginx/access.log'],
@@ -202,7 +225,7 @@ pcap: false
         file: { value: 'foo.pcap' },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithString);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplateWithString);
       expect(output).toEqual({
         pcap: true,
       });
@@ -213,7 +236,7 @@ pcap: false
         file: { value: 'file' },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithString);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplateWithString);
       expect(output).toEqual({
         pcap: false,
       });
@@ -236,7 +259,7 @@ text_var: {{escape_string text_var}}
         password: { type: 'password', value: "ab'c'" },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         password: "ab'c'",
@@ -252,7 +275,11 @@ New lines and\\n escaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithNewlinesAndEscapes);
+      const output = compileTemplate(
+        vars,
+        getMockedMetaVariable(),
+        streamTemplateWithNewlinesAndEscapes
+      );
       expect(output).toEqual({
         input: 'log',
         text_var: `This is a text with
@@ -276,7 +303,7 @@ New lines and\n escaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a text with
@@ -299,7 +326,7 @@ escaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a multiline text with
@@ -323,7 +350,7 @@ New lines and\nescaped values.`,
         },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a text with
@@ -351,7 +378,7 @@ yaml_var: {{to_json yaml_var}}
         json_var: { type: 'text', value: `{"foo":["bar","bazz"]}` },
       };
 
-      const output = compileTemplate(vars, streamTemplate);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
       expect(output).toEqual({
         input: 'log',
         json_var: {
@@ -371,7 +398,7 @@ yaml_var: {{to_json yaml_var}}
         },
       };
 
-      const output = compileTemplate(vars, streamTemplateWithNewYaml);
+      const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplateWithNewYaml);
       expect(output).toEqual({
         input: 'log',
         yaml_var: {
@@ -395,10 +422,104 @@ input: logs
       },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'logs',
     });
+  });
+
+  const rerouteConfigVars = {
+    reroute_config: {
+      type: 'yaml',
+      value: `
+- if:
+    and:
+      - not.has_fields: _conf.dataset
+      - regexp.message: "devid=\\"?FG"
+  then:
+    - add_fields:
+        target: ''
+        fields:
+          _conf.dataset: "fortinet_fortigate.log"
+- if:
+    and:
+      - not.has_fields: _conf.dataset
+      - regexp.message: " CheckPoint [0-9]+ - "
+  then:
+    - add_fields:
+        target: ''
+        fields:
+          _conf.dataset: "checkpoint.firewall"
+          _conf.tz_offset: "UTC"
+      `,
+    },
+  };
+
+  it('should handle deeply nested yaml values without producing compact mappings', () => {
+    const streamTemplate = `
+input: udp
+host: "0.0.0.0:9515"
+reroute_config: {{reroute_config}}
+    `;
+
+    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      input: 'udp',
+      host: '0.0.0.0:9515',
+      reroute_config: [
+        {
+          if: {
+            and: [{ 'not.has_fields': '_conf.dataset' }, { 'regexp.message': 'devid="?FG' }],
+          },
+          then: [
+            {
+              add_fields: {
+                target: '',
+                fields: { '_conf.dataset': 'fortinet_fortigate.log' },
+              },
+            },
+          ],
+        },
+        {
+          if: {
+            and: [
+              { 'not.has_fields': '_conf.dataset' },
+              { 'regexp.message': ' CheckPoint [0-9]+ - ' },
+            ],
+          },
+          then: [
+            {
+              add_fields: {
+                target: '',
+                fields: {
+                  '_conf.dataset': 'checkpoint.firewall',
+                  '_conf.tz_offset': 'UTC',
+                },
+              },
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it('should handle root-level yaml variables with values containing double quotes (syslog_router pattern)', () => {
+    const streamTemplate = `
+input: udp
+host: "0.0.0.0:9515"
+processors:
+- add_locale: ~
+{{#if reroute_config}}
+{{reroute_config}}
+{{/if}}
+    `;
+
+    const output = compileTemplate(rerouteConfigVars, getMockedMetaVariable(), streamTemplate);
+    expect(output.processors).toBeDefined();
+    expect(output.processors).toHaveLength(3);
+    expect(output.processors[0]).toEqual({ add_locale: null });
+    expect(output.processors[1].if.and[1]['regexp.message']).toBe('devid="?FG');
+    expect(output.processors[2].if.and[1]['regexp.message']).toBe(' CheckPoint [0-9]+ - ');
   });
 
   it('should support $$$$ yaml values at root level', () => {
@@ -413,7 +534,7 @@ input: logs
       },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       input: 'logs',
       test: '$$$$',
@@ -458,7 +579,7 @@ my-package:
       },
     };
 
-    const output = compileTemplate(vars, stringTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), stringTemplate);
     expect(output).toEqual(targetOutput);
   });
 
@@ -472,7 +593,7 @@ paths:
 `;
     const vars = {};
 
-    expect(() => compileTemplate(vars, streamTemplate)).toThrowError(
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), streamTemplate)).toThrowError(
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
@@ -489,9 +610,34 @@ paths:
       },
     };
 
-    expect(() => compileTemplate(vars, template)).toThrowError(
-      'YAMLException: duplicated mapping key'
+    expect(() => compileTemplate(vars, getMockedMetaVariable(), template)).toThrowError(
+      'YAMLException: Duplicated key "processors" found in agent policy yaml, please check your yaml variables.'
     );
+  });
+
+  it('should inject package meta varaible', () => {
+    const streamTemplate = `
+input: {{_meta.input.id}}
+package_name: {{_meta.package.name}}
+package_title: {{_meta.package.title}}
+package_version: {{_meta.package.version}}
+stream_id: {{_meta.stream.id}}
+dataset: {{_meta.stream.data_stream.dataset}}
+type: {{_meta.stream.data_stream.type}}
+      `;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      input: 'input-id',
+      package_name: 'test-package',
+      package_title: 'Test Package',
+      package_version: '1.0.0',
+      stream_id: 'stream-id',
+      dataset: 'dataset.name',
+      type: 'logs',
+    });
   });
 });
 
@@ -507,7 +653,7 @@ describe('encode', () => {
       hosts: { value: 'localhost', type: 'text' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       hosts: ['sqlserver://db_elastic_agent%40%3F%23%3A:dbelasticagent%5B%21%23%402023@localhost'],
     });
@@ -524,7 +670,7 @@ describe('encode', () => {
       hosts: { value: 'localhost', type: 'text' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       hosts: ['sqlserver://domain%5Cusername:dbelasticagent%5B%21%23%402023@localhost'],
     });
@@ -541,11 +687,164 @@ describe('encode', () => {
       hosts: { value: 'localhost', type: 'text' },
     };
 
-    const output = compileTemplate(vars, streamTemplate);
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
     expect(output).toEqual({
       hosts: [
         'sqlserver://db_elastic_agent:Special%20Characters%3A%20%21%20%2A%20%28%20%29%27@localhost',
       ],
+    });
+  });
+});
+
+describe('semverSatisfies', () => {
+  it('should render the block when the agent version satisfies the condition', () => {
+    const streamTemplate = `
+    {{#semverSatisfies _meta.agent.version "^9.3.0"}}
+    supported: true
+    {{/semverSatisfies}}
+    {{#semverSatisfies _meta.agent.version "<9.3.0"}}
+    supported: false
+    {{/semverSatisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      supported: true,
+    });
+  });
+
+  it('should not render the block when the agent version does not satisfy the condition', () => {
+    const streamTemplate = `
+    field: "value"
+    {{#semverSatisfies _meta.agent.version ">=10.0.0"}}
+    supported: true
+    {{/semverSatisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(vars, getMockedMetaVariable(), streamTemplate);
+    expect(output).toEqual({
+      field: 'value',
+    });
+  });
+
+  it('should not render any blocks when the agent version variable is not set', () => {
+    const streamTemplate = `
+    field: "value"
+    {{#semverSatisfies _meta.agent.version "^9.3.0"}}
+    supported: true
+    {{/semverSatisfies}}
+    {{#semverSatisfies _meta.agent.version "<9.3.0"}}
+    supported: false
+    {{/semverSatisfies}}`;
+
+    const vars = {};
+
+    const output = compileTemplate(
+      vars,
+      {
+        ...getMockedMetaVariable(),
+        agent: {
+          version: undefined,
+        },
+      },
+      streamTemplate
+    );
+    expect(output).toEqual({
+      field: 'value',
+    });
+  });
+});
+
+describe('mergeCompiledTemplates', () => {
+  it('returns the override when base is empty', () => {
+    expect(mergeCompiledTemplates({}, { key: 'value' })).toEqual({ key: 'value' });
+  });
+
+  it('returns the base when override is empty', () => {
+    expect(mergeCompiledTemplates({ key: 'value' }, {})).toEqual({ key: 'value' });
+  });
+
+  it('scalar in override replaces scalar in base', () => {
+    expect(mergeCompiledTemplates({ key: 'base' }, { key: 'override' })).toEqual({
+      key: 'override',
+    });
+  });
+
+  it('key only in base is preserved', () => {
+    expect(mergeCompiledTemplates({ a: 1, b: 2 }, { b: 99 })).toEqual({ a: 1, b: 99 });
+  });
+
+  it('key only in override is added', () => {
+    expect(mergeCompiledTemplates({ a: 1 }, { b: 2 })).toEqual({ a: 1, b: 2 });
+  });
+
+  it('arrays are concatenated (base elements first, override appended)', () => {
+    expect(mergeCompiledTemplates({ items: [1, 2] }, { items: [3, 4] })).toEqual({
+      items: [1, 2, 3, 4],
+    });
+  });
+
+  it('nested objects are deep-merged', () => {
+    expect(mergeCompiledTemplates({ config: { a: 1, b: 2 } }, { config: { b: 99, c: 3 } })).toEqual(
+      { config: { a: 1, b: 99, c: 3 } }
+    );
+  });
+
+  it('deeply nested objects are recursively merged', () => {
+    expect(
+      mergeCompiledTemplates(
+        { level1: { level2: { x: 1, y: 2 } } },
+        { level1: { level2: { y: 99, z: 3 } } }
+      )
+    ).toEqual({ level1: { level2: { x: 1, y: 99, z: 3 } } });
+  });
+
+  it('override scalar replaces base object (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: 'scalar' })).toEqual({
+      key: 'scalar',
+    });
+  });
+
+  it('override object replaces base scalar (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: 'scalar' }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override array replaces base scalar (type mismatch)', () => {
+    expect(mergeCompiledTemplates({ key: 'scalar' }, { key: [1, 2] })).toEqual({
+      key: [1, 2],
+    });
+  });
+
+  it('handles mixed keys (scalars, objects, arrays) in the same object', () => {
+    expect(
+      mergeCompiledTemplates(
+        { scalar: 'base', obj: { a: 1 }, list: ['x'] },
+        { scalar: 'override', obj: { b: 2 }, list: ['y'] }
+      )
+    ).toEqual({ scalar: 'override', obj: { a: 1, b: 2 }, list: ['x', 'y'] });
+  });
+
+  it('does not mutate the base or override objects', () => {
+    const base = { arr: [1, 2], obj: { a: 1 } };
+    const override = { arr: [3], obj: { b: 2 } };
+    mergeCompiledTemplates(base, override);
+    expect(base).toEqual({ arr: [1, 2], obj: { a: 1 } });
+    expect(override).toEqual({ arr: [3], obj: { b: 2 } });
+  });
+
+  it('null in base is replaced by override object', () => {
+    expect(mergeCompiledTemplates({ key: null }, { key: { nested: true } })).toEqual({
+      key: { nested: true },
+    });
+  });
+
+  it('override null replaces base value', () => {
+    expect(mergeCompiledTemplates({ key: { nested: true } }, { key: null })).toEqual({
+      key: null,
     });
   });
 });

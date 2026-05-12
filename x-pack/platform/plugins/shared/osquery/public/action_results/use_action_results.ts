@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { useMemo } from 'react';
 import type { InspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ResultEdges, Direction } from '../../common/search_strategy';
-import { API_VERSIONS } from '../../common/constants';
+import { API_VERSIONS, ACTION_RESPONSES_INDEX } from '../../common/constants';
+import { getAgentIdFromFields } from '../../common/utils/agent_fields';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -36,11 +38,25 @@ export interface UseActionResults {
   sortField: string;
   kuery?: string;
   isLive?: boolean;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 interface ActionResultsResponse {
+  metadata?: {
+    scheduleId: string;
+    executionCount: number;
+    packId: string;
+    packName: string;
+    queryName: string;
+    queryText: string;
+    timestamp: string;
+  };
   edges: ResultEdges;
   total: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -61,14 +77,45 @@ export const useActionResults = ({
   kuery,
   startDate,
   isLive = false,
+  scheduleId,
+  executionCount,
 }: UseActionResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
+  const isScheduled = !!scheduleId && executionCount != null;
+
+  const currentPageAgentIds = useMemo(() => {
+    if (isScheduled) return [];
+    const startIndex = activePage * limit;
+    const endIndex = startIndex + limit;
+
+    return agentIds?.slice(startIndex, endIndex) || [];
+  }, [agentIds, activePage, limit, isScheduled]);
+
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField }],
-    () =>
-      http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
+    [
+      'actionResults',
+      { actionId, activePage, limit, direction, sortField, scheduleId, executionCount },
+    ],
+    () => {
+      if (isScheduled) {
+        return http.get<ActionResultsResponse>(
+          `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+          {
+            version: API_VERSIONS.public.v1,
+            query: {
+              page: activePage,
+              pageSize: limit,
+              sort: sortField,
+              sortOrder: direction,
+              ...(kuery && { kuery }),
+            },
+          }
+        );
+      }
+
+      return http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
         query: {
           page: activePage,
@@ -77,30 +124,64 @@ export const useActionResults = ({
           sortOrder: direction,
           ...(kuery && { kuery }),
           ...(startDate && { startDate }),
-          ...(agentIds?.length && { agentIds: agentIds.join(',') }),
+          ...(currentPageAgentIds.length > 0 && {
+            agentIds: currentPageAgentIds.join(','),
+          }),
+          totalAgents: agentIds?.length ?? 0,
         },
-      }),
+      });
+    },
     {
-      select: (response) => ({
-        edges: response.edges,
-        aggregations: response.aggregations,
-        inspect: response.inspect || { dsl: [], response: [] },
-      }),
+      select: (response) => {
+        if (isScheduled) {
+          return {
+            edges: response.edges as ResultEdges,
+            aggregations: response.aggregations,
+            inspect: response.inspect || { dsl: [], response: [] },
+          };
+        }
+
+        const respondedAgentIds = new Set(
+          response.edges
+            .map((edge) => getAgentIdFromFields(edge.fields))
+            .filter((id): id is string => id !== undefined)
+        );
+
+        const placeholderEdges = currentPageAgentIds
+          .filter((agentId) => agentId && !respondedAgentIds.has(agentId))
+          .map((agentId) => ({
+            _index: `${ACTION_RESPONSES_INDEX}-default`,
+            _id: `placeholder-${agentId}`,
+            _source: {},
+            fields: { agent_id: [agentId] },
+          }));
+
+        const mergedEdges = [...response.edges, ...placeholderEdges] as ResultEdges;
+
+        return {
+          edges: mergedEdges,
+          aggregations: response.aggregations,
+          inspect: response.inspect || { dsl: [], response: [] },
+        };
+      },
       initialData: {
         edges: [],
         total: 0,
+        currentPage: 0,
+        pageSize: limit,
+        totalPages: 0,
         aggregations: {
           totalRowCount: 0,
           totalResponded: 0,
           successful: 0,
-          pending: agentIds?.length ?? 0,
+          pending: isScheduled ? 0 : agentIds?.length ?? 0,
           failed: 0,
         },
         inspect: { dsl: [], response: [] },
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !!agentIds?.length,
+      enabled: isScheduled ? !!scheduleId : !!actionId && !!agentIds?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {

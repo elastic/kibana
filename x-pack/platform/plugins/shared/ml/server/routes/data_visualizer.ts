@@ -24,10 +24,18 @@ function getHistogramsForFields(
   query: any,
   fields: FieldsForHistograms,
   samplerShardSize: number,
-  runtimeMappings: RuntimeMappings
+  runtimeMappings: RuntimeMappings,
+  projectRouting?: string
 ) {
   const dv = new DataVisualizer(client);
-  return dv.getHistogramsForFields(indexPattern, query, fields, samplerShardSize, runtimeMappings);
+  return dv.getHistogramsForFields(
+    indexPattern,
+    query,
+    fields,
+    samplerShardSize,
+    runtimeMappings,
+    projectRouting
+  );
 }
 
 /**
@@ -66,7 +74,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
         try {
           const {
             params: { indexPattern },
-            body: { query, fields, samplerShardSize, runtimeMappings },
+            body: { query, fields, samplerShardSize, runtimeMappings, projectRouting },
           } = request;
 
           const results = await getHistogramsForFields(
@@ -75,7 +83,8 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
             query,
             fields,
             samplerShardSize,
-            runtimeMappings
+            runtimeMappings,
+            projectRouting
           );
 
           return response.ok({

@@ -9,8 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-common';
+import { validateAccessor } from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import { LayoutDirection } from '@elastic/charts';
 import type { MetricVisRenderConfig } from '../types';
 import { visType } from '../types';
@@ -109,13 +110,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     primaryPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
-        defaultMessage: 'The postion of the Primary Metric (top or bottom).',
-      }),
-    },
-    titleWeight: {
-      types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.titleWeight.help', {
-        defaultMessage: 'The title weight.',
+        defaultMessage: 'The position of the Primary Metric (top, middle, or bottom).',
       }),
     },
     color: {
@@ -183,6 +178,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.palette.help', {
         defaultMessage: 'Specifies the palette used for the Secondary Metric trend',
+      }),
+      multi: true,
+      required: false,
+    },
+    secondaryTrendTextPalette: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryTrend.textPalette.help', {
+        defaultMessage: 'Specifies the text palette used for the Secondary Metric trend',
       }),
       multi: true,
       required: false,
@@ -280,7 +283,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
             primaryPosition: args.primaryPosition,
-            titleWeight: args.titleWeight,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,
@@ -289,6 +291,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               visuals: args.secondaryTrendVisuals,
               baseline: args.secondaryTrendBaseline,
               palette: args.secondaryTrendPalette,
+              textPalette: args.secondaryTrendTextPalette,
             },
             secondaryLabelPosition: args.secondaryLabelPosition,
             applyColorTo: args.applyColorTo,

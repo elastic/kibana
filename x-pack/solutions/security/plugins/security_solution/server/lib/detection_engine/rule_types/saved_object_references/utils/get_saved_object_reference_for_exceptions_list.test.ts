@@ -11,7 +11,7 @@ import {
   EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME,
   getSavedObjectReferenceForExceptionsList,
 } from '.';
-import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
 describe('get_saved_object_reference_for_exceptions_list', () => {
   type FuncReturn = ReturnType<typeof getSavedObjectReferenceForExceptionsList>;
@@ -25,7 +25,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
     {
       id: '123',
       name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_0`,
-      type: EXCEPTION_LIST_NAMESPACE,
+      type: EXCEPTION_LIST_NAMESPACE_AWARE,
     },
   ];
 
@@ -45,7 +45,7 @@ describe('get_saved_object_reference_for_exceptions_list', () => {
       {
         id: '345',
         name: `${EXCEPTIONS_SAVED_OBJECT_REFERENCE_NAME}_1`,
-        type: EXCEPTION_LIST_NAMESPACE,
+        type: EXCEPTION_LIST_NAMESPACE_AWARE,
       },
     ];
     expect(

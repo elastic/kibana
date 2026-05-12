@@ -14,8 +14,10 @@ import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks
 import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 jest.mock(
   '../../../../../assistant/tools/esql/graphs/select_index_pattern/select_index_pattern',
@@ -56,6 +58,10 @@ const setupAgent = (responses: NodeResponse[]) => {
     dashboardMigrationsRetriever: mockRetriever,
     logger,
     telemetryClient: mockTelemetryClient,
+    inference: inferenceMock.createStartContract(),
+    request: httpServerMock.createKibanaRequest(),
+    connectorId: 'test-connector',
+    experimentalFeatures: { splunkV2DashboardsEnabled: false } as unknown as ExperimentalFeatures,
   });
   return graph;
 };

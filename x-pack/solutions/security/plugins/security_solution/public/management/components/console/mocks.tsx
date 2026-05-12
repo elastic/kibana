@@ -10,7 +10,7 @@
 import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import { act, fireEvent, within } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 import { convertToTestId } from './components/command_list';
 import { Console } from './console';
 import type {
@@ -38,9 +38,11 @@ interface ConsoleSelectorsAndActionsMock {
       inputOnly: boolean;
       /**
        * if true, then the keyboard keys will be used to send the command.
-       * Use this if wanting ot press keyboard keys other than letter/punctuation
+       * Use this if wanting to press keyboard keys other than letter/punctuation
        */
       useKeyboard: boolean;
+      /** Paste the command into the console input. `useKeyboard` must be false */
+      paste: boolean;
     }>
   ): Promise<void>;
 }
@@ -71,16 +73,16 @@ export const getConsoleSelectorsAndActionMock = (
   dataTestSubj: string = 'test'
 ): ConsoleTestSetup['selectors'] => {
   const getLeftOfCursorInputText: ConsoleSelectorsAndActionsMock['getLeftOfCursorInputText'] =
-    () => {
-      return renderResult.getByTestId(`${dataTestSubj}-cmdInput-leftOfCursor`).textContent ?? '';
-    };
+    getInputTextLeftOfCursor.bind(null, renderResult, dataTestSubj);
+
   const getRightOfCursorInputText: ConsoleSelectorsAndActionsMock['getRightOfCursorInputText'] =
-    () => {
-      return renderResult.getByTestId(`${dataTestSubj}-cmdInput-rightOfCursor`).textContent ?? '';
-    };
-  const getInputText: ConsoleSelectorsAndActionsMock['getInputText'] = () => {
-    return getLeftOfCursorInputText() + getRightOfCursorInputText();
-  };
+    getInputTextRightOfCursor.bind(null, renderResult, dataTestSubj);
+
+  const getInputText: ConsoleSelectorsAndActionsMock['getInputText'] = getInputTextFullValue.bind(
+    null,
+    renderResult,
+    dataTestSubj
+  );
 
   const isHelpPanelOpen = (): boolean => {
     return Boolean(renderResult.queryByTestId(`${dataTestSubj}-sidePanel-helpContent`));
@@ -93,6 +95,7 @@ export const getConsoleSelectorsAndActionMock = (
       });
     }
   };
+
   const closeHelpPanel: ConsoleSelectorsAndActionsMock['closeHelpPanel'] = () => {
     if (isHelpPanelOpen()) {
       act(() => {
@@ -100,11 +103,13 @@ export const getConsoleSelectorsAndActionMock = (
       });
     }
   };
+
   const submitCommand: ConsoleSelectorsAndActionsMock['submitCommand'] = () => {
     act(() => {
       renderResult.getByTestId(`${dataTestSubj}-inputTextSubmitButton`).click();
     });
   };
+
   const enterCommand: ConsoleSelectorsAndActionsMock['enterCommand'] = async (
     cmd,
     options = {}
@@ -124,8 +129,48 @@ export const getConsoleSelectorsAndActionMock = (
 };
 
 /**
+ * Get the text in the console's input area to the left of the cursor position
+ * @param renderResult
+ * @param dataTestSubj
+ */
+const getInputTextLeftOfCursor = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): string => {
+  return renderResult.getByTestId(`${dataTestSubj}-cmdInput-leftOfCursor`).textContent ?? '';
+};
+
+/**
+ * Get the text in the console's input ara to the right of the cusror position
+ * @param renderResult
+ * @param dataTestSubj
+ */
+const getInputTextRightOfCursor = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): string => {
+  return renderResult.getByTestId(`${dataTestSubj}-cmdInput-rightOfCursor`).textContent ?? '';
+};
+
+/**
+ * Get the full text in the console's input area'
+ * @param renderResult
+ * @param dataTestSubj
+ */
+const getInputTextFullValue = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): string => {
+  return (
+    getInputTextLeftOfCursor(renderResult, dataTestSubj) +
+    getInputTextRightOfCursor(renderResult, dataTestSubj)
+  );
+};
+
+/**
  * Finds the console in the Render Result and enters the command provided
  * @param renderResult
+ * @param user
  * @param cmd
  * @param inputOnly
  * @param useKeyboard
@@ -138,13 +183,16 @@ export const enterConsoleCommand = async (
   {
     inputOnly = false,
     useKeyboard = false,
+    paste = false,
     dataTestSubj = 'test',
   }: Partial<{
     inputOnly: boolean;
     useKeyboard: boolean;
+    paste: boolean;
     dataTestSubj: string;
   }> = {}
 ): Promise<void> => {
+  const inputTextPriorToKeyboardInput = getInputTextFullValue(renderResult, dataTestSubj);
   const keyCaptureInput = renderResult.getByTestId(`${dataTestSubj}-keyCapture-input`);
 
   if (keyCaptureInput === null) {
@@ -154,7 +202,12 @@ export const enterConsoleCommand = async (
   if (useKeyboard) {
     await user.keyboard(cmd);
   } else {
-    await user.type(keyCaptureInput, cmd);
+    if (paste) {
+      await user.click(keyCaptureInput);
+      await user.paste(cmd);
+    } else {
+      await user.type(keyCaptureInput, cmd);
+    }
   }
 
   if (!inputOnly) {
@@ -164,6 +217,17 @@ export const enterConsoleCommand = async (
     // await user.keyboard('[Enter]');
     fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13, code: 'Enter' });
   }
+
+  await waitFor(
+    () => {
+      expect(getInputTextFullValue(renderResult, dataTestSubj)).not.toEqual(
+        inputTextPriorToKeyboardInput
+      );
+    },
+    { interval: 1, timeout: 3 }
+  ).catch(() => {
+    // Ignore errors. We just needed for the console to process state, which can be done async
+  });
 };
 
 /**

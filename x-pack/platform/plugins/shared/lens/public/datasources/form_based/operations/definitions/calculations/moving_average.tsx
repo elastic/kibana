@@ -14,12 +14,8 @@ import {
   MOVING_AVERAGE_ID,
   MOVING_AVERAGE_WINDOW_DEFAULT_VALUE,
 } from '@kbn/lens-formula-docs';
+import type { FormBasedLayer, MovingAverageIndexPatternColumn } from '@kbn/lens-common';
 import { useDebounceWithOptions } from '../../../../../shared_components';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import type { FormBasedLayer } from '../../../types';
 import {
   buildLabelFunction,
   checkForDateHistogram,
@@ -27,6 +23,7 @@ import {
   dateBasedOperationToExpression,
   hasDateField,
   checkForDataLayerType,
+  getReferencedColumnLabel,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
 import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
@@ -44,14 +41,6 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
-
-export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: typeof MOVING_AVERAGE_ID;
-    params: {
-      window: number;
-    };
-  };
 
 export const movingAverageOperation: OperationDefinition<
   MovingAverageIndexPatternColumn,
@@ -86,16 +75,24 @@ export const movingAverageOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, columns, indexPattern) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
+    const refLabel = getReferencedColumnLabel(column.references[0], columns, indexPattern);
+    return ofName(refLabel, column.timeScale, column.timeShift);
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
-      window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
-    });
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(
+      layer,
+      columnId,
+      'moving_average',
+      {
+        window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
+      },
+      indexPattern
+    );
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
     const window = columnParams?.window ?? MOVING_AVERAGE_WINDOW_DEFAULT_VALUE;
+    const timeShift = columnParams?.shift || previousColumn?.timeShift;
 
     return {
       label: ofName(metric?.label, previousColumn?.timeScale, previousColumn?.timeShift),
@@ -103,7 +100,7 @@ export const movingAverageOperation: OperationDefinition<
       operationType: 'moving_average',
       isBucketed: false,
       references: referenceIds,
-      timeShift: columnParams?.shift || previousColumn?.timeShift,
+      timeShift,
       filter: getFilter(previousColumn, columnParams),
       timeScale: previousColumn?.timeScale,
       params: {

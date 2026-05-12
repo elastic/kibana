@@ -282,9 +282,10 @@ export class EditRoleMappingPage extends Component<Props, State> {
     if (this.checkEmptyAnyAllMappings(this.state.roleMapping!.rules as RoleMappingRule)) {
       return (
         <EuiCallOut
+          announceOnMount
           title="Warning"
           color="warning"
-          iconType="alert"
+          iconType="warning"
           data-test-subj="emptyAnyOrAllRulesWarning"
         >
           <FormattedMessage
@@ -317,7 +318,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
       <EuiButton
         // {...reactRouterNavigate(this.props.history, '')}
         onClick={this.backToRoleMappingsList}
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         data-test-subj="roleMappingFormReturnButton"
       >
         <FormattedMessage

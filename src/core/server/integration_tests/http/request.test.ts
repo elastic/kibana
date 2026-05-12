@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
@@ -14,7 +15,9 @@ jest.mock('uuid', () => ({
 import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { schema } from '@kbn/config-schema';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { createInternalHttpService } from '../utilities';
@@ -27,20 +30,23 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
 
   server = createInternalHttpService({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {
   await server.stop();
 });
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('KibanaRequest', () => {
   describe('auth', () => {
     describe('isAuthenticated', () => {
@@ -52,7 +58,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -69,9 +74,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -88,9 +103,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -107,9 +132,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -128,7 +163,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
@@ -150,9 +184,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: false },
           },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
@@ -169,9 +213,19 @@ describe('KibanaRequest', () => {
         router.get(
           {
             path: '/',
-            security: { authz: { enabled: false, reason: '' } },
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
-            options: { authRequired: 'optional' },
           },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
@@ -190,7 +244,6 @@ describe('KibanaRequest', () => {
             path: '/',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: { authRequired: true },
           },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
@@ -222,7 +275,7 @@ describe('KibanaRequest', () => {
               });
 
               // prevents the server to respond
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -261,7 +314,7 @@ describe('KibanaRequest', () => {
               });
 
               // prevents the server to respond
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -418,7 +471,7 @@ describe('KibanaRequest', () => {
               });
 
               expect(nextSpy).not.toHaveBeenCalled();
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );
@@ -456,7 +509,7 @@ describe('KibanaRequest', () => {
               });
 
               expect(nextSpy).not.toHaveBeenCalled();
-              await delay(30000);
+              await timer(30_000);
               return res.ok({ body: 'ok' });
             }
           );

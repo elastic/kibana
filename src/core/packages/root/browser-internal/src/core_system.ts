@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/css';
-import { filter, firstValueFrom } from 'rxjs';
+import { type Subscription, filter, firstValueFrom, pairwise } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -31,7 +31,7 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
-import { SavedObjectsService } from '@kbn/core-saved-objects-browser-internal';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
@@ -96,7 +96,6 @@ export class CoreSystem {
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly httpRateLimiter: HttpRateLimiterService;
-  private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
   private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
@@ -118,6 +117,7 @@ export class CoreSystem {
   private readonly userProfile: UserProfileService;
   private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
+  private overlayNavigationSubscription: Subscription | undefined;
 
   constructor(params: CoreSystemParams) {
     const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
@@ -158,13 +158,13 @@ export class CoreSystem {
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.httpRateLimiter = new HttpRateLimiterService();
-    this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.settings = new SettingsService();
     this.overlay = new OverlayService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      basePath: injectedMetadata.basePath,
       coreContext: this.coreContext,
     });
     this.docLinks = new DocLinksService(this.coreContext);
@@ -267,7 +267,7 @@ export class CoreSystem {
       const injection = this.injection.setup();
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
-      this.chrome.setup({ analytics });
+      const chrome = this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
@@ -279,6 +279,7 @@ export class CoreSystem {
       const core: InternalCoreSetup = {
         analytics,
         application,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         featureFlags,
         http,
@@ -324,7 +325,6 @@ export class CoreSystem {
       const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = this.http.start();
-      const savedObjects = await this.savedObjects.start({ http });
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
@@ -357,12 +357,46 @@ export class CoreSystem {
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
       });
+
+      this.overlayNavigationSubscription = application.currentAppId$
+        .pipe(pairwise())
+        .subscribe(() => {
+          this.overlay.closeAllFlyouts();
+        });
+
+      const featureFlags = await this.featureFlags.start();
+
+      // Temp hack: https://github.com/elastic/kibana/issues/247820
+      // Create a deferred promise for notifications to break circular dependency
+      // chrome -> rendering -> notifications -> chrome
+      let resolveNotifications: (notifications: NotificationsStart) => void;
+      const notificationsPromise = new Promise<NotificationsStart>((resolve) => {
+        resolveNotifications = resolve;
+      });
+
+      const chrome = await this.chrome.start({
+        application,
+        docLinks,
+        http,
+        injectedMetadata,
+        getNotifications: () => notificationsPromise,
+        customBranding,
+        i18n,
+        theme,
+        userProfile,
+        uiSettings,
+        featureFlags,
+      });
+      const deprecations = this.deprecations.start({ http });
+
       const rendering = this.rendering.start({
         analytics,
         executionContext,
         i18n,
         theme,
         userProfile,
+        coreEnv: this.coreContext.env,
+        chrome,
       });
 
       const notifications = this.notifications.start({
@@ -370,25 +404,10 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
         rendering,
+        settings,
       });
 
-      const featureFlags = await this.featureFlags.start();
-
-      const chrome = await this.chrome.start({
-        application,
-        docLinks,
-        http,
-        injectedMetadata,
-        notifications,
-        customBranding,
-        i18n,
-        theme,
-        userProfile,
-        uiSettings,
-        analytics,
-        featureFlags,
-      });
-      const deprecations = this.deprecations.start({ http });
+      resolveNotifications!(notifications);
 
       this.coreApp.start({
         application,
@@ -413,7 +432,6 @@ export class CoreSystem {
         featureFlags,
         http,
         theme,
-        savedObjects,
         i18n,
         injectedMetadata,
         injection,
@@ -446,7 +464,15 @@ export class CoreSystem {
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.renderCore(
-        { chrome, application, overlays, featureFlags },
+        {
+          chrome,
+          application,
+          overlays,
+          featureFlags,
+          http,
+          docLinks,
+          customBranding,
+        },
         coreUiTargetDomElement
       );
 
@@ -456,9 +482,6 @@ export class CoreSystem {
 
       // Wait for the first app navigation to report Kibana Loaded
       firstValueFrom(application.currentAppId$.pipe(filter(Boolean))).then(() => {
-        performance.mark(KBN_LOAD_MARKS, {
-          detail: LOAD_FIRST_NAV,
-        });
         this.reportKibanaLoadedEvent(analytics);
       });
 
@@ -478,6 +501,7 @@ export class CoreSystem {
   }
 
   public stop() {
+    this.overlayNavigationSubscription?.unsubscribe();
     this.plugins.stop();
     this.coreApp.stop();
     this.notifications.stop();

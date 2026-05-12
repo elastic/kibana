@@ -31,6 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       TAB_TYPES = pageObjects.cloudPostureDashboard.TAB_TYPES;
       await pageObjects.svlCommonPage.loginWithRole('admin');
       await cspDashboard.waitForPluginInitialized();
+      await dashboard.finishTourIfExists();
       await cspDashboard.navigateToComplianceDashboardPage();
       await retry.waitFor(
         'Cloud posture integration dashboard to be displayed',

@@ -9,9 +9,6 @@ import { lastValueFrom } from 'rxjs';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-
-import { flatten, reverse, uniqBy } from 'lodash/fp';
-import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import {
   getActionResultsRequestParamsSchema,
@@ -31,6 +28,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -60,6 +58,11 @@ export const getActionResultsRoute = (
               GetActionResultsRequestParamsSchema
             >(getActionResultsRequestParamsSchema),
           },
+          response: {
+            200: {
+              body: () => actionResultsResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -88,21 +91,29 @@ export const getActionResultsRoute = (
 
           const search = await context.search;
 
+          // Parse agentIds from query parameter
           const agentIds = request.query.agentIds
             ? request.query.agentIds.split(',').map((id) => id.trim())
-            : undefined;
+            : [];
+
+          const page = request.query.page ?? 0;
+          const pageSize = request.query.pageSize ?? 100;
+
+          const totalAgentCount = request.query.totalAgents ?? agentIds.length;
 
           const res = await lastValueFrom(
             search.search<ActionResultsRequestOptions, ActionResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.actionResults,
+                agentIds,
                 kuery: request.query.kuery,
                 startDate: request.query.startDate,
-                pagination: generateTablePaginationOptions(
-                  request.query.page ?? 0,
-                  request.query.pageSize ?? 100
-                ),
+                // Client already sliced agents for current page, so fetch all of them (no pagination)
+                pagination:
+                  agentIds.length > 0
+                    ? generateTablePaginationOptions(0, agentIds.length)
+                    : generateTablePaginationOptions(page, pageSize),
                 sort: {
                   direction: request.query.sortOrder ?? Direction.desc,
                   field: request.query.sort ?? '@timestamp',
@@ -115,35 +126,31 @@ export const getActionResultsRoute = (
             )
           );
 
-          const totalResponded =
-            res.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count ?? 0;
-          const totalRowCount =
-            res.rawResponse?.aggregations?.aggs.responses_by_action_id?.rows_count?.value ?? 0;
-          const aggsBuckets =
-            res.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
-
-          const previousEdges =
-            agentIds?.map(
-              (agentId) =>
-                ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
-            ) ?? [];
-
-          const processedEdges = reverse(
-            uniqBy('fields.agent_id[0]', flatten([res.edges, previousEdges]))
-          );
+          const responseAgg = res.rawResponse?.aggregations?.aggs.responses_by_action_id;
+          const totalResponded = responseAgg?.doc_count ?? 0;
+          const totalRowCount = responseAgg?.rows_count?.value ?? 0;
+          const aggsBuckets = responseAgg?.responses.buckets;
 
           const aggregations = {
             totalRowCount,
             totalResponded,
             successful: aggsBuckets?.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
             failed: aggsBuckets?.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
-            pending: agentIds?.length ? Math.max(0, agentIds.length - totalResponded) : 0,
+            pending: Math.max(0, totalAgentCount - totalResponded),
           };
+
+          // Return only real responses - placeholders will be generated client-side
+          const processedEdges = res.edges;
+
+          const totalPages = pageSize > 0 ? Math.ceil(totalAgentCount / pageSize) : 0;
 
           return response.ok({
             body: {
               edges: processedEdges,
-              total: res.total,
+              total: totalAgentCount,
+              currentPage: page,
+              pageSize,
+              totalPages,
               aggregations,
               inspect: res.inspect,
             },

@@ -13,12 +13,35 @@ import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useRef, useCallback, useMemo, useState } from 'react';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import type { VisualizeEditorContext } from '../types';
-import type { LensDocument } from '../persistence';
+import type {
+  VisualizeEditorContext,
+  LensAppLocator,
+  LensAppLocatorParams,
+  LensDocument,
+} from '@kbn/lens-common';
+import type {
+  EmbeddableEditorBreadcrumb,
+  EmbeddableEditorState,
+} from '@kbn/embeddable-plugin/public';
 import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
+
+/**
+ * Returns true when the user navigated to Lens from an active container view (e.g. a Dashboard panel),
+ * as opposed to a library listing page (e.g. the Dashboard Visualizations tab or the Visualize library).
+ * Used to determine whether "Save and Return" should be shown and whether `isLinkedToOriginatingApp`
+ * should be set on initial load.
+ */
+export function isComingFromContainerView(
+  incomingState: EmbeddableEditorState | undefined
+): boolean {
+  return Boolean(
+    incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      !incomingState.originatingPath.includes('/list/')
+  );
+}
 
 export function isLegacyEditorEmbeddable(
   initialContext: VisualizeEditorContext | VisualizeFieldContext | undefined
@@ -65,39 +88,43 @@ export function setBreadcrumbsTitle(
     chrome: ChromeStart;
   },
   {
-    isByValueMode,
     originatingAppName,
+    incomingBreadcrumbs,
     redirectToOrigin,
-    isFromLegacyEditor,
     currentDocTitle,
   }: {
-    isByValueMode: boolean;
     originatingAppName: string | undefined;
+    incomingBreadcrumbs: EmbeddableEditorBreadcrumb[] | undefined;
     redirectToOrigin: ((props?: RedirectToOriginProps | undefined) => void) | undefined;
-    isFromLegacyEditor: boolean;
     currentDocTitle: string;
   }
 ) {
   const breadcrumbs: EuiBreadcrumb[] = [];
-  if (isFromLegacyEditor && originatingAppName && redirectToOrigin) {
+
+  if (incomingBreadcrumbs?.length) {
+    breadcrumbs.push(...incomingBreadcrumbs);
+  } else if (originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {
         redirectToOrigin();
       },
       text: originatingAppName,
     });
-  }
-  if (!isByValueMode) {
-    breadcrumbs.push({
-      href: application.getUrlForApp(VISUALIZE_APP_ID),
-      onClick: (e) => {
-        application.navigateToApp(VISUALIZE_APP_ID, { path: '/' });
-        e.preventDefault();
+  } else if (!originatingAppName) {
+    breadcrumbs.push(
+      {
+        text: i18n.translate('xpack.lens.breadcrumbsDashboards', {
+          defaultMessage: 'Dashboards',
+        }),
+        href: application.getUrlForApp('dashboards', { path: '#/list' }),
       },
-      text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-        defaultMessage: 'Visualize library',
-      }),
-    });
+      {
+        text: i18n.translate('xpack.lens.breadcrumbsVisualizations', {
+          defaultMessage: 'Visualizations',
+        }),
+        href: application.getUrlForApp('dashboards', { path: '#/list/visualizations' }),
+      }
+    );
   }
 
   const currentDocBreadcrumb: EuiBreadcrumb = { text: currentDocTitle };
@@ -109,7 +136,9 @@ export function setBreadcrumbsTitle(
     // the serverless navigation is not yet aware of the byValue/originatingApp context
     serverless.setBreadcrumbs(currentDocBreadcrumb);
   } else {
-    chrome.setBreadcrumbs(breadcrumbs);
+    chrome.setBreadcrumbs(breadcrumbs, {
+      project: { value: breadcrumbs, absolute: true },
+    });
   }
 }
 

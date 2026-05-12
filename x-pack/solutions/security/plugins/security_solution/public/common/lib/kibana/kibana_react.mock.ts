@@ -7,14 +7,15 @@
 
 import React from 'react';
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -111,13 +112,16 @@ export const createStartServicesMock = (
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   core.settings.client.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
+  const { storage: sessionStorage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const customDataService = dataPluginMock.createStartContract();
+  const logger = loggingSystemMock.createLogger();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
   const locator = urlService.locators.create(new MlLocatorDefinition());
   const fleet = fleetMock.createStartMock();
+  const kql = kqlPluginMock.createStartContract();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const navigation = navigationPluginMock.createStartContract();
   const discover = discoverPluginMock.createStartContract();
@@ -155,6 +159,8 @@ export const createStartServicesMock = (
     configSettings: getDefaultConfigSettings(),
     apm,
     cases,
+    kql,
+    logger,
     unifiedSearch,
     navigation,
     discover,
@@ -222,6 +228,10 @@ export const createStartServicesMock = (
         actions: {
           show: true,
         },
+        fleet: {
+          crud: true,
+          read: true,
+        },
       },
     },
     security,
@@ -267,12 +277,8 @@ export const createStartServicesMock = (
     timelineDataService,
     alerting,
     siemMigrations,
-    sessionStorage: new Storage({
-      getItem: jest.fn(),
-      setItem: jest.fn(),
-      removeItem: jest.fn(),
-      clear: jest.fn(),
-    }),
+    sessionStorage,
+    aiRuleCreation: jest.fn(),
     plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };

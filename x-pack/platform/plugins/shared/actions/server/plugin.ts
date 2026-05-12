@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { i18n } from '@kbn/i18n';
+import { extractApiKeyIdFromAuthzHeader } from '@kbn/core-security-server';
+import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginInitializerContext,
@@ -43,12 +44,15 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ActionsConfig, EnabledConnectorTypes } from './config';
+import type { AxiosInstance } from 'axios';
+import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
+import { AuthTypeRegistry, registerAuthTypes } from './auth_types';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
@@ -62,6 +66,7 @@ import type {
   ActionTypeParams,
   ActionsRequestHandlerContext,
   UnsecuredServices,
+  ConnectorLifecycleListener,
 } from './types';
 
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -70,16 +75,25 @@ import { getActionsConfigurationUtilities } from './actions_config';
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
+  initializeOAuthStateCleanupTask,
+  scheduleOAuthStateCleanupTask,
+} from './lib/oauth_state_cleanup_task';
+import {
+  initializeUserConnectorTokenCleanupTask,
+  scheduleUserConnectorTokenCleanupTask,
+} from './lib/user_connector_token_cleanup_task';
+import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+  USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
 import { setupSavedObjects } from './saved_objects';
 import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import type { ActionExecutionSource } from './lib/action_execution_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
+import { getCurrentUserProfileIdFromRequest } from './lib/get_current_user_profile_id';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
@@ -103,6 +117,9 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { createSystemConnectors } from './create_system_actions';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
+import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
+import type { GetAxiosInstanceWithAuthFnOpts } from './lib/get_axios_instance';
+import { getAxiosInstanceWithAuth } from './lib/get_axios_instance';
 
 export interface PluginSetupContract {
   registerType<
@@ -121,6 +138,8 @@ export interface PluginSetupContract {
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
 
+  getAxiosInstanceWithAuth(opts: GetAxiosInstanceWithAuthFnOpts): Promise<AxiosInstance>;
+
   isPreconfiguredConnector(connectorId: string): boolean;
 
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
@@ -135,6 +154,8 @@ export interface PluginSetupContract {
   setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
 
   isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
+
+  registerConnectorLifecycleListener(listener: ConnectorLifecycleListener): void;
 }
 
 export interface PluginStartContract {
@@ -148,7 +169,21 @@ export interface PluginStartContract {
 
   getAllTypes: ActionTypeRegistry['getAllTypes'];
 
+  listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+
+  /**
+   * Returns an ActionsClient that is bound to the provided spaceId (namespace) while preserving
+   * the original request (and its auth context).
+   *
+   * This enables space-agnostic consumers to manage/execute connectors in a fixed space
+   * without forging fake requests (which can break auth under UIAM).
+   */
+  getActionsClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<PublicMethodsOf<ActionsClient>>;
 
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
@@ -164,6 +199,22 @@ export interface PluginStartContract {
   ): Params;
 
   isSystemActionConnector: (connectorId: string) => boolean;
+
+  /**
+   * Add a new dynamic InMemoryConnector to the inMemoryConnectors list if a connector with the id doesn't already exist.
+   * @param connector to add to the inMemoryConnectors list
+   * @returns boolean indicating whether the connector was added or not
+   */
+  registerDynamicConnector: (connector: InMemoryConnector) => boolean;
+
+  /**
+   * Remove a previously registered dynamic InMemoryConnector from the inMemoryConnectors list.
+   * Only connectors flagged as dynamic (via registerDynamicConnector) can be removed this way;
+   * preconfigured or system connectors are left untouched.
+   * @param connectorId id of the dynamic connector to remove
+   * @returns boolean indicating whether the connector was removed or not
+   */
+  unregisterDynamicConnector: (connectorId: string) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -178,6 +229,7 @@ export interface ActionsPluginsSetup {
   monitoringCollection?: MonitoringCollectionSetup;
   serverless?: ServerlessPluginSetup;
   cloud: CloudSetup;
+  usageApi?: UsageApiSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -205,9 +257,11 @@ export class ActionsPlugin
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
   private actionTypeRegistry?: ActionTypeRegistry;
+  private authTypeRegistry?: AuthTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
+  private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
   private eventLogger?: IEventLogger;
   private isESOCanEncrypt?: boolean;
@@ -216,6 +270,8 @@ export class ActionsPlugin
   private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
   private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
+  private connectorLifecycleListeners: ConnectorLifecycleListener[] = [];
+  private skippedPreconfiguredConnectorIds: Set<string> = new Set();
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -269,11 +325,13 @@ export class ActionsPlugin
           id: preconfiguredId,
           isPreconfigured: true,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         };
 
         this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
+          isConnectorTypeDeprecated: false,
         });
       } else {
         this.logger.warn(
@@ -294,13 +352,23 @@ export class ActionsPlugin
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
+    this.spaces = plugins.spaces;
+
+    includedHiddenTypes.push(USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE);
+
+    this.authTypeRegistry = new AuthTypeRegistry();
+    registerAuthTypes(this.authTypeRegistry);
 
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
       plugins.taskManager.index,
-      this.inMemoryConnectors
+      this.inMemoryConnectors,
+      async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
+      }
     );
 
     const usageCollection = plugins.usageCollection;
@@ -327,13 +395,27 @@ export class ActionsPlugin
         eventLogIndex
       );
 
+      // We plan to remove the usage config from this plugin in the future in favor of the new Usage API plugin.
+      let usageApiConfig: Writable<ActionsConfig['usage']> = {};
+      if (plugins.usageApi?.config) {
+        usageApiConfig.enabled = plugins.usageApi?.config?.enabled;
+        usageApiConfig.url = plugins.usageApi?.config?.url;
+        if (plugins.usageApi?.config?.tls?.ca) {
+          // Normalize the CA path to the format expected by the ConnectorUsageReportingTask
+          usageApiConfig.ca = { path: plugins.usageApi.config.tls.ca };
+        }
+      } else {
+        // If no configuration is provided via the Usage API plugin, use the configuration from this plugin.
+        usageApiConfig = this.actionsConfig.usage;
+      }
+
       this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
         logger: this.logger,
         eventLogIndex,
         core,
         taskManager: plugins.taskManager,
         projectId: plugins.cloud.serverless.projectId,
-        config: this.actionsConfig.usage,
+        config: usageApiConfig,
       });
     }
 
@@ -351,10 +433,18 @@ export class ActionsPlugin
       });
     }
 
+    initializeOAuthStateCleanupTask(this.logger, plugins.taskManager, core);
+    initializeUserConnectorTokenCleanupTask(this.logger, plugins.taskManager, core);
+
     const subActionFramework = createSubActionConnectorFramework({
       actionTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
+    });
+
+    // Initialize OAuth rate limiter
+    const oauthRateLimiter = new OAuthRateLimiter({
+      config: this.actionsConfig.auth.oauth_authorization_code.rate_limits,
     });
 
     // Routes
@@ -363,6 +453,9 @@ export class ActionsPlugin
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
+      logger: this.logger,
+      core,
+      oauthRateLimiter,
     });
 
     return {
@@ -385,6 +478,10 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
+      getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(
+        actionsConfigUtils,
+        plugins.cloud
+      ),
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -415,6 +512,9 @@ export class ActionsPlugin
       },
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
         return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
+      },
+      registerConnectorLifecycleListener: (listener: ConnectorLifecycleListener) => {
+        this.connectorLifecycleListeners.push(listener);
       },
     };
   }
@@ -452,29 +552,27 @@ export class ActionsPlugin
      */
     this.setSystemActions();
 
-    const getActionsClientWithRequest = async (
-      request: KibanaRequest,
-      authorizationContext?: ActionExecutionSource<unknown>
-    ) => {
-      if (isESOCanEncrypt !== true) {
-        throw new Error(
-          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-        );
-      }
+    this.detectPreconfiguredConflicts(core);
 
-      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
-        core.savedObjects,
-        request
-      );
-
+    const createActionsClient = async ({
+      request,
+      unsecuredSavedObjectsClient,
+      spaceId,
+    }: {
+      request: KibanaRequest;
+      unsecuredSavedObjectsClient: SavedObjectsClientContract;
+      spaceId?: string;
+    }) => {
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
+        authTypeRegistry: this.authTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
+        spaceId,
         authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
@@ -495,7 +593,42 @@ export class ActionsPlugin
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
+        getAxiosInstanceWithAuth: this.getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+        spaces: this.spaces?.spacesService,
+        isESOCanEncrypt: isESOCanEncrypt!,
+        encryptedSavedObjectsClient,
+        connectorLifecycleListeners: this.connectorLifecycleListeners,
+        getCurrentUserProfileId,
       });
+    };
+
+    const throwIfCannotEncrypt = () => {
+      if (isESOCanEncrypt !== true) {
+        throw new Error(
+          `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        );
+      }
+    };
+
+    const getActionsClientWithRequest = async (request: KibanaRequest) => {
+      throwIfCannotEncrypt();
+
+      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+        core.savedObjects,
+        request
+      );
+      return await createActionsClient({ request, unsecuredSavedObjectsClient });
+    };
+
+    const getActionsClientWithRequestInSpace = async (request: KibanaRequest, spaceId: string) => {
+      throwIfCannotEncrypt();
+
+      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+        core.savedObjects,
+        request
+      ).asScopedToNamespace(spaceId);
+
+      return await createActionsClient({ request, unsecuredSavedObjectsClient, spaceId });
     };
 
     const getUnsecuredActionsClient = () => {
@@ -517,6 +650,7 @@ export class ActionsPlugin
         internalSavedObjectsRepository,
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
+        connectorTypeRegistry: actionTypeRegistry!,
       });
     };
 
@@ -545,6 +679,49 @@ export class ActionsPlugin
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
+    /**
+     * Resolves profile UID from the `Authorization` API-key header for callers that run under a
+     * `FakeRequest` (action executor / background execution), where there is no browser session
+     * and `userProfiles.getCurrent` cannot run. For real `KibanaRequest` traffic, use
+     * `getCurrentUserProfileIdFromRequest` instead.
+     */
+    async function getCurrentUserProfileIdFromAPIKey(
+      request: KibanaRequest
+    ): Promise<string | undefined> {
+      try {
+        const id = extractApiKeyIdFromAuthzHeader(request.headers.authorization);
+        if (!id) {
+          logger.debug(`Failed to decode API key ID from Authorization header.`);
+          return undefined;
+        }
+
+        const response = await core.elasticsearch.client
+          .asScoped(request)
+          .asCurrentUser.security.getApiKey({
+            with_profile_uid: true,
+            id,
+          });
+
+        if (response.api_keys && response.api_keys.length > 0) {
+          return response.api_keys[0].profile_uid;
+        }
+
+        logger.debug(
+          `No API keys were returned from query, cannot retrieve associated profile id.`
+        );
+      } catch (error) {
+        logger.debug(
+          `Failed to retrieve API key for user profile retrieval: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return undefined;
+    }
+
+    const getCurrentUserProfileId = (requestWithAuth: KibanaRequest) =>
+      getCurrentUserProfileIdFromRequest(requestWithAuth, plugins.security, logger);
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -569,6 +746,7 @@ export class ActionsPlugin
         return instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
+      getCurrentUserProfileIdFromAPIKey,
     });
 
     taskRunnerFactory!.initialize({
@@ -585,6 +763,8 @@ export class ActionsPlugin
     this.eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+        scheduleOAuthStateCleanupTask(this.logger, plugins.taskManager);
+        scheduleUserConnectorTokenCleanupTask(this.logger, plugins.taskManager);
       })
       .catch(() => {});
 
@@ -611,10 +791,14 @@ export class ActionsPlugin
         return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
+      listTypes: (featureId?: string) => {
+        return this.actionTypeRegistry!.list({ featureId, exposeValidation: true });
+      },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getActionsClientWithRequestInSpace,
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
@@ -625,6 +809,10 @@ export class ActionsPlugin
             inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
         );
       },
+      registerDynamicConnector: (connector: InMemoryConnector) =>
+        this.registerDynamicConnector(connector),
+      unregisterDynamicConnector: (connectorId: string) =>
+        this.unregisterDynamicConnector(connectorId),
     };
   }
 
@@ -704,7 +892,57 @@ export class ActionsPlugin
 
   private setSystemActions = () => {
     const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
-    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+    this.inMemoryConnectors.push(...systemConnectors);
+  };
+
+  private detectPreconfiguredConflicts = (core: CoreStart) => {
+    const preconfiguredIds = new Set(
+      this.inMemoryConnectors.filter((c) => c.isPreconfigured).map((c) => c.id)
+    );
+
+    if (preconfiguredIds.size === 0) return;
+
+    const internalRepo = core.savedObjects.createInternalRepository([ACTION_SAVED_OBJECT_TYPE]);
+
+    void (async () => {
+      try {
+        const rawIds = Array.from(preconfiguredIds).map(
+          (id) => `${ACTION_SAVED_OBJECT_TYPE}:${id}`
+        );
+        const result = await internalRepo.search({
+          type: ACTION_SAVED_OBJECT_TYPE,
+          query: { ids: { values: rawIds } },
+          _source: false,
+          namespaces: ['*'],
+        });
+
+        const conflictingIds = (result?.hits?.hits ?? [])
+          .map((hit) => hit._id?.replace(`${ACTION_SAVED_OBJECT_TYPE}:`, ''))
+          .filter((id): id is string => id !== undefined && preconfiguredIds.has(id));
+
+        if (conflictingIds.length > 0) {
+          this.skippedPreconfiguredConnectorIds = new Set(conflictingIds);
+          const conflictSet = new Set(conflictingIds);
+          this.inMemoryConnectors.splice(
+            0,
+            this.inMemoryConnectors.length,
+            ...this.inMemoryConnectors.filter((c) => !(c.isPreconfigured && conflictSet.has(c.id)))
+          );
+          this.logger.error(
+            i18n.translate('xpack.actions.preconfiguredConnectorConflictSkipped', {
+              defaultMessage:
+                'Preconfigured {count, plural, one {connector} other {connectors}} with {count, plural, one {ID} other {IDs}} [{ids}] {count, plural, one {conflicts} other {conflict}} with existing saved {count, plural, one {connector} other {connectors}} and {count, plural, one {was} other {were}} skipped.',
+              values: {
+                count: conflictingIds.length,
+                ids: conflictingIds.join(', '),
+              },
+            })
+          );
+        }
+      } catch (err) {
+        this.logger.debug(`Failed to check for preconfigured connector conflicts: ${err.message}`);
+      }
+    })();
   };
 
   private throwIfSystemActionsInConfig = () => {
@@ -723,6 +961,7 @@ export class ActionsPlugin
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
+      authTypeRegistry,
       isESOCanEncrypt,
       getInMemoryConnectors,
       actionExecutor,
@@ -730,11 +969,16 @@ export class ActionsPlugin
       security,
       usageCounter,
       logger,
+      getAxiosInstanceWithAuthHelper,
+      spaces,
+      connectorLifecycleListeners,
     } = this;
+    const getSkippedPreconfiguredIds = () => this.skippedPreconfiguredConnectorIds;
 
     return async function actionsRouteHandlerContext(context, request) {
-      const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
-        await core.getStartServices();
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
+      const { savedObjects } = coreStart;
 
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
@@ -750,10 +994,15 @@ export class ActionsPlugin
             excludedExtensions: [SECURITY_EXTENSION_ID],
             includedHiddenTypes,
           });
+          const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
+            includedHiddenTypes,
+          });
+
           return new ActionsClient({
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
+            authTypeRegistry: authTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             inMemoryConnectors,
@@ -772,17 +1021,25 @@ export class ActionsPlugin
             usageCounter,
             connectorTokenClient: new ConnectorTokenClient({
               unsecuredSavedObjectsClient,
-              encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
-                includedHiddenTypes,
-              }),
+              encryptedSavedObjectsClient,
               logger,
             }),
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
+            getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper(actionsConfigUtils),
+            spaces: spaces?.spacesService,
+            isESOCanEncrypt: isESOCanEncrypt!,
+            encryptedSavedObjectsClient,
+            connectorLifecycleListeners,
+            getCurrentUserProfileId: (requestWithAuth: KibanaRequest) =>
+              getCurrentUserProfileIdFromRequest(requestWithAuth, pluginsStart.security, logger),
           });
         },
-        listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
+        listTypes: (featureId?: string) => {
+          return actionTypeRegistry!.list({ featureId });
+        },
+        getSkippedPreconfiguredConnectorIds: getSkippedPreconfiguredIds,
       };
     };
   };
@@ -798,6 +1055,47 @@ export class ActionsPlugin
         this.actionTypeRegistry?.get(connectorType);
       });
     }
+  };
+
+  private getAxiosInstanceWithAuthHelper = (
+    actionsConfigUtils: ActionsConfigurationUtilities,
+    cloud?: CloudSetup
+  ) => {
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      cloud,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+
+    return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
+      return await getAxiosInstanceFn(getAxiosParams);
+    };
+  };
+
+  private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
+    if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      this.inMemoryConnectors.push({
+        ...connector,
+        isDynamic: true,
+        isPreconfigured: true,
+      });
+      this.logger.info(`Registered dynamic connector with id ${connector.id}`);
+      return true;
+    }
+    return false;
+  };
+
+  private unregisterDynamicConnector = (connectorId: string): boolean => {
+    const index = this.inMemoryConnectors.findIndex(
+      (c) => c.id === connectorId && c.isDynamic === true
+    );
+    if (index === -1) {
+      return false;
+    }
+    this.inMemoryConnectors.splice(index, 1);
+    this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
+    return true;
   };
 
   public stop() {

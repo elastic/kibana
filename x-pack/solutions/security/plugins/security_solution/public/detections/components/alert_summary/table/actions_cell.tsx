@@ -11,33 +11,23 @@ import type { GetTableProp } from './types';
 import { MoreActionsRowControlColumn } from './more_actions_row_control_column';
 import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
 
-export type ActionsCellProps = Pick<
-  ComponentProps<GetTableProp<'renderActionsCell'>>,
-  /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
-   */
-  | 'alert'
-  /**
-   * The Ecs type is @deprecated but needed for the case actions within the more action dropdown
-   */
-  | 'ecsAlert'
->;
+export type ActionsCellProps = Pick<ComponentProps<GetTableProp<'renderActionsCell'>>, 'alert'>;
 
 /**
- * Component used in the AI for SOC alert summary table.
+ * Component used in EASE alert summary table.
  * It is passed to the renderActionsCell property of the EuiDataGrid.
  * It renders all the icons in the row action icons:
  * - open flyout
  * - assistant
  * - more actions
  */
-export const ActionsCell = memo(({ alert, ecsAlert }: ActionsCellProps) => (
+export const ActionsCell = memo(({ alert }: ActionsCellProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem>
       <OpenFlyoutRowControlColumn alert={alert} />
     </EuiFlexItem>
     <EuiFlexItem>
-      <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
+      <MoreActionsRowControlColumn alert={alert} />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

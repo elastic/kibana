@@ -44,10 +44,10 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 4000,
     euiIconType: 'logoSecurity',
   },
-  chat: {
-    id: 'chat',
-    label: i18n.translate('core.ui.chatNavList.label', {
-      defaultMessage: 'Workchat',
+  workplaceAI: {
+    id: 'workplaceAI',
+    label: i18n.translate('core.ui.workplaceAINavList.label', {
+      defaultMessage: 'Workplace AI',
     }),
     order: 4500,
     euiIconType: 'logoElasticsearch',

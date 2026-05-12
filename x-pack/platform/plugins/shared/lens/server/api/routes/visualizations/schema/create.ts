@@ -6,38 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
-import {
-  lensResponseItemSchema,
-  lensAPIConfigSchema,
-  lensCMCreateOptionsSchema,
-} from '../../../../content_management';
-import { lensItemSchemaV0 } from '../../../../content_management/v0';
+import { lensCMCreateOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
+import { lensResponseItemSchema } from './common';
 
-const apiConfigData = lensAPIConfigSchema.extends({
-  id: undefined,
-});
-
-const v0ConfigData = lensItemSchemaV0.extends({
-  id: undefined,
-});
-
-export const lensCreateRequestBodySchema = schema.object(
+export const lensCreateRequestQuerySchema = schema.object(
   {
-    data: schema.oneOf([
-      apiConfigData,
-      v0ConfigData, // Temporarily permit passing old v0 SO attributes on create
-    ]),
-    // TODO should these options be here or in params?
-    options: schema.object(
-      {
-        ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
-      },
-      { unknowns: 'forbid' }
-    ),
+    ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
   },
   { unknowns: 'forbid' }
 );
+
+export const lensCreateRequestBodySchema = lensApiConfigSchemaNoESQL;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

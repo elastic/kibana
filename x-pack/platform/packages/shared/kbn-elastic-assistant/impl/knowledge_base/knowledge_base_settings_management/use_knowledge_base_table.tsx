@@ -21,7 +21,7 @@ import { FormattedDate } from '@kbn/i18n-react';
 import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
@@ -136,7 +136,7 @@ export const useKnowledgeBaseTable = () => {
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
     if (entry.type === DocumentEntryType.value) {
       if (entry.kbResource === 'user') {
-        return 'userAvatar';
+        return 'user';
       }
       if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';

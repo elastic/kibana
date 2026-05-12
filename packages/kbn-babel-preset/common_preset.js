@@ -8,14 +8,18 @@
  */
 
 module.exports = (api) => ({
+  // Enables import-attributes syntax on imports
+  generatorOpts: {
+    importAttributesKeyword: 'with',
+  },
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
+        require.resolve('@kbn/lazy-object/src/plugin/lazy_babel_plugin'),
         require.resolve('babel-plugin-add-module-exports'),
-
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined
         // proposal yet, which includes private field, so this transform is

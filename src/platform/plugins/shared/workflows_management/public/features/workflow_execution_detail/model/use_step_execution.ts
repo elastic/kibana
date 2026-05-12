@@ -7,23 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import type { ExecutionStatus } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
-export function useStepExecution(workflowExecutionId: string, stepExecutionId: string) {
-  const { http } = useKibana().services;
+const REFETCH_INTERVAL_MS = 5000;
+
+/**
+ * Fetches a single step execution with full data (input/output).
+ * Polls while the step is still running, stops once it reaches a terminal status.
+ */
+export function useStepExecution(
+  workflowExecutionId: string,
+  stepExecutionId: string | undefined,
+  stepStatus: ExecutionStatus | undefined
+) {
+  const api = useWorkflowsApi();
+  const isStepFinished = stepStatus ? isTerminalStatus(stepStatus) : false;
 
   return useQuery({
     queryKey: ['stepExecution', workflowExecutionId, stepExecutionId],
     queryFn: async () => {
-      const response = await http!.get<EsWorkflowStepExecution>(
-        `/api/workflowExecutions/${workflowExecutionId}/steps/${stepExecutionId}`
-      );
-      return response;
+      if (!workflowExecutionId || !stepExecutionId) {
+        throw new Error('Workflow execution ID and step execution ID are required');
+      }
+      return api.getStepExecution(workflowExecutionId, stepExecutionId);
     },
     enabled: !!workflowExecutionId && !!stepExecutionId,
-    staleTime: 5000, // Refresh every 5 seconds for real-time logs
-    refetchInterval: 5000, // Auto-refresh logs
+    staleTime: isStepFinished ? Infinity : REFETCH_INTERVAL_MS, // will be cleared when switching to a different execution
+    // Use the fetched data's own status to decide when to stop polling, rather than
+    // relying solely on the lightweight polling status. This handles the case where
+    // the execution polling already reports the step as finished, but ES hasn't
+    // refreshed the full step document (with input/output) for the detailed fetch yet.
+    refetchInterval: (data) => {
+      if (data && isTerminalStatus(data.status)) {
+        return false;
+      }
+      return REFETCH_INTERVAL_MS;
+    },
   });
 }

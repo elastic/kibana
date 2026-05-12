@@ -112,10 +112,11 @@ export const RemoveClusterSettingsFlyout = ({
           <h2 id="removeClusterSettingsDetailsFlyoutTitle">{message}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="flyoutBody">
         {statusType === 'error' && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.errorTitle}
               color="danger"
               iconType="warning"

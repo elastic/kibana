@@ -141,6 +141,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
       <>
         <EuiText>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="primary"
             iconType={EuiLoadingSpinner}

@@ -55,7 +55,7 @@ export const generateCspFinding = (
     },
     rule: {
       rego_rule_id: 'AZU-1.0-1.0',
-      references: 'https://elastic.co',
+      reference: 'https://elastic.co',
       impact: `impact ${id}`,
       description: `description ${id}`,
       section: `Section ${id}`,
@@ -226,7 +226,8 @@ export const searchFindingsHandler = (findings: CspFinding[]) =>
 
     if (hasRuleSectionQuerySearchTerm) {
       const filteredFindings = findings.filter((finding) => {
-        const termValue = (filter[0].bool?.should as estypes.QueryDslQueryContainer[])?.[0]?.term?.[
+        const termValue = (filter[0]?.bool?.should as estypes.QueryDslQueryContainer[])?.[0]
+          ?.term?.[
           'rule.section'
           // @ts-expect-error FieldValue is now very broad (can be anything)
         ]?.value;

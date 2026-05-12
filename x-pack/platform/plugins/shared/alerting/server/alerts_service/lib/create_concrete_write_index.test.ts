@@ -9,7 +9,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   createConcreteWriteIndex,
-  findOrSetConcreteWriteIndex,
+  updateAliasesAndSetConcreteWriteIndex,
 } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
@@ -102,6 +102,7 @@ describe('createConcreteWriteIndex', () => {
             aliases: {
               '.alerts-test.alerts-default': {
                 is_write_index: true,
+                is_hidden: true,
               },
             },
           });
@@ -326,6 +327,7 @@ describe('createConcreteWriteIndex', () => {
             aliases: {
               '.alerts-test.alerts-default': {
                 is_write_index: true,
+                is_hidden: true,
               },
             },
           });
@@ -401,6 +403,7 @@ describe('createConcreteWriteIndex', () => {
             aliases: {
               '.alerts-test.alerts-default': {
                 is_write_index: true,
+                is_hidden: true,
               },
             },
           });
@@ -1133,8 +1136,8 @@ describe('setConcreteWriteIndex', () => {
     jest.resetAllMocks();
   });
 
-  it(`should call updateAliases to set the concrete write index`, async () => {
-    await findOrSetConcreteWriteIndex({
+  it(`should set the latest index as write index when none exists`, async () => {
+    await updateAliasesAndSetConcreteWriteIndex({
       logger,
       esClient: clusterClient,
       concreteIndices: [
@@ -1142,21 +1145,25 @@ describe('setConcreteWriteIndex', () => {
           index: '.internal.alerts-test.alerts-default-000003',
           alias: '.alerts-test.alerts-default',
           isWriteIndex: false,
+          isHidden: true,
         },
         {
           index: '.internal.alerts-test.alerts-default-000004',
           alias: '.alerts-test.alerts-default',
           isWriteIndex: false,
+          isHidden: true,
         },
         {
           index: '.internal.alerts-test.alerts-default-000001',
           alias: '.alerts-test.alerts-default',
           isWriteIndex: false,
+          isHidden: true,
         },
         {
           index: '.internal.alerts-test.alerts-default-000002',
           alias: '.alerts-test.alerts-default',
           isWriteIndex: false,
+          isHidden: true,
         },
       ],
       alias: '.alerts-test.alerts-default',
@@ -1178,21 +1185,196 @@ describe('setConcreteWriteIndex', () => {
             alias: '.alerts-test.alerts-default',
             index: '.internal.alerts-test.alerts-default-000004',
             is_write_index: true,
+            is_hidden: true,
           },
         },
       ],
     });
     expect(logger.info).toHaveBeenCalledWith(
-      'Successfully set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'
+      'Successfully set write index for alias: .alerts-test.alerts-default.'
     );
   });
 
-  it(`should throw an error if there is a failure setting the concrete write index`, async () => {
+  it(`should migrate non-hidden aliases to hidden using fresh state from ES`, async () => {
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: false } },
+      },
+      '.internal.alerts-test.alerts-default-000002': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: true, is_write_index: false } },
+      },
+      '.internal.alerts-test.alerts-default-000003': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: true } },
+      },
+      '.internal.alerts-test.alerts-default-000004': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: true, is_write_index: false } },
+      },
+    });
+
+    await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000003',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: true,
+          isHidden: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000004',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: true,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000002',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: true,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Attempting to set index aliases as hidden for alias: .alerts-test.alerts-default.'
+    );
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000001',
+            is_hidden: true,
+            is_write_index: false,
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000003',
+            is_hidden: true,
+            is_write_index: true,
+          },
+        },
+      ],
+    });
+    expect(logger.info).toHaveBeenCalledWith(
+      'Successfully set index aliases to hidden for alias: .alerts-test.alerts-default.'
+    );
+  });
+
+  it(`should set write index and migrate to hidden in separate calls`, async () => {
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: false } },
+      },
+      '.internal.alerts-test.alerts-default-000002': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: true, is_write_index: false } },
+      },
+      '.internal.alerts-test.alerts-default-000003': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: false } },
+      },
+      '.internal.alerts-test.alerts-default-000004': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: true, is_write_index: true } },
+      },
+    });
+
+    await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000003',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000004',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: true,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000002',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: true,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Attempting to set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Attempting to set index aliases as hidden for alias: .alerts-test.alerts-default.'
+    );
+
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledTimes(2);
+
+    expect(clusterClient.indices.updateAliases).toHaveBeenNthCalledWith(1, {
+      actions: [
+        {
+          remove: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000004',
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000004',
+            is_write_index: true,
+            is_hidden: true,
+          },
+        },
+      ],
+    });
+
+    expect(clusterClient.indices.updateAliases).toHaveBeenNthCalledWith(2, {
+      actions: [
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000001',
+            is_hidden: true,
+            is_write_index: false,
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000003',
+            is_hidden: true,
+            is_write_index: false,
+          },
+        },
+      ],
+    });
+  });
+
+  it(`should throw an error if there is a failure setting the write index`, async () => {
     const error = new Error(`fail`) as EsError;
     clusterClient.indices.updateAliases.mockRejectedValueOnce(error);
 
     await expect(() =>
-      findOrSetConcreteWriteIndex({
+      updateAliasesAndSetConcreteWriteIndex({
         logger,
         esClient: clusterClient,
         concreteIndices: [
@@ -1200,12 +1382,214 @@ describe('setConcreteWriteIndex', () => {
             index: '.internal.alerts-test.alerts-default-000001',
             alias: '.alerts-test.alerts-default',
             isWriteIndex: false,
+            isHidden: true,
           },
         ],
         alias: '.alerts-test.alerts-default',
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to set index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default."`
+      `"Failed to set write index for alias: .alerts-test.alerts-default. Error: fail"`
     );
+  });
+
+  it(`should include external indices when migrating aliases to hidden`, async () => {
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: true } },
+      },
+      '.siem-signals-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: false } },
+      },
+    });
+
+    await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: true,
+          isHidden: false,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000001',
+            is_hidden: true,
+            is_write_index: true,
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.siem-signals-default-000001',
+            is_hidden: true,
+            is_write_index: false,
+          },
+        },
+      ],
+    });
+    expect(logger.info).toHaveBeenCalledWith(
+      'Successfully set index aliases to hidden for alias: .alerts-test.alerts-default.'
+    );
+  });
+
+  it(`should not throw when hidden migration fails`, async () => {
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false } },
+      },
+    });
+    clusterClient.indices.updateAliases.mockRejectedValueOnce(
+      new Error('alias constraint violation')
+    );
+
+    const result = await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: true,
+          isHidden: false,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(result).toEqual({
+      index: '.internal.alerts-test.alerts-default-000001',
+      alias: '.alerts-test.alerts-default',
+      isWriteIndex: true,
+      isHidden: false,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Failed to set index aliases to hidden for alias: .alerts-test.alerts-default. Error: alias constraint violation'
+    );
+  });
+
+  it(`should return existing write index without calling updateAliases when all indices are already hidden`, async () => {
+    const result = await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: true,
+          isHidden: true,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(result).toEqual({
+      index: '.internal.alerts-test.alerts-default-000001',
+      alias: '.alerts-test.alerts-default',
+      isWriteIndex: true,
+      isHidden: true,
+    });
+    expect(clusterClient.indices.updateAliases).not.toHaveBeenCalled();
+  });
+
+  it(`should succeed setting write index and migrate all indices including external ones to hidden`, async () => {
+    clusterClient.indices.getAlias.mockResolvedValueOnce({
+      '.internal.alerts-test.alerts-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: false } },
+      },
+      '.internal.alerts-test.alerts-default-000002': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: true } },
+      },
+      '.siem-signals-default-000001': {
+        aliases: { '.alerts-test.alerts-default': { is_hidden: false, is_write_index: false } },
+      },
+    });
+
+    const result = await updateAliasesAndSetConcreteWriteIndex({
+      logger,
+      esClient: clusterClient,
+      concreteIndices: [
+        {
+          index: '.internal.alerts-test.alerts-default-000001',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: false,
+        },
+        {
+          index: '.internal.alerts-test.alerts-default-000002',
+          alias: '.alerts-test.alerts-default',
+          isWriteIndex: false,
+          isHidden: false,
+        },
+      ],
+      alias: '.alerts-test.alerts-default',
+    });
+
+    expect(result).toEqual({
+      index: '.internal.alerts-test.alerts-default-000002',
+      alias: '.alerts-test.alerts-default',
+      isWriteIndex: true,
+      isHidden: false,
+    });
+
+    expect(clusterClient.indices.updateAliases).toHaveBeenCalledTimes(2);
+
+    // First call: set write index
+    expect(clusterClient.indices.updateAliases).toHaveBeenNthCalledWith(1, {
+      actions: [
+        {
+          remove: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000002',
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000002',
+            is_write_index: true,
+            is_hidden: undefined,
+          },
+        },
+      ],
+    });
+
+    // Second call: migrate all non-hidden indices (including external) to hidden
+    expect(clusterClient.indices.updateAliases).toHaveBeenNthCalledWith(2, {
+      actions: [
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000001',
+            is_hidden: true,
+            is_write_index: false,
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000002',
+            is_hidden: true,
+            is_write_index: true,
+          },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.siem-signals-default-000001',
+            is_hidden: true,
+            is_write_index: false,
+          },
+        },
+      ],
+    });
   });
 });

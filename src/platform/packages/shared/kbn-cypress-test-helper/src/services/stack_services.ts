@@ -12,7 +12,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
-import type { ReqOptions } from '@kbn/test/src/kbn_client/kbn_client_requester';
+import type { ReqOptions } from '@kbn/kbn-client';
 import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';

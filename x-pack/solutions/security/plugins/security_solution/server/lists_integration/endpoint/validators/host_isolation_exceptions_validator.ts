@@ -6,13 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -58,7 +59,7 @@ const HostIsolationBasicDataSchema = BasicEndpointExceptionDataSchema.extends({
 
 export class HostIsolationExceptionsValidator extends BaseValidator {
   static isHostIsolationException(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id;
   }
 
   protected async validateHasWritePrivilege(): Promise<void> {
@@ -71,6 +72,20 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return this.validateHasPrivilege('canReadHostIsolationExceptions');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateHostIsolationData(item);
+    });
   }
 
   async validatePreCreateItem(
@@ -124,12 +139,6 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
 
   async validatePreMultiListFind(): Promise<void> {
     await this.validateHasReadPrivilege();
-  }
-
-  async validatePreImport(): Promise<void> {
-    throw new EndpointArtifactExceptionValidationError(
-      'Import is not supported for Endpoint artifact exceptions'
-    );
   }
 
   private async validateHostIsolationData(item: ExceptionItemLikeOptions): Promise<void> {

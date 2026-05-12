@@ -17,6 +17,7 @@ const ExperimentalFeaturesServiceMock = {
       // add new experimental features set to `true` here
       // e.g.
       // responseActionDownloadFileEnabled: true,
+      microsoftDefenderEndpointCancelEnabled: true,
     };
 
     return ff;

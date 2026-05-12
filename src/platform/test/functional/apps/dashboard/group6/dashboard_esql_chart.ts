@@ -34,7 +34,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await dashboard.navigateToApp();
-      await testSubjects.click('discard-unsaved-New-Dashboard');
+      if (await testSubjects.exists('discard-unsaved-New-Dashboard')) {
+        await testSubjects.click('discard-unsaved-New-Dashboard');
+      }
     });
 
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
@@ -42,9 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
 
       await retry.try(async () => {
@@ -65,9 +68,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset to the previous state on edit inline', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
 
       // Save the panel and close the flyout
@@ -103,26 +106,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelFlyoutButton');
       const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      const panelsAfterDelete = await dashboard.getDashboardPanels();
+      expect(panelsAfterDelete.length).to.eql(0);
     });
 
     it('should be able to edit the query and render another chart', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
+      log.debug('After openAddPanelFlyout');
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
-
-      await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
-      await testSubjects.click('ESQLEditor-run-query-button');
       await header.waitUntilLoadingHasFinished();
 
+      await monacoEditor.setCodeEditorValue('from logstash-* | stats maxB = max(bytes)');
+      const editorValue = await monacoEditor.getCodeEditorValue();
+      expect(editorValue).to.be('from logstash-* | stats maxB = max(bytes)');
+      await testSubjects.click('ESQLEditor-run-query-button');
+      await header.waitUntilLoadingHasFinished();
+      // wait for Lens to re-render the suggestion with the new query results
+      await retry.try(async () => {
+        expect(await testSubjects.exists('mtrVis')).to.be(true);
+      });
+
       await testSubjects.click('applyFlyoutButton');
-      expect(await testSubjects.exists('mtrVis')).to.be(true);
+      await dashboard.waitForRenderComplete();
+      await retry.try(async () => {
+        expect(await testSubjects.exists('mtrVis')).to.be(true);
+      });
     });
 
     it('should add a second panel and remove when hitting cancel', async () => {
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
       // Cancel
       await testSubjects.click('cancelFlyoutButton');
@@ -136,9 +154,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not remove the first panel of two when editing and cancelling', async () => {
       // add a second panel
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();
       // save it
       await testSubjects.click('applyFlyoutButton');

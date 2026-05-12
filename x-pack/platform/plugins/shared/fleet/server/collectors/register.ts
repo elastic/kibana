@@ -28,6 +28,12 @@ import type { AgentsPerOutputType } from './agents_per_output';
 import { getAgentsPerOutput } from './agents_per_output';
 import type { IntegrationsDetails } from './integrations_collector';
 import { getIntegrationsDetails } from './integrations_collector';
+import { getModifiedILMs } from './modified_ilms';
+import {
+  getVersionSpecificPoliciesUsage,
+  type AgentOnVersionSpecificPolicy,
+} from './version_specific_policies_collector';
+import { getAgentUpgradeRollbacks } from './agent_upgrade_rollbacks';
 
 export interface Usage {
   agents_enabled: boolean;
@@ -44,12 +50,17 @@ export interface FleetUsage extends Usage, AgentData {
     output_types: string[];
     count_with_global_data_tags: number;
     count_with_non_default_space: number;
+    count_with_agent_version_conditions: number;
   };
   agent_logs_panics_last_hour: AgentPanicLogsData['agent_logs_panics_last_hour'];
   agent_logs_top_errors?: string[];
   fleet_server_logs_top_errors?: string[];
   agents_per_output_type: AgentsPerOutputType[];
   integrations_details: IntegrationsDetails[];
+  modified_ilms: string[];
+  packages_with_agent_version_conditions: string[];
+  agents_on_version_specific_policies_per_version: AgentOnVersionSpecificPolicy[];
+  agent_upgrade_rollbacks: number;
 }
 
 export const fetchFleetUsage = async (
@@ -62,6 +73,12 @@ export const fetchFleetUsage = async (
     return;
   }
 
+  const {
+    agent_policies_count,
+    packages_with_agent_version_conditions,
+    agents_on_version_specific_policies_per_version,
+  } = await getVersionSpecificPoliciesUsage(soClient, esClient);
+
   const usage = {
     agents_enabled: getIsAgentsEnabled(config),
     agents: await getAgentUsage(soClient, esClient),
@@ -69,7 +86,10 @@ export const fetchFleetUsage = async (
     packages: await getPackageUsage(soClient),
     ...(await getAgentData(esClient, soClient, abortController)),
     fleet_server_config: await getFleetServerConfig(soClient),
-    agent_policies: await getAgentPoliciesUsage(soClient),
+    agent_policies: {
+      ...(await getAgentPoliciesUsage(soClient)),
+      count_with_agent_version_conditions: agent_policies_count,
+    },
     ...(await getPanicLogsLastHour(esClient)),
     ...(await getAgentLogsTopErrors(esClient)),
     agents_per_output_type: await getAgentsPerOutput(soClient, esClient),
@@ -77,6 +97,10 @@ export const fetchFleetUsage = async (
     deployment_id: appContextService.getCloud()?.deploymentId,
     integrations_details: await getIntegrationsDetails(soClient),
     agentless_agents: await getAgentUsage(soClient, esClient, true),
+    modified_ilms: await getModifiedILMs(),
+    agents_on_version_specific_policies_per_version,
+    packages_with_agent_version_conditions,
+    ...(await getAgentUpgradeRollbacks(esClient)),
   };
   return usage;
 };

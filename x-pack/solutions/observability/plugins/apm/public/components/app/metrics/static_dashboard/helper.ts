@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import Mustache from 'mustache';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
-import { existingDashboardFileNames, loadDashboardFile } from './dashboards/dashboard_catalog';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/public';
+import type { DashboardFileName } from './dashboards/dashboard_catalog';
+import { loadDashboardFile } from './dashboards/dashboard_catalog';
 import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
+
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
+  runtimeVersion?: string;
   serverlessType?: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
@@ -19,21 +24,29 @@ interface DashboardFileProps {
 
 export interface MetricsDashboardProps extends DashboardFileProps {
   dataView: DataView;
+  apmIndices?: APMIndices;
 }
 
-function getDashboardFileNameFromProps({
+export function getDashboardFileNameFromProps({
   agentName,
   telemetrySdkName,
   telemetrySdkLanguage,
-}: DashboardFileProps) {
-  const dashboardFile =
-    agentName && getDashboardFileName({ agentName, telemetrySdkName, telemetrySdkLanguage });
-  return dashboardFile;
+  runtimeVersion,
+}: DashboardFileProps): DashboardFileName | undefined {
+  if (!agentName) {
+    return undefined;
+  }
+
+  return getDashboardFileName({
+    agentName,
+    telemetrySdkName,
+    telemetrySdkLanguage,
+    runtimeVersion,
+  });
 }
 
 export function hasDashboard(props: DashboardFileProps) {
-  const dashboardFilename = getDashboardFileNameFromProps(props);
-  return !!dashboardFilename && existingDashboardFileNames.has(dashboardFilename);
+  return !!getDashboardFileNameFromProps(props);
 }
 
 const getAdhocDataView = (dataView: DataView) => {
@@ -44,16 +57,52 @@ const getAdhocDataView = (dataView: DataView) => {
   };
 };
 
-export async function convertSavedDashboardToPanels(
-  props: MetricsDashboardProps,
+export function getMetricIndexPattern(
+  dashboardFilename: DashboardFileName,
+  apmIndices: APMIndices | undefined,
   dataView: DataView
-): Promise<DashboardState['panels'] | undefined> {
-  const dashboardFilename = getDashboardFileNameFromProps(props);
-  const dashboardJSON = !!dashboardFilename ? await loadDashboardFile(dashboardFilename) : false;
+): string {
+  const fullPattern = apmIndices?.metric ?? dataView.getIndexPattern();
+  const patterns = fullPattern.split(',').map((p) => p.trim());
 
-  if (!dashboardFilename || !dashboardJSON) {
+  if (dashboardFilename.startsWith('otel_native-')) {
+    const otelPatterns = patterns.filter((p) => p.includes('.otel-'));
+    if (otelPatterns.length > 0) {
+      return otelPatterns.join(',');
+    }
+  }
+
+  if (dashboardFilename.startsWith('classic_apm-')) {
+    const classicPatterns = patterns.filter((p) => !p.includes('.otel-'));
+    if (classicPatterns.length > 0) {
+      return classicPatterns.join(',');
+    }
+  }
+
+  return fullPattern;
+}
+
+export async function convertSavedDashboardToPanels(
+  props: MetricsDashboardProps
+): Promise<DashboardState['panels'] | undefined> {
+  const { dataView, apmIndices } = props;
+  const dashboardFilename = getDashboardFileNameFromProps(props);
+  const unreplacedDashboardJSON = dashboardFilename
+    ? await loadDashboardFile(dashboardFilename)
+    : false;
+
+  if (!dashboardFilename || !unreplacedDashboardJSON) {
     return undefined;
   }
+
+  // Convert the Dashboard into a string
+  const dashboardString = JSON.stringify(unreplacedDashboardJSON);
+  // Replace indexPattern placeholder
+  const dashboardStringWithReplacements = Mustache.render(dashboardString, {
+    indexPattern: getMetricIndexPattern(dashboardFilename, apmIndices, dataView),
+  });
+  // Convert to JSON object
+  const dashboardJSON = JSON.parse(dashboardStringWithReplacements);
 
   const panelsRawObjects = JSON.parse(dashboardJSON.attributes.panelsJSON) as any[];
 
@@ -65,9 +114,9 @@ export async function convertSavedDashboardToPanels(
 
     acc.push({
       type: panel.type,
-      gridData,
-      panelIndex,
-      panelConfig: {
+      grid: gridData,
+      uid: panelIndex,
+      config: {
         id: panelIndex,
         ...embeddableConfig,
         title,

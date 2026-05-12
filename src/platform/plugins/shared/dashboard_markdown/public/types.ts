@@ -12,23 +12,19 @@ import type {
   HasEditCapabilities,
   CanOverrideHoverActions,
   PublishesUnsavedChanges,
-  SerializedTitles,
+  HasLibraryTransforms,
+  HasType,
 } from '@kbn/presentation-publishing';
+import type {
+  MarkdownByReferenceState,
+  MarkdownByValueState,
+  MarkdownEmbeddableState,
+} from '../server';
+import type { MARKDOWN_EMBEDDABLE_TYPE } from '../common/constants';
 
-/**
- * The markdown editor's own state. Every embeddable type should separate out its own self-managed state, from state
- * supplied by other common managers.
- */
-export interface MarkdownEditorState {
-  content: string;
-}
-
-/**
- * Markdown serialized state includes all state that the parent should provide to this embeddable.
- */
-export type MarkdownEditorSerializedState = SerializedTitles & MarkdownEditorState;
-
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState> &
+export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
+  DefaultEmbeddableApi<MarkdownEmbeddableState> &
   PublishesUnsavedChanges &
   HasEditCapabilities &
-  CanOverrideHoverActions;
+  CanOverrideHoverActions &
+  HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState>;

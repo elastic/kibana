@@ -19,6 +19,7 @@ import type {
   RegistryVarsEntry,
   RegistryRequiredVars,
   NewPackagePolicyInputStream,
+  RegistryVarGroup,
 } from '../types';
 
 import { DATASET_VAR_NAME } from '../constants';
@@ -28,6 +29,8 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getInputEffectiveName,
+  buildInputKey,
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset } from './is_valid_namespace';
@@ -196,6 +199,75 @@ const validatePackageRequiredVars = (
   return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
 };
 
+/**
+ * Get all variable names that are controlled by any var_group.
+ */
+const getVarsControlledByVarGroups = (varGroups: RegistryVarGroup[]): Set<string> => {
+  return new Set(varGroups.flatMap((group) => group.options.flatMap((option) => option.vars)));
+};
+
+/**
+ * Determines if a variable should be validated based on var_group selections.
+ * Returns false if the var is controlled by a var_group but not in the selected option.
+ */
+const shouldValidateVar = (
+  varName: string,
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: Record<string, string> | undefined
+): boolean => {
+  if (!varGroups || varGroups.length === 0) {
+    return true; // No var_groups, validate all vars
+  }
+
+  const controlledVars = getVarsControlledByVarGroups(varGroups);
+
+  // If this var is not controlled by any var_group, always validate it
+  if (!controlledVars.has(varName)) {
+    return true;
+  }
+
+  // Check if this var is in the selected option for any var_group
+  for (const group of varGroups) {
+    const selectedOptionName = varGroupSelections?.[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption?.vars.includes(varName)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * Determines if a variable should be treated as required based on var_group settings.
+ * When var_group.required is true, all vars in the selected option are required.
+ */
+const isVarRequiredByVarGroup = (
+  varName: string,
+  varGroups: RegistryVarGroup[] | undefined,
+  varGroupSelections: Record<string, string> | undefined
+): boolean => {
+  if (!varGroups || varGroups.length === 0) {
+    return false;
+  }
+
+  for (const group of varGroups) {
+    if (!group.required) continue;
+
+    const selectedOptionName = varGroupSelections?.[group.name];
+    if (!selectedOptionName) continue;
+
+    const selectedOption = group.options.find((opt) => opt.name === selectedOptionName);
+    if (selectedOption?.vars.includes(varName)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
   /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
 
@@ -258,14 +330,31 @@ export const validatePackagePolicy = (
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
   const packageVars = Object.entries(packagePolicy.vars || {});
+  const packageVarGroups = packageInfo.var_groups;
+  const packageVarGroupSelections = packagePolicy.var_group_selections;
 
   if (packageVars.length) {
     validationResults.vars = packageVars.reduce((results, [name, varEntry]) => {
+      // Skip validation for vars that are controlled by var_groups but not currently visible
+      if (!shouldValidateVar(name, packageVarGroups, packageVarGroupSelections)) {
+        results[name] = null;
+        return results;
+      }
+
+      // Check if var is required due to var_group.required
+      const requiredByVarGroup = isVarRequiredByVarGroup(
+        name,
+        packageVarGroups,
+        packageVarGroupSelections
+      );
+
       results[name] = validatePackagePolicyConfig(
         varEntry,
         packageVarsByName[name],
         name,
-        safeLoadYaml
+        safeLoadYaml,
+        undefined,
+        requiredByVarGroup
       );
       return results;
     }, {} as ValidationEntry);
@@ -282,7 +371,11 @@ export const validatePackagePolicy = (
   >((varDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const varDefKey = hasIntegrations ? `${policyTemplate.name}-${input.type}` : input.type;
+      const varDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         varDefs[varDefKey] = keyBy(input.vars || [], 'name');
@@ -295,9 +388,11 @@ export const validatePackagePolicy = (
   >((reqVarDefs, policyTemplate) => {
     const inputs = getNormalizedInputs(policyTemplate);
     inputs.forEach((input) => {
-      const requiredVarDefKey = hasIntegrations
-        ? `${policyTemplate.name}-${input.type}`
-        : input.type;
+      const requiredVarDefKey = buildInputKey(
+        getInputEffectiveName(input),
+        policyTemplate.name,
+        hasIntegrations
+      );
 
       if ((input.vars || []).length) {
         reqVarDefs[requiredVarDefKey] = input.required_vars;
@@ -330,12 +425,24 @@ export const validatePackagePolicy = (
     return reqVarDefs;
   }, {});
 
+  // Build cache for stream-level var_groups
+  const streamVarGroupsByDatasetAndInput = Object.entries(streamsByDatasetAndInput).reduce<
+    Record<string, RegistryVarGroup[] | undefined>
+  >((varGroupDefs, [path, stream]) => {
+    varGroupDefs[path] = stream.var_groups;
+    return varGroupDefs;
+  }, {});
+
   // Validate each package policy input with either its own var fields and stream vars
   packagePolicy.inputs.forEach((input) => {
     if (!input.vars && !input.streams) {
       return;
     }
-    const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
+    const inputKey = buildInputKey(
+      getInputEffectiveName(input),
+      input.policy_template,
+      hasIntegrations
+    );
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       required_vars: undefined,
@@ -374,12 +481,28 @@ export const validatePackagePolicy = (
     if (input.streams.length) {
       input.streams.forEach((stream) => {
         const streamValidationResults: PackagePolicyConfigValidationResults = {};
+        const streamKey = `${stream.data_stream.dataset}-${getInputEffectiveName(input)}`;
 
-        const streamVarDefs =
-          streamVarDefsByDatasetAndInput[`${stream.data_stream.dataset}-${input.type}`];
+        const streamVarDefs = streamVarDefsByDatasetAndInput[streamKey];
+        const streamVarGroups = streamVarGroupsByDatasetAndInput[streamKey];
+        const streamVarGroupSelections = stream.var_group_selections;
+
         if (streamVarDefs && Object.keys(streamVarDefs).length) {
           streamValidationResults.vars = Object.keys(streamVarDefs).reduce((results, name) => {
             const configEntry = stream?.vars?.[name];
+
+            // Skip validation for vars not visible due to var_group selections
+            if (!shouldValidateVar(name, streamVarGroups, streamVarGroupSelections)) {
+              results[name] = null;
+              return results;
+            }
+
+            // Check if var is required due to var_group.required
+            const requiredByVarGroup = isVarRequiredByVarGroup(
+              name,
+              streamVarGroups,
+              streamVarGroupSelections
+            );
 
             results[name] =
               input.enabled && stream.enabled
@@ -388,7 +511,8 @@ export const validatePackagePolicy = (
                     streamVarDefs[name],
                     name,
                     safeLoadYaml,
-                    packageInfo.type
+                    packageInfo.type,
+                    requiredByVarGroup
                   )
                 : null;
 
@@ -399,7 +523,7 @@ export const validatePackagePolicy = (
         if (stream.vars && stream.enabled) {
           const requiredVars = validatePackageRequiredVars(
             stream,
-            streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
+            streamRequiredVarsDefsByDataAndInput[streamKey]
           );
           if (requiredVars) {
             streamValidationResults.required_vars = requiredVars;
@@ -429,7 +553,8 @@ export const validatePackagePolicyConfig = (
   varDef: RegistryVarsEntry,
   varName: string,
   safeLoadYaml: (yaml: string) => any,
-  packageType?: string
+  packageType?: string,
+  isRequiredByVarGroup?: boolean
 ): string[] | null => {
   const errors: string[] = [];
 
@@ -449,7 +574,10 @@ export const validatePackagePolicyConfig = (
     return null;
   }
 
-  if (varDef.required) {
+  // Check if var is required - either by varDef.required or by var_group.required
+  const isRequired = varDef.required || isRequiredByVarGroup;
+
+  if (isRequired) {
     if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
@@ -504,7 +632,9 @@ export const validatePackagePolicyConfig = (
 
   if (varDef.type === 'yaml') {
     try {
-      parsedValue = safeLoadYaml(value);
+      // Coerce to string before parsing to match the behavior of js-yaml.load,
+      // which internally calls String(input). The yaml package requires a string.
+      parsedValue = safeLoadYaml(String(value));
     } catch (e) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {
@@ -526,7 +656,7 @@ export const validatePackagePolicyConfig = (
       );
       return errors;
     }
-    if (varDef.required && Array.isArray(parsedValue)) {
+    if (isRequired && Array.isArray(parsedValue)) {
       const hasEmptyString =
         varDef.type === 'text' &&
         parsedValue.some((item) => typeof item === 'string' && item.trim() === '');

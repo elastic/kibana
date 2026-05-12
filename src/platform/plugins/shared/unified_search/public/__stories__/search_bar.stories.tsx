@@ -567,6 +567,7 @@ export const WithPrependedControls = {
       prependFilterBar: (
         <EuiComboBox
           placeholder="Select option"
+          aria-label="Select option"
           options={[
             {
               label: 'Filter 1',

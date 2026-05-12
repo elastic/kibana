@@ -23,8 +23,23 @@ export class ExportPageObject extends FtrService {
     await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
   }
 
-  async clickExportTopNavButton() {
-    return this.testSubjects.click('exportTopNavButton');
+  async clickExportTopNavButton(): Promise<boolean> {
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      await this.testSubjects.click('exportTopNavButton');
+      return true;
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      if (await this.testSubjects.exists('exportTopNavButton')) {
+        await this.testSubjects.click('exportTopNavButton');
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async isExportPopoverOpen() {
@@ -41,7 +56,7 @@ export class ExportPageObject extends FtrService {
 
   async clickPopoverItem(
     label: string,
-    exportPopoverOpener: () => Promise<void> = this.clickExportTopNavButton.bind(this)
+    exportPopoverOpener: () => Promise<boolean> = this.clickExportTopNavButton.bind(this)
   ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
@@ -64,16 +79,18 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    await this.retry.waitFor('close export flyout', async () => {
-      const isExportFlyoutOpen = await this.isExportFlyoutOpen();
+    const closeButtonSubj = 'exportFlyoutCloseButton';
+    await this.retry.waitFor('flyout to close', async () => {
+      const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
 
       if (!isExportFlyoutOpen) {
         return true; // It was already closed
-      } else {
-        await this.testSubjects.click('exportFlyoutCloseButton');
-        // Wait for the flyout to actually close
-        return !(await this.isExportFlyoutOpen());
       }
+
+      // Use clickWhenNotDisabledWithoutRetry to avoid the internal retry mechanism
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(closeButtonSubj);
+      await this.testSubjects.waitForDeleted(closeButtonSubj);
+      return true;
     });
   }
 

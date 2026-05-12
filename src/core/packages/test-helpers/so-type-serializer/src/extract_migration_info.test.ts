@@ -193,8 +193,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
+          modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -202,8 +204,10 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
+          modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
           newMappings: ['foo.type'],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -242,8 +246,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill'],
           hasTransformation: true,
+          modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -251,8 +257,10 @@ describe('extractMigrationInfo', () => {
           version: '2',
           changeTypes: ['mappings_addition'],
           hasTransformation: false,
+          modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
           newMappings: ['foo.type'],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -291,8 +299,10 @@ describe('extractMigrationInfo', () => {
           version: '1',
           changeTypes: ['data_backfill', 'data_removal', 'unsafe_transform'],
           hasTransformation: true,
+          modelVersionHash: '9cd0fcc20655480bc520446b62b677f8af0c07eff6853553892be53fafc4a696',
           newMappings: [],
           schemas: {
+            create: false,
             forwardCompatibility: false,
           },
         },
@@ -309,12 +319,14 @@ describe('extractMigrationInfo', () => {
     });
 
     it('returns the correct values for schemas', () => {
+      const typeSchemaV1 = schema.object({ title: schema.string() });
       const type = createType({
         modelVersions: {
           1: {
             changes: [],
             schemas: {
               forwardCompatibility: jest.fn(),
+              create: typeSchemaV1,
             },
           },
           2: {
@@ -325,12 +337,70 @@ describe('extractMigrationInfo', () => {
       });
       const output = extractMigrationInfo(type);
 
-      expect(output.modelVersions[0].schemas).toEqual({
-        forwardCompatibility: true,
-      });
+      const { forwardCompatibility, create } = output.modelVersions[0].schemas;
+      expect(typeof forwardCompatibility).toBe('string');
+      expect(typeof create).toBe('string');
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
+        create: false,
       });
+    });
+
+    it('returns the same hash for two structurally identical config-schema objects', () => {
+      const makeType = () =>
+        createType({
+          modelVersions: {
+            1: {
+              changes: [],
+              schemas: {
+                create: schema.object({ title: schema.string() }),
+              },
+            },
+          },
+        });
+
+      const hashA = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      const hashB = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      expect(hashA).toEqual(hashB);
+    });
+
+    it('returns different hashes for structurally different config-schema objects', () => {
+      const typeWithTitle = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ title: schema.string() }) } },
+        },
+      });
+      const typeWithBody = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ body: schema.string() }) } },
+        },
+      });
+
+      const hashWithTitle = extractMigrationInfo(typeWithTitle).modelVersions[0].schemas.create;
+      const hashWithBody = extractMigrationInfo(typeWithBody).modelVersions[0].schemas.create;
+      expect(hashWithTitle).not.toEqual(hashWithBody);
+    });
+
+    it('returns different hashes when a custom validator is added to a config-schema object', () => {
+      const withoutValidator = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ interval: schema.string() }) } },
+        },
+      });
+      const withValidator = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              create: schema.object({ interval: schema.string({ validate: () => undefined }) }),
+            },
+          },
+        },
+      });
+
+      const hashWithout = extractMigrationInfo(withoutValidator).modelVersions[0].schemas.create;
+      const hashWith = extractMigrationInfo(withValidator).modelVersions[0].schemas.create;
+      expect(hashWithout).not.toEqual(hashWith);
     });
   });
 
@@ -376,8 +446,10 @@ describe('extractMigrationInfo', () => {
               version: '1',
               changeTypes: ['data_backfill'],
               hasTransformation: true,
+              modelVersionHash: '9d8366ac2d6d4c1e178eda7efbb59c09d466eb5f7691ac030adafbce4db8da9f',
               newMappings: [],
               schemas: {
+                create: false,
                 forwardCompatibility: false,
               },
             },
@@ -385,8 +457,10 @@ describe('extractMigrationInfo', () => {
               version: '2',
               changeTypes: ['mappings_addition'],
               hasTransformation: false,
+              modelVersionHash: '50f6452c115c1de4e15985fbbabf98a8c3bd04def73a5cb3c4850c25172e8061',
               newMappings: ['foo.type'],
               schemas: {
+                create: false,
                 forwardCompatibility: false,
               },
             },

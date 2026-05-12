@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   arrayOfStringsSchema,
   keyMetricSchema,
@@ -62,6 +62,7 @@ export const entityDefinitionSchema = z.object({
           z.literal('transform'),
           z.literal('ingest_pipeline'),
           z.literal('template'),
+          z.literal('ilm_policy'),
         ]),
         id: z.string(),
       })

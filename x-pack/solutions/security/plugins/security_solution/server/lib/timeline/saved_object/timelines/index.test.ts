@@ -11,6 +11,7 @@ import { mockTimeline } from '../../__mocks__/create_timelines';
 
 import {
   convertStringToBase64,
+  deleteTimeline,
   getExistingPrepackagedTimelines,
   getAllTimeline,
   getDraftTimeline,
@@ -19,8 +20,13 @@ import {
   copyTimeline,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
-import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
+import { deleteSearchByTimelineId } from '../saved_search';
+import { deleteNotesByTimelineId, getNotesByTimelineId, persistNote } from '../notes/saved_object';
+import {
+  deleteAllPinnedEventsOnTimeline,
+  getAllPinnedEventsByTimelineId,
+  persistPinnedEventOnTimeline,
+} from '../pinned_events';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import type {
   GetTimelinesResponse,
@@ -41,13 +47,19 @@ jest.mock('./convert_saved_object_to_savedtimeline', () => ({
 }));
 
 jest.mock('../notes/saved_object', () => ({
+  deleteNotesByTimelineId: jest.fn().mockResolvedValue(undefined),
   getNotesByTimelineId: jest.fn().mockResolvedValue([]),
   persistNote: jest.fn(),
 }));
 
 jest.mock('../pinned_events', () => ({
+  deleteAllPinnedEventsOnTimeline: jest.fn().mockResolvedValue(undefined),
   getAllPinnedEventsByTimelineId: jest.fn().mockResolvedValue([]),
   persistPinnedEventOnTimeline: jest.fn(),
+}));
+
+jest.mock('../saved_search', () => ({
+  deleteSearchByTimelineId: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('saved_object', () => {
@@ -555,6 +567,66 @@ describe('saved_object', () => {
       );
 
       expect(res.timeline.savedObjectId).toBe(mockResolvedTimeline.savedObjectId);
+    });
+  });
+
+  describe('deleteTimeline', () => {
+    let mockDeleteSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      mockRequest = {
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                delete: mockDeleteSavedObject,
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    it('deduplicates timeline ids before deleting', async () => {
+      const duplicatedTimelineIds = ['timeline-1', 'timeline-1', 'timeline-2'];
+
+      await deleteTimeline(mockRequest, duplicatedTimelineIds, ['search-1']);
+
+      expect(mockDeleteSavedObject).toHaveBeenCalledTimes(2);
+      expect(mockDeleteSavedObject).toHaveBeenNthCalledWith(1, 'siem-ui-timeline', 'timeline-1');
+      expect(mockDeleteSavedObject).toHaveBeenNthCalledWith(2, 'siem-ui-timeline', 'timeline-2');
+      expect(deleteNotesByTimelineId).toHaveBeenCalledTimes(2);
+      expect(deleteAllPinnedEventsOnTimeline).toHaveBeenCalledTimes(2);
+      expect(deleteSearchByTimelineId).toHaveBeenCalledWith(mockRequest, ['search-1']);
+    });
+
+    it('processes timeline deletes in bounded batches', async () => {
+      const pendingDeletes: Array<() => void> = [];
+      const startedDeleteCalls: string[] = [];
+      mockDeleteSavedObject.mockImplementation(
+        (_type: string, id: string) =>
+          new Promise((resolve) => {
+            startedDeleteCalls.push(id);
+            pendingDeletes.push(() => resolve(undefined));
+          })
+      );
+      const timelineIds = Array.from({ length: 11 }, (_, index) => `timeline-${index}`);
+
+      const deletePromise = deleteTimeline(mockRequest, timelineIds);
+      await Promise.resolve();
+
+      expect(startedDeleteCalls).toHaveLength(10);
+
+      pendingDeletes.splice(0, 10).forEach((resolveDelete) => resolveDelete());
+      await new Promise(process.nextTick);
+
+      expect(startedDeleteCalls).toHaveLength(11);
+
+      pendingDeletes.forEach((resolveDelete) => resolveDelete());
+      await deletePromise;
     });
   });
 });

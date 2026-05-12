@@ -5,27 +5,55 @@
  * 2.0.
  */
 
-import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
-import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  Streams,
+  getParentId,
+  isRoot,
+  getRoot,
+  LOGS_ROOT_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  LOGS_ECS_STREAM_NAME,
+} from '@kbn/streams-schema';
+import type {
+  IngestPutPipelineRequest,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { transpileIngestPipeline } from '@kbn/streamlang';
+import { createStreamlangResolverOptions } from '../resolvers';
 import { ASSET_VERSION } from '../../../../common/constants';
-import { getLogsDefaultPipelineProcessors } from './logs_default_pipeline';
+import {
+  getLogsOtelPipelineProcessors,
+  getLogsEcsPipelineProcessors,
+} from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 
-export function generateIngestPipeline(
+export async function generateIngestPipeline(
   name: string,
   definition: Streams.all.Definition,
-  {
-    isServerless,
-  }: {
-    isServerless: boolean;
-  }
-): IngestPutPipelineRequest {
+  esClient: ElasticsearchClient
+): Promise<IngestPutPipelineRequest> {
   const isWiredStream = Streams.WiredStream.Definition.is(definition);
+  const rootStream = getRoot(definition.name);
+
+  // Determine which processors to use based on root stream
+  let rootProcessors: IngestProcessorContainer[] = [];
+  if (isRoot(definition.name)) {
+    switch (rootStream) {
+      case LOGS_ECS_STREAM_NAME:
+        rootProcessors = getLogsEcsPipelineProcessors();
+        break;
+      case LOGS_OTEL_STREAM_NAME:
+      case LOGS_ROOT_STREAM_NAME:
+        rootProcessors = getLogsOtelPipelineProcessors();
+        break;
+    }
+  }
+
   return {
     id: getProcessingPipelineName(name),
     processors: [
-      ...(isRoot(definition.name) ? getLogsDefaultPipelineProcessors(isServerless) : []),
+      ...rootProcessors,
       ...(!isRoot(definition.name) && isWiredStream
         ? [
             {
@@ -52,7 +80,15 @@ export function generateIngestPipeline(
           },
         },
       },
-      ...(isWiredStream ? transpileIngestPipeline(definition.ingest.processing).processors : []),
+      ...(isWiredStream
+        ? (
+            await transpileIngestPipeline(
+              definition.ingest.processing,
+              undefined,
+              createStreamlangResolverOptions(esClient)
+            )
+          ).processors
+        : []),
       {
         pipeline: {
           name: `${name}@stream.reroutes`,
@@ -60,6 +96,12 @@ export function generateIngestPipeline(
         },
       },
     ],
+    // root doesn't need flexible access pattern because it can't contain custom processing and default special case processing doesn't work properly with it
+    ...(!isRoot(definition.name)
+      ? {
+          field_access_pattern: 'flexible',
+        }
+      : {}),
     _meta: {
       description: `Default pipeline for the ${name} stream`,
       managed: true,
@@ -68,14 +110,22 @@ export function generateIngestPipeline(
   };
 }
 
-export function generateClassicIngestPipelineBody(definition: Streams.ingest.all.Definition) {
-  const transpiledIngestPipeline = transpileIngestPipeline(definition.ingest.processing);
+export async function generateClassicIngestPipelineBody(
+  definition: Streams.ingest.all.Definition,
+  esClient: ElasticsearchClient
+): Promise<Partial<IngestPutPipelineRequest>> {
+  const transpiledIngestPipeline = await transpileIngestPipeline(
+    definition.ingest.processing,
+    undefined,
+    createStreamlangResolverOptions(esClient)
+  );
   return {
     processors: transpiledIngestPipeline.processors,
     _meta: {
       description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,
     },
+    field_access_pattern: 'flexible',
     version: ASSET_VERSION,
   };
 }

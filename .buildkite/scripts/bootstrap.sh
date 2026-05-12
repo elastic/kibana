@@ -23,10 +23,14 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
-  if [[ -d ~/.kibana-moon-cache ]]; then
-    echo "Using ~/.moon/cache as a starting point"
-    mkdir -p ./.moon/cache
-    mv ~/.kibana-moon-cache ./.moon/cache
+  # Check if there's a cache artifact uploaded from a previous step
+  if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
+    if (buildkite-agent artifact download --step "store_cache" "moon-cache.tar.zst" ~/); then
+      echo "Found moon-cache.tar.zst artifact, extracting to ./.moon/cache"
+      mkdir -p ./.moon/cache
+      echo "Extracting moon-cache.tar.zst to ./.moon/cache"
+      tar -xf ~/moon-cache.tar.zst -I zstd -C ./
+    fi
   fi
 fi
 
@@ -39,7 +43,6 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
-  export MOON_LOG=debug
   echo "--- yarn install and bootstrap, attempt 2"
   yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi

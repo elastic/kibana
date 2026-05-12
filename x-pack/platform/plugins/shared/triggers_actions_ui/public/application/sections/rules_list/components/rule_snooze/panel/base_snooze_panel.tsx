@@ -241,7 +241,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                             {scheduleSummary(schedule as SnoozeSchedule)}
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="arrowRight" />
+                            <EuiIcon type="chevronSingleRight" />
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiButton>
@@ -254,7 +254,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                 <EuiButtonEmpty
                   isDisabled={numberOfSchedules >= 5}
                   data-test-subj="ruleSchedulesListAddButton"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   onClick={onClickAddSchedule}
                 >
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.addButton', {
@@ -495,6 +495,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             iconType="info"
             size="s"
             title={i18n.translate(

@@ -12,7 +12,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -20,12 +20,6 @@ import privilegedUserMonitoringPageImg from '../common/images/privileged_user_mo
 import eaOverviewPageImg from '../common/images/ea_overview_page.png';
 
 const privMonLinks: LinkItem = {
-  isBeta: true,
-  betaOptions: {
-    text: i18n.translate('xpack.securitySolution.navigation.privilegedUserMonitoring.betaStatus', {
-      defaultMessage: 'TECHNICAL PREVIEW',
-    }),
-  },
   id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
   title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
   description: i18n.translate(
@@ -42,12 +36,11 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
-  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityAnalyticsEntityStoreV2',
 };
 
 const eaOverviewLinks: LinkItem = {
@@ -73,6 +66,32 @@ const eaOverviewLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityAnalyticsNewHomePageEnabled',
+};
+
+const homePageLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHomePage,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage', {
+    defaultMessage: 'Entity Analytics',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.homePage.description',
+    {
+      defaultMessage:
+        'Entity analytics interface for analyzing entity risk scores, anomalies, and investigating potential security threats across users, hosts, and services.',
+    }
+  ),
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage.keywords', {
+      defaultMessage: 'entity analytics',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+  experimentalKey: 'entityAnalyticsNewHomePageEnabled',
 };
 
 export const entityAnalyticsLinks: LinkItem = {
@@ -85,11 +104,25 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks],
+  links: [eaOverviewLinks, privMonLinks, homePageLinks],
   hideTimeline: true,
   skipUrlState: true,
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
-  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+};
+
+export const entityAnalyticsV2Links: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHomePage,
+  title: ENTITY_ANALYTICS,
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  globalNavPosition: 7,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
+      defaultMessage: 'Entity analytics',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

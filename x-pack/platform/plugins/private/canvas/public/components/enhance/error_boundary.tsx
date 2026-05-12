@@ -8,7 +8,6 @@
 import type { ErrorInfo, FC, ReactElement } from 'react';
 import React from 'react';
 import { withState, withHandlers, lifecycle, mapProps, compose } from 'react-recompose';
-import PropTypes from 'prop-types';
 import { omit } from 'lodash';
 
 interface Props {
@@ -26,13 +25,6 @@ type ChildrenProps = Omit<ComponentProps, 'children'>;
 const ErrorBoundaryComponent: FC<ComponentProps> = (props) => {
   const { children, ...rest } = props;
   return <>{children(rest)}</>;
-};
-
-ErrorBoundaryComponent.propTypes = {
-  children: PropTypes.func.isRequired,
-  error: PropTypes.object,
-  errorInfo: PropTypes.object,
-  resetErrorState: PropTypes.func.isRequired,
 };
 
 export const errorBoundaryHoc = compose<ComponentProps, Pick<ComponentProps, 'children'>>(

@@ -10,16 +10,33 @@
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import {
+  UserProfilesKibanaProvider,
   UserProfilesProvider,
   useUserProfilesServices,
 } from '@kbn/content-management-user-profiles';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@kbn/react-query';
+
+/**
+ * Create a React Query client for a single content-editor provider instance.
+ *
+ * Called inside a `useMemo` so each mounted {@link ContentEditorKibanaProvider}
+ * gets its own client that can be garbage-collected on unmount, avoiding
+ * unbounded cache growth when multiple instances are mounted across the app.
+ */
+const createContentEditorQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -45,9 +62,9 @@ export interface Theme {
  * Abstract external services for this component.
  */
 export interface Services {
-  openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  openSystemFlyout(node: ReactNode, options?: OverlaySystemFlyoutOpenOptions): OverlayRef;
   notifyError: NotifyFn;
-  TagList?: FC<{ references: SavedObjectsReference[] }>;
+  TagList?: FC<{ tagIds: string[] }>;
   TagSelector?: React.FC<TagSelectorProps>;
 }
 
@@ -80,7 +97,10 @@ export interface ContentEditorKibanaDependencies {
   /** CoreStart contract */
   core: ContentEditorStartServices & {
     overlays: {
-      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+      openSystemFlyout(
+        content: React.ReactElement,
+        options?: OverlaySystemFlyoutOpenOptions
+      ): OverlayRef;
     };
     notifications: {
       toasts: {
@@ -121,20 +141,61 @@ export interface ContentEditorKibanaDependencies {
 
 /**
  * Kibana-specific Provider that maps to known dependency types.
+ *
+ * Self-provides every external context the editor needs so consumers can drop
+ * it into any provider tree without thinking about ancestry:
+ *
+ * - {@link QueryClientProvider} — the inner body uses `useQueryClient()` to
+ *   forward the client into the system flyout it opens, so user-profile
+ *   queries inside the flyout work without an outer `QueryClientProvider`.
+ * - {@link UserProfilesKibanaProvider} — the inner body reads profile services
+ *   via `useUserProfilesServices()` for the same forwarding reason.
+ *
+ * When this provider is itself rendered under another `QueryClientProvider`
+ * or `UserProfilesProvider` (e.g. legacy `TableListViewKibanaProvider`), the
+ * inner providers shadow the outer with semantically equivalent values derived
+ * from the same `core` services, so nesting is harmless.
  */
 export const ContentEditorKibanaProvider: FC<
   PropsWithChildren<ContentEditorKibanaDependencies>
 > = ({ children, ...services }) => {
+  // Create a per-instance QueryClient so the cache is released when this
+  // provider unmounts, preventing unbounded memory growth across multiple
+  // mounted ContentEditorKibanaProvider trees.
+  const queryClient = useMemo(() => createContentEditorQueryClient(), []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <UserProfilesKibanaProvider core={services.core}>
+        <ContentEditorKibanaProviderInner {...services}>
+          {children}
+        </ContentEditorKibanaProviderInner>
+      </UserProfilesKibanaProvider>
+    </QueryClientProvider>
+  );
+};
+
+/**
+ * Inner body of {@link ContentEditorKibanaProvider}.
+ *
+ * Split from the public provider so `useUserProfilesServices()` reads from
+ * the {@link UserProfilesKibanaProvider} rendered by the outer wrapper.
+ */
+const ContentEditorKibanaProviderInner: FC<PropsWithChildren<ContentEditorKibanaDependencies>> = ({
+  children,
+  ...services
+}) => {
   const { core, savedObjectsTagging } = services;
   const { overlays, notifications, rendering } = core;
-  const { openFlyout: coreOpenFlyout } = overlays;
+  const { openSystemFlyout: coreOpenFlyout } = overlays;
 
   const TagList = useMemo(() => {
-    const Comp: Services['TagList'] = ({ references }) => {
+    const Comp: Services['TagList'] = ({ tagIds }) => {
       if (!savedObjectsTagging?.ui.components.TagList) {
         return null;
       }
       const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      const references = tagIds.map((id) => ({ type: 'tag', id, name: `tag-${id}` }));
       return <PluginTagList object={{ references }} />;
     };
 
@@ -144,24 +205,21 @@ export const ContentEditorKibanaProvider: FC<
   const userProfilesServices = useUserProfilesServices();
   const queryClient = useQueryClient();
 
-  const openFlyout = useCallback(
-    (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
+  const openSystemFlyout = useCallback(
+    (node: ReactNode, options: OverlaySystemFlyoutOpenOptions) => {
       return coreOpenFlyout(
-        toMountPoint(
-          <QueryClientProvider client={queryClient}>
-            <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
-          </QueryClientProvider>,
-          rendering
-        ),
+        <QueryClientProvider client={queryClient}>
+          <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>
+        </QueryClientProvider>,
         options
       );
     },
-    [coreOpenFlyout, rendering, userProfilesServices, queryClient]
+    [coreOpenFlyout, userProfilesServices, queryClient]
   );
 
   return (
     <ContentEditorProvider
-      openFlyout={openFlyout}
+      openSystemFlyout={openSystemFlyout}
       notifyError={(title, text) => {
         notifications.toasts.addDanger({ title: toMountPoint(title, rendering), text });
       }}

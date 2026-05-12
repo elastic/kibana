@@ -6,24 +6,27 @@
  */
 
 import { Readable } from 'stream';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
 import { omit } from 'lodash';
-import type { QueryLink } from '../../../common/assets';
+import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import type { QueryLink } from '../../../common/queries';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
+import { exportContentRequest } from '../../oas_examples';
 import {
   prepareStreamsForExport,
   prepareStreamsForImport,
   scopeContentPackStreams,
   scopeIncludedObjects,
+  withoutBaseFields,
+  withoutInheritedFieldMetadata,
 } from '../../lib/content/stream';
-import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 import { asTree } from '../../lib/content/stream/tree';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
@@ -34,10 +37,30 @@ const exportContentRoute = createServerRoute({
     access: 'public',
     summary: 'Export stream content',
     description: 'Exports the content associated to a stream.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {
+              exportContent: { value: exportContentRequest },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content pack archive for the stream.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to export content from.'),
     }),
     body: z.object({
       name: z.string(),
@@ -51,8 +74,10 @@ const exportContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, response, getScopedClients }) {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  async handler({ params, request, response, context, getScopedClients }) {
+    await checkEnabled(context);
+
+    const { getQueryClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -64,10 +89,11 @@ const exportContentRoute = createServerRoute({
       streamsClient.getDescendants(params.path.name),
     ]);
 
-    const queryLinks = await assetClient.getAssetLinks(
-      [params.path.name, ...descendants.map((stream) => stream.name)],
-      ['query']
-    );
+    const queryClient = await getQueryClient();
+    const queryLinks = await queryClient.getStreamToQueryLinksMap([
+      params.path.name,
+      ...descendants.map((stream) => stream.name),
+    ]);
     const inheritedFields = getInheritedFieldsFromAncestors(ancestors);
 
     const exportedTree = asTree({
@@ -76,22 +102,26 @@ const exportContentRoute = createServerRoute({
         root: params.path.name,
         include: params.body.include,
       }),
-      streams: [root, ...descendants].map((stream) =>
-        asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] })
-      ),
+      streams: [root, ...descendants].map((stream) => {
+        if (stream.name === params.path.name) {
+          // merge non-base inherited mappings into the exported root
+          // strip inherited field metadata (from, alias_for) so exports contain clean FieldDefinition
+          stream.ingest.wired.fields = withoutInheritedFieldMetadata(
+            withoutBaseFields({
+              ...inheritedFields,
+              ...stream.ingest.wired.fields,
+            })
+          );
+        }
+
+        return asContentPackEntry({ stream, queryLinks: queryLinks[stream.name] });
+      }),
     });
 
-    const streamObjects = prepareStreamsForExport({
-      tree: exportedTree,
-      inheritedFields: Object.keys(inheritedFields)
-        .filter((field) => !baseFields[field])
-        .reduce((fields, field) => {
-          fields[field] = omit(inheritedFields[field], ['from']);
-          return fields;
-        }, {} as FieldDefinition),
-    });
-
-    const archive = await generateArchive(params.body, streamObjects);
+    const archive = await generateArchive(
+      params.body,
+      prepareStreamsForExport({ tree: exportedTree })
+    );
 
     return response.ok({
       body: archive,
@@ -114,7 +144,13 @@ function asContentPackEntry({
     type: 'stream' as const,
     name: stream.name,
     request: {
-      stream: { ...omit(stream, ['name']) },
+      stream: {
+        ...omit(stream, ['name', 'updated_at']),
+        ingest: {
+          ...stream.ingest,
+          processing: omit(stream.ingest.processing, 'updated_at'),
+        },
+      },
       ...emptyAssets,
       queries: queryLinks.map(({ query }) => query),
     },
@@ -127,15 +163,40 @@ const importContentRoute = createServerRoute({
     access: 'public',
     summary: 'Import content into a stream',
     description: 'Links content objects to a stream.',
+    availability: {
+      since: '9.1.0',
+      stability: 'experimental',
+    },
     body: {
       accepts: 'multipart/form-data',
       maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
+    oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'multipart/form-data': {
+            examples: {
+              importContent: {
+                value: {
+                  include: JSON.stringify({ objects: { all: {} } }),
+                  content: '<binary zip archive>',
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Content was imported into the stream successfully.',
+        },
+      },
+    }),
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z
@@ -149,8 +210,10 @@ const importContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ params, request, getScopedClients }) {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  async handler({ params, request, context, getScopedClients }) {
+    await checkEnabled(context);
+
+    const { getQueryClient, streamsClient } = await getScopedClients({ request });
 
     const root = await streamsClient.getStream(params.path.name);
     if (!Streams.WiredStream.Definition.is(root)) {
@@ -160,10 +223,11 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const descendants = await streamsClient.getDescendants(params.path.name);
-    const queryLinks = await assetClient.getAssetLinks(
-      [params.path.name, ...descendants.map(({ name }) => name)],
-      ['query']
-    );
+    const queryClient = await getQueryClient();
+    const queryLinks = await queryClient.getStreamToQueryLinksMap([
+      params.path.name,
+      ...descendants.map(({ name }) => name),
+    ]);
 
     const existingTree = asTree({
       root: params.path.name,
@@ -218,13 +282,23 @@ const previewContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ request, params, getScopedClients }): Promise<ContentPack> {
+  async handler({ request, params, context, getScopedClients }): Promise<ContentPack> {
+    await checkEnabled(context);
+
     const { streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
     return await parseArchive(params.body.content);
   },
 });
+
+async function checkEnabled(context: RequestHandlerContext) {
+  const core = await context.core;
+  const enabled = await core.uiSettings.client.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS);
+  if (!enabled) {
+    throw new StatusError('Content packs are not enabled', 400);
+  }
+}
 
 export const contentRoutes = {
   ...exportContentRoute,

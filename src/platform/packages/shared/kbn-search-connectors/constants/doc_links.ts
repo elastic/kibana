@@ -17,6 +17,7 @@ class ESDocLinks {
   public connectorsConfluence: string = '';
   public connectorsDropbox: string = '';
   public connectorsGithub: string = '';
+  public connectorsGitlab: string = '';
   public connectorsGmail: string = '';
   public connectorsGoogleCloudStorage: string = '';
   public connectorsGoogleDrive: string = '';
@@ -51,6 +52,7 @@ class ESDocLinks {
     this.connectorsClients = docLinks.enterpriseSearch.connectorsClients;
     this.connectorsDropbox = docLinks.enterpriseSearch.connectorsDropbox;
     this.connectorsGithub = docLinks.enterpriseSearch.connectorsGithub;
+    this.connectorsGitlab = docLinks.enterpriseSearch.connectorsGitlab;
     this.connectorsGoogleCloudStorage = docLinks.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsGoogleDrive = docLinks.enterpriseSearch.connectorsGoogleDrive;
     this.connectorsGmail = docLinks.enterpriseSearch.connectorsGmail;

@@ -229,7 +229,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiButton
               {...reactRouterNavigate(history, linkToAddRepository(currentUrl))}
               color="danger"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="addRepositoryButton"
             >
               <FormattedMessage
@@ -523,6 +523,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             data-test-subj="repositoryNotFoundWarning"
             title={
               <FormattedMessage

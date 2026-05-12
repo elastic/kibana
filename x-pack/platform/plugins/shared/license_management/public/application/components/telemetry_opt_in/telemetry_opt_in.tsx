@@ -15,9 +15,16 @@ import {
   EuiPopover,
   EuiLoadingSpinner,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LazyOptInExampleFlyout } from '@kbn/telemetry-management-section-plugin/public';
 import type { TelemetryPluginStart } from '../../lib/telemetry';
+
+const styles = {
+  licManagementNarrowText: css`
+    width: 240px;
+  `,
+};
 
 interface State {
   showMoreTelemetryInfo: boolean;
@@ -48,7 +55,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
     this.setState({ showExample: true });
     this.closeReadMorePopover();
   };
-  onChangeOptIn = (event: any) => {
+  onChangeOptIn = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isOptingInToTelemetry = event.target.checked;
     const { onOptInChange } = this.props;
     onOptInChange(isOptingInToTelemetry);
@@ -108,7 +115,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
         closePopover={this.closeReadMorePopover}
         className="eui-AlignBaseline"
       >
-        <EuiText className="licManagement__narrowText">
+        <EuiText css={styles.licManagementNarrowText}>
           <p>
             <FormattedMessage
               id="xpack.licenseMgmt.telemetryOptIn.featureUsageWarningMessage"

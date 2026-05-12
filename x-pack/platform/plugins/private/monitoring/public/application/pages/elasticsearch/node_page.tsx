@@ -19,6 +19,7 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useCharts } from '../../hooks/use_charts';
 import { nodesByIndices } from '../../../components/elasticsearch/shard_allocation/transformers/nodes_by_indices';
+import { ensureShardLegendNodes } from '../../../components/elasticsearch/shard_allocation/lib/ensure_shard_legend_nodes';
 // @ts-ignore
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import type { AlertsByName } from '../../../alerts/types';
@@ -97,8 +98,9 @@ export const ElasticsearchNodePage: React.FC<ComponentProps> = ({ clusters }) =>
       });
 
       setData(response);
+      const nodes = ensureShardLegendNodes(response);
       const transformer = nodesByIndices();
-      setNodesByIndicesData(transformer(response.shards, response.nodes));
+      setNodesByIndicesData(transformer(response.shards ?? [], nodes));
       const alertsResponse = await fetchAlerts({
         fetch: services.http.fetch,
         alertTypeIds: [

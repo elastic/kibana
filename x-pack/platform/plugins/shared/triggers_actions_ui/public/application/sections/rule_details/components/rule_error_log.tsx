@@ -289,6 +289,10 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
       )}
       <EuiBasicTable
         data-test-subj="RuleErrorLog"
+        tableCaption={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.ruleErrorLog.tableCaption',
+          { defaultMessage: 'Rule error log' }
+        )}
         loading={isLoading}
         items={logs ?? []}
         columns={columns}

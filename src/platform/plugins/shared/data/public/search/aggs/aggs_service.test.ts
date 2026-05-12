@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Subscription } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
-
 import { coreMock } from '@kbn/core/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { BucketAggType, MetricAggType } from '../../../common';
 import { getAggTypes } from '../../../common';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { dataPluginMock } from '../../mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import type { AggsSetupDependencies, AggsStartDependencies } from './aggs_service';
 import { AggsService, createGetConfig } from './aggs_service';
@@ -37,7 +36,7 @@ describe('AggsService - public', () => {
     };
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
-      indexPatterns: dataPluginMock.createStartContract().indexPatterns,
+      dataViews: dataViewPluginMocks.createStartContract(),
     };
   });
 

@@ -7,25 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import type {
   FormBasedPersistedState,
-  FormulaPublicApi,
-  XYState,
-  XYReferenceLineLayerConfig,
-  XYDataLayerConfig,
   PersistedIndexPatternLayer,
-} from '@kbn/lens-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
-import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+  TextBasedLayerColumn,
+  XYByValueAnnotationLayerConfig,
+  XYDataLayerConfig,
+  XYReferenceLineLayerConfig,
+  XYVisualizationState,
+} from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  mapToFormula,
-} from '../utils';
+import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import type {
   BuildDependencies,
   LensAnnotationLayer,
@@ -38,7 +32,13 @@ import type {
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(config: LensXYConfig): XYState {
+function normalizeBreakdown(
+  breakdown: LensBreakdownConfig | LensBreakdownConfig[] | undefined
+): LensBreakdownConfig[] {
+  return breakdown ? (Array.isArray(breakdown) ? breakdown : [breakdown]) : [];
+}
+
+function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
   return {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,
@@ -48,10 +48,11 @@ function buildVisualizationState(config: LensXYConfig): XYState {
     legend: {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',
+      ...(config.legend?.legendStats ? { legendStats: config.legend.legendStats } : {}),
     },
     hideEndzones: true,
     preferredSeriesType: 'line',
-    valueLabels: 'hide',
+    valueLabels: config.valueLabels ?? 'hide',
     emphasizeFitting: config?.emphasizeFitting ?? true,
     fittingFunction: config?.fittingFunction ?? 'Linear',
     yLeftExtent: {
@@ -123,16 +124,21 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               forAccessor: `${ACCESSOR}${i}_${index}`,
               axisMode: 'left',
               color: yAxis.seriesColor,
+              ...(yAxis.fill ? { fill: yAxis.fill } : {}),
+              ...(yAxis.lineThickness ? { lineWidth: yAxis.lineThickness } : {}),
             })),
-          } as XYReferenceLineLayerConfig;
-        case 'series':
+          } satisfies XYReferenceLineLayerConfig;
+        case 'series': {
+          const layerBreakdown = normalizeBreakdown(layer.breakdown);
           return {
             layerId: `layer_${i}`,
             layerType: 'data',
             xAccessor: `x_${ACCESSOR}${i}`,
-            ...(layer.breakdown
+            ...(layerBreakdown.length > 0
               ? {
-                  splitAccessor: `${ACCESSOR}${i}_breakdown`,
+                  splitAccessors: layerBreakdown.map(
+                    (_, breakdownIndex) => `${ACCESSOR}${i}_breakdown_${breakdownIndex}`
+                  ),
                 }
               : {}),
             accessors: layer.yAxis.map((_, index) => `${ACCESSOR}${i}_${index}`),
@@ -142,39 +148,70 @@ function buildVisualizationState(config: LensXYConfig): XYState {
               color: yAxis.seriesColor,
             })),
           } as XYDataLayerConfig;
+        }
       }
     }),
   };
 }
 
+function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
+  return (
+    yAxis.format &&
+    (yAxis.suffix || yAxis.compactValues || yAxis.decimals || yAxis.fromUnit || yAxis.toUnit)
+  );
+}
+
 function getValueColumns(layer: LensSeriesLayer, i: number) {
-  if (layer.breakdown && typeof layer.breakdown !== 'string') {
+  const layerBreakdown = normalizeBreakdown(layer.breakdown);
+
+  // For ES|QL queries, breakdown must be field names (strings)
+  if (layerBreakdown.some((bd) => typeof bd !== 'string')) {
     throw new Error('`breakdown` must be a field name when not using index source');
   }
+
   return [
-    ...(layer.breakdown
-      ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
-      : []),
-    getXValueColumn(layer.xAxis, i),
-    ...layer.yAxis.map((yAxis, index) =>
-      getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number')
+    ...layerBreakdown.map((bd, breakdownIndex) =>
+      getValueColumn(`${ACCESSOR}${i}_breakdown_${breakdownIndex}`, bd as string)
     ),
+    ...getXValueColumn(layer.xAxis, i),
+    ...layer.yAxis.map((yAxis, index) => {
+      const params = hasFormatParams(yAxis)
+        ? {
+            id: yAxis.format as string,
+            params: {
+              compact: yAxis.compactValues,
+              decimals: yAxis.decimals ?? 0,
+              suffix: yAxis.suffix,
+              fromUnit: yAxis.fromUnit,
+              toUnit: yAxis.toUnit,
+            },
+          }
+        : undefined;
+
+      return getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', params);
+    }),
   ];
 }
 
-function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
+function getXValueColumn(
+  xConfig: LensBreakdownConfig | undefined,
+  index: number
+): TextBasedLayerColumn[] {
+  if (!xConfig) {
+    return [];
+  }
   const accessor = `x_${ACCESSOR}${index}`;
   if (typeof xConfig === 'string') {
-    return getValueColumn(accessor, xConfig);
+    return [getValueColumn(accessor, xConfig)];
   }
 
   switch (xConfig.type) {
     case 'dateHistogram':
-      return getValueColumn(accessor, xConfig.field, 'date');
+      return [getValueColumn(accessor, xConfig.field, 'date')];
     case 'intervals':
-      return getValueColumn(accessor, xConfig.field, 'number');
+      return [getValueColumn(accessor, xConfig.field, 'number')];
     case 'topValues':
-      return getValueColumn(accessor, xConfig.field);
+      return [getValueColumn(accessor, xConfig.field)];
     case 'filters':
       throw new Error('Not implemented yet');
   }
@@ -183,15 +220,13 @@ function getXValueColumn(xConfig: LensBreakdownConfig, index: number) {
 function buildAllFormulasInLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): PersistedIndexPatternLayer {
   return layer.yAxis.reduce((acc, curr, valueIndex) => {
     const formulaColumn = getFormulaColumn(
       `${ACCESSOR}${i}_${valueIndex}`,
       mapToFormula(curr),
       dataView,
-      formulaAPI,
       valueIndex > 0 ? acc : undefined
     );
     return { ...acc, ...formulaColumn };
@@ -201,11 +236,10 @@ function buildAllFormulasInLayer(
 function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
-    const resultLayer = buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
+    const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
 
     if (layer.xAxis) {
       const columnName = `x_${ACCESSOR}${i}`;
@@ -216,20 +250,23 @@ function buildFormulaLayer(
       addLayerColumn(resultLayer, columnName, breakdownColumn, true);
     }
 
-    if (layer.breakdown) {
-      const columnName = `${ACCESSOR}${i}_breakdown`;
-      const breakdownColumn = getBreakdownColumn({
-        options: layer.breakdown,
-        dataView,
+    const layerBreakdown = normalizeBreakdown(layer.breakdown);
+    if (layerBreakdown.length > 0) {
+      layerBreakdown.forEach((breakdown, breakdownIndex) => {
+        const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
+        const breakdownColumn = getBreakdownColumn({
+          options: breakdown,
+          dataView,
+        });
+        addLayerColumn(resultLayer, columnName, breakdownColumn, true);
       });
-      addLayerColumn(resultLayer, columnName, breakdownColumn, true);
     }
 
     return resultLayer;
   } else if (layer.type === 'annotation') {
     // nothing ?
   } else if (layer.type === 'reference') {
-    return buildAllFormulasInLayer(layer, i, dataView, formulaAPI);
+    return buildAllFormulasInLayer(layer, i, dataView);
   }
 
   return {
@@ -240,11 +277,11 @@ function buildFormulaLayer(
 
 export async function buildXY(
   config: LensXYConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: any, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
@@ -252,7 +289,7 @@ export async function buildXY(
     getValueColumns,
     dataViewsAPI
   );
-  const references = buildReferences(dataviews);
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
 
   return {
     title: config.title,
@@ -260,12 +297,11 @@ export async function buildXY(
     references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

@@ -41,11 +41,11 @@ const pages = {
     bulkImportSaveButton: 'knowledgeBaseBulkImportFlyoutSaveButton',
     bulkImportCancelButton: 'knowledgeBaseBulkImportFlyoutCancelButton',
     bulkImportFlyout: 'knowledgeBaseBulkImportFlyout',
+    bulkImportFilePicker: 'knowledgeBaseBulkImportFilePicker',
     toastTitle: 'euiToastHeader__title',
   },
   conversations: {
-    setupGenAiConnectorsButtonSelector:
-      'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
+    setupGenAiConnectorsButtonSelector: 'observabilityAiAssistantInitialSetupPanelSetUpModelButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     installKnowledgeBaseButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     settingUpKnowledgeBase: 'observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseText',
@@ -69,14 +69,10 @@ const pages = {
     },
     archivedBadge: 'observabilityAiAssistantArchivedBadge',
   },
-  createConnectorFlyout: {
-    flyout: 'create-connector-flyout',
-    genAiCard: '.gen-ai-card',
-    bedrockCard: '.bedrock-card',
-    nameInput: 'nameInput',
-    urlInput: 'config.apiUrl-input',
-    apiKeyInput: 'secrets.apiKey-input',
-    saveButton: 'create-connector-flyout-save-btn',
+  inferenceFlyout: {
+    flyout: 'inference-flyout',
+    submitButton: 'inference-endpoint-submit-button',
+    closeButton: 'inference-flyout-close-button',
   },
   contextualInsights: {
     container: 'obsAiAssistantInsightContainer',

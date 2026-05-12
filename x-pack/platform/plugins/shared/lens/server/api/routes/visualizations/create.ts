@@ -5,38 +5,45 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { boomify, isBoom } from '@hapi/boom';
 
-import type { TypeOf } from '@kbn/config-schema';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
   LENS_VIS_API_PATH,
   LENS_API_VERSION,
   LENS_API_ACCESS,
-  LENS_CONTENT_TYPE,
+  LENS_API_TAG,
 } from '../../../../common/constants';
 import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../types';
-import { ConfigBuilderStub } from '../../../../common/transforms';
-import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
-import { getLensResponseItem } from '../utils';
-import { isNewApiFormat } from '../../../../common/transforms/config_builder_stub';
+import type { LensCreateResponseBody } from './types';
+import { getLensRequestConfig, getLensResponseItem } from './utils';
+import {
+  lensCreateRequestBodySchema,
+  lensCreateRequestQuerySchema,
+  lensCreateResponseBodySchema,
+} from './schema';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder, usageCounter }
 ) => {
   const createRoute = router.post({
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
-    summary: 'Create Lens visualization',
-    description: 'Create a new Lens visualization.',
+    summary: 'Create visualization',
+    description: [
+      'Creates a Lens visualization and saves it to the library.',
+      '',
+      'ES|QL visualizations cannot be created through this endpoint.',
+    ].join('\n'),
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -52,6 +59,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       version: LENS_API_VERSION,
       validate: {
         request: {
+          query: lensCreateRequestQuerySchema,
           body: lensCreateRequestBodySchema,
         },
         response: {
@@ -74,41 +82,28 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      // TODO fix IContentClient to type this client based on the actual
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { references, ...lensItem } = isNewApiFormat(req.body.data)
-        ? // TODO: Find a better way to conditionally omit id
-          omit(ConfigBuilderStub.in(req.body.data), 'id')
-        : // For now we need to be able to create old SO, this may be moved to the config builder
-          ({
-            ...req.body.data,
-            description: req.body.data.description ?? undefined,
-          } satisfies LensCreateIn['data']);
+        try {
+          const { references, ...data } = getLensRequestConfig(builder, req.body);
+          const options: LensCreateIn['options'] = { ...req.query, references };
+          const { result } = await client.create(data, options);
+          const responseItem = getLensResponseItem(builder, result.item);
 
-      try {
-        // Note: these types are to enforce loose param typings of client methods
-        const data: LensCreateIn['data'] = lensItem;
-        const options: LensCreateIn['options'] = { ...req.body.options, references };
-        const { result } = await client.create(data, options);
+          return res.created<LensCreateResponseBody>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return res.forbidden();
+          }
 
-        if (result.item.error) {
-          throw result.item.error;
+          return boomify(error); // forward unknown error
         }
-
-        return res.created<TypeOf<typeof lensCreateResponseBodySchema>>({
-          body: getLensResponseItem(result.item),
-        });
-      } catch (error) {
-        if (isBoom(error) && error.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return boomify(error); // forward unknown error
-      }
-    }
+      })
   );
 };

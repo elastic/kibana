@@ -63,7 +63,6 @@ export const QueryRulesOverview = () => {
         <KibanaPageTemplate.Header
           pageTitle={PLUGIN_TITLE}
           restrictWidth
-          color="primary"
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesOverviewHeaderButtons">
               <EuiFlexItem grow={false}>
@@ -89,7 +88,7 @@ export const QueryRulesOverview = () => {
                 <EuiButton
                   data-test-subj="queryRulesOverviewCreateButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     usageTracker?.click(AnalyticsEvents.addRulesetClicked);
                     setIsCreateModalVisible(true);

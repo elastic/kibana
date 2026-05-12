@@ -26,7 +26,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import type { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '../../../common/types';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
@@ -117,6 +117,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         <Fragment>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount={false}
             style={{ maxWidth: 400 }}
             title={
               <FormattedMessage
@@ -261,6 +262,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
 
           <EuiModalBody>
             <EuiCallOut
+              announceOnMount={false}
               style={{ maxWidth: 400 }}
               title={
                 <FormattedMessage

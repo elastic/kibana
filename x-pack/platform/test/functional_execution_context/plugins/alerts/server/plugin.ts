@@ -12,7 +12,6 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -25,6 +24,10 @@ export interface FixtureStartDeps {
   spaces?: SpacesPluginStart;
 }
 
+const alertingFeatures = [
+  { ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] },
+];
+
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   constructor() {}
 
@@ -34,8 +37,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      alerting: [{ ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] }],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      alerting: alertingFeatures,
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -45,7 +47,10 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              all: [{ ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] }],
+              all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
           },
           ui: [],
@@ -58,7 +63,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           alerting: {
             rule: {
-              read: [{ ruleTypeId: 'test.executionContext', consumers: ['fecAlertsTestPlugin'] }],
+              read: alertingFeatures,
             },
           },
           ui: [],
@@ -96,15 +101,16 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       {
         path: '/emit_log_with_trace_id',
         security: {
+          authc: {
+            enabled: false,
+            reason: 'This route is part of a test plugin and does not require authentication.',
+          },
           authz: {
             enabled: false,
             reason: 'This route is opted out from authorization',
           },
         },
         validate: false,
-        options: {
-          authRequired: false,
-        },
       },
       async (ctx, req, res) => {
         const coreCtx = await ctx.core;

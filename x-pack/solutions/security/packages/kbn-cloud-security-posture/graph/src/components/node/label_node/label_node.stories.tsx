@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from '@emotion/react';
 import { ReactFlow, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { LabelNode as LabelNodeComponent } from './label_node';
@@ -24,8 +23,8 @@ const meta: Meta<LabelNodeViewModel> = {
     shape: 'label',
     color: 'primary',
     interactive: true,
-    eventsCount: 2,
-    alertsCount: 2,
+    uniqueEventsCount: 2,
+    uniqueAlertsCount: 2,
     ips: [
       '10.200.0.202',
       '192.14.29.80',
@@ -57,7 +56,7 @@ const nodeTypes = {
 };
 
 const Template: StoryFn<LabelNodeViewModel> = (args: LabelNodeViewModel) => (
-  <ThemeProvider theme={{ darkMode: false }}>
+  <>
     <ReactFlow
       fitView
       attributionPosition={undefined}
@@ -74,7 +73,7 @@ const Template: StoryFn<LabelNodeViewModel> = (args: LabelNodeViewModel) => (
       <Background />
     </ReactFlow>
     <GlobalGraphStyles />
-  </ThemeProvider>
+  </>
 );
 
 export const LabelNode: StoryObj<LabelNodeViewModel> = {

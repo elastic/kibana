@@ -15,11 +15,13 @@ import {
   getWebhookServer,
   getHttpsWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
+import { ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhook_servers';
 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
   async function getPortOfConnector(connectorId: string): Promise<string> {
     const response = await supertest.get(`/api/actions/connectors`).expect(200);
@@ -35,9 +37,12 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   }
 
   describe('webhook connector', () => {
+    afterEach(() => objectRemover.removeAll());
+
     describe('with http endpoint', () => {
       let webhookSimulatorURL: string = '';
       let webhookServer: http.Server;
+
       before(async () => {
         webhookServer = await getWebhookServer();
         const availablePort = await getPort({ port: 9000 });
@@ -76,22 +81,52 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         webhookSimulatorURL = `https://localhost:${availablePort}`;
       });
 
-      it('should support the POST method against webhook target', async () => {
-        const webhookConnectorId = await createWebhookConnector(supertest, webhookSimulatorURL, {
+      for (const testParams of [
+        {
           method: 'post',
-        });
-        const { body: result } = await supertest
-          .post(`/api/actions/connector/${webhookConnectorId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              body: 'success_post_method',
-            },
-          })
-          .expect(200);
+          params: {
+            body: 'success_post_method',
+          },
+        },
+        {
+          method: 'put',
+          params: {
+            body: 'success_put_method',
+          },
+        },
+        {
+          method: 'patch',
+          params: {
+            body: 'success_patch_method',
+          },
+        },
+        {
+          method: 'get',
+          params: {},
+        },
+        {
+          method: 'delete',
+          params: {},
+        },
+      ]) {
+        const { method, params } = testParams;
 
-        expect(result.status).to.eql('ok');
-      });
+        it(`should support the ${method} method against webhook target`, async () => {
+          const webhookConnectorId = await createWebhookConnector(supertest, webhookSimulatorURL, {
+            method,
+          });
+          objectRemover.add('default', webhookConnectorId, 'connector', 'actions', false);
+          const { body: result } = await supertest
+            .post(`/api/actions/connector/${webhookConnectorId}/_execute`)
+            .set('kbn-xsrf', 'test')
+            .send({
+              params,
+            })
+            .expect(200);
+
+          expect(result.status).to.eql('ok');
+        });
+      }
 
       after(() => {
         webhookServer.close();

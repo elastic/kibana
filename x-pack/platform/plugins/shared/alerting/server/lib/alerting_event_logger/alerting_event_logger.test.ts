@@ -34,7 +34,8 @@ import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import { schema } from '@kbn/config-schema';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { GapBase } from '../rule_gaps/types';
+import type { GapBase } from '../../application/gaps/types';
+import { gapReasonType } from '../../../common/constants';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -1285,6 +1286,7 @@ describe('AlertingEventLogger', () => {
           [TaskRunnerTimerSpan.PersistAlerts]: 60,
           [TaskRunnerTimerSpan.TriggerActions]: 70,
           [TaskRunnerTimerSpan.ProcessRuleRun]: 80,
+          [TaskRunnerTimerSpan.UpdateAlerts]: 90,
         },
       });
 
@@ -1308,6 +1310,7 @@ describe('AlertingEventLogger', () => {
                   persist_alerts_duration_ms: 60,
                   trigger_actions_duration_ms: 70,
                   process_rule_duration_ms: 80,
+                  update_alerts_duration_ms: 90,
                 },
               },
             },
@@ -1345,6 +1348,7 @@ describe('AlertingEventLogger', () => {
           [TaskRunnerTimerSpan.PersistAlerts]: 60,
           [TaskRunnerTimerSpan.TriggerActions]: 70,
           [TaskRunnerTimerSpan.ProcessRuleRun]: 80,
+          [TaskRunnerTimerSpan.UpdateAlerts]: 90,
         },
       });
 
@@ -1379,6 +1383,7 @@ describe('AlertingEventLogger', () => {
                   persist_alerts_duration_ms: 60,
                   trigger_actions_duration_ms: 70,
                   process_rule_duration_ms: 80,
+                  update_alerts_duration_ms: 90,
                 },
               },
             },
@@ -1473,6 +1478,7 @@ describe('AlertingEventLogger', () => {
       expect(() =>
         alertingEventLogger.reportGap({
           gap: { gte: '', lte: '' },
+          reason: { type: gapReasonType.RULE_DID_NOT_RUN },
         })
       ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
     });
@@ -1483,7 +1489,10 @@ describe('AlertingEventLogger', () => {
         gte: '2022-05-05T15:59:54.480Z',
         lte: '2022-05-05T16:59:54.480Z',
       };
-      alertingEventLogger.reportGap({ gap: range });
+      alertingEventLogger.reportGap({
+        gap: range,
+        reason: { type: gapReasonType.RULE_DISABLED },
+      });
 
       const gap: GapBase = {
         status: 'unfilled' as const,
@@ -1495,6 +1504,9 @@ describe('AlertingEventLogger', () => {
         filled_duration_ms: 0,
         unfilled_duration_ms: 3600000,
         in_progress_duration_ms: 0,
+        updated_at: mockNow,
+        failed_auto_fill_attempts: 0,
+        reason: { type: gapReasonType.RULE_DISABLED },
       };
 
       const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);
@@ -1528,6 +1540,7 @@ describe('AlertingEventLogger', () => {
       filled_duration_ms: 3600000,
       unfilled_duration_ms: 0,
       in_progress_duration_ms: 0,
+      reason: { type: gapReasonType.RULE_DISABLED },
     };
 
     test('should call eventLogger.updateEvents with correct parameters', async () => {
@@ -2167,6 +2180,7 @@ describe('helper functions', () => {
           gte: '2022-05-05T15:59:54.480Z',
           lte: '2022-05-05T16:59:54.480Z',
         },
+        reason: { type: gapReasonType.RULE_DID_NOT_RUN },
       });
 
       // these fields should be explicitly set

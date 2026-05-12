@@ -31,6 +31,7 @@ import type { ThreatMapping } from '@kbn/security-solution-plugin/common/api/det
 import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
+import { INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
 import type { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
@@ -42,6 +43,7 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { deleteAllAlerts, deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import {
   previewRule,
   getAlerts,
@@ -51,12 +53,8 @@ import {
   scheduleRuleRun,
   stopAllManualRuns,
   waitForBackfillExecuted,
+  setAdvancedSettings,
 } from '../../../../utils';
-import {
-  deleteAllAlerts,
-  deleteAllRules,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -64,15 +62,10 @@ const createThreatMatchRule = ({
   name = 'Query with a rule id',
   index = ['auditbeat-*'],
   query = '*:*',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   rule_id = 'rule-1',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_indicator_path = 'threat.indicator',
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_query = 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_index = ['auditbeat-*'],
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   threat_mapping = [
     // We match host.name against host.name
     {
@@ -1099,6 +1092,72 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(2);
       });
+
+      // Similar to https://github.com/elastic/kibana/issues/259169, but with indicators first
+      // We seed 2 matching events followed by 10 non-matching events and force 1 event/page.
+      // The first page of indicators creates 2 alerts; later no-op pages verify that the count of created alerts doesn't
+      // get inflated and trigger a false max-signals warning despite only 2 created preview alerts.
+      it('reproduces false max alerts warning when later event pages have no threat matches', async () => {
+        const id = uuidv4();
+        const baseTs = moment();
+
+        const matchingEvents = [
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(1, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(1, 's').toISOString(),
+          },
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(2, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(2, 's').toISOString(),
+          },
+        ];
+        const nonMatchingEvents = Array.from({ length: 100 }, (_, i) => ({
+          id,
+          user: { name: `eventmiss${i + 1}` },
+          '@timestamp': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+          'event.ingested': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+        }));
+        const numThreats = 20;
+        const threats = [
+          {
+            ...threatDoc(id, baseTs.clone().subtract(numThreats, 'm').toISOString()),
+            user: { name: 'matchuser' },
+          },
+          ...Array.from({ length: numThreats - 1 }, (_, i) => ({
+            ...threatDoc(id, baseTs.clone().subtract(i, 'm').toISOString()),
+          })),
+        ];
+
+        await indexListOfDocuments([...matchingEvents, ...nonMatchingEvents, ...threats]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_mapping: [
+            {
+              entries: [{ field: 'user.name', value: 'user.name', type: 'mapping' }],
+            },
+          ],
+          items_per_search: 1,
+          concurrent_searches: 1,
+        };
+
+        const { logs, previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        const allWarnings = logs.flatMap((l) => l.warnings ?? []);
+
+        expect(previewAlerts.length).toEqual(2);
+        expect(allWarnings).not.toContain(getMaxAlertsWarning());
+      });
     });
 
     describe('indicator enrichment: event-first search', () => {
@@ -1611,6 +1670,79 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(2);
+      });
+
+      // https://github.com/elastic/kibana/issues/259169
+      // We seed 2 matching events followed by 10 non-matching events and force 1 event/page.
+      // The first two pages create 2 alerts; later no-op pages verify that the count of created alerts doesn't
+      // get inflated and trigger a false max-signals warning despite only 2 created preview alerts.
+      it('reproduces false max alerts warning when later event pages have no threat matches', async () => {
+        const id = uuidv4();
+        const baseTs = moment();
+        const timestamp = baseTs.toISOString();
+
+        const matchingEvents = [
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(1, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(1, 's').toISOString(),
+          },
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(2, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(2, 's').toISOString(),
+          },
+        ];
+        const nonMatchingEvents = Array.from({ length: 10 }, (_, i) => ({
+          id,
+          user: { name: `eventmiss${i + 1}` },
+          '@timestamp': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+          'event.ingested': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+        }));
+        const threats = [
+          {
+            ...threatDoc(id, timestamp),
+            user: { name: 'matchuser' },
+          },
+          ...Array.from({ length: 19 }, (_, i) => ({
+            ...threatDoc(
+              id,
+              baseTs
+                .clone()
+                .subtract(i + 1, 'm')
+                .toISOString()
+            ),
+            user: { name: `threatfiller${i + 1}` },
+          })),
+        ];
+
+        await indexListOfDocuments([...matchingEvents, ...nonMatchingEvents, ...threats]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_mapping: [
+            {
+              entries: [{ field: 'user.name', value: 'user.name', type: 'mapping' }],
+            },
+          ],
+          items_per_search: 1,
+          concurrent_searches: 1,
+        };
+
+        const { logs, previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        const allWarnings = logs.flatMap((l) => l.warnings ?? []);
+
+        expect(previewAlerts.length).toEqual(2);
+        expect(allWarnings).not.toContain(getMaxAlertsWarning());
       });
     });
 
@@ -2772,6 +2904,111 @@ export default ({ getService }: FtrProviderContext) => {
         const alert = previewAlerts[0]._source;
         expect(alert?.user?.name).toEqual('user1');
         expect(alert?.host?.name).toEqual('server');
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const timestamp = new Date().toISOString();
+
+        // Create event documents with different namespaces
+        const eventDocNamespace1 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          user: { name: 'user1' },
+          host: { name: 'server' },
+        };
+        const eventDocNamespace2 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          user: { name: 'user2' },
+          host: { name: 'server' },
+        };
+        const eventDocNamespace3 = {
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          user: { name: 'user3' },
+          host: { name: 'server' },
+        };
+
+        // Create threat indicators
+        const threatIndicatorDoc = (threatId: string, threatTimestamp: string) => ({
+          id: threatId,
+          '@timestamp': threatTimestamp,
+          data_stream: { namespace: 'namespace1' },
+          agent: { type: 'threat' },
+          user: { name: 'user1' },
+          host: { name: 'server' },
+        });
+
+        await indexListOfDocuments([
+          eventDocNamespace1,
+          eventDocNamespace2,
+          eventDocNamespace3,
+          threatIndicatorDoc(uuidv4(), timestamp),
+        ]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...createThreatMatchRule({
+            index: ['ecs_compliant'],
+            query: `* and NOT agent.type:"threat"`,
+            threat_index: ['ecs_compliant'],
+            threat_query: '* and agent.type:"threat"',
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'user.name',
+                    value: 'user.name',
+                    type: 'mapping',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+          }),
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1, not namespace2 or namespace3
+        // (namespace1 matches the threat indicator, namespace2 and namespace3 don't)
+        expect(previewAlerts.length).toEqual(1);
+        // @ts-expect-error namespace does not exist on type
+        expect(previewAlerts[0]._source?.data_stream?.namespace).toEqual('namespace1');
       });
     });
   });

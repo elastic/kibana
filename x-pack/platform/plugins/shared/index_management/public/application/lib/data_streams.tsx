@@ -76,29 +76,16 @@ export const getLifecycleValue = (
 
   // Extract size and unit, in order to correctly map the unit to the correct text
   const activeRetention = lifecycle?.effective_retention || lifecycle?.data_retention;
-  const { size, unit } = splitSizeAndUnits(activeRetention as string);
-  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
-  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
 
-  return `${size} ${match?.text ?? unit}`;
+  return getRetentionPeriod(activeRetention as string);
 };
 
-export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
-  return (
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
-    dataStream?.indices?.every(
-      (index) => index.managedBy?.toLowerCase() === 'index lifecycle management'
-    )
-  );
+export const isNextGenIlm = (dataStream?: DataStream | null): boolean => {
+  return dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management';
 };
 
-export const isDataStreamFullyManagedByDSL = (dataStream?: DataStream | null) => {
-  return (
-    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle' &&
-    dataStream?.indices?.every(
-      (index) => index.managedBy?.toLowerCase() === 'data stream lifecycle'
-    )
-  );
+export const isNextGenDsl = (dataStream?: DataStream | null): boolean => {
+  return dataStream?.nextGenerationManagedBy?.toLowerCase() === 'data stream lifecycle';
 };
 
 export const isDSLWithILMIndices = (dataStream?: DataStream | null) => {
@@ -138,4 +125,12 @@ export const deserializeGlobalMaxRetention = (globalMaxRetention?: string) => {
     unit,
     unitText: match?.text ?? unit,
   };
+};
+
+export const getRetentionPeriod = (retention: string) => {
+  const { size, unit } = splitSizeAndUnits(retention);
+  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
+  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
+
+  return `${size} ${match?.text ?? unit}`;
 };

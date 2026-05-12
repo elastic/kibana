@@ -126,7 +126,7 @@ const CategoryExampleMessageRow: React.FC<CategoryExampleMessageRowProps> = ({
             <EuiButtonIcon
               data-test-subj="infraCategoryExampleMessageRowButton"
               aria-label={MENU_LABEL}
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               size="s"
               onClick={toggleMenu}
             />

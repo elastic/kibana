@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { notImplemented } from '@hapi/boom';
+import { boomify, notImplemented } from '@hapi/boom';
+import { isInferenceError } from '@kbn/inference-common';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
 import { v4 } from 'uuid';
 import type { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { last } from 'lodash';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { flushBuffer } from '../../service/util/flush_buffer';
@@ -28,6 +31,11 @@ import {
   screenContextRt,
 } from '../runtime_types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import type {
+  BufferFlushEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../../../common/conversation_complete';
+import type { ConversationCreateRequest } from '../../../common/types';
 
 const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
   t.type({
@@ -38,6 +46,7 @@ const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
         persist: toBooleanRt,
       }),
       t.partial({
+        isStream: t.union([t.undefined, toBooleanRt]), // accept undefined in order to default to true
         conversationId: t.string,
         title: t.string,
         disableFunctions: toBooleanRt,
@@ -76,7 +85,7 @@ const chatCompletePublicRt = t.intersection([
 async function initializeChatRequest({
   context,
   request,
-  plugins: { cloud, actions },
+  plugins: { cloud, inference },
   params: {
     body: { connectorId, scopes },
   },
@@ -84,16 +93,17 @@ async function initializeChatRequest({
 }: ObservabilityAIAssistantRouteHandlerResources & {
   params: { body: { connectorId: string; scopes: AssistantScope[] } };
 }) {
-  await withAssistantSpan('guard_against_invalid_connector', async () => {
-    const actionsClient = await (await actions.start()).getActionsClientWithRequest(request);
-
-    const connector = await actionsClient.get({
-      id: connectorId,
-      throwIfSystemAction: true,
+  try {
+    await withAssistantSpan('guard_against_invalid_connector', async () => {
+      const inferenceStart = await inference.start();
+      return inferenceStart.getConnectorById(connectorId, request);
     });
-
-    return connector;
-  });
+  } catch (error) {
+    if (isInferenceError(error) && error.status) {
+      throw boomify(error, { statusCode: error.status });
+    }
+    throw error;
+  }
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
     service.getClient({ request, scopes }),
@@ -245,7 +255,10 @@ async function chatComplete(
   resources: ObservabilityAIAssistantRouteHandlerResources & {
     params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
-) {
+): Promise<{
+  response$: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>;
+  getConversation: () => Promise<ConversationCreateRequest>;
+}> {
   const { params, service } = resources;
 
   const {
@@ -286,7 +299,7 @@ async function chatComplete(
         : userInstructionOrString
   );
 
-  const response$ = client.complete({
+  const { response$, getConversation } = client.complete({
     messages,
     connectorId,
     conversationId,
@@ -299,7 +312,8 @@ async function chatComplete(
     disableFunctions,
   });
 
-  return response$.pipe(flushBuffer(isCloudEnabled));
+  const responseWithFlushBuffer$ = response$.pipe(flushBuffer(isCloudEnabled));
+  return { response$: responseWithFlushBuffer$, getConversation };
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
@@ -310,8 +324,22 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   params: chatCompleteInternalRt,
-  handler: async (resources): Promise<Readable> => {
-    return observableIntoStream(await chatComplete(resources));
+  handler: async (resources) => {
+    const { params } = resources;
+    const { response$, getConversation } = await chatComplete(resources);
+    const { isStream = true, connectorId } = params.body;
+
+    if (isStream === false) {
+      const response = await getConversation();
+
+      return {
+        conversationId: response.conversation.id,
+        data: last(response.messages)?.message.content,
+        connectorId,
+      };
+    }
+
+    return observableIntoStream(response$);
   },
 });
 
@@ -326,18 +354,15 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['observability-ai-assistant'],
   },
-  handler: async (resources): Promise<Readable> => {
+  handler: async (resources) => {
     const { params, logger } = resources;
+    const { actions, ...bodyParams } = params.body;
 
-    const {
-      body: { actions, ...restOfBody },
-    } = params;
-
-    const response$ = await chatComplete({
+    const { response$ } = await chatComplete({
       ...resources,
       params: {
         body: {
-          ...restOfBody,
+          ...bodyParams,
           scopes: ['observability'],
           screenContexts: [
             {

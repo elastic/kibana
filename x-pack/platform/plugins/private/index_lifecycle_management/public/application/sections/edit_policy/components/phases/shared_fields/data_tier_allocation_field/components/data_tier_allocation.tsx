@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { get } from 'lodash';
+import { css } from '@emotion/react';
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
 
 import { SuperSelectField, useFormData } from '../../../../../../../../shared_imports';
 import type { PhaseWithAllocation } from '../../../../../../../../../common/types';
@@ -22,7 +23,19 @@ import { UseField } from '../../../../../form';
 import { NodeAllocation } from './node_allocation';
 import type { SharedProps } from './types';
 
-import './data_tier_allocation.scss';
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    controlSection: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      padding-top: ${euiTheme.size.m};
+      padding-left: ${euiTheme.size.m};
+      padding-right: ${euiTheme.size.m};
+      padding-bottom: ${euiTheme.size.m};
+    `,
+  };
+};
 
 type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 
@@ -157,6 +170,7 @@ const getSelectOptions = (phase: PhaseWithAllocation, disableDataTierOption: boo
   ].filter(Boolean) as SelectOptions[];
 
 export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
+  const styles = useStyles();
   const { phase, hasNodeAttributes, isCloudEnabled, isUsingDeprecatedDataRoleConfig, isLoading } =
     props;
 
@@ -206,7 +220,7 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
       {dataTierAllocationType === 'node_attrs' && hasNodeAttributes && (
         <>
           <EuiSpacer size="s" />
-          <div className="indexLifecycleManagement__phase__dataTierAllocation__controlSection">
+          <div css={styles.controlSection}>
             <NodeAllocation {...props} />
           </div>
         </>

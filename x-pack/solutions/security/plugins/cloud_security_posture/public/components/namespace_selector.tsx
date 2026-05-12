@@ -59,7 +59,7 @@ export const NamespaceSelector = ({
         fullWidth
         compressed
         aria-label={label}
-        prepend={<span>{label}</span>}
+        prepend={label}
       />
     </div>
   );

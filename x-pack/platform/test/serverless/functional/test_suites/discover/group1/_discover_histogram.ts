@@ -74,16 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      // this is the number of renderings of the histogram needed when new data is fetched
-      let renderingCountInc = 3; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
-      const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await queryBar.submitQuery();
-      await retry.waitFor('chart rendering complete', async () => {
-        const actualCount = await elasticChart.getVisualizationRenderingCount();
-        const expectedCount = prevRenderingCount + renderingCountInc;
-        log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount <= expectedCount;
-      });
+      await elasticChart.waitForRenderComplete();
       let prevRowData = '';
       // to make sure the table is already rendered
       await retry.try(async () => {
@@ -93,17 +84,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.brushHistogram();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      renderingCountInc = 4; // Multiple renders caused by https://github.com/elastic/kibana/issues/177055
-      await retry.waitFor('chart rendering complete after being brushed', async () => {
-        const actualCount = await elasticChart.getVisualizationRenderingCount();
-        const expectedCount = prevRenderingCount + renderingCountInc * 2;
-        log.debug(`renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount <= expectedCount;
-      });
+      await elasticChart.waitForRenderComplete();
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
-      // to brush a different range in the histogram, resulting in a different duration
-      expect(Math.round(newDurationHours)).to.be(31);
+      // to brush a different range in the histogram, resulting in a different duration.
+      // Any visual change in the layout will change the brushed range and thus the duration
+      expect(Math.round(newDurationHours)).to.be(26);
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await PageObjects.discover.getDocTableField(1);
@@ -123,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different count
-      expect(await PageObjects.discover.getHitCount()).to.be('10');
+      expect(await PageObjects.discover.getHitCount()).to.be('7');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {

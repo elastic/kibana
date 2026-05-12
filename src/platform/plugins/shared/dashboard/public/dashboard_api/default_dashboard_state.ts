@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import type { DashboardState } from '../../common';
+import type { DashboardReadResponseBody } from '../../server';
 
 export const DEFAULT_DASHBOARD_STATE: DashboardState = {
-  timeRestore: false,
-  query: { query: '', language: 'kuery' },
+  query: { expression: '', language: 'kql' },
   description: '',
   filters: [],
   panels: [],
+  pinned_panels: [],
+  options: {
+    ...DEFAULT_DASHBOARD_OPTIONS,
+  },
   title: '',
   tags: [],
-
-  // options
-  useMargins: true,
-  syncColors: false,
-  syncCursor: true,
-  syncTooltips: false,
-  hidePanelTitles: false,
 };
+
+export function getLastSavedState(readResult?: DashboardReadResponseBody) {
+  return {
+    ...DEFAULT_DASHBOARD_STATE,
+    ...readResult?.data,
+  };
+}

@@ -12,7 +12,7 @@ import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
   AttachmentRequest,
-  BulkCreateAttachmentsRequest,
+  BulkCreateAttachmentsRequestV2,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
@@ -25,9 +25,11 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
-  CaseSummaryResponse,
-  InferenceConnectorsResponse,
   FindCasesContainingAllAlertsResponse,
+  BulkAddObservablesRequest,
+  FindCasesContainingAllDocumentsRequest,
+  UpdateSummary,
+  CasesPatchResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -44,7 +46,6 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
-  InferenceConnectors,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -63,8 +64,7 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
-  getCaseSummaryUrl,
-  getInferenceConnectorsUrl,
+  getBulkCreateObservablesUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -98,7 +98,6 @@ import type {
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   UserActionUI,
-  CaseSummary,
 } from './types';
 
 import {
@@ -107,32 +106,49 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  decodeCasesWithUpdateSummaryResponse,
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
-  decodeCaseSummaryResponse,
-  decodeInferenceConnectorsResponse,
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
   caseId,
   signal,
+  mode = 'legacy',
 }: {
   caseId: string;
   signal?: AbortSignal;
+  mode?: 'legacy' | 'unified';
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: true },
+      query: { includeComments: true, mode },
       signal,
     }
   );
   return convertCaseResolveToCamelCase(decodeCaseResolveResponse(response));
+};
+
+export const getCase = async ({
+  caseId,
+  signal,
+}: {
+  caseId: string;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {
+    method: 'GET',
+    signal,
+  });
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getTags = async ({
@@ -195,44 +211,15 @@ export const getSingleCaseMetrics = async (
   );
 };
 
-export const getCaseSummary = async (
-  caseId: string,
-  connectorId: string,
-  signal?: AbortSignal
-): Promise<CaseSummary> => {
-  const response = await KibanaServices.get().http.fetch<CaseSummaryResponse>(
-    getCaseSummaryUrl(caseId),
-    {
-      method: 'GET',
-      signal,
-      query: { connectorId },
-    }
-  );
-  return decodeCaseSummaryResponse(response);
-};
-
-export const getInferenceConnectors = async (
-  signal?: AbortSignal
-): Promise<InferenceConnectors> => {
-  const response = await KibanaServices.get().http.fetch<InferenceConnectorsResponse>(
-    getInferenceConnectorsUrl(),
-    {
-      method: 'GET',
-      signal,
-    }
-  );
-  return decodeInferenceConnectorsResponse(response);
-};
-
-export const findCasesByAttachmentId = async (alertIds: string[], caseIds: string[]) => {
+export const findCasesByAttachmentId = async (documentIds: string[], caseIds: string[]) => {
   const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
     `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
     {
       method: 'POST',
       body: JSON.stringify({
-        alertIds,
+        documentIds,
         caseIds,
-      }),
+      } as FindCasesContainingAllDocumentsRequest),
     }
   );
   return decodeFindAllAttachedAlertsResponse(response);
@@ -313,6 +300,9 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    extendedFieldFilters: [],
+    from: DEFAULT_FROM_DATE,
+    to: DEFAULT_TO_DATE,
   },
   queryParams = {
     page: 1,
@@ -341,6 +331,11 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.extendedFieldFilters && filterOptions.extendedFieldFilters.length > 0
+      ? { extendedFieldFilters: filterOptions.extendedFieldFilters }
+      : {}),
+    ...(filterOptions.from ? { from: filterOptions.from } : {}),
+    ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
   };
 
@@ -384,7 +379,18 @@ export const patchCase = async ({
   caseId: string;
   updatedCase: Pick<
     CasePatchRequest,
-    'description' | 'status' | 'tags' | 'title' | 'settings' | 'connector'
+    | 'description'
+    | 'status'
+    | 'tags'
+    | 'title'
+    | 'settings'
+    | 'connector'
+    | 'severity'
+    | 'assignees'
+    | 'category'
+    | 'customFields'
+    | 'extended_fields'
+    | 'template'
   >;
   version: string;
   signal?: AbortSignal;
@@ -403,18 +409,22 @@ export const updateCases = async ({
 }: {
   cases: CaseUpdateRequest[];
   signal?: AbortSignal;
-}): Promise<CasesUI> => {
+}): Promise<Array<CaseUI & { updateSummary?: UpdateSummary }>> => {
   if (cases.length === 0) {
     return [];
   }
 
-  const response = await KibanaServices.get().http.fetch<Cases>(CASES_URL, {
+  const response = await KibanaServices.get().http.fetch<CasesPatchResponse>(CASES_URL, {
     method: 'PATCH',
     body: JSON.stringify({ cases }),
     signal,
   });
 
-  return convertCasesToCamelCase(decodeCasesResponse(response));
+  const decodedResponse = decodeCasesWithUpdateSummaryResponse(response);
+  return decodedResponse.map(({ updateSummary, ...theCase }) => ({
+    ...convertCaseToCamelCase(theCase),
+    ...(updateSummary != null ? { updateSummary } : {}),
+  }));
 };
 
 export const replaceCustomField = async ({
@@ -550,7 +560,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateAttachmentsRequest;
+  attachments: BulkCreateAttachmentsRequestV2;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {
@@ -695,6 +705,21 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
+};
+
+export const bulkPostObservables = async (
+  request: BulkAddObservablesRequest,
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getBulkCreateObservablesUrl(request.caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ caseId: request.caseId, observables: request.observables }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

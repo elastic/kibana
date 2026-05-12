@@ -129,10 +129,17 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiBasicTable items={truncatedFields} columns={columns} />
+          <EuiBasicTable
+            items={truncatedFields}
+            columns={columns}
+            tableCaption={i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.result.fieldsTableCaption',
+              { defaultMessage: 'Document fields' }
+            )}
+          />
           {hiddenFields > 0 && (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiIcon type="arrowRight" color="subdued" />
+              <EuiIcon type="chevronSingleRight" color="subdued" />
               <EuiTextColor color="subdued">
                 <code>
                   <FormattedMessage

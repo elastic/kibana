@@ -80,15 +80,18 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": false,
+        "hideTable": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": undefined,
         "managed": false,
@@ -230,15 +233,18 @@ describe('getSavedSearch', () => {
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
+        "chartInterval": undefined,
         "columns": Array [
           "_source",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "description",
         "grid": Object {},
         "headerRowHeight": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": true,
+        "hideTable": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": true,
         "managed": false,

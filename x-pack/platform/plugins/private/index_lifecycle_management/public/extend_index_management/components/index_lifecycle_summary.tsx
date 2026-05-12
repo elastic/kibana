@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { EuiBadgeProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiLink,
@@ -26,54 +25,167 @@ import {
 } from '@elastic/eui';
 
 import type { ApplicationStart } from '@kbn/core/public';
-import type { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
-import type { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
-import type { Phase } from '../../../common/types';
+import type { IndexDetailsTab } from '@kbn/index-management-shared-types';
+import type {
+  IlmExplainLifecycleLifecycleExplain,
+  IlmExplainLifecycleLifecycleExplainManaged,
+  IlmExplainLifecycleResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import { usePhaseColors } from '@kbn/data-lifecycle-phases';
+import type { Index, Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-interface Props {
+import { PHASE_NAMES } from '../../application/lib';
+import { sendGet } from '../../application/services/http';
+import { usePollingUntil } from '../../application/hooks/use_polling_until';
+
+interface IndexLifecycleSummaryProps {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  euiTheme: EuiThemeComputed;
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({
-  index,
-  getUrlForApp,
-  euiTheme,
-}) => {
-  const { ilm: ilmData } = index;
-  // only ILM managed indices render the ILM tab
-  const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
-  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+export const IndexLifecycleSummary = ({ index, getUrlForApp }: IndexLifecycleSummaryProps) => {
+  const baseIlm = index.ilm as IlmExplainLifecycleLifecycleExplain | undefined;
+  const [ilm, setIlm] = useState<IlmExplainLifecycleLifecycleExplain | undefined>(baseIlm);
 
-  // Changing the mappings for the phases in Borealis as a mid-term solution. See https://github.com/elastic/kibana/issues/203664#issuecomment-2536593361.
+  const lastIndexNameRef = useRef<string>(index.name);
+
+  const getIlmCompletenessScore = useCallback(
+    (value: IlmExplainLifecycleLifecycleExplain | undefined) => {
+      if (!value || !value.managed) return 0;
+      const managed = value as IlmExplainLifecycleLifecycleExplainManaged;
+      return (
+        Number(Boolean(managed.policy)) +
+        Number(Boolean(managed.phase)) +
+        Number(Boolean(managed.action)) +
+        Number(Boolean(managed.step))
+      );
+    },
+    []
+  );
+
+  const getIlmFreshnessScore = useCallback(
+    (value: IlmExplainLifecycleLifecycleExplain | undefined) => {
+      if (!value || !value.managed) return 0;
+      const managed = value as IlmExplainLifecycleLifecycleExplainManaged;
+
+      return Math.max(
+        managed.lifecycle_date_millis ?? 0,
+        managed.phase_time_millis ?? 0,
+        managed.action_time_millis ?? 0,
+        managed.step_time_millis ?? 0
+      );
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (lastIndexNameRef.current !== index.name) {
+      lastIndexNameRef.current = index.name;
+      setIlm(baseIlm);
+      return;
+    }
+
+    setIlm((current) => {
+      if (!current) return baseIlm;
+      if (!baseIlm) return current;
+
+      const currentScore = getIlmCompletenessScore(current);
+      const nextScore = getIlmCompletenessScore(baseIlm);
+
+      const currentFreshness = getIlmFreshnessScore(current);
+      const nextFreshness = getIlmFreshnessScore(baseIlm);
+
+      if (
+        nextScore > currentScore ||
+        (nextScore === currentScore && nextFreshness > currentFreshness)
+      ) {
+        return baseIlm;
+      }
+
+      return current;
+    });
+  }, [baseIlm, getIlmCompletenessScore, getIlmFreshnessScore, index.name]);
+
+  const effectiveIlm = ilm?.index === index.name ? ilm : baseIlm;
+
+  const managedIlm =
+    effectiveIlm && effectiveIlm.managed
+      ? (effectiveIlm as IlmExplainLifecycleLifecycleExplainManaged)
+      : undefined;
+
+  const shouldFetchExplain = Boolean(
+    managedIlm &&
+      (!managedIlm.policy || !managedIlm.phase || !managedIlm.action || !managedIlm.step)
+  );
+
+  const pollExplain = useCallback(async () => {
+    const response = await sendGet('explain', { index: index.name });
+    const body = response as Partial<IlmExplainLifecycleResponse> | undefined;
+    const explain = body?.indices?.[index.name];
+    if (!explain) {
+      throw new Error(`Missing explain payload for index ${index.name}`);
+    }
+    return explain;
+  }, [index.name]);
+
+  const shouldStopPolling = useCallback((value: IlmExplainLifecycleLifecycleExplain) => {
+    const nextManaged = value.managed
+      ? (value as IlmExplainLifecycleLifecycleExplainManaged)
+      : undefined;
+    return Boolean(
+      nextManaged?.policy && nextManaged?.phase && nextManaged?.action && nextManaged?.step
+    );
+  }, []);
+
+  const explainPollingStatus = usePollingUntil<IlmExplainLifecycleLifecycleExplain>({
+    enabled: shouldFetchExplain,
+    pollIntervalMs: 1000,
+    maxAttempts: 6,
+    onPoll: pollExplain,
+    shouldStop: shouldStopPolling,
+    onUpdate: setIlm,
+  });
+
+  const policyName = managedIlm?.policy;
+  const phase = managedIlm?.phase;
+  const ilmEditPolicyHref = policyName
+    ? getUrlForApp('management', {
+        path: `data/index_lifecycle_management/${getPolicyEditPath(policyName)}`,
+      })
+    : undefined;
+
+  const phaseColors = usePhaseColors();
   const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
     hot: {
-      color: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
-      label: 'Hot',
+      color: phaseColors.hot,
+      label: PHASE_NAMES.hot,
     },
     warm: {
-      color: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
-      label: 'Warm',
+      color: phaseColors.warm,
+      label: PHASE_NAMES.warm,
     },
     cold: {
-      color: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
-      label: 'Cold',
+      color: phaseColors.cold,
+      label: PHASE_NAMES.cold,
     },
     frozen: {
-      color: euiTheme.colors.vis.euiColorVis4,
-      label: 'Frozen',
+      color: phaseColors.frozen,
+      label: PHASE_NAMES.frozen,
     },
     delete: {
       color: 'default',
-      label: 'Delete',
+      label: PHASE_NAMES.delete,
     },
   };
 
-  // if ilm.phase is an unexpected value, then display a default badge
-  const phaseBadgeConfig = phaseToBadgeMapping[ilm.phase as Phase] ?? {
+  const phaseBadgeFromMapping = phase ? phaseToBadgeMapping[phase as Phase] : undefined;
+  const phaseBadgeConfig = phaseBadgeFromMapping ?? {
     color: 'default',
-    label: ilm.phase,
+    label:
+      phase ??
+      i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.pendingPhaseLabel', {
+        defaultMessage: 'Pending',
+      }),
   };
   const lifecycleProperties = [
     {
@@ -83,7 +195,11 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
           defaultMessage: 'Policy name',
         }
       ),
-      description: ilm.policy!,
+      description:
+        policyName ??
+        i18n.translate('xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.unknownPolicyLabel', {
+          defaultMessage: 'Unknown',
+        }),
     },
     {
       title: i18n.translate(
@@ -95,7 +211,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
       description: <EuiBadge color={phaseBadgeConfig.color}>{phaseBadgeConfig.label}</EuiBadge>,
     },
   ];
-  if (ilm.action) {
+  if (managedIlm?.action) {
     lifecycleProperties.push({
       title: i18n.translate(
         'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTitle',
@@ -103,10 +219,10 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
           defaultMessage: 'Current action',
         }
       ),
-      description: <EuiCode>{ilm.action}</EuiCode>,
+      description: <EuiCode>{managedIlm.action}</EuiCode>,
     });
   }
-  if (ilm.action_time_millis) {
+  if (managedIlm?.action_time_millis) {
     lifecycleProperties.push({
       title: i18n.translate(
         'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeTitle',
@@ -114,10 +230,10 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
           defaultMessage: 'Current action time',
         }
       ),
-      description: moment(ilm.action_time_millis).format('YYYY-MM-DD HH:mm:ss'),
+      description: moment(managedIlm.action_time_millis).format('YYYY-MM-DD HH:mm:ss'),
     });
   }
-  if (ilm.step) {
+  if (managedIlm?.step) {
     lifecycleProperties.push({
       title: i18n.translate(
         'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentStepTitle',
@@ -125,7 +241,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
           defaultMessage: 'Current step',
         }
       ),
-      description: <EuiCode>{ilm.step}</EuiCode>,
+      description: <EuiCode>{managedIlm.step}</EuiCode>,
     });
   }
   return (
@@ -150,18 +266,14 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink
-                  color="primary"
-                  href={getUrlForApp('management', {
-                    path: `data/index_lifecycle_management/${getPolicyEditPath(ilm.policy!)}`,
-                  })}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    defaultMessage="Edit policy in ILM"
-                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.ilmLinkLabel"
-                  />
-                </EuiLink>
+                {ilmEditPolicyHref ? (
+                  <EuiLink color="primary" href={ilmEditPolicyHref} target="_blank">
+                    <FormattedMessage
+                      defaultMessage="Edit policy in ILM"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.ilmLinkLabel"
+                    />
+                  </EuiLink>
+                ) : null}
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -180,7 +292,33 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
             min-width: 600px;
           `}
         >
-          {ilm.step_info && ilm.step === 'ERROR' && (
+          {shouldFetchExplain && explainPollingStatus === 'polling' && (
+            <>
+              <EuiPanel hasBorder={true} grow={false} data-test-subj="ilmExplainPendingPanel">
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.refreshingExplainMessage"
+                    defaultMessage="Refreshing lifecycle details…"
+                  />
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+          {shouldFetchExplain && explainPollingStatus === 'exhausted' && (
+            <>
+              <EuiPanel hasBorder={true} grow={false} data-test-subj="ilmExplainFailedPanel">
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.refreshingExplainFailedMessage"
+                    defaultMessage="Unable to refresh lifecycle details."
+                  />
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+          {managedIlm?.step_info && managedIlm.step === 'ERROR' && (
             // there is an error
             <>
               <EuiPanel
@@ -199,7 +337,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
                   <EuiSpacer />
                   <EuiCodeBlock language="json" isCopyable>
                     {JSON.stringify(
-                      { failed_step: ilm.failed_step, step_info: ilm.step_info },
+                      { failed_step: managedIlm.failed_step, step_info: managedIlm.step_info },
                       null,
                       2
                     )}
@@ -209,7 +347,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
               <EuiSpacer />
             </>
           )}
-          {ilm.step_info && ilm.step !== 'ERROR' && (
+          {managedIlm?.step_info && managedIlm.step !== 'ERROR' && (
             // ILM is waiting for the step to complete
             <>
               <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
@@ -222,14 +360,14 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
                   </h3>
                   <EuiSpacer />
                   <EuiCodeBlock language="json" isCopyable>
-                    {JSON.stringify(ilm.step_info, null, 2)}
+                    {JSON.stringify(managedIlm.step_info, null, 2)}
                   </EuiCodeBlock>
                 </EuiText>
               </EuiPanel>
               <EuiSpacer />
             </>
           )}
-          {ilm.phase_execution && (
+          {managedIlm?.phase_execution && (
             <EuiPanel hasBorder={true} grow={false} data-test-subj="phaseDefinitionPanel">
               <EuiText size="xs">
                 <h3>
@@ -241,7 +379,7 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({
               </EuiText>
               <EuiSpacer />
               <EuiCodeBlock language="json" isCopyable>
-                {JSON.stringify(ilm.phase_execution, null, 2)}
+                {JSON.stringify(managedIlm.phase_execution, null, 2)}
               </EuiCodeBlock>
             </EuiPanel>
           )}
@@ -260,8 +398,10 @@ export const indexLifecycleTab: IndexDetailsTab = {
     />
   ),
   order: 50,
-  renderTabContent: IndexLifecycleSummary,
+  renderTabContent: ({ index, getUrlForApp }) => (
+    <IndexLifecycleSummary index={index} getUrlForApp={getUrlForApp} />
+  ),
   shouldRenderTab: ({ index }) => {
-    return !!index.ilm && index.ilm.managed;
+    return Boolean(index.ilm && index.ilm.managed);
   },
 };

@@ -6,26 +6,28 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules, deleteRule } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
+  createDeprecatedPrebuiltRuleAssetSavedObjects,
   installPrebuiltRulesAndTimelines,
   getPrebuiltRulesAndTimelinesStatus,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   getInstalledRules,
+  reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
-import { deleteAllRules, deleteRule } from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   describe('@ess @serverless @skipInServerlessMKI Install from mocked prebuilt rule assets', () => {
     beforeEach(async () => {
@@ -203,7 +205,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await installPrebuiltRulesAndTimelines(es, supertest);
 
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: {
               rule_id: 'rule-1',
@@ -230,7 +232,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules_installed).toBe(0);
         expect(response.rules_updated).toBe(1);
 
-        const { body: prebuiltRule } = await securitySolutionApi.readRule({
+        const { body: prebuiltRule } = await detectionsApi.readRule({
           query: { rule_id: 'rule-1' },
         });
 
@@ -253,7 +255,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
         await installPrebuiltRulesAndTimelines(es, supertest);
 
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: {
               rule_id: 'rule-1',
@@ -279,7 +281,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.rules_installed).toBe(0);
         expect(response.rules_updated).toBe(1);
 
-        const { body: prebuiltRule } = await securitySolutionApi.readRule({
+        const { body: prebuiltRule } = await detectionsApi.readRule({
           query: { rule_id: 'rule-1' },
         });
 
@@ -292,6 +294,49 @@ export default ({ getService }: FtrProviderContext): void => {
             type: 'detection',
           }),
         ]);
+      });
+
+      describe('Deprecated rule exclusion', () => {
+        it('does not install deprecated rule assets when installing all rules', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'active-rule-1', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'active-rule-2', version: 1 }),
+          ]);
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          const body = await installPrebuiltRules(es, supertest);
+
+          const installedRuleIds = body.results.created.map((r) => r.rule_id);
+          expect(installedRuleIds).toContain('active-rule-1');
+          expect(installedRuleIds).toContain('active-rule-2');
+          expect(installedRuleIds).not.toContain('deprecated-rule-1');
+          expect(body.summary.succeeded).toBe(2);
+        });
+
+        it('installs zero rules when only deprecated rule assets are present', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          const body = await installPrebuiltRules(es, supertest);
+
+          expect(body.summary.succeeded).toBe(0);
+          expect(body.results.created).toHaveLength(0);
+        });
+
+        it('does not include deprecated rule assets in the install review after the bootstrap endpoint is called', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 1 },
+          ]);
+
+          await detectionsApi.bootstrapPrebuiltRules().expect(200);
+
+          const response = await reviewPrebuiltRulesToInstall(supertest);
+          const ruleIds = response.rules.map((r: { rule_id: string }) => r.rule_id);
+          expect(ruleIds).not.toContain('deprecated-rule-1');
+        });
       });
 
       describe('legacy (PUT /api/detection_engine/rules/prepackaged)', () => {

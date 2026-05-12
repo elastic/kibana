@@ -9,17 +9,24 @@
 
 export type {
   // commands
+  BulkCreateWorkflowsCommand,
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   // execution engine
   Provider,
   ProviderInput,
   RunWorkflowCommand,
+  RunStepCommand,
   RunWorkflowResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
+  StackFrame,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -32,46 +39,54 @@ export type {
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  WorkflowStepExecutionListDto,
+  WorkflowMgetResponseDto,
+  ChildWorkflowExecutionItem,
+  // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // api types
+  WorkflowsSearchParams,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorContractUnion,
+  InternalConnectorContract,
+  DynamicConnectorContract,
+  BaseConnectorContract,
+  StepStabilityLevel,
+  HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
+  StepPropertyHandler,
+  PropertySelectionHandler,
+  SelectionOption,
+  SelectionDetails,
+  SelectionContext,
+  StepSelectionValues,
+  RequestOptions,
+  GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
 export {
   // command schemas
+  BulkCreateWorkflowsCommandSchema,
   CreateWorkflowCommandSchema,
   ExecutionStatus,
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
+  // shared constants
+  MAX_WORKFLOW_YAML_LENGTH,
 } from './v1';
-
-export type {
-  GraphNode,
-  AtomicGraphNode,
-  EnterConditionBranchNode,
-  EnterConditionBranchNodeSchema,
-  EnterForeachNode,
-  EnterIfNode,
-  EnterRetryNode,
-  ExitConditionBranchNode,
-  ExitConditionBranchNodeSchema,
-  ExitForeachNode,
-  ExitIfNode,
-  ExitRetryNode,
-  EnterContinueNode,
-  ExitContinueNode,
-  WaitGraphNodeSchema,
-  WaitGraphNode,
-  HttpGraphNode,
-  HttpGraphNodeSchema,
-  EnterTryBlockNode,
-  ExitTryBlockNode,
-  EnterNormalPathNode,
-  ExitNormalPathNode,
-  EnterFallbackPathNode,
-  ExitFallbackPathNode,
-  UnionExecutionGraphNode,
-} from './execution';

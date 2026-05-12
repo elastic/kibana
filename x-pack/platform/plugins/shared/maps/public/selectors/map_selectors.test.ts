@@ -92,6 +92,7 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       searchSessionMapBuffer,
+      undefined,
       isReadOnly,
       executionContext
     );
@@ -110,10 +111,50 @@ describe('getDataFilters', () => {
       embeddableSearchContext,
       searchSessionId,
       undefined,
+      undefined,
       isReadOnly,
       executionContext
     );
     expect(dataFilters.buffer).toEqual(mapBuffer);
+  });
+
+  test('should include projectRouting in data filters when provided', () => {
+    const projectRouting = '_alias:_origin';
+    const dataFilters = getDataFilters.resultFunc(
+      mapExtent,
+      mapBuffer,
+      mapZoom,
+      timeFilters,
+      timeslice,
+      query,
+      filters,
+      embeddableSearchContext,
+      searchSessionId,
+      searchSessionMapBuffer,
+      projectRouting,
+      isReadOnly,
+      executionContext
+    );
+    expect(dataFilters.projectRouting).toBe('_alias:_origin');
+  });
+
+  test('should include projectRouting as undefined in data filters when not provided', () => {
+    const dataFilters = getDataFilters.resultFunc(
+      mapExtent,
+      mapBuffer,
+      mapZoom,
+      timeFilters,
+      timeslice,
+      query,
+      filters,
+      embeddableSearchContext,
+      searchSessionId,
+      searchSessionMapBuffer,
+      undefined,
+      isReadOnly,
+      executionContext
+    );
+    expect(dataFilters.projectRouting).toBeUndefined();
   });
 });
 

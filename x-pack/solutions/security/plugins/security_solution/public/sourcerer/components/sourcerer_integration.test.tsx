@@ -9,13 +9,13 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
-import { SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
 import { useSignalHelpers } from '../containers/use_signal_helpers';
-import { sourcererActions, sourcererModel } from '../store';
+import { sourcererActions } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 import { useSourcererDataView } from '../containers';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockDispatch = jest.fn();
 
@@ -54,7 +54,7 @@ jest.mock('../../common/utils/global_query_string', () => {
 });
 
 const defaultProps = {
-  scope: sourcererModel.SourcererScopeName.default,
+  scope: PageScope.default,
 };
 
 const checkOptionsAndSelections = (wrapper: ReactWrapper, patterns: string[]) => ({
@@ -93,8 +93,8 @@ describe.skip('Sourcerer integration tests', () => {
       ],
       sourcererScopes: {
         ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.default]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+        [PageScope.default]: {
+          ...mockGlobalState.sourcerer.sourcererScopes[PageScope.default],
           loading: false,
           selectedDataViewId: id,
           selectedPatterns: patternListNoSignals.slice(0, 2),
@@ -134,7 +134,7 @@ describe.skip('Sourcerer integration tests', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.default,
+        id: PageScope.default,
         selectedDataViewId: '1234',
         selectedPatterns: ['fakebeat-*'],
       })

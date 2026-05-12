@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const spacesService = getService('spaces');
   const securityService = getService('security');
-  const inspector = getService('inspector');
-  const { common, header, discover, security, timePicker, searchSessionsManagement } =
-    getPageObjects([
-      'common',
-      'header',
-      'discover',
-      'security',
-      'timePicker',
-      'searchSessionsManagement',
-    ]);
-  const browser = getService('browser');
+  const filterBar = getService('filterBar');
+  const { common, header, discover, security, timePicker } = getPageObjects([
+    'common',
+    'header',
+    'discover',
+    'security',
+    'timePicker',
+  ]);
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
@@ -39,39 +34,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.waitForDocTableLoadingComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.save();
-        await searchSessions.expectState('backgroundCompleted');
-        await inspector.open();
-
-        const savedSessionId = await (
-          await testSubjects.find('inspectorRequestSearchSessionId')
-        ).getAttribute('data-search-session-id');
-        await inspector.close();
-
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
-
-        // purge client side search cache
-        // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
-        await browser.refresh();
-
-        const searchSessionList = await searchSessionsManagement.getList();
-        const searchSessionItem = searchSessionList.find(
-          (session) => session.id === savedSessionId
+        // Add slow query through DSL so we can background it
+        await filterBar.addDslFilter(
+          JSON.stringify({
+            error_query: {
+              indices: [
+                {
+                  error_type: 'none',
+                  name: '*',
+                  stall_time_seconds: 5,
+                },
+              ],
+            },
+          }),
+          false
         );
+        await timePicker.setDefaultAbsoluteRange();
+        await searchSessions.save({ withRefresh: true });
 
-        if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
+        // Dismiss the "Background search created" toast
+        await toasts.dismissAllWithChecks();
+        await searchSessions.openCompletedSearchFromToast();
 
-        // navigate to discover
-        await searchSessionItem.view();
-
+        // Wait for discover to load
         await header.waitUntilLoadingHasFinished();
         await discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
-        await searchSessions.expectState('restored');
-        expect(await toasts.getCount()).to.be(0); // no session restoration related warnings
+        await searchSessions.expectNoErrorsOrWarnings();
       });
     });
     describe('Disabled storing search sessions in space', () => {
@@ -89,8 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await discover.waitForDocTableLoadingComplete();
 
-        await searchSessions.expectState('completed');
-        await searchSessions.disabledOrFail();
+        await searchSessions.missingOrFail();
       });
     });
   });

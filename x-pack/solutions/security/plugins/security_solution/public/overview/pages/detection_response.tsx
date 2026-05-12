@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { SocTrends } from '../components/detection_response/soc_trends';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -19,7 +19,6 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
-
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
@@ -42,7 +41,7 @@ const DetectionResponseComponent = () => {
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -54,11 +53,10 @@ const DetectionResponseComponent = () => {
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canReadCases = userCasesPermissions.read;
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
-  const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 
   if (!canReadAlerts && !canReadCases) {
@@ -75,10 +73,9 @@ const DetectionResponseComponent = () => {
         <>
           <FiltersGlobal>
             <SiemSearchBar
+              dataView={experimentalDataView}
               id={InputsModelId.global}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
+              sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
             />
           </FiltersGlobal>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
@@ -121,11 +118,6 @@ const DetectionResponseComponent = () => {
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    {isSocTrendsEnabled && (
-                      <EuiFlexItem grow={false}>
-                        <SocTrends signalIndexName={signalIndexName} />
-                      </EuiFlexItem>
-                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
 

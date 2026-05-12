@@ -6,66 +6,35 @@
  */
 
 import React from 'react';
-import { mapPercentageToQuality } from '@kbn/dataset-quality-plugin/common';
-import { DatasetQualityIndicator, calculatePercentage } from '@kbn/dataset-quality-plugin/public';
-import useAsync from 'react-use/lib/useAsync';
-import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import type { StreamHistogramFetch } from '../../hooks/use_streams_histogram_fetch';
+import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
+import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
+import { EuiLink } from '@elastic/eui';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function DataQualityColumn({
-  histogramQueryFetch,
+  streamName,
+  quality,
+  isLoading,
 }: {
-  histogramQueryFetch: StreamHistogramFetch;
+  streamName: string;
+  quality: QualityIndicators;
+  isLoading: boolean;
 }) {
-  const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
-  const failedDocsResult = useAsync(
-    () => histogramQueryFetch.failedDocCount,
-    [histogramQueryFetch]
+  const router = useStreamsAppRouter();
+
+  return (
+    <EuiLink
+      href={router.link('/{key}/management/{tab}', {
+        path: { key: streamName, tab: 'dataQuality' },
+      })}
+      data-test-subj={`streamsDataQualityLink-${streamName}`}
+    >
+      <DatasetQualityIndicator
+        dataTestSubj={`dataQualityIndicator-${streamName}`}
+        quality={quality}
+        isLoading={isLoading}
+        showTooltip={true}
+      />
+    </EuiLink>
   );
-  const degradedDocsResult = useAsync(
-    () => histogramQueryFetch.degradedDocCount,
-    [histogramQueryFetch]
-  );
-
-  const allTimeseries = React.useMemo(
-    () =>
-      esqlResultToTimeseries({
-        result: histogramQueryResult,
-        metricNames: ['doc_count'],
-      }),
-    [histogramQueryResult]
-  );
-
-  const docCount = React.useMemo(
-    () =>
-      allTimeseries.reduce(
-        (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
-        0
-      ),
-    [allTimeseries]
-  );
-
-  const degradedDocCount = degradedDocsResult?.value
-    ? Number(degradedDocsResult.value?.values?.[0]?.[0])
-    : 0;
-  const failedDocCount = failedDocsResult?.value
-    ? Number(failedDocsResult.value?.values?.[0]?.[0])
-    : 0;
-
-  const degradedPercentage = calculatePercentage({
-    totalDocs: docCount,
-    count: degradedDocCount,
-  });
-
-  const failedPercentage = calculatePercentage({
-    totalDocs: docCount,
-    count: failedDocCount,
-  });
-
-  const quality = mapPercentageToQuality([degradedPercentage, failedPercentage]);
-
-  const isLoading =
-    histogramQueryResult.loading || failedDocsResult?.loading || degradedDocsResult.loading;
-
-  return <DatasetQualityIndicator quality={quality} isLoading={isLoading} />;
 }

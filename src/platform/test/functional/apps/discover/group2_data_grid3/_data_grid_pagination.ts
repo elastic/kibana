@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const { common, discover, header, timePicker, dashboard } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, dashboard } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'header',
@@ -106,7 +107,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ...defaultSettings,
         'discover:sampleSize': 12,
         'discover:sampleRowsPerPage': 6,
-        hideAnnouncements: true,
       });
 
       // first render is based on settings value
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(savedSearchTitle);
 
       // start a new search session
-      await testSubjects.click('discoverNewButton');
+      await appMenu.clickMenuItem('discoverNewButton');
       await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);
@@ -138,7 +138,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultAbsoluteRange();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(savedSearchTitle);
       await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
@@ -158,7 +158,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         ...defaultSettings,
         'discover:sampleRowsPerPage': rowsPerPage,
-        hideAnnouncements: true,
       });
 
       await common.navigateToApp('discover');
@@ -183,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultAbsoluteRange();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch(savedSearchESQL);
       await header.waitUntilLoadingHasFinished();
 

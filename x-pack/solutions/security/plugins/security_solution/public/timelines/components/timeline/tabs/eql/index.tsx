@@ -15,7 +15,9 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -30,7 +32,6 @@ import { useTimelineEvents } from '../../../../containers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
@@ -44,12 +45,16 @@ import { EqlTabHeader } from './header';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
-import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
-import { NotesFlyout } from '../../properties/notes_flyout';
 import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 import { TimelineRefetch } from '../../refetch_timeline';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { isAttackDiscoveryRow } from '../../unified_components/data_table/is_attack_discovery_row';
+import {
+  AttackDetailsLeftPanelKey,
+  AttackDetailsRightPanelKey,
+} from '../../../../../flyout/attack_details/constants/panel_keys';
+import { NOTES_TAB_ID } from '../../../../../flyout/attack_details/constants/left_panel_paths';
 
 export type Props = TimelineTabCommonProps & PropsFromRedux;
 
@@ -64,7 +69,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   timerangeKind,
-  pinnedEventIds,
   eventIdToNoteIds,
 }) => {
   /*
@@ -85,10 +89,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     loading: oldSourcererLoading,
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
   const experimentalDataViewId = experimentalDataView.id ?? null;
 
   const dataViewId = useMemo(
@@ -133,22 +137,25 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [end, isBlankTimeline, dataViewLoading, start]
   );
 
-  const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      eqlOptions: restEqlOption,
-      fields: timelineQueryFieldsFromColumns,
-      filterQuery: eqlQuery ?? '',
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: 'eql',
-      limit: sampleSize,
-      runtimeMappings,
-      skip: !canQueryTimeline(),
-      startDate: start,
-      timerangeKind,
-    });
+  const [
+    dataLoadingState,
+    { events, rawEvents, inspect, totalCount, loadNextBatch, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    eqlOptions: restEqlOption,
+    fields: timelineQueryFieldsFromColumns,
+    filterQuery: eqlQuery ?? '',
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: 'eql',
+    limit: sampleSize,
+    runtimeMappings,
+    skip: !canQueryTimeline(),
+    startDate: start,
+    timerangeKind,
+    dateRangeField: experimentalDataView?.getTimeField()?.name ?? '@timestamp',
+  });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
 
@@ -172,29 +179,37 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
-  const {
-    associateNote,
-    notes,
-    isNotesFlyoutVisible,
-    closeNotesFlyout,
-    showNotesFlyout,
-    eventId: noteEventId,
-    setNotesEventId,
-  } = useNotesInFlyout({
-    eventIdToNoteIds,
-    refetch,
-    timelineId,
-    activeTab: TimelineTabs.eql,
-  });
 
   const onToggleShowNotes = useCallback(
-    (eventId?: string) => {
+    (eventId?: string, eventData?: DataTableRecord & TimelineItem) => {
+      if (!eventId) {
+        return;
+      }
+
+      const isAttackRow = eventData != null && isAttackDiscoveryRow(eventData);
       const indexName = selectedPatterns.join(',');
-      if (eventId && !securitySolutionNotesDisabled) {
+
+      if (isAttackRow) {
+        openFlyout({
+          right: {
+            id: AttackDetailsRightPanelKey,
+            params: {
+              attackId: eventId,
+              indexName,
+            },
+          },
+          left: {
+            id: AttackDetailsLeftPanelKey,
+            path: {
+              tab: NOTES_TAB_ID,
+            },
+            params: {
+              attackId: eventId,
+              indexName,
+            },
+          },
+        });
+      } else {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -216,36 +231,23 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
-          location: timelineId,
-        });
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'left',
-        });
-      } else {
-        if (eventId) {
-          setNotesEventId(eventId);
-          showNotesFlyout();
-        }
       }
+      telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
+        location: timelineId,
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: timelineId,
+        panel: 'left',
+      });
     },
-    [
-      openFlyout,
-      securitySolutionNotesDisabled,
-      selectedPatterns,
-      telemetry,
-      timelineId,
-      setNotesEventId,
-      showNotesFlyout,
-    ]
+    [openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
   const leadingControlColumns = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
-    pinnedEventIds,
+    rawEvents,
     eventIdToNoteIds,
     onToggleShowNotes,
   });
@@ -272,20 +274,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [activeTab, newDataViewPickerEnabled, setTimelineFullScreen, timelineFullScreen, timelineId]
   );
 
-  const NotesFlyoutMemo = useMemo(() => {
-    return (
-      <NotesFlyout
-        associateNote={associateNote}
-        eventId={noteEventId}
-        show={isNotesFlyoutVisible}
-        notes={notes}
-        onClose={closeNotesFlyout}
-        onCancel={closeNotesFlyout}
-        timelineId={timelineId}
-      />
-    );
-  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
-
   return (
     <>
       <TimelineRefetch
@@ -301,7 +289,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           <EventsCountBadge data-test-subj="eql-events-count">{totalCount}</EventsCountBadge>
         ) : null}
       </InPortal>
-      {NotesFlyoutMemo}
       <FullWidthFlexGroup>
         <UnifiedTimelineBody
           header={unifiedHeader}
@@ -334,15 +321,8 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { timelineId }: TimelineTabCommonProps) => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const {
-      activeTab,
-      columns,
-      eqlOptions,
-      itemsPerPage,
-      itemsPerPageOptions,
-      pinnedEventIds,
-      eventIdToNoteIds,
-    } = timeline;
+    const { activeTab, columns, eqlOptions, itemsPerPage, itemsPerPageOptions, eventIdToNoteIds } =
+      timeline;
 
     return {
       activeTab,
@@ -353,7 +333,6 @@ const makeMapStateToProps = () => {
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
-      pinnedEventIds,
       eventIdToNoteIds,
       start: input.timerange.from,
       timerangeKind: input.timerange.kind,
@@ -377,7 +356,6 @@ const EqlTabContent = connector(
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.timelineId === nextProps.timelineId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.pinnedEventIds, nextProps.pinnedEventIds) &&
       deepEqual(prevProps.eventIdToNoteIds, nextProps.eventIdToNoteIds) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions)
   )

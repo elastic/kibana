@@ -21,26 +21,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import React, { useCallback, useState } from 'react';
 import { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-  PATTERN_ANALYSIS_DATA_VIEW_REF_NAME,
-} from '@kbn/aiops-log-pattern-analysis/constants';
+import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import type { PatternAnalysisEmbeddableState } from '../../embeddables/pattern_analysis/types';
-import type { RandomSamplerOption, RandomSamplerProbability } from './sampling_menu/random_sampler';
+import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-import { getDataviewReferences } from '../../embeddables/get_dataview_references';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 interface AttachmentsMenuProps {
   randomSamplerMode: RandomSamplerOption;
@@ -84,29 +74,24 @@ export const AttachmentsMenu = ({
     async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const embeddableInput: Partial<PatternAnalysisEmbeddableState> = {
-        title: newTitle,
-        description: newDescription,
-        dataViewId: dataView.id,
-        fieldName: selectedField,
-        randomSamplerMode,
-        randomSamplerProbability,
-        minimumTimeRangeOption: 'No minimum',
-        ...(applyTimeRange && { timeRange }),
-      };
-
       const state = {
         serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, PATTERN_ANALYSIS_DATA_VIEW_REF_NAME),
+          title: newTitle,
+          description: newDescription,
+          dataViewId: dataView.id,
+          fieldName: selectedField,
+          randomSamplerMode,
+          randomSamplerProbability,
+          minimumTimeRangeOption: 'No minimum',
+          ...(applyTimeRange && { timeRange }),
         },
         type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },
@@ -155,7 +140,7 @@ export const AttachmentsMenu = ({
                       minimumTimeRangeOption: 'No minimum',
                       randomSamplerMode,
                       randomSamplerProbability,
-                      timeRange,
+                      time_range: timeRange,
                     });
                   },
                 },
@@ -235,7 +220,7 @@ export const AttachmentsMenu = ({
                 color="text"
                 display="base"
                 isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

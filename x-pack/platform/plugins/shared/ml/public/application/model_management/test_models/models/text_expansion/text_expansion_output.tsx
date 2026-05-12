@@ -78,7 +78,7 @@ export const DocumentResult: FC<{
               <EuiTextColor color={statInfo.color}>
                 <span>
                   {statInfo.icon !== null ? (
-                    <EuiIcon type={statInfo.icon} color={statInfo.color} />
+                    <EuiIcon aria-hidden={true} type={statInfo.icon} color={statInfo.color} />
                   ) : null}
                   {statInfo.text}
                 </span>
@@ -122,7 +122,7 @@ export const DocumentResultWithTokens: FC<{
               <EuiTextColor color={statInfo.color}>
                 <span>
                   {statInfo.icon !== null ? (
-                    <EuiIcon type={statInfo.icon} color={statInfo.color} />
+                    <EuiIcon aria-hidden={true} type={statInfo.icon} color={statInfo.color} />
                   ) : null}
                   {statInfo.text}
                 </span>
@@ -148,7 +148,7 @@ export const DocumentResultWithTokens: FC<{
         >
           <>
             <EuiSpacer size="s" />
-            <EuiCallOut color="primary">
+            <EuiCallOut announceOnMount={false} color="primary">
               <FormattedMessage
                 id="xpack.ml.trainedModels.testModelsFlyout.textExpansion.output.tokenHelpInfo"
                 defaultMessage="Top {count} extracted tokens, which are not synonyms of the query, represent linguistic elements

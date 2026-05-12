@@ -57,7 +57,8 @@ const dataWithFormats: Datatable = {
 };
 const getFormatSpy: jest.Mock = jest.fn();
 const convertSpy: jest.Mock = jest.fn((x) => x);
-getFormatSpy.mockReturnValue({ convert: convertSpy });
+const paramsSpy: jest.Mock = jest.fn(() => ({}));
+getFormatSpy.mockReturnValue({ convert: convertSpy, params: paramsSpy });
 
 const defaultProps: Omit<XYChartRenderProps, 'args'> = {
   data: dataPluginMock.createStartContract(),
@@ -97,7 +98,7 @@ describe('provides correct series naming', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     convertSpy.mockImplementation((d) => d);
-    getFormatSpy.mockReturnValue({ convert: convertSpy });
+    getFormatSpy.mockReturnValue({ convert: convertSpy, params: paramsSpy });
   });
 
   test('simplest xy chart without human-readable name', async () => {
@@ -226,6 +227,7 @@ describe('provides correct series naming', () => {
       layers: [
         {
           ...args.layers[0],
+          xScaleType: XScaleTypes.ORDINAL,
           xAccessor: 'c',
           accessors: ['a'],
           splitAccessors: ['d'],
@@ -257,6 +259,7 @@ describe('provides correct series naming', () => {
       layers: [
         {
           ...args.layers[0],
+          xScaleType: XScaleTypes.ORDINAL,
           accessors: ['a', 'b'],
           splitAccessors: ['d'],
           columnToLabel: '{"a": "Label A","b": "Label B"}',
@@ -281,6 +284,7 @@ describe('provides correct series naming', () => {
       layers: [
         {
           ...args.layers[0],
+          xScaleType: XScaleTypes.ORDINAL,
           accessors: ['a', 'b'],
           splitAccessors: ['d'],
           columnToLabel: '{"a": "Label A","b": "Label B"}',

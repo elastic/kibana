@@ -133,7 +133,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                   defaultMessage: 'Sort host handle',
                 })}
               >
-                <EuiIcon color="text" type="grab" />
+                <EuiIcon color="text" type="dragVertical" />
               </DraggableDiv>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -379,7 +379,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
           disabled={disabled}
           size="xs"
           flush="left"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={addRowHandler}
         >
           {isUrl ? (

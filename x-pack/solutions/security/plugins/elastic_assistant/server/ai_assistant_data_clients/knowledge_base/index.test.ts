@@ -13,7 +13,7 @@ import {
   getKnowledgeBaseEntrySearchEsMock,
 } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import { authenticatedUser } from '../../__mocks__/user';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
@@ -589,7 +589,9 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
   describe('getAssistantTools', () => {
     it('should return structured tools for relevant index entries', async () => {
-      IndexPatternsFetcher.prototype.getExistingIndices = jest.fn().mockResolvedValue(['test']);
+      IndexPatternsFetcher.prototype.getIndexPatternMatches = jest
+        .fn()
+        .mockResolvedValue({ matchedIndexPatterns: ['test'] });
       esClientMock.search.mockReturnValue(
         // @ts-expect-error not full response interface
         getKnowledgeBaseEntrySearchEsMock('index')

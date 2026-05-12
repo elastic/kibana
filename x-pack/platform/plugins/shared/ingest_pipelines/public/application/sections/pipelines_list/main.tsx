@@ -171,7 +171,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         <EuiButton
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           data-test-subj="createPipelineDropdown"
           key="createPipelineDropdown"
           onClick={() => setShowPopover((previousBool) => !previousBool)}
@@ -231,7 +231,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
           <span data-test-subj="appTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.list.listTitle"
-              defaultMessage="Ingest Pipelines"
+              defaultMessage="Ingest pipelines"
             />
           </span>
         }

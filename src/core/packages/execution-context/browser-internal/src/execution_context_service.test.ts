@@ -57,6 +57,7 @@ describe('ExecutionContextService', () => {
         foo: 1,
       },
       description: 'first set',
+      space: 'awesome-space',
     });
 
     expect(execContext.get()).toMatchInlineSnapshot(
@@ -65,6 +66,7 @@ describe('ExecutionContextService', () => {
         description: 'first set',
         type: 'ghf',
         url: '/',
+        space: 'awesome-space',
       },
       `
       Object {
@@ -73,6 +75,7 @@ describe('ExecutionContextService', () => {
           "foo": 1,
         },
         "name": "app1",
+        "space": "awesome-space",
         "type": "ghf",
         "url": "/",
       }

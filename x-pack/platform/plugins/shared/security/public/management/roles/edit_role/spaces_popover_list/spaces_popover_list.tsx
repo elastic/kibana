@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './spaces_popover_list.scss';
-
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -16,8 +14,10 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
+  useEuiFontSize,
 } from '@elastic/eui';
-import React, { Component, memo, Suspense } from 'react';
+import { css } from '@emotion/react';
+import React, { Component, type FC, memo, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,6 +35,26 @@ interface State {
   isPopoverOpen: boolean;
 }
 
+interface ButtonProps {
+  onButtonClick: () => void;
+  buttonText: string;
+}
+
+const EmptyButton: FC<ButtonProps> = ({ onButtonClick, buttonText }) => {
+  const { fontSize } = useEuiFontSize('xs');
+  return (
+    <EuiButtonEmpty size={'xs'} onClick={onButtonClick}>
+      <span
+        css={css`
+          font-size: ${fontSize};
+        `}
+      >
+        {buttonText}
+      </span>
+    </EuiButtonEmpty>
+  );
+};
+
 export class SpacesPopoverList extends Component<Props, State> {
   public state = {
     allowSpacesListFocus: false,
@@ -43,9 +63,7 @@ export class SpacesPopoverList extends Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiButtonEmpty size={'xs'} onClick={this.onButtonClick}>
-        <span className="secSpacesPopoverList__buttonText">{this.props.buttonText}</span>
-      </EuiButtonEmpty>
+      <EmptyButton onButtonClick={this.onButtonClick} buttonText={this.props.buttonText} />
     );
 
     return (
@@ -57,6 +75,12 @@ export class SpacesPopoverList extends Component<Props, State> {
         panelPaddingSize="none"
         anchorPosition="downLeft"
         ownFocus={false}
+        aria-label={i18n.translate(
+          'xpack.security.management.editRole.spacesPopoverList.popoverAriaLabel',
+          {
+            defaultMessage: 'Spaces',
+          }
+        )}
       >
         <EuiFocusTrap>{this.getMenuPanel()}</EuiFocusTrap>
       </EuiPopover>
@@ -77,7 +101,6 @@ export class SpacesPopoverList extends Component<Props, State> {
 
     return (
       <EuiSelectable
-        className={'spcMenu'}
         title={i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
           defaultMessage: 'Spaces',
         })}
