@@ -235,5 +235,14 @@ export const dispatchToolCall = async (
   if (!definition) {
     return { message: { success: false, error: `Unknown tool: ${call.toolName}` } };
   }
-  return definition.execute(call.args, { state, deps });
+  const parsed = definition.schema.safeParse(call.args);
+  if (!parsed.success) {
+    return {
+      message: {
+        success: false,
+        error: `Invalid arguments for ${call.toolName}: ${parsed.error.message}`,
+      },
+    };
+  }
+  return definition.execute(parsed.data, { state, deps });
 };

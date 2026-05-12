@@ -68,4 +68,18 @@ describe('dispatchToolCall', () => {
     expect(result.message.success).toBe(false);
     expect(result.message.error).toMatch(/unknown tool/i);
   });
+
+  it('rejects args that fail schema validation without invoking the handler', async () => {
+    // set_yaml requires `args.yaml: string` — missing it would crash the
+    // handler if dispatch didn't validate first.
+    const result = await dispatchToolCall(
+      { yaml: '' },
+      { toolCallId: 't1', toolName: 'set_yaml', args: {} },
+      baseDeps
+    );
+
+    expect(result.yaml).toBeUndefined();
+    expect(result.message.success).toBe(false);
+    expect(result.message.error).toMatch(/invalid arguments for set_yaml/i);
+  });
 });
