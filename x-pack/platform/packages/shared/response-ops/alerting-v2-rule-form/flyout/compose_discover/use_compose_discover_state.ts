@@ -13,10 +13,13 @@ import type {
   SandboxTabConfig,
 } from './types';
 
-const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => ({
+const createInitialState = (
+  mode: ComposeDiscoverMode,
+  initialSandboxQuery = ''
+): ComposeDiscoverState => ({
   mode,
   step: 0,
-  fullQuery: '',
+  sandbox: { query: initialSandboxQuery },
   activeTab: 'alert',
   childOpen: mode === 'create',
   queryCommitted: mode === 'edit',
@@ -42,8 +45,8 @@ export function getSandboxTabConfig(_state: ComposeDiscoverState): SandboxTabCon
 
 function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): ComposeDiscoverState {
   switch (action.type) {
-    case 'SET_FULL_QUERY':
-      return { ...state, fullQuery: action.query };
+    case 'SET_SANDBOX_QUERY':
+      return { ...state, sandbox: { ...state.sandbox, query: action.query } };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
@@ -65,13 +68,21 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
       return { ...state, step: action.step, childOpen: true };
     case 'CLOSE_CHILD':
       return { ...state, childOpen: false };
-    case 'COMMIT_CHILD_QUERY':
-      return { ...state, fullQuery: action.fullQuery, childOpen: false, queryCommitted: true };
+    case 'COMMIT_SANDBOX_QUERY':
+      return {
+        ...state,
+        sandbox: { ...state.sandbox, query: action.query },
+        childOpen: false,
+        queryCommitted: true,
+      };
     default:
       return state;
   }
 }
 
-export const useComposeDiscoverState = (mode: ComposeDiscoverMode = 'create') => {
-  return useReducer(reducer, mode, createInitialState);
+export const useComposeDiscoverState = (
+  mode: ComposeDiscoverMode = 'create',
+  initialSandboxQuery = ''
+) => {
+  return useReducer(reducer, undefined, () => createInitialState(mode, initialSandboxQuery));
 };

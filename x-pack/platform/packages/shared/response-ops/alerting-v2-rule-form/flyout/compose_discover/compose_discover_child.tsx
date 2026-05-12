@@ -60,7 +60,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   services,
   onClose,
 }) => {
-  const [localQuery, setLocalQuery] = useState(state.fullQuery);
+  const [localQuery, setLocalQuery] = useState(state.sandbox.query);
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
   // preview window for testing the query, not a rule configuration field.
@@ -145,7 +145,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   }, [run]);
 
   const handleDone = useCallback(() => {
-    dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: localQuery });
+    dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: localQuery });
     onClose();
   }, [localQuery, dispatch, onClose]);
 

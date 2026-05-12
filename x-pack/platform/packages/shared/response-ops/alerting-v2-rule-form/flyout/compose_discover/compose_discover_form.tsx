@@ -51,8 +51,8 @@ function AlertConditionStep({
 
   // Only fetch date fields when the query has a committed, valid index pattern
   const queryForFields =
-    /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.fullQuery) && state.queryCommitted
-      ? state.fullQuery
+    /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.sandbox.query) && state.queryCommitted
+      ? state.sandbox.query
       : '';
   const { data: fieldMap } = useDataFields({
     query: queryForFields,
@@ -94,7 +94,7 @@ function AlertConditionStep({
         </>
       ) : (
         <>
-          <QuerySummary query={state.fullQuery} label="query" />
+          <QuerySummary query={state.sandbox.query} label="query" />
           <EuiSpacer size="s" />
           <EuiButton
             size="s"

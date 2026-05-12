@@ -81,7 +81,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   isSaving = false,
 }) => {
   // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
-  const [uiState, dispatch] = useComposeDiscoverState(mode);
+  // In edit mode, seed the sandbox draft with the rule's existing query so the
+  // Alert Condition step shows the current query summary instead of "No query defined".
+  const initialSandboxQuery =
+    mode === 'edit' ? (rule ? mapRuleResponseToFormValues(rule).evaluation?.query?.base ?? '' : '') : '';
+  const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(services);
@@ -127,10 +131,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // Sync the committed query into RHF whenever the user applies changes from the Sandbox.
   // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
-    if (uiState.queryCommitted && uiState.fullQuery) {
-      methods.setValue('evaluation', { query: { base: uiState.fullQuery } });
+    if (uiState.queryCommitted && uiState.sandbox.query) {
+      methods.setValue('evaluation', { query: { base: uiState.sandbox.query } });
     }
-  }, [uiState.fullQuery, uiState.queryCommitted, methods]);
+  }, [uiState.sandbox.query, uiState.queryCommitted, methods]);
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {

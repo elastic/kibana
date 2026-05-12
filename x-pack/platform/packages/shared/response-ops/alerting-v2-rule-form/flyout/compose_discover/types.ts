@@ -19,6 +19,21 @@ export interface SandboxTabConfig {
 }
 
 /**
+ * Pending query values being edited in the Discover Sandbox.
+ * These are draft values — NOT yet committed to FormValues / the API.
+ * They become the source of truth only after the user clicks "Apply changes",
+ * which syncs them into RHF via the bridge in ComposeDiscoverFlyout.
+ *
+ * Tracking mode follow-up will extend this with:
+ *   baseQuery: string;
+ *   alertBlock: string;
+ *   recoveryBlock: string;
+ */
+export interface SandboxDraft {
+  query: string;
+}
+
+/**
  * UI-only state for the ComposeDiscover flyout.
  *
  * This reducer manages navigation and Sandbox state only.
@@ -28,8 +43,11 @@ export interface SandboxTabConfig {
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
-  /** The live query in the Sandbox editor — committed to FormValues on "Apply changes". */
-  fullQuery: string;
+  /**
+   * Pending (draft) query values being edited in the Sandbox.
+   * Not committed to FormValues until the user clicks "Apply changes".
+   */
+  sandbox: SandboxDraft;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
@@ -40,7 +58,7 @@ export interface ComposeDiscoverState {
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_FULL_QUERY'; query: string }
+  | { type: 'SET_SANDBOX_QUERY'; query: string }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT' }
@@ -49,4 +67,4 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD' }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string };
+  | { type: 'COMMIT_SANDBOX_QUERY'; query: string };
