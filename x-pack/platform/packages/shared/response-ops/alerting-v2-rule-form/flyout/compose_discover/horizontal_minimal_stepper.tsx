@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ClassNames } from '@emotion/react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useHorizontalMinimalStepperStyles } from './horizontal_minimal_stepper.styles';
 
@@ -60,13 +61,19 @@ export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> =
       role="group"
       aria-label={`Step ${displayIndex + 1} of ${total}: ${currentTitle}`}
     >
-      {/* Step indicators — decorative, described by the group aria-label */}
+      {/* Step indicators — decorative, described by the group aria-label.
+          ClassNames converts SerializedStyles → real CSS class names so we can
+          use className on plain divs without needing the Emotion JSX transform. */}
       <EuiFlexItem grow={false}>
-        <div css={indicatorRow} aria-hidden>
-          {steps.map((step, i) => (
-            <div key={i} css={indicatorByStatus[step.status]} />
-          ))}
-        </div>
+        <ClassNames>
+          {({ css }) => (
+            <div className={css(indicatorRow)} aria-hidden>
+              {steps.map((step, i) => (
+                <div key={i} className={css(indicatorByStatus[step.status])} />
+              ))}
+            </div>
+          )}
+        </ClassNames>
       </EuiFlexItem>
 
       {/* Current step title */}
