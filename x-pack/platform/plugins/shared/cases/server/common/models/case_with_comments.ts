@@ -337,6 +337,58 @@ export class CaseCommentModel {
 
     const dedupedAttachments: CommentRequestWithId = [];
     const idsAlreadySeen = new Set();
+
+    // Dedup helper for unified (v2) alert/event attachments. The unified contract for
+    // metadata.index is "scalar broadcast OR 1-to-1 array of matching length"; an array
+    // whose length does not match attachmentId has no sensible interpretation and is
+    // rejected, mirroring the legacy paired-array strictness.
+    const dedupeUnifiedAttachment = <
+      T extends { attachmentId: string | string[]; metadata?: unknown }
+    >(
+      attachment: T,
+      idsAlreadyInCase: Set<string>
+    ): T | undefined => {
+      const { ids } = getIDsAndIndicesAsArrays(attachment as unknown as AttachmentRequestV2);
+      const existingMetadata =
+        attachment.metadata && typeof attachment.metadata === 'object'
+          ? (attachment.metadata as Record<string, unknown>)
+          : {};
+      const rawMetadataIndex = existingMetadata.index as string | string[] | undefined;
+
+      if (Array.isArray(rawMetadataIndex) && rawMetadataIndex.length !== ids.length) {
+        throw Boom.badRequest(
+          `attachmentId and metadata.index must have matching lengths when metadata.index is an array. Received attachmentId.length=${ids.length} and metadata.index.length=${rawMetadataIndex.length}.`
+        );
+      }
+
+      const idPositionsThatAlreadyExistInCase: number[] = [];
+
+      ids.forEach((id, index) => {
+        if (idsAlreadyInCase.has(id) || idsAlreadySeen.has(id)) {
+          idPositionsThatAlreadyExistInCase.push(index);
+        }
+
+        idsAlreadySeen.add(id);
+      });
+
+      const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
+      const newMetadataIndex = Array.isArray(rawMetadataIndex)
+        ? removeItemsByPosition(rawMetadataIndex, idPositionsThatAlreadyExistInCase)
+        : rawMetadataIndex;
+
+      if (newIds.length === 0) {
+        return undefined;
+      }
+
+      return {
+        ...attachment,
+        attachmentId: newIds,
+        metadata: {
+          ...existingMetadata,
+          index: newMetadataIndex,
+        },
+      };
+    };
     const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
       {
         caseId: this.caseInfo.id,
@@ -383,36 +435,9 @@ export class CaseCommentModel {
             });
           }
         } else if ('attachmentId' in attachment) {
-          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-          const idPositionsThatAlreadyExistInCase: number[] = [];
-
-          ids.forEach((id, index) => {
-            if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
-              idPositionsThatAlreadyExistInCase.push(index);
-            }
-
-            idsAlreadySeen.add(id);
-          });
-
-          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
-
-          const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
-          const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
-
-          if (newIds.length > 0) {
-            const existingMetadata =
-              attachment.metadata && typeof attachment.metadata === 'object'
-                ? (attachment.metadata as Record<string, unknown>)
-                : {};
-
-            dedupedAttachments.push({
-              ...attachment,
-              attachmentId: newIds,
-              metadata: {
-                ...existingMetadata,
-                index: newIndices,
-              },
-            });
+          const deduped = dedupeUnifiedAttachment(attachment, alertsAttachedToCase);
+          if (deduped) {
+            dedupedAttachments.push(deduped);
           }
         }
         return;
@@ -444,36 +469,9 @@ export class CaseCommentModel {
             });
           }
         } else if ('attachmentId' in attachment) {
-          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-          const idPositionsThatAlreadyExistInCase: number[] = [];
-
-          ids.forEach((id, index) => {
-            if (eventsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
-              idPositionsThatAlreadyExistInCase.push(index);
-            }
-
-            idsAlreadySeen.add(id);
-          });
-
-          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
-
-          const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
-          const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
-
-          if (newIds.length > 0) {
-            const existingMetadata =
-              attachment.metadata && typeof attachment.metadata === 'object'
-                ? (attachment.metadata as Record<string, unknown>)
-                : {};
-
-            dedupedAttachments.push({
-              ...attachment,
-              attachmentId: newIds,
-              metadata: {
-                ...existingMetadata,
-                index: newIndices,
-              },
-            });
+          const deduped = dedupeUnifiedAttachment(attachment, eventsAttachedToCase);
+          if (deduped) {
+            dedupedAttachments.push(deduped);
           }
         }
 

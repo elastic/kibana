@@ -621,6 +621,56 @@ describe('CaseCommentModel', () => {
       expect(unifiedCall.attributes.metadata.index).toEqual(['idx-1', 'idx-3']);
     });
 
+    it('rejects a unified (v2) event attachment when metadata.index is an array of mismatched length', async () => {
+      const unifiedEventWithMismatchedIndex = {
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        owner: SECURITY_SOLUTION_OWNER,
+        attachmentId: ['event-id-1', 'event-id-2', 'event-id-3'],
+        metadata: {
+          index: ['idx-1', 'idx-2'],
+        },
+      };
+
+      await expect(
+        model.bulkCreate({
+          attachments: [{ id: 'comment-1', ...unifiedEventWithMismatchedIndex } as never],
+        })
+      ).rejects.toThrow(
+        'attachmentId and metadata.index must have matching lengths when metadata.index is an array'
+      );
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('preserves scalar metadata.index when a unified (v2) event attachment has array attachmentId', async () => {
+      const unifiedEventWithScalarIndex = {
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        owner: SECURITY_SOLUTION_OWNER,
+        attachmentId: ['event-id-1', 'event-id-2', 'event-id-3'],
+        metadata: {
+          index: 'test-events-index',
+        },
+      };
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedEventWithScalarIndex } as never],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments.length).toBe(1);
+      const unifiedCall = attachments[0] as unknown as {
+        attributes: { attachmentId: string[]; metadata: { index: string } };
+      };
+      expect(unifiedCall.attributes.attachmentId).toEqual([
+        'event-id-1',
+        'event-id-2',
+        'event-id-3',
+      ]);
+      expect(unifiedCall.attributes.metadata.index).toBe('test-events-index');
+    });
+
     it('does not remove alerts not attached to the case', async () => {
       await model.bulkCreate({
         attachments: [
