@@ -22,19 +22,14 @@ export type AlertsRagCategory =
   | 'field_specific_lookup';
 
 /**
- * One LangSmith-derived example. The alert context is NOT embedded — the
- * Agent Builder agent under test retrieves alerts from Elasticsearch via its
- * own tools (search.alerts and friends). The eval cluster has the shared
- * security alerts snapshot loaded by `restoreAlertsSnapshot` before the suite
- * runs.
+ * One question/reference pair driven through Agent Builder.
+ *
+ * The alert context is NOT embedded — the Agent Builder agent under test
+ * retrieves alerts from Elasticsearch via its own tools (`security.alerts`
+ * and friends). The eval cluster has the shared security alerts snapshot
+ * loaded by `restoreAlertsSnapshot` before the suite runs.
  */
 export interface AlertsRagExample {
-  /**
-   * LangSmith example UUID, for traceability back to the source dataset.
-   * Dataset: "Alerts RAG Regression (Episodes 1-8)"
-   * Dataset ID: bd5bba1d-97aa-4512-bce7-b09aa943c651
-   */
-  langsmithExampleId: string;
   input: string;
   expected: { reference: string };
   metadata: {
@@ -42,6 +37,3 @@ export interface AlertsRagExample {
     dataset_split: string[];
   };
 }
-
-export const LANGSMITH_DATASET_ID = 'bd5bba1d-97aa-4512-bce7-b09aa943c651';
-export const LANGSMITH_DATASET_NAME = 'Alerts RAG Regression (Episodes 1-8)';

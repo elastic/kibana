@@ -14,10 +14,9 @@ import {
   restoreAlertsSnapshot,
 } from '../src/data_generators/restore_alerts_snapshot';
 
-const DATASET_NAME = 'Security Alerts RAG Regression (Episodes 1-8)';
+const DATASET_NAME = 'Security Alerts RAG Regression';
 const DATASET_DESCRIPTION =
-  'Security Agent Builder alerts RAG evaluation. Migrated from the LangSmith ' +
-  'dataset (id: bd5bba1d-97aa-4512-bce7-b09aa943c651). Drives `/api/agent_builder/converse` ' +
+  'Security Agent Builder alerts RAG evaluation. Drives `/api/agent_builder/converse` ' +
   'over the shared Security alerts snapshot (reused with the Attack Discovery eval suite).';
 
 evaluate.describe('Security Alerts RAG', { tag: tags.stateful.classic }, () => {

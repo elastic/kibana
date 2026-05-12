@@ -41,7 +41,6 @@ describe('buildAlertsRagEvaluators', () => {
 
 describe('toDatasetExample', () => {
   const fixture: AlertsRagExample = {
-    langsmithExampleId: 'ls-1',
     input: 'what hosts are affected?',
     expected: { reference: 'SRVMAC08, SRVMAC09' },
     metadata: { category: 'field_specific_lookup', dataset_split: ['regression'] },
@@ -69,7 +68,6 @@ describe('toDatasetExample', () => {
     expect(wrapped.metadata).toEqual({
       category: 'field_specific_lookup',
       dataset_split: ['regression'],
-      langsmithExampleId: 'ls-1',
     });
   });
 });

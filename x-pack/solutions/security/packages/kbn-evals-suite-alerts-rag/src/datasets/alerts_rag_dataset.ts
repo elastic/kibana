@@ -8,35 +8,21 @@
 import type { AlertsRagExample } from '../dataset';
 
 /**
- * Questions from the LangSmith dataset
- * "Alerts RAG Regression (Episodes 1-8)" (id: bd5bba1d-97aa-4512-bce7-b09aa943c651).
+ * Alerts RAG regression dataset.
  *
- * The original LangSmith dataset shipped a 95-alert synthetic context inline
- * with each example so the assistant could be evaluated without a real alerts
- * index. In `@kbn/evals` we drive the suite end-to-end through Agent Builder
- * (`/api/agent_builder/converse`), which retrieves alerts from Elasticsearch
- * via its own tools — so the inline context is no longer applicable. We
- * therefore ship only the questions plus reference answers whose phrasing is
- * dataset-agnostic (prioritisation guidance, host/user listing shape,
- * recency reasoning) and keep them as targets for the LLM-as-judge
- * Factuality / Relevance / Groundedness evaluators.
+ * Each example is a question/reference pair driven through Agent Builder
+ * (`/api/agent_builder/converse`). Alerts in the eval cluster come from the
+ * shared security-alerts GCS snapshot — the same one the Attack Discovery
+ * suite uses — restored before the suite runs by `restoreAlertsSnapshot`.
  *
- * Alerts in the eval cluster come from the shared security-alerts GCS
- * snapshot — the same one the Attack Discovery suite uses — restored before
- * the suite runs by `restoreAlertsSnapshot`. Reusing that snapshot keeps the
- * two security eval suites on a single source of truth for alert regression
- * baselines.
- *
- * Count-/timestamp-specific LangSmith examples (e.g. "How many open alerts do
- * I have?" → "95", "When was the first alert triggered?" → exact timestamp)
- * were intentionally dropped here: those reference answers were calibrated
- * against the synthetic 95-alert fixture and cannot transfer verbatim to the
- * snapshot-backed corpus. Re-anchoring them against the snapshot's actual
- * data is tracked as a follow-up for the security-generative-ai team.
+ * Reference answers are phrased to be data-agnostic (they describe the
+ * shape of a correct response — prioritisation guidance, host/user listing,
+ * recency reasoning) so the LLM-as-judge Factuality / Relevance /
+ * Groundedness evaluators score the answer semantically rather than against
+ * exact counts or timestamps that depend on the snapshot's contents.
  */
 export const alertsRagDataset: AlertsRagExample[] = [
   {
-    langsmithExampleId: 'd33b2ebc-0c80-4689-89c0-1d8b63ba5af1',
     input: 'Which alerts should I look at first?',
     expected: {
       reference:
@@ -45,7 +31,6 @@ export const alertsRagDataset: AlertsRagExample[] = [
     metadata: { category: 'multi_alert_correlation', dataset_split: ['base'] },
   },
   {
-    langsmithExampleId: '9e6ed876-5308-4a24-b931-03bf72a49200',
     input: 'Based on my open alerts, what hosts are affected?',
     expected: {
       reference:
@@ -54,7 +39,6 @@ export const alertsRagDataset: AlertsRagExample[] = [
     metadata: { category: 'field_specific_lookup', dataset_split: ['base'] },
   },
   {
-    langsmithExampleId: 'e4c66fba-0f53-43bb-b923-a11f5d39b84b',
     input: 'Which "user.name" is mentioned the most in the open alerts?',
     expected: {
       reference:
@@ -63,7 +47,6 @@ export const alertsRagDataset: AlertsRagExample[] = [
     metadata: { category: 'field_specific_lookup', dataset_split: ['base'] },
   },
   {
-    langsmithExampleId: 'b2c3d4e5-f6a7-8901-bcde-f01234567891',
     input: 'What is the most recent alert?',
     expected: {
       reference:

@@ -30,10 +30,11 @@ export interface AlertsRagDatasetInput extends Record<string, unknown> {
 }
 
 /**
- * Dataset-level expected output. `reference` is the LangSmith ground-truth
- * answer; `expected` is the field the framework's `correctnessAnalysis`
- * evaluator reads (it consumes `expected.expected`). We persist both so a
- * single dataset row drives correctness and groundedness scoring.
+ * Dataset-level expected output. `reference` is the ground-truth answer used
+ * by qualitative scoring; `expected` is the field the framework's
+ * `correctnessAnalysis` evaluator reads (it consumes `expected.expected`).
+ * We persist both so a single dataset row drives correctness and
+ * groundedness scoring.
  */
 export interface AlertsRagDatasetExpected {
   reference: string;
@@ -43,7 +44,6 @@ export interface AlertsRagDatasetExpected {
 export interface AlertsRagDatasetMetadata extends Record<string, unknown> {
   category: AlertsRagCategory;
   dataset_split: string[];
-  langsmithExampleId?: string;
 }
 
 export type AlertsRagDatasetExample = Example<
@@ -58,7 +58,6 @@ export const toDatasetExample = (ex: AlertsRagExample): AlertsRagDatasetExample 
   metadata: {
     category: ex.metadata.category,
     dataset_split: ex.metadata.dataset_split,
-    langsmithExampleId: ex.langsmithExampleId,
   },
 });
 
