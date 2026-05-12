@@ -5,6 +5,7 @@
     "outDir": "target/types"
   },
   "include": [
+    ".storybook/**/*",
     "common/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
@@ -112,5 +113,5 @@
     "@kbn/code-editor",
     "@kbn/workflows-yaml"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
