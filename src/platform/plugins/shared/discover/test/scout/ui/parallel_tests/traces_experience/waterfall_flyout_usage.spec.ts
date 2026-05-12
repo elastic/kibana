@@ -30,7 +30,8 @@ const openTraceTimeline = async (pageObjects: {
     flyout: TracesFlyout;
   };
 }) => {
-  await pageObjects.discover.goto();
+  // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+  await pageObjects.discover.gotoInQueryMode('esql');
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
@@ -201,7 +202,8 @@ spaceTest.describe(
 
         await spaceTest.step('setup: login and open the scroll target span document', async () => {
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+          await pageObjects.discover.gotoInQueryMode('esql');
           await pageObjects.discover.writeAndSubmitEsqlQuery(
             `${TRACES.ESQL_QUERY} | WHERE span.name == "${DEEP_TRACE.SCROLL_TARGET_SPAN_NAME}"`
           );

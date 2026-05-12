@@ -43,7 +43,8 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          // Enforce classic mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+          await pageObjects.discover.gotoInQueryMode('classic');
 
           await spaceTest.step('wait for results to load', async () => {
             await pageObjects.discover.waitForDocTableRendered();
@@ -58,28 +59,12 @@ spaceTest.describe(
       );
 
       spaceTest(
-        `should not render RED metrics charts in ESQL mode (${name})`,
-        async ({ scoutSpace, browserAuth, pageObjects }) => {
-          await scoutSpace.setSolutionView(solutionView);
-          await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
-
-          await spaceTest.step('run ESQL query for traces', async () => {
-            await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
-          });
-
-          await spaceTest.step('verify RED metrics grid is not visible', async () => {
-            await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeHidden();
-          });
-        }
-      );
-
-      spaceTest(
         `should not show Overview tab in document flyout (${name})`,
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+          await pageObjects.discover.gotoInQueryMode('classic');
 
           await spaceTest.step('open first document in flyout', async () => {
             await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
@@ -87,6 +72,24 @@ spaceTest.describe(
 
           await spaceTest.step('verify Overview tab is not present', async () => {
             await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeHidden();
+          });
+        }
+      );
+
+      spaceTest(
+        `should not render RED metrics charts in ESQL mode (${name})`,
+        async ({ scoutSpace, browserAuth, pageObjects }) => {
+          await scoutSpace.setSolutionView(solutionView);
+          await browserAuth.loginAsViewer();
+          // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+          await pageObjects.discover.gotoInQueryMode('esql');
+
+          await spaceTest.step('run ESQL query for traces', async () => {
+            await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
+          });
+
+          await spaceTest.step('verify RED metrics grid is not visible', async () => {
+            await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeHidden();
           });
         }
       );

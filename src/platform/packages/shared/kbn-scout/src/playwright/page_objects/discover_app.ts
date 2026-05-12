@@ -15,6 +15,8 @@ import { KibanaCodeEditorWrapper } from '../ui_components';
 
 const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
+export type DiscoverQueryMode = 'esql' | 'classic';
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -440,6 +442,14 @@ export class DiscoverApp {
   }
 
   async writeAndSubmitKqlQuery(query: string) {
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode !== 'classic') {
+      throw new Error(
+        `writeAndSubmitKqlQuery requires Discover to be in classic mode, but the current mode is "${currentMode}".`
+      );
+    }
+
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.page.testSubj.click('querySubmitButton');
@@ -491,11 +501,18 @@ export class DiscoverApp {
   }
 
   async selectTextBaseLang() {
-    if (await this.page.testSubj.isEnabled('select-text-based-language-btn')) {
-      await this.page.testSubj.click('select-text-based-language-btn');
-      await this.waitUntilSearchingHasFinished();
+    // ES|QL may already be the active mode (e.g. when the discover.isEsqlDefault
+    // feature flag is on), so we need an early detection.
+    const currentMode = await this.getCurrentQueryMode();
+
+    if (currentMode === 'esql') {
       await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+      return;
     }
+
+    await this.page.testSubj.click('select-text-based-language-btn');
+    await this.waitUntilSearchingHasFinished();
+    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
@@ -616,12 +633,43 @@ export class DiscoverApp {
     await expect(docTable).toContainText(text);
   }
 
-  public setQueryMode(mode: 'esql' | 'classic') {
+  /**
+   * Persists the requested Discover query mode in localStorage on the next
+   * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
+   * feature flag being toggled at the project level.
+   */
+  public setQueryMode(mode: DiscoverQueryMode) {
     return this.page.addInitScript(
       ([_mode, _discoverQueryModeKey]) => {
         window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
       },
       [mode, DISCOVER_QUERY_MODE_KEY]
     );
+  }
+
+  /**
+   * Detects whether Discover is currently rendering ES|QL or classic
+   * (KQL + data view) mode by racing the two mode-specific anchors:
+   * the ES|QL editor and the classic KQL `queryInput`.
+   */
+  async getCurrentQueryMode(): Promise<DiscoverQueryMode> {
+    const esqlEditor = this.page.testSubj.locator('ESQLEditor');
+    const classicQueryInput = this.page.testSubj.locator('queryInput');
+
+    // Wait until one of the two mode-specific anchors is rendered
+    await expect(esqlEditor.or(classicQueryInput)).toBeVisible();
+
+    // Return the mode that is currently visible
+    return (await esqlEditor.isVisible()) ? 'esql' : 'classic';
+  }
+
+  /**
+   * Quick helper that sets the desired Discover query mode in
+   * localStorage and then navigates to Discover, so that the test does
+   * not depend on the `discover.isEsqlDefault` feature flag default.
+   */
+  async gotoInQueryMode(mode: DiscoverQueryMode) {
+    await this.setQueryMode(mode);
+    await this.goto();
   }
 }

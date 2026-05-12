@@ -26,9 +26,8 @@ spaceTest.describe(
       await setupTracesExperience(scoutSpace, config);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -38,6 +37,9 @@ spaceTest.describe(
     spaceTest(
       'should display trace-specific columns in data view mode',
       async ({ pageObjects }) => {
+        // Enforce classic mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+        await pageObjects.discover.gotoInQueryMode('classic');
+
         await spaceTest.step('verify trace-specific column headers', async () => {
           await pageObjects.discover.waitForDocTableRendered();
           for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
@@ -48,6 +50,9 @@ spaceTest.describe(
     );
 
     spaceTest('should display trace-specific columns in ESQL mode', async ({ pageObjects }) => {
+      // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
+      await pageObjects.discover.gotoInQueryMode('esql');
+
       await spaceTest.step('switch to ESQL mode with a different index pattern', async () => {
         await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
       });
