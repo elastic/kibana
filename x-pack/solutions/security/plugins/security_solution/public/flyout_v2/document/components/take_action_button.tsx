@@ -13,6 +13,7 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -24,12 +25,20 @@ import { useInvestigateInTimeline } from '../../../detections/components/alerts_
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { useResponderActionItem } from '../../../common/components/endpoint/responder';
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
   defaultMessage: 'Take action',
 });
+
+const TAKE_ACTION_MENU = i18n.translate(
+  'xpack.securitySolution.flyoutV2.footer.takeActionMenuLabel',
+  {
+    defaultMessage: 'Take action menu',
+  }
+);
 
 const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
   defaultMessage: 'Add note',
@@ -44,6 +53,10 @@ export interface TakeActionButtonProps {
    * ECS data for the document
    */
   ecsData: Ecs;
+  /**
+   * Field-browser-shaped event data used by endpoint response action helpers.
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
   /**
    * Non-ECS data for the document
    */
@@ -70,6 +83,7 @@ export const TakeActionButton = memo(
   ({
     hit,
     ecsData,
+    dataFormattedForFieldBrowser,
     nonEcsData,
     refetchFlyoutData,
     onAlertUpdated,
@@ -169,6 +183,11 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
+    const endpointResponseActionsConsoleItems = useResponderActionItem(
+      dataFormattedForFieldBrowser,
+      closePopoverHandler
+    );
+
     const items = useMemo(
       () => [
         ...(!isRemoteDocument ? addToCaseActionItems : []),
@@ -176,6 +195,7 @@ export const TakeActionButton = memo(
         ...(!isRemoteDocument && isAlert ? alertTagsItems : []),
         ...(!isRemoteDocument && isAlert ? alertAssigneesItems : []),
         ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
+        ...(!isRemoteDocument ? endpointResponseActionsConsoleItems : []),
         ...(!isRemoteDocument && !isAlert ? noteItems : []),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
         ...(!isInSecurityApp ? exploreActionItems : []),
@@ -185,6 +205,7 @@ export const TakeActionButton = memo(
         alertAssigneesItems,
         alertTagsItems,
         documentWorkflowMenuItem,
+        endpointResponseActionsConsoleItems,
         exploreActionItems,
         investigateInTimelineActionItems,
         isAlert,
@@ -232,6 +253,7 @@ export const TakeActionButton = memo(
     return (
       <EuiPopover
         id="AlertTakeActionPanel"
+        aria-label={TAKE_ACTION_MENU}
         button={takeActionButton}
         isOpen={isPopoverOpen}
         closePopover={closePopoverHandler}

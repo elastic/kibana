@@ -12,17 +12,16 @@ import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout } from '../../../../common/components/response_actions/response_actions_empty_prompt';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { RESPONSE_NO_DATA_TEST_ID } from '../components/test_ids';
-import type { SearchHit } from '../../../../../common/search_strategy';
+import { useUserPrivileges } from '../user_privileges';
+import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
   RawEventData,
-} from '../../../../../common/types/response_actions';
-import { ResponseActionsResults } from '../../../../common/components/response_actions/response_actions_results';
-import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
-import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
+} from '../../../../common/types/response_actions';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
+import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout } from './response_actions_empty_prompt';
+import { ResponseActionsResults } from './response_actions_results';
 
 const RESPONSE_ACTIONS_VIEW = i18n.translate(
   'xpack.securitySolution.flyout.response.responseActionsView',
@@ -30,6 +29,8 @@ const RESPONSE_ACTIONS_VIEW = i18n.translate(
     defaultMessage: 'Response Results',
   }
 );
+
+export const RESPONSE_NO_DATA_TEST_ID = 'securitySolutionFlyoutResponseNoData' as const;
 
 const TabContentWrapper = styled.div`
   height: 100%;

@@ -7,18 +7,18 @@
 
 import { renderHook } from '@testing-library/react';
 import { useResponseActionsView } from './use_response_actions_view';
-import { mockSearchHit } from '../../shared/mocks/mock_search_hit';
-import { mockDataAsNestedObject } from '../../shared/mocks/mock_data_as_nested_object';
-import { useGetAutomatedActionList } from '../../../../management/hooks/response_actions/use_get_automated_action_list';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { mockSearchHit } from '../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { mockDataAsNestedObject } from '../../../flyout/document_details/shared/mocks/mock_data_as_nested_object';
+import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useUserPrivileges } from '../user_privileges';
 
 const ecsData = mockDataAsNestedObject;
 const rawEventData = mockSearchHit;
 
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../management/hooks/response_actions/use_get_automated_action_list');
+jest.mock('../../hooks/use_experimental_features');
+jest.mock('../user_privileges');
+jest.mock('../../../management/hooks/response_actions/use_get_automated_action_list');
 
 const useGetAutomatedActionListMock = useGetAutomatedActionList as jest.Mock;
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;

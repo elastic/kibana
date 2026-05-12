@@ -14,6 +14,7 @@ import { createStore } from 'redux';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { StartServices } from '../../../types';
 import { SECURITY_FEATURE_ID } from '../../../../common/constants';
+import { useConsoleManager } from '../../../management/components/console/components/console_manager';
 import { flyoutProviders } from './flyout_provider';
 
 jest.mock('../../../common/components/user_privileges/user_privileges_context', () => ({
@@ -76,6 +77,12 @@ const ExpandableFlyoutApiProbe = () => {
   return <div>{typeof openPreviewPanel}</div>;
 };
 
+const ConsoleManagerProbe = () => {
+  const consoleManager = useConsoleManager();
+
+  return <div data-test-subj="console-manager-probe">{typeof consoleManager.register}</div>;
+};
+
 describe('flyoutProviders', () => {
   it('uses the provided history when available', () => {
     const history = createMemoryHistory({ initialEntries: ['/security?foo=bar'] });
@@ -119,5 +126,19 @@ describe('flyoutProviders', () => {
     );
 
     expect(screen.getByText('function')).toBeInTheDocument();
+  });
+
+  it('provides console manager context to children', () => {
+    const store = createStore(() => ({}));
+
+    render(
+      flyoutProviders({
+        services,
+        store,
+        children: <ConsoleManagerProbe />,
+      })
+    );
+
+    expect(screen.getByTestId('console-manager-probe')).toHaveTextContent('function');
   });
 });

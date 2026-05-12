@@ -153,6 +153,7 @@ describe('<TakeAction />', () => {
       expect.objectContaining({
         hit,
         ecsData: mockEcsData,
+        dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
         refetchFlyoutData: mockRefetchFlyoutData,
         onAlertUpdated,
         onShowNotes: mockOnShowNotes,

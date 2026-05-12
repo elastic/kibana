@@ -22,6 +22,7 @@ import { UpsellingProvider } from '../../../common/components/upselling_provider
 import { DiscoverInTimelineContextProvider } from '../../../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../../../assistant/provider';
 import { CaseProvider } from '../../../cases/components/provider/provider';
+import { ConsoleManager } from '../../../management/components/console/components/console_manager';
 
 export const flyoutProviders = ({
   services,
@@ -56,7 +57,9 @@ export const flyoutProviders = ({
                 <UpsellingProvider upsellingService={services.upselling}>
                   <DiscoverInTimelineContextProvider>
                     <CaseProvider>
-                      <AssistantProvider>{flyoutContent}</AssistantProvider>
+                      <ConsoleManager>
+                        <AssistantProvider>{flyoutContent}</AssistantProvider>
+                      </ConsoleManager>
                     </CaseProvider>
                   </DiscoverInTimelineContextProvider>
                 </UpsellingProvider>
