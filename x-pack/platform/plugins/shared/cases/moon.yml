@@ -111,6 +111,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-browser'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/resizable-layout'
   - '@kbn/css-utils'
