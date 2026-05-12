@@ -1480,6 +1480,43 @@ describe('current status route', () => {
       expect(splitFilter).toBeUndefined();
     });
 
+    it("does not surface a remote ping from another local space (meta.space_id: 'production') when the active space is 'default'", async () => {
+      // a remote ping with meta.space_id: 'production' and a 'default' local space is not shown in the overview
+      // because the ES query filter on `meta.space_id: ['default', '*']` drops it at filter time
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: {} },
+        spaceId: 'default',
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: false,
+          config: { experimental: { ccs: { enabled: true } } },
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([] as any);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const filters = searchCall.query.bool.filter;
+      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.terms['meta.space_id']).toEqual(['default', '*']);
+      expect(spaceFilter.terms['meta.space_id']).not.toContain('production');
+
+      expect(result.down).toBe(0);
+      expect(result.up).toBe(0);
+      expect(result.pending).toBe(0);
+      expect(Object.keys(result.downConfigs)).toHaveLength(0);
+      expect(Object.keys(result.upConfigs)).toHaveLength(0);
+      expect(Object.keys(result.pendingConfigs)).toHaveLength(0);
+    });
+
     it('includes simple_query_string filter when query param is provided', async () => {
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
