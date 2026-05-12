@@ -32,7 +32,7 @@ import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_ent
 import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
-import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
+import { useHighlightedFields } from '../../../../flyout_v2/document/main/hooks/use_highlighted_fields';
 import { TableTabTour } from '../components/table_tab_tour';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
