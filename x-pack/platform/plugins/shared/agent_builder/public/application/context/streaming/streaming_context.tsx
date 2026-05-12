@@ -40,7 +40,7 @@ export interface StreamingContextValue {
   removeAllErrors: () => void;
 }
 
-const SendMessageContext = createContext<StreamingContextValue | null>(null);
+const StreamingContext = createContext<StreamingContextValue | null>(null);
 
 const emptyRecord: StreamRecord = { errorSteps: [] };
 
@@ -214,11 +214,11 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     ]
   );
 
-  return <SendMessageContext.Provider value={value}>{children}</SendMessageContext.Provider>;
+  return <StreamingContext.Provider value={value}>{children}</StreamingContext.Provider>;
 };
 
 export const useStreamingContext = () => {
-  const context = useContext(SendMessageContext);
+  const context = useContext(StreamingContext);
   if (!context) {
     throw new Error('useStreamingContext must be used within a StreamingProvider');
   }
