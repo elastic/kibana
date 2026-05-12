@@ -71,7 +71,7 @@ const AGENT_BUILDER_CONVERSATION_PATH = '/app/agent_builder/conversations/';
 // Reusable small components
 // ---------------------------------------------------------------------------
 
-const ConversationLink = React.memo(({ conversationId }: { conversationId: string }) => {
+const ConversationLink = ({ conversationId }: { conversationId: string }) => {
   const {
     core: {
       http: { basePath },
@@ -85,9 +85,9 @@ const ConversationLink = React.memo(({ conversationId }: { conversationId: strin
       {TRANSLATIONS.lifecycle.viewConversation}
     </EuiLink>
   );
-});
+};
 
-const EvidencesList = React.memo(({ evidences }: { evidences: LifecycleEvidence[] }) => {
+const EvidencesList = ({ evidences }: { evidences: LifecycleEvidence[] }) => {
   if (!evidences.length) return null;
   return (
     <>
@@ -141,7 +141,7 @@ const EvidencesList = React.memo(({ evidences }: { evidences: LifecycleEvidence[
       ))}
     </>
   );
-});
+};
 
 const CountedAccordion = ({
   id,
@@ -194,7 +194,7 @@ const RawDocAccordion = ({ type, docId }: { type: SigEventDocType; docId: string
 // Detection timeline item
 // ---------------------------------------------------------------------------
 
-const DetectionItem = React.memo(({ detection }: { detection: LifecycleDetection }) => (
+const DetectionItem = ({ detection }: { detection: LifecycleDetection }) => (
   <EuiTimelineItem
     icon="bell"
     iconAriaLabel={TRANSLATIONS.lifecycle.detectionStep}
@@ -252,13 +252,13 @@ const DetectionItem = React.memo(({ detection }: { detection: LifecycleDetection
       <RawDocAccordion type="detection" docId={detection.id} />
     </EuiPanel>
   </EuiTimelineItem>
-));
+);
 
 // ---------------------------------------------------------------------------
 // Discovery timeline item
 // ---------------------------------------------------------------------------
 
-const DiscoveryItem = React.memo(({ discovery }: { discovery: LifecycleDiscovery }) => {
+const DiscoveryItem = ({ discovery }: { discovery: LifecycleDiscovery }) => {
   const dependencyListItems = useMemo(
     () =>
       discovery.dependency_edges.map((edge) => {
@@ -407,13 +407,13 @@ const DiscoveryItem = React.memo(({ discovery }: { discovery: LifecycleDiscovery
       </EuiPanel>
     </EuiTimelineItem>
   );
-});
+};
 
 // ---------------------------------------------------------------------------
 // Verdict timeline item
 // ---------------------------------------------------------------------------
 
-const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) => (
+const VerdictItem = ({ verdict: v }: { verdict: LifecycleVerdict }) => (
   <EuiTimelineItem
     icon="check"
     iconAriaLabel={TRANSLATIONS.lifecycle.verdictStep}
@@ -507,7 +507,7 @@ const VerdictItem = React.memo(({ verdict: v }: { verdict: LifecycleVerdict }) =
       <RawDocAccordion type="verdict" docId={v.id} />
     </EuiPanel>
   </EuiTimelineItem>
-));
+);
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -527,68 +527,72 @@ interface LifecycleTimelineProps {
   eventTimestamp: string;
 }
 
-export const LifecycleTimeline = React.memo(
-  ({ detections, discoveries, verdicts, eventId, eventTimestamp }: LifecycleTimelineProps) => {
-    const sortedItems = useMemo(() => {
-      const entries: TimelineEntry[] = [];
+export const LifecycleTimeline = ({
+  detections,
+  discoveries,
+  verdicts,
+  eventId,
+  eventTimestamp,
+}: LifecycleTimelineProps) => {
+  const sortedItems = useMemo(() => {
+    const entries: TimelineEntry[] = [];
 
-      for (const detection of detections) {
-        entries.push({
-          timestamp: new Date(detection.timestamp).getTime(),
-          key: `detection-${detection.detection_id}`,
-          node: <DetectionItem detection={detection} />,
-        });
-      }
-
-      for (const discovery of discoveries) {
-        entries.push({
-          timestamp: new Date(discovery.timestamp).getTime(),
-          key: `discovery-${discovery.id}`,
-          node: <DiscoveryItem discovery={discovery} />,
-        });
-      }
-
-      for (const v of verdicts) {
-        entries.push({
-          timestamp: new Date(v.timestamp).getTime(),
-          key: `verdict-${v.id}`,
-          node: <VerdictItem verdict={v} />,
-        });
-      }
-
+    for (const detection of detections) {
       entries.push({
-        timestamp: new Date(eventTimestamp).getTime(),
-        key: 'event-created',
-        node: (
-          <EuiTimelineItem
-            icon="document"
-            iconAriaLabel={TRANSLATIONS.lifecycle.eventCreated}
-            verticalAlign="top"
-          >
-            <EuiPanel paddingSize="s" color="plain" hasBorder>
-              <EuiText size="xs" color="subdued">
-                {formatTimestamp(eventTimestamp)}
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <EuiText size="s">
-                <strong>{TRANSLATIONS.lifecycle.eventCreated}</strong>
-              </EuiText>
-              <RawDocAccordion type="event" docId={eventId} />
-            </EuiPanel>
-          </EuiTimelineItem>
-        ),
+        timestamp: new Date(detection.timestamp).getTime(),
+        key: `detection-${detection.detection_id}`,
+        node: <DetectionItem detection={detection} />,
       });
+    }
 
-      entries.sort((a, b) => a.timestamp - b.timestamp);
-      return entries;
-    }, [detections, discoveries, verdicts, eventId, eventTimestamp]);
+    for (const discovery of discoveries) {
+      entries.push({
+        timestamp: new Date(discovery.timestamp).getTime(),
+        key: `discovery-${discovery.id}`,
+        node: <DiscoveryItem discovery={discovery} />,
+      });
+    }
 
-    return (
-      <EuiTimeline>
-        {sortedItems.map((entry) => (
-          <React.Fragment key={entry.key}>{entry.node}</React.Fragment>
-        ))}
-      </EuiTimeline>
-    );
-  }
-);
+    for (const v of verdicts) {
+      entries.push({
+        timestamp: new Date(v.timestamp).getTime(),
+        key: `verdict-${v.id}`,
+        node: <VerdictItem verdict={v} />,
+      });
+    }
+
+    entries.push({
+      timestamp: new Date(eventTimestamp).getTime(),
+      key: 'event-created',
+      node: (
+        <EuiTimelineItem
+          icon="document"
+          iconAriaLabel={TRANSLATIONS.lifecycle.eventCreated}
+          verticalAlign="top"
+        >
+          <EuiPanel paddingSize="s" color="plain" hasBorder>
+            <EuiText size="xs" color="subdued">
+              {formatTimestamp(eventTimestamp)}
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiText size="s">
+              <strong>{TRANSLATIONS.lifecycle.eventCreated}</strong>
+            </EuiText>
+            <RawDocAccordion type="event" docId={eventId} />
+          </EuiPanel>
+        </EuiTimelineItem>
+      ),
+    });
+
+    entries.sort((a, b) => a.timestamp - b.timestamp);
+    return entries;
+  }, [detections, discoveries, verdicts, eventId, eventTimestamp]);
+
+  return (
+    <EuiTimeline>
+      {sortedItems.map((entry) => (
+        <React.Fragment key={entry.key}>{entry.node}</React.Fragment>
+      ))}
+    </EuiTimeline>
+  );
+};
