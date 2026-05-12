@@ -28,6 +28,9 @@ const buildCaseData = (overrides: Partial<CaseAttachmentData> = {}): CaseAttachm
   tags: ['Phishing'],
   owner: 'securitySolution',
   assignees: [{ uid: 'u1' }],
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  total_observables: 0,
   ...overrides,
 });
 

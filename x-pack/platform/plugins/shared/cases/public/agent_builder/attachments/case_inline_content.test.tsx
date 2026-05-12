@@ -27,6 +27,9 @@ const buildAttachment = (overrides: Partial<CaseAttachment['data']> = {}): CaseA
     tags: ['Phishing', 'User Alert', 'Review', 'Extra1', 'Extra2'],
     owner: 'securitySolution',
     assignees: Array.from({ length: 12 }, (_, i) => ({ uid: `u${i}` })),
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+    total_observables: 0,
     ...overrides,
   },
 });

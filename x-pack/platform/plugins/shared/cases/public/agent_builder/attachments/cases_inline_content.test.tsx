@@ -27,6 +27,9 @@ const buildCase = (overrides: Partial<CaseAttachmentData> = {}): CaseAttachmentD
   tags: [],
   owner: 'securitySolution',
   assignees: [],
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_at: '2026-01-01T00:00:00.000Z',
+  total_observables: 0,
   ...overrides,
 });
 
