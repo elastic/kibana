@@ -37,7 +37,9 @@ describe('createRemoteMonitorDetailUrl', () => {
       locationId: 'us-east-1',
       spaceId: 'default',
     });
-    expect(url).toBe('https://remote.example.com/app/synthetics/monitor/monitor-abc?locationId=us-east-1');
+    expect(url).toBe(
+      'https://remote.example.com/app/synthetics/monitor/monitor-abc?locationId=us-east-1'
+    );
   });
 
   it('omits the /s/ prefix when spaceId is undefined', () => {
@@ -45,7 +47,9 @@ describe('createRemoteMonitorDetailUrl', () => {
       monitor: baseMonitor,
       locationId: 'us-east-1',
     });
-    expect(url).toBe('https://remote.example.com/app/synthetics/monitor/monitor-abc?locationId=us-east-1');
+    expect(url).toBe(
+      'https://remote.example.com/app/synthetics/monitor/monitor-abc?locationId=us-east-1'
+    );
   });
 
   it('adds an /s/<spaceId> prefix for non-default spaces', () => {

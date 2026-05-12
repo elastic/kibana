@@ -678,4 +678,3 @@ const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
       'The remote Kibana URL is not available. Ensure the remote cluster has server.publicBaseUrl configured.',
   }
 );
-
