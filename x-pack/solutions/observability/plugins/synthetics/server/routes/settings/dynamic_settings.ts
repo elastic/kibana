@@ -143,14 +143,14 @@ export const validateInteger = (value: number): string | undefined => {
 export const DynamicSettingsSchema = schema.object({
   certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
   certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
+  defaultConnectors: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
   defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
   defaultEmail: schema.maybe(
     schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+      to: schema.arrayOf(schema.string(), { maxSize: 100 }),
+      cc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+      bcc: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     })
   ),
   privateLocationsSyncInterval: schema.maybe(
