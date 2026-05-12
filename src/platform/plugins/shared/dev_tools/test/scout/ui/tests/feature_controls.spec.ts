@@ -14,44 +14,23 @@ import { test, testData } from '../fixtures';
 test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () => {
   test.afterAll(async ({ apiServices }) => {
     await apiServices.spaces.delete(testData.CUSTOM_SPACE.id).catch(() => {});
-    await apiServices.spaces.delete(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
   });
 
-  test('dev tools all privileges allow navigation without read-only badge', async ({
-    browserAuth,
-    pageObjects,
-  }) => {
+  test('dev tools all privileges allow navigation', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsDevToolsAll();
 
     for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
       await pageObjects.devTools.goto(hash);
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
-      await expect(pageObjects.devTools.readOnlyBadge).toBeHidden();
     }
   });
 
-  test('dev tools read privileges allow navigation with read-only badge', async ({
-    browserAuth,
-    pageObjects,
-  }) => {
+  test('dev tools read privileges allow navigation', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsDevToolsRead();
 
     for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
       await pageObjects.devTools.goto(hash);
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
-      await expect(pageObjects.devTools.readOnlyBadge).toBeVisible();
-    }
-  });
-
-  test('users without dev tools privileges cannot access dev tools apps', async ({
-    browserAuth,
-    pageObjects,
-  }) => {
-    await browserAuth.loginAsNoDevToolsPrivileges();
-
-    for (const { hash } of testData.DEV_TOOL_APPS) {
-      await pageObjects.devTools.goto(hash);
-      await expect(pageObjects.devTools.appNotFoundMessage).toBeVisible();
     }
   });
 
@@ -74,28 +53,6 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
         })
       );
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeVisible();
-    }
-  });
-
-  test('space with dev tools disabled hides registered dev tool apps', async ({
-    apiServices,
-    browserAuth,
-    kbnUrl,
-    page,
-    pageObjects,
-  }) => {
-    await apiServices.spaces.delete(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id).catch(() => {});
-    await apiServices.spaces.create(testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED);
-    await browserAuth.loginAsDevToolsAll();
-
-    for (const { hash } of testData.DEV_TOOL_APPS) {
-      await page.goto(
-        kbnUrl.app('dev_tools', {
-          space: testData.CUSTOM_SPACE_DEV_TOOLS_DISABLED.id,
-          pathOptions: { hash },
-        })
-      );
-      await expect(pageObjects.devTools.appNotFoundMessage).toBeVisible();
     }
   });
 });

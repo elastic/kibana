@@ -34,7 +34,7 @@ apiTest.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, (
       const { cookieHeader } = await samlAuth.asInteractiveUser(DEV_TOOLS_ALL_ROLE);
       const response = await apiClient.post(CAPABILITIES_API_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {},
+        body: { applications: [] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -49,7 +49,7 @@ apiTest.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, (
       const { cookieHeader } = await samlAuth.asInteractiveUser(DEV_TOOLS_READ_ROLE);
       const response = await apiClient.post(CAPABILITIES_API_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {},
+        body: { applications: [] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -64,7 +64,7 @@ apiTest.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, (
       const { cookieHeader } = await samlAuth.asInteractiveUser(NO_DEV_TOOLS_ROLE);
       const response = await apiClient.post(CAPABILITIES_API_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {},
+        body: { applications: [] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -81,7 +81,7 @@ apiTest.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, (
       const { cookieHeader } = await samlAuth.asInteractiveUser(DEV_TOOLS_READ_ROLE);
       const response = await apiClient.post(getCapabilitiesApiPath(API_CUSTOM_SPACE.id), {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
-        body: {},
+        body: { applications: [] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -99,7 +99,7 @@ apiTest.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, (
         getCapabilitiesApiPath(API_CUSTOM_SPACE_DEV_TOOLS_DISABLED.id),
         {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: {},
+          body: { applications: [] },
         }
       );
 

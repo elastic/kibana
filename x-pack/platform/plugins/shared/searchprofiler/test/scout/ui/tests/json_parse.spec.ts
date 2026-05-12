@@ -8,10 +8,27 @@
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
+const INDEX_NAME = 'search_profiler_json_parse_index';
+
 test.describe('Search Profiler JSON parsing', { tag: testData.SEARCH_PROFILER_TAGS }, () => {
+  test.beforeAll(async ({ esClient }) => {
+    await esClient.indices.create({
+      index: INDEX_NAME,
+      mappings: {
+        properties: {
+          message: { type: 'text' },
+        },
+      },
+    });
+  });
+
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsSearchProfilerUser();
     await pageObjects.searchProfiler.goto();
+  });
+
+  test.afterAll(async ({ esClient }) => {
+    await esClient.indices.delete({ index: INDEX_NAME }).catch(() => {});
   });
 
   test('accepts triple-quoted strings in profile query JSON', async ({ pageObjects }) => {
