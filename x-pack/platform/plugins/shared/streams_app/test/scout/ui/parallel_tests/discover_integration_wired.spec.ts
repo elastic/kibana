@@ -29,6 +29,10 @@ test.describe(
       });
     });
 
+    test.beforeEach(async ({ pageObjects }) => {
+      await pageObjects.discover.setQueryMode('classic');
+    });
+
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       await apiServices.streams.deleteStream(WIRED_STREAM_NAME);
       await logsSynthtraceEsClient.clean();
