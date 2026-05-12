@@ -106,7 +106,7 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight }) => {
 
   return (
     <div
-      data-test-subj="alertProcessingKeyInsightsContainer"
+      data-test-subj="costSavingsKeyInsightsContainer"
       css={css`
         background: linear-gradient(
           112deg,
@@ -124,9 +124,9 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight }) => {
     >
       <EuiFlexGroup
         gutterSize="s"
-        alignItems="center"
+        alignItems="flexStart"
         responsive={false}
-        data-test-subj="alertProcessingKeyInsightsGreetingGroup"
+        data-test-subj="costSavingsKeyInsightsGreetingGroup"
         // These props are necessary when rendering the component in export mode.
         // This attribute signals the export logic that it should wait for this element
         data-shared-item
@@ -134,20 +134,13 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight }) => {
         data-render-complete={isRenderComplete}
         ref={containerRef}
       >
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <p data-test-subj="alertProcessingKeyInsightsGreeting">
-              {i18n.KEY_INSIGHT}
-              <EuiIcon
-                css={css`
-                  margin-left: ${size.xs};
-                `}
-                type="sparkles"
-                color="primary"
-                aria-hidden={true}
-              />
-            </p>
+            <p data-test-subj="costSavingsKeyInsightsGreeting">{i18n.KEY_INSIGHT}</p>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="sparkles" color="primary" aria-hidden={true} />
         </EuiFlexItem>
       </EuiFlexGroup>
 

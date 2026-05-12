@@ -13,6 +13,7 @@ import {
 } from '@kbn/management-settings-ids';
 import {
   EuiFlexGroup,
+  EuiIcon,
   EuiImage,
   EuiEmptyPrompt,
   EuiFlexItem,
@@ -22,6 +23,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AnnouncementBanner } from '@kbn/announcement-banner';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { useSecuritySolutionLinkProps } from '../../../common/components/links';
 import analyticsSpeedAcceleration from './analytics_speed_acceleration.svg';
 import { AIValueReportLayout } from './ai_value_report_layout';
 import { useValueReportData } from '../../hooks/use_value_report_data';
@@ -29,7 +33,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 import { PageLoader } from '../../../common/components/page_loader';
 import * as i18n from './translations';
-import { SampleAttackDiscoveryCta } from './sample_attack_discovery_cta';
 
 interface Props {
   setHasReportData: React.Dispatch<boolean>;
@@ -43,6 +46,9 @@ export const AIValueReport: React.FC<Props> = (props) => {
   const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
+  const { href: attackDiscoveryHref } = useSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.attackDiscovery,
+  });
 
   // When exporting/scheduling, forwardedState can include relative date-math strings
   // (e.g. now-7d, now). Resolve them to a deterministic absolute range for this run.
@@ -99,11 +105,24 @@ export const AIValueReport: React.FC<Props> = (props) => {
     // to show the full report layout and provide an example of how the metrics are calculated
     return (
       <>
-        {/*
-         * TODO: This is a placeholder CTA. Once https://github.com/elastic/kibana/pull/267971
-         * is merged, this will be replaced with the correct banner.
-         */}
-        <SampleAttackDiscoveryCta />
+        <AnnouncementBanner
+          data-test-subj="aiValueSampleAttackDiscoveryBanner"
+          title={i18n.RUN_ATTACK_DISCOVERY_TEXT}
+          headingElement="h3"
+          text={i18n.GET_STARTED_ATTACK_DISCOVERY_TEXT}
+          media={<EuiIcon type={analyticsSpeedAcceleration} size="original" aria-hidden={true} />}
+          actionProps={{
+            primary: {
+              children: i18n.ATTACK_DISCOVERY_LINK,
+              href: attackDiscoveryHref,
+              iconType: 'popout',
+              iconSide: 'left',
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              'data-test-subj': 'sampleAttackDiscoveryCtaButton',
+            },
+          }}
+        />
         <EuiSpacer size="l" />
         <EuiPanel hasBorder={true} borderRadius="m" color="transparent" paddingSize="l">
           <EuiFlexGroup>

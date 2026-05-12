@@ -92,6 +92,7 @@
     "@kbn/securitysolution-exception-list-components",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/rison",
+    "@kbn/announcement-banner",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/securitysolution-hook-utils",
     "@kbn/test-jest-helpers",

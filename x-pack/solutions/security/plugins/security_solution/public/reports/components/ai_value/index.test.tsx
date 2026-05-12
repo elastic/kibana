@@ -43,10 +43,6 @@ jest.mock('./ai_value_report_layout', () => ({
   AIValueReportLayout: jest.fn(() => <div data-test-subj="mock-ai-value-report-layout" />),
 }));
 
-jest.mock('./sample_attack_discovery_cta', () => ({
-  SampleAttackDiscoveryCta: () => <div data-test-subj="mock-sample-cta" />,
-}));
-
 jest.mock('../../../common/components/page_loader', () => ({
   PageLoader: () => <div data-test-subj="mock-page-loader" />,
 }));
@@ -179,7 +175,7 @@ describe('AIValueReport', () => {
 
     render(<AIValueReport {...defaultProps} />);
 
-    expect(screen.getByTestId('mock-sample-cta')).toBeInTheDocument();
+    expect(screen.getByTestId('aiValueSampleAttackDiscoveryBanner')).toBeInTheDocument();
     expect(mockAIValueReportLayout).toHaveBeenCalledWith(
       expect.objectContaining({
         isSample: true,
@@ -213,7 +209,7 @@ describe('AIValueReport', () => {
     render(<AIValueReport {...defaultProps} />);
 
     expect(screen.queryByTestId('mock-ai-value-report-layout')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('mock-sample-cta')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('aiValueSampleAttackDiscoveryBanner')).not.toBeInTheDocument();
     expect(screen.getByText('No results for the selected time range')).toBeInTheDocument();
     expect(defaultProps.setHasReportData).toHaveBeenCalledWith(false);
   });

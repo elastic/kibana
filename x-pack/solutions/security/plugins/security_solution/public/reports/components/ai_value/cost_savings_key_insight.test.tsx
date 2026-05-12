@@ -163,9 +163,9 @@ describe('CostSavingsKeyInsight', () => {
     render(<CostSavingsKeyInsight {...defaultProps} />, { wrapper });
 
     await waitFor(() => {
-      expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
-      expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
-      expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
+      expect(screen.getByTestId('costSavingsKeyInsightsContainer')).toBeInTheDocument();
+      expect(screen.getByTestId('costSavingsKeyInsightsGreetingGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('costSavingsKeyInsightsGreeting')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
       expect(mockUseKibana).toHaveBeenCalled();
       expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
@@ -361,9 +361,9 @@ describe('CostSavingsKeyInsight', () => {
 
       it('should attempt to generate the insight', async () => {
         await waitFor(() => {
-          expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
-          expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
-          expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
+          expect(screen.getByTestId('costSavingsKeyInsightsContainer')).toBeInTheDocument();
+          expect(screen.getByTestId('costSavingsKeyInsightsGreetingGroup')).toBeInTheDocument();
+          expect(screen.getByTestId('costSavingsKeyInsightsGreeting')).toBeInTheDocument();
           expect(screen.getByRole('progressbar')).toBeInTheDocument();
           expect(mockUseKibana).toHaveBeenCalled();
           expect(mockLicenseService.isEnterprise).toHaveBeenCalled();
@@ -403,7 +403,7 @@ describe('CostSavingsKeyInsight', () => {
         { wrapper }
       );
 
-      const container = screen.getByTestId('alertProcessingKeyInsightsGreetingGroup');
+      const container = screen.getByTestId('costSavingsKeyInsightsGreetingGroup');
       container.addEventListener('renderComplete', renderCompleteHandler);
 
       expect(container).toHaveAttribute('data-shared-item');
