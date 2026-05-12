@@ -609,10 +609,10 @@
           },
           {
             "parentPluginId": "@kbn/change-history",
-            "id": "def-common.ChangeHistoryDocument.transaction",
+            "id": "def-common.ChangeHistoryDocument.span",
             "type": "Object",
             "tags": [],
-            "label": "transaction",
+            "label": "span",
             "description": [],
             "signature": [
               "{ id: string; } | undefined"
@@ -1304,7 +1304,7 @@
             "tags": [],
             "label": "correlationId",
             "description": [
-              "ID shared between events that take place together (ie in the same transaction)."
+              "ID shared between events that take place together (ie in the same bulk operation)."
             ],
             "signature": [
               "string | undefined"
