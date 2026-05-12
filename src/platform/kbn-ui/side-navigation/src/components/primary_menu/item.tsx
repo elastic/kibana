@@ -17,7 +17,6 @@ import type { MenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { MenuItem as MenuItemComponent } from '../menu_item';
 import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
-import { useTooltip } from '../../hooks/use_tooltip';
 
 export interface PrimaryMenuItemProps extends Omit<MenuItem, 'href'> {
   as?: 'a' | 'button';
@@ -57,7 +56,6 @@ export const PrimaryMenuItem = forwardRef<
     ref: ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
   ): JSX.Element => {
     const { euiTheme } = useEuiTheme();
-    const { tooltipRef, handleMouseOut } = useTooltip();
 
     const wrapperStyles = css`
       display: flex;
@@ -110,11 +108,9 @@ export const PrimaryMenuItem = forwardRef<
     if (tooltipContent) {
       return (
         <EuiToolTip
-          ref={tooltipRef}
           anchorProps={{ css: wrapperStyles }}
           content={tooltipContent}
           disableScreenReaderOutput
-          onMouseOut={handleMouseOut}
           position="right"
           repositionOnScroll
           offset={TOOLTIP_OFFSET}
