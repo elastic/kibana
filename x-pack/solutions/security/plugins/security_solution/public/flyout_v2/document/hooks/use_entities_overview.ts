@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import {
@@ -36,11 +35,6 @@ export interface UseEntitiesOverviewParams {
    * Document record used to retrieve host and user fields.
    */
   hit: DataTableRecord;
-  /**
-   * Pre-fetched ECS-nested object supplied by legacy adapters that already have it.
-   * Flyout v2 and Discover derive identity from `hit.flattened`/`hit.raw` instead.
-   */
-  dataAsNestedObject?: Ecs | null;
 }
 
 export interface UseEntitiesOverviewResult {
@@ -59,21 +53,6 @@ export interface UseEntitiesOverviewResult {
 }
 
 const hasEntityName = (name: string | undefined): name is string => name != null && name !== '';
-
-const getDocumentIdentitySource = (
-  hit: DataTableRecord,
-  dataAsNestedObject: Ecs | null | undefined
-) => {
-  if (dataAsNestedObject !== undefined) {
-    return dataAsNestedObject;
-  }
-
-  if (Object.keys(hit.flattened).length > 0) {
-    return hit.flattened;
-  }
-
-  return hit.raw;
-};
 
 const getLegacyIdentityFields = (
   field: 'host.name' | 'user.name',
@@ -114,23 +93,21 @@ const getEntityOverviewData = ({
  */
 export const useEntitiesOverview = ({
   hit,
-  dataAsNestedObject,
 }: UseEntitiesOverviewParams): UseEntitiesOverviewResult => {
   const hostName = getFieldValue(hit, 'host.name') as string | undefined;
   const userName = getFieldValue(hit, 'user.name') as string | undefined;
+  const { flattened } = hit;
 
   const euidApi = useEntityStoreEuidApi();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
-  const documentIdentitySource = getDocumentIdentitySource(hit, dataAsNestedObject);
-
   const hostEntityIdentifiers = useMemo(
-    () => euidApi?.euid.getEntityIdentifiersFromDocument('host', documentIdentitySource),
-    [euidApi?.euid, documentIdentitySource]
+    () => euidApi?.euid.getEntityIdentifiersFromDocument('host', flattened),
+    [euidApi?.euid, flattened]
   );
   const userEntityIdentifiers = useMemo(
-    () => euidApi?.euid.getEntityIdentifiersFromDocument('user', documentIdentitySource),
-    [euidApi?.euid, documentIdentitySource]
+    () => euidApi?.euid.getEntityIdentifiersFromDocument('user', flattened),
+    [euidApi?.euid, flattened]
   );
 
   const legacyUserIdentityForStore = getLegacyIdentityFields('user.name', userName);
@@ -139,12 +116,12 @@ export const useEntitiesOverview = ({
   const hostIdentityFields = hostEntityIdentifiers ?? legacyHostIdentityForStore;
 
   const hostEntityId = useMemo(
-    () => euidApi?.euid.getEuidFromObject('host', documentIdentitySource),
-    [euidApi?.euid, documentIdentitySource]
+    () => euidApi?.euid.getEuidFromObject('host', flattened),
+    [euidApi?.euid, flattened]
   );
   const userEntityId = useMemo(
-    () => euidApi?.euid.getEuidFromObject('user', documentIdentitySource),
-    [euidApi?.euid, documentIdentitySource]
+    () => euidApi?.euid.getEuidFromObject('user', flattened),
+    [euidApi?.euid, flattened]
   );
 
   const { entityRecord: userEntityRecord } = useEntityFromStore({

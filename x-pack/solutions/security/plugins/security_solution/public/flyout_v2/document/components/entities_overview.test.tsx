@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { TestProviders } from '../../../common/mock';
@@ -45,7 +44,6 @@ const buildHit = (source: Record<string, unknown>): DataTableRecord =>
 
 const renderEntitiesOverview = (props: {
   hit: DataTableRecord;
-  dataAsNestedObject?: Ecs | null;
   onShowEntitiesDetails?: () => void;
   showIcon?: boolean;
 }) =>
@@ -56,13 +54,6 @@ const renderEntitiesOverview = (props: {
   );
 
 const NO_DATA_MESSAGE = 'Host and user information are unavailable for this alert.';
-
-const dataAsNestedObject = {
-  _id: 'id-1',
-  _index: 'idx-1',
-  timestamp: '2026-05-07T00:00:00.000Z',
-  event: { kind: ['signal'] },
-} as unknown as Ecs;
 
 describe('<EntitiesOverview />', () => {
   beforeEach(() => {
@@ -172,8 +163,8 @@ describe('<EntitiesOverview />', () => {
   it('should pass document data to the entities overview hook', () => {
     const hit = buildHit({ host: { name: 'host-name' } });
 
-    renderEntitiesOverview({ hit, dataAsNestedObject });
+    renderEntitiesOverview({ hit });
 
-    expect(mockUseEntitiesOverview).toHaveBeenCalledWith({ hit, dataAsNestedObject });
+    expect(mockUseEntitiesOverview).toHaveBeenCalledWith({ hit });
   });
 });

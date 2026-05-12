@@ -35,15 +35,8 @@ const KEY = 'insights';
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
 export const InsightsSection = memo(() => {
-  const {
-    dataAsNestedObject,
-    getFieldsData,
-    investigationFields,
-    isPreviewMode,
-    searchHit,
-    scopeId,
-    isRulePreview,
-  } = useDocumentDetailsContext();
+  const { getFieldsData, investigationFields, isPreviewMode, searchHit, scopeId, isRulePreview } =
+    useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
@@ -97,7 +90,6 @@ export const InsightsSection = memo(() => {
     >
       <EntitiesOverview
         hit={hit}
-        dataAsNestedObject={dataAsNestedObject}
         scopeId={scopeId}
         showIcon={!isPreviewMode}
         renderCellActions={renderCellActions}

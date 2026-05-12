@@ -8,7 +8,6 @@
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -173,19 +172,15 @@ describe('useEntitiesOverview', () => {
     });
   });
 
-  it('uses legacy nested data as the EUID identity source when provided', () => {
+  it('uses hit flattened data as the EUID identity source', () => {
     mockUseUiSetting.mockReturnValue(true);
-    const dataAsNestedObject = {
-      host: { id: ['legacy-host-id'], name: ['legacy-host'] },
-      user: { name: ['legacy-user'] },
-    } as unknown as Ecs;
     const hit = buildHit({ host: { name: 'host-1' }, user: { name: 'user-1' } });
 
-    renderHook(() => useEntitiesOverview({ hit, dataAsNestedObject }));
+    renderHook(() => useEntitiesOverview({ hit }));
 
-    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('host', dataAsNestedObject);
-    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('user', dataAsNestedObject);
-    expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', dataAsNestedObject);
-    expect(mockGetEuidFromObject).toHaveBeenCalledWith('user', dataAsNestedObject);
+    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('host', hit.flattened);
+    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('user', hit.flattened);
+    expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', hit.flattened);
+    expect(mockGetEuidFromObject).toHaveBeenCalledWith('user', hit.flattened);
   });
 });

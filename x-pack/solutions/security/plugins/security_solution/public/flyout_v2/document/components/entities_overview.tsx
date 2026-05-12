@@ -10,7 +10,6 @@ import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
@@ -24,11 +23,6 @@ export interface EntitiesOverviewProps {
    * Document record used to retrieve host and user fields.
    */
   hit: DataTableRecord;
-  /**
-   * Pre-fetched ECS-nested object supplied by legacy adapters that already have it.
-   * Flyout v2 and Discover derive identity from `hit.flattened`/`hit.raw` instead.
-   */
-  dataAsNestedObject?: Ecs | null;
   /**
    * Whether to show the navigation icon in the panel header.
    */
@@ -78,17 +72,13 @@ const NO_DATA = (
 export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
   ({
     hit,
-    dataAsNestedObject: dataAsNestedObjectProp,
     showIcon = true,
     scopeId = '',
     renderCellActions = noopCellActionRenderer,
     onShowEntitiesDetails,
     enableEntityLinks = false,
   }) => {
-    const { user, host, hasAnyEntity } = useEntitiesOverview({
-      hit,
-      dataAsNestedObject: dataAsNestedObjectProp,
-    });
+    const { user, host, hasAnyEntity } = useEntitiesOverview({ hit });
 
     const link = useMemo(
       () =>
