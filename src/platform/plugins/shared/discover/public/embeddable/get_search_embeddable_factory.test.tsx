@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
+import { BehaviorSubject, firstValueFrom, Observable, of } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -34,6 +35,7 @@ import type {
 import { SolutionType } from '../context_awareness';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { getDiscoverSessionEmbeddableSchema } from '../../server/embeddable/schema';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -424,6 +426,82 @@ describe('saved search embeddable', () => {
         expect(queryByTestId('discoverEmbeddableDeletedTabCallout')).toBeInTheDocument();
         expect(queryByTestId('discoverDocTable')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe.only('unsaved changes', () => {
+    const discoverSessionSchema = getDiscoverSessionEmbeddableSchema(mockGetDrilldownsSchema);
+
+    beforeAll(() => {
+      jest
+        .spyOn(discoverServiceMock.data.search.searchSource, 'create')
+        .mockResolvedValue(createSearchSourceMock());
+    });
+
+    afterAll(() => {
+      jest.resetAllMocks();
+    });
+
+    test('should have unsaved changes when there are changes', async () => {
+      const lastSavedState = discoverSessionSchema.validate({
+        tabs: [
+          {
+            data_source: {
+              type: 'data_view_reference',
+              ref_id: 'oldId',
+            },
+          },
+        ],
+      });
+      const initialState = discoverSessionSchema.validate({
+        tabs: [
+          {
+            data_source: {
+              type: 'data_view_reference',
+              ref_id: 'newId',
+            },
+          },
+        ],
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState,
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: {
+          ...mockedDashboardApi,
+          lastSavedStateForChild$: () => of(lastSavedState),
+          getLastSavedStateForChild: lastSavedState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    test('should not have unsaved changes when there are no changes', async () => {
+      const initialState = discoverSessionSchema.validate({
+        tabs: [
+          {
+            data_source: {
+              type: 'data_view_reference',
+              ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            },
+          },
+        ],
+      });
+      const embeddable = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState,
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: {
+          ...mockedDashboardApi,
+          lastSavedStateForChild$: () => of(initialState),
+          getLastSavedStateForChild: initialState,
+        },
+      });
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
     });
   });
 
