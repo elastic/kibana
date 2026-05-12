@@ -69,6 +69,7 @@ describe('AttackAiAssistantButton', () => {
     (useViewInAiAssistant as jest.Mock).mockReturnValue({
       disabled: false,
       showAssistantOverlay: mockShowAssistantOverlay,
+      isAssistantVisible: true,
     });
   });
 
@@ -114,10 +115,28 @@ describe('AttackAiAssistantButton', () => {
     (useViewInAiAssistant as jest.Mock).mockReturnValue({
       disabled: true,
       showAssistantOverlay: mockShowAssistantOverlay,
+      isAssistantVisible: true,
     });
 
     renderComponent();
 
     expect(screen.getByTestId(VIEW_IN_AI_ASSISTANT_TEST_ID)).toBeDisabled();
+  });
+
+  it('does not render when isAssistantVisible is false', () => {
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentChatExperienceEnabled: false,
+    });
+    (useAttackDiscoveryAttachment as jest.Mock).mockReturnValue(jest.fn());
+    (useViewInAiAssistant as jest.Mock).mockReturnValue({
+      disabled: false,
+      showAssistantOverlay: mockShowAssistantOverlay,
+      isAssistantVisible: false,
+    });
+
+    renderComponent();
+
+    expect(screen.queryByTestId(VIEW_IN_AI_ASSISTANT_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(NEW_AGENT_BUILDER_ATTACHMENT_TEST_ID)).not.toBeInTheDocument();
   });
 });
