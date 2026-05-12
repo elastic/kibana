@@ -28,7 +28,7 @@ import { SESSION_VIEW_ID, SessionView } from '../components/session_view';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
-import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { METRIC_TYPE } from '../../../../common/lib/telemetry';
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -21,7 +21,7 @@ const mockAnalyzeGraphTestId = 'analyze-graph';
 const mockSessionViewTestId = 'session-view';
 
 // Mock all required dependencies
-jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview');
+jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
 jest.mock('../../../../common/hooks/use_upselling');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../shared/context');

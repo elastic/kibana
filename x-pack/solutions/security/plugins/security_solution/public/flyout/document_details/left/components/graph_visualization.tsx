@@ -9,9 +9,9 @@ import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, getFieldValue, type EsHitRecord } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { GraphVisualization as SharedGraphVisualization } from '../../../shared/components/graph_visualization';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 
 export { GRAPH_ID } from '../../../shared/components/graph_visualization';
 

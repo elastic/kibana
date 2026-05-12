@@ -21,17 +21,17 @@ import {
 import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
-} from '../../../../flyout_v2/document/components/test_ids';
+} from '../../../../flyout_v2/document/main/components/test_ids';
 import { GRAPH_PREVIEW_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
-import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree';
+import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree';
 import { TestProviders } from '../../../../common/mock';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/main/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -41,9 +41,12 @@ import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_ses
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-jest.mock('../../../../flyout_v2/document/hooks/use_alert_prevalence_from_process_tree', () => ({
-  useAlertPrevalenceFromProcessTree: jest.fn(),
-}));
+jest.mock(
+  '../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree',
+  () => ({
+    useAlertPrevalenceFromProcessTree: jest.fn(),
+  })
+);
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
 jest.mock('../../../../common/hooks/use_experimental_features');
@@ -64,7 +67,7 @@ jest.mock(
 );
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 
-jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview');
+jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview');
 jest.mock('../../../../common/hooks/use_upselling');
 
 const mockUseGraphPreview = useGraphPreview as jest.Mock;

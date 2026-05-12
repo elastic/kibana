@@ -96,11 +96,11 @@ jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+jest.mock('../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: () => <div />,
 }));
 
-jest.mock('../../../../flyout_v2/network_details', () => ({
+jest.mock('../../../../flyout_v2/network/main', () => ({
   Network: () => <div />,
 }));
 
@@ -140,7 +140,7 @@ jest.mock('../../shared/context', () => ({
 const MOCK_EVENT_IDS = ['event-1', 'event-2'];
 const MOCK_TIMESTAMP = new Date().toISOString();
 
-jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview', () => ({
+jest.mock('../../../../flyout_v2/document/main/hooks/use_graph_preview', () => ({
   useGraphPreview: () => ({
     eventIds: MOCK_EVENT_IDS,
     timestamp: MOCK_TIMESTAMP,
