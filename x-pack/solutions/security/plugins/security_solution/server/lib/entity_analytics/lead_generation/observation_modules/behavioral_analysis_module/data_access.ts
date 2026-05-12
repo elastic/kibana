@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity } from '../../types';
+import { DEFAULT_MAX_TERMS_QUERY_COUNT } from '../../../utils/elasticsearch_terms_limits';
 import { parseAlertBuckets } from '../types';
 import { ALERT_ENTITY_TYPES, ALERT_LOOKBACK, MODULE_ID, type AlertSummary } from './config';
 
@@ -77,43 +78,42 @@ export const fetchAlertSummariesForEntities = async (
     }
   }
 
-  const entityTerms: Array<Record<string, unknown>> = Object.entries(namesByType)
-    .filter(([, names]) => names.length > 0)
-    .map(([type, names]) => ({ terms: { [`${type}.name`]: names } }));
-  if (entityTerms.length === 0) return result;
+  if (Object.keys(namesByType).length === 0) return result;
 
   try {
-    const response = await esClient.search({
-      index: alertsIndexPattern,
-      size: 0,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: {
-        bool: {
-          filter: [
-            { bool: { should: entityTerms, minimum_should_match: 1 } },
-            { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
-            { range: { '@timestamp': { gte: ALERT_LOOKBACK, lte: 'now' } } },
-          ],
-          must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
-        },
-      },
-      aggs: Object.fromEntries(
-        Object.keys(namesByType).map((type) => [
-          `by_${type}`,
-          {
-            terms: {
-              field: `${type}.name`,
-              size: Math.min(namesByType[type].length, ENTITY_BUCKET_LIMIT),
-            },
-            aggs: alertSubAggs(),
-          },
-        ])
-      ),
-    });
-
     for (const type of Object.keys(namesByType)) {
-      parseEntityBuckets(response.aggregations?.[`by_${type}`], type, result);
+      const names = namesByType[type];
+      for (let offset = 0; offset < names.length; offset += DEFAULT_MAX_TERMS_QUERY_COUNT) {
+        const chunk = names.slice(offset, offset + DEFAULT_MAX_TERMS_QUERY_COUNT);
+
+        const response = await esClient.search({
+          index: alertsIndexPattern,
+          size: 0,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          query: {
+            bool: {
+              filter: [
+                { terms: { [`${type}.name`]: chunk } },
+                { terms: { 'kibana.alert.workflow_status': ['open', 'acknowledged'] } },
+                { range: { '@timestamp': { gte: ALERT_LOOKBACK, lte: 'now' } } },
+              ],
+              must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
+            },
+          },
+          aggs: {
+            [`by_${type}`]: {
+              terms: {
+                field: `${type}.name`,
+                size: Math.min(chunk.length, ENTITY_BUCKET_LIMIT),
+              },
+              aggs: alertSubAggs(),
+            },
+          },
+        });
+
+        parseEntityBuckets(response.aggregations?.[`by_${type}`], type, result);
+      }
     }
   } catch (error) {
     logger.warn(`[${MODULE_ID}] Failed to fetch alert summaries: ${error}`);
