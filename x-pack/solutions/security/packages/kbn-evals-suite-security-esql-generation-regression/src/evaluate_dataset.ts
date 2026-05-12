@@ -31,6 +31,24 @@ const queryExtractor = (output: unknown): string[] => {
   return query ? [query] : [];
 };
 
+/**
+ * Honors `ESQL_GENERATION_DATASET_OFFSET` (skip first N) and
+ * `ESQL_GENERATION_DATASET_LIMIT` (cap result size) to slice the dataset for
+ * fast smoke iteration. Invalid values fall through to the full dataset.
+ */
+function sliceDataset<T>(examples: readonly T[]): T[] {
+  const parsePositiveInt = (value: string | undefined): number | undefined => {
+    if (!value) return undefined;
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+  };
+
+  const offset = parsePositiveInt(process.env.ESQL_GENERATION_DATASET_OFFSET) ?? 0;
+  const limit = parsePositiveInt(process.env.ESQL_GENERATION_DATASET_LIMIT);
+  const end = limit !== undefined ? offset + limit : examples.length;
+  return examples.slice(offset, end);
+}
+
 export type EvaluateEsqlGenerationDataset = () => Promise<void>;
 
 export function createEvaluateEsqlGenerationDataset({
@@ -93,13 +111,13 @@ export function createEvaluateEsqlGenerationDataset({
   };
 
   return async function evaluateEsqlGenerationDataset(): Promise<void> {
+    const examples = sliceDataset(esqlGenerationDataset);
     await executorClient.runExperiment(
       {
         dataset: {
           name: 'security-esql-generation: regression suite',
-          description:
-            'Security ES|QL generation: 31 examples (natural-language question → ground-truth query)',
-          examples: esqlGenerationDataset,
+          description: `Security ES|QL generation: ${examples.length} examples (natural-language question → ground-truth query)`,
+          examples,
         },
         task: async ({ input }) => {
           const question = input?.question ?? '';
