@@ -65,7 +65,7 @@ Search
 :   Search for content across SharePoint sites, lists, and drives using the Microsoft Graph Search API.
     - `query` (required): The search query string (KQL syntax).
     - `entityTypes` (optional): Array of entity types to search. Valid values: `site`, `list`, `listItem`, `drive`, `driveItem`. Defaults to `[site]`.
-    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (certificate) auth; ignored with delegated auth. Defaults to `NAM` when using app-only auth.
+    - `region` (optional): Search region (`NAM`, `EUR`, `APC`, `LAM`, `MEA`). Only used with app-only (certificate) auth and ignored with delegated auth. Defaults to `NAM` when using app-only auth.
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return.
 
@@ -133,7 +133,7 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [sharepoint-online-api-credentials]
 
-Both authentication types start with the same Entra app registration. The differences are in which credential type you add (client secret vs. certificate) and which permission kind you grant (delegated vs. application).
+Both authentication types start with the same Entra app registration. The differences are in which credential type you add (client secret versus certificate) and which permission kind you grant (delegated versus application).
 
 ### Create the Entra app registration [sharepoint-online-entra-registration]
 
@@ -150,11 +150,11 @@ Both authentication types start with the same Entra app registration. The differ
 This matches the **OAuth Client Certificate (Microsoft Entra)** authentication type in {{kib}}.
 
 1. Grant **application** Microsoft Graph permissions:
-   1. In the app registration, go to **API permissions** > **Add a permission** > **Microsoft Graph** > **Application permissions**.
+   1. In the app registration, go to **API permissions** → **Add a permission** → **Microsoft Graph** → **Application permissions**.
    2. Add the following permissions:
       - `Sites.Selected` — read items in selected site collections.
       - `Files.Read.All` — read files in all site collections.
-      - `Sites.ReadWrite.All` and/or `Files.ReadWrite.All` — only if write operations are needed.
+      - `Sites.ReadWrite.All`, `Files.ReadWrite.All`, or both — only if write operations are needed.
    3. Select **Grant admin consent** for your organization.
 2. Generate or obtain a certificate and its matching private key. The certificate can be self-signed (common for service-to-service scenarios) or CA-issued.
 
@@ -170,7 +170,7 @@ This matches the **OAuth Client Certificate (Microsoft Entra)** authentication t
 
    Use `-nodes` only if you do not want the private key encrypted with a passphrase. Omit `-nodes` (and instead use `-passout`) if you prefer an encrypted PKCS#8 key.
 3. Upload the certificate to the Entra app registration:
-   1. In the app registration, go to **Certificates & secrets** > **Certificates** > **Upload certificate**.
+   1. In the app registration, go to **Certificates & secrets** → **Certificates** → **Upload certificate**.
    2. Upload the `.pem` (or `.cer`) public certificate from the previous step.
 4. Enter the following values when configuring the connector in {{kib}}:
     - **Token URL**: `https://login.microsoftonline.com/{your-tenant-id}/oauth2/v2.0/token`
@@ -188,7 +188,7 @@ Under the hood, the connector signs a JWT client assertion with the private key 
 This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}.
 
 1. Add a redirect URI so Entra can return the user to {{kib}} after sign-in:
-   1. In the app registration, go to **Authentication** > **Add a platform** > **Web**.
+   1. In the app registration, go to **Authentication** → **Add a platform** → **Web**.
    2. Under **Redirect URIs**, add {{kib}}'s connector OAuth callback. Substitute your public {{kib}} hostname:
 
       ```text
@@ -197,14 +197,14 @@ This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}
 
    3. Save the platform configuration.
 2. Grant **delegated** Microsoft Graph permissions:
-   1. In the app registration, go to **API permissions** > **Add a permission** > **Microsoft Graph** > **Delegated permissions**.
+   1. In the app registration, go to **API permissions** → **Add a permission** → **Microsoft Graph** → **Delegated permissions**.
    2. Add the following permissions:
       - `Sites.Selected` — read items in selected site collections.
       - `Files.Read.All` — read files in site collections the signed-in user has access to.
       - `offline_access` — allow {{kib}} to refresh tokens without re-prompting the user.
    3. Select **Grant admin consent** if required by your tenant's policy.
 3. Create a client secret:
-   1. In the app registration, go to **Certificates & secrets** > **Client secrets** > **New client secret**.
+   1. In the app registration, go to **Certificates & secrets** → **Client secrets** → **New client secret**.
    2. Enter a description and an expiration period.
    3. Copy the secret **Value** immediately — it is not retrievable after you leave the page.
 4. Enter the following values when configuring the connector in {{kib}}:
