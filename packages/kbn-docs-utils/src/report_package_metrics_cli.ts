@@ -12,20 +12,25 @@ import Path from 'path';
 import apm from 'elastic-apm-node';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { initApm } from '@kbn/apm-config-loader';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 
-import {
-  parseCliFlags,
-  setupProject,
-  buildApiMap,
-  collectStats,
-  reportMetrics,
-  type CliFlags,
-  type CliContext,
-} from './cli';
+import { findPlugins } from './find_plugins';
+import { getPathsByPackage } from './get_paths_by_package';
+import { countEnzymeImports } from './count_enzyme_imports';
+import { countEslintDisableLines } from './count_eslint_disable';
 
 const rootDir = Path.join(__dirname, '../../..');
+
+interface CliFlags {
+  plugin?: string | string[];
+  package?: string | string[];
+}
+
+const toStringArray = (value?: string | string[]): string[] | undefined => {
+  if (!value) return undefined;
+  return typeof value === 'string' ? [value] : value;
+};
 
 const startApm = () => {
   if (!apm.isStarted()) {
@@ -38,28 +43,64 @@ export const runReportPackageMetrics = async (log: ToolingLog, flags: CliFlags) 
   const transaction = apm.startTransaction('report-package-metrics', 'kibana-cli');
 
   try {
-    const options = parseCliFlags(flags);
+    const pluginFilter = toStringArray(flags.plugin);
+    const packageFilter = toStringArray(flags.package);
+    const reporter = CiStatsReporter.fromEnv(log);
 
-    const outputFolder = Path.resolve(REPO_ROOT, 'api_docs_metrics');
-    const context: CliContext = {
-      log,
-      transaction,
-      outputFolder,
-    };
+    const spanPlugins = transaction.startSpan('report_package_metrics.findPlugins', 'setup');
+    const plugins = findPlugins({ pluginFilter, packageFilter });
+    spanPlugins?.end();
+    log.info(`Scanning ${plugins.length} package(s) for Enzyme imports and ESLint disables.`);
 
-    const setupResult = await setupProject(context, options);
-    const apiMapResult = buildApiMap(
-      setupResult.project,
-      setupResult.plugins,
-      setupResult.allPlugins,
-      log,
-      transaction,
-      options
-    );
+    const spanPaths = transaction.startSpan('report_package_metrics.getPathsByPackage', 'setup');
+    const pathsByPackage = await getPathsByPackage(plugins);
+    spanPaths?.end();
 
-    const allPluginStats = await collectStats(setupResult, apiMapResult, log, transaction, options);
+    for (const plugin of plugins) {
+      const paths = pathsByPackage.get(plugin) ?? [];
+      if (paths.length === 0) continue;
 
-    reportMetrics(setupResult, apiMapResult, allPluginStats, log, transaction, options);
+      const span = transaction.startSpan(
+        `report_package_metrics.scanPackage-${plugin.id}`,
+        'stats'
+      );
+
+      const { enzymeImportCount } = await countEnzymeImports(paths);
+      const { eslintDisableLineCount, eslintDisableFileCount } = await countEslintDisableLines(
+        paths
+      );
+
+      const pluginTeam = plugin.manifest.owner.name;
+
+      reporter.metrics([
+        {
+          id: plugin.id,
+          meta: { pluginTeam },
+          group: 'Enzyme imports',
+          value: enzymeImportCount,
+        },
+        {
+          id: plugin.id,
+          meta: { pluginTeam },
+          group: 'ESLint disabled line counts',
+          value: eslintDisableLineCount,
+        },
+        {
+          id: plugin.id,
+          meta: { pluginTeam },
+          group: 'ESLint disabled in files',
+          value: eslintDisableFileCount,
+        },
+        {
+          id: plugin.id,
+          meta: { pluginTeam },
+          group: 'Total ESLint disabled count',
+          value: eslintDisableLineCount + eslintDisableFileCount,
+        },
+      ]);
+
+      span?.end();
+    }
   } catch (error) {
     transaction?.setOutcome('failure');
     throw error;
@@ -75,9 +116,7 @@ export const runReportPackageMetricsCli = () => {
       await runReportPackageMetrics(log, flags as CliFlags);
     },
     {
-      log: {
-        defaultLevel: 'info',
-      },
+      log: { defaultLevel: 'info' },
       flags: {
         string: ['plugin', 'package'],
         help: `
