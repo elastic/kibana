@@ -184,6 +184,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.outlook',
+    lazy(() => import(/* webpackChunkName: "connectorIconOutlook" */ './specs/outlook/icon')),
+  ],
+  [
     '.google_cloud_storage',
     lazy(
       () =>
