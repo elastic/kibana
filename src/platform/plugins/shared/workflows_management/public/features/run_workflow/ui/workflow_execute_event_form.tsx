@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { DataGridDensity } from '@kbn/discover-utils';
@@ -35,9 +35,13 @@ import {
   type DataTableColumnsMeta,
   getRenderCustomToolbarWithElements,
   OPEN_DETAILS,
+  SELECT_ROW,
   type SortOrder,
   UnifiedDataTable,
+  type UnifiedDataTableRenderCustomToolbar,
+  type UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
+import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 import {
   WORKFLOWS_EVENTS_DATA_STREAM,
   WORKFLOWS_EVENTS_DATA_VIEW_FIELDS,
@@ -48,6 +52,7 @@ import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_event_log_grid_cells';
 import { getWorkflowCustomTriggerTypeIds } from './workflow_execute_modal_helpers';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useSpaceId } from '../../../hooks/use_space_id';
 import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
 
 const PAGE_SIZE = 50;
@@ -72,6 +77,27 @@ function workflowsEventsKqlFieldToFieldSpec(field: DataViewFieldBase): FieldSpec
 const WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS: FieldSpec[] = WORKFLOWS_EVENTS_DATA_VIEW_FIELDS.map(
   workflowsEventsKqlFieldToFieldSpec
 );
+
+export function buildTriggerEventReplayInputs(
+  source: Record<string, unknown>,
+  currentSpaceId: string
+): Record<string, unknown> {
+  const rawPayload = source.payload;
+  const payload =
+    rawPayload !== null && typeof rawPayload === 'object' && !Array.isArray(rawPayload)
+      ? { ...(rawPayload as Record<string, unknown>) }
+      : {};
+
+  return {
+    event: {
+      ...payload,
+      timestamp: new Date().toISOString(),
+      spaceId: currentSpaceId,
+      eventChainDepth: 0,
+      eventChainVisitedWorkflowIds: [] as string[],
+    },
+  };
+}
 
 function buildSummaryText(row: TriggerEventLogGridRow): string {
   const parts: string[] = [];
@@ -99,6 +125,8 @@ export interface WorkflowExecuteEventFormProps {
   value: string;
   setValue: (data: string) => void;
   errors: string | null;
+  /** Clears validation errors when the table updates the run payload from the current selection. */
+  setErrors?: (errors: string | null) => void;
 }
 
 interface TriggerEventTableRow {
@@ -119,11 +147,58 @@ function formatQueryError(error: unknown): string {
   });
 }
 
+interface TriggerEventRunPayloadSelectionSyncProps {
+  dataTableRows: DataTableRecord[];
+  replaySpaceId: string;
+  setValue: (value: string) => void;
+  setErrors?: (errors: string | null) => void;
+}
+
+/**
+ * Renders inside UnifiedDataTable's toolbar (under UnifiedDataTableContext.Provider) so we can
+ * mirror checkbox selection into the modal JSON without adding APIs to @kbn/unified-data-table.
+ */
+const TriggerEventRunPayloadSelectionSync = ({
+  dataTableRows,
+  replaySpaceId,
+  setValue,
+  setErrors,
+}: TriggerEventRunPayloadSelectionSyncProps) => {
+  const { selectedDocsState } = useContext(UnifiedDataTableContext);
+  const selectedStateRef = useRef(selectedDocsState);
+  selectedStateRef.current = selectedDocsState;
+
+  const docIdsKey = (selectedDocsState?.docIdsInSelectionOrder ?? []).join('\0');
+
+  useEffect(() => {
+    const docIds = selectedStateRef.current?.docIdsInSelectionOrder ?? [];
+    if (docIds.length === 0) {
+      setValue('');
+      setErrors?.(null);
+      return;
+    }
+    const primaryId = docIds[0];
+    const record = dataTableRows.find((r) => r.id === primaryId);
+    if (!record) {
+      setValue('');
+      return;
+    }
+    const source = (record.raw._source ?? {}) as Record<string, unknown>;
+    setValue(JSON.stringify(buildTriggerEventReplayInputs(source, replaySpaceId), null, 2));
+    setErrors?.(null);
+  }, [dataTableRows, docIdsKey, replaySpaceId, setErrors, setValue]);
+
+  return null;
+};
+
+TriggerEventRunPayloadSelectionSync.displayName = 'TriggerEventRunPayloadSelectionSync';
+
 export const WorkflowExecuteEventForm = ({
   definition,
   value: _value,
   setValue,
   errors,
+  setErrors,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -135,6 +210,8 @@ export const WorkflowExecuteEventForm = ({
   const { eventDrivenExecutionEnabled, isLoading: isEventConfigLoading } =
     useEventDrivenExecutionStatus();
 
+  const activeSpaceId = useSpaceId();
+  const replaySpaceId = activeSpaceId ?? 'default';
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
@@ -404,27 +481,60 @@ export const WorkflowExecuteEventForm = ({
   );
 
   const documentCount = searchResult?.total ?? 0;
-  const leftToolbarContent = useMemo(
+  const selectionAutoHint = useMemo(
     () => (
-      <EuiText size="s" color="subdued" data-test-subj="workflowTriggerEventsDocumentCount">
-        <span css={{ fontWeight: euiTheme.font.weight.bold }}>
-          <FormattedNumber value={documentCount} />
-        </span>{' '}
-        {i18n.translate('workflows.workflowExecuteEventTriggerForm.documentCountLabel', {
-          defaultMessage: '{count, plural, one {document} other {documents}}',
-          values: { count: documentCount },
+      <EuiText size="xs" color="subdued" data-test-subj="workflowTriggerEventsSelectionAutoHint">
+        {i18n.translate('workflows.workflowExecuteEventTriggerForm.selectionAutoHint', {
+          defaultMessage:
+            'Selecting a row fills the run payload. If several rows are selected, the first in selection order is used.',
         })}
       </EuiText>
     ),
-    [documentCount, euiTheme.font.weight.bold]
+    []
   );
-  const renderCustomToolbar = useMemo(
+  const leftToolbarContent = useMemo(
+    () => (
+      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="workflowTriggerEventsDocumentCount">
+            <span css={{ fontWeight: euiTheme.font.weight.bold }}>
+              <FormattedNumber value={documentCount} />
+            </span>{' '}
+            {i18n.translate('workflows.workflowExecuteEventTriggerForm.documentCountLabel', {
+              defaultMessage: '{count, plural, one {document} other {documents}}',
+              values: { count: documentCount },
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{selectionAutoHint}</EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [documentCount, euiTheme.font.weight.bold, selectionAutoHint]
+  );
+  const baseToolbarRenderer = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         leftSide: leftToolbarContent,
       }),
     [leftToolbarContent]
   );
+  const renderCustomToolbar = useMemo((): UnifiedDataTableRenderCustomToolbar => {
+    function renderTriggerEventToolbar(toolbarProps: UnifiedDataTableRenderCustomToolbarProps) {
+      return (
+        <>
+          <TriggerEventRunPayloadSelectionSync
+            dataTableRows={dataTableRows}
+            replaySpaceId={replaySpaceId}
+            setValue={setValue}
+            setErrors={setErrors}
+          />
+          {baseToolbarRenderer(toolbarProps)}
+        </>
+      );
+    }
+    renderTriggerEventToolbar.displayName = 'WorkflowTriggerEventsRenderCustomToolbar';
+    return renderTriggerEventToolbar;
+  }, [baseToolbarRenderer, dataTableRows, replaySpaceId, setErrors, setValue]);
   const totalPages =
     searchResult && searchResult.total > 0
       ? Math.ceil(searchResult.total / (searchResult.size || PAGE_SIZE))
@@ -583,11 +693,6 @@ export const WorkflowExecuteEventForm = ({
                 padding-bottom: 0 !important;
                 margin-bottom: 0 !important;
               }
-              [data-test-subj='unifiedDataTableSelectionBtn'],
-              [data-test-subj='dscGridSelectAllDocs'],
-              [data-test-subj='unifiedDataTableCompareSelectedDocuments'] {
-                display: none !important;
-              }
             `,
           ]}
           data-test-subj="workflowTriggerEventsTable"
@@ -644,7 +749,7 @@ export const WorkflowExecuteEventForm = ({
                 showFullScreenButton={true}
                 showKeyboardShortcuts={false}
                 enableInTableSearch={true}
-                controlColumnIds={[OPEN_DETAILS]}
+                controlColumnIds={[SELECT_ROW, OPEN_DETAILS]}
                 customGridColumnsConfiguration={customGridColumnsConfiguration}
                 renderCustomToolbar={renderCustomToolbar}
                 externalCustomRenderers={externalCustomRenderers}

@@ -107,7 +107,28 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     }, []);
 
     const handleSubmit = useCallback(() => {
-      onSubmit(JSON.parse(executionInput), selectedTrigger);
+      const trimmed = executionInput.trim();
+      if (selectedTrigger === 'event' && trimmed === '') {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.eventSelectionRequired', {
+            defaultMessage: 'Select a trigger event row to use as the run input.',
+          })
+        );
+        return;
+      }
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = trimmed === '' ? {} : (JSON.parse(executionInput) as Record<string, unknown>);
+      } catch {
+        setExecutionInputErrors(
+          i18n.translate('workflows.workflowExecuteModal.invalidRunPayloadJson', {
+            defaultMessage: 'Fix invalid JSON in the run payload before continuing.',
+          })
+        );
+        return;
+      }
+      setExecutionInputErrors(null);
+      onSubmit(parsed, selectedTrigger);
       onClose();
     }, [selectedTrigger, onSubmit, onClose, executionInput]);
 
@@ -564,6 +585,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     value={executionInput}
                     setValue={handleInputChange}
                     errors={executionInputErrors}
+                    setErrors={setExecutionInputErrors}
                   />
                 )}
                 {selectedTrigger === 'historical' && (
@@ -584,7 +606,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             <EuiButton
               onClick={handleSubmit}
               iconType="play"
-              disabled={Boolean(executionInputErrors)}
+              disabled={
+                Boolean(executionInputErrors) ||
+                (selectedTrigger === 'event' && executionInput.trim() === '')
+              }
               color="success"
               data-test-subj="executeWorkflowButton"
             >

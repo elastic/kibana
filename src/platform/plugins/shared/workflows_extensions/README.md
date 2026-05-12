@@ -11,8 +11,6 @@ The `workflows_extensions` plugin serves as the home for workflow extension poin
 
 External teams must implement steps and triggers in their own plugins and register via the plugin contract; see [Custom step types](dev_docs/STEPS.md#important-internal-vs-external-steps) and [Event-driven triggers](dev_docs/TRIGGERS.md) for details.
 
-To analyze **usage telemetry** for your step/trigger ids (e.g. filter by `cases.*`) on Elastic’s behavioral telemetry cluster, see [Telemetry dashboard: workflows extensions usage](dev_docs/telemetry_dashboard_workflows_extensions.md).
-
 ## Step Type Registry Architecture
 
 The step type registry provides a clean separation between:
