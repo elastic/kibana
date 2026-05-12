@@ -456,6 +456,7 @@ export function MonitorDetailFlyout(props: Props) {
               loading={Boolean(monitorDetail.loading)}
               configId={configId}
               locationId={locationId}
+              remoteName={monitor?.remote?.remoteName}
             />
             <FlyoutSummaryKPIs
               monitorId={id}
