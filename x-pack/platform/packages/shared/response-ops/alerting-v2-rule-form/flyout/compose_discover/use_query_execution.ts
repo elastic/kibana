@@ -11,8 +11,6 @@ import { getESQLResults } from '@kbn/esql-utils';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-const MAX_ROWS = 500;
-
 export interface QueryColumn extends EuiDataGridColumn {
   esType: string;
 }
@@ -160,7 +158,7 @@ export const useQueryExecution = ({
       });
       return record;
     });
-    return { rows: allRows.slice(0, MAX_ROWS), totalRowCount: allRows.length };
+    return { rows: allRows, totalRowCount: allRows.length };
   }, [response?.columns, response?.values]);
 
   const errorMessage = isError && error instanceof Error ? error.message : null;
