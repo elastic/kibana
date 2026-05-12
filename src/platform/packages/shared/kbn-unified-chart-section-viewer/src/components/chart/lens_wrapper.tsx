@@ -116,7 +116,6 @@ export function LensWrapper({
         <EmbeddableComponent
           {...lensProps}
           title={lensProps.attributes.title}
-          description={lensProps.description}
           titleHighlight={titleHighlight}
           extraActions={extraActions}
           abortController={abortController}
