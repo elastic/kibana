@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOMemberSummary, CompositeSLOSummary } from '@kbn/slo-schema';
 import { storedCompositeSloSummarySchema } from '@kbn/slo-schema';
-import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
+import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 
 export interface PersistedCompositeSummary {
   summary: CompositeSLOSummary;

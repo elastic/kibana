@@ -9,8 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UpdateCompositeSLOInput, UpdateCompositeSLOResponse } from '@kbn/slo-schema';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { persistCompositeSummaryDoc } from './composite_summary_writer';
-import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { SummaryClient } from './summary_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
 
 export interface UpdateCompositeSloParams extends UpdateCompositeSLOInput {
   id: string;

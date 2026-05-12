@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
+import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
 import {
   fetchCompositeSloSummariesFromIndex,
   mapCompositeSummaryIndexSource,

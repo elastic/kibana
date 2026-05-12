@@ -28,10 +28,13 @@ import { toRichRollingTimeWindow, type TimeWindow } from '../../../domain/models
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
-import { buildCompositeSloSummaryDocId } from '../../composite_slo_summary_index';
-import { buildCompositeSummaryDoc } from '../../composite_summary_writer';
+import { buildCompositeSloSummaryDocId } from '../../composites/composite_slo_summary_index';
+import { buildCompositeSummaryDoc } from '../../composites/composite_summary_writer';
 import { DefaultSummaryClient } from '../../summary_client';
-import { computeCompositeSummary, type MemberSummaryData } from '../../compute_composite_summary';
+import {
+  computeCompositeSummary,
+  type MemberSummaryData,
+} from '../../composites/compute_composite_summary';
 
 type SpaceItems = Array<{ compositeSlo: CompositeSLODefinition }>;
 type MemberDefinitionMap = Map<string, SLODefinition>;

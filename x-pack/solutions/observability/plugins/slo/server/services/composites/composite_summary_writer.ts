@@ -8,14 +8,14 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
-import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../common/constants';
-import type { CompositeSLODefinition } from '../domain/models';
-import { toRichRollingTimeWindow } from '../domain/models';
-import { retryTransientEsErrors } from '../utils/retry';
+import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../common/constants';
+import type { CompositeSLODefinition } from '../../domain/models';
+import { toRichRollingTimeWindow } from '../../domain/models';
+import { retryTransientEsErrors } from '../../utils/retry';
 import { buildCompositeSloSummaryDocId } from './composite_slo_summary_index';
 import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
-import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { SummaryClient } from './summary_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
 
 export interface CompositeSummaryDoc {
   spaceId: string;

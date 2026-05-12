@@ -10,10 +10,10 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { escapeKuery } from '@kbn/es-query';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
-import { SLOIdConflict, SLONotFound } from '../errors';
-import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
+import { SLOIdConflict, SLONotFound } from '../../errors';
+import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
 import { DefaultCompositeSLORepository } from './composite_slo_repository';
-import { createCompositeSlo } from './fixtures/composite_slo';
+import { createCompositeSlo } from '../fixtures/composite_slo';
 
 describe('DefaultCompositeSLORepository', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;

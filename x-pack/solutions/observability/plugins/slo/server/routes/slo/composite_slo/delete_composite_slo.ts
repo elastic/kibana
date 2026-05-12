@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { deleteCompositeSLOParamsSchema } from '@kbn/slo-schema';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
-import { buildCompositeSloSummaryDocId } from '../../../services/composite_slo_summary_index';
+import { buildCompositeSloSummaryDocId } from '../../../services/composites/composite_slo_summary_index';
 import { retryTransientEsErrors } from '../../../utils/retry';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';

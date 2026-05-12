@@ -12,14 +12,14 @@ import {
   getCompositeSLOResponseSchema,
 } from '@kbn/slo-schema';
 import type { BatchGetCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
-import { toRichRollingTimeWindow } from '../domain/models';
+import { toRichRollingTimeWindow } from '../../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import {
   fetchCompositeSloSummariesFromIndex,
   type PersistedCompositeSummary,
 } from './composite_slo_summary_index';
-import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { SummaryClient } from './summary_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
 import { computeCompositeSummary, type MemberSummaryData } from './compute_composite_summary';
 
 export interface GetCompositeSloSummaryReadContext {

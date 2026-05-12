@@ -7,19 +7,19 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { CompositeSLOSummary } from '@kbn/slo-schema';
-import { createSLO, createAPMTransactionErrorRateIndicator } from './fixtures/slo';
-import { createCompositeSlo } from './fixtures/composite_slo';
+import { createSLO, createAPMTransactionErrorRateIndicator } from '../fixtures/slo';
+import { createCompositeSlo } from '../fixtures/composite_slo';
 import * as compositeSloSummaryIndex from './composite_slo_summary_index';
 import { GetCompositeSLO } from './get_composite_slo';
 import {
   createSummaryClientMock,
   createSLORepositoryMock,
   createCompositeSLORepositoryMock,
-} from './mocks';
+} from '../mocks';
 import type { CompositeSLORepository } from './composite_slo_repository';
-import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { BurnRateWindow, SummaryClient } from './summary_client';
-import { Duration, DurationUnit, type Summary } from '../domain/models';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { BurnRateWindow, SummaryClient } from '../summary_client';
+import { Duration, DurationUnit, type Summary } from '../../domain/models';
 
 const buildSummary = (overrides: Partial<Summary> = {}): Summary => ({
   status: 'HEALTHY',

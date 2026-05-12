@@ -16,12 +16,12 @@ import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
 import { DefaultSummaryClient } from '../../summary_client';
-import { computeCompositeSummary } from '../../compute_composite_summary';
+import { computeCompositeSummary } from '../../composites/compute_composite_summary';
 import { computeAndPersistCompositeSummaries } from './compute_and_persist_composite_summaries';
 
 jest.mock('../../summary_client');
 jest.mock('../../burn_rates_client');
-jest.mock('../../compute_composite_summary');
+jest.mock('../../composites/compute_composite_summary');
 
 const MockDefaultSummaryClient = DefaultSummaryClient as jest.MockedClass<
   typeof DefaultSummaryClient

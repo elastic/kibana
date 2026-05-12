@@ -46,7 +46,7 @@ import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
 } from './services';
-import { DefaultCompositeSLORepository } from './services/composite_slo_repository';
+import { DefaultCompositeSLORepository } from './services/composites/composite_slo_repository';
 import { DefaultSLOSettingsRepository } from './services/slo_settings_repository';
 import { DefaultSLOTemplateRepository } from './services/slo_template_repository';
 import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';

@@ -9,9 +9,9 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { Logger } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import { compositeSloDefinitionSchema, storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
-import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../domain/models';
-import { SLOIdConflict, SLONotFound } from '../errors';
-import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
+import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../../domain/models';
+import { SLOIdConflict, SLONotFound } from '../../errors';
+import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
 
 export interface CompositeSLORepository {
   create(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition>;

@@ -10,8 +10,8 @@ import type { CreateCompositeSLOInput, CreateCompositeSLOResponse } from '@kbn/s
 import { v4 as uuidv4 } from 'uuid';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import { persistCompositeSummaryDoc } from './composite_summary_writer';
-import type { SLODefinitionRepository } from './slo_definition_repository';
-import type { SummaryClient } from './summary_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SummaryClient } from '../summary_client';
 
 export interface CreateCompositeSloParams extends CreateCompositeSLOInput {
   spaceId: string;
