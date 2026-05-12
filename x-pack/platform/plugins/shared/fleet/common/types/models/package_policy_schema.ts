@@ -93,7 +93,7 @@ const PackagePolicyStreamsSchema = {
     schema.string({
       meta: {
         description:
-          '**Experimental.** EQL expression evaluated by Elastic Agent to conditionally apply this stream.',
+          '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
       },
     })
   ),
@@ -116,7 +116,7 @@ export const PackagePolicyInputsSchema = {
     schema.string({
       meta: {
         description:
-          '**Experimental.** EQL expression evaluated by Elastic Agent to conditionally apply this input.',
+          '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
       },
     })
   ),
@@ -285,7 +285,7 @@ export const PackagePolicyBaseSchema = {
     schema.string({
       meta: {
         description:
-          '**Experimental.** EQL expression evaluated by Elastic Agent to conditionally apply this integration to its inputs.',
+          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
       },
     })
   ),
@@ -442,6 +442,14 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       ),
       deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
+      condition: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+          },
+        })
+      ),
       streams: schema.maybe(
         schema.recordOf(
           schema.string(),
@@ -456,6 +464,14 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             vars: schema.maybe(SimplifiedVarsSchema),
             var_group_selections: VarGroupSelectionsSchema,
             deprecated: schema.maybe(DeprecationInfoSchema),
+            condition: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+                },
+              })
+            ),
           }),
           {
             meta: {
@@ -539,6 +555,14 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         maxSize: 100,
       }),
     ])
+  ),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+      },
+    })
   ),
 });
 

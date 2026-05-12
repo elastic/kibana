@@ -276,5 +276,159 @@ export default function (providerContext: FtrProviderContext) {
         await deleteAgentPolicy(tempAgentPolicyId);
       }
     });
+
+    describe('simplified package policy format', () => {
+      const SIMPLIFIED_INPUT_ID = `${PKG_NAME}-${INPUT_TYPE}`;
+
+      it('persists condition fields at integration, input, and stream levels', async () => {
+        const integrationCondition = "${host.platform} == 'linux'";
+        const inputCondition = "${host.platform} != 'windows'";
+        const streamCondition = "${host.name} == 'mybox'";
+        const created = await createPackagePolicy({
+          name: `cond-simplified-persists-${uuidv4()}`,
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          condition: integrationCondition,
+          inputs: {
+            [SIMPLIFIED_INPUT_ID]: {
+              enabled: true,
+              condition: inputCondition,
+              streams: {
+                [DATASET]: {
+                  enabled: true,
+                  condition: streamCondition,
+                  vars: { test_var_required: 'required' },
+                },
+              },
+            },
+          },
+          package: { name: PKG_NAME, version: PKG_VERSION },
+        });
+        const id = created.item.id;
+
+        const fetched = await getPackagePolicy(id);
+        expect(fetched.condition).to.eql(integrationCondition);
+        expect(fetched.inputs[0].condition).to.eql(inputCondition);
+        expect(fetched.inputs[0].streams[0].condition).to.eql(streamCondition);
+      });
+
+      it('reflects updates to condition fields on subsequent GET', async () => {
+        const created = await createPackagePolicy({
+          name: `cond-simplified-updates-${uuidv4()}`,
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          condition: "${host.platform} == 'linux'",
+          inputs: {
+            [SIMPLIFIED_INPUT_ID]: {
+              enabled: true,
+              streams: {
+                [DATASET]: {
+                  enabled: true,
+                  condition: "${host.name} == 'mybox'",
+                  vars: { test_var_required: 'required' },
+                },
+              },
+            },
+          },
+          package: { name: PKG_NAME, version: PKG_VERSION },
+        });
+        const id = created.item.id;
+
+        await supertest
+          .put(`/api/fleet/package_policies/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: created.item.name,
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            condition: "${host.platform} == 'darwin'",
+            inputs: {
+              [SIMPLIFIED_INPUT_ID]: {
+                enabled: true,
+                streams: {
+                  [DATASET]: {
+                    enabled: true,
+                    condition: "${host.name} == 'macbook'",
+                    vars: { test_var_required: 'required' },
+                  },
+                },
+              },
+            },
+            package: { name: PKG_NAME, version: PKG_VERSION },
+          })
+          .expect(200);
+
+        const fetched = await getPackagePolicy(id);
+        expect(fetched.condition).to.eql("${host.platform} == 'darwin'");
+        expect(fetched.inputs[0].streams[0].condition).to.eql("${host.name} == 'macbook'");
+      });
+
+      it('rejects any condition on agentless package policies (400)', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `cond-simplified-agentless-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            supports_agentless: true,
+            condition: "${host.platform} == 'linux'",
+            inputs: {
+              [SIMPLIFIED_INPUT_ID]: {
+                enabled: true,
+                streams: {
+                  [DATASET]: {
+                    enabled: true,
+                    vars: { test_var_required: 'required' },
+                  },
+                },
+              },
+            },
+            package: { name: PKG_NAME, version: PKG_VERSION },
+          })
+          .expect(400);
+        expect(body.message).to.match(/agentless/i);
+      });
+
+      it('fans out integration-level condition to inputs in the full agent policy', async () => {
+        const tempAgentPolicyId = await createAgentPolicy();
+        try {
+          const integrationCondition = "${host.platform} == 'linux'";
+          const inputCondition = "${host.platform} != 'windows'";
+          const streamCondition = "${host.name} == 'mybox'";
+
+          await createPackagePolicy({
+            name: `cond-simplified-full-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: tempAgentPolicyId,
+            condition: integrationCondition,
+            inputs: {
+              [SIMPLIFIED_INPUT_ID]: {
+                enabled: true,
+                condition: inputCondition,
+                streams: {
+                  [DATASET]: {
+                    enabled: true,
+                    condition: streamCondition,
+                    vars: { test_var_required: 'required' },
+                  },
+                },
+              },
+            },
+            package: { name: PKG_NAME, version: PKG_VERSION },
+          });
+
+          const fullPolicy = await getFullAgentPolicy(tempAgentPolicyId);
+          const input = fullPolicy.inputs.find((i: { type: string }) => i.type === INPUT_TYPE);
+          expect(input).to.be.ok();
+          // Integration- and input-level conditions AND-combine at the input; no template condition for this package.
+          expect(input.condition).to.eql(`(${integrationCondition}) and (${inputCondition})`);
+          // Stream-level condition emits as-is when there is no template stream condition.
+          expect(input.streams[0].condition).to.eql(streamCondition);
+        } finally {
+          await deleteAgentPolicy(tempAgentPolicyId);
+        }
+      });
+    });
   });
 }

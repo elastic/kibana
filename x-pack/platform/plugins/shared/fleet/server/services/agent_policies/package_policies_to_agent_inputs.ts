@@ -95,7 +95,7 @@ export const storedPackagePolicyToAgentInputs = (
         : undefined;
 
     const inputStreams = getFullInputStreams(input, {
-      integrationCondition: integrationLevelCondition,
+      userIntegrationCondition: integrationLevelCondition,
     });
 
     const fullInput: FullAgentPolicyInput = {
@@ -187,7 +187,7 @@ export interface GetFullInputStreamsOptions {
   /** Map of stream ids <destinationId, originalId>. */
   streamsOriginalIdsMap?: Map<string, string>;
   /** Pre-gated by the caller; layered onto the input-level condition. */
-  integrationCondition?: string;
+  userIntegrationCondition?: string;
 }
 
 export const getFullInputStreams = (
@@ -195,7 +195,7 @@ export const getFullInputStreams = (
   {
     allStreamEnabled = false,
     streamsOriginalIdsMap,
-    integrationCondition,
+    userIntegrationCondition,
   }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
   const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
@@ -203,7 +203,7 @@ export const getFullInputStreams = (
   const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
   const userInputCondition = enableIntegrationConditions ? input.condition : undefined;
   const inputCondition = combineConditions([
-    integrationCondition,
+    userIntegrationCondition,
     compiledInputCondition,
     userInputCondition,
   ]);
