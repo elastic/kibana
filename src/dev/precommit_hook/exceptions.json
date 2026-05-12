@@ -397,6 +397,7 @@
     "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case",
     "src/platform/packages/shared/deeplinks/workplace_ai": "'workplace_ai' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/search_project": "'search_project' should be kebab-case",
+    "src/platform/packages/shared/serverless/settings/vectordb_project": "'vectordb_project' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/workplace_ai_project": "'workplace_ai_project' should be kebab-case",
     "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials": "'api-tutorials' should be snake_case",
     "x-pack/solutions/search/packages/kbn-search-code-examples/src/getting-started-tutorials": "'getting-started-tutorials' should be snake_case",

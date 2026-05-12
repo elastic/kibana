@@ -17,6 +17,7 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+  LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
 } from '../../domain/saved_objects/global_state/constants';
 
 const DEFAULT_DOCS_LIMIT = 10000;
@@ -81,6 +82,8 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
           delay: LOG_EXTRACTION_DELAY_DEFAULT,
           entityDefinition,
           windowOverride: { fromDateISO, toDateISO },
+          // windowOverride bypasses the cap, so this value is irrelevant on this code path.
+          maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
         });
 
         if (result.error) {
