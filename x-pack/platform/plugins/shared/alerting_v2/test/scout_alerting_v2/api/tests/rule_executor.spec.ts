@@ -464,7 +464,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest.only(
+  apiTest(
     'extracts severity from the ES|QL row onto breached events as a top-level field',
     async ({ apiServices }) => {
       /**
