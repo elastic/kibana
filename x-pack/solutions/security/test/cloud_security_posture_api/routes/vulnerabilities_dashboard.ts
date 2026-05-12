@@ -119,13 +119,15 @@ export default function (providerContext: FtrProviderContext) {
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_LATEST_INDEX);
   const scoresIndex = new EsIndexDataProvider(es, BENCHMARK_SCORES_INDEX);
 
-  // Failing: See https://github.com/elastic/kibana/issues/257006
-  describe.skip('Vulnerability Dashboard API', async () => {
+  describe('Vulnerability Dashboard API', async () => {
     beforeEach(async () => {
       await vulnerabilitiesIndex.deleteAll();
       await scoresIndex.deleteAll();
       await waitForPluginInitialized({ retry, logger, supertest });
-      await scoresIndex.addBulk(scoresVulnerabilitiesMock, false);
+      // Override the mock @timestamp to `now` so the score docs fall inside the
+      // `now-30d` range filter in getVulnTrendsQuery. Vulnerabilities index docs keep
+      // their fixed timestamps because the dashboard route reads `latest` (not time-ranged).
+      await scoresIndex.addBulk(scoresVulnerabilitiesMock);
       await vulnerabilitiesIndex.addBulk(vulnerabilitiesLatestMock, false);
     });
 
@@ -135,105 +137,110 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('responds with a 200 status code and matching data mock', async () => {
-      const { body } = await supertest
-        .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
+      // The findings_stats_task may concurrently write competing zero-value trend docs to
+      // the scores index. Retry the GET + assertion until our mock doc is the latest in its
+      // daily bucket (top_hits desc) so the dashboard reflects the expected mock data.
+      await retry.tryForTime(60_000, async () => {
+        const { body } = await supertest
+          .get(`/internal/cloud_security_posture/vulnerabilities_dashboard`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .expect(200);
 
-      // @timestamp and event are real time calculated fields, we need to remove them in order to remove inconsistencies between mock and actual result
-      const cleanedBody = removeRealtimeCalculatedFields(body);
+        // @timestamp and event are real time calculated fields, we need to remove them in order to remove inconsistencies between mock and actual result
+        const cleanedBody = removeRealtimeCalculatedFields(body);
 
-      expect(cleanedBody).to.eql({
-        cnvmStatistics: {
-          criticalCount: 0,
-          highCount: 1,
-          mediumCount: 1,
-          resourcesScanned: 2,
-          cloudAccounts: 1,
-        },
-        vulnTrends: [
-          {
-            high: 1,
-            policy_template: 'vuln_mgmt',
-            critical: 0,
-            low: 0,
-            vulnerabilities_stats_by_cloud_account: {
-              '704479110758': {
-                cloudAccountName: 'elastic-security-cloud-security-dev',
-                high: 1,
-                critical: 0,
-                low: 0,
-                cloudAccountId: '704479110758',
-                medium: 1,
+        expect(cleanedBody).to.eql({
+          cnvmStatistics: {
+            criticalCount: 0,
+            highCount: 1,
+            mediumCount: 1,
+            resourcesScanned: 2,
+            cloudAccounts: 1,
+          },
+          vulnTrends: [
+            {
+              high: 1,
+              policy_template: 'vuln_mgmt',
+              critical: 0,
+              low: 0,
+              vulnerabilities_stats_by_cloud_account: {
+                '704479110758': {
+                  cloudAccountName: 'elastic-security-cloud-security-dev',
+                  high: 1,
+                  critical: 0,
+                  low: 0,
+                  cloudAccountId: '704479110758',
+                  medium: 1,
+                },
+              },
+              medium: 1,
+            },
+          ],
+          topVulnerableResources: [
+            {
+              resource: {
+                id: '02d62a7df23951b19',
+                name: 'name-ng-1-Node',
+              },
+              vulnerabilityCount: 1,
+              cloudRegion: 'eu-west-1',
+            },
+            {
+              resource: {
+                id: '09d11277683ea41c5',
+                name: 'othername-june12-8-8-0-1',
+              },
+              vulnerabilityCount: 1,
+              cloudRegion: 'eu-west-1',
+            },
+          ],
+          topPatchableVulnerabilities: [
+            {
+              cve: 'CVE-2015-8390',
+              cvss: {
+                score: 9.800000190734863,
+                version: '3.1',
+              },
+              packageFixVersion: '2.56.1-9.amzn2.0.6',
+              vulnerabilityCount: 1,
+            },
+            {
+              cve: 'CVE-2015-8394',
+              cvss: {
+                score: 9.800000190734863,
+                version: '3.1',
+              },
+              packageFixVersion: '2.56.1-9.amzn2.0.6',
+              vulnerabilityCount: 1,
+            },
+          ],
+          topVulnerabilities: [
+            {
+              cve: 'CVE-2015-8390',
+              packageFixVersion: '2.56.1-9.amzn2.0.6',
+              packageName: 'glib2',
+              packageVersion: '2.56.1-9.amzn2.0.5',
+              severity: 'MEDIUM',
+              vulnerabilityCount: 1,
+              cvss: {
+                score: 9.800000190734863,
+                version: '3.1',
               },
             },
-            medium: 1,
-          },
-        ],
-        topVulnerableResources: [
-          {
-            resource: {
-              id: '02d62a7df23951b19',
-              name: 'name-ng-1-Node',
+            {
+              cve: 'CVE-2015-8394',
+              packageFixVersion: '2.56.1-9.amzn2.0.6',
+              packageName: 'glib2',
+              packageVersion: '2.56.1-9.amzn2.0.5',
+              severity: 'HIGH',
+              vulnerabilityCount: 1,
+              cvss: {
+                score: 9.800000190734863,
+                version: '3.1',
+              },
             },
-            vulnerabilityCount: 1,
-            cloudRegion: 'eu-west-1',
-          },
-          {
-            resource: {
-              id: '09d11277683ea41c5',
-              name: 'othername-june12-8-8-0-1',
-            },
-            vulnerabilityCount: 1,
-            cloudRegion: 'eu-west-1',
-          },
-        ],
-        topPatchableVulnerabilities: [
-          {
-            cve: 'CVE-2015-8390',
-            cvss: {
-              score: 9.800000190734863,
-              version: '3.1',
-            },
-            packageFixVersion: '2.56.1-9.amzn2.0.6',
-            vulnerabilityCount: 1,
-          },
-          {
-            cve: 'CVE-2015-8394',
-            cvss: {
-              score: 9.800000190734863,
-              version: '3.1',
-            },
-            packageFixVersion: '2.56.1-9.amzn2.0.6',
-            vulnerabilityCount: 1,
-          },
-        ],
-        topVulnerabilities: [
-          {
-            cve: 'CVE-2015-8390',
-            packageFixVersion: '2.56.1-9.amzn2.0.6',
-            packageName: 'glib2',
-            packageVersion: '2.56.1-9.amzn2.0.5',
-            severity: 'MEDIUM',
-            vulnerabilityCount: 1,
-            cvss: {
-              score: 9.800000190734863,
-              version: '3.1',
-            },
-          },
-          {
-            cve: 'CVE-2015-8394',
-            packageFixVersion: '2.56.1-9.amzn2.0.6',
-            packageName: 'glib2',
-            packageVersion: '2.56.1-9.amzn2.0.5',
-            severity: 'HIGH',
-            vulnerabilityCount: 1,
-            cvss: {
-              score: 9.800000190734863,
-              version: '3.1',
-            },
-          },
-        ],
+          ],
+        });
       });
     });
 
