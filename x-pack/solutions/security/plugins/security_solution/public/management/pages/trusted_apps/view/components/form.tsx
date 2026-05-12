@@ -395,20 +395,29 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedValidationResult: ValidationResult = validateValues(updatedItem);
         setValidationResult(updatedValidationResult);
 
+        const shouldShowWildcardConfirmModal =
+          updatedValidationResult.extraWarning || conditionsState.hasWildcardWithWrongOperator;
+
         onChange({
           item: updatedItem,
           isValid: updatedValidationResult.isValid && conditionsState.areValid && hasFormChanged,
-          confirmModalLabels: updatedValidationResult.extraWarning
+          confirmModalLabels: shouldShowWildcardConfirmModal
             ? CONFIRM_WARNING_MODAL_LABELS(
                 i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
                   defaultMessage: 'trusted application',
                 }),
-                { hasWildcardWithWrongOperator: updatedValidationResult.extraWarning }
+                { hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal }
               )
             : undefined,
         });
       },
-      [conditionsState.areValid, hasFormChanged, item, onChange]
+      [
+        conditionsState.areValid,
+        conditionsState.hasWildcardWithWrongOperator,
+        hasFormChanged,
+        item,
+        onChange,
+      ]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(

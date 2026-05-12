@@ -855,6 +855,19 @@ describe('Trusted apps form', () => {
           expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
           expect(renderResult.queryByTestId('unnecessaryEscapingCallout')).not.toBeInTheDocument();
         });
+
+        it('should provide confirm modal labels when wildcard warning exists', async () => {
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expect.stringContaining('wildcards')],
+                }),
+              })
+            );
+          });
+          });
+        });
     });
   });
 
