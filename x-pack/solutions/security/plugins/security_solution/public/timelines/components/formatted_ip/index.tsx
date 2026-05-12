@@ -137,7 +137,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         <OpenFlyoutLink
           field={fieldName}
           value={address}
-          isStandalone
+          asParent
           data-test-subj="network-details"
         />
       ) : (

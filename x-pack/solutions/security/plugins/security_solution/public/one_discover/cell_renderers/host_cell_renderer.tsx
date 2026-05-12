@@ -16,6 +16,7 @@ import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component
 import { Host } from '../../flyout_v2/entity_details/host';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export const HOST_CELL_RENDERER_FIELDS = new Set(['host.name', 'host.hostname']);
 
@@ -37,6 +38,7 @@ export interface HostCellRendererProps extends DataGridCellValueElementProps {
 export const HostCellRenderer = React.memo<HostCellRendererProps>(
   ({ services, store, ...props }) => {
     const history = useHistory();
+    const isInSecurityApp = useIsInSecurityApp();
     const { overlays } = services;
     const rawValue = props.row.flattened[props.columnId];
 
@@ -63,7 +65,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
             history,
             children: (
               <>
-                <DataViewManagerBootstrap />
+                {!isInSecurityApp && <DataViewManagerBootstrap />}
                 <Host hostName={hostName} entityId={entityId} />
               </>
             ),
@@ -75,7 +77,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
           }
         );
       },
-      [overlays, services, store, history, props.row]
+      [props.row, overlays, services, store, history, isInSecurityApp]
     );
 
     if (values.length === 0) {

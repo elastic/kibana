@@ -42,7 +42,6 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         (prev, { context }) =>
         (params) => {
           const entries = prev(params);
-
           if (!params.dataView.getIndexPattern().includes(ALERTS_INDEX_PATTERN)) {
             return entries;
           }

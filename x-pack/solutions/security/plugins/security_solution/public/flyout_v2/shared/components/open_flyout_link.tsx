@@ -32,10 +32,10 @@ export interface OpenFlyoutLinkProps {
    */
   value: string;
   /**
-   * When true, opens a new standalone flyout replacing the current stack.
+   * When true, opens as a parent flyout starting a new session.
    * When false (default), opens as a child flyout inheriting the parent session.
    */
-  isStandalone?: boolean;
+  asParent?: boolean;
   /**
    * Optional data-test-subj value
    */
@@ -56,7 +56,7 @@ export interface OpenFlyoutLinkProps {
 export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   field,
   value,
-  isStandalone = false,
+  asParent = false,
   children,
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
 }) => {
@@ -72,7 +72,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
-      const baseFlyoutProperties = isStandalone
+      const baseFlyoutProperties = asParent
         ? defaultToolsFlyoutProperties
         : defaultDocumentFlyoutProperties;
       overlays.openSystemFlyout(
@@ -85,7 +85,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
         {
           ...baseFlyoutProperties,
           historyKey,
-          session: isStandalone ? 'start' : 'inherit',
+          session: asParent ? 'start' : 'inherit',
         }
       );
     }
@@ -96,7 +96,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     store,
     history,
     flyoutContent,
-    isStandalone,
+    asParent,
     historyKey,
   ]);
 

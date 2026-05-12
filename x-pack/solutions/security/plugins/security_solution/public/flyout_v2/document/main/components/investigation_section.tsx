@@ -118,7 +118,7 @@ export const InvestigationSection = memo(
 
     const renderFlyoutLink = useCallback(
       (props: OpenFlyoutLinkProps) => (
-        <OpenFlyoutLink {...props} isStandalone={props.field === HOST_NAME_FIELD_NAME} />
+        <OpenFlyoutLink {...props} asParent={props.field === HOST_NAME_FIELD_NAME} />
       ),
       []
     );

@@ -96,8 +96,8 @@ describe('<OpenFlyoutLink />', () => {
       );
     });
 
-    it('should open as standalone flyout when isStandalone is true', () => {
-      const { getByTestId } = renderOpenFlyoutLink({ isStandalone: true });
+    it('should open as standalone flyout when asParent is true', () => {
+      const { getByTestId } = renderOpenFlyoutLink({ asParent: true });
 
       getByTestId(OPEN_FLYOUT_LINK_TEST_ID).click();
       expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
