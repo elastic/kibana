@@ -194,25 +194,57 @@ export const useStreamDescriptionApi = ({
   );
 
   const onCancelEdit = useCallback(() => {
-    acknowledgeDescriptionGenerationTask()
+    void acknowledgeDescriptionGenerationTask()
       .then(refreshTask)
       .then(() => {
         setDescription(definition.stream.description);
         setIsEditing(false);
+      })
+      .catch((error) => {
+        notifications.toasts.addError(getFormattedError(error), {
+          title: i18n.translate(
+            'xpack.streams.streamDetailView.streamDescription.acknowledgeGenerationTaskErrorTitle',
+            {
+              defaultMessage: 'Failed to acknowledge description generation task',
+            }
+          ),
+        });
       });
-  }, [acknowledgeDescriptionGenerationTask, definition.stream.description, refreshTask]);
+  }, [
+    acknowledgeDescriptionGenerationTask,
+    definition.stream.description,
+    notifications.toasts,
+    refreshTask,
+  ]);
 
   const onSaveDescription = useCallback(
     (desc?: string) => {
-      acknowledgeDescriptionGenerationTask().then(() => {
-        const generatedDescription = desc ?? description;
-        if (generatedDescription !== definition.stream.description) {
-          return save(generatedDescription).then(() => setIsEditing(false));
-        }
-        setIsEditing(false);
-      });
+      void acknowledgeDescriptionGenerationTask()
+        .then(() => {
+          const generatedDescription = desc ?? description;
+          if (generatedDescription !== definition.stream.description) {
+            return save(generatedDescription).then(() => setIsEditing(false));
+          }
+          setIsEditing(false);
+        })
+        .catch((error) => {
+          notifications.toasts.addError(getFormattedError(error), {
+            title: i18n.translate(
+              'xpack.streams.streamDetailView.streamDescription.acknowledgeGenerationTaskErrorTitle',
+              {
+                defaultMessage: 'Failed to acknowledge description generation task',
+              }
+            ),
+          });
+        });
     },
-    [acknowledgeDescriptionGenerationTask, description, definition.stream.description, save]
+    [
+      acknowledgeDescriptionGenerationTask,
+      description,
+      definition.stream.description,
+      notifications.toasts,
+      save,
+    ]
   );
 
   useEffect(() => {
