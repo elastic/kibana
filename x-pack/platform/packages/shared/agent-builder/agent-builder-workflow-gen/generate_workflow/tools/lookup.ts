@@ -19,7 +19,6 @@ import {
   categorizeConnectorType,
   formatBuiltInStep,
   formatConnectorStep,
-  truncateDescription,
   type StepDefinitionForAgent,
 } from './lookup_helpers';
 
@@ -57,7 +56,6 @@ const buildDynamicConnectorStepEntries = async (
       out.push({
         id: stepType,
         label: info.displayName ?? stepType,
-        description: truncateDescription(info.displayName),
         category: categorizeConnectorType(stepType),
         connectorId: 'required',
       });
