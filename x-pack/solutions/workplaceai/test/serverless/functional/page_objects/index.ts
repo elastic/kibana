@@ -7,7 +7,7 @@
 
 import { pageObjects as svlPlatformPageObjects } from '@kbn/test-suites-xpack-platform/serverless/functional/page_objects';
 
-export const services = {
+export const pageObjects = {
   ...svlPlatformPageObjects,
   // Workplace AI Solution serverless FTR page objects
 };
