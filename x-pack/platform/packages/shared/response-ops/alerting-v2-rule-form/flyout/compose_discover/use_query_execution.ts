@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
+import { Parser } from '@elastic/esql';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -50,17 +51,20 @@ function injectTimeFilter(query: string, timeField: string): string {
   const trimmed = query.trim();
   if (!trimmed) return trimmed;
 
-  // Split on the first pipe rather than on newlines so that single-line queries
-  // like `FROM logs-* | STATS count() BY host` don't end up with the time filter
-  // after STATS (where @timestamp is no longer in scope).
-  const fromMatch = trimmed.match(/^(FROM\s[^|]+)/i);
-  if (!fromMatch) return trimmed;
+  try {
+    const { root } = Parser.parse(trimmed);
+    const fromCmd = root.commands.find((c) => c.name === 'from' || c.name === 'ts');
+    if (!fromCmd) return trimmed;
 
-  const fromClause = fromMatch[1].trimEnd();
-  const rest = trimmed.slice(fromMatch[1].length).trimStart();
-  const whereClause = `| WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`;
-
-  return rest ? `${fromClause}\n${whereClause}\n${rest}` : `${fromClause}\n${whereClause}`;
+    // Insert the WHERE clause immediately after the FROM command using its AST location.
+    // This is immune to pipes inside index names or string literals, unlike regex-based splitting.
+    const before = trimmed.slice(0, fromCmd.location.max + 1).trimEnd();
+    const after = trimmed.slice(fromCmd.location.max + 1).trimStart();
+    const whereClause = `| WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`;
+    return after ? `${before}\n${whereClause}\n${after}` : `${before}\n${whereClause}`;
+  } catch {
+    return trimmed;
+  }
 }
 
 export const useQueryExecution = ({
