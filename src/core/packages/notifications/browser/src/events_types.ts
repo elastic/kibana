@@ -48,7 +48,7 @@ interface BaseNotificationEvent {
   id: string;
   timestamp: number;
   title: string;
-  message: string;
+  message: string | string[];
   /** Default `false`. Hydrated from the persisted read-set at `notify()` time. */
   isRead: boolean;
   /** Default `false`. Hydrated from the persisted pin-set at `notify()` time. */

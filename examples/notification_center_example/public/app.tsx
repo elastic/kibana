@@ -39,6 +39,11 @@ import { notificationCenterAppId } from './notification_center_app';
 const nextId = (typeId: string) =>
   `${typeId}:${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
+// Returns a single message string most of the time, but randomly returns an
+// array of messages (~33% chance) to exercise the accordion in the center.
+const withRandomExtraMessages = (primary: string, extras: string[]): string | string[] =>
+  Math.random() < 0.33 ? [primary, ...extras] : primary;
+
 export function App() {
   const events = useNotificationEventsService();
   const center = useSidebarApp(notificationCenterAppId);
@@ -52,7 +57,10 @@ export function App() {
       id: nextId(reportTypeId),
       timestamp: Date.now(),
       title: '[Error Monitoring Report] is generated',
-      message: 'The report was generated and is ready to download.',
+      message: withRandomExtraMessages('The report was generated and is ready to download.', [
+        'File size: 2.4 MB',
+        'Rows exported: 14,203',
+      ]),
       isRead: false,
     });
   };
@@ -64,7 +72,11 @@ export function App() {
       id: nextId(alertTypeId),
       timestamp: Date.now(),
       title: 'High CPU on web-1',
-      message: 'CPU exceeded 90% for the last 5 minutes.',
+      message: withRandomExtraMessages('CPU exceeded 90% for the last 5 minutes.', [
+        'Current value: 94%',
+        'Threshold: 90%',
+        'Affected host: web-1.prod',
+      ]),
       isRead: false,
     });
   };
@@ -76,7 +88,10 @@ export function App() {
       id: nextId(cloudTypeId),
       timestamp: Date.now(),
       title: 'Deployment provisioning complete',
-      message: 'us-east-1 deployment is ready for use.',
+      message: withRandomExtraMessages('us-east-1 deployment is ready for use.', [
+        'Region: us-east-1',
+        'Nodes: 3',
+      ]),
       isRead: false,
     });
   };
