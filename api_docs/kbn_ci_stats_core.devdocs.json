@@ -71,6 +71,7 @@
             "lineNumber": 43,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "SomeDevLog",
             "trackAdoption": false,
             "isRequired": true
           }

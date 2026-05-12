@@ -19,6 +19,7 @@ export const useFetchRules = ({
   search,
   sortField,
   sortOrder,
+  enabled = true,
 }: {
   page: number;
   perPage: number;
@@ -26,6 +27,7 @@ export const useFetchRules = ({
   search?: string;
   sortField?: FindRulesSortField;
   sortOrder?: 'asc' | 'desc';
+  enabled?: boolean;
 }) => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
@@ -40,6 +42,7 @@ export const useFetchRules = ({
         })
       );
     },
+    enabled,
     keepPreviousData: true,
     retry: false,
     refetchOnWindowFocus: false,

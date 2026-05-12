@@ -16,6 +16,11 @@ export type FullTraceWaterfallProps = {
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   onErrorClick?: FullTraceWaterfallOnErrorClick;
+  ebt: {
+    row: { element: string };
+    errorBadge: { element: string };
+    serviceBadge: { element: string };
+  };
 } & FullTraceWaterfallScrollProps;
 
 export type FullTraceWaterfallOnErrorClick = (params: {

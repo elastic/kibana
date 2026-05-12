@@ -12,7 +12,6 @@ import * as fs from 'fs/promises';
 import { existsSync, mkdirSync } from 'fs';
 import * as path from 'path';
 import globby from 'globby';
-import { v4 as uuidv4 } from 'uuid';
 
 import { localPrompts } from '../server/lib/prompt/local_prompt_object';
 import { localToolPrompts } from '../server/lib/prompt/tool_prompts';
@@ -76,6 +75,21 @@ export const writeSavedObjects = async ({
   }
 };
 
+const toKebabCase = (str: string): string =>
+  str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1-$2')
+    .toLowerCase();
+
+export const generateStableId = ({ promptGroupId, promptId, provider, model }: Prompt): string => {
+  const parts = [SAVED_OBJECT_ID_PREFIX + toKebabCase(promptGroupId), toKebabCase(promptId)];
+  if (provider) {
+    parts.push(toKebabCase(provider));
+    if (model) parts.push(toKebabCase(model));
+  }
+  return parts.join('-');
+};
+
 export const generateSavedObject = (prompt: Prompt): SecurityAiPromptSavedObject => ({
   attributes: {
     ...prompt,
@@ -83,7 +97,7 @@ export const generateSavedObject = (prompt: Prompt): SecurityAiPromptSavedObject
       default: `${prompt.prompt.default}`,
     },
   },
-  id: `${SAVED_OBJECT_ID_PREFIX}${uuidv4()}`,
+  id: generateStableId(prompt),
   type: 'security-ai-prompt',
 });
 

@@ -100,6 +100,7 @@
             "lineNumber": 38,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -169,6 +170,7 @@
             "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -186,6 +188,7 @@
             "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatterOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -290,6 +293,7 @@
             "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Maybe",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -375,6 +379,7 @@
             "lineNumber": 28,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "DurationProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -412,6 +417,7 @@
             "lineNumber": 106,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "DurationDistributionChartProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -629,6 +635,7 @@
             "lineNumber": 22,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpStatusCodeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -726,6 +733,7 @@
             "lineNumber": 21,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -763,6 +771,7 @@
             "lineNumber": 24,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "TimestampProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -831,6 +840,7 @@
             "lineNumber": 37,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeUnit",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1068,6 +1078,7 @@
             "lineNumber": 29,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "FormatterOptions",
             "trackAdoption": false
           }
         ],

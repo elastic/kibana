@@ -86,6 +86,7 @@
               "lineNumber": 87,
               "columnNumber": 28,
               "deprecated": false,
+              "docsReferencedTypeName": "AddToDatasetFlyoutOpenOptions",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -125,6 +126,7 @@
               "lineNumber": 88,
               "columnNumber": 27,
               "deprecated": false,
+              "docsReferencedTypeName": "AddToDatasetActionConfig",
               "trackAdoption": false,
               "isRequired": true
             }

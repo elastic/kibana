@@ -8,10 +8,10 @@
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/main/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { AnalyzerPreviewContainer } from '../../../../flyout_v2/document/components/analyzer_preview_container';
-import { SessionPreviewContainer } from '../../../../flyout_v2/document/components/session_preview_container';
+import { AnalyzerPreviewContainer } from '../../../../flyout_v2/document/main/components/analyzer_preview_container';
+import { SessionPreviewContainer } from '../../../../flyout_v2/document/main/components/session_preview_container';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -21,7 +21,7 @@ import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_ses
 import {
   VISUALIZATION_SECTION_TEST_ID,
   VISUALIZATION_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/visualizations_section';
+} from '../../../../flyout_v2/document/main/components/visualizations_section';
 
 const KEY = 'visualizations';
 

@@ -349,6 +349,7 @@
                         "lineNumber": 123,
                         "columnNumber": 3,
                         "deprecated": false,
+                        "docsReferencedTypeName": "TExample",
                         "trackAdoption": false
                       }
                     ]
@@ -410,6 +411,7 @@
                 "lineNumber": 177,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -505,6 +507,7 @@
             "lineNumber": 59,
             "columnNumber": 84,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }

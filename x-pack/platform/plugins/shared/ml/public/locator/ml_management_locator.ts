@@ -9,8 +9,8 @@ import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AnomalyDetectionQueryState, MlLocatorParams } from '../../common/types/locator';
-import { ML_PAGES } from '../../common/constants/locator';
+import type { AnomalyDetectionQueryState, MlLocatorParams } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,

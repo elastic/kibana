@@ -157,6 +157,7 @@ describe('ColumnsPopover', () => {
     );
 
     await userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await waitForEuiPopoverOpen();
 
     expect(await screen.findAllByTestId('column-selection-popover-draggable-icon')).toHaveLength(3);
 

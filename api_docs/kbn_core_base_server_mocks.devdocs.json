@@ -78,7 +78,7 @@
                 "id": "def-server.mockCoreContext.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  env = createTestEnv(),\n  logger = loggerMock.create(),\n  configService = configServiceMock.create(),\n}",
                 "description": [],
                 "signature": [
                   "{ env?: ",

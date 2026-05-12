@@ -151,6 +151,7 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Comparator",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -236,6 +237,7 @@
             "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EsqlTable",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -326,6 +328,7 @@
             "lineNumber": 58,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Comparator",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -380,6 +383,7 @@
             "lineNumber": 60,
             "columnNumber": 60,
             "deprecated": false,
+            "docsReferencedTypeName": "EsqlResultRow",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -438,6 +442,7 @@
             "lineNumber": 205,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ESQLSearchResponse",
             "trackAdoption": false,
             "isRequired": true
           }

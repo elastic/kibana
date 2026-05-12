@@ -91,6 +91,7 @@
                 "lineNumber": 62,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -138,6 +139,7 @@
                 "lineNumber": 64,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -204,6 +206,7 @@
                 "lineNumber": 74,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -221,6 +224,7 @@
                 "lineNumber": 74,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "InspectorPluginStartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -304,7 +308,13 @@
             ],
             "label": "start",
             "description": [
-              "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n{@link RequestResponder#finish}, {@link RequestResponder#ok} or\n{@link RequestResponder#error}.\n"
+              "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n",
+              "RequestResponder#finish",
+              ", ",
+              "RequestResponder#ok",
+              " or\n",
+              "RequestResponder#error",
+              ".\n"
             ],
             "signature": [
               "(name: string, params?: ",
@@ -359,6 +369,7 @@
                 "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -446,6 +457,7 @@
                 "lineNumber": 64,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -479,6 +491,7 @@
                 "lineNumber": 65,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WeakMap",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -653,7 +666,9 @@
         "tags": [],
         "label": "RequestResponder",
         "description": [
-          "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
+          "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using ",
+          "RequestAdapter#start",
+          "."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
         "lineNumber": 15,
@@ -697,6 +712,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Request",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -814,6 +830,7 @@
                 "lineNumber": 34,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestStatistics",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -866,6 +883,7 @@
                 "lineNumber": 56,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestStatus",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -883,6 +901,7 @@
                 "lineNumber": 56,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "Response",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -921,6 +940,7 @@
                 "lineNumber": 63,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Response",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -959,6 +979,7 @@
                 "lineNumber": 67,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Response",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1328,6 +1349,7 @@
                 "lineNumber": 50,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "Adapters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1357,7 +1379,9 @@
         "tags": [],
         "label": "InspectorViewProps",
         "description": [
-          "\nThe props interface that a custom inspector view component, that will be passed\nto {@link InspectorViewDescription#component}, must use."
+          "\nThe props interface that a custom inspector view component, that will be passed\nto ",
+          "InspectorViewDescription#component",
+          ", must use."
         ],
         "signature": [
           {
@@ -1786,6 +1810,7 @@
               "lineNumber": 34,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "InspectorViewDescription",
               "trackAdoption": false
             }
           ]
@@ -1856,6 +1881,7 @@
               "lineNumber": 37,
               "columnNumber": 17,
               "deprecated": false,
+              "docsReferencedTypeName": "Adapters",
               "trackAdoption": false,
               "isRequired": false
             }
@@ -1874,7 +1900,9 @@
           ],
           "label": "open",
           "description": [
-            "\nOpens the inspector panel for the given adapters and close any previously opened\ninspector panel. The previously panel will be closed also if no new panel will be\nopened (e.g. because of the passed adapters no view is available). You can use\n{@link InspectorSession#close} on the return value to close that opened panel again.\n"
+            "\nOpens the inspector panel for the given adapters and close any previously opened\ninspector panel. The previously panel will be closed also if no new panel will be\nopened (e.g. because of the passed adapters no view is available). You can use\n",
+            "InspectorSession#close",
+            " on the return value to close that opened panel again.\n"
           ],
           "signature": [
             "(adapters: ",
@@ -1924,6 +1952,7 @@
               "lineNumber": 52,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "Adapters",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -1950,6 +1979,7 @@
               "lineNumber": 52,
               "columnNumber": 30,
               "deprecated": false,
+              "docsReferencedTypeName": "InspectorOptions",
               "trackAdoption": false,
               "isRequired": false
             },
@@ -2048,7 +2078,13 @@
             ],
             "label": "start",
             "description": [
-              "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n{@link RequestResponder#finish}, {@link RequestResponder#ok} or\n{@link RequestResponder#error}.\n"
+              "\nStart logging a new request into this request adapter. The new request will\nby default be in a processing state unless you explicitly finish it via\n",
+              "RequestResponder#finish",
+              ", ",
+              "RequestResponder#ok",
+              " or\n",
+              "RequestResponder#error",
+              ".\n"
             ],
             "signature": [
               "(name: string, params?: ",
@@ -2103,6 +2139,7 @@
                 "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2190,6 +2227,7 @@
                 "lineNumber": 64,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2223,6 +2261,7 @@
                 "lineNumber": 65,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "WeakMap",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2397,7 +2436,9 @@
         "tags": [],
         "label": "RequestResponder",
         "description": [
-          "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
+          "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using ",
+          "RequestAdapter#start",
+          "."
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
         "lineNumber": 15,
@@ -2441,6 +2482,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Request",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2558,6 +2600,7 @@
                 "lineNumber": 34,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestStatistics",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2610,6 +2653,7 @@
                 "lineNumber": 56,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestStatus",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2627,6 +2671,7 @@
                 "lineNumber": 56,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "Response",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2665,6 +2710,7 @@
                 "lineNumber": 63,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Response",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2703,6 +2749,7 @@
                 "lineNumber": 67,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Response",
                 "trackAdoption": false,
                 "isRequired": true
               }

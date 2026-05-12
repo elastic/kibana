@@ -170,6 +170,7 @@ export const useDashboardPreviewUnifiedSearch = ({
       screenTitle: dashboardState.title,
       displayStyle: 'inPage' as const,
       disableSubscribingToGlobalDataServices: true,
+      enableDateRangePicker: true,
     }),
     [
       dashboardApi,

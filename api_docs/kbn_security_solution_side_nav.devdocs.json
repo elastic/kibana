@@ -63,6 +63,7 @@
             "lineNumber": 16,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "SolutionSideNavProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -543,6 +544,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UiCounterMetricType",
             "trackAdoption": false
           },
           {

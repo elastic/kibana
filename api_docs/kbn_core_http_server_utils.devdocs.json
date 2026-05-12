@@ -44,6 +44,7 @@
             "lineNumber": 33,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -91,6 +92,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RawRequest",
             "trackAdoption": false,
             "isRequired": true
           },

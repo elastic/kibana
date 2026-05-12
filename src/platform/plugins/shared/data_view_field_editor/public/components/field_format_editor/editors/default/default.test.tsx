@@ -16,7 +16,7 @@ import { DefaultFormatEditor, convertSampleInput } from './default';
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => () => {}),
+  reactConvert: jest.fn().mockImplementation(() => null),
 };
 const formatParams = {};
 const onChange = jest.fn();
@@ -68,7 +68,6 @@ describe('DefaultFormatEditor', () => {
       />
     );
 
-    expect(format.getConverterFor).toBeCalled();
     expect(onError).toBeCalled();
     expect(component).toMatchSnapshot();
   });
@@ -90,7 +89,7 @@ describe('DefaultFormatEditor', () => {
 
   it('should call prop onError() if converter throws an error', async () => {
     const newFormat = {
-      getConverterFor: jest.fn().mockImplementation(() => () => {
+      reactConvert: jest.fn().mockImplementation(() => {
         throw new Error('Test error message');
       }),
     };

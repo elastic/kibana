@@ -158,6 +158,12 @@ export const serverless: Command = {
         `Invalid projectType '${options.esProjectType}', supported values: ${supportedProjectTypesStr}`
       );
     }
+
+    // Normalize 'elasticsearch' alias to 'elasticsearch_general_purpose'
+    if (options.esProjectType === 'elasticsearch') {
+      options.esProjectType = 'elasticsearch_general_purpose' as typeof options.esProjectType;
+    }
+
     // also provide the Kibana project type, e.g. for role file selection
     options.projectType = kbnProjectTypeFromEs.get(options.esProjectType) as ServerlessProjectType;
 

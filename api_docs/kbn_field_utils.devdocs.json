@@ -181,6 +181,7 @@
             "lineNumber": 19,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldIconProps",
             "trackAdoption": false
           }
         ],
@@ -315,6 +316,7 @@
             "lineNumber": 46,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldSelectProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -366,6 +368,7 @@
             "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -410,6 +413,7 @@
             "lineNumber": 15,
             "columnNumber": 72,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -451,6 +455,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -469,6 +474,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GetCustomFieldType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -564,6 +570,7 @@
             "lineNumber": 17,
             "columnNumber": 67,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
