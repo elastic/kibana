@@ -60,8 +60,8 @@ export const mountApp = async ({
                         <PageWrapper>
                           <Router history={history}>
                             <SendMessageProvider>
-                            <AgentBuilderRoutes />
-                          </SendMessageProvider>
+                              <AgentBuilderRoutes />
+                            </SendMessageProvider>
                           </Router>
                         </PageWrapper>
                       </RedirectAppLinks>
