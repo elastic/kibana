@@ -10,7 +10,8 @@
 export { ExecutionError } from './errors/execution_error';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
-export { buildWorkflowSpaceFilter } from './lib/workflow_space_filter';
+export { applyManagedFilter, buildWorkflowSpaceFilter } from './lib/workflow_space_filter';
+export type { ManagedFilter, WorkflowQueryFilter } from './lib/workflow_space_filter';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
 export {

@@ -11,7 +11,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflow, WorkflowDetailDto } from '../..';
 import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
-import { buildWorkflowSpaceFilter } from '../lib/workflow_space_filter';
+import { applyManagedFilter, buildWorkflowSpaceFilter } from '../lib/workflow_space_filter';
+import type { ManagedFilter } from '../lib/workflow_space_filter';
+
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -22,26 +24,10 @@ export type WorkflowRepositoryParams = Omit<WorkflowRepositoryOptions, 'indexNam
   indexName?: string;
 };
 
-export type ManagedFilter = 'all' | 'managed' | 'unmanaged';
-
 export interface WorkflowLookupOptions {
   includeGlobal?: boolean;
   managedFilter?: ManagedFilter;
 }
-
-const applyManagedFilter = (
-  managedFilter: ManagedFilter | undefined,
-  query: { must: estypes.QueryDslQueryContainer[]; must_not: estypes.QueryDslQueryContainer[] }
-): void => {
-  if (managedFilter === 'managed') {
-    query.must.push({ term: { managed: true } });
-    return;
-  }
-
-  if (managedFilter === 'unmanaged') {
-    query.must_not.push({ term: { managed: true } });
-  }
-};
 
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;

@@ -19,6 +19,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerEmitEventRoute } from './routes/emit_event';
 import { registerEmitLoopRoute } from './routes/emit_loop';
 import { registerStepDefinitions } from './step_types';
@@ -95,7 +96,7 @@ export class WorkflowsExtensionsExamplePlugin
       );
 
       await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, {
-        spaceId: 'default',
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
         values: { recipient: 'World' },
       });
 

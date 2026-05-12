@@ -99,8 +99,8 @@ The plugin also demonstrates **managed workflow** registration — a code-owned 
 
 ### How it works
 
-1. **Define** the workflow in `server/managed_workflows/definition.ts` with `yamlTemplate` for install-time parameterization.
-2. **Register** in the central `@kbn/workflows/managed` registry (required for orphan cleanup and auto-update reconciliation).
+1. **Define** the workflow in the plugin's definition file under `@kbn/workflows/managed/definitions/` with `yamlTemplate` for install-time parameterization.
+2. **Register** in the central `@kbn/workflows/managed` registry in `managed/index.ts` (required for orphan cleanup and auto-update reconciliation).
 3. **Declare ownership** during setup via `registerManagedWorkflowOwner(pluginId)`.
 4. **Install** during start via `initManagedWorkflowsClient(pluginId)` → `client.install(id, { spaceId, values })`.
 
@@ -115,9 +115,7 @@ export const EXAMPLE_MANAGED_WORKFLOW: ManagedWorkflowDefinition = {
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
-  - type: scheduled
-    with:
-      every: 30m
+  - type: manual
 steps:
   - name: greet
     type: console

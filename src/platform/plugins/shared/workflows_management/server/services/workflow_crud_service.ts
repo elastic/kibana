@@ -597,6 +597,7 @@ export class WorkflowCrudService {
   ): Promise<{ source: WorkflowProperties }> {
     const source = await this.getWorkflowDocumentSource(id, spaceId, {
       includeDeleted: true,
+      includeGlobal: true,
     });
     if (!source) {
       throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
