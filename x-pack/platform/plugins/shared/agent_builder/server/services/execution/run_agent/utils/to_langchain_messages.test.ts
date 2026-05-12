@@ -19,7 +19,7 @@ import {
   ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -199,17 +199,19 @@ describe('convertPreviousRounds', () => {
     // ToolMessage type guard is not imported, so just check property
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-1');
     expect(toolCallToolMessage.content).toEqual(
-      JSON.stringify({
-        results: [
-          {
-            tool_result_id: 'result-1',
-            type: ToolResultType.other,
-            data: {
-              some: 'result1',
+      wrapToolResultContent(
+        JSON.stringify({
+          results: [
+            {
+              tool_result_id: 'result-1',
+              type: ToolResultType.other,
+              data: {
+                some: 'result1',
+              },
             },
-          },
-        ],
-      })
+          ],
+        })
+      )
     );
     expect(isAIMessage(assistantMessage)).toBe(true);
     expect(assistantMessage.content).toBe('done!');
@@ -270,11 +272,13 @@ describe('convertPreviousRounds', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-2');
     expect(toolCallToolMessage.content).toEqual(
-      JSON.stringify({
-        results: [
-          { tool_result_id: 'result-2', type: ToolResultType.other, data: { some: 'result1' } },
-        ],
-      })
+      wrapToolResultContent(
+        JSON.stringify({
+          results: [
+            { tool_result_id: 'result-2', type: ToolResultType.other, data: { some: 'result1' } },
+          ],
+        })
+      )
     );
     expect(isAIMessage(secondAssistantMessage)).toBe(true);
     expect(secondAssistantMessage.content).toBe('done with bar');
@@ -456,7 +460,9 @@ describe('convertPreviousRounds', () => {
       });
 
       const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
+      const content = JSON.parse(
+        (toolResultMessage.content as string).replace(/^<tool_result>|<\/tool_result>$/g, '')
+      );
 
       expect(customTransformer).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -521,7 +527,9 @@ describe('convertPreviousRounds', () => {
       });
 
       const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
+      const content = JSON.parse(
+        (toolResultMessage.content as string).replace(/^<tool_result>|<\/tool_result>$/g, '')
+      );
 
       // Should have one aggregated result
       expect(content.results).toHaveLength(1);

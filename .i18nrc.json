@@ -25,6 +25,7 @@
     "controls": "src/platform/plugins/shared/controls",
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
+    "dashboardMarkdown": "src/platform/plugins/shared/dashboard_markdown",
     "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": [
       "packages/default-nav",
@@ -171,7 +172,6 @@
     "visDefaultEditor": "src/platform/plugins/private/vis_default_editor",
     "visTypeGauge": "src/platform/plugins/private/vis_types/gauge",
     "visTypeHeatmap": "src/platform/plugins/private/vis_types/heatmap",
-    "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
     "visTypeMetric": "src/platform/plugins/private/vis_types/metric",
     "visTypePie": "src/platform/plugins/private/vis_types/pie",
     "visTypeTable": "src/platform/plugins/private/vis_types/table",
