@@ -18,7 +18,7 @@ import type { PrivateLocation, ServiceLocation } from '../../common/runtime_type
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
-  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 1000 })])
 );
 
 const UseLogicalAndFieldLiterals = useLogicalAndFields.map((f) => schema.literal(f)) as [
@@ -38,7 +38,12 @@ const CommonQuerySchema = {
   configIds: StringOrArraySchema,
   showFromAllSpaces: schema.maybe(schema.boolean()),
   useLogicalAndFor: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals))])
+    schema.oneOf([
+      schema.string(),
+      schema.arrayOf(schema.oneOf(UseLogicalAndFieldLiterals), {
+        maxSize: useLogicalAndFields.length,
+      }),
+    ])
   ),
 };
 
@@ -48,7 +53,7 @@ export const QuerySchema = schema.object({
   perPage: schema.maybe(schema.number()),
   sortField: MonitorSortFieldSchema,
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  searchAfter: schema.maybe(schema.arrayOf(schema.string())),
+  searchAfter: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   internal: schema.maybe(
     schema.boolean({
       defaultValue: false,
