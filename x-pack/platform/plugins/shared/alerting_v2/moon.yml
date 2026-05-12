@@ -113,6 +113,8 @@ dependsOn:
   - '@kbn/agent-context-layer-plugin'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/code-editor'
+  - '@kbn/workflows-yaml'
 tags:
   - plugin
   - prod
