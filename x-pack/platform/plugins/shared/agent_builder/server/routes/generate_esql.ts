@@ -62,13 +62,6 @@ export function registerGenerateEsqlRoute({
                   },
                 })
               ),
-              execute_query: schema.boolean({
-                defaultValue: true,
-                meta: {
-                  description:
-                    'If false, only validate the query using AST. If true (default), will execute the query to ensure it is valid before returning it.',
-                },
-              }),
               disable_named_params: schema.boolean({
                 defaultValue: false,
                 meta: {
@@ -111,7 +104,7 @@ export function registerGenerateEsqlRoute({
 
         const toolResult = await registry.execute({
           toolId: platformCoreTools.generateEsql,
-          toolParams,
+          toolParams: { ...toolParams, executeQuery: false },
           source: 'user'
         });
 
