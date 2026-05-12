@@ -96,9 +96,9 @@ export function createEvaluateEsqlGenerationDataset({
     await executorClient.runExperiment(
       {
         dataset: {
-          name: 'esql-generation: regression suite',
+          name: 'security-esql-generation: regression suite',
           description:
-            '31 ES|QL generation examples (natural-language question → ground-truth query)',
+            'Security ES|QL generation: 31 examples (natural-language question → ground-truth query)',
           examples: esqlGenerationDataset,
         },
         task: async ({ input }) => {

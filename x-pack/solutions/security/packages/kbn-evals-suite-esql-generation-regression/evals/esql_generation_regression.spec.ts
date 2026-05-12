@@ -8,7 +8,7 @@
 import { tags } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 
-evaluate.describe('ES|QL generation regression', { tag: tags.stateful.classic }, () => {
+evaluate.describe('Security ES|QL generation regression', { tag: tags.stateful.classic }, () => {
   evaluate('full dataset', async ({ evaluateDataset }) => {
     await evaluateDataset();
   });

@@ -1,4 +1,4 @@
-# ES|QL Generation Regression Suite (`esql-generation-regression`)
+# Security ES|QL Generation Regression Suite (`esql-generation-regression`)
 
 Playwright-based regression suite for the ES|QL generation feature in Elastic Security, built on `@kbn/evals` — the source of truth for eval framework primitives (fixtures, evaluators, dataset typing, reporting).
 

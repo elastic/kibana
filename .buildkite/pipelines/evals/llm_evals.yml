@@ -310,7 +310,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: ES|QL Generation Regression'
+      - label: 'Evals: Security ES|QL Generation Regression'
         key: kbn-evals-weekly-esql-generation-regression
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:

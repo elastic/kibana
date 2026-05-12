@@ -189,7 +189,7 @@
     },
     {
       "id": "esql-generation-regression",
-      "name": "ES|QL Generation Regression",
+      "name": "Security ES|QL Generation Regression",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression/playwright.config.ts",
       "tags": ["security", "esql-generation"],
       "ciLabels": ["evals:esql-generation-regression"]
