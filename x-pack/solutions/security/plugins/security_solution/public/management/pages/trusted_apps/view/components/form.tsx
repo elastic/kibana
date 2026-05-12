@@ -132,7 +132,8 @@ interface ValidationResult {
   }>;
 
   /**  Additional Warning callout after submit */
-  extraWarning?: boolean;
+  showWildcardWithWrongOperatorCalloutAndConfirmModal?: boolean;
+  showUnnecessaryEscapingCalloutAndConfirmModal?: boolean;
 }
 
 const addResultToValidation = (
@@ -168,7 +169,6 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
     isValid,
     result: {},
   };
-  let extraWarning: ValidationResult['extraWarning'];
 
   // Name field
   if (!values.name.trim()) {
@@ -223,7 +223,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         })
       ) {
         if (entry.field === ConditionEntryField.PATH) {
-          extraWarning = true;
+          validation.showWildcardWithWrongOperatorCalloutAndConfirmModal = true;
           addResultToValidation(
             validation,
             'entries',
@@ -238,6 +238,10 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
             INPUT_ERRORS.wildcardWithWrongField(index)
           );
         }
+      }
+
+      if (entry.field === ConditionEntryField.PATH && hasEscaping([{ entries: [entry] }])) {
+        validation.showUnnecessaryEscapingCalloutAndConfirmModal = true;
       }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
@@ -273,7 +277,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
     });
   }
 
-  if (extraWarning) {
+  if (validation.showWildcardWithWrongOperatorCalloutAndConfirmModal) {
     addResultToValidation(
       validation,
       'entries',
@@ -284,7 +288,18 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
       </>,
       true
     );
-    validation.extraWarning = extraWarning;
+  }
+  if (validation.showUnnecessaryEscapingCalloutAndConfirmModal) {
+    addResultToValidation(
+      validation,
+      'entries',
+      'errors',
+      <>
+        <EuiSpacer size="s" />
+        <UnnecessaryEscapingCallout />
+      </>,
+      true
+    );
   }
   validation.isValid = isValid;
   return validation;
@@ -398,9 +413,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedValidationResult: ValidationResult = validateValues(updatedItem);
         setValidationResult(updatedValidationResult);
 
-        const shouldShowWildcardConfirmModal =
-          updatedValidationResult.extraWarning || conditionsState.hasWildcardWithWrongOperator;
-        const shouldShowUnnecessaryEscapingConfirmModal = conditionsState.hasUnnecessaryEscaping;
+        const shouldShowWildcardConfirmModal = isAdvancedModeEnabled(updatedItem)
+          ? conditionsState.hasWildcardWithWrongOperator
+          : updatedValidationResult.showWildcardWithWrongOperatorCalloutAndConfirmModal;
+
+        const shouldShowUnnecessaryEscapingConfirmModal = isAdvancedModeEnabled(updatedItem)
+          ? conditionsState.hasUnnecessaryEscaping
+          : updatedValidationResult.showUnnecessaryEscapingCalloutAndConfirmModal;
 
         onChange({
           item: updatedItem,

@@ -1054,7 +1054,9 @@ export const hasWrongOperatorWithWildcard = (
   });
 };
 
-export const hasEscaping = (items: ExceptionsBuilderReturnExceptionItem[]): boolean => {
+export const hasEscaping = (
+  items: Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>[]
+): boolean => {
   // flattens array of multiple entries added with OR
   const multipleEntries = items.flatMap((item) => item.entries);
   // flattens nested entries

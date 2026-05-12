@@ -765,30 +765,30 @@ describe('Trusted apps form', () => {
 
   describe('warnings and confirmation modals', () => {
     describe('Basic mode', () => {
-  describe('and a wildcard value is used with the IS operator', () => {
+      describe('and a wildcard value is used with the IS operator', () => {
         describe('when the field is PATH', () => {
           beforeEach(() => {
             render();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*')],
-      };
-      latestUpdatedItem = { ...formProps.item, ...propsItem };
-      rerenderWithLatestProps();
-      act(() => {
-        fireEvent.blur(getConditionValue(getCondition()));
+            const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+              entries: [createEntry(ConditionEntryField.PATH, 'match', 'somewildcard*')],
+            };
+            latestUpdatedItem = { ...formProps.item, ...propsItem };
+            rerenderWithLatestProps();
+            act(() => {
+              fireEvent.blur(getConditionValue(getCondition()));
             });
-      });
+          });
 
           it('shows warning callout and help text warning if the field is PATH', async () => {
-      expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
+            expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout'));
             expect(
               renderResult.getByText(INPUT_ERRORS.wildcardWithWrongOperatorWarning(0))
             ).toBeTruthy();
             expect(
               renderResult.queryByTestId('unnecessaryEscapingCallout')
             ).not.toBeInTheDocument();
-    });
+          });
 
           it('should provide confirm modal labels when wildcard warning exists', async () => {
             await waitFor(() => {
@@ -807,18 +807,18 @@ describe('Trusted apps form', () => {
           beforeEach(() => {
             render();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.HASH, 'match', 'somewildcard*')],
-      };
-      latestUpdatedItem = { ...formProps.item, ...propsItem };
-      rerenderWithLatestProps();
+            const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+              entries: [createEntry(ConditionEntryField.HASH, 'match', 'somewildcard*')],
+            };
+            latestUpdatedItem = { ...formProps.item, ...propsItem };
+            rerenderWithLatestProps();
             act(() => {
               fireEvent.blur(getConditionValue(getCondition()));
             });
           });
 
           it('shows a warning if field is HASH or SIGNATURE, but no callout is displayed', () => {
-      expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
+            expect(renderResult.getByText(INPUT_ERRORS.wildcardWithWrongField(0))).toBeTruthy();
 
             expect(
               renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
@@ -833,6 +833,78 @@ describe('Trusted apps form', () => {
                 })
               );
             });
+          });
+        });
+      });
+
+      describe('and escaping is used', () => {
+        beforeEach(() => {
+          render();
+
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            entries: [createEntry(ConditionEntryField.PATH, 'match', 'C:\\\\abc\\\\test.exe')],
+          };
+          latestUpdatedItem = { ...formProps.item, ...propsItem };
+
+          rerenderWithLatestProps();
+        });
+
+        it('shows warning callout and help text warning if the field is PATH', async () => {
+          act(() => {
+            fireEvent.blur(getConditionValue(getCondition()));
+          });
+
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+          ).not.toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when unnecessary escaping warning exists', async () => {
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expect.stringContaining('escaping')],
+                }),
+              })
+            );
+          });
+        });
+      });
+
+      describe('and both wildcard and escaping are used', () => {
+        beforeEach(() => {
+          render();
+
+          const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+            entries: [createEntry(ConditionEntryField.PATH, 'match', 'C:\\\\abc*\\\\test.exe')],
+          };
+          latestUpdatedItem = { ...formProps.item, ...propsItem };
+
+          rerenderWithLatestProps();
+        });
+
+        it('shows both warnings when both warnings exist', async () => {
+          act(() => {
+            fireEvent.blur(getConditionValue(getCondition()));
+          });
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when both warnings exist', async () => {
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [
+                    expect.stringContaining('wildcards'),
+                    expect.stringContaining('escaping'),
+                  ],
+                }),
+              })
+            );
           });
         });
       });
@@ -866,8 +938,8 @@ describe('Trusted apps form', () => {
               })
             );
           });
-          });
         });
+      });
 
       describe('and escaping is used', () => {
         beforeEach(() => {
