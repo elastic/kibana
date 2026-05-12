@@ -15,4 +15,4 @@ export {
   getEnvironmentEsField,
   getEnvironmentKuery,
   getNextEnvironmentUrlParam,
-} from '@kbn/apm-types';
+} from '@kbn/apm-common';
