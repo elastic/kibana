@@ -92,11 +92,21 @@ Do **not** use bare parenthetical labels like `(best practices)` or `(ui best pr
 
 ### Re-run behavior
 
-On each re-run:
+On each re-run, walk the existing inline review comments authored by this workflow (available via `pr-review-comments.json`). For each one, decide:
 
-1. **Update the status**: if an inline comment was addressed in a recent commit, update and resolve the comment.
-2. **Do not post any top-level issue comment or review body** — not on the first run, not on re-runs, not to acknowledge new commits, not to say "no new issues found". Inline comments are the only surface. Silence with nothing new to add is the correct behavior.
-3. **Do not duplicate inline comments** on lines you've already commented on, unless the code on that line has changed (update the existing comment).
+- **Addressed**: the lines/diff hunk that the comment originally pointed at have changed in a way that resolves the finding (the bad pattern is gone, the suggested fix is applied, or the file/section was removed). Confirm with the surrounding code, not just a textual match.
+  1. Identify the most recent commit SHA that touched the relevant lines (use `pr-files.json` and the diff).
+  2. Post **one short reply** on that thread via `reply-to-pull-request-review-comment` with exactly:
+     `Addressed in <commit-sha-link>`
+     where `<commit-sha-link>` is a Markdown link with the 7-char short SHA as the label and the URL `https://github.com/<owner>/<repo>/pull/<pr>/commits/<full-sha>` (read `<owner>/<repo>` from `pr-metadata.json.url` and `<pr>` from `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER`).
+  3. Immediately call `resolve-pull-request-review-thread` with the thread id of that comment.
+- **Still open**: the finding still applies on the current code. Do not re-comment, do not reply, do not resolve.
+- **Stale (line removed entirely)**: the file or block was deleted. Resolve the thread without posting a reply.
+
+Other re-run rules:
+
+1. **Do not post any top-level issue comment or review body** — not on the first run, not on re-runs, not to acknowledge new commits, not to say "no new issues found". Inline comments are the only surface. Silence with nothing new to add is the correct behavior.
+2. **Do not duplicate inline comments** on lines you've already commented on, unless the code on that line has changed (in which case post a fresh inline comment as if the old one is gone — never edit; gh-aw cannot edit existing review comments).
 
 ## Output via safe-outputs
 
@@ -106,4 +116,5 @@ These rules translate the **Output** contract above into the gh-aw safe-output c
 - If at least one inline comment is posted, submit a single non-blocking review with `submit-pull-request-review` (event `COMMENT`, body **empty** — the MacroScope review body never carried prose, only inline pointers).
 - If no findings, call `noop` with the message `No issues found`. Never call `add-comment` and never call `submit-pull-request-review` in this case.
 - For follow-up `@scout` comment events (issue comment or review comment), reply only via `reply-to-pull-request-review-comment` for review-thread comments, or `add-comment` for top-level PR comments. Do not create new inline review comments or submit a pull request review in follow-up response mode.
+- For an inline comment whose finding has been addressed in a new commit on the PR, post a one-line reply via `reply-to-pull-request-review-comment` (`Addressed in <commit-link>`) and then call `resolve-pull-request-review-thread` with the thread id. Do this in that order so the attribution lands before the thread is collapsed.
 - If the request is not actionable, call `noop` with a brief reason.

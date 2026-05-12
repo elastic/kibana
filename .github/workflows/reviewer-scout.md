@@ -1,5 +1,5 @@
 ---
-name: Scout Reviewer
+name: Scout Test Reviewer
 on:
   pull_request_target:
     types: [synchronize, reopened, labeled]
@@ -143,9 +143,11 @@ safe-outputs:
     max: 10
     target: ${{ env.PR_NUMBER }}
     footer: false
+  resolve-pull-request-review-thread:
+    max: 10
 ---
 
-# Scout PR Reviewer
+# Scout Test Reviewer
 
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and `workflow_dispatch` workflow events.
