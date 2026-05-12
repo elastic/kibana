@@ -16,8 +16,6 @@ import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
 interface FindCompositeSloParams {
-  compositeSloRepository: CompositeSLORepository;
-  esClient: ElasticsearchClient;
   spaceId: string;
   search: string | undefined;
   tags: string[];
@@ -26,6 +24,11 @@ interface FindCompositeSloParams {
   sortDirection: 'asc' | 'desc' | undefined;
   page: number;
   perPage: number;
+}
+
+interface FindCompositeSloDeps {
+  compositeSloRepository: CompositeSLORepository;
+  esClient: ElasticsearchClient;
 }
 
 /**
@@ -37,18 +40,19 @@ interface FindCompositeSloParams {
  * Composites without a persisted summary doc (e.g. a still-bootstrapping deployment from a
  * pre-inline-persist build) will not appear here until the background task runs.
  */
-async function findCompositeSlos({
-  compositeSloRepository,
-  esClient,
-  spaceId,
-  search,
-  tags,
-  statusFilter,
-  sortBy,
-  sortDirection,
-  page,
-  perPage,
-}: FindCompositeSloParams): Promise<Paginated<CompositeSLODefinition>> {
+async function findCompositeSlos(
+  {
+    spaceId,
+    search,
+    tags,
+    statusFilter,
+    sortBy,
+    sortDirection,
+    page,
+    perPage,
+  }: FindCompositeSloParams,
+  { compositeSloRepository, esClient }: FindCompositeSloDeps
+): Promise<Paginated<CompositeSLODefinition>> {
   const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];
   if (search) {
     filters.push({
@@ -125,17 +129,21 @@ export const findCompositeSLORoute = createSloServerRoute({
     const tags = query.tags ? query.tags.split(',').map((tag) => tag.trim()) : [];
     const statusFilter = query.status ?? [];
 
-    return await findCompositeSlos({
-      compositeSloRepository,
-      esClient: scopedClusterClient.asCurrentUser,
-      spaceId,
-      search: query.search,
-      tags,
-      statusFilter,
-      sortBy: query.sortBy,
-      sortDirection: query.sortDirection,
-      page,
-      perPage,
-    });
+    return await findCompositeSlos(
+      {
+        spaceId,
+        search: query.search,
+        tags,
+        statusFilter,
+        sortBy: query.sortBy,
+        sortDirection: query.sortDirection,
+        page,
+        perPage,
+      },
+      {
+        compositeSloRepository,
+        esClient: scopedClusterClient.asCurrentUser,
+      }
+    );
   },
 });
