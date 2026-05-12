@@ -37,6 +37,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
@@ -350,11 +351,19 @@ export function MonitorDetailFlyout(props: Props) {
 
   const editLink = useEditMonitorLocator({ configId, spaces });
 
-  const remoteMonitorUrl = useMemo(() => {
-    if (!monitor?.remote?.kibanaUrl) return undefined;
-    const baseUrl = monitor.remote.kibanaUrl.replace(/\/+$/, '');
-    return `${baseUrl}/app/synthetics/monitor/${configId}?locationId=${locationId}`;
-  }, [monitor?.remote?.kibanaUrl, configId, locationId]);
+  const { space } = useKibanaSpace();
+
+  const remoteMonitorUrl = useMemo(
+    () =>
+      monitor
+        ? createRemoteMonitorDetailUrl({
+            monitor,
+            locationId,
+            spaceId: space?.id,
+          })
+        : undefined,
+    [monitor, locationId, space?.id]
+  );
 
   const dispatch = useDispatch();
 
@@ -370,8 +379,6 @@ export function MonitorDetailFlyout(props: Props) {
   const error = useSelector(selectSyntheticsMonitorError);
 
   const upsertSuccess = upsertStatus?.status === 'success';
-
-  const { space } = useKibanaSpace();
 
   // Skip fetching the local saved object for remote monitors — they have no
   // local SO and the request would 404.

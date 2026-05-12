@@ -40,6 +40,8 @@ import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_lo
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 import { useAddToDashboard } from '../../../common/components/add_to_dashboard';
 import { selectOverviewView } from '../../../../state';
+import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -114,6 +116,7 @@ export function ActionsPopover({
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
   const isRemote = Boolean(monitor.remote);
+  const { space } = useKibanaSpace();
 
   const { http } = useKibana().services;
   const locationLabel = monitor.locations[0]?.label ?? '';
@@ -206,13 +209,15 @@ export function ActionsPopover({
     }),
   });
 
-  const remoteMonitorUrl = useMemo(() => {
-    if (!monitor.remote?.kibanaUrl) return undefined;
-    const baseUrl = monitor.remote.kibanaUrl.replace(/\/+$/, '');
-    return `${baseUrl}/app/synthetics/monitor/${monitor.configId}?locationId=${
-      locationId || monitor.locations[0]?.id || ''
-    }`;
-  }, [monitor.remote?.kibanaUrl, monitor.configId, monitor.locations, locationId]);
+  const remoteMonitorUrl = useMemo(
+    () =>
+      createRemoteMonitorDetailUrl({
+        monitor,
+        locationId: locationId || monitor.locations[0]?.id,
+        spaceId: space?.id,
+      }),
+    [monitor, locationId, space?.id]
+  );
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
 
