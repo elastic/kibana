@@ -16,6 +16,7 @@
     "@kbn/lens-plugin",
     "@kbn/presentation-panel-plugin",
     "@kbn/react-hooks",
+    "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-toolbar-selector",
     "@kbn/shared-ux-utility",
     "@kbn/ui-actions-plugin",

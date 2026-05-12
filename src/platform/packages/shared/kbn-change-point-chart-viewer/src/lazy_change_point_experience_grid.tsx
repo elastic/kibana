@@ -9,15 +9,20 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { dynamic } from '@kbn/shared-ux-utility';
+import type { UnifiedChangePointGridProps } from './types';
 
-export const LazyChangePointExperienceGrid = dynamic(
-  () => import('./change_point_experience_grid'),
-  {
-    fallback: (
-      <EuiDelayRender delay={300}>
-        <EuiSkeletonText />
-      </EuiDelayRender>
-    ),
-  }
+const ChangePointExperienceGridLazy = dynamic(() => import('./change_point_experience_grid'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});
+
+export const LazyChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = (props) => (
+  <KibanaSectionErrorBoundary sectionName="Change point charts">
+    <ChangePointExperienceGridLazy {...props} />
+  </KibanaSectionErrorBoundary>
 );

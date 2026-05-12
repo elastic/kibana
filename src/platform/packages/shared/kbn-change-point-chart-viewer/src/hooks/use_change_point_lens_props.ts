@@ -160,6 +160,7 @@ export const useChangePointLensProps = ({
   });
 
   const [lensPropsContext, setLensPropsContext] = useState<ChangePointLensProps>();
+  const [buildError, setBuildError] = useState<Error | undefined>();
 
   // useStableCallback always invokes the latest closure, so fetchParams and timeRangeOverride
   // are always current even though this callback is only created once (stable identity).
@@ -215,6 +216,9 @@ export const useChangePointLensProps = ({
           catchError((err) => {
             // eslint-disable-next-line no-console
             console.error('[useChangePointLensProps] Failed to build Lens attributes', err);
+            // Surface the error so the component can render an error state instead of an
+            // infinite spinner. setBuildError is a stable React setter — safe to call here.
+            setBuildError(err instanceof Error ? err : new Error(String(err)));
             return EMPTY;
           })
         )
@@ -231,6 +235,8 @@ export const useChangePointLensProps = ({
         map(([attributes]) => attributes)
       )
       .subscribe((attributes) => {
+        // Clear any previous build error so the component transitions from error → chart.
+        setBuildError(undefined);
         updateLensPropsContext(attributes);
       });
 
@@ -239,7 +245,7 @@ export const useChangePointLensProps = ({
     };
   }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef]);
 
-  return lensPropsContext;
+  return { lensProps: lensPropsContext, buildError };
 };
 
 export const getChangePointLensProps = ({

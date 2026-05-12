@@ -239,7 +239,7 @@ export const useChangePointControls = (
   const showSortControls = cardCount > 1 && sortOptions.length > 1;
   const showTypeFilter = cardCount > 1 && filterSelectableOptions.length > 0;
   // Top-10 filter is only meaningful when there are more than 10 charts.
-  const showTopTenSwitch = cardCount > 1 && cardCount > 10 && hasPvalueData;
+  const showTopTenSwitch = cardCount > 10 && hasPvalueData;
 
   // Thin composition layer — each piece is pre-computed above with its own dep list.
   const controlsNode = useMemo(() => {

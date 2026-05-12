@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
   LensAnnotationLayer,
@@ -149,7 +149,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card.annotationEvents, fetchParams.timeRange]);
 
-  const lensProps = useChangePointLensProps({
+  const { lensProps, buildError } = useChangePointLensProps({
     lensInstanceId: `changePointMiniLens-${card.id}`,
     title: card.title,
     description: card.entityDescription,
@@ -209,22 +209,9 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
     lensProps,
   ]);
 
-  return (
-    <div
-      css={css`
-        display: flex;
-        flex-direction: column;
-        height: ${CHART_HEIGHT_PX}px;
-        overflow: hidden;
-        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-        border-radius: ${euiTheme.border.radius.medium};
-      `}
-      ref={chartRef}
-      data-test-subj={`changePointLensChart-${cardIndex}`}
-    >
-      <ChangePointEntityTitle card={card} />
-      {/* Chart area fills the remaining height */}
-      {lensProps ? (
+  const renderChartBody = () => {
+    if (lensProps) {
+      return (
         <div css={chartContainerCss}>
           <EmbeddableRendererContext.Provider value={EMBEDDABLE_QUICK_ACTIONS}>
             <EmbeddableComponent
@@ -240,7 +227,11 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
             />
           </EmbeddableRendererContext.Provider>
         </div>
-      ) : (
+      );
+    }
+
+    if (buildError) {
+      return (
         <EuiFlexGroup
           style={{ flex: 1 }}
           justifyContent="center"
@@ -248,10 +239,48 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiLoadingChart size="l" />
+            <EuiText color="danger" size="s" textAlign="center">
+              <p>
+                {i18n.translate('changePointChartViewer.chart.buildError', {
+                  defaultMessage: 'Failed to load chart.',
+                })}
+              </p>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
+      );
+    }
+
+    return (
+      <EuiFlexGroup
+        style={{ flex: 1 }}
+        justifyContent="center"
+        alignItems="center"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingChart size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  return (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        height: ${CHART_HEIGHT_PX}px;
+        overflow: hidden;
+        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+      ref={chartRef}
+      data-test-subj={`changePointLensChart-${cardIndex}`}
+    >
+      <ChangePointEntityTitle card={card} />
+      {/* Chart area fills the remaining height */}
+      {renderChartBody()}
 
       {/* Badge row — sits below the chart, right-aligned, never overlaps chart content */}
       <div
