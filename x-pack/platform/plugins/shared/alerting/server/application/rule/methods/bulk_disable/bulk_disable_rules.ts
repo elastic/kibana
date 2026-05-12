@@ -41,7 +41,7 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams, RuleDomain } from '../../types';
 import { bulkDisableRulesSo } from '../../../../data/rule';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDisableRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -249,7 +249,7 @@ const bulkDisableRulesWithOCC = async (
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: result.saved_objects,
     rulesClientContext: context,
     changesContext: {

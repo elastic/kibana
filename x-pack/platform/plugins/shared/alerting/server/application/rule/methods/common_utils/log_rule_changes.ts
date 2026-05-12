@@ -11,7 +11,7 @@ import type { RawRule, RuleTypeRegistry } from '../../../../types';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-interface LogBulkRuleChanges {
+interface LogRuleChanges {
   /**
    * Rule saved objects after applying the changes
    */
@@ -45,11 +45,11 @@ interface LogBulkRuleChanges {
   };
 }
 
-export async function logBulkRuleChanges({
+export async function logRuleChanges({
   ruleSOs,
   rulesClientContext: { changeTrackingService, ruleTypeRegistry, logger, spaceId },
-  changesContext: { action, timestamp, metadata: extraMetadata },
-}: LogBulkRuleChanges): Promise<void> {
+  changesContext: { action, timestamp, metadata },
+}: LogRuleChanges): Promise<void> {
   if (!changeTrackingService) {
     return;
   }
@@ -84,17 +84,10 @@ export async function logBulkRuleChanges({
   }
 
   try {
-    const bulkCountMetadata = extraMetadata?.bulkCount ?? ruleSOs.length;
-    const metadata = {
-      ...extraMetadata,
-      ...(bulkCountMetadata > 1 ? { bulkCount: bulkCountMetadata } : {}),
-    };
-    const hasMetadata = Boolean(Object.keys(metadata).length);
-
     await changeTrackingService.logBulk(changes, {
       action,
       spaceId,
-      ...(hasMetadata ? { data: { metadata } } : {}),
+      ...(metadata ? { data: { metadata } } : {}),
     });
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);

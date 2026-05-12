@@ -49,7 +49,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -366,7 +366,7 @@ const bulkEnableRulesWithOCC = async (
       })
   );
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: result.saved_objects,
     rulesClientContext: context,
     changesContext: {
