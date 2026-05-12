@@ -51,10 +51,7 @@ export class ManagedWorkflowsService {
     this.logger = deps.logger;
   }
 
-  public async registerManagedWorkflowPlugin(
-    pluginId: string,
-    _options?: { spaceId?: string }
-  ): Promise<void> {
+  public async registerManagedWorkflowPlugin(pluginId: string): Promise<void> {
     if (!pluginId) {
       throw new Error('pluginId is required to register managed workflows plugin');
     }
@@ -283,11 +280,6 @@ export class ManagedWorkflowsService {
 
   /**
    * Per-plugin reconciliation triggered by ready().
-   * Removes persisted static workflow documents whose definition was NOT installed
-   * during the startup window.
-   */
-  /**
-   * Per-plugin reconciliation triggered by ready().
    * Removes persisted static workflow documents that were NOT installed during the
    * startup window. Compares at the (workflowDocumentId, spaceId) level so that
    * suffix-based and per-space instances are individually tracked.
@@ -478,7 +470,12 @@ export class ManagedWorkflowsService {
     const { definition, values, existingTemplateValues } = params;
 
     if (definition.yamlTemplate) {
-      const templateValues = values ?? existingTemplateValues ?? {};
+      const templateValues = values ?? existingTemplateValues;
+      if (!templateValues || Object.keys(templateValues).length === 0) {
+        throw new Error(
+          `Managed workflow '${definition.id}' uses yamlTemplate but no template values were provided and none are persisted`
+        );
+      }
       const yaml = definition.yamlTemplate(templateValues);
       return {
         yaml,

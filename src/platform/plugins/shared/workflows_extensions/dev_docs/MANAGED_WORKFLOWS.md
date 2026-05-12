@@ -276,14 +276,14 @@ Key distinction: **static** workflows are declarative — the set installed at s
 
 ## 7) Authoring a definition
 
-All managed workflow definitions live in `@kbn/workflows/managed`. Adding a new definition is a three-step change in that package:
+All managed workflow definitions live in `@kbn/workflows/managed`, organized as **one file per plugin** under the `definitions/` directory. Adding a new definition is a three-step change in that package:
 
-1. **Declare the id as a `const` and the definition.** Export both — the id is the value other code uses to call `install` / `uninstall` / `execute`, and tests reference it.
+1. **Create or update the plugin's definition file** in `managed/definitions/<your_plugin>.ts`. Declare the id as a `const` and the definition, and export both — the id is the value other code uses to call `install` / `uninstall` / `execute`, and tests reference it.
 2. **Register the definition** by adding it to the `managedWorkflowDefinitions` array in `managed/index.ts`. The platform discovers definitions through this registry (e.g., for orphan cleanup and auto-update reconciliation), so a definition that isn't in this list does not exist as far as the platform is concerned.
 3. **Re-export the id** from `managed/index.ts` so consumers import it from the package entry point (`@kbn/workflows/managed`) rather than from internal paths.
 
 ```ts
-// packages/kbn-workflows/managed/workflows.ts
+// packages/kbn-workflows/managed/definitions/my_plugin.ts
 export const MY_WORKFLOW_ID = 'system-my-workflow';
 
 export const MY_WORKFLOW: ManagedWorkflowDefinition = {
@@ -296,7 +296,7 @@ export const MY_WORKFLOW: ManagedWorkflowDefinition = {
 
 ```ts
 // packages/kbn-workflows/managed/index.ts
-import { MY_WORKFLOW, MY_WORKFLOW_ID } from './workflows';
+import { MY_WORKFLOW, MY_WORKFLOW_ID } from './definitions/my_plugin';
 
 export const managedWorkflowDefinitions = [
   // ...existing definitions

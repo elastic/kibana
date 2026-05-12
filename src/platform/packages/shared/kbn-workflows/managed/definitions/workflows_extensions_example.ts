@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ManagedWorkflowDefinition } from './types';
+import type { ManagedWorkflowDefinition } from '../types';
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 

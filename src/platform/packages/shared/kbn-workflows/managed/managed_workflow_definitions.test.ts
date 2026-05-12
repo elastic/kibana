@@ -10,8 +10,8 @@
 import { parse } from 'yaml';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
+import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions/workflows_extensions_example';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 import { WorkflowSchema } from '../spec/schema';
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];

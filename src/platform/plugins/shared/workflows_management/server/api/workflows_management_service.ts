@@ -425,12 +425,9 @@ export class WorkflowsService {
     );
   }
 
-  public async registerManagedWorkflowPlugin(
-    pluginId: string,
-    options?: { spaceId?: string }
-  ): Promise<void> {
+  public async registerManagedWorkflowPlugin(pluginId: string): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.registerManagedWorkflowPlugin(pluginId, options);
+    return this.managedWorkflowsService.registerManagedWorkflowPlugin(pluginId);
   }
 
   public async pluginReady(pluginId: string): Promise<void> {

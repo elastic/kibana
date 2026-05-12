@@ -42,7 +42,7 @@ export const createWorkflowsClientProvider = (
             );
             return;
           }
-          await workflowsService.registerManagedWorkflowPlugin(pluginId, options);
+          await workflowsService.registerManagedWorkflowPlugin(pluginId);
           await workflowsService.installManagedWorkflow(id, options, pluginId);
         },
         uninstall: async (pluginId, id, options) => {
@@ -52,7 +52,7 @@ export const createWorkflowsClientProvider = (
             );
             return;
           }
-          await workflowsService.registerManagedWorkflowPlugin(pluginId, options);
+          await workflowsService.registerManagedWorkflowPlugin(pluginId);
           await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
         },
         execute: async (pluginId, id, options) => {
@@ -62,7 +62,7 @@ export const createWorkflowsClientProvider = (
             );
             throw new Error('Workflows is not available in this environment');
           }
-          await workflowsService.registerManagedWorkflowPlugin(pluginId, options);
+          await workflowsService.registerManagedWorkflowPlugin(pluginId);
           return workflowsService.executeManagedWorkflow(id, request, options, pluginId);
         },
       },
