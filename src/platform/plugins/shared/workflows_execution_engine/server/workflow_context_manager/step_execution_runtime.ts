@@ -15,7 +15,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
 

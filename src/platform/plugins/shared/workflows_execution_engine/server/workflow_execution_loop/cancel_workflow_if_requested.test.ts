@@ -15,7 +15,7 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 
-import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/types';
 

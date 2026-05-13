@@ -8,13 +8,7 @@
  */
 
 import type { StackFrame } from '@kbn/workflows';
-
-export interface ScopeData {
-  nodeId: string;
-  stepId: string;
-  nodeType: string;
-  scopeId?: string;
-}
+import type { ScopeData } from './collaborators/scope_data';
 
 /**
  * Manages the execution scope stack for workflow execution, tracking nested scopes within workflow steps.

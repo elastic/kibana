@@ -29,7 +29,7 @@ import type {
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 

@@ -29,7 +29,7 @@ import {
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 
 export interface ContextManagerInit {

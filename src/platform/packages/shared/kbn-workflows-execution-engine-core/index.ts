@@ -52,3 +52,4 @@ export * from './src/step/on_failure/fallback_step';
 export * from './src/step/on_failure/retry_step';
 export * from './src/step/timeout_zone_step';
 export * from './src/step/workflow_output_step';
+export { WorkflowScopeStack } from './src/workflow_scope_stack';

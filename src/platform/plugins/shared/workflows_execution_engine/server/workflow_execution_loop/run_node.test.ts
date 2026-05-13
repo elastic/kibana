@@ -19,7 +19,7 @@ import type { WorkflowExecutionLoopParams } from './types';
 import type { CancellableNode, NodeImplementation } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
 
 jest.mock('./run_stack_monitor/run_stack_monitor');

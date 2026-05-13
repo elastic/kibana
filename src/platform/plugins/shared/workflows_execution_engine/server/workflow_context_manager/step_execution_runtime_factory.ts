@@ -16,7 +16,7 @@ import { StepExecutionRuntime } from './step_execution_runtime';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';

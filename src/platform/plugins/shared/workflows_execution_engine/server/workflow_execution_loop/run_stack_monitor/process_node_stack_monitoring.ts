@@ -9,7 +9,7 @@
 
 import type { MonitorableNode } from '../../step/node_implementation';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { cancelWorkflowIfRequested } from '../cancel_workflow_if_requested';
 import type { WorkflowExecutionLoopParams } from '../types';
 
