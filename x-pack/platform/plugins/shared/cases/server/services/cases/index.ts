@@ -467,14 +467,30 @@ export class CasesService {
   }) {
     try {
       this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
-      await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+      const bulkDeleteResult = await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
 
-      // Cases-as-data v2: drop analytics docs for any case-typed entries in
-      // the batch. Comments / attachments / user-actions are tracked by their
-      // own surfaces (added in PR 2 and PR 3) so they're skipped here.
-      for (const entity of entities) {
-        if (entity.type === CASE_SAVED_OBJECT) {
-          this.analyticsV2Writer.deleteCase(entity.id);
+      // Cases-as-data v2: drop analytics docs ONLY for entities whose SO
+      // delete actually succeeded. The bulkDelete response carries a
+      // per-entity status; iterating `entities` blindly would remove the
+      // analytics doc even when the underlying SO survives (version
+      // conflict, lost shard, etc.). That state is unrecoverable because
+      // reconciliation can't see it — the surviving SO's `updated_at`
+      // didn't change, so the filter won't pick it up.
+      //
+      // `success: true` covers both 200 (deleted) and 404 (already gone) —
+      // either way the post-state is "SO absent", which is what the
+      // analytics delete is mirroring. Failures (success: false) skip the
+      // analytics call, leaving the doc in place to match the SO.
+      //
+      // Comments / attachments / user-actions are tracked by their own
+      // surfaces (added in PR 2 and PR 3) so they're skipped here.
+      const entityById = new Map(entities.map((e) => [`${e.type}:${e.id}`, e]));
+      for (const status of bulkDeleteResult.statuses) {
+        if (status.success) {
+          const entity = entityById.get(`${status.type}:${status.id}`);
+          if (entity?.type === CASE_SAVED_OBJECT) {
+            this.analyticsV2Writer.deleteCase(entity.id);
+          }
         }
       }
     } catch (error) {
@@ -916,6 +932,12 @@ export class CasesService {
         updatedAttributes
       );
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
+      // Compute the merged reference list once and share it between the SO
+      // update and the analytics-writer synthesis. Mirrors the
+      // `builtReferences` pattern in bulkPatchCases — without this, the two
+      // callers could subtly diverge if anyone changed how the references
+      // are computed in only one place.
+      const builtReferences = transformedAttributes.referenceHandler.build(originalCase.references);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -923,7 +945,7 @@ export class CasesService {
         transformedAttributes.attributes,
         {
           version,
-          references: transformedAttributes.referenceHandler.build(originalCase.references),
+          references: builtReferences,
           refresh,
         }
       );
@@ -942,8 +964,7 @@ export class CasesService {
           ...transformedAttributes.attributes,
         } as CasePersistedAttributes,
         version: updatedCase.version ?? originalCase.version,
-        references:
-          transformedAttributes.referenceHandler.build(originalCase.references) ?? [],
+        references: builtReferences ?? [],
       });
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
