@@ -8,6 +8,7 @@
 import {
   createQuantitativeCorrectnessEvaluators,
   createQuantitativeGroundednessEvaluator,
+  createSkillInvocationEvaluator,
   selectEvaluators,
   withEvaluatorSpan,
   type DefaultEvaluators,
@@ -17,6 +18,8 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   EvaluationChatClient,
   ErrorResponse,
@@ -245,12 +248,16 @@ interface CreateEvaluateDatasetOpts {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   chatClient: EvaluationChatClient;
+  traceEsClient: EsClient;
+  log: ToolingLog;
 }
 
 export function createEvaluateDataset({
   evaluators,
   executorClient,
   chatClient,
+  traceEsClient,
+  log,
 }: CreateEvaluateDatasetOpts): EvaluateDataset {
   return async function evaluateDataset({
     dataset: { name, description, examples },
@@ -292,6 +299,9 @@ export function createEvaluateDataset({
           } catch (err) {
             // Judge model may return invalid tool call args (toolValidationError); continue without
             // analysis so quantitative evaluators report "unavailable" instead of failing the test.
+            // Surface the error as a warning so the operator can see the failure rate (silent
+            // skips were producing noise in the correctness column with no observable signal).
+            log.warning(`Quantitative judge failed on example: ${err}`);
           }
 
           return {
@@ -318,6 +328,17 @@ export function createEvaluateDataset({
             // ground truth text, so quantitative correctness comparison produces noise (low scores).
           ),
         ]),
+        // Baseline trace-based evaluators (zero per-example LLM cost): tool-call count,
+        // end-to-end latency, input/output/cached token usage. Sourced from OTel spans
+        // captured during the Converse call.
+        ...Object.values(evaluators.traceBasedEvaluators),
+        // Verifies the agent loaded the canonical SKILL.md instead of freelancing with raw
+        // tools — catches skill-selection regressions that pass-rate alone would miss.
+        createSkillInvocationEvaluator({
+          traceEsClient,
+          log,
+          skillName: 'entity-analytics',
+        }),
       ]
     );
   };
