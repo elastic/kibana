@@ -69,7 +69,8 @@ import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import removedTypes from '../removed_types.json';
 
 /**
  * @internal
@@ -130,7 +131,7 @@ export class SavedObjectsService
   private migrator$ = new Subject<IKibanaMigrator>();
 
   private typeRegistry = new SavedObjectTypeRegistry({
-    legacyTypes: REMOVED_TYPES,
+    legacyTypes: removedTypes,
   });
 
   private started = false;

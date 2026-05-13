@@ -446,6 +446,9 @@ export const AnomalyTimeline: FC = () => {
               css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
             >
               <EuiPopover
+                aria-label={i18n.translate('xpack.ml.explorer.swimlane.actionsPopoverAriaLabel', {
+                  defaultMessage: 'Anomaly swim lane actions menu',
+                })}
                 button={
                   <EuiButtonIcon
                     size="s"
