@@ -27,10 +27,12 @@ import {
   updateYamlFieldDefault,
   removeYamlFieldDefault,
 } from '../utils/update_yaml_field_default';
+import { computeChangedLines } from '../hooks/use_line_differences_decorations';
 import {
   FieldType,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
+import { normalizeYamlString } from '../utils/normalize_yaml_string';
 
 interface TemplateFormLayoutProps {
   form: UseFormReturn<YamlEditorFormValues>;
@@ -74,6 +76,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     value: yamlValue,
     onChange: onYamlChange,
     handleReset,
+    clearDraft,
     isSaving: isYamlSaving,
     isSaved: isYamlSaved,
   } = useDebouncedYamlEdit(
@@ -82,7 +85,9 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-  const hasChanges = yamlValue.trimEnd() !== initialValue.trimEnd();
+  const hasChanges =
+    computeChangedLines(normalizeYamlString(initialValue), normalizeYamlString(yamlValue)).length >
+    0;
 
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
@@ -147,6 +152,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       async (data) => {
         try {
           await onCreate(data, isEnabled);
+          clearDraft(isEdit ? data.definition : undefined);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -155,7 +161,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         setSubmitError(i18n.FIX_VALIDATION_ERRORS);
       }
     )();
-  }, [form, onCreate, isEnabled]);
+  }, [form, onCreate, isEnabled, isEdit, clearDraft]);
 
   const handleIsEnabledChange = useCallback((enabled: boolean) => {
     setIsEnabled(enabled);
@@ -195,6 +201,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
             currentTemplateId={templateId}
+            savedValue={isEdit ? initialValue : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

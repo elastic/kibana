@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import {
   getTemplateDefinitionJsonSchema,
   TEMPLATE_SCHEMA_URI,
@@ -20,6 +20,7 @@ import { useValidationAccordionPositioning } from '../hooks/use_validation_accor
 import { useFieldNameValidation } from '../hooks/use_field_name_validation';
 import { useUserPickerValidation } from '../hooks/use_user_picker_validation';
 import { useExtendsValidation } from '../hooks/use_extends_validation';
+import { useLineDifferencesDecorations } from '../hooks/use_line_differences_decorations';
 import { useKibana } from '../../../common/lib/kibana';
 
 export interface YamlEditorFormValues {
@@ -31,6 +32,7 @@ export interface TemplateYamlEditorProps {
   onChange: (value: string) => void;
   isSaving?: boolean;
   isSaved?: boolean;
+  savedValue?: string;
 }
 
 const styles = {
@@ -59,6 +61,14 @@ const styles = {
       pointerEvents: 'auto',
     },
   }),
+  changedLineGlobal: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '.templateChangedLineDecoration': {
+        background: euiTheme.colors.warning,
+        width: '3px !important',
+        marginLeft: '3px',
+      },
+    }),
 };
 
 export const TemplateYamlEditor = ({
@@ -66,6 +76,7 @@ export const TemplateYamlEditor = ({
   onChange,
   isSaving = false,
   isSaved = false,
+  savedValue,
 }: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
   const { security } = useKibana().services;
@@ -87,6 +98,11 @@ export const TemplateYamlEditor = ({
   useFieldNameValidation(editorRef.current, value);
   useUserPickerValidation(editorRef.current, value, security);
   useExtendsValidation(editorRef.current, value);
+  useLineDifferencesDecorations({
+    editor: editorRef.current,
+    savedValue,
+    currentValue: value,
+  });
 
   const schemas = useMemo(() => {
     const jsonSchema = getTemplateDefinitionJsonSchema();
@@ -106,6 +122,7 @@ export const TemplateYamlEditor = ({
 
   return (
     <>
+      <Global styles={styles.changedLineGlobal(euiTheme)} />
       <div
         ref={containerRef}
         css={styles.editorContainer(euiTheme)}
