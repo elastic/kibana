@@ -47,6 +47,7 @@ interface TraceQueryParams {
   indexes: string;
   filters: string[];
   metadataFields: string[];
+  breakdownField?: string;
 }
 
 function createBaseTraceQuery({
@@ -66,16 +67,22 @@ export function getErrorRateChart({
   indexes,
   filters,
   metadataFields,
+  breakdownField,
 }: TraceQueryParams): TraceChart | null {
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
+    const byClause = breakdownField
+      ? `timestamp = ${createTimeBucketAggregation({})}, ${breakdownField}`
+      : `timestamp = ${createTimeBucketAggregation({})}`;
     query.pipe(
-      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY timestamp = ${createTimeBucketAggregation(
-        {}
-      )}`
+      `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY ${byClause}`
     );
     query.pipe('EVAL error_rate = TO_DOUBLE(failure) / all');
-    query.pipe('KEEP timestamp, error_rate');
+    query.pipe(
+      breakdownField
+        ? `KEEP timestamp, ${breakdownField}, error_rate`
+        : 'KEEP timestamp, error_rate'
+    );
     query.pipe('SORT timestamp');
 
     return {
@@ -97,6 +104,7 @@ export function getLatencyChart({
   indexes,
   filters,
   metadataFields,
+  breakdownField,
 }: TraceQueryParams): TraceChart | null {
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
@@ -108,7 +116,10 @@ export function getLatencyChart({
     query.pipe(`EVAL duration_ms_otel = ROUND(${DURATION})/1000/1000`);
     // need to convert both to the same type to make sure the COALESCE works
     query.pipe('EVAL duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))');
-    query.pipe(`STATS AVG(duration_ms) BY ${createTimeBucketAggregation({})}`);
+    const byClause = breakdownField
+      ? `${createTimeBucketAggregation({})}, ${breakdownField}`
+      : createTimeBucketAggregation({});
+    query.pipe(`STATS AVG(duration_ms) BY ${byClause}`);
 
     return {
       id: 'latency',
@@ -129,11 +140,15 @@ export function getThroughputChart({
   indexes,
   filters,
   metadataFields,
+  breakdownField,
 }: TraceQueryParams): TraceChart | null {
   try {
     const query = createBaseTraceQuery({ indexes, filters, metadataFields });
     query.pipe(`EVAL id = COALESCE(${TRANSACTION_ID}, ${SPAN_ID})`);
-    query.pipe(`STATS COUNT(id) BY ${createTimeBucketAggregation({})}`);
+    const byClause = breakdownField
+      ? `${createTimeBucketAggregation({})}, ${breakdownField}`
+      : createTimeBucketAggregation({});
+    query.pipe(`STATS COUNT(id) BY ${byClause}`);
 
     return {
       id: 'throughput',

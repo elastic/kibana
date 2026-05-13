@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
@@ -18,8 +18,21 @@ import { getLatencyChart } from './trace_charts_definition';
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
 const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
+
+  const dimensions = useMemo(
+    () => (breakdownField ? [{ name: breakdownField }] : []),
+    [breakdownField]
+  );
 
   const chartLayers = useChartLayers({
     metricItem: {
@@ -30,6 +43,7 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
     },
     color,
     seriesType,
+    dimensions,
   });
 
   return (
@@ -49,17 +63,19 @@ const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyCha
       syncTooltips
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
+      legend={breakdownField ? { show: true, position: 'right', size: 'm' } : undefined}
     />
   );
 };
 
 export const LatencyChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
 
   const latencyChart = getLatencyChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!latencyChart) {

@@ -33,8 +33,16 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
 
   const chartLayers = useMemo<LensSeriesLayer[]>(
     () => [
@@ -54,9 +62,10 @@ const ErrorRateChartContent = ({
             ...getLensMetricFormat(unit),
           },
         ],
+        breakdown: breakdownField ?? undefined,
       },
     ],
-    [seriesType, color, unit]
+    [seriesType, color, unit, breakdownField]
   );
 
   return (
@@ -77,17 +86,19 @@ const ErrorRateChartContent = ({
       yBounds={ERROR_RATE_Y_BOUNDS}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
+      legend={breakdownField ? { show: true, position: 'right', size: 'm' } : undefined}
     />
   );
 };
 
 export const ErrorRateChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
 
   const errorRateChart = getErrorRateChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!errorRateChart) {

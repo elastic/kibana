@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
@@ -24,8 +24,21 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
+
+  const dimensions = useMemo(
+    () => (breakdownField ? [{ name: breakdownField }] : []),
+    [breakdownField]
+  );
 
   const chartLayers = useChartLayers({
     metricItem: {
@@ -37,6 +50,7 @@ const ThroughputChartContent = ({
     color,
     seriesType,
     customFunction: 'COUNT',
+    dimensions,
   });
 
   return (
@@ -56,16 +70,18 @@ const ThroughputChartContent = ({
       syncCursor
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
+      legend={breakdownField ? { show: true, position: 'right', size: 'm' } : undefined}
     />
   );
 };
 
 export const ThroughputChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
   const throughputChart = getThroughputChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!throughputChart) {

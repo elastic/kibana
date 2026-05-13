@@ -16,6 +16,7 @@ type TraceMetricsContextProps = {
   metadataFields: string[];
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   actions: UnifiedMetricsGridProps['actions'];
+  breakdownField?: string;
 } & Pick<
   UnifiedMetricsGridProps,
   'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter' | 'profileId'
