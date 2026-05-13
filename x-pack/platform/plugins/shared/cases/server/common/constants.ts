@@ -36,6 +36,11 @@ export const COMMENT_REF_NAME = `associated-${CASE_COMMENT_SAVED_OBJECT}`;
 export const EXTERNAL_REFERENCE_REF_NAME = 'externalReferenceId';
 
 /**
+ * The name of the saved object reference indicating the attachmentId reference
+ */
+export const ATTACHMENT_ID_REF_NAME = 'attachmentId';
+
+/**
  * The name of the licensing feature to notify for feature usage with the licensing plugin
  */
 export const LICENSING_CASE_ASSIGNMENT_FEATURE = 'Cases user usage';

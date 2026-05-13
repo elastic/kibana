@@ -490,10 +490,16 @@ const testEmailsInvalid = ['invalid-email-address', '(garbage)'];
 const testEmailsAll = testEmailsOk.concat(testEmailsNotAllowed).concat(testEmailsInvalid);
 
 describe('validateEmailAddresses()', () => {
-  test('all domains allowed if config not set', () => {
+  test('all domains allowed if config not set, but format still validated', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
-    const message = acu.validateEmailAddresses(testEmailsAll);
+    const message = acu.validateEmailAddresses(testEmailsOk.concat(testEmailsNotAllowed));
     expect(message).toEqual(undefined);
+  });
+
+  test('invalid format rejected even without domain allowlist', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    const message = acu.validateEmailAddresses(testEmailsInvalid);
+    expect(message).toMatchInlineSnapshot(`"not valid emails: invalid-email-address, (garbage)"`);
   });
 
   test('only filtered domains allowed if config set', () => {
