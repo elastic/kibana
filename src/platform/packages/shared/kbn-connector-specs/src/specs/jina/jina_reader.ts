@@ -115,6 +115,7 @@ export const JinaReaderConnector: ConnectorSpec = {
   actions: {
     browse: {
       isTool: true,
+      responseSizeHeader: 'x-decompressed-content-length',
       description: 'Turn any URL to markdown for LLM consumption',
       input: lazySchema(() =>
         z.object({
@@ -159,6 +160,7 @@ export const JinaReaderConnector: ConnectorSpec = {
     },
     search: {
       isTool: true,
+      responseSizeHeader: 'x-decompressed-content-length',
       description: 'Web search to find relevant context for LLMs',
       input: lazySchema(() =>
         z.object({
