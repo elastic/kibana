@@ -16,7 +16,7 @@ import {
   filterDuplicatedWarnings,
   shouldAutoTriggerSuggestions,
 } from './helpers';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import type { MonacoMessage } from '@kbn/code-editor';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
