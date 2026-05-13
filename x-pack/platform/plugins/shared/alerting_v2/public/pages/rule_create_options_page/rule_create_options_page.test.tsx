@@ -9,6 +9,9 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPage } from './rule_create_options_page';
+import { paths } from '../../constants';
+
+const mockNavigateToUrl = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -23,7 +26,7 @@ jest.mock('@kbn/core-di-browser', () => ({
       return {};
     }
     if (token === 'application') {
-      return {};
+      return { navigateToUrl: mockNavigateToUrl };
     }
     if (token === 'chrome') {
       return { docTitle: { change: jest.fn() } };
@@ -41,12 +44,21 @@ jest.mock('@kbn/core-di', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
+  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
+    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
+      Compose Discover flyout
+    </button>
+  ),
 }));
 
 const mockCreateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_create_rule', () => ({
   useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
+}));
+
+const mockUpdateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_update_rule', () => ({
+  useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
 
 const renderPage = () =>
@@ -57,6 +69,11 @@ const renderPage = () =>
   );
 
 describe('RuleCreateOptionsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCreateRuleMutate.mockImplementation((_payload, options) => options?.onSuccess?.());
+  });
+
   it('renders the page title', () => {
     renderPage();
 
@@ -85,5 +102,14 @@ describe('RuleCreateOptionsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
 
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('navigates to the rules list after creating a rule from the flyout', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockNavigateToUrl).toHaveBeenCalledWith(paths.ruleList);
   });
 });

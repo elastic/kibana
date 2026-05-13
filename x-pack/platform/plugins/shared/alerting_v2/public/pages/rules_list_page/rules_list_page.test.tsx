@@ -35,9 +35,19 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    return {};
+    if (token === 'notifications') {
+      return {};
+    }
+    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+      return {};
+    }
+    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => key,
 }));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
@@ -51,6 +61,16 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
 
 jest.mock('../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+}));
+
+const mockCreateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_create_rule', () => ({
+  useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
+}));
+
+const mockUpdateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_update_rule', () => ({
+  useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
