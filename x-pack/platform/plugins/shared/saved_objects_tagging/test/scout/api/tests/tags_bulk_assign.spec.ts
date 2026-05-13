@@ -6,12 +6,13 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, COMMON_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
 apiTest.describe(
   'POST /api/saved_objects_tagging/assignments/update_by_tags',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
