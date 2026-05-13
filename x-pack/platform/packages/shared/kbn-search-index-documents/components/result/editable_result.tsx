@@ -120,7 +120,16 @@ export const EditableResult: React.FC<EditableResultProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                {error && <EuiIcon type="warning" color="danger" aria-label={i18n.translate('xpack.sharedKbnSearchIndexDocuments.editableResult.warningIconAriaLabel', { defaultMessage: 'Error' })} />}
+                {error && (
+                  <EuiIcon
+                    type="warning"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.sharedKbnSearchIndexDocuments.editableResult.warningIconAriaLabel',
+                      { defaultMessage: 'Error' }
+                    )}
+                  />
+                )}
                 {!error &&
                   hasIndexSelector &&
                   (isLoading ? (

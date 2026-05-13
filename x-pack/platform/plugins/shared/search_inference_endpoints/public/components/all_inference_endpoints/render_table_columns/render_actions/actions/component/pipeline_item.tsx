@@ -56,7 +56,14 @@ export const PipelineItem: React.FC<UsageProps> = ({ usageItem }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="navigateToPipelinePage" onClick={navigateToPipeline} aria-label={i18n.translate('xpack.searchInferenceEndpoints.pipelineItem.openPipelineLink', { defaultMessage: 'Open pipeline' })}>
+            <EuiLink
+              data-test-subj="navigateToPipelinePage"
+              onClick={navigateToPipeline}
+              aria-label={i18n.translate(
+                'xpack.searchInferenceEndpoints.pipelineItem.openPipelineLink',
+                { defaultMessage: 'Open pipeline' }
+              )}
+            >
               <EuiIcon size="s" type="external" aria-hidden={true} />
             </EuiLink>
           </EuiFlexItem>

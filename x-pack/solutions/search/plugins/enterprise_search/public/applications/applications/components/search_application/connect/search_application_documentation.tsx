@@ -68,7 +68,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon aria-hidden={true} type="lock" size="l" />
+                  <EuiIcon aria-hidden type="lock" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
@@ -115,7 +115,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon aria-hidden={true} type="keyboard" size="l" />
+                  <EuiIcon aria-hidden type="keyboard" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
@@ -162,7 +162,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon aria-hidden={true} type="radar" size="l" />
+                  <EuiIcon aria-hidden type="radar" size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">

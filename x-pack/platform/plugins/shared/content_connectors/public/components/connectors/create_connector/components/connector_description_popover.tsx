@@ -37,7 +37,10 @@ const nativePopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
-    icons: [<EuiIcon size="l" type="plugs" aria-hidden={true} />, <EuiIcon size="l" type="logoElastic" aria-hidden={true} />],
+    icons: [
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="logoElastic" aria-hidden={true} />,
+    ],
     id: 'native-configure-connector',
   },
 ];
