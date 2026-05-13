@@ -1054,9 +1054,7 @@ export const hasWrongOperatorWithWildcard = (
   });
 };
 
-export const hasEscaping = (
-  items: Pick<ExceptionsBuilderReturnExceptionItem, 'entries'>[]
-): boolean => {
+export const hasEscaping = (items: Array<ExceptionsBuilderReturnExceptionItem>): boolean => {
   // flattens array of multiple entries added with OR
   const multipleEntries = items.flatMap((item) => item.entries);
   // flattens nested entries
@@ -1067,14 +1065,16 @@ export const hasEscaping = (
     return item;
   });
 
-  return allEntries.some((e) => {
-    if (e.type !== 'list' && 'value' in e && typeof e.value === 'string') {
-      return e.value.includes('\\\\') || e.value.includes('\\*') || e.value.includes('\\?');
-    }
-
-    return false;
-  });
+  return allEntries.some(hasEntryEscaping);
 };
+
+export const hasEntryEscaping = (builderEntry: BuilderEntry): boolean =>
+  builderEntry.type !== 'list' &&
+  'value' in builderEntry &&
+  typeof builderEntry.value === 'string' &&
+  (builderEntry.value.includes('\\\\') ||
+    builderEntry.value.includes('\\*') ||
+    builderEntry.value.includes('\\?'));
 
 /**
  * Event filters helper where given an exceptions list,

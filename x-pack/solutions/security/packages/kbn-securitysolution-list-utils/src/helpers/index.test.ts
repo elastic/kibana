@@ -12,6 +12,7 @@ import {
   hasEscaping,
   hasPartialCodeSignatureEntry,
   getOperatorOptions,
+  hasEntryEscaping,
 } from '.';
 import {
   ALL_OPERATORS,
@@ -281,6 +282,69 @@ describe('Helpers', () => {
           },
         ])
       ).toBeTruthy();
+    });
+  });
+
+  describe('hasEntryEscaping', () => {
+    test('returns true when a match value contains doubled backslashes', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'match',
+          value: 'a\\\\b',
+          field: '',
+          operator: 'included',
+        })
+      ).toBe(true);
+    });
+
+    test('returns true when a match value contains backslash followed by asterisk', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'match',
+          value: 'prefix\\*suffix',
+          field: '',
+          operator: 'included',
+        })
+      ).toBe(true);
+    });
+
+    test('returns true when a match value contains backslash followed by question mark', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'match',
+          value: 'prefix\\?suffix',
+          field: '',
+          operator: 'included',
+        })
+      ).toBe(true);
+    });
+
+    test('returns false when a match value does not contain backslash escapes', () => {
+      expect(
+        hasEntryEscaping({ type: 'match', value: 'normal*?', field: '', operator: 'included' })
+      ).toBe(false);
+    });
+
+    test('returns false when a match value is a list', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'list',
+          field: '',
+          operator: 'included',
+          list: { id: 'list-id', type: 'keyword' },
+        })
+      ).toBe(false);
+    });
+
+    test('returns false when a match value is not a string', () => {
+      expect(
+        hasEntryEscaping({
+          type: 'match',
+          value: 666 as unknown as string,
+          field: '',
+          operator: 'included',
+        })
+      ).toBe(false);
     });
   });
 

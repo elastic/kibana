@@ -32,6 +32,7 @@ import {
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
   hasEscaping,
+  hasEntryEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   hasSimpleExecutableName,
@@ -240,7 +241,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         }
       }
 
-      if (entry.field === ConditionEntryField.PATH && hasEscaping([{ entries: [entry] }])) {
+      if (entry.field === ConditionEntryField.PATH && hasEntryEscaping(entry)) {
         validation.showUnnecessaryEscapingCalloutAndConfirmModal = true;
       }
 
