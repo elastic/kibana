@@ -103,7 +103,7 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
       order: 1000,
       content: (
         <NotificationEventsProvider events={core.notifications.events}>
-          <HeaderNotificationButton />
+          <HeaderNotificationButton currentAppId$={core.application.currentAppId$} />
         </NotificationEventsProvider>
       ),
     });
