@@ -54,6 +54,7 @@
     "@kbn/discover-utils",
     "@kbn/xstate-utils",
     "@kbn/ml-plugin",
-    "@kbn/saved-search-component"
+    "@kbn/saved-search-component",
+    "@kbn/core-execution-context-common"
   ]
 }
