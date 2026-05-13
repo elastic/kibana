@@ -35,6 +35,8 @@ export function ServiceContents({
   environment,
   kuery,
   isEmbedded,
+  showFocusMap,
+  clearKueryOnNavigation,
 }: ContentsProps) {
   const apmRouter = useApmRouter();
   const { query } = useAnyOfApmParams(
@@ -82,13 +84,15 @@ export function ServiceContents({
     return null;
   }
 
+  const destinationKuery = clearKueryOnNavigation ? '' : kuery;
+
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
     query: {
       rangeFrom,
       rangeTo,
       environment,
-      kuery,
+      kuery: destinationKuery,
       comparisonEnabled,
       serviceGroup,
     },
@@ -100,7 +104,7 @@ export function ServiceContents({
       rangeFrom,
       rangeTo,
       environment,
-      kuery,
+      kuery: destinationKuery,
       serviceGroup,
       comparisonEnabled,
     },
@@ -131,7 +135,7 @@ export function ServiceContents({
           })}
         </EuiButton>
       </EuiFlexItem>
-      {!isEmbedded && (
+      {(showFocusMap ?? !isEmbedded) && (
         <EuiFlexItem>
           <EuiButton
             data-test-subj="apmServiceContentsFocusMapButton"
