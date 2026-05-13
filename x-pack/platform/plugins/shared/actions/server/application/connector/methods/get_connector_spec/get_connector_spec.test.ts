@@ -9,7 +9,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import type { ActionsClientContext } from '../../../../actions_client';
 import type { ActionsConfigurationUtilities } from '../../../../actions_config';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
-import { getConnectorSpec } from './get_connector_spec';
+import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 
 const authorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
@@ -23,7 +23,7 @@ function createContext(): ActionsClientContext {
   return { authorization, auditLogger } as unknown as ActionsClientContext;
 }
 
-describe('getConnectorSpec', () => {
+describe('getConnectorSpecAsJsonSchema', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     authorization.ensureAuthorized.mockResolvedValue(undefined);
@@ -31,7 +31,7 @@ describe('getConnectorSpec', () => {
 
   describe('authorization', () => {
     test('ensures user is authorised to get actions before returning a connector type spec', async () => {
-      await getConnectorSpec({
+      await getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: '.alienvault-otx',
         configurationUtilities,
@@ -44,7 +44,7 @@ describe('getConnectorSpec', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized to get actions'));
 
       await expect(
-        getConnectorSpec({
+        getConnectorSpecAsJsonSchema({
           context: createContext(),
           id: '.alienvault-otx',
           configurationUtilities,
@@ -60,7 +60,7 @@ describe('getConnectorSpec', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
 
       await expect(
-        getConnectorSpec({
+        getConnectorSpecAsJsonSchema({
           context: createContext(),
           id: '.alienvault-otx',
           configurationUtilities,
@@ -80,7 +80,7 @@ describe('getConnectorSpec', () => {
   });
 
   it('returns serialized spec when the connector type exists', async () => {
-    const result = await getConnectorSpec({
+    const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),
       id: '.alienvault-otx',
       configurationUtilities,
@@ -94,7 +94,7 @@ describe('getConnectorSpec', () => {
 
   it('rejects with 404 when the connector type has no spec', async () => {
     await expect(
-      getConnectorSpec({
+      getConnectorSpecAsJsonSchema({
         context: createContext(),
         id: '__no_such_spec_connector__',
         configurationUtilities,
