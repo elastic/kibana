@@ -212,13 +212,13 @@ describe('Cloud Plugin', () => {
           });
           expect(setup.trialDaysLeft()).toBe(0);
         });
-        it('returns 0 when `trial_end_date` is not set', () => {
+        it('returns undefined when `trial_end_date` is not set', () => {
           const { setup } = setupPlugin({});
-          expect(setup.trialDaysLeft()).toBe(0);
+          expect(setup.trialDaysLeft()).toBeUndefined();
         });
-        it('returns 0 when `trial_end_date` is invalid', () => {
+        it('returns undefined when `trial_end_date` is invalid', () => {
           const { setup } = setupPlugin({ trial_end_date: 'invalid-date' });
-          expect(setup.trialDaysLeft()).toBe(0);
+          expect(setup.trialDaysLeft()).toBeUndefined();
         });
       });
     });
@@ -294,13 +294,13 @@ describe('Cloud Plugin', () => {
           });
           expect(start.trialDaysLeft()).toBe(0);
         });
-        it('returns 0 when `trial_end_date` is invalid', () => {
+        it('returns undefined when `trial_end_date` is invalid', () => {
           const { start } = setupPlugin({ trial_end_date: 'invalid-date' });
-          expect(start.trialDaysLeft()).toBe(0);
+          expect(start.trialDaysLeft()).toBeUndefined();
         });
-        it('returns 0 when `trial_end_date` is not set', () => {
+        it('returns undefined when `trial_end_date` is not set', () => {
           const { start } = setupPlugin({});
-          expect(start.trialDaysLeft()).toBe(0);
+          expect(start.trialDaysLeft()).toBeUndefined();
         });
       });
     });

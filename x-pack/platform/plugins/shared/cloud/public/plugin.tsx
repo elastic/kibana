@@ -197,7 +197,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     }
   }
 
-  private trialDaysLeft(): number {
+  private trialDaysLeft(): number | undefined {
     if (this.config.trial_end_date) {
       const endDateMs = new Date(this.config.trial_end_date).getTime();
       if (!Number.isNaN(endDateMs)) {
@@ -207,11 +207,12 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return 0;
+    return undefined;
   }
 
   private isInTrial(): boolean {
     if (this.config.serverless?.in_trial) return true;
-    return this.trialDaysLeft() > 0;
+    const daysLeft = this.trialDaysLeft();
+    return daysLeft !== undefined && daysLeft > 0;
   }
 }

@@ -104,9 +104,10 @@ export interface CloudStart extends CloudBasicUrls {
    */
   isInTrial: () => boolean;
   /**
-   * Method to retrieve the number of days left in the trial. Returns 0 if not in a date-based trial or if expired.
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
    */
-  trialDaysLeft: () => number;
+  trialDaysLeft: () => number | undefined;
   /**
    * `true` when running on Serverless Elastic Cloud
    * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
@@ -263,9 +264,10 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   isInTrial: () => boolean;
   /**
-   * Method to retrieve the number of days left in the trial. Returns 0 if not in a date-based trial or if expired.
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
    */
-  trialDaysLeft: () => number;
+  trialDaysLeft: () => number | undefined;
 }
 
 export interface PublicElasticsearchConfigType {

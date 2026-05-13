@@ -176,9 +176,10 @@ export interface CloudSetup {
    */
   isInTrial: () => boolean;
   /**
-   * Method to retrieve the number of days left in the trial. Returns 0 if not in a date-based trial or if expired.
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
    */
-  trialDaysLeft: () => number;
+  trialDaysLeft: () => number | undefined;
 }
 
 /**
@@ -206,9 +207,10 @@ export interface CloudStart {
    */
   isInTrial: () => boolean;
   /**
-   * Method to retrieve the number of days left in the trial. Returns 0 if not in a date-based trial or if expired.
+   * Method to retrieve the number of days left in the trial.
+   * Returns undefined if trial_end_date is not set, or the number of days remaining (0 if expired).
    */
-  trialDaysLeft: () => number;
+  trialDaysLeft: () => number | undefined;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -434,7 +436,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     };
   }
 
-  private trialDaysLeft(): number {
+  private trialDaysLeft(): number | undefined {
     if (this.trialEndDate !== undefined && this.config.trial_end_date) {
       const endDateMs = this.trialEndDate.getTime();
       if (!Number.isNaN(endDateMs)) {
@@ -444,11 +446,12 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return 0;
+    return undefined;
   }
 
   private isInTrial(): boolean {
     if (this.config.serverless?.in_trial) return true;
-    return this.trialDaysLeft() > 0;
+    const daysLeft = this.trialDaysLeft();
+    return daysLeft !== undefined && daysLeft > 0;
   }
 }
