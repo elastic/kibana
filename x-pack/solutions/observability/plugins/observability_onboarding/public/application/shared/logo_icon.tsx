@@ -124,6 +124,7 @@ export function LogoIcon({
         size={size}
         type={type}
         className={className}
+        aria-hidden={true}
         css={
           hasBorder
             ? css`
