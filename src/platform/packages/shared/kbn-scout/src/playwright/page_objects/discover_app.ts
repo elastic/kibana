@@ -514,12 +514,10 @@ export class DiscoverApp {
   async selectTextBaseLang() {
     const currentMode = await this.getCurrentQueryMode();
 
-    if (currentMode === 'esql') {
-      await this.codeEditor.waitCodeEditorReady('ESQLEditor');
-      return;
+    if (currentMode !== 'esql') {
+      await this.page.testSubj.click('select-text-based-language-btn');
     }
 
-    await this.page.testSubj.click('select-text-based-language-btn');
     await this.waitUntilSearchingHasFinished();
     await this.codeEditor.waitCodeEditorReady('ESQLEditor');
   }
