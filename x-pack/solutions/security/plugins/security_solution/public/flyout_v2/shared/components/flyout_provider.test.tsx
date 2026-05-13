@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { Router } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { createStore } from 'redux';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
@@ -105,18 +106,35 @@ describe('flyoutProviders', () => {
     expect(screen.getByText('/security?foo=bar')).toBeInTheDocument();
   });
 
-  it('renders children without a router when no history is provided', () => {
+  it('provides router context when no history is provided', () => {
     const store = createStore(() => ({}));
 
     render(
       flyoutProviders({
         services,
         store,
-        children: <div>{'NoRouterFallback'}</div>,
+        children: <LocationProbe />,
       })
     );
 
-    expect(screen.getByText('NoRouterFallback')).toBeInTheDocument();
+    expect(screen.getByText('/')).toBeInTheDocument();
+  });
+
+  it('uses the existing router context when no history is provided', () => {
+    const history = createMemoryHistory({ initialEntries: ['/existing-router'] });
+    const store = createStore(() => ({}));
+
+    render(
+      <Router history={history}>
+        {flyoutProviders({
+          services,
+          store,
+          children: <LocationProbe />,
+        })}
+      </Router>
+    );
+
+    expect(screen.getByText('/existing-router')).toBeInTheDocument();
   });
 
   it('provides expandable flyout context to children', () => {

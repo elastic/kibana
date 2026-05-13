@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { FC, ReactElement, ReactNode } from 'react';
-import React from 'react';
+import React, { type FC, type ReactElement, type ReactNode, useMemo } from 'react';
+import { createMemoryHistory } from 'history';
 import type { History } from 'history';
 import { Router } from '@kbn/shared-ux-router';
+import { useLocation } from 'react-router-dom';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -35,6 +36,28 @@ const FlyoutEuiThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
 };
 
+const useHasRouterContext = (): boolean => {
+  try {
+    useLocation();
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const FlyoutRouter: FC<{ children: ReactNode; history?: History }> = ({ children, history }) => {
+  const hasRouterContext = useHasRouterContext();
+  const fallbackHistory = useMemo(() => createMemoryHistory(), []);
+
+  // Security app flyouts can be opened from inside an existing Router, while Discover can
+  // render this provider without one. Reuse the host Router when present to avoid nesting.
+  return hasRouterContext ? (
+    <>{children}</>
+  ) : (
+    <Router history={history ?? fallbackHistory}>{children}</Router>
+  );
+};
+
 export const flyoutProviders = ({
   services,
   store,
@@ -50,8 +73,8 @@ export const flyoutProviders = ({
   // TODO remove ExpandableFlyoutProvider when we're ready to drop the expandable flyout
   // ConsoleManager and AssistantProvider must live inside the Router because the Respond
   // PageOverlay they render calls `useLocation()` (for `hideOnUrlPathnameChange`).
-  const flyoutContent = history ? (
-    <Router history={history}>
+  const flyoutContent = (
+    <FlyoutRouter history={history}>
       <FlyoutEuiThemeProvider>
         <ConsoleManager>
           <AssistantProvider>
@@ -59,15 +82,7 @@ export const flyoutProviders = ({
           </AssistantProvider>
         </ConsoleManager>
       </FlyoutEuiThemeProvider>
-    </Router>
-  ) : (
-    <FlyoutEuiThemeProvider>
-      <ConsoleManager>
-        <AssistantProvider>
-          <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-        </AssistantProvider>
-      </ConsoleManager>
-    </FlyoutEuiThemeProvider>
+    </FlyoutRouter>
   );
 
   return (
