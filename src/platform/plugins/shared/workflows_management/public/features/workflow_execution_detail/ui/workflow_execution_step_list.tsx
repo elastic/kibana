@@ -40,6 +40,9 @@ export interface WorkflowExecutionStepListProps {
   onToggleStepExpansion: (stepExecutionId: string) => void;
   childExecutionsMap?: ChildWorkflowExecutionsMap;
   isLoadingChildExecutions?: boolean;
+  // When true, leaf rows skip rendering their inline expanded body because the
+  // parent renders it in a dedicated side panel instead.
+  useSidePanel?: boolean;
 }
 
 export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListProps>(
@@ -53,6 +56,7 @@ export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListPro
     onToggleStepExpansion,
     childExecutionsMap,
     isLoadingChildExecutions,
+    useSidePanel = false,
   }) => {
     const failedBeforeSteps =
       execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
@@ -211,6 +215,7 @@ export const WorkflowExecutionStepList = React.memo<WorkflowExecutionStepListPro
             expandedStepData={expandedStepData}
             isExpandedStepDataLoading={isExpandedStepDataLoading}
             onToggleStepExpansion={onToggleStepExpansion}
+            useSidePanel={useSidePanel}
           />
         ))}
       </div>
@@ -227,6 +232,7 @@ interface StepListItemProps {
   expandedStepData: WorkflowStepExecutionDto | undefined;
   isExpandedStepDataLoading: boolean;
   onToggleStepExpansion: (stepExecutionId: string) => void;
+  useSidePanel: boolean;
 }
 
 const StepListItem = React.memo<StepListItemProps>(
@@ -238,6 +244,7 @@ const StepListItem = React.memo<StepListItemProps>(
     expandedStepData,
     isExpandedStepDataLoading,
     onToggleStepExpansion,
+    useSidePanel,
   }) => {
     const stepExecution = stepExecutionMap.get(item.stepExecutionId ?? '');
     const stepId = stepExecution?.stepId ?? item.stepId;
@@ -285,8 +292,9 @@ const StepListItem = React.memo<StepListItemProps>(
           childCount={hasChildren ? item.children.length : undefined}
           expandedContent={
             // Container rows toggle children visibility (rendered below); leaf rows
-            // render their input/output inside the row's own collapsible body.
-            !hasChildren && isLeafExpanded ? (
+            // render their input/output inside the row's own collapsible body —
+            // unless the parent is showing them in a side panel.
+            !hasChildren && isLeafExpanded && !useSidePanel ? (
               <StepExecutionInlineBody
                 stepExecution={expandedStepData ?? stepExecution}
                 isLoading={isExpandedStepDataLoading}
@@ -315,6 +323,7 @@ const StepListItem = React.memo<StepListItemProps>(
                   expandedStepData={expandedStepData}
                   isExpandedStepDataLoading={isExpandedStepDataLoading}
                   onToggleStepExpansion={onToggleStepExpansion}
+                  useSidePanel={useSidePanel}
                 />
               ))}
             </div>
