@@ -21,7 +21,7 @@ import {
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
@@ -86,9 +86,16 @@ export const getMonitorsEmbeddableFactory = (
         parentApi,
         uuid,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(
-          map(() => undefined)
-        ),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$, 
+          filters$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ), 
+          view$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                )),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',

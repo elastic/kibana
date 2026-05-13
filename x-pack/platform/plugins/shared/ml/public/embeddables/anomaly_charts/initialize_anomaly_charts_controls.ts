@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import type {
@@ -87,9 +87,23 @@ export const initializeAnomalyChartsControls = (
       onLoading,
       onError,
     } as AnomalyChartsDataLoadingApi,
-    anyStateChange$: merge(jobIds$, maxSeriesToPlot$, severityThreshold$, selectedEntities$).pipe(
-      map(() => undefined)
-    ),
+    anyStateChange$: merge(
+      jobIds$.pipe(
+              skip(1),
+              map(() => undefined)
+            ), 
+      maxSeriesToPlot$.pipe(
+              skip(1),
+              map(() => undefined)
+            ), 
+      severityThreshold$.pipe(
+        skip(1),
+        map(() => undefined)
+      ), 
+      selectedEntities$.pipe(
+        skip(1),
+        map(() => undefined)
+      )),
     getLatestState,
     reinitializeState: (lastSavedState: AnomalyChartsEmbeddableState) => {
       jobIds$.next(lastSavedState.jobIds);

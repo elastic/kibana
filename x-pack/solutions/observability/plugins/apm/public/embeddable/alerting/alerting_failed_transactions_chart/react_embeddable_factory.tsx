@@ -13,7 +13,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import type { EmbeddableApmAlertingVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
@@ -62,17 +62,47 @@ export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: Emb
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          serviceName$,
-          transactionType$,
-          transactionName$,
-          environment$,
-          rangeFrom$,
-          rangeTo$,
-          rule$,
-          alert$,
-          kuery$,
-          filters$
-        ).pipe(map(() => undefined)),
+          serviceName$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          transactionType$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          transactionName$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          environment$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          rangeFrom$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          rangeTo$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          rule$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          alert$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          kuery$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
+          filters$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                )
+        ),
         getComparators: () => ({
           ...titleComparators,
           serviceName: 'referenceEquality',

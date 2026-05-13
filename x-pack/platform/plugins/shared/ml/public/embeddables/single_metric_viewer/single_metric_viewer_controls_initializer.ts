@@ -6,7 +6,7 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   SingleMetricViewerEmbeddableState,
@@ -80,12 +80,27 @@ export const initializeSingleMetricViewerControls = (
       updateUserInput,
     },
     anyStateChange$: merge(
-      jobIds,
-      forecastId,
-      selectedDetectorIndex,
-      selectedEntities,
-      functionDescription
-    ).pipe(map(() => undefined)),
+      jobIds.pipe(
+              skip(1),
+              map(() => undefined)
+            ),
+      forecastId.pipe(
+              skip(1),
+              map(() => undefined)
+            ),
+      selectedDetectorIndex.pipe(
+              skip(1),
+              map(() => undefined)
+            ),
+      selectedEntities.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      functionDescription.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getLatestState,
     reinitializeState: (lastSavedState: SingleMetricViewerControlsState) => {
       jobIds.next(lastSavedState.jobIds);

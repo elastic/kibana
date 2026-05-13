@@ -26,7 +26,7 @@ import {
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
@@ -97,9 +97,12 @@ export const getStatsOverviewEmbeddableFactory = (
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          filters$,
+          filters$.pipe(
+                  skip(1),
+                  map(() => undefined)
+                ),
           drilldownsManager.anyStateChange$
-        ).pipe(map(() => undefined)),
+        ),
         getComparators: () => ({
           ...titleComparators,
           filters: 'referenceEquality',
