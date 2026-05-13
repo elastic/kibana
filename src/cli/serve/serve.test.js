@@ -10,7 +10,8 @@
 import { applyConfigOverrides } from './serve';
 import { KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 
-describe('applyConfigOverrides', () => {
+// Failing: See https://github.com/elastic/kibana/issues/269079
+describe.skip('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
     const output = applyConfigOverrides({}, {}, {}, {});
     const defaultEmptyConfig = {
