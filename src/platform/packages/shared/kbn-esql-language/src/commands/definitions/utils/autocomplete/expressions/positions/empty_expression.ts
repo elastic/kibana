@@ -24,13 +24,13 @@ import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
-import {
-  FunctionDefinitionTypes,
-  type FunctionDefinition,
-  type FunctionParameter,
-  type FunctionParameterType,
-  type ParameterHint,
+import type {
+  FunctionDefinition,
+  FunctionParameter,
+  FunctionParameterType,
+  ParameterHint,
 } from '../../../../types';
+import { FunctionDefinitionTypes } from '../../../../types';
 import { type ISuggestionItem } from '../../../../../registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../../../constants';
 import {
@@ -407,7 +407,7 @@ function buildSuggestionsFromHints(
         types: config.acceptedTypes,
         addComma: config.shouldAddComma,
         excludeParentFunctions: true,
-        functionTypes: [FunctionDefinitionTypes.AGG, FunctionDefinitionTypes.TIME_SERIES_AGG],
+        functionTypes: [FunctionDefinitionTypes.AGG],
       })
       .build();
   }

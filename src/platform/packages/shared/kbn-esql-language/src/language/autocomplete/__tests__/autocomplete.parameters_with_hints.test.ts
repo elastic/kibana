@@ -102,9 +102,7 @@ describe('function parameters autocomplete from hints', () => {
     );
 
     const aggNames = new Set(
-      getAllFunctions({
-        type: [FunctionDefinitionTypes.AGG, FunctionDefinitionTypes.TIME_SERIES_AGG],
-      }).map((fn) => fn.name.toUpperCase())
+      getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map((fn) => fn.name.toUpperCase())
     );
 
     // Every suggestion must be an aggregation / time-series-agg function — no fields, scalar functions, literals, operators
