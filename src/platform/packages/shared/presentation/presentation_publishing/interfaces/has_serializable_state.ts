@@ -13,7 +13,7 @@ import type { Observable } from 'rxjs';
 export interface HasSerializableState<SerializedState extends object = object> {
   /**
    * Emit on any state change.
-   * 
+   *
    * Must not emit on subscribe.
    * Must not debounce.
    */

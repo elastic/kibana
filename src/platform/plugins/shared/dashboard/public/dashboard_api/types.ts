@@ -175,7 +175,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesOnSave & {
     /*
      * Emits on any dashboard state change
-     * 
+     *
      * Recommend to debounce when subscribing
      */
     anyStateChange$: Observable<void>;
