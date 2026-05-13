@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../endpoint/service/response_actions/constants';
 
 export const ValidateRuleInputSchema = z.object({
   /** Detection rule ID (UUID) to validate. */
@@ -14,6 +15,13 @@ export const ValidateRuleInputSchema = z.object({
   endpointIds: z.array(z.string().min(1)).min(1),
   /** Dispatch mode. Defaults to `log_injection`. */
   mode: z.enum(['log_injection', 'real_execution']).optional(),
+  /**
+   * EDR agent type for `real_execution` dispatch. Only `endpoint` is wired
+   * end-to-end today; selecting another type is rejected upstream until the
+   * external connector resolution lands. Defaults to `endpoint`. Ignored for
+   * `log_injection` (which writes synthetic ECS docs and is agent-agnostic).
+   */
+  agentType: z.enum(RESPONSE_ACTION_AGENT_TYPE).optional(),
   /**
    * Maximum wall-clock budget in milliseconds for the full pipeline (dispatch +
    * telemetry polling). Defaults to 120 000 ms (2 min). Hard-capped at 300 000 ms

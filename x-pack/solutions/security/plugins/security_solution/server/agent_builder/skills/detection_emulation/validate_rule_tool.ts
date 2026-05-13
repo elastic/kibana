@@ -161,7 +161,13 @@ Dispatches payloads mapped to the rule's MITRE ATT&CK technique tags, collects r
 Use this tool when the user asks to validate, test, score, or confirm whether a detection rule will fire on a known attack technique.`,
     schema: validateRuleSchema,
     handler: async (rawParams, { esClient, spaceId, request }) => {
-      const { ruleId, endpointIds, mode = 'log_injection', wallBudgetMs: rawBudget } = rawParams;
+      const {
+        ruleId,
+        endpointIds,
+        mode = 'log_injection',
+        agentType = 'endpoint',
+        wallBudgetMs: rawBudget,
+      } = rawParams;
       const wallBudgetMs = Math.min(rawBudget ?? WALL_BUDGET_DEFAULT_MS, WALL_BUDGET_CEILING_MS);
 
       // I1: token from rate-limit acquire (real_execution only). Released in
@@ -325,7 +331,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         // Step 4: Scenario generator — derives payload set from the rule's MITRE tags.
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const scenarioResult = await generateScenario(
-          { ruleId, endpointIds, agentType: 'endpoint', mode },
+          { ruleId, endpointIds, agentType, mode },
           { rulesClient }
         );
 
@@ -350,7 +356,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
         const scenarioFingerprint = computeScenarioFingerprint(
           ruleId,
           scenarioResult.selectedPayloads.map((p) => p.techniqueId),
-          'endpoint'
+          agentType
         );
 
         // Step 5: Dispatch.
@@ -404,7 +410,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           for (const payload of scenarioResult.selectedPayloads) {
             const runInput = {
               emulationId: scenarioResult.scenarioId,
-              agentType: 'endpoint',
+              agentType,
               endpointIds,
               command: payload.command,
               parameters: payload.parameters ?? undefined,
@@ -484,7 +490,7 @@ Use this tool when the user asks to validate, test, score, or confirm whether a 
           scenarioFingerprint,
           mode,
           endpointIds,
-          agentType: 'endpoint',
+          agentType,
           startedAt,
           completedAt,
           payloadIds: scenarioResult.selectedPayloads.map((p) => p.techniqueId),

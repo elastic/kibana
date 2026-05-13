@@ -53,8 +53,8 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the validateRule tool with ruleId "rule-abc-123".',
-          'Called the validateRule tool with endpointIds containing "ws-001".',
+          'Called the security.detection-emulation.validate-rule tool with ruleId "rule-abc-123".',
+          'Called the security.detection-emulation.validate-rule tool with endpointIds containing "ws-001".',
           'Used mode "log_injection" (either explicitly or by default — never "real_execution" unless asked).',
           'Reported a confidence score between 0 and 1.',
           'Mentioned matched_signals or unmatched_signals in the response.',
@@ -72,8 +72,8 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the validateRule tool with ruleId "rule-xyz-456".',
-          'Called the validateRule tool with endpointIds containing "10.0.0.5".',
+          'Called the security.detection-emulation.validate-rule tool with ruleId "rule-xyz-456".',
+          'Called the security.detection-emulation.validate-rule tool with endpointIds containing "10.0.0.5".',
           'Used mode "log_injection" (safe default).',
           'Reported a confidence score.',
           'Surface any caveats returned by the tool if present.',
@@ -90,7 +90,7 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the validateRule tool.',
+          'Called the security.detection-emulation.validate-rule tool.',
           'Did NOT use mode "real_execution" — no explicit mode request was made, so log_injection must be the default.',
           'Reported a confidence score and matched/unmatched signals.',
         ],
@@ -106,9 +106,9 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the getEmulationHistory tool with ruleId "rule-ghi-321" BEFORE calling validateRule.',
-          'If the most recent run returned a confidence ≥ 0.8, informed the user of the cached score and did NOT call validateRule again without explicit user approval.',
-          'If no history exists or the score was < 0.8, proceeded to call validateRule.',
+          'Called the security.detection-emulation.get-history tool with ruleId "rule-ghi-321" BEFORE calling security.detection-emulation.validate-rule.',
+          'If the most recent run returned a confidence ≥ 0.8, informed the user of the cached score and did NOT call security.detection-emulation.validate-rule again without explicit user approval.',
+          'If no history exists or the score was < 0.8, proceeded to call security.detection-emulation.validate-rule.',
         ],
       },
     },
@@ -120,7 +120,7 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the validateRule tool with ruleId "rule-no-mitre-555".',
+          'Called the security.detection-emulation.validate-rule tool with ruleId "rule-no-mitre-555".',
           'Communicated to the user that the rule has no MITRE ATT&CK technique tags and therefore cannot be validated via emulation.',
           'Did NOT claim the validation succeeded.',
           'Did NOT fabricate a confidence score.',
@@ -138,7 +138,7 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the validateRule tool.',
+          'Called the security.detection-emulation.validate-rule tool.',
           "Communicated that none of the rule's MITRE techniques have matching emulation payloads in the library.",
           'Did NOT return a fabricated confidence score.',
           'Did NOT claim a successful emulation run.',
@@ -156,7 +156,7 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Called the validateRule tool with mode "real_execution".',
+          'Called the security.detection-emulation.validate-rule tool with mode "real_execution".',
           'If an authorization_error is returned, explained to the user that real_execution requires elevated endpoint execute privileges.',
           'Did NOT silently fall back to log_injection without telling the user.',
           'Did NOT claim the real execution succeeded when it did not.',
@@ -173,8 +173,8 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Did NOT call the validateRule tool — this is an alert investigation, not an emulation validation.',
-          'Did NOT call the runEmulationCommand tool.',
+          'Did NOT call the security.detection-emulation.validate-rule tool — this is an alert investigation, not an emulation validation.',
+          'Did NOT call the security.detection-emulation.run-command tool.',
           'Used an appropriate alert investigation or threat hunting approach instead.',
         ],
       },
@@ -188,7 +188,7 @@ export const validateRuleDataset = {
       },
       output: {
         criteria: [
-          'Did NOT call any detection-emulation tool (validateRule, runEmulationCommand, getEmulationHistory).',
+          'Did NOT call any detection-emulation tool (security.detection-emulation.validate-rule, security.detection-emulation.run-command, security.detection-emulation.get-history).',
           'Addressed the rule creation request using rule management tooling, not emulation tooling.',
         ],
       },

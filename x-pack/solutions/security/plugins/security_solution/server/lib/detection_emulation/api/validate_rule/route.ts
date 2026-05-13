@@ -196,6 +196,7 @@ export const validateRuleRoute = (
             ruleId,
             endpointIds,
             mode = 'log_injection',
+            agentType = 'endpoint',
             wallBudgetMs: rawBudget,
           } = request.body;
 
@@ -292,7 +293,7 @@ export const validateRuleRoute = (
           // Step 4: Scenario generator — derives payload set from the rule's MITRE tags.
           const rulesClient = await ctx.alerting.getRulesClient();
           const scenarioResult = await generateScenario(
-            { ruleId, endpointIds, agentType: 'endpoint', mode },
+            { ruleId, endpointIds, agentType, mode },
             { rulesClient }
           );
 
@@ -310,7 +311,7 @@ export const validateRuleRoute = (
           const scenarioFingerprint = computeScenarioFingerprint(
             ruleId,
             scenarioResult.selectedPayloads.map((p) => p.techniqueId),
-            'endpoint'
+            agentType
           );
 
           // Step 5: Dispatch.
@@ -366,7 +367,7 @@ export const validateRuleRoute = (
             for (const payload of scenarioResult.selectedPayloads) {
               const runInput = {
                 emulationId: scenarioResult.scenarioId,
-                agentType: 'endpoint',
+                agentType,
                 endpointIds,
                 command: payload.command,
                 parameters: payload.parameters ?? undefined,
@@ -447,7 +448,7 @@ export const validateRuleRoute = (
             scenarioFingerprint,
             mode,
             endpointIds,
-            agentType: 'endpoint',
+            agentType,
             startedAt,
             completedAt,
             payloadIds: scenarioResult.selectedPayloads.map((p) => p.techniqueId),

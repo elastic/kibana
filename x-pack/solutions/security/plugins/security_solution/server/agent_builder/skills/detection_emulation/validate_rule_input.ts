@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 
 /**
  * Tool-boundary schema for the `validateRule` Agent Builder skill.
@@ -36,6 +37,12 @@ export const validateRuleSchema = z.object({
     .optional()
     .describe(
       'Dispatch mode. `log_injection` (default): synthesises structurally-correct ECS documents in a dedicated emulation index (`.kibana-security-emulation-logs-<spaceId>-*`) so Detection Engine rules can match without touching real endpoints — safe for all environments. `real_execution`: dispatches live response actions to the target endpoints via the ResponseActionsClient — requires additional endpoint RBAC privileges and the `detectionEmulationRealExecution` feature flag. Omit to use `log_injection`.'
+    ),
+  agentType: z
+    .enum(RESPONSE_ACTION_AGENT_TYPE)
+    .optional()
+    .describe(
+      'EDR agent family for `real_execution` dispatch. Today only `endpoint` is wired end-to-end (the synthesizer pipeline lacks per-vendor command translation for the others); selecting `sentinel_one`, `crowdstrike`, or `microsoft_defender_endpoint` is rejected upstream until external connector support lands. Defaults to `endpoint` if omitted. Ignored for `log_injection` (which writes synthetic ECS docs and is agent-agnostic).'
     ),
   wallBudgetMs: z
     .number()

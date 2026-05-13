@@ -26,8 +26,13 @@ export const getDetectionEmulationSkill = (ctx: DetectionEmulationSkillContext) 
     id: 'detection-emulation',
     name: 'detection-emulation',
     basePath: 'skills/security/endpoint',
-    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire. Exposes three tools: \`validateRule\` (full 8-step pipeline — scenario generation, dispatch, telemetry collection, confidence scoring, history write), \`getEmulationHistory\` (retrieve past validation runs for a rule), and \`runEmulationCommand\` (dispatch a single low-level response action against endpoint agents). Both log-injection (safe, no real endpoints) and real-execution modes are supported; each is gated by an independent feature flag (\`detectionEmulationLogInjection\` / \`detectionEmulationRealExecution\`).`,
+    description: `Validate Elastic Security detection rules by running attack emulation scenarios and measuring whether the rules fire on MITRE ATT&CK techniques. Provides tools to validate rules, review past emulation history, and dispatch low-level response actions against endpoint agents.`,
     content: `# Detection Emulation Skill
+
+> **Tool IDs:** when the LLM judge or downstream consumers reference these tools by their canonical registered IDs:
+> - \`validateRule\` → \`security.detection-emulation.validate-rule\`
+> - \`getEmulationHistory\` → \`security.detection-emulation.get-history\`
+> - \`runEmulationCommand\` → \`security.detection-emulation.run-command\`
 
 ## When to Use
 
@@ -102,6 +107,12 @@ Runs the full validation pipeline and returns a confidence score:
 
 **Output:** \`confidence\`, \`coverage\`, \`precision\`, \`tp\`, \`fp\`, \`caveats\`,
 \`matched_signals\`, \`unmatched_signals\`, \`report_id\`, \`poll_duration_ms\`.
+
+\`agentType\` defaults to \`endpoint\` and currently only \`endpoint\` is wired end-to-end
+for \`real_execution\` (the synthesizer pipeline lacks per-vendor command translation
+for \`sentinel_one\`, \`crowdstrike\`, and \`microsoft_defender_endpoint\`). Omit the
+field unless you are explicitly targeting a non-Elastic-Defend integration that has
+been confirmed to be available — otherwise the call will be rejected upstream.
 
 Returns \`no_mitre_tags\` (422) if the rule has no ATT\&CK technique tags, or
 \`no_supported_techniques\` (422) if none of the tags map to a library payload.
