@@ -11,24 +11,19 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import type { CaseUI } from '../../../../common/ui/types';
+import type { CommonAttachmentTabViewProps } from '../../../client/attachment_framework/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
-import { FilesTable } from '../../attachments/file/files_table';
-import { FilesUtilityBar } from '../../attachments/file/files_utility_bar';
-
-interface CaseViewFilesProps {
-  caseData: CaseUI;
-  searchTerm?: string;
-}
+import { FilesTable } from './files_table';
+import { FilesUtilityBar } from './files_utility_bar';
 
 export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
   page: 0,
   perPage: 10,
 };
 
-export const CaseViewFiles = ({ caseData, searchTerm }: CaseViewFilesProps) => {
+export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentTabViewProps) => {
   const searchTermRef = useRef<string | undefined>(searchTerm);
   const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
     ...DEFAULT_CASE_FILES_FILTERING_OPTIONS,
@@ -39,7 +34,6 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CaseViewFilesProps) => {
     if (searchTermRef.current !== searchTerm) {
       searchTermRef.current = searchTerm;
       setFilteringOptions((prev) => ({
-        // reset pagination when search term changes
         page: 0,
         perPage: prev.perPage,
         ...(searchTerm && { searchTerm }),
