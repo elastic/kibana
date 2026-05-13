@@ -30,6 +30,8 @@ export function useSecretHeaders(connectorId?: string) {
       enabled: Boolean(connectorId),
       initialData: [],
       refetchOnMount: 'always',
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       onError: (error: ServerError) => {
         toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
           title: i18n.translate('xpack.stackConnectors.public.common.errorFetchingSecretHeaders', {
