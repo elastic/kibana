@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type {
   ActionPolicyResponse,
+  ActionPolicyType,
   CreateActionPolicyData,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
@@ -24,6 +25,11 @@ export function validateDateString(dateString: string): void {
 }
 
 const normalizeNullableField = <T>(value: T | null | undefined): T | null => value ?? null;
+
+const resolveRuleIdForType = (
+  type: ActionPolicyType,
+  ruleId: string | null | undefined
+): string | null => (type === 'single_rule' ? ruleId ?? null : null);
 
 const resolveNextNullableField = <T>(
   value: T | null | undefined,
@@ -67,6 +73,8 @@ export const buildCreateActionPolicyAttributes = ({
   return {
     name: data.name,
     description: data.description,
+    type: data.type,
+    ruleId: resolveRuleIdForType(data.type, data.ruleId),
     enabled: true,
     destinations: data.destinations,
     matcher: data.matcher ?? null,
@@ -103,6 +111,8 @@ export const buildUpdateActionPolicyAttributes = ({
   return {
     name: update.name ?? existing.name,
     description: update.description ?? existing.description,
+    type: existing.type,
+    ruleId: resolveRuleIdForType(existing.type, existing.ruleId),
     enabled: existing.enabled,
     destinations: update.destinations ?? existing.destinations,
     matcher: resolveNextNullableField(update.matcher, existing.matcher),
@@ -135,6 +145,8 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     version,
     name: attributes.name,
     description: attributes.description,
+    type: attributes.type,
+    ruleId: resolveRuleIdForType(attributes.type, attributes.ruleId),
     enabled: attributes.enabled,
     destinations: attributes.destinations,
     matcher: normalizeNullableField(attributes.matcher),
