@@ -36,5 +36,5 @@ snapshots.js
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-workflows/spec/elasticsearch/generated/**
 /src/platform/packages/shared/kbn-workflows/spec/kibana/generated/**
-/x-pack/platform/packages/shared/kbn_agent_condition_language/src/parser
+/x-pack/platform/packages/shared/kbn-agent-condition-language/src/parser
 /x-pack/platform/plugins/shared/screenshotting/chromium
