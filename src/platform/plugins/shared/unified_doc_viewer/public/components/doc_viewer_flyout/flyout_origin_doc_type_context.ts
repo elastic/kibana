@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DOC_VIEWER_VIEWED_EVENT_TYPE = 'unified_doc_viewer_viewed';
-export const DOC_VIEWER_VIEWED_ROOT_CONTENT_ID = 'doc_detail';
+import { createContext, useContext } from 'react';
+import type { FlyoutOriginDocType } from '@kbn/unified-doc-viewer';
 
-/**
- *  Document type of the originating top-level flyout for telemetry purposes.
- *  Should be inherited by every nested flyout.
- * */
-export type FlyoutOriginDocType = 'trace' | 'log' | 'generic' | 'default';
+export const FlyoutOriginDocTypeContext = createContext<FlyoutOriginDocType | undefined>(undefined);
+
+export const useFlyoutOriginDocType = () => useContext(FlyoutOriginDocTypeContext);

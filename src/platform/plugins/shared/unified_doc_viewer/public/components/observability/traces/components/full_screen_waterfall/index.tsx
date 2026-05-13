@@ -24,6 +24,7 @@ import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
+import { useFlyoutOriginDocType } from '../../../../doc_viewer_flyout/flyout_origin_doc_type_context';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout } from './waterfall_flyout/document_detail_flyout';
 import { FlyoutContentId } from '../../common/constants';
@@ -70,6 +71,7 @@ export const FullScreenWaterfall = ({
   skipNextEventReport,
 }: FullScreenWaterfallProps) => {
   const historyKey = useFlyoutHistoryKey();
+  const flyoutOriginDocType = useFlyoutOriginDocType();
   const { analytics, discoverShared } = getUnifiedDocViewerServices();
   const FullTraceWaterfall = discoverShared.features.registry.getById(
     'observability-full-trace-waterfall'
@@ -78,6 +80,7 @@ export const FullScreenWaterfall = ({
 
   useDocViewerViewedEvent({
     reportEvent: analytics.reportEvent,
+    flyoutOriginDocType,
     contentId: FlyoutContentId.TRACE_TIMELINE,
     skipNextReport: skipNextEventReport,
   });

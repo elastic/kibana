@@ -9,6 +9,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { useEffect, useMemo, useRef } from 'react';
+import type { FlyoutOriginDocType } from './constants';
 import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
 import type { DocViewRenderProps } from '../types';
 
@@ -16,6 +17,10 @@ import type { DocViewRenderProps } from '../types';
  * Payload for the `unified_doc_viewer_viewed` event.
  */
 export interface DocViewerViewedEvent {
+  /**
+   * Document type of the originating top-level flyout; inherited by all nested flyouts.
+   */
+  flyoutOriginDocType?: FlyoutOriginDocType;
   /**
    * Identifies which doc viewer content is being viewed.
    */
@@ -60,14 +65,15 @@ export interface UseDocViewerViewedEventParams
  * Reports a viewed event for a doc viewer content area when its calculated event key changes.
  */
 export const useDocViewerViewedEvent = ({
-  reportEvent,
+  flyoutOriginDocType,
   contentId,
   tabId,
   keys,
   enabled = true,
   initialEventKey,
-  onEventKeyChange,
   skipNextReport,
+  reportEvent,
+  onEventKeyChange,
 }: UseDocViewerViewedEventParams) => {
   const lastReportedEventRef = useRef(initialEventKey);
   const skipNextReportRef = useRef(skipNextReport);
@@ -77,7 +83,9 @@ export const useDocViewerViewedEvent = ({
       return;
     }
 
-    const eventKey = [contentId, tabId, ...(keys ?? [])].filter(Boolean).join('|');
+    const eventKey = [contentId, tabId, flyoutOriginDocType, ...(keys ?? [])]
+      .filter(Boolean)
+      .join('|');
 
     if (lastReportedEventRef.current === eventKey) {
       return;
@@ -93,6 +101,7 @@ export const useDocViewerViewedEvent = ({
     try {
       onEventKeyChange?.(eventKey);
       reportEvent(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+        flyoutOriginDocType,
         contentId,
         tabId,
       });
@@ -100,7 +109,7 @@ export const useDocViewerViewedEvent = ({
       // eslint-disable-next-line no-console
       console.error(`Error reporting event ${DOC_VIEWER_VIEWED_EVENT_TYPE}:`, error);
     }
-  }, [contentId, enabled, keys, onEventKeyChange, reportEvent, tabId]);
+  }, [contentId, enabled, flyoutOriginDocType, keys, onEventKeyChange, reportEvent, tabId]);
 };
 
 /**

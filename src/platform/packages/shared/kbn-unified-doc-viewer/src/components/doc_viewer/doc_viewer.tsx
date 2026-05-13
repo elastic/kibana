@@ -15,6 +15,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
+import type { FlyoutOriginDocType } from '../../analytics';
 import { useDocViewerTabViewedEvent } from '../../analytics';
 import { useRestorableState, withRestorableState } from './restorable_state';
 
@@ -31,13 +32,24 @@ export interface InternalDocViewerProps
   docViews: DocView[];
   initialTabId?: DocView['id'];
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
+  flyoutOriginDocType?: FlyoutOriginDocType;
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
 const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewer_tab_', '');
 
 const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProps>(
-  ({ docViews, initialTabId, onUpdateSelectedTabId, reportEvent, ...renderProps }, ref) => {
+  (
+    {
+      docViews,
+      initialTabId,
+      onUpdateSelectedTabId,
+      reportEvent,
+      flyoutOriginDocType,
+      ...renderProps
+    },
+    ref
+  ) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map((docView: DocView) => ({
@@ -83,6 +95,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
     useDocViewerTabViewedEvent({
       reportEvent,
       tabId: selectedTab ? getOriginalTabId(selectedTab.id) : undefined,
+      flyoutOriginDocType,
       hit: renderProps.hit,
       initialEventKey: initialDocViewerViewedEventKey,
       onEventKeyChange: setInitialDocViewerViewedEventKey,
