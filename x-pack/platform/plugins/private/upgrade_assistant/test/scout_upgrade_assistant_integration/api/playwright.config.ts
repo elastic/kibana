@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('upgrade assistant', function () {
-    loadTestFile(require.resolve('./api_deprecations'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

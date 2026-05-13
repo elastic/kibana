@@ -63,6 +63,7 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - test/scout/**/*
+    - test/scout_upgrade_assistant_integration/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
