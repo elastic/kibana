@@ -19,7 +19,6 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import type { FormValues } from '../../form/types';
@@ -61,7 +60,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { breach: '' },
   grouping: undefined,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
@@ -86,7 +85,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const initialSandboxQuery = useMemo(() => {
     if (mode !== 'edit' || !rule) return '';
     const mapped = mapRuleResponseToFormValues(rule);
-    return mapped.query ? getBreachEsqlQuery(mapped.query) : '';
+    return mapped.query?.breach ?? '';
   }, [mode, rule]);
   const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
 
@@ -111,7 +110,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           every: mapped.schedule?.every ?? '1m',
           lookback: mapped.schedule?.lookback ?? '5m',
         },
-        query: mapped.query ?? { format: 'standalone', breach: '' },
+        query: mapped.query ?? { breach: '' },
         grouping: mapped.grouping,
         stateTransition: mapped.stateTransition,
         stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
@@ -134,7 +133,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // timeField and grouping are written directly to RHF by the form components via useFormContext.
   useEffect(() => {
     if (uiState.queryCommitted && uiState.sandbox.query) {
-      methods.setValue('query', { format: 'standalone', breach: uiState.sandbox.query });
+      methods.setValue('query', { breach: uiState.sandbox.query });
     }
   }, [uiState.sandbox.query, uiState.queryCommitted, methods]);
 

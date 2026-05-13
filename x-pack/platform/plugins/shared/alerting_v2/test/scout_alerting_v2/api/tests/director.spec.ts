@@ -1075,7 +1075,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           metadata: { name: 'director-recovering-timeframe-and' },
           query: {
             format: 'standalone',
-            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
           state_transition: {
             pending_count: 0,
