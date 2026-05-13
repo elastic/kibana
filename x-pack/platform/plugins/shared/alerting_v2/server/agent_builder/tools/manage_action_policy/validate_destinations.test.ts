@@ -34,7 +34,7 @@ const createMockConnectorLookup = (
 });
 
 describe('validateDestinations', () => {
-  it('passes when destination matches an in-memory workflow attachment by attachment ID', async () => {
+  it('rejects bare attachment IDs and instructs to use workflowId', async () => {
     const attachments = createMockAttachments([
       {
         id: 'att-workflow-1',
@@ -43,17 +43,29 @@ describe('validateDestinations', () => {
       },
     ]);
 
-    const result = await validateDestinations(
-      [{ type: 'workflow', id: 'att-workflow-1' }],
-      {
-        attachments,
-        workflowLookup: createMockWorkflowLookup(),
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      }
-    );
+    await expect(
+      validateDestinations(
+        [{ type: 'workflow', id: 'att-workflow-1' }],
+        {
+          attachments,
+          workflowLookup: createMockWorkflowLookup(),
+          connectorLookup: createMockConnectorLookup(),
+          spaceId: 'default',
+        }
+      )
+    ).rejects.toThrow(ActionPolicyOperationValidationError);
 
-    expect(result).toBeInstanceOf(Map);
+    await expect(
+      validateDestinations(
+        [{ type: 'workflow', id: 'att-workflow-1' }],
+        {
+          attachments,
+          workflowLookup: createMockWorkflowLookup(),
+          connectorLookup: createMockConnectorLookup(),
+          spaceId: 'default',
+        }
+      )
+    ).rejects.toThrow(/is a workflow attachment ID, not a workflow ID/);
   });
 
   it('passes when destination matches an in-memory workflow attachment by workflowId', async () => {
@@ -153,19 +165,19 @@ describe('validateDestinations', () => {
     ).rejects.toThrow(/is not a valid workflow in this space or conversation/);
   });
 
-  it('skips persisted and connector lookups when attachment matches', async () => {
+  it('skips persisted and connector lookups when workflowId matches', async () => {
     const attachments = createMockAttachments([
       {
         id: 'att-wf',
         type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-        versions: [{ data: { yaml: 'version: 1' } }],
+        versions: [{ data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'High CPU' } }],
       },
     ]);
     const workflowLookup = createMockWorkflowLookup();
     const connectorLookup = createMockConnectorLookup();
 
     await validateDestinations(
-      [{ type: 'workflow', id: 'att-wf' }],
+      [{ type: 'workflow', id: 'notify-high-cpu' }],
       { attachments, workflowLookup, connectorLookup, spaceId: 'default' }
     );
 
@@ -197,14 +209,14 @@ describe('validateDestinations', () => {
       {
         id: 'att-wf-ok',
         type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-        versions: [{ data: { yaml: 'version: 1' } }],
+        versions: [{ data: { yaml: 'version: 1', workflowId: 'notify-ok', name: 'OK' } }],
       },
     ]);
 
     await expect(
       validateDestinations(
         [
-          { type: 'workflow', id: 'att-wf-ok' },
+          { type: 'workflow', id: 'notify-ok' },
           { type: 'workflow', id: 'bad-id' },
         ],
         {
@@ -240,17 +252,19 @@ describe('validateDestinations', () => {
   });
 
   describe('resolved destination metadata', () => {
-    it('marks in-memory attachment destinations as drafts', async () => {
+    it('marks in-memory workflowId destinations as drafts', async () => {
       const attachments = createMockAttachments([
         {
           id: 'att-wf-1',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [{ data: { yaml: 'version: 1', name: 'Notify: High CPU' } }],
+          versions: [
+            { data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'Notify: High CPU' } },
+          ],
         },
       ]);
 
       const result = await validateDestinations(
-        [{ type: 'workflow', id: 'att-wf-1' }],
+        [{ type: 'workflow', id: 'notify-high-cpu' }],
         {
           attachments,
           workflowLookup: createMockWorkflowLookup(),
@@ -259,7 +273,7 @@ describe('validateDestinations', () => {
         }
       );
 
-      expect(result.get('att-wf-1')).toEqual({ name: 'Notify: High CPU', isDraft: true });
+      expect(result.get('notify-high-cpu')).toEqual({ name: 'Notify: High CPU', isDraft: true });
     });
 
     it('marks in-memory attachment destinations by workflowId as drafts', async () => {
@@ -304,17 +318,17 @@ describe('validateDestinations', () => {
       expect(result.get('persisted-wf')).toEqual({ name: 'SRE Notifications', isDraft: false });
     });
 
-    it('returns empty map when no names are available', async () => {
+    it('falls back to workflowId as name when no name is available', async () => {
       const attachments = createMockAttachments([
         {
           id: 'att-wf-1',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [{ data: { yaml: 'version: 1' } }],
+          versions: [{ data: { yaml: 'version: 1', workflowId: 'notify-unnamed' } }],
         },
       ]);
 
       const result = await validateDestinations(
-        [{ type: 'workflow', id: 'att-wf-1' }],
+        [{ type: 'workflow', id: 'notify-unnamed' }],
         {
           attachments,
           workflowLookup: createMockWorkflowLookup(),
@@ -323,7 +337,7 @@ describe('validateDestinations', () => {
         }
       );
 
-      expect(result.size).toBe(0);
+      expect(result.get('notify-unnamed')).toEqual({ name: 'notify-unnamed', isDraft: true });
     });
 
     it('resolves mixed draft and persisted destinations', async () => {
@@ -331,7 +345,9 @@ describe('validateDestinations', () => {
         {
           id: 'att-wf-1',
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [{ data: { yaml: 'v: 1', name: 'Draft Workflow' } }],
+          versions: [
+            { data: { yaml: 'v: 1', workflowId: 'notify-draft', name: 'Draft Workflow' } },
+          ],
         },
       ]);
       const workflowLookup = createMockWorkflowLookup(
@@ -340,7 +356,7 @@ describe('validateDestinations', () => {
 
       const result = await validateDestinations(
         [
-          { type: 'workflow', id: 'att-wf-1' },
+          { type: 'workflow', id: 'notify-draft' },
           { type: 'workflow', id: 'persisted-wf' },
         ],
         {
@@ -351,7 +367,7 @@ describe('validateDestinations', () => {
         }
       );
 
-      expect(result.get('att-wf-1')).toEqual({ name: 'Draft Workflow', isDraft: true });
+      expect(result.get('notify-draft')).toEqual({ name: 'Draft Workflow', isDraft: true });
       expect(result.get('persisted-wf')).toEqual({ name: 'Saved Workflow', isDraft: false });
     });
   });

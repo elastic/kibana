@@ -303,7 +303,8 @@ If the user agrees, follow these two steps in order:
 1. Load the \`workflow-authoring\` skill via \`filestore.read\` (path: \`skills/platform/workflows\`).
 2. Call \`platform.workflows.get_connectors\` with \`actionTypeId: ".email"\` to find an available email connector.
    - If no email connector exists, tell the user: "No email connector is configured. You can set one up under Stack Management → Connectors, then come back to add notifications."
-3. Call \`platform.workflows.workflow_set_yaml\` with a YAML template tailored to the rule's query columns.
+3. Generate a unique \`workflowId\` — a UUID (e.g. \`550e8400-e29b-41d4-a716-446655440000\`). Pass it as the \`workflowId\` parameter when calling \`platform.workflows.workflow_set_yaml\`. This same ID will be used as the persisted workflow ID and must be referenced in the action policy destination. **Do NOT use a human-readable slug** — it would collide across conversations.
+4. Call \`platform.workflows.workflow_set_yaml\` with the \`workflowId\` and a YAML template tailored to the rule's query columns.
 
 ### Building the Workflow YAML
 
@@ -376,16 +377,18 @@ steps:
 | \`kibanaUrl\` | The Kibana base URL |
 | \`now\` | ISO timestamp of execution start |
 
-4. After creating the workflow, render it inline for user review:
+5. After creating the workflow, render it inline for user review:
    \`<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>\`
    where \`attachmentId\` and \`attachmentVersion\` come from the \`workflow_set_yaml\` tool result.
+6. Use the \`workflowId\` you generated in step 3 for action policy destinations in Step 2. Do NOT use the \`attachmentId\` — that is only for rendering.
 
 ## Step 2 — Create a Default Action Policy
 
 Use ${alertingTools.manageActionPolicy} with these operations in order:
 
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
-2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflow-id-from-step-1>" }]\`
+2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
+   - **IMPORTANT**: Use the \`workflowId\` field from the \`workflow_set_yaml\` tool result, NOT the \`attachmentId\`. The \`workflowId\` is the stable workflow ID used for persistence and cross-references. Using the attachment ID will cause a validation error.
 3. \`set_matcher\`: \`rule.id: "<ruleId>"\`
    <!-- TODO(single_rule): When single_rule action policy type is available, replace set_matcher with set_type operation using type: 'single_rule' and ruleId. -->
    - Use the \`ruleId\` value from the \`manage_rule\` tool result. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".

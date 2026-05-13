@@ -39,34 +39,44 @@ export async function validateDestinations(
   { attachments, workflowLookup, connectorLookup, spaceId }: ValidateDestinationsDeps
 ): Promise<Map<string, ResolvedDestination>> {
   const activeAttachments = attachments.getActive();
-  const workflowAttachmentIds = new Set<string>();
-  const attachmentNameById = new Map<string, string>();
+
+  // Build lookup maps from workflow attachments:
+  // - workflowIds: workflowId → display name (for accepting valid destinations)
+  // - attachmentToWorkflowId: attachment ID → workflowId (for rejecting bare attachment IDs with a helpful hint)
+  const workflowIds = new Map<string, string>();
+  const attachmentToWorkflowId = new Map<string, string | undefined>();
 
   for (const att of activeAttachments) {
     if (att.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) continue;
-    workflowAttachmentIds.add(att.id);
     const latestVersion = att.versions.at(-1);
     const data = latestVersion?.data as { workflowId?: string; name?: string } | undefined;
-    if (data?.name) {
-      attachmentNameById.set(att.id, data.name);
-    }
     if (data?.workflowId) {
-      workflowAttachmentIds.add(data.workflowId);
-      if (data.name) {
-        attachmentNameById.set(data.workflowId, data.name);
-      }
+      workflowIds.set(data.workflowId, data.name ?? data.workflowId);
     }
+    attachmentToWorkflowId.set(att.id, data?.workflowId);
   }
 
   const resolved = new Map<string, ResolvedDestination>();
 
   for (const dest of destinations) {
-    if (workflowAttachmentIds.has(dest.id)) {
-      const name = attachmentNameById.get(dest.id);
-      if (name) {
-        resolved.set(dest.id, { name, isDraft: true });
-      }
+    // Accept pre-assigned workflowIds from in-conversation workflow attachments
+    const draftName = workflowIds.get(dest.id);
+    if (draftName) {
+      resolved.set(dest.id, { name: draftName, isDraft: true });
       continue;
+    }
+
+    // Reject bare attachment IDs — the agent should use workflowId instead
+    if (attachmentToWorkflowId.has(dest.id)) {
+      const correctId = attachmentToWorkflowId.get(dest.id);
+      const hint = correctId
+        ? ` The correct workflow ID for this attachment is "${correctId}".`
+        : ` This workflow attachment has no workflowId — pass a \`workflowId\` when calling \`workflow_set_yaml\`.`;
+      throw new ActionPolicyOperationValidationError(
+        `Destination ID "${dest.id}" is a workflow attachment ID, not a workflow ID. ` +
+          `Use the \`workflowId\` value from the \`workflow_set_yaml\` tool result instead of the \`attachmentId\`.` +
+          hint
+      );
     }
 
     const workflow = await workflowLookup.getWorkflow(dest.id, spaceId);
@@ -83,16 +93,16 @@ export async function validateDestinations(
         `Destination ID "${dest.id}" is a connector ("${connector.name}"), not a workflow. ` +
           `Action policy destinations must reference workflow IDs. ` +
           `To fix this: create a workflow that uses this connector via the workflow_set_yaml ` +
-          `tool, then use the workflow's attachment ID as the destination.`
+          `tool, then use the workflow's \`workflowId\` as the destination.`
       );
     }
 
     throw new ActionPolicyOperationValidationError(
       `Destination ID "${dest.id}" is not a valid workflow in this space or conversation. ` +
         `Each destination must reference either a persisted workflow ID from this Kibana space, ` +
-        `or an in-memory workflow attachment ID from this conversation. ` +
+        `or a \`workflowId\` from the \`workflow_set_yaml\` tool result. ` +
         `To create a workflow, use the workflow_set_yaml tool first, then use the returned ` +
-        `workflow attachment ID as the destination.`
+        `\`workflowId\` as the destination.`
     );
   }
 
