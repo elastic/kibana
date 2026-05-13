@@ -25,7 +25,7 @@ import type {
   ESQLTelemetryCallbacks,
   ESQLSourceResult,
 } from '@kbn/esql-types';
-import type { ESQLDependencies } from '@kbn/monaco/src/languages/esql/language';
+import type { ESQLDependencies } from '@kbn/code-editor';
 
 export interface DataErrorsControl {
   enabled: boolean;

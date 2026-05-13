@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
 import { QuerySource, type TelemetryQuerySubmittedProps } from '@kbn/esql-types';
 import { prettifyQuery } from '@kbn/esql-utils';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { getToggleCommentLines } from '../helpers';
 import type { ESQLEditorProps } from '../types';
