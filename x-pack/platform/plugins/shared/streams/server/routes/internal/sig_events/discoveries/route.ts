@@ -6,15 +6,10 @@
  */
 
 import { discoverySchema, type Discovery } from '@kbn/streams-schema';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-
-const stringArrayFromQuery = z
-  .union([z.string().transform((value) => [value]), z.array(z.string())])
-  .optional();
 
 const discoverySortEnum = z.enum([
   '@timestamp:asc',
@@ -22,23 +17,20 @@ const discoverySortEnum = z.enum([
   'criticality:asc',
   'criticality:desc',
 ]);
-const discoverySortFromQuery = z
-  .union([discoverySortEnum.transform((value) => [value]), z.array(discoverySortEnum)])
-  .optional();
 
-const discoveriesSearchQuery = z.object({
+const discoveriesSearchBody = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
   kind: z.enum(['finding', 'clearance']).optional(),
-  discovery_id: stringArrayFromQuery,
-  exclude_discovery_id: stringArrayFromQuery,
-  exclude_grouped: BooleanFromString.optional(),
-  size: z.coerce.number().int().positive().optional(),
-  sort: discoverySortFromQuery,
+  discovery_id: z.array(z.string()).optional(),
+  exclude_discovery_id: z.array(z.string()).optional(),
+  exclude_grouped: z.boolean().optional(),
+  size: z.number().int().positive().optional(),
+  sort: z.array(discoverySortEnum).optional(),
 });
 
 const discoveriesSearchRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/discoveries',
+  endpoint: 'POST /internal/sig_events/discoveries/_search',
   options: {
     access: 'internal',
     summary: 'Get latest discoveries',
@@ -50,7 +42,7 @@ const discoveriesSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: discoveriesSearchQuery,
+    body: discoveriesSearchBody,
   }),
   handler: async ({
     params,
@@ -62,12 +54,12 @@ const discoveriesSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDiscoveryClient().findLatest(params.query);
+    return getDiscoveryClient().findLatest(params.body);
   },
 });
 
 const discoveriesLatestPerSlugRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/discoveries/_latest_per_slug',
+  endpoint: 'POST /internal/sig_events/discoveries/_latest_per_slug',
   options: {
     access: 'internal',
     summary: 'Get latest discovery per slug',
@@ -80,7 +72,7 @@ const discoveriesLatestPerSlugRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: discoveriesSearchQuery,
+    body: discoveriesSearchBody,
   }),
   handler: async ({
     params,
@@ -92,7 +84,7 @@ const discoveriesLatestPerSlugRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDiscoveryClient().findLatestPerSlug(params.query);
+    return getDiscoveryClient().findLatestPerSlug(params.body);
   },
 });
 

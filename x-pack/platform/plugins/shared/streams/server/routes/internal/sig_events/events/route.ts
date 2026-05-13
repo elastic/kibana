@@ -6,19 +6,10 @@
  */
 
 import { sigEventSchema, verdictEnum, type SigEvent } from '@kbn/streams-schema';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-
-const stringArrayFromQuery = z
-  .union([z.string().transform((value) => [value]), z.array(z.string())])
-  .optional();
-
-const verdictArrayFromQuery = z
-  .union([verdictEnum.transform((value) => [value]), z.array(verdictEnum)])
-  .optional();
 
 const eventSortEnum = z.enum([
   '@timestamp:asc',
@@ -26,26 +17,23 @@ const eventSortEnum = z.enum([
   'last_reviewed_at:asc',
   'last_reviewed_at:desc',
 ]);
-const eventSortFromQuery = z
-  .union([eventSortEnum.transform((value) => [value]), z.array(eventSortEnum)])
-  .optional();
 
-const eventsSearchQuery = z.object({
+const eventsSearchBody = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
-  verdict: verdictArrayFromQuery,
-  slug: stringArrayFromQuery,
-  exclude_slug: stringArrayFromQuery,
-  discovery_id: stringArrayFromQuery,
-  exclude_grouped: BooleanFromString.optional(),
+  verdict: z.array(verdictEnum).optional(),
+  slug: z.array(z.string()).optional(),
+  exclude_slug: z.array(z.string()).optional(),
+  discovery_id: z.array(z.string()).optional(),
+  exclude_grouped: z.boolean().optional(),
   last_reviewed_before: z.iso.datetime().optional(),
   or_last_reviewed_lte: z.iso.datetime().optional(),
-  size: z.coerce.number().int().positive().optional(),
-  sort: eventSortFromQuery,
+  size: z.number().int().positive().optional(),
+  sort: z.array(eventSortEnum).optional(),
 });
 
 const eventsSearchRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/events',
+  endpoint: 'POST /internal/sig_events/events/_search',
   options: {
     access: 'internal',
     summary: 'Get latest events',
@@ -57,14 +45,14 @@ const eventsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: eventsSearchQuery,
+    body: eventsSearchBody,
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: SigEvent[] }> => {
     const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().findLatest(params.query);
+    return getEventClient().findLatest(params.body);
   },
 });
 

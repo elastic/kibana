@@ -6,42 +6,34 @@
  */
 
 import { detectionSchema, type Detection } from '@kbn/streams-schema';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
-const stringArrayFromQuery = z
-  .union([z.string().transform((value) => [value]), z.array(z.string())])
-  .optional();
-
 const detectionSortEnum = z.enum(['@timestamp:asc', '@timestamp:desc']);
-const detectionSortFromQuery = z
-  .union([detectionSortEnum.transform((value) => [value]), z.array(detectionSortEnum)])
-  .optional();
 
-const detectionsSearchQuery = z.object({
+const detectionsSearchBody = z.object({
   from: z.iso.datetime().optional(),
   to: z.iso.datetime().optional(),
-  rule_uuid: stringArrayFromQuery,
+  rule_uuid: z.array(z.string()).optional(),
   rule_name: z.string().optional(),
   stream_name: z.string().optional(),
-  silent: BooleanFromString.optional(),
-  superseded: BooleanFromString.optional(),
+  silent: z.boolean().optional(),
+  superseded: z.boolean().optional(),
   superseded_at: z
     .object({
       from: z.iso.datetime().optional(),
       to: z.iso.datetime().optional(),
     })
     .optional(),
-  size: z.coerce.number().int().positive().optional(),
-  sort: detectionSortFromQuery,
+  size: z.number().int().positive().optional(),
+  sort: z.array(detectionSortEnum).optional(),
   group_by: z.enum(['detection_id', 'rule_uuid']).optional(),
 });
 
 const detectionsSearchRoute = createServerRoute({
-  endpoint: 'GET /internal/sig_events/detections',
+  endpoint: 'POST /internal/sig_events/detections/_search',
   options: {
     access: 'internal',
     summary: 'Get latest detections',
@@ -54,7 +46,7 @@ const detectionsSearchRoute = createServerRoute({
     },
   },
   params: z.object({
-    query: detectionsSearchQuery,
+    body: detectionsSearchBody,
   }),
   handler: async ({
     params,
@@ -66,7 +58,7 @@ const detectionsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getDetectionClient().findLatest(params.query);
+    return getDetectionClient().findLatest(params.body);
   },
 });
 
