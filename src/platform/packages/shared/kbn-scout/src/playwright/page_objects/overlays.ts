@@ -8,7 +8,6 @@
  */
 
 import type { ScoutPage } from '..';
-import { expect } from '..';
 
 export class OverlaysPage {
   constructor(private readonly page: ScoutPage) {}
@@ -18,7 +17,7 @@ export class OverlaysPage {
   }
 
   public get newsfeedButton() {
-    return this.page.testSubj.locator('newsfeed');
+    return this.page.testSubj.locator('^newsfeed');
   }
 
   public get newsfeedFlyout() {
@@ -33,11 +32,11 @@ export class OverlaysPage {
 
   public async openNewsfeedFlyout() {
     await this.newsfeedButton.click();
-    await expect(this.newsfeedFlyout).toBeVisible();
+    await this.newsfeedFlyout.waitFor({ state: 'visible' });
   }
 
   public async closeNewsfeedFlyout() {
     await this.newsfeedFlyoutCloseButton.click();
-    await expect(this.newsfeedFlyout).toBeHidden();
+    await this.newsfeedFlyout.waitFor({ state: 'hidden' });
   }
 }

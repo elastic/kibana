@@ -4,8 +4,9 @@
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "test/scout/**/*", "test/scout_shared_ux_no_data/**/*"],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/data-views-plugin",
     "@kbn/custom-integrations-plugin",
