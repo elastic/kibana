@@ -35,13 +35,17 @@ const QUERY_RESULT_TYPE = 'query';
 const ESQL_RESULTS_RESULT_TYPE = 'esql_results';
 
 /**
- * Match a fenced ES|QL code block (```esql ... ``` or ``` ... ```) followed
- * by the close fence. Used as the fallback path when the agent surfaces the
- * query in prose without a structured tool result (rare, but happens for
- * datasets where the agent refuses to invoke `generate_esql` and just types
- * the query out).
+ * Match a fenced ES|QL code block (```esql ... ``` or untagged ``` ... ```).
+ *
+ * **`sql`-tagged blocks are intentionally NOT matched.** Models that
+ * specifically label a block ```sql have told us their output is SQL,
+ * not ES|QL, and treating it as ES|QL inflates the validity tier by
+ * accidentally extracting SQL fragments that happen to start with `FROM`.
+ * The downstream `ES|QL Validity` evaluator scores the empty extraction
+ * 0, which is the correct outcome for a model that emitted SQL when
+ * the task was ES|QL generation.
  */
-const ESQL_FENCE_REGEX = /```(?:esql|esQL|ES\|QL|sql)?\s*\n([\s\S]*?)\n\s*```/i;
+const ESQL_FENCE_REGEX = /```(?:esql|ES\|QL)?\s*\n([\s\S]*?)\n\s*```/i;
 
 /**
  * Last-resort heuristic: detect the canonical `FROM <index>` prelude of an
@@ -54,6 +58,42 @@ const ESQL_FENCE_REGEX = /```(?:esql|esQL|ES\|QL|sql)?\s*\n([\s\S]*?)\n\s*```/i;
  * rather than silently masquerading as a working query.
  */
 const FROM_HEURISTIC_REGEX = /\bFROM\s+[\S]/i;
+
+/**
+ * Source commands an ES|QL query can legitimately start with. Per the
+ * ES|QL grammar the only top-level statement openers are `FROM`, `ROW`,
+ * and `SHOW`; anything else (`SELECT`, `WITH`, `ALTER`, `CREATE`, …) is
+ * either SQL or natural-language prose, neither of which the suite
+ * should score as a candidate query.
+ */
+const ESQL_SOURCE_COMMAND_REGEX = /^\s*(FROM|ROW|SHOW)\b/i;
+
+/**
+ * SQL-only verbs that, when they appear in the message BEFORE a `FROM`
+ * keyword, identify that `FROM` as the FROM-clause of a SQL `SELECT`
+ * (or sibling DML/DDL statement) rather than the source command of an
+ * ES|QL query. Used to guard the `FROM` heuristic against models like
+ * `openai-gpt-oss-120b` that emit raw SQL — `SELECT user.name FROM
+ * logs-* WHERE ...` would otherwise be sliced into `FROM logs-*
+ * WHERE ...` and scored as a (broken) ES|QL candidate.
+ */
+const SQL_PRECEDING_VERB_REGEX =
+  /\b(SELECT|INSERT|UPDATE|DELETE|ALTER|CREATE|DROP|TRUNCATE|MERGE|WITH)\b/i;
+
+/**
+ * Return `true` when `query` plausibly opens with an ES|QL source
+ * command. Used as a final shape guard for free-form extraction paths
+ * (fenced block, `FROM` heuristic) so SQL or prose that happens to
+ * contain a `FROM` keyword does not propagate as a candidate query.
+ *
+ * Tool-call extraction paths (`generate_esql` / `execute_esql`) skip
+ * this guard because those tools are contracted to emit ES|QL — adding
+ * the check there would regress legitimate edge cases (e.g. an ES|QL
+ * statement with unusual leading whitespace or comments).
+ */
+function looksLikeEsql(query: string): boolean {
+  return ESQL_SOURCE_COMMAND_REGEX.test(query);
+}
 
 /**
  * Extract the generated ES|QL query string from an Agent Builder
@@ -69,11 +109,17 @@ const FROM_HEURISTIC_REGEX = /\bFROM\s+[\S]/i;
  *      path and what the LangSmith-era `DefaultAssistantGraph` used to
  *      surface via `result.queries[last]`.
  *   2. **Fenced markdown block** — extract the first triple-backtick block
- *      from the final assistant message. Handles cases where the agent
- *      answers in prose with the query embedded.
+ *      tagged `esql` / `ES|QL` (or untagged) from the final assistant
+ *      message. ```sql blocks are intentionally skipped — see
+ *      {@link ESQL_FENCE_REGEX}. The extracted text must pass the
+ *      {@link looksLikeEsql} shape check or the result is discarded
+ *      and the FROM heuristic is tried.
  *   3. **`FROM` heuristic** — slice the final message from the first
- *      `FROM` keyword onward. Last resort; the validity evaluator scores
- *      the result so a bad slice cannot silently inflate the suite.
+ *      `FROM` keyword onward, AS LONG AS no SQL verb (`SELECT`,
+ *      `INSERT`, `UPDATE`, `DELETE`, `ALTER`, `CREATE`, `DROP`,
+ *      `TRUNCATE`, `MERGE`, `WITH`) appears before it. When a SQL
+ *      verb precedes the `FROM`, the FROM is part of a SQL statement,
+ *      not an ES|QL source command, and the extractor returns empty.
  *
  * Returns an empty string when no ES|QL could be extracted; the downstream
  * evaluators handle the empty-string case (validity returns 0, execution
@@ -98,10 +144,26 @@ export function extractEsqlFromConverseResponse(output: ConverseLikeOutput): str
   if (!finalMessage) return '';
 
   const fenced = finalMessage.match(ESQL_FENCE_REGEX);
-  if (fenced?.[1]) return fenced[1].trim();
+  if (fenced?.[1]) {
+    const candidate = fenced[1].trim();
+    if (looksLikeEsql(candidate)) return candidate;
+    // The fenced block exists but its content is not ES|QL-shaped —
+    // do NOT fall through to the FROM heuristic on the surrounding
+    // prose. The model already committed to a code block; trying to
+    // salvage a `FROM` from the rest of the message would be worse
+    // signal than scoring this candidate 0.
+    return '';
+  }
 
   const fromMatch = finalMessage.match(FROM_HEURISTIC_REGEX);
   if (fromMatch && typeof fromMatch.index === 'number') {
+    const beforeFrom = finalMessage.slice(0, fromMatch.index);
+    if (SQL_PRECEDING_VERB_REGEX.test(beforeFrom)) {
+      // SQL `SELECT col FROM table` (or sibling DDL/DML) — the `FROM`
+      // we matched is not an ES|QL source command. Refuse the
+      // extraction so the validity evaluator scores it 0.
+      return '';
+    }
     return finalMessage.slice(fromMatch.index).trim();
   }
 

@@ -68,17 +68,22 @@ In CI the trace-based evaluators query the `tracingEs` cluster declared in `kbn-
 
 This suite replaces the legacy LangSmith-based `DefaultAssistantGraph` evaluation. The four ES|QL evaluators above are the parity baseline (LangSmith covered the same dimensions: query validity, execution success, result equivalence, functional equivalence). End-to-end verification with the live Agent Builder `converse` loop confirms the agent loop, ES|QL extractor, and fixture indices all pull their weight end-to-end. The five trace-based observability evaluators are additive — LangSmith did not expose those metrics as scored evaluators and they require no parity-equivalent in the prior suite.
 
-### Verified runs
+### Verified runs (v1 baseline)
 
-End-to-end runs against EIS (Elastic Inference Service) connectors after the agent-builder + fixtures fixes landed:
+End-to-end six-model EIS fanout in Buildkite [build #441763](https://buildkite.com/elastic/kibana-pull-request/builds/441763) on commit `35c64e3` — 1,680 score documents and 138 K OTel spans landed in the golden cluster (`kibana-evaluations` data stream). Judge for every run was `google-gemini-3.1-pro`; all 31 dataset examples ran for each task model.
 
-| Run | Examples | Judge | Model | Execution Validity | Functional Equivalence | Result Equivalence | Validity |
-|---|---|---|---|---|---|---|---|
-| Smoke (LIMIT=1) | 1 | `pmeClaudeV45SonnetUsEast1` | `pmeClaudeV45SonnetUsEast1` | 1.00 | 1.00 | 1.00 | 1.00 |
-| Smoke (LIMIT=1) | 1 | `eis-google-gemini-3-1-pro` | `eis-anthropic-claude-4-7-opus` | 1.00 | 0.00 | 0.00 | 1.00 |
-| Full (EIS) | 31 | `eis-google-gemini-3-1-pro` | `eis-anthropic-claude-4-5-sonnet` | 0.69 | 0.10 | 0.35 | 0.90 |
+| Task model (EIS) | Validity | ExecValidity | FuncEq | ResultEq |
+|---|---|---|---|---|
+| `anthropic-claude-4.6-sonnet` | 0.97 | 0.81 | 0.07 | 0.42 |
+| `anthropic-claude-4.6-opus`   | 0.97 | 0.66 | 0.03 | 0.26 |
+| `google-gemini-3.1-pro`       | 0.97 | 0.76 | 0.03 | 0.42 |
+| `google-gemini-3.0-flash`     | 0.87 | 0.63 | 0.10 | 0.26 |
+| `openai-gpt-5.4`              | 0.97 | 0.69 | 0.10 | 0.29 |
+| `openai-gpt-oss-120b`         | 0.29 | 0.16 | 0.03 | 0.03 |
 
-The full EIS baseline is what CI will compare against; the per-example scores are stored in `.kibana-evaluations` and the trace evaluators provide the cost/latency baseline when the run targets a cluster that holds the OTel spans (`TRACING_ES_URL` set).
+These are the **v1 baseline**: measured with the framework's binary `Yes/No` FuncEq judge AND without `?_tstart` / `?_tend` substitution at the ES boundary, so they undercount cases where the candidate query was actually correct but tripped one of those mechanical issues. The two suite-local quality fixes ([Calibrated FuncEq + bind-param substitution](#calibrated-funceq--bind-param-substitution)) are expected to raise ExecValidity (substitution unblocks the candidates that were failing on `parsing_exception: Unknown query parameter [_tstart]`) and shift FuncEq from a 0/1 to a 0/0.5/1 distribution that gives partial credit for "equivalent with caveats" candidates. The first CI run after those commits lands the **v2 baseline**, every score document stamped with `evaluator.metadata.judgeVersion=v2` so trending dashboards can keep both eras side-by-side or filter to one.
+
+`openai-gpt-oss-120b` is the canary for the `extract_esql` SQL pre-check guard — it emits raw SQL (`SELECT ... FROM ... JOIN ... ON`, `ALTER TABLE`, `OFFSET N`) for a meaningful share of examples. The guard returns an empty extraction for non-ES|QL output so Validity scores those candidates 0 instead of accidentally letting a sliced SQL fragment pass as ES|QL.
 
 ---
 
