@@ -8,11 +8,11 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { CorrelationsDetailsAlertsTable } from '../../../../flyout_v2/correlations/components/correlations_details_alerts_table';
+import { CorrelationsDetailsAlertsTable } from '../../../../flyout_v2/document/tools/correlations/components/correlations_details_alerts_table';
 import { useOriginalAlertIds } from '../../hooks/use_original_alert_ids';
 import { useAttackDetailsContext } from '../../context';
 import { ATTACK_DETAILS_LEFT_INSIGHTS_CORRELATION_TABLE } from '../../constants/test_ids';
-import { getColumns } from '../../../../flyout_v2/correlations/utils/get_columns';
+import { getColumns } from '../../../../flyout_v2/document/tools/correlations/utils/get_columns';
 import { ALERT_PREVIEW_BANNER } from '../../../document_details/preview/constants';
 import { DocumentDetailsPreviewPanelKey } from '../../../document_details/shared/constants/panel_keys';
 

@@ -25,7 +25,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
-  formatFieldValue,
+  formatFieldValueText,
 } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
@@ -405,7 +405,7 @@ export const EntitiesDataTable = ({
             return getEmptyTagValue();
           }
           const field = dv.fields.getByName(columnId);
-          return <>{formatFieldValue(value, row.raw, ff, dv, field, 'text')}</>;
+          return <>{formatFieldValueText({ value, fieldFormats: ff, dataView: dv, field })}</>;
         },
       ])
     );
@@ -427,7 +427,12 @@ export const EntitiesDataTable = ({
               const resolvedTo = row.flattened[ENTITY_FIELDS.RESOLVED_TO];
               const isTarget = resolvedTo === null || resolvedTo === undefined;
               const field = dv.fields.getByName(ENTITY_FIELDS.ENTITY_NAME);
-              const formattedValue = formatFieldValue(value, row.raw, ff, dv, field, 'text');
+              const formattedValue = formatFieldValueText({
+                value,
+                fieldFormats: ff,
+                dataView: dv,
+                field,
+              });
 
               if (isTarget) {
                 return (
