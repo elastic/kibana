@@ -19,7 +19,7 @@ description: >
 
 - **Location:** `security_solution/.agents/skills`; workflow is **repo-wide** (`.github/CODEOWNERS`, `.buildkite/`).
 - **Multi-owner paths:** Each team gets full credit for every CODEOWNERS line that lists it (totals across teams are not additive).
-- **Skips:** Static markers in source only — not CI Stats / GitHub `skipped-test` volume. Cypress tag skips (`@skipInServerless`, …) are out of band unless the user asks.
+- **Skips:** Static markers in source (e.g. `describe.skip`) plus **Cypress conditional tag skips** (see §3). Exclude CI Stats / GitHub `skipped-test` volume — those are not grepped from sources.
 
 ## Completeness rule (Tests table)
 
@@ -60,7 +60,7 @@ Reports live under **`.agents/tmp/<file>.md`** (two levels below repo root). Eve
 - [ ] **Ownership** (§1): test-relevant CODEOWNERS prefixes only
 - [ ] Scout configs under those prefixes
 - [ ] Per config: `npx playwright test --list --reporter=json` → unique spec count ([scripts/count_playwright_list_unique_specs.mjs](scripts/count_playwright_list_unique_specs.mjs))
-- [ ] Cypress `*.cy.ts(x)` — **Test Cases** heuristic + skips (mirror §§2–3)
+- [ ] Cypress `*.cy.ts(x)` — **Test Cases** heuristic + static skips + **@skipIn…** tag skips (§3)
 - [ ] Table **Tests**: always **FTR**, **Cypress**, **Scout** in that order; each row filled per §§2–4 (**Completeness rule** — no placeholder **0** without searching owned trees)
 - [ ] **Execution phase** table from `.buildkite/` — use **`../../.buildkite/...`** markdown links (comma-separated when several apply); literal **`-`** when `No`
 - [ ] **Coverage and descriptions** (Scout API or UI): run [scripts/extract_scout_api_coverage_md.mjs](scripts/extract_scout_api_coverage_md.mjs) with link prefix **`../../x-pack/.../tests/`** (or the correct relative path for that tree). Paste after **Execution phase**
@@ -116,12 +116,23 @@ References: `docs/extend/scout/skip-tests.md`.
 | Metric | Heuristic |
 |--------|-----------|
 | Test cases | `it(`, `context(`, `specify(` counts under ownership |
-| describe-level skips | `describe.skip`, nested describe skip patterns |
-| test-level skips | `it.skip`, `xit`, … |
+| describe-level static skips | `describe.skip`, `context.skip`, nested describe skip patterns |
+| test-level static skips | `it.skip`, `xit`, `xcontext`, … |
+| Suite-level **tag** skips | Any `describe(` or `context(` **not** using `.skip`, whose options include `tags: [...]` with at least one string matching **`@skipIn`** (Security Solution convention: `@skipInServerless`, `@skipInServerlessMKI`, `@skipInServerlessQA`, … — grep owned specs for `'@skipIn` to discover current tags). Count **suite roots** separately from static skips; **K TC** = sum of `it(` / `specify(` leaves under that suite only. |
+| Test-level **tag** skips | Any `it(` / `specify(` whose options include `tags` with **`@skipIn…`**, and **no** ancestor `describe` / `context` (up to the file’s top level) already has suite `tags` containing **`@skipIn…`** — otherwise those TCs are already counted under suite-level tag skips. Attribute bullets to the **file**. |
+
+**`Skipped` column (Cypress):** Use **`<br>`** for line breaks. **Combine** static skips and **@skipIn…** tag skips into **one** inventory (do not split into two sub-headings).
+
+1. **Opening line:** **`N Suites (M TCs)`** (optionally bold) where **`N`** = all counted suite roots / groupings: static **`describe.skip` / `context.skip`** (plus isolated static **`it.skip`** / `xit` bullets if needed) **plus** tag-conditioned suite roots and test-level tag items from the rules in the table above — **without double-counting** when the same suite is both static and tag (static wins; see below). **`M`** = sum of **`K TC`** across all bullets.
+2. **Single bullet list:** **`- [basename](../../path) - K TC`** with a suffix so readers see the mechanism: **`(static)`** for describe/context (or file-level) static skips, **`(tags: …)`** / **`(tags: …; suite: …)`** for **@skipIn…** suite skips, **`(test-level tags: …)`** for tag-only **`it`** skips when applicable.
+3. When the **same** suite is both `describe.skip` and tag-conditioned, **one bullet only**, counted under **static** — **`(static)`** — do not also list it under tag skips.
+4. Use **`-`** for the whole **Skipped** cell only when there are no static and no tag skips.
+
+Reference: Cypress runner / config excludes tags per environment; inventory records **source** intent, not a specific CI job outcome.
 
 ### 4) FTR-oriented / integration-style
 
-Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Same `it` / `context` / `specify` heuristics; skip levels mirror Cypress rules.
+Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Same `it` / `context` / `specify` heuristics for **Test Cases**. **Skipped:** static markers only (`describe.skip`, `it.skip`, …). FTR/Jest does **not** use Cypress `@skipIn…` tags — no `(tags: …)` bullets on the FTR row.
 
 The deliverable **Tests** table **always lists FTR**. If legacy suites remain on disk but the team relies on Scout only, still show **`-`** Test type with **0** **Test Cases** (unless owned FTR-style files are counted — then fill type / **Test Cases** / **Skipped** honestly).
 
@@ -177,7 +188,7 @@ _Test-relevant paths only (subtree contains Scout, Cypress, FTR-style, or Jest t
 (row per `*.spec.ts`; TC titles joined with `<br>` in third column — regenerate via `extract_scout_api_coverage_md.mjs`)
 ```
 
-Rows **in fixed order**: **FTR**, **Cypress**, **Scout**. **`Skipped`** cell: **`N Suites (M TCs)`** line, then **`- [file](../../…) - K TC`** per skipped-suite source file (ASCII hyphen).
+Rows **in fixed order**: **FTR**, **Cypress**, **Scout**. **`Skipped`** cell: **`N Suites (M TCs)`** plus per-file bullets; **Cypress** includes **@skipIn…** entries in the **same** list as static skips, per §3 (suffixes **`(static)`** vs **`(tags: …)`**; ASCII hyphen in bullets).
 
 **Coverage and descriptions:** `node scripts/extract_scout_api_coverage_md.mjs <scout-tests-dir> ../../x-pack/.../tests/` (prefix must match **`.agents/tmp/`** link depth).
 
