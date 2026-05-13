@@ -26,6 +26,7 @@
     "@kbn/content-list",
     "@kbn/content-list-page",
     "@kbn/content-list-provider",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/use-observable"
   ]
 }
