@@ -1024,9 +1024,9 @@ x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-t
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-entities-schema @elastic/core-analysis
 x-pack/platform/packages/shared/kbn-es-snapshot-loader @elastic/obs-ai-team
-x-pack/platform/packages/shared/kbn-evals @elastic/obs-ai-team @elastic/security-generative-ai
-x-pack/platform/packages/shared/kbn-evals-common @elastic/obs-ai-team @elastic/security-generative-ai
-x-pack/platform/packages/shared/kbn-evals-extensions @elastic/obs-ai-team @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-evals @elastic/obs-ai-team @elastic/security-genai-research-and-development
+x-pack/platform/packages/shared/kbn-evals-common @elastic/obs-ai-team @elastic/security-genai-research-and-development
+x-pack/platform/packages/shared/kbn-evals-extensions @elastic/obs-ai-team @elastic/security-genai-research-and-development
 x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team
@@ -1034,7 +1034,7 @@ x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-t
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-fs @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-grok-heuristics @elastic/obs-onboarding-team
-x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-pds-deployment
+x-pack/platform/packages/shared/kbn-inbox-common @elastic/security-genai-research-and-development
 x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra @elastic/search-inference-team
 x-pack/platform/packages/shared/kbn-inference-connectors @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/search-kibana
@@ -1161,14 +1161,14 @@ x-pack/platform/plugins/shared/elastic_console @elastic/obs-elastic-brain-team
 x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/encrypted_saved_objects @elastic/kibana-security
 x-pack/platform/plugins/shared/entity_manager @elastic/core-analysis
-x-pack/platform/plugins/shared/evals @elastic/obs-ai-team @elastic/security-generative-ai
+x-pack/platform/plugins/shared/evals @elastic/obs-ai-team @elastic/security-genai-research-and-development
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/platform/plugins/shared/fields_metadata @elastic/obs-onboarding-team
 x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/fleet/cypress @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
-x-pack/platform/plugins/shared/inbox @elastic/security-pds-deployment
+x-pack/platform/plugins/shared/inbox @elastic/security-genai-research-and-development
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/search-kibana
 x-pack/platform/plugins/shared/inference_endpoint @elastic/search-kibana
@@ -2741,7 +2741,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_endpoint_protection @elastic/security-defend-workflows
-/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_ai_prompts @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_ai_prompts @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_detection_rule_monitoring @elastic/security-detection-rule-management
 
 # Security Solution sub teams
@@ -3381,8 +3381,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
 /.agents/skills/buildkite-logs @elastic/appex-qa
-/.agents/skills/evals-create-suite/** @elastic/obs-ai-team @elastic/security-generative-ai
-/.agents/skills/evals-write-spec/** @elastic/obs-ai-team @elastic/security-generative-ai
+/.agents/skills/evals-create-suite/** @elastic/obs-ai-team @elastic/security-genai-research-and-development
+/.agents/skills/evals-write-spec/** @elastic/obs-ai-team @elastic/security-genai-research-and-development
 
 # Security team skills: API authorization, CodeQL, and privilege deprecation guidance.
 /.agents/skills/api-authz/** @elastic/kibana-security
@@ -3438,11 +3438,11 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scout_ci_config.yml @elastic/appex-qa
 
 # Evals (Buildkite + scripts)
-/.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
-/.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
+/.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-genai-research-and-development
+/.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-genai-research-and-development
 
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
-/x-pack/platform/test/inbox_api_integration/ @elastic/security-generative-ai
+/x-pack/platform/test/inbox_api_integration/ @elastic/security-genai-research-and-development
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
