@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 import { useFormattedEOLDate } from '../../hooks/use_formatted_eol_date';
+import { getModelEOLMessage } from '../../utils/eis_utils';
 
 interface ModelEOLBadgeProps {
   id: string;
@@ -21,20 +22,7 @@ interface ModelEOLBadgeProps {
 export const ModelEOLBadge = ({ id, metadata }: ModelEOLBadgeProps) => {
   const eolDate = useFormattedEOLDate(metadata);
 
-  const tooltipContent = eolDate
-    ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
-        {
-          defaultMessage: "This model's end of life date is {eolDate}. It is no longer available.",
-          values: { eolDate },
-        }
-      )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
-        {
-          defaultMessage: 'This model has reached end of life and is no longer available.',
-        }
-      );
+  const tooltipContent = getModelEOLMessage(eolDate);
 
   return (
     <EuiToolTip
@@ -50,7 +38,7 @@ export const ModelEOLBadge = ({ id, metadata }: ModelEOLBadgeProps) => {
         tabIndex={0}
         iconSide="left"
         iconType="warning"
-        color="error"
+        color="danger"
         data-test-subj={`modelEolBadge-${id}`}
       >
         {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.content', {

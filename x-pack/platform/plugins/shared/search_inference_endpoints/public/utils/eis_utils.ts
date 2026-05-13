@@ -249,3 +249,40 @@ export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefin
   if (!metadata.heuristics?.end_of_life_date) return undefined;
   return dateMath.parse(metadata.heuristics.end_of_life_date);
 }
+
+export function getModelEOLMessage(eolFormattedDate: string | null) {
+  return eolFormattedDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
+        {
+          defaultMessage:
+            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          values: { eolFormattedDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
+        {
+          defaultMessage: 'This model has reached end of life and is no longer available.',
+        }
+      );
+}
+
+export function getModelDeprecatedMessage(eolFormattedDate: string | null) {
+  return eolFormattedDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
+        {
+          defaultMessage:
+            'This model will be deprecated on {eolFormattedDate}. We recommend a newer model for optimal results.',
+          values: { eolFormattedDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
+        {
+          defaultMessage:
+            'This model is deprecated. We recommend a newer model for optimal results.',
+        }
+      );
+}
