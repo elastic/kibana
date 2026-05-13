@@ -31,6 +31,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { RULES_V2_PATH } from '../../../common/constants';
+import { ExecutionLogTable } from '../components/execution_log_table';
 import { RuleAlertsTable } from '../components/rule_alerts_table';
 import * as i18n from '../translations';
 
@@ -158,6 +159,18 @@ export const RulesV2ViewPage = () => {
         name: i18n.TAB_ALERTS,
         content: <AlertsTab ruleId={id} />,
       },
+      {
+        id: 'execution-log',
+        name: 'Execution results',
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            <EuiPanel paddingSize="l" hasBorder>
+              <ExecutionLogTable ruleId={id} />
+            </EuiPanel>
+          </>
+        ),
+      },
     ],
     [rule, id]
   );
@@ -217,3 +230,4 @@ export const RulesV2ViewPage = () => {
     </SecuritySolutionPageWrapper>
   );
 };
+
