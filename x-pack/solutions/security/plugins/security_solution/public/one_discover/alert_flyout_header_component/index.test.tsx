@@ -17,7 +17,7 @@ import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
@@ -34,11 +34,11 @@ jest.mock('../../common/components/user_privileges/user_privileges_context', () 
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-jest.mock('../../flyout_v2/document/header', () => ({
+jest.mock('../../flyout_v2/document/main/header', () => ({
   Header: (props: unknown) => mockDocumentHeader(props),
 }));
 
-jest.mock('../../flyout_v2/notes', () => ({
+jest.mock('../../flyout_v2/shared/tools/notes', () => ({
   NotesDetails: () => <div>{'MockNotesDetails'}</div>,
 }));
 
@@ -281,9 +281,27 @@ describe('AlertFlyoutHeader', () => {
     expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        historyKey: alertFlyoutHistoryKey,
+        historyKey: documentFlyoutHistoryKey,
       })
     );
+  });
+
+  it('renders nothing while services or store are not yet resolved', () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    const { container } = render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={new Promise(() => {})}
+          storePromise={new Promise(() => {})}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('shows a callout when _id or _index are missing from hit.raw', async () => {
@@ -335,6 +353,39 @@ describe('AlertFlyoutHeader', () => {
       expect(
         screen.getByText(
           'This event originates from a remote cluster. Some features may not be available.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows linked project callout text for remote docs in serverless', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'remote-cluster:logs-system-default' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+    const serverlessServicesMock = {
+      ...servicesMock,
+      cloud: { isServerlessEnabled: true },
+    } as unknown as StartServices;
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(serverlessServicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'This event originates from a linked project. Some features may not be available.'
         )
       ).toBeInTheDocument();
     });
