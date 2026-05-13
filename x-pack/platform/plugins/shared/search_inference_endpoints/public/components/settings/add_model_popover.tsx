@@ -15,7 +15,7 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
 import { getConnectorIcon } from '../../utils/connector_display';
 import { ModelStatusBadge } from '../model_status/model_status_badge';
-import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
+import { getModelStatus } from '../../utils/eis_utils';
 import { EisModelStatus } from '../../types';
 
 const getConnectorTaskType = (connector: InferenceConnector): string => {
