@@ -25,6 +25,11 @@ dependsOn:
   - '@kbn/core-notifications-browser-components'
   - '@kbn/core-notifications-browser-hooks'
   - '@kbn/spaces-plugin'
+  - '@kbn/content-list'
+  - '@kbn/content-list-page'
+  - '@kbn/content-list-provider'
+  - '@kbn/i18n'
+  - '@kbn/use-observable'
 tags:
   - plugin
   - prod
