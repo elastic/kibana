@@ -175,6 +175,7 @@ export interface RuleExecutorOptions<
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
   ruleExecutionTimeout?: string;
+  cpsData?: CpsData;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -458,6 +459,18 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
+
+export interface CpsLinkedProject {
+  id: string;
+  alias: string;
+  type: string;
+  organization: string;
+}
+
+export interface CpsData {
+  resolvedExpression?: string;
+  linkedProjects: CpsLinkedProject[];
+}
 
 export interface ConsumerExecutionMetrics {
   total_indexing_duration_ms: number;
