@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginFunctionalProviderContext } from '../../plugin_functional/services';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('content management examples', function () {
-    loadTestFile(require.resolve('./todo_app'));
-    loadTestFile(require.resolve('./msearch'));
-    loadTestFile(require.resolve('./finder'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
