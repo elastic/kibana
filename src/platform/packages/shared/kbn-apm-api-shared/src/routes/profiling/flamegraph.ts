@@ -8,7 +8,7 @@
  */
 import * as t from 'io-ts';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
-import { environmentRt } from '@kbn/apm-types-shared';
+import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kueryRt, rangeRt } from '../../default_api_types';
 

@@ -10,7 +10,7 @@ import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ServiceHealthStatus, SloStatus } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types-shared';
+import { environmentRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import {
   kueryRt,

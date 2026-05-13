@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import * as t from 'io-ts';
-import { environmentStringRt } from '@kbn/apm-types-shared';
+import { environmentStringRt } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 
 export interface CreateAnomalyDetectionJobsResponse {
