@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiContextMenuItem,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -132,6 +133,26 @@ export function NotificationCenterApp({
     unread.forEach((e) => events.markAsRead(e.id, true));
   };
 
+  const buildContextMenu = useCallback(
+    (event: NotificationEventType) => (_id: string) => [
+      <EuiContextMenuItem
+        key="read"
+        icon={event.isRead ? 'minus' : 'check'}
+        onClick={() => events.markAsRead(event.id, !event.isRead)}
+      >
+        {event.isRead ? 'Mark as Unread' : 'Mark as Read'}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        key="delete"
+        icon="trash"
+        onClick={() => events.delete(event.id)}
+      >
+        Delete
+      </EuiContextMenuItem>,
+    ],
+    [events]
+  );
+
   return (
     <>
       <SidebarHeader
@@ -231,6 +252,7 @@ export function NotificationCenterApp({
               isRead={event.isRead}
               isPinned={event.isPinned ?? false}
               onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
+              onOpenContextMenu={buildContextMenu(event)}
             />
           ))
         )}
