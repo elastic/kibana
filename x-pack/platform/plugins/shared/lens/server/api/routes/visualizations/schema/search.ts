@@ -21,7 +21,7 @@ export const lensSearchRequestQuerySchema = schema.object({
     })
   ),
   search_fields: schema.maybe(
-    schema.oneOf([schema.string(), schema.arrayOf(schema.string()), { maxSize: 100 }], {
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
       meta: {
         description:
           'The fields to match the `query` text against. Defaults to `title` when omitted.',
