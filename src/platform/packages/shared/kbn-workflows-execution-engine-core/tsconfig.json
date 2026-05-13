@@ -9,6 +9,7 @@
   "kbn_references": [
     "@kbn/workflows",
     "@kbn/eval-kql",
+    "@kbn/es-query",
     "@kbn/workflows-execution-engine-utils"
   ]
 }

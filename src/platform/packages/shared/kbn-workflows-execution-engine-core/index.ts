@@ -23,3 +23,8 @@ export type {
   ICancellableNode,
 } from './src/collaborators';
 export { isCancellableNode } from './src/collaborators';
+
+export { WorkflowTemplatingEngine } from './src/templating_engine';
+export { evaluateCondition } from './src/evaluate_condition';
+export { safeEvaluateKql } from './src/safe_evaluate_kql';
+export type { SafeEvaluateKqlResult } from './src/safe_evaluate_kql';
