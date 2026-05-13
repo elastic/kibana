@@ -109,10 +109,20 @@ export const MetricVis = ({
 }: MetricVisComponentProps) => {
   const grid = useRef<MetricSpec['data']>([[]]);
   const {
-    euiTheme: { colors },
+    euiTheme: { colors, font },
     highContrastMode,
   } = useEuiTheme();
   const defaultColor = colors.emptyShade;
+
+  const primaryMetricValueFontStyle = useMemo(
+    () =>
+      css({
+        '.echMetricText__value': {
+          fontWeight: font.weight.medium,
+        },
+      }),
+    [font.weight.medium]
+  );
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -329,6 +339,7 @@ export const MetricVis = ({
       ref={scrollContainerRef}
       css={[
         styles.layout,
+        primaryMetricValueFontStyle,
         css`
           height: 100%;
           width: 100%;
