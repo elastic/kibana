@@ -133,7 +133,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
                       button.href && button.target === '_blank' ? 'noopener noreferrer' : undefined,
                     onClick: () => {
                       closePopover();
-                      button.handler?.();
+                      button.handler();
                     },
                   })),
                 },

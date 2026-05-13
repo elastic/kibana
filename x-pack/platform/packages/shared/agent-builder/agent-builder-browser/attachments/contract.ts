@@ -118,10 +118,9 @@ export interface ActionButton {
    */
   target?: '_self' | '_blank' | '_parent' | '_top';
   /**
-   * Handler function called when the button is clicked. Optional when `href`
-   * is set (browser navigation handles the action), required otherwise.
+   * Handler function called when the button is clicked.
    */
-  handler?: () => void | Promise<void>;
+  handler: () => void | Promise<void>;
 }
 
 /**

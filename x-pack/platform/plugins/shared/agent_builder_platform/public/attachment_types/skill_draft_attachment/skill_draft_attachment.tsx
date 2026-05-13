@@ -418,6 +418,9 @@ export const createSkillDraftAttachmentDefinition = ({
               path: `${SKILLS_MANAGE_PATH}/${skillId}`,
             }),
             target: '_blank',
+            handler: () => {
+              // Do nothing. navigation handled by href
+            },
           };
           actionButtons.push(editInManagementButton);
         } else {

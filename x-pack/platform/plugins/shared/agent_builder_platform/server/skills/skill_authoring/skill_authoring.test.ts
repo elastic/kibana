@@ -10,8 +10,9 @@ import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { SKILL_DRAFT_ATTACHMENT_TYPE } from '../../common/attachments';
+import { SKILL_DRAFT_ATTACHMENT_TYPE } from '../../../common/attachments';
 import { createSkillDraftAttachmentType } from '../../attachment_types/skill_draft';
 import { createProposeSkillTool } from './propose_skill';
 import { createPatchSkillDraftTool } from './patch_skill_draft';
@@ -29,7 +30,9 @@ const createTestContext = (): {
   const skillDraftType = createSkillDraftAttachmentType();
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) =>
-      type === SKILL_DRAFT_ATTACHMENT_TYPE ? skillDraftType : undefined,
+      type === SKILL_DRAFT_ATTACHMENT_TYPE
+        ? (skillDraftType as AttachmentTypeDefinition)
+        : undefined,
   });
 
   const context = {

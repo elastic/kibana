@@ -45,34 +45,34 @@ describe('skill_draft attachment type', () => {
   const definition = createSkillDraftAttachmentType();
 
   describe('validate', () => {
-    it('accepts a fully populated draft', () => {
-      const result = definition.validate(validDraft);
+    it('accepts a fully populated draft', async () => {
+      const result = await definition.validate(validDraft);
       expect(result.valid).toBe(true);
       if (result.valid) {
         expect(result.data.id).toBe('incident-triage');
       }
     });
 
-    it('rejects an empty content body', () => {
-      const result = definition.validate({ ...validDraft, content: '' });
+    it('rejects an empty content body', async () => {
+      const result = await definition.validate({ ...validDraft, content: '' });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects an id with uppercase letters', () => {
-      const result = definition.validate({ ...validDraft, id: 'Incident-Triage' });
+    it('rejects an id with uppercase letters', async () => {
+      const result = await definition.validate({ ...validDraft, id: 'Incident-Triage' });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects a referenced file with a path outside ./', () => {
-      const result = definition.validate({
+    it('rejects a referenced file with a path outside ./', async () => {
+      const result = await definition.validate({
         ...validDraft,
         referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
       });
       expect(result.valid).toBe(false);
     });
 
-    it('rejects more than 5 tool_ids', () => {
-      const result = definition.validate({
+    it('rejects more than 5 tool_ids', async () => {
+      const result = await definition.validate({
         ...validDraft,
         tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
       });
