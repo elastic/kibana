@@ -42,6 +42,7 @@ import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_po
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
+import { paths } from '../../constants';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -157,11 +158,7 @@ export const RulesListPage = () => {
             data-test-subj="createRuleSplitButton"
           >
             <EuiSplitButton.ActionPrimary
-              onClick={() =>
-                application.navigateToUrl(
-                  http.basePath.prepend('/app/management/alertingV2/rules/create')
-                )
-              }
+              onClick={() => application.navigateToUrl(http.basePath.prepend(paths.ruleCreate))}
               data-test-subj="createRuleButton"
             >
               <FormattedMessage
