@@ -278,7 +278,7 @@ export class CoreSystem {
       const settings = this.settings.setup({ http, injectedMetadata });
       const userStorage = this.userStorage.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
-      const hotkeys = this.hotkeys.setup();
+      const hotkeys = this.hotkeys.setup({ chrome });
       const customBranding = this.customBranding.setup({ injectedMetadata });
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -420,7 +420,7 @@ export class CoreSystem {
 
       resolveNotifications!(notifications);
 
-      const hotkeys = this.hotkeys.start({ application });
+      const hotkeys = this.hotkeys.start({ application, chrome });
 
       this.coreApp.start({
         application,
@@ -486,7 +486,6 @@ export class CoreSystem {
           http,
           docLinks,
           customBranding,
-          hotkeys,
         },
         coreUiTargetDomElement
       );

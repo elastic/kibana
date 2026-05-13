@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-hotkeys-browser-mocks'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-core'
+  defaultOwner: '@elastic/appex-sharedux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/core-hotkeys-browser-mocks'
   description: Moon project for @kbn/core-hotkeys-browser-mocks
   channel: ''
-  owner: '@elastic/kibana-core'
+  owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/hotkeys/browser-mocks
 dependsOn:
   - '@kbn/utility-types-jest'

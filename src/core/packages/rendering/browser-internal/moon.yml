@@ -49,7 +49,6 @@ dependsOn:
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/core-custom-branding-browser-mocks'
   - '@kbn/core-hotkeys-browser'
-  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package

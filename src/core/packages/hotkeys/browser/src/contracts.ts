@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { Observable } from 'rxjs';
 import type { AppScopedHotkeys, HotkeyDefinition, HotkeyHandle } from './types';
 
 /**
@@ -55,13 +53,4 @@ export interface HotkeysStart {
    * mount.
    */
   forApp(appId?: string): AppScopedHotkeys;
-
-  /**
-   * Observable of the current set of Kibana-registered hotkeys. Emits whenever
-   * registrations are added, removed, or updated.
-   *
-   * Only registrations that went through this service are included; raw
-   * `@tanstack/hotkeys` registrations made by third-party code are not surfaced.
-   */
-  getRegistrations$(): Observable<ReadonlyArray<HotkeyDefinition>>;
 }

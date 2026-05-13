@@ -4777,9 +4777,6 @@ importers:
       react-router-dom:
         specifier: 5.3.4
         version: 5.3.4(react@18.2.0)
-      react-shortcuts:
-        specifier: 2.1.0
-        version: 2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-use:
         specifier: 17.6.1
         version: 17.6.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -17275,9 +17272,6 @@ packages:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
 
-  combokeys@3.0.1:
-    resolution: {integrity: sha512-5nAfaLZ3oO3kA+/xdoL7t197UJTz2WWidyH3BBeU6hqHtvyFERICd0y3DQFrQkJFTKBrtUDck/xCLLoFpnjaCw==}
-
   comma-separated-tokens@1.0.8:
     resolution: {integrity: sha512-GHuDRO12Sypu2cV70d1dkA2EUmXHgntrzbpvOB+Qy+49ypNfGgFQIC2fhhXbnyrJRynDCAARsT7Ou0M6hirpfw==}
 
@@ -18816,10 +18810,6 @@ packages:
 
   events-universal@1.0.1:
     resolution: {integrity: sha512-LUd5euvbMLpwOF8m6ivPCbhQeSiYVNb8Vs0fQ8QjXo0JTkEHpz8pxdQf0gStltaPpw0Cca8b39KxvK9cfKRiAw==}
-
-  events@1.1.1:
-    resolution: {integrity: sha512-kEcvvCBByWXGnZy6JUlgAp2gBIUjfCAV6P6TgT1/aaQKcmuAEC4OZTV1I4EWQLz2gxZw76atuVyvHhTxvi0Flw==}
-    engines: {node: '>=0.4.x'}
 
   events@3.3.0:
     resolution: {integrity: sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==}
@@ -20805,9 +20795,6 @@ packages:
   just-curry-it@3.2.1:
     resolution: {integrity: sha512-Q8206k8pTY7krW32cdmPsP+DqqLgWx/hYPSj9/+7SYqSqz7UuwPbfSe07lQtvuuaVyiSJveXk0E5RydOuWwsEg==}
 
-  just-reduce-object@1.2.1:
-    resolution: {integrity: sha512-/3ov68tJlesyccBgilcd5wDAOEZJ10NyhVa5pkUMbH0lC/NBBGfPewn1CUZNXecX5zgZqQVIO7MAi1whbYhVFg==}
-
   jwa@1.4.2:
     resolution: {integrity: sha512-eeH5JO+21J78qMvTIDdBXidBd6nG2kZjg5Ohz/1fpa28Z4CcsWUzJ1ZZyFq/3z3N17aZy+ZuBoHljASbL1WfOw==}
 
@@ -22621,9 +22608,6 @@ packages:
     resolution: {integrity: sha512-emEcLuomt2j03vxD54giVB4SxTjnsqkU692xZOZXHDVoYyypEm+b3jpiTcc+Cf+myooc+/Ly0z01jqeNHVgJGw==}
     engines: {node: '>=16.0.0'}
 
-  platform@1.3.6:
-    resolution: {integrity: sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==}
-
   playwright-core@1.63.0:
     resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
     engines: {node: '>=20'}
@@ -23446,12 +23430,6 @@ packages:
     resolution: {integrity: sha512-oScf2FqQ9LFVQgA73vr86xl2NaOIX73rh+YFqcOp68CWj56tSfgtGKrEbyhCj0rSijyG9M1CYprTh39fBi5hzA==}
     peerDependencies:
       react: ^16.0.0 || ^17.0.0 || ^18.0.0
-
-  react-shortcuts@2.1.0:
-    resolution: {integrity: sha512-yETQgoy/KRCOPjdlGSnfTjyVHwJYsFoHtVmuLzJABYBAnilpm1M14DhDavuAAMElbaQlXunOwKjh0Oq3I6Vt0A==}
-    peerDependencies:
-      react: ^0.14.8 || ^15 || ^16
-      react-dom: ^0.14.8 || ^15 || ^16
 
   react-style-singleton@2.2.3:
     resolution: {integrity: sha512-b6jSvxvVnyptAiLjbkWLE/lOnR4lfTtDAl+eUC7RZy+QQWc6wRzIV2CE6xBuMmDxc2qIihtDCZD5NPOFl7fRBQ==}
@@ -35003,8 +34981,6 @@ snapshots:
     dependencies:
       delayed-stream: 1.0.0
 
-  combokeys@3.0.1: {}
-
   comma-separated-tokens@1.0.8: {}
 
   comma-separated-tokens@2.0.3: {}
@@ -36862,8 +36838,6 @@ snapshots:
       bare-events: 2.9.2
     transitivePeerDependencies:
       - bare-abort-controller
-
-  events@1.1.1: {}
 
   events@3.3.0: {}
 
@@ -39422,8 +39396,6 @@ snapshots:
 
   just-curry-it@3.2.1: {}
 
-  just-reduce-object@1.2.1: {}
-
   jwa@1.4.2:
     dependencies:
       buffer-equal-constant-time: 1.0.1
@@ -41645,8 +41617,6 @@ snapshots:
       pvutils: 1.2.0
       tslib: 2.8.1
 
-  platform@1.3.6: {}
-
   playwright-core@1.63.0: {}
 
   playwright@1.63.0:
@@ -42556,17 +42526,6 @@ snapshots:
       object-assign: 4.1.1
       react: 18.2.0
       react-is: 18.3.1
-
-  react-shortcuts@2.1.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
-    dependencies:
-      combokeys: 3.0.1
-      events: 1.1.1
-      invariant: 2.2.4
-      just-reduce-object: 1.2.1
-      platform: 1.3.6
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
 
   react-style-singleton@2.2.3(@types/react@18.2.79)(react@18.2.0):
     dependencies:

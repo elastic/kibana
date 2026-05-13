@@ -128,6 +128,7 @@ dependsOn:
   - '@kbn/palettes'
   - '@kbn/core-application-browser'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-hotkeys-browser'
   - '@kbn/core-capabilities-common'
   - '@kbn/managed-content-badge'
   - '@kbn/esql-types'

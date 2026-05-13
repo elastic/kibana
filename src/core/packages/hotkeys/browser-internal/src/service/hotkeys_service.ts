@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EMPTY, Subscription } from 'rxjs';
+import { createElement } from 'react';
+import { EMPTY, type Observable, Subscription } from 'rxjs';
 import {
   HotkeyManager,
   type HotkeyCallback,
@@ -15,7 +16,7 @@ import {
   type RegisterableHotkey,
 } from '@tanstack/hotkeys';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import type {
   AppScopedHotkeys,
   HotkeyDefinition,
@@ -23,20 +24,26 @@ import type {
   HotkeysSetup,
   HotkeysStart,
 } from '@kbn/core-hotkeys-browser';
-import { createAppScopedHotkeys } from './app_scoped_hotkeys';
-import { createDerivedRegistrations, type DerivedRegistrations } from './derive_registrations';
+import { i18n } from '@kbn/i18n';
+import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { createAppScopedHotkeys } from './lib/app_scoped_hotkeys';
+import { createDerivedRegistrations, type DerivedRegistrations } from './lib/derive_registrations';
 import {
   createEmptyOverridesSource,
   type HotkeyOverride,
   type HotkeyOverridesSource,
-} from './overrides_source';
+} from './lib/overrides_source';
+
+export const OPEN_CHEAT_SHEET_HOTKEY_ID = 'platform:hotkeys.openCheatSheet';
 
 /** @internal */
-export type SetupDeps = Record<string, never>;
+export interface SetupDeps {
+  chrome: CoreSetup['chrome'];
+}
 
 /** @internal */
-export interface StartDeps {
-  application: Pick<ApplicationStart, 'currentAppId$'>;
+export interface StartDeps extends Pick<CoreStart, 'chrome' | 'application'> {
   /**
    * Optional source of user hotkey overrides. When omitted the service
    * uses an empty source and every registration runs with its declared
@@ -95,31 +102,56 @@ const keysEqual = (a: HotkeyDefinition['keys'], b: HotkeyDefinition['keys']): bo
  */
 export class HotkeysService {
   private readonly manager: HotkeyManager = HotkeyManager.getInstance();
+  public readonly derived: DerivedRegistrations = createDerivedRegistrations(this.manager);
   private readonly internal = new Map<string, InternalEntry>();
   private readonly subscriptions = new Subscription();
-  private derived: DerivedRegistrations | undefined;
   private latestAppId: string | undefined;
-  private latestOverrides: ReadonlyMap<string, HotkeyOverride> = new Map();
-  private started = false;
+  private currentAppId$?: Observable<string | undefined>;
+  private userOverrides: ReadonlyMap<string, HotkeyOverride> = new Map();
 
-  public setup(_deps: SetupDeps = {}): HotkeysSetup {
+  private hotkeysAppUpdater: SidebarAppUpdater | undefined;
+
+  public setup({ chrome }: SetupDeps): HotkeysSetup {
+    this.hotkeysAppUpdater = chrome.sidebar.registerApp({
+      appId: 'hotkeys',
+      loadComponent: () =>
+        import('../components/hotkeys_cheat_sheet').then((m) => {
+          return Promise.resolve((props: SidebarComponentProps) =>
+            createElement(m.HotkeysCheatSheet, {
+              ...props,
+              getRegistrations$: () => this.derived.registrations$,
+              getCurrentAppId$: () => this.currentAppId$ ?? EMPTY,
+            })
+          );
+        }),
+      status: 'pending',
+    });
+
     return {};
   }
 
-  public start({ application, overrides = createEmptyOverridesSource() }: StartDeps): HotkeysStart {
-    this.started = true;
-    this.derived = createDerivedRegistrations(this.manager);
+  public start({
+    application,
+    chrome,
+    overrides = createEmptyOverridesSource(),
+  }: StartDeps): HotkeysStart {
+    this.currentAppId$ = application.currentAppId$;
+
     this.subscriptions.add(
-      application.currentAppId$.subscribe((id) => {
+      this.currentAppId$.subscribe((id) => {
         this.latestAppId = id;
       })
     );
+
     this.subscriptions.add(overrides.overrides$.subscribe((next) => this.applyOverrides(next)));
 
-    const register: HotkeysStart['register'] = (def, handler) => this.doRegister(def, handler);
+    // register hotkey for opening the global cheat sheet
+    this.registerCheatSheetHotkey({ sidebar: chrome.sidebar });
+
+    this.hotkeysAppUpdater?.({ status: 'available' });
 
     const registerMany: HotkeysStart['registerMany'] = (defs) => {
-      const handles = defs.map(({ def, handler }) => register(def, handler));
+      const handles = defs.map(({ def, handler }) => this.doRegister.call(this, def, handler));
       return () => {
         for (const handle of handles) {
           handle.unregister();
@@ -129,28 +161,20 @@ export class HotkeysService {
 
     const forApp: HotkeysStart['forApp'] = (appId?: string): AppScopedHotkeys =>
       createAppScopedHotkeys({
-        register,
+        register: this.doRegister.bind(this),
         pinnedAppId: appId,
         resolveAppId: () => this.latestAppId,
         currentAppId$: application.currentAppId$,
       });
 
-    const getRegistrations$: HotkeysStart['getRegistrations$'] = () =>
-      this.derived?.registrations$ ?? EMPTY;
-
-    return { register, registerMany, forApp, getRegistrations$ };
+    return { register: this.doRegister.bind(this), registerMany, forApp };
   }
 
   public stop() {
-    if (!this.started) {
-      return;
-    }
-    this.started = false;
     this.subscriptions.unsubscribe();
     this.derived?.dispose();
-    this.derived = undefined;
     this.internal.clear();
-    this.latestOverrides = new Map();
+    this.userOverrides = new Map();
     this.manager.destroy();
   }
 
@@ -158,28 +182,31 @@ export class HotkeysService {
     if (this.internal.has(def.id)) {
       throw new Error(`HotkeysService: a hotkey with id "${def.id}" is already registered`);
     }
+
     const stored: HotkeyDefinition = {
       ...def,
       scope: def.scope ?? 'context',
       defaultKeys: def.keys,
     };
+
     const callback: HotkeyCallback = (event) => handler(event);
-    const override = this.latestOverrides.get(stored.id);
+    const override = this.userOverrides.get(stored.id);
     const resolvedKeys = override?.keys ?? stored.keys;
     const resolvedEnabled = override?.enabled ?? stored.enabled !== false;
+
     const managerHandle = this.manager.register(resolvedKeys as RegisterableHotkey, callback, {
       enabled: resolvedEnabled,
       target: stored.target ?? undefined,
       meta: buildMeta(stored),
     });
-    const entry: InternalEntry = {
+
+    this.internal.set(stored.id, {
       def: stored,
       callback,
       managerHandle,
       lastResolvedKeys: resolvedKeys,
       lastResolvedEnabled: resolvedEnabled,
-    };
-    this.internal.set(stored.id, entry);
+    });
 
     return {
       id: stored.id,
@@ -203,8 +230,8 @@ export class HotkeysService {
   }
 
   private applyOverrides(next: ReadonlyMap<string, HotkeyOverride>): void {
-    const previous = this.latestOverrides;
-    this.latestOverrides = next;
+    const previous = this.userOverrides;
+    this.userOverrides = next;
     if (this.internal.size === 0) {
       return;
     }
@@ -226,7 +253,7 @@ export class HotkeysService {
    * underlying key listener routes the new chord.
    */
   private rebindEntry(entry: InternalEntry): void {
-    const override = this.latestOverrides.get(entry.def.id);
+    const override = this.userOverrides.get(entry.def.id);
     const resolvedKeys = override?.keys ?? entry.def.keys;
     const resolvedEnabled = override?.enabled ?? entry.def.enabled !== false;
     const meta = buildMeta(entry.def);
@@ -247,6 +274,33 @@ export class HotkeysService {
     }
     entry.lastResolvedKeys = resolvedKeys;
     entry.lastResolvedEnabled = resolvedEnabled;
+  }
+
+  /**
+   * Register the hotkey combination to open the cheat sheet modal.
+   */
+  private registerCheatSheetHotkey({ sidebar }: Pick<CoreStart['chrome'], 'sidebar'>) {
+    const handler = () => {
+      return sidebar.getApp('hotkeys').open();
+    };
+
+    this.doRegister(
+      {
+        id: OPEN_CHEAT_SHEET_HOTKEY_ID,
+        keys: 'Shift+?',
+        scope: 'global',
+        group: i18n.translate('core.ui.chrome.hotkeysCheatSheet.groupHelp', {
+          defaultMessage: 'Help',
+        }),
+        label: i18n.translate('core.ui.chrome.hotkeysCheatSheet.openShortcutLabel', {
+          defaultMessage: 'Show keyboard shortcuts',
+        }),
+        description: i18n.translate('core.ui.chrome.hotkeysCheatSheet.openShortcutDescription', {
+          defaultMessage: 'Displays the keyboard shortcuts cheat sheet',
+        }),
+      },
+      handler
+    );
   }
 }
 

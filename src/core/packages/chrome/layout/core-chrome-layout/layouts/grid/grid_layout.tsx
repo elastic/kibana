@@ -72,7 +72,7 @@ export class GridLayout implements LayoutService {
    * Returns a layout component with the provided dependencies
    */
   public getComponent(): React.ComponentType {
-    const { application, overlays, http, docLinks, customBranding, hotkeys } = this.deps;
+    const { application, overlays, http, docLinks, customBranding } = this.deps;
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
@@ -82,7 +82,6 @@ export class GridLayout implements LayoutService {
       http,
       docLinks,
       customBranding,
-      hotkeys,
     };
 
     const GridLayoutContent = React.memo(() => {
