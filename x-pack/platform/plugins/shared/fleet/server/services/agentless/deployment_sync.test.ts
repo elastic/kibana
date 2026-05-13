@@ -27,6 +27,8 @@ function mockDependencies() {
     deleteAgentlessAgent: jest.fn().mockResolvedValue({}),
   };
 
+  jest.mocked(agentPolicyService.update).mockResolvedValue({} as AgentPolicy);
+
   jest.mocked(agentPolicyService.getByIds).mockImplementation(async (_, ids) => {
     ids = ids.filter((id) => (id as string).match(/^policy[0-9]+$/));
 
@@ -478,6 +480,217 @@ describe('Agentless Deployment Sync', () => {
       expect(agentlessAgentService.listAgentlessDeployments).not.toHaveBeenCalled();
       expect(agentlessAgentService.createAgentlessAgent).not.toHaveBeenCalled();
       expect(agentlessAgentService.deleteAgentlessAgent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('update cluster_id', () => {
+    it('persists cluster_id when the API returns one that differs from the stored value', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: 'Agentless policy policy1',
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+          agentless: {},
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 0,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService });
+
+      expect(agentPolicyService.update).toHaveBeenCalledTimes(1);
+      expect(agentPolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'policy1',
+        { agentless: { cluster_id: 'cluster-abc' } },
+        { bumpRevision: false }
+      );
+      expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalledTimes(0);
+      expect(agentlessAgentService.deleteAgentlessAgent).toHaveBeenCalledTimes(0);
+    });
+
+    it('preserves existing agentless fields when persisting cluster_id', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: 'Agentless policy policy1',
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+          agentless: { cloud_connectors: { enabled: true, target_csp: 'aws' } },
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 0,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService });
+
+      expect(agentPolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'policy1',
+        {
+          agentless: {
+            cloud_connectors: { enabled: true, target_csp: 'aws' },
+            cluster_id: 'cluster-abc',
+          },
+        },
+        { bumpRevision: false }
+      );
+    });
+
+    it('does nothing when cluster_id is already up to date', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: 'Agentless policy policy1',
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+          agentless: { cluster_id: 'cluster-abc' },
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 0,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService });
+
+      expect(agentPolicyService.update).not.toHaveBeenCalled();
+      expect(agentlessAgentService.createAgentlessAgent).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when the API returns no cluster_id', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10 }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: 'Agentless policy policy1',
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+          agentless: {},
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 0,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService });
+
+      expect(agentPolicyService.update).not.toHaveBeenCalled();
+      expect(agentlessAgentService.createAgentlessAgent).not.toHaveBeenCalled();
+    });
+
+    it('logs only in dry run mode without updating', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: 'Agentless policy policy1',
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+          agentless: {},
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 0,
+        perPage: 100,
+      });
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService }, { dryRun: true });
+
+      expect(agentPolicyService.update).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        '[Agentless Deployment Sync][Dry Run] Updating cluster_id for policy policy1'
+      );
+    });
+
+    it('logs error when cluster_id update fails', async () => {
+      const { logger, agentlessAgentService } = mockDependencies();
+      agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
+        deployments: [{ policy_id: 'policy1', revision_idx: 10, cluster_id: 'cluster-abc' }],
+      });
+
+      jest.mocked(agentPolicyService.getByIds).mockResolvedValueOnce([
+        {
+          id: 'policy1',
+          name: 'Agentless policy policy1',
+          is_managed: true,
+          revision: 10,
+          keep_monitoring_alive: true,
+          monitoring_enabled: [],
+          agentless: {},
+        },
+      ] as unknown as AgentPolicy[]);
+      jest.mocked(agentPolicyService.list).mockReset();
+      jest.mocked(agentPolicyService.list).mockResolvedValueOnce({
+        items: [] as AgentPolicy[],
+        total: 0,
+        page: 0,
+        perPage: 100,
+      });
+      jest.mocked(agentPolicyService.update).mockRejectedValueOnce(new Error('Update failed'));
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService });
+
+      expect(logger.error).toHaveBeenCalledWith(
+        '[Agentless Deployment Sync] Failed to update cluster_id for policy policy1',
+        expect.anything()
+      );
     });
   });
 
