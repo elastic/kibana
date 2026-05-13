@@ -22,16 +22,23 @@ import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from '
 export type GraphPreviewData = React.ComponentProps<typeof GraphPreview>['data'];
 
 export interface GraphPreviewPanelProps {
-  /** When omitted, no expand link is shown. */
+  /** Callback invoked when the user opens the full graph visualization. When omitted, no expand link is shown. */
   onShowGraph?: () => void;
+  /** Whether to show the graph preview panel header icon. */
   showIcon: boolean;
+  /** Whether to hide navigation to the full graph visualization. */
   disableNavigation: boolean;
+  /** Whether the graph preview is available for the current document. */
   shouldShowGraph: boolean;
+  /** Whether the graph preview data is currently loading. */
   isLoading: boolean;
+  /** Whether loading the graph preview data failed. */
   isError: boolean;
+  /** Data used to render the graph preview nodes and edges. */
   data?: GraphPreviewData;
 }
 
+/** Displays a graph preview panel or graph visualization upsell for the current document. */
 export const GraphPreviewPanel = ({
   shouldShowGraph,
   isLoading,
