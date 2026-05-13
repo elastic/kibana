@@ -1,19 +1,33 @@
 ---
 name: team-auto-tests-stats
 description: >
-  Produces a markdown team report under `.agents/tmp/` (gitignored): **Ownership** (CODEOWNERS prefixes with tests
-  only), **Test Cases** (Scout Playwright `--list`), FTR/Cypress/Scout rows, **Skipped**, **Execution phase**
-  (Buildkite links), optional **Coverage** per `*.spec.ts`. Do not write `docs/team-automation-*.md`. Use for
-  `@elastic/` automation inventory and CI phase mapping.
+  Use when someone needs an `@elastic/<team>` automation and test inventory tied to CODEOWNERS, Buildkite
+  execution phases, and per-framework counts/skips for FTR, Cypress, and Scout (including Playwright `--list` for
+  Scout). Typical asks: team automation stats, where Security Solution tests run in CI, Scout vs Cypress coverage by
+  ownership. Markdown deliverables belong only under gitignored `.agents/tmp/` at the repo root, never committed `docs/`.
 ---
 
 # Elastic team testing / automation inventory
+
+## Overview
+
+Structured inventory: **ownership paths that contain tests**, a fixed **FTR / Cypress / Scout** table (counts + skips), **where tests run** in Buildkite, and optional **Scout coverage** rows. Follow the workflow checklist and §§1–6 — the YAML `description` above is for discovery only, not a shortcut for the steps below.
+
+## When to use
+
+- Per-team or multi-team **`@elastic/`** automation visibility (counts, skips, CI phases).
+- Auditing completeness of FTR/Cypress/Scout rows for an owning team.
+
+## When not to use
+
+- CI Stats volume, flaky-test mining, or GitHub `skipped-test` triage (see **Out of scope**).
+- Repo-wide Jest unit counts unless explicitly requested later.
 
 ## Terminology (Tests table)
 
 - **Test suite:** a `describe` / `apiTest.describe` / `spaceTest.describe` block (skipped suite ⇒ `describe.skip` / `apiTest.describe.skip` / `spaceTest.describe.skip` applies to everything nested under it except hooks below).
 - **TC (test case):** a leaf **`apiTest('…',`** / **`spaceTest('…',`** or **`test('…',`** invocation inside a suite. **Exclude hooks:** `*.beforeAll`, `*.beforeEach`, `*.afterAll`, `*.afterEach`.
-- **`Test Cases` column:** total logical Scout specs from `--list` (see §2) or analogous counts for Cypress/FTR heuristics.
+- **`Test Cases` column:** Scout — sum of `--list` unique-spec integers across owned configs (§2); Cypress/FTR — analogous leaf-marker heuristics (§§3–4).
 
 ## Scope
 
@@ -40,7 +54,7 @@ The **Tests** table must **always** include three rows, in order: **FTR**, **Cyp
 | Output | Path |
 |--------|------|
 | Per-team report | `.agents/tmp/team-automation-<slug>.md` |
-| Multi-team aggregate (optional) | `.agents/tmp/team-automation-inventory-7-teams.md` |
+| Multi-team aggregate (optional) | `.agents/tmp/team-automation-inventory-<n>-teams.md` (example name; pick `<n>` to match teams covered) |
 
 **Path name:** the directory is **`.agents/tmp`** (plural **`agents`**), not `.agent/tmp`.
 
@@ -59,11 +73,11 @@ Reports live under **`.agents/tmp/<file>.md`** (two levels below repo root). Eve
 - [ ] **Output:** **`.agents/tmp/team-automation-<slug>.md`** only — **`../../`** on every link; no `docs/` copy
 - [ ] **Ownership** (§1): test-relevant CODEOWNERS prefixes only
 - [ ] Scout configs under those prefixes
-- [ ] Per config: `npx playwright test --list --reporter=json` → unique spec count ([scripts/count_playwright_list_unique_specs.mjs](scripts/count_playwright_list_unique_specs.mjs))
+- [ ] Per owned Scout config dir: `npx playwright test --list --reporter=json` → integer via [scripts/count_playwright_list_unique_specs.mjs](scripts/count_playwright_list_unique_specs.mjs); **Scout `Test Cases` row** = **sum** of those integers (see §2)
 - [ ] Cypress `*.cy.ts(x)` — **Test Cases** heuristic + static skips + **@skipIn…** tag skips (§3)
 - [ ] Table **Tests**: always **FTR**, **Cypress**, **Scout** in that order; each row filled per §§2–4 (**Completeness rule** — no placeholder **0** without searching owned trees)
 - [ ] **Execution phase** table from `.buildkite/` — use **`../../.buildkite/...`** markdown links (comma-separated when several apply); literal **`-`** when `No`
-- [ ] **Coverage and descriptions** (Scout API or UI): run [scripts/extract_scout_api_coverage_md.mjs](scripts/extract_scout_api_coverage_md.mjs) with link prefix **`../../x-pack/.../tests/`** (or the correct relative path for that tree). Paste after **Execution phase**
+- [ ] **Coverage and descriptions** (Scout API or UI): run `extract_scout_api_coverage_md.mjs` via **`$REPO_ROOT`/… path** as in §6 (link prefix **`../../x-pack/.../tests/`** or correct depth for that tree). Paste after **Execution phase**
 - [ ] **Done:** report exists only under **`.agents/tmp/`** — no copies under `docs/`
 
 ### 1) Ownership — CODEOWNERS (prefixes with tests only)
@@ -95,6 +109,10 @@ rm -f "$TMP_JSON"
 ```
 
 **Test Cases:** use the script’s integer — unique specs keyed by `file:line:title` walking `suites` → nested `suites` → `specs[]`. **Do not** approximate Scout totals by counting `test(` / `apiTest(` in source; Scout **projects** (e.g. `local`, `ech`, `mki`) invalidate that heuristic.
+
+**Scout row (`Test Cases`) with multiple configs:** **Sum** the script integer from **each** owned Scout config directory after running the §2 bash block once per directory. **Ambiguity (not specified here):** whether to dedupe specs that might appear in more than one config/project — **do not guess**; if overlap is plausible, add a one-line caveat next to the Scout row.
+
+Scout **Skipped** inventory follows §2 only (suite/test `.skip` patterns). **Do not** apply Cypress **`@skipIn…`** tag rules to the Scout row.
 
 Bootstrap: match root **`engines.node`**, run **`yarn kbn bootstrap`** if `@kbn/*` resolution fails during `--list`.
 
@@ -132,7 +150,11 @@ Reference: Cypress runner / config excludes tags per environment; inventory reco
 
 ### 4) FTR-oriented / integration-style
 
-Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Same `it` / `context` / `specify` heuristics for **Test Cases**. **Skipped:** static markers only (`describe.skip`, `it.skip`, …). FTR/Jest does **not** use Cypress `@skipIn…` tags — no `(tags: …)` bullets on the FTR row.
+Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Use the **same leaf markers** as Cypress where they appear (`it(`, `context(`, `specify(`); **other** FTR/Jest patterns may exist — **flag** in the report if counts look inconsistent rather than inventing new heuristics here.
+
+**FTR row vs Jest units:** This row is for **FTR-style / integration paths** above. Ordinary **Jest unit** files (`*.test.ts`) under ownership are **not** mixed into the FTR **Test Cases** number unless you explicitly expand scope (see **Out of scope**).
+
+**Skipped:** static markers only (`describe.skip`, `it.skip`, …). FTR/Jest does **not** use Cypress `@skipIn…` tags — no `(tags: …)` bullets on the FTR row.
 
 The deliverable **Tests** table **always lists FTR**. If legacy suites remain on disk but the team relies on Scout only, still show **`-`** Test type with **0** **Test Cases** (unless owned FTR-style files are counted — then fill type / **Test Cases** / **Skipped** honestly).
 
@@ -154,7 +176,7 @@ The deliverable **Tests** table **always lists FTR**. If legacy suites remain on
 
 ### 6) Markdown shape (`.agents/tmp/team-automation-<slug>.md`)
 
-Minimal output — all links use **`../../`** from repo root.
+Minimal output — repo-target links in the report use **`../../`** **from the report file** (under `.agents/tmp/`), not from the repo root.
 
 ```markdown
 # Test automation inventory — @elastic/<slug>
@@ -190,9 +212,22 @@ _Test-relevant paths only (subtree contains Scout, Cypress, FTR-style, or Jest t
 
 Rows **in fixed order**: **FTR**, **Cypress**, **Scout**. **`Skipped`** cell: **`N Suites (M TCs)`** plus per-file bullets; **Cypress** includes **@skipIn…** entries in the **same** list as static skips, per §3 (suffixes **`(static)`** vs **`(tags: …)`**; ASCII hyphen in bullets).
 
-**Coverage and descriptions:** `node scripts/extract_scout_api_coverage_md.mjs <scout-tests-dir> ../../x-pack/.../tests/` (prefix must match **`.agents/tmp/`** link depth).
+**Coverage and descriptions** (run from any cwd; use repo root):
+
+```bash
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+node "$REPO_ROOT/x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/extract_scout_api_coverage_md.mjs" \
+  <scout-tests-dir> ../../x-pack/.../tests/
+```
+
+Second argument = link prefix for markdown paths (**must** match **`.agents/tmp/`** depth, trailing slash as needed).
 
 **Do not** include: disclaimer blocks, methodology section, helper-only audit logs, Notes column clutter, “commands used” appendix. **Do not** add copies of this report under `docs/`.
+
+## Common mistakes
+
+- **Placeholder zeros:** Scout filled in, **FTR** or **Cypress** left at **0** without grepping owned trees (see **Completeness rule**).
+- **`../../` in wrong context:** Links are relative to **`.agents/tmp/<report>.md`**, not the skill file path.
 
 ## Out of scope
 
