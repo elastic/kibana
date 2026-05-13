@@ -30,10 +30,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
-import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import type {
+  EisModelStatus,
+  InferenceFeatureResponse as InferenceFeatureConfig,
+} from '../../../common/types';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
@@ -280,6 +284,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 endpointIds={endpointIds}
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
+                deprecatedEndpointsMap={deprecatedEndpointsMap}
                 globalDefaultRow={
                   showGlobalDefaultRow
                     ? {
@@ -317,7 +322,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                             const { icon = 'compute', label = endpointId } =
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
-                            const isDeprecated = deprecatedEndpointsMap.has(endpointId);
+                            const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
                             return (
                               <div>
                                 <EuiSplitPanel.Inner
@@ -384,11 +389,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         </EuiText>
                                       </EuiToolTip>
                                     </EuiFlexItem>
-                                    {isDeprecated && (
+                                    {deprecationInfo && (
                                       <ModelStatusBadge
                                         id={endpointId}
-                                        status={deprecatedEndpointsMap.get(endpointId)!.status}
-                                        metadata={deprecatedEndpointsMap.get(endpointId)!.metadata}
+                                        status={deprecationInfo.status}
+                                        metadata={deprecationInfo.metadata}
                                       />
                                     )}
                                     <EuiFlexItem grow={false}>
@@ -571,6 +576,13 @@ interface RecommendedEndpointsListProps {
   endpointIds: string[];
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<
+    string,
+    {
+      status: EisModelStatus;
+      metadata: EisInferenceEndpointMetadata;
+    }
+  >;
   globalDefaultRow?: {
     icon: string;
     label: string;
@@ -584,6 +596,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
   endpointIds,
   endpointDisplayMap,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   globalDefaultRow,
 }) => {
   return (
@@ -600,6 +613,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
       {endpointIds.map((endpointId, index) => {
         const { icon = 'compute', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);
+        const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
         return (
           <div key={endpointId}>
             <EuiSplitPanel.Inner
@@ -633,6 +647,13 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
                     <span>{label}</span>
                   </EuiText>
                 </EuiFlexItem>
+                {deprecationInfo && (
+                  <ModelStatusBadge
+                    id={endpointId}
+                    status={deprecationInfo.status}
+                    metadata={deprecationInfo.metadata}
+                  />
+                )}
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
             {index !== endpointIds.length - 1 && <EuiHorizontalRule margin="none" />}
