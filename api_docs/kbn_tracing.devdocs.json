@@ -39,7 +39,7 @@
           "SpanExporter"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-        "lineNumber": 18,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -55,7 +55,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-            "lineNumber": 28,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -71,7 +71,7 @@
                   "ElasticsearchClient"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-                "lineNumber": 28,
+                "lineNumber": 42,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "ElasticsearchClient",
@@ -96,7 +96,7 @@
               ") => void) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-            "lineNumber": 30,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -113,7 +113,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-                "lineNumber": 30,
+                "lineNumber": 44,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -132,7 +132,7 @@
                   ") => void"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-                "lineNumber": 30,
+                "lineNumber": 44,
                 "columnNumber": 41,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -152,7 +152,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-            "lineNumber": 67,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -170,7 +170,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
-            "lineNumber": 71,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
