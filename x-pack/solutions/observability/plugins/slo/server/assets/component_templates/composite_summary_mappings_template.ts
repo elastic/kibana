@@ -65,6 +65,23 @@ export const COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateReq
         oneHourBurnRate: { type: 'double' },
         oneDayBurnRate: { type: 'double' },
         unresolvedMemberIds: { type: 'keyword' },
+        members: {
+          properties: {
+            id: { type: 'keyword' },
+            name: {
+              type: 'text',
+              fields: {
+                keyword: { type: 'keyword' },
+              },
+            },
+            weight: { type: 'double' },
+            normalisedWeight: { type: 'double' },
+            sliValue: { type: 'double' },
+            contribution: { type: 'double' },
+            status: { type: 'keyword' },
+            instanceId: { type: 'keyword' },
+          },
+        },
       },
     },
   },

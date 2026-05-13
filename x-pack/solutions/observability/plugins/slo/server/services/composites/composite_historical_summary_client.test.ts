@@ -7,14 +7,14 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
-import { createSLO, createAPMTransactionErrorRateIndicator } from './fixtures/slo';
-import { createCompositeSlo } from './fixtures/composite_slo';
-import { Duration, DurationUnit } from '../domain/models';
+import { createSLO, createAPMTransactionErrorRateIndicator } from '../fixtures/slo';
+import { createCompositeSlo } from '../fixtures/composite_slo';
+import { Duration, DurationUnit } from '../../domain/models';
 import { CompositeHistoricalSummaryClient } from './composite_historical_summary_client';
 import type { HistoricalSummaryProvider } from './composite_historical_summary_client';
-import { createCompositeSLORepositoryMock, createSLORepositoryMock } from './mocks';
+import { createCompositeSLORepositoryMock, createSLORepositoryMock } from '../mocks';
 import type { CompositeSLORepository } from './composite_slo_repository';
-import type { SLODefinitionRepository } from './slo_definition_repository';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
 
 const buildHistoricalPoint = (date: string, sliValue: number, status: string = 'HEALTHY') => ({
   date,

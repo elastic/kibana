@@ -14,12 +14,12 @@ import type {
   HistoricalSummaryResponse,
 } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { computeWeightedSli, NO_DATA } from '../domain/services';
-import type { CompositeSLODefinition, SLODefinition } from '../domain/models';
-import { toRichRollingTimeWindow } from '../domain/models';
+import { computeWeightedSli, NO_DATA } from '../../domain/services';
+import type { CompositeSLODefinition, SLODefinition } from '../../domain/models';
+import { toRichRollingTimeWindow } from '../../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
-import type { SLODefinitionRepository } from './slo_definition_repository';
-import { HistoricalSummaryClient } from './historical_summary_client';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import { HistoricalSummaryClient } from '../historical_summary_client';
 
 export interface HistoricalSummaryProvider {
   fetch(params: FetchHistoricalSummaryParams): Promise<FetchHistoricalSummaryResponse>;

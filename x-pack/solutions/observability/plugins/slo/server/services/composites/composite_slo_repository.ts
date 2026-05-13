@@ -8,19 +8,10 @@
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
-import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { compositeSloDefinitionSchema, storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
-import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../domain/models';
-import { SLOIdConflict, SLONotFound } from '../errors';
-import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
-
-interface SearchParams {
-  pagination: Pagination;
-  search?: string;
-  tags?: string[];
-  sortBy?: 'name' | 'createdAt' | 'updatedAt';
-  sortDirection?: 'asc' | 'desc';
-}
+import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../../domain/models';
+import { SLOIdConflict, SLONotFound } from '../../errors';
+import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
 
 export interface CompositeSLORepository {
   create(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition>;
@@ -28,7 +19,6 @@ export interface CompositeSLORepository {
   findById(id: string): Promise<CompositeSLODefinition>;
   findAllByIds(ids: string[]): Promise<CompositeSLODefinition[]>;
   deleteById(id: string): Promise<void>;
-  search(params: SearchParams): Promise<Paginated<CompositeSLODefinition>>;
 }
 
 export class DefaultCompositeSLORepository implements CompositeSLORepository {
@@ -122,45 +112,6 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     }
 
     await this.soClient.delete(SO_SLO_COMPOSITE_TYPE, response.saved_objects[0].id);
-  }
-
-  async search({
-    search,
-    pagination,
-    tags = [],
-    sortBy = 'createdAt',
-    sortDirection = 'desc',
-  }: SearchParams): Promise<Paginated<CompositeSLODefinition>> {
-    const filter = [];
-    if (tags.length > 0) {
-      filter.push(
-        `${SO_SLO_COMPOSITE_TYPE}.attributes.tags: (${tags
-          .map((tag) => escapeKuery(tag))
-          .join(' OR ')})`
-      );
-    }
-
-    const sortField = sortBy === 'name' ? 'name.keyword' : sortBy;
-    const response = await this.soClient.find<StoredCompositeSLODefinition>({
-      type: SO_SLO_COMPOSITE_TYPE,
-      page: pagination.page,
-      perPage: pagination.perPage,
-      ...(search ? { search, searchFields: ['name'] } : {}),
-      ...(filter.length > 0 ? { filter: filter.join(' AND ') } : {}),
-      sortField,
-      sortOrder: sortDirection,
-    });
-
-    const results = response.saved_objects
-      .map((so) => this.toCompositeSLO(so.attributes))
-      .filter(this.isCompositeSLO);
-
-    return {
-      total: response.total - (response.saved_objects.length - results.length),
-      perPage: response.per_page,
-      page: response.page,
-      results,
-    };
   }
 
   private toCompositeSLO(stored: StoredCompositeSLODefinition): CompositeSLODefinition | undefined {
