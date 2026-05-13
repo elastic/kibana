@@ -1,5 +1,5 @@
 {
-  "sha1": "32f5479779939fba58407b4a063c0656a853e2fb",
+  "sha1": "fbbc92abe72d4828df6ca007bfbfe63453fce95f",
   "tests": [
     {
       "id": "8065d296c26f2cd-b37771106c4b8c3",
@@ -69,67 +69,15 @@
       }
     },
     {
-      "id": "4a7d2ce0033e93a-20bca93d1cc197d",
-      "title": "Quick edit rule flyout opens the quick edit flyout from the table pencil icon",
-      "expectedStatus": "passed",
+      "id": "885339228dd56a5-73c89e4070ac6f5",
+      "title": "Execution history — smoke loads the page and shows the empty state when there are no events",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 34,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-4b9a9b1a258e7d7",
-      "title": "Quick edit rule flyout opens the quick edit flyout from the rule summary flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 57,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-f170f3e9b100bd7",
-      "title": "Quick edit rule flyout edits a rule name and persists the change",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 79,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-1ab8bdf5d5cc418",
-      "title": "Quick edit rule flyout cancel discards changes",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 104,
-        "column": 7
-      }
-    },
-    {
-      "id": "4a7d2ce0033e93a-1d465f4dc87ac95",
-      "title": "Quick edit rule flyout opening the summary flyout closes the quick edit flyout",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/quick_edit_rule.spec.ts",
-        "line": 121,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
+        "line": 22,
         "column": 7
       }
     },
