@@ -14,6 +14,7 @@ import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
   type ManagedWorkflowDefinition,
+  type ManagedWorkflowId,
   type ManagedWorkflowTemplateValues,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -36,7 +37,6 @@ interface ManagedWorkflowsServiceDeps {
 }
 
 export class ManagedWorkflowsService {
-  private readonly registeredPluginIds = new Set<string>();
   private readonly readyPluginIds = new Set<string>();
   /**
    * Tracks every static workflow installed during the startup window, keyed by plugin ID.
@@ -49,13 +49,6 @@ export class ManagedWorkflowsService {
 
   constructor(private readonly deps: ManagedWorkflowsServiceDeps) {
     this.logger = deps.logger;
-  }
-
-  public async registerManagedWorkflowPlugin(pluginId: string): Promise<void> {
-    if (!pluginId) {
-      throw new Error('pluginId is required to register managed workflows plugin');
-    }
-    this.registeredPluginIds.add(pluginId);
   }
 
   public isPluginReady(pluginId: string): boolean {
@@ -83,9 +76,9 @@ export class ManagedWorkflowsService {
    * or whose definition no longer exists in the registry.
    * Safe to run immediately at start — no dependency on install() calls.
    */
-  public async cleanupUnregisteredOrphans(registeredPluginIds: string[]): Promise<void> {
+  public async cleanupUnregisteredOrphans(registeredOwnerPluginIds: string[]): Promise<void> {
     const knownDefinitionIds = new Set(getManagedWorkflowDefinitions().map((d) => d.id));
-    const knownPluginIds = new Set(registeredPluginIds.filter(Boolean));
+    const knownPluginIds = new Set(registeredOwnerPluginIds.filter(Boolean));
 
     const existingManagedDocs = await this.deps.crudService.getManagedWorkflowDocumentsAllSpaces({
       includeDeleted: true,
@@ -122,7 +115,7 @@ export class ManagedWorkflowsService {
   }
 
   public async installManagedWorkflow(
-    id: string,
+    id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
     registeredPluginId: string
   ): Promise<void> {
@@ -194,7 +187,7 @@ export class ManagedWorkflowsService {
   }
 
   public async uninstallManagedWorkflow(
-    id: string,
+    id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
     registeredPluginId: string
   ): Promise<void> {
@@ -221,7 +214,7 @@ export class ManagedWorkflowsService {
   }
 
   public async executeManagedWorkflow(
-    id: string,
+    id: ManagedWorkflowId,
     request: KibanaRequest,
     options: ExecuteManagedWorkflowOptions,
     registeredPluginId: string

@@ -433,18 +433,13 @@ export class WorkflowsService {
     );
   }
 
-  public async registerManagedWorkflowPlugin(pluginId: string): Promise<void> {
-    await this.ensureInitialized();
-    return this.managedWorkflowsService.registerManagedWorkflowPlugin(pluginId);
-  }
-
   public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.pluginReady(pluginId);
   }
 
-  public async cleanupUnregisteredOrphans(registeredPluginIds: string[]): Promise<void> {
+  public async cleanupUnregisteredOrphans(registeredOwnerPluginIds: string[]): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredPluginIds);
+    return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredOwnerPluginIds);
   }
 }
