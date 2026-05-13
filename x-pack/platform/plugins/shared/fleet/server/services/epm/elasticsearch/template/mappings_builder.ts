@@ -76,23 +76,9 @@ export class MappingsBuilder {
     let fieldProps: Properties;
 
     if (type === 'group') {
-      const groupResult = handler?.mapGroup?.(field, this, context);
-      if (groupResult === undefined) return;
-
-      fieldProps = groupResult.fieldProps;
-
-      // Only propagate hasDynamicTemplateMappings upward when the group produced
-      // no static properties — matching original behavior.
-      if (groupResult.onlyDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
-
-      // A group that also has an object_type was merged with an object during deduplication.
-      // Generate the dynamic mapping for the object side too, and mark the group as dynamic.
-      if (field.object_type) {
-        this.addObjectAsDynamicMapping(context, field);
-        context.hasDynamicTemplateMappings = true;
-        fieldProps.type = 'object';
-        fieldProps.dynamic = true;
-      }
+      const mapped = this.processGroup(context, field);
+      if (mapped === undefined) return;
+      fieldProps = mapped;
     } else if (handler) {
       const mapped = handler.staticMapping?.(field, this, context);
       if (mapped === undefined) return;
@@ -102,6 +88,36 @@ export class MappingsBuilder {
       fieldProps = { ...getDefaultProperties(field), type };
     }
 
+    this.applyCommonProps(fieldProps, field, type);
+
+    // Even if we don't add the property because it has a wildcard, notify
+    // the parent that there is some kind of property, so the intermediate object
+    // is still created.
+    // This is done for legacy packages that include ambiguous mappings with objects
+    // without object type. This is not allowed starting on Package Spec v3.
+    context.hasNonDynamicTemplateMappings = true;
+
+    // Avoid including maps with wildcards, they have generated dynamic mappings.
+    if (field.name.includes('*')) {
+      context.hasDynamicTemplateMappings = true;
+      return;
+    }
+
+    context.properties[field.name] = fieldProps;
+  }
+
+  /**
+   * Apply per-walker post-processing that is uniform across all field types:
+   * field-level metadata (`meta`), TSDB-only flags (`time_series_metric`,
+   * `time_series_dimension`), and `subobjects`.
+   *
+   * TODO: `time_series_metric` is also applied inside `numericType` and
+   * `booleanType` handlers (via `applyTimeSeriesMetric`). The handler-level
+   * call uses a truthy check on `field.metric_type` while this method uses a
+   * key-existence check; the two diverge for falsy values. Worth unifying
+   * once that subtle behavioral difference is confirmed acceptable.
+   */
+  private applyCommonProps(fieldProps: Properties, field: Field, type: string): void {
     // TODO: when a field has `metric_type` but no `unit`, this assigns
     // `fieldProps.meta = {}` (an empty object). `meta` only ever populates
     // `unit`, so the `metric_type` half of the guard looks unintentional.
@@ -124,21 +140,29 @@ export class MappingsBuilder {
     if (field.subobjects !== undefined) {
       fieldProps.subobjects = field.subobjects;
     }
+  }
 
-    // Even if we don't add the property because it has a wildcard, notify
-    // the parent that there is some kind of property, so the intermediate object
-    // is still created.
-    // This is done for legacy packages that include ambiguous mappings with objects
-    // without object type. This is not allowed starting on Package Spec v3.
-    context.hasNonDynamicTemplateMappings = true;
+  private processGroup(context: WalkContext, field: Field): Properties | undefined {
+    const handler = fieldTypeRegistry.group;
+    const groupResult = handler?.mapGroup?.(field, this, context);
+    if (groupResult === undefined) return undefined;
 
-    // Avoid including maps with wildcards, they have generated dynamic mappings.
-    if (field.name.includes('*')) {
+    const fieldProps = groupResult.fieldProps;
+
+    // Only propagate hasDynamicTemplateMappings upward when the group produced
+    // no static properties — matching original behavior.
+    if (groupResult.onlyDynamicTemplateMappings) context.hasDynamicTemplateMappings = true;
+
+    // A group that also has an object_type was merged with an object during deduplication.
+    // Generate the dynamic mapping for the object side too, and mark the group as dynamic.
+    if (field.object_type) {
+      this.addObjectAsDynamicMapping(context, field);
       context.hasDynamicTemplateMappings = true;
-      return;
+      fieldProps.type = 'object';
+      fieldProps.dynamic = true;
     }
 
-    context.properties[field.name] = fieldProps;
+    return fieldProps;
   }
 
   private addRuntimeField(context: WalkContext, field: Field, type: string) {
