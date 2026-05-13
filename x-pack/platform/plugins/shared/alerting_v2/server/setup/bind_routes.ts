@@ -37,6 +37,8 @@ import { UnsnoozeActionPolicyRoute } from '../routes/action_policies/unsnooze_ac
 import { UpdateActionPolicyRoute } from '../routes/action_policies/update_action_policy_route';
 import { UpdateActionPolicyApiKeyRoute } from '../routes/action_policies/update_action_policy_api_key_route';
 import { DeleteActionPolicyRoute } from '../routes/action_policies/delete_action_policy_route';
+import { ListExecutionHistoryRoute } from '../routes/action_policies/list_execution_history_route';
+import { CountNewExecutionHistoryEventsRoute } from '../routes/action_policies/count_new_execution_history_events_route';
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
 import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_route';
@@ -44,6 +46,8 @@ import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_pro
 import { ListInsightsRoute } from '../routes/rule_doctor_insights/list_insights_route';
 import { GetInsightRoute } from '../routes/rule_doctor_insights/get_insight_route';
 import { UpdateInsightStatusRoute } from '../routes/rule_doctor_insights/update_insight_status_route';
+import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
+import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 
 /**
  * TODO: https://github.com/elastic/rna-program/issues/426
@@ -83,6 +87,8 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(SnoozeActionPolicyRoute);
   bind(Route).toConstantValue(UnsnoozeActionPolicyRoute);
   bind(Route).toConstantValue(BulkActionActionPoliciesRoute);
+  bind(Route).toConstantValue(ListExecutionHistoryRoute);
+  bind(Route).toConstantValue(CountNewExecutionHistoryEventsRoute);
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
 
@@ -93,4 +99,6 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(UpdateInsightStatusRoute);
   // TODO(rna-program#426): remove this binding before GA.
   bind(Route).toConstantValue(ResetResourcesRoute);
+  bind(Route).toConstantValue(UpsertRuleRoute);
+  bind(Route).toConstantValue(UpsertActionPolicyRoute);
 }

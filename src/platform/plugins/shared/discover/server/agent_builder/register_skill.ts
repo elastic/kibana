@@ -125,6 +125,16 @@ You MUST include this section after the visualization. Write 3 targeted follow-u
 
 Present each query in an esql-tagged code block with a brief explanation of what it investigates and why. Only if the discover_run_query tool is available, tell the user they can ask you to run any of these queries in a new Discover tab. If the tool is not available, do NOT mention this capability.
 
+#### 5. What else I can do
+You MUST include this section as the final part of your response. Do NOT skip it. Briefly tell the user — in 2-3 sentences or a short bullet list — what additional on-demand analyses they can ask for. Phrase it as an invitation, not a list of features. Cover all three:
+- **Correlations** — find relationships between fields (e.g. "do correlations exist between status and response time?").
+- **Time-over-time comparison** — compare the current period against a previous one (e.g. "compare this week to last week").
+- **Field statistics** — top values, distributions, min/max/avg for specific fields (e.g. "show me field stats for status").
+
+Use natural phrasing. Example: "I can also run a few other analyses on this data — just ask. I can look for correlations between fields, compare this time range against a previous one, or break down field statistics (top values, ranges, distributions) for any column you're interested in."
+
+Do NOT execute any of these — only mention them as next-step options.
+
 ### Additional Capabilities
 - If the discover_run_query tool is available and the user asks to run or open a query in Discover, use it. This opens the query in Discover.`,
   getRegistryTools: () => TOOL_IDS,

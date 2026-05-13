@@ -53,7 +53,6 @@ export const ExternalLinkComponent = ({
         content: link.error?.message,
         position: layout === LINKS_VERTICAL_LAYOUT ? 'right' : 'bottom',
         repositionOnScroll: true,
-        delay: 'long',
         'data-test-subj': `${testId}--tooltip`,
       }}
       iconType={link.error ? 'warning' : undefined}
