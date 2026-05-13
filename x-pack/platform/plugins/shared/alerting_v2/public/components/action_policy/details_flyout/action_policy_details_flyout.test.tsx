@@ -24,6 +24,11 @@ jest.mock('@kbn/core-di-browser', () => ({
         client: { get: () => 'YYYY-MM-DD HH:mm' },
       };
     }
+    if (token === 'http') {
+      return {
+        basePath: { prepend: (path: string) => `/base${path}` },
+      };
+    }
     return {};
   },
   CoreStart: (key: string) => key,
@@ -51,6 +56,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   version: 'v1',
   name: 'Critical alerts policy',
   description: 'Routes critical alerts to the oncall workflow',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   destinations: [
     { type: 'workflow', id: 'wf-1' },
@@ -133,6 +140,23 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
       renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('renders a "Global" badge for global policies', () => {
+      renderFlyout({ policy: createPolicy({ type: 'global', ruleId: null }) });
+
+      expect(screen.getByText('Global')).toBeInTheDocument();
+      expect(screen.queryByText('Single rule')).not.toBeInTheDocument();
+    });
+
+    it('renders a "Single rule" badge and a link to the rule details for single_rule policies', () => {
+      renderFlyout({
+        policy: createPolicy({ type: 'single_rule', ruleId: 'rule-42' }),
+      });
+
+      expect(screen.getByText('Single rule')).toBeInTheDocument();
+      const link = screen.getByTestId('actionPolicyDetailsFlyoutLinkedRuleLink');
+      expect(link).toHaveAttribute('href', expect.stringContaining('rule-42'));
     });
   });
 
