@@ -53,6 +53,9 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/user-profile-components'
   - '@kbn/unified-data-table'
+  - '@kbn/charts-plugin'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/unified-doc-viewer-plugin'
 tags:
   - shared-browser
   - package
