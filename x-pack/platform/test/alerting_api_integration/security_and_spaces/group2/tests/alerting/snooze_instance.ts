@@ -244,7 +244,11 @@ export default function createSnoozeAlertInstanceTests({ getService }: FtrProvid
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getUnauthorizedErrorMessage('snoozeAlert', 'test.restricted-noop', 'alerts'),
+                message: getUnauthorizedErrorMessage(
+                  'snoozeAlert',
+                  'test.restricted-noop',
+                  'alerts'
+                ),
                 statusCode: 403,
               });
               break;
