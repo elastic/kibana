@@ -99,9 +99,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('verify the inline configuration panel is interactive', async () => {
-      // The simplified inline editor for ES|QL viz no longer surfaces the legacy
-      // `lns_colorEditing_trigger`; assert against stable controls in the
-      // inline-edit flyout wrapper that are present for ES|QL panels.
       await expect(page.testSubj.locator('inlineEditingFlyoutLabel')).toBeVisible();
     });
 
@@ -175,9 +172,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       );
       const copyModal = page.locator('[role="dialog"][aria-labelledby="copyToDashboardTitle"]');
       await expect(copyModal).toBeVisible();
-      // Clicking the EuiRadio wrapper does not toggle the underlying input
-      // reliably; clicking the associated label does (same pattern as the
-      // "save to a new dashboard" step above).
       await page.locator('label[for="new-dashboard-option"]').click();
       await expect(page.testSubj.locator('confirmCopyToButton')).toBeEnabled();
       await page.testSubj.click('confirmCopyToButton');
