@@ -13,8 +13,8 @@ import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-pl
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
-import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 import { of } from 'rxjs';
+import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export type Api = DefaultEmbeddableApi<{}>;
 
