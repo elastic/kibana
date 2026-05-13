@@ -100,13 +100,23 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
-  private patternExtractionService?: PatternExtractionService;
+  /**
+   * Always defined: initialized in the constructor before any consumer can
+   * see it. Downstream registration code therefore types it as required;
+   * the optional `?` was removed alongside the `service_unavailable`
+   * fallback in `design_pipeline.ts`.
+   */
+  private patternExtractionService: PatternExtractionService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
     this.processorSuggestionsService = new ProcessorSuggestionsService();
+    this.patternExtractionService = new PatternExtractionService(
+      this.config.workers.patternExtraction,
+      this.logger.get('patternExtraction')
+    );
   }
 
   public setup(
@@ -117,11 +127,6 @@ export class StreamsPlugin
       config: this.config,
       logger: this.logger,
     } as StreamsServer;
-
-    this.patternExtractionService = new PatternExtractionService(
-      this.config.workers.patternExtraction,
-      this.logger.get('patternExtraction')
-    );
 
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
@@ -573,6 +578,6 @@ export class StreamsPlugin
   }
 
   public async stop() {
-    await this.patternExtractionService?.stop();
+    await this.patternExtractionService.stop();
   }
 }
