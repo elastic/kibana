@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
+import type { z } from '@kbn/zod/v4';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
@@ -89,9 +90,11 @@ export interface RowContext {
  * View props for reference-based unified attachments (e.g., alerts, events)
  * These attachments reference external entities by ID
  */
-export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentViewProps {
+export interface UnifiedReferenceAttachmentViewProps<
+  Metadata = UnifiedReferenceAttachmentPayload['metadata']
+> extends CommonAttachmentViewProps {
   attachmentId: UnifiedReferenceAttachmentPayload['attachmentId'];
-  metadata?: UnifiedReferenceAttachmentPayload['metadata'];
+  metadata?: Metadata;
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;
@@ -101,8 +104,9 @@ export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentVie
  * View props for value-based unified attachments (e.g., lens, user comments)
  * These attachments contain data/content directly
  */
-export interface UnifiedValueAttachmentViewProps extends CommonAttachmentViewProps {
-  data: UnifiedValueAttachmentPayload['data'];
+export interface UnifiedValueAttachmentViewProps<Data = UnifiedValueAttachmentPayload['data']>
+  extends CommonAttachmentViewProps {
+  data: Data;
   createdBy: CaseUser;
   version: string;
   rowContext: RowContext;
@@ -120,10 +124,18 @@ export interface AttachmentType<Props> {
   schemaValidator?: (data: unknown) => void;
 }
 
+interface UnifiedAttachmentSchema {
+  /** Full-payload zod schema. Preferred over `schemaValidator`. */
+  schema?: z.ZodType;
+}
+
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
-export type UnifiedReferenceAttachmentType = AttachmentType<UnifiedReferenceAttachmentViewProps>;
-export type UnifiedValueAttachmentType = AttachmentType<UnifiedValueAttachmentViewProps>;
+export type UnifiedReferenceAttachmentType<
+  Metadata = UnifiedReferenceAttachmentPayload['metadata']
+> = AttachmentType<UnifiedReferenceAttachmentViewProps<Metadata>> & UnifiedAttachmentSchema;
+export type UnifiedValueAttachmentType<Data = UnifiedValueAttachmentPayload['data']> =
+  AttachmentType<UnifiedValueAttachmentViewProps<Data>> & UnifiedAttachmentSchema;
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
@@ -135,3 +147,29 @@ export interface AttachmentFramework {
     unifiedAttachmentType: UnifiedReferenceAttachmentType | UnifiedValueAttachmentType
   ) => void;
 }
+
+/** A payload with `attachmentId` is a reference attachment; otherwise it's value. */
+type IsReferenceSchema<S extends z.ZodType> = z.infer<S> extends { attachmentId: string }
+  ? true
+  : false;
+
+/** Narrow registration type — renderers see typed `data`/`metadata` from `schema`. */
+type UnifiedAttachmentTypeFromSchema<S extends z.ZodType> = IsReferenceSchema<S> extends true
+  ? UnifiedReferenceAttachmentType<z.infer<S> extends { metadata?: infer M } ? M : never>
+  : z.infer<S> extends { data: infer D }
+  ? UnifiedValueAttachmentType<D>
+  : never;
+
+/** Broad registration type returned to callers; avoids a union (contravariant intersection on view props). */
+type UnifiedAttachmentTypeForRegistry<S extends z.ZodType> = IsReferenceSchema<S> extends true
+  ? UnifiedReferenceAttachmentType
+  : UnifiedValueAttachmentType;
+
+/**
+ * Defines a unified attachment. Renderer prop narrowing (`data` / `metadata`)
+ * is inferred from `schema`, which the registry also uses for full-payload validation.
+ */
+export const defineAttachment = <S extends z.ZodType>(
+  attachmentType: UnifiedAttachmentTypeFromSchema<S> & { schema: S }
+): UnifiedAttachmentTypeForRegistry<S> =>
+  attachmentType as unknown as UnifiedAttachmentTypeForRegistry<S>;

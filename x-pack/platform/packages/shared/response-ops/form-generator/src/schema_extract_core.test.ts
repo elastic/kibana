@@ -270,6 +270,16 @@ describe('extractSchemaCore', () => {
       expect(getMeta(result.schema).disabled).toBe(true);
     });
 
+    it('should use the outermost default when ZodDefaults are nested', () => {
+      // Mirrors getSchemaForAuthType wrapping a connector-spec default override
+      // around an auth type's built-in default (e.g. useBasicAuth: false over true)
+      const schema = z.boolean().default(true).optional().default(false);
+      const result = extractSchemaCore(schema, meta);
+
+      expect(result.defaultValue).toBe(false);
+      expect(result.isOptional).toBe(true);
+    });
+
     it('should unwrap multiple optional wrappers', () => {
       // Note: This is an unusual case but should still work
       const schema = z.string().optional().optional();
