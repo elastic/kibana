@@ -6,3 +6,4 @@
  */
 
 export const INGEST_HUB_ENABLED_FLAG = 'ingestHub.enabled';
+export const INGEST_HUB_ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
