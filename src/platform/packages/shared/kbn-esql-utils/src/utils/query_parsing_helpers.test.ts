@@ -998,11 +998,11 @@ describe('esql query helpers', () => {
       expect(getSparklineColumns(esql)).toEqual(['Sparkline']);
     });
 
-    it('should return bare SPARKLINE expression as column id', () => {
+    it('should return bare SPARKLINE expression as column id using source text', () => {
       const esql =
         'FROM index | STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(msg)';
       expect(getSparklineColumns(esql)).toEqual([
-        'SPARKLINE(COUNT(*),@timestamp,10,?_tstart,?_tend)',
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
       ]);
     });
 
@@ -1023,11 +1023,11 @@ describe('esql query helpers', () => {
       expect(getSparklineColumns(esql)).toEqual(['my_spark']);
     });
 
-    it('should return bare SPARKLINE expression from INLINE STATS as column id', () => {
+    it('should return bare SPARKLINE expression from INLINE STATS as column id using source text', () => {
       const esql =
         'FROM index | INLINE STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)';
       expect(getSparklineColumns(esql)).toEqual([
-        'SPARKLINE(COUNT(*),@timestamp,10,?_tstart,?_tend)',
+        'SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend)',
       ]);
     });
 
@@ -1041,6 +1041,15 @@ describe('esql query helpers', () => {
       const esql =
         'FROM index | INLINE STATS Spark = SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) | RENAME Spark AS MySpark';
       expect(getSparklineColumns(esql)).toEqual(['MySpark']);
+    });
+
+    it('should return source text for bare SPARKLINE alongside an aliased SPARKLINE in the same STATS', () => {
+      const esql =
+        'FROM logs | STATS sparkline = SPARKLINE(AVG(bytes), timestamp, 50, ?_tstart, ?_tend), SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend), Count = COUNT(*) BY clientip';
+      expect(getSparklineColumns(esql)).toEqual([
+        'sparkline',
+        'SPARKLINE(COUNT(*), timestamp, 50, ?_tstart, ?_tend)',
+      ]);
     });
 
     it('should handle SPARKLINE with an aggregate inline WHERE filter', () => {

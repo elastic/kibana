@@ -556,8 +556,11 @@ export const getSparklineColumns = (esql: string): string[] => {
       return;
     }
     if (arg.name === 'sparkline') {
-      // STATS/INLINE STATS SPARKLINE(field) — bare, unaliased
-      columns.push(arg.text);
+      // Bare (unaliased) SPARKLINE — extract the column name from the original query source
+      // rather than arg.text, because Elasticsearch names bare aggregate expressions using
+      // the source text (e.g. "SPARKLINE(COUNT(*), ts, 50, ...)") while arg.text is the
+      // compact printer form without spaces, which would not match the column ID in results.
+      columns.push(esql.substring(arg.location.min, arg.location.max + 1));
       return;
     }
     if (
