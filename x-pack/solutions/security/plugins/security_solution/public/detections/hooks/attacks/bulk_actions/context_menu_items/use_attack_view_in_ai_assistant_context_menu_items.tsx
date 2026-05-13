@@ -38,7 +38,7 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
 }: UseAttackViewInAiAssistantContextMenuItemsProps): {
   items: EuiContextMenuPanelItemDescriptorEntry[];
 } => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantVisible } = useAssistantAvailability();
   const { registerPromptContext, showAssistantOverlay, unRegisterPromptContext } =
     useAssistantContext();
   const {
@@ -125,6 +125,10 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
       ];
     }
 
+    if (!isAssistantVisible) {
+      return [];
+    }
+
     return [
       {
         name: i18n.VIEW_IN_AI_ASSISTANT,
@@ -142,6 +146,7 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
     hasAgentBuilderPrivilege,
     isAddToChatDisabled,
     isAgentChatExperienceEnabled,
+    isAssistantVisible,
     onViewInAgentBuilder,
     onViewInAiAssistant,
     viewInAiAssistantDisabled,
