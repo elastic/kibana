@@ -129,7 +129,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
             <EuiFlexGroup gutterSize="xs" direction="column">
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">
                         <strong>
@@ -142,6 +142,7 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
                         type="info"
+                        iconProps={{ size: 's', color: 'subdued' }}
                         content={i18n.translate(
                           'xpack.searchSharedUI.trialUsageBadge.trialPeriodTooltip',
                           {
