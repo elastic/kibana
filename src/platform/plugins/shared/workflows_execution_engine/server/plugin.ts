@@ -1235,6 +1235,20 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
+      // Freshness guard: a waitForInput step whose parent workflow already
+      // terminated (timeout, cancel, external failure) can leave the execution
+      // doc with `status: waiting_for_input` but `finishedAt` set — writing
+      // resumeInput and scheduling a resume task in that state is a no-op that
+      // silently swallows the analyst's response. Reject explicitly so the
+      // caller sees a 409 and the Inbox provider can surface a real error.
+      if (workflowExecution.finishedAt) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          `${workflowExecution.status} (already finished at ${workflowExecution.finishedAt})`,
+          ExecutionStatus.WAITING_FOR_INPUT
+        );
+      }
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: executionId,
         context: { ...workflowExecution.context, resumeInput: input },
@@ -1290,9 +1304,19 @@ export class WorkflowsExecutionEnginePlugin
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {
-      this.initializePromise = createIndexes({
+      // Clear the cached promise on rejection so a transient failure (e.g. an ES
+      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
+      // callers still share the same attempt; only the *next* call after rejection
+      // gets a fresh `createIndexes` invocation.
+      const attempt = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
         logger: this.logger,
+      });
+      this.initializePromise = attempt;
+      attempt.catch(() => {
+        if (this.initializePromise === attempt) {
+          this.initializePromise = undefined;
+        }
       });
     }
     await this.initializePromise;

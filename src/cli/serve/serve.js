@@ -8,6 +8,7 @@
  */
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
+import chalk from 'chalk';
 import _ from 'lodash';
 import { resolve } from 'path';
 import url from 'url';
@@ -564,8 +565,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
     MOCK_IDP_KIBANA_BASE_PATH,
-    MOCK_IDP_REALM_NAME,
-    MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
+    MOCK_IDP_REALM_NAME, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
 
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
@@ -608,20 +608,31 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     });
   }
 
-  // Set a fake cloud.id so that the cloud plugin is activated (required by the mockIdpPlugin).
-  if (!_.has(rawConfig, 'xpack.cloud.id')) {
-    lodashSet(rawConfig, 'xpack.cloud.id', 'ftr_fake_cloud_id');
-  }
-
-  if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
-    lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
-  }
-
-  // Pin Kibana to a fixed base path so SP/ACS endpoints in Elasticsearch's SAML realm stay aligned
-  // with Kibana's URL across restarts (the dev proxy otherwise generates a random one each run).
-  // Skipped when the user passed `--no-base-path` or already configured a custom value.
-  if (opts.basePath !== false && !_.has(rawConfig, 'server.basePath')) {
+  // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
+  if (opts.basePath !== false && !opts.runExamples && !_.has(rawConfig, 'server.basePath')) {
     lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
+  }
+
+  const basePath =
+    _.get(extraCliOptions, 'server.basePath') ?? _.get(rawConfig, 'server.basePath', '');
+
+  if (!_.has(rawConfig, 'server.publicBaseUrl')) {
+    const protocol = _.get(rawConfig, 'server.ssl.enabled') ? 'https' : 'http';
+    const host = _.get(rawConfig, 'server.host', 'localhost');
+    const port = _.get(rawConfig, 'server.port', 5601);
+
+    lodashSet(rawConfig, 'server.publicBaseUrl', `${protocol}://${host}:${port}${basePath}`);
+  }
+
+  if (basePath !== MOCK_IDP_KIBANA_BASE_PATH) {
+    const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
+    const label = chalk.black.bgYellow(' saml-mock-idp ');
+    console.warn(label, '='.repeat(100));
+    console.warn(
+      label,
+      `Kibana is running with a non-default base path. Make sure to use the --kibanaUrl=${publicBaseUrl} parameter while running the local ES cluster.`
+    );
+    console.warn(label, '='.repeat(100));
   }
 
   return true;

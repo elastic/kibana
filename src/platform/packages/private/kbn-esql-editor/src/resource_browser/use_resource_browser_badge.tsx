@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { getSupportedCommand } from './utils';

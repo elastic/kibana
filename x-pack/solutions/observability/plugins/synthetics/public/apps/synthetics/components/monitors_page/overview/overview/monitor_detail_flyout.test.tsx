@@ -188,6 +188,115 @@ describe('Monitor Detail Flyout', () => {
     expect(getByText('test-id'));
   });
 
+  describe('remote monitor flyout', () => {
+    it('renders remote monitor details panel instead of infinite spinner', () => {
+      const { getByText, queryByRole } = render(
+        <MonitorDetailFlyout
+          configId="remote-config-id"
+          id="remote-monitor-id"
+          location="europe-west3-a"
+          locationId="europe-west3-a"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+              syntheticsMonitorLoading: false,
+            },
+            overviewStatus: {
+              status: {
+                upConfigs: {
+                  'remote-config-id-europe-west3-a': {
+                    monitorQueryId: 'remote-monitor-id',
+                    configId: 'remote-config-id',
+                    name: 'Remote HTTPS Monitor',
+                    type: 'http',
+                    schedule: '10',
+                    tags: ['production'],
+                    isEnabled: true,
+                    isStatusAlertEnabled: false,
+                    overallStatus: 'up',
+                    urls: 'https://medium.com/',
+                    remote: {
+                      remoteName: 'remote-cluster-1',
+                      kibanaUrl: 'https://remote-kibana.example.com',
+                    },
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
+                  },
+                },
+                downConfigs: {},
+                pendingConfigs: {},
+                disabledConfigs: {},
+              },
+            },
+          },
+        }
+      );
+
+      fireEvent.click(getByText('Details'));
+
+      // Should show the remote monitor details, not a loading spinner
+      expect(getByText('Monitor details')).toBeInTheDocument();
+      expect(getByText('remote-config-id')).toBeInTheDocument();
+      expect(getByText('Remote cluster')).toBeInTheDocument();
+      expect(getByText('remote-cluster-1')).toBeInTheDocument();
+      expect(queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+
+    it('renders "View on remote cluster" button instead of "Go to monitor"', () => {
+      const { getByText, queryByText } = render(
+        <MonitorDetailFlyout
+          configId="remote-config-id"
+          id="remote-monitor-id"
+          location="europe-west3-a"
+          locationId="europe-west3-a"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />,
+        {
+          state: {
+            monitorDetails: {
+              syntheticsMonitor: null,
+            },
+            overviewStatus: {
+              status: {
+                upConfigs: {
+                  'remote-config-id-europe-west3-a': {
+                    monitorQueryId: 'remote-monitor-id',
+                    configId: 'remote-config-id',
+                    name: 'Remote HTTPS Monitor',
+                    type: 'http',
+                    schedule: '10',
+                    tags: [],
+                    isEnabled: true,
+                    isStatusAlertEnabled: false,
+                    overallStatus: 'up',
+                    remote: {
+                      remoteName: 'remote-cluster-1',
+                      kibanaUrl: 'https://remote-kibana.example.com',
+                    },
+                    locations: [{ id: 'europe-west3-a', label: 'europe-west3-a', status: 'up' }],
+                  },
+                },
+                downConfigs: {},
+                pendingConfigs: {},
+                disabledConfigs: {},
+              },
+            },
+          },
+        }
+      );
+
+      expect(getByText('View on remote cluster')).toBeInTheDocument();
+      expect(queryByText('Go to monitor')).not.toBeInTheDocument();
+      expect(queryByText('Edit monitor')).not.toBeInTheDocument();
+    });
+  });
+
   describe('agent builder attachment', () => {
     const mockSetChatConfig = jest.fn();
     const mockClearChatConfig = jest.fn();

@@ -13,7 +13,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
-import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
+import { getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { writeErrorHandler } from '../write_error_handler';
@@ -43,7 +43,7 @@ export function registerCreateRoute(
       version: routeVersion,
       validate: () => ({
         request: {
-          body: getCreateRequestBodySchema(isDashboardAppRequest),
+          body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
           201: {
