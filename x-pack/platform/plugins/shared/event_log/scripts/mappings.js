@@ -331,6 +331,13 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      cps_scope_expression: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+      cps_scope_linked_projects: {
+        type: 'flattened',
+      },
       space_ids: {
         type: 'keyword',
         ignore_above: 1024,
