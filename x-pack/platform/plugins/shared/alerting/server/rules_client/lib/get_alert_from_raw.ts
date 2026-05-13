@@ -181,7 +181,6 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       opts.references || []
     ) as Params,
     ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
-    snoozedInstanceIds: (snoozedInstances ?? []).map((s) => s.instanceId),
     ...(includeSnoozeData && !excludeFromPublicApi
       ? {
           activeSnoozes: getActiveScheduledSnoozes({

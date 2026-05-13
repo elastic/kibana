@@ -265,7 +265,6 @@ export interface Rule<Params extends RuleTypeParams = never> {
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
-  snoozedInstanceIds?: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
