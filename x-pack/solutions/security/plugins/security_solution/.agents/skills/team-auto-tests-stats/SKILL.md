@@ -1,27 +1,22 @@
 ---
 name: team-auto-tests-stats
 description: >
-  Use when someone needs an `@elastic/<team>` automation and test inventory tied to CODEOWNERS, Buildkite
-  execution phases, and per-framework counts/skips for FTR, Cypress, and Scout (including Playwright `--list` for
-  Scout). Typical asks: team automation stats, where Security Solution tests run in CI, Scout vs Cypress coverage by
-  ownership. Markdown deliverables belong only under gitignored `.agents/tmp/` at the repo root, never committed `docs/`.
+  Use when someone needs an `@elastic/<team>` automation and test inventory tied to CODEOWNERS,
+  Buildkite execution phases, and per-framework counts/skips for FTR, Cypress, and Scout
+  (including Playwright `--list`). Typical asks: team automation stats, where Security Solution
+  tests run in CI, Scout vs Cypress coverage by ownership; per-team or multi-team `@elastic/`
+  visibility; auditing completeness of the three framework rows. Deliver markdown only under
+  gitignored `.agents/tmp/`, never `docs/`. Do not use for CI Stats volume, flaky-test mining,
+  GitHub skipped-test triage, or repo-wide Jest unit counts unless explicitly requested.
 ---
 
 # Elastic team testing / automation inventory
 
 ## Overview
 
-Structured inventory: **ownership paths that contain tests**, a fixed **FTR / Cypress / Scout** table (counts + skips), **where tests run** in Buildkite, and optional **Scout coverage** rows. Follow the workflow checklist and §§1–6 — the YAML `description` above is for discovery only, not a shortcut for the steps below.
+Structured inventory: **ownership paths that contain tests**, a fixed **FTR / Cypress / Scout** table (counts + skips), **where tests run** (Buildkite plus Elastic Cloud / Appex QA where relevant), and optional **Scout coverage** rows.
 
-## When to use
-
-- Per-team or multi-team **`@elastic/`** automation visibility (counts, skips, CI phases).
-- Auditing completeness of FTR/Cypress/Scout rows for an owning team.
-
-## When not to use
-
-- CI Stats volume, flaky-test mining, or GitHub `skipped-test` triage (see **Out of scope**).
-- Repo-wide Jest unit counts unless explicitly requested later.
+YAML **`description`** carries **when / when-not triggers** for discovery. **Procedure** lives in the workflow checklist and §§1–6 below — read those sections to execute; **do not** infer operational steps from the YAML alone.
 
 ## Terminology (Tests table)
 
@@ -70,15 +65,16 @@ Reports live under **`.agents/tmp/<file>.md`** (two levels below repo root). Eve
 
 ## Workflow checklist
 
-- [ ] **Output:** **`.agents/tmp/team-automation-<slug>.md`** only — **`../../`** on every link; no `docs/` copy
-- [ ] **Ownership** (§1): test-relevant CODEOWNERS prefixes only
-- [ ] Scout configs under those prefixes
-- [ ] Per owned Scout config dir: `npx playwright test --list --reporter=json` → integer via [scripts/count_playwright_list_unique_specs.mjs](scripts/count_playwright_list_unique_specs.mjs); **Scout `Test Cases` row** = **sum** of those integers (see §2)
-- [ ] Cypress `*.cy.ts(x)` — **Test Cases** heuristic + static skips + **@skipIn…** tag skips (§3)
-- [ ] Table **Tests**: always **FTR**, **Cypress**, **Scout** in that order; each row filled per §§2–4 (**Completeness rule** — no placeholder **0** without searching owned trees)
-- [ ] **Execution phase** table from `.buildkite/` — use **`../../.buildkite/...`** markdown links (comma-separated when several apply); literal **`-`** when `No`
-- [ ] **Coverage and descriptions** (Scout API or UI): run `extract_scout_api_coverage_md.mjs` via **`$REPO_ROOT`/… path** as in §6 (link prefix **`../../x-pack/.../tests/`** or correct depth for that tree). Paste after **Execution phase**
-- [ ] **Done:** report exists only under **`.agents/tmp/`** — no copies under `docs/`
+Navigation only — details are in the referenced sections.
+
+- [ ] Output path, link prefix **`../../`**, no **`docs/`** copy (**§6**)
+- [ ] Ownership — test-relevant CODEOWNERS (**§1**)
+- [ ] Scout — configs, **`--list`**, sum rule, skips, Security Solution shared-config caveat (**§2**)
+- [ ] Cypress — counts & skips (**§3**)
+- [ ] FTR — counts & skips (**§4**)
+- [ ] **Completeness rule** — table rows **FTR**, **Cypress**, **Scout** in order; no placeholder zeros
+- [ ] **Execution phase** — `.buildkite/` links plus Elastic Cloud / Appex QA note (**§5**)
+- [ ] **Coverage and descriptions** — **`extract_scout_api_coverage_md.mjs`** (**§6**)
 
 ### 1) Ownership — CODEOWNERS (prefixes with tests only)
 
@@ -96,6 +92,8 @@ Reference (not for the table): `rg -n '@elastic/<slug>\b' .github/CODEOWNERS`
 ### 2) Scout (Playwright)
 
 Configs: `**/test/scout/**/playwright.config.ts`, `parallel.playwright.config.ts`, `scout_cspm_agentless` when owned.
+
+**Security Solution — shared Playwright config:** Feature-team Scout specs often sit under **one** shared Playwright config co-owned by **`@elastic/sec-eng-prod`** and **`@elastic/appex-qa`** (not per-feature-team CODEOWNERS). Until per-team config splits land, **`--list` scoped only to “configs owned by this team” can yield 0** even when the team has many Scout tests. **Interim:** attribute Scout **`Test Cases`** / skips to specs under that team’s **subtree within the shared Scout test tree** (by path / folder convention), not solely by config CODEOWNERS. Do **not** treat Scout **0** as valid if owned specs exist under that subtree (**Completeness rule**).
 
 Per config directory (from repo root, `REPO_ROOT="$(git rev-parse --show-toplevel)"`). **Do not** put JSON under `.agents/tmp/` — use **`/tmp/`** (or `$TMPDIR`):
 
@@ -133,7 +131,7 @@ References: `docs/extend/scout/skip-tests.md`.
 
 | Metric | Heuristic |
 |--------|-----------|
-| Test cases | `it(`, `context(`, `specify(` counts under ownership |
+| Test cases | **`it(`** and **`specify(`** counts under ownership (leaf tests only). **`context(`** is an alias for **`describe`**-style grouping — **do not** count **`context(`** toward **Test Cases**; use it only when identifying **suites** / skips / tags below. |
 | describe-level static skips | `describe.skip`, `context.skip`, nested describe skip patterns |
 | test-level static skips | `it.skip`, `xit`, `xcontext`, … |
 | Suite-level **tag** skips | Any `describe(` or `context(` **not** using `.skip`, whose options include `tags: [...]` with at least one string matching **`@skipIn`** (Security Solution convention: `@skipInServerless`, `@skipInServerlessMKI`, `@skipInServerlessQA`, … — grep owned specs for `'@skipIn` to discover current tags). Count **suite roots** separately from static skips; **K TC** = sum of `it(` / `specify(` leaves under that suite only. |
@@ -150,7 +148,7 @@ Reference: Cypress runner / config excludes tags per environment; inventory reco
 
 ### 4) FTR-oriented / integration-style
 
-Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Use the **same leaf markers** as Cypress where they appear (`it(`, `context(`, `specify(`); **other** FTR/Jest patterns may exist — **flag** in the report if counts look inconsistent rather than inventing new heuristics here.
+Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Count **leaf** tests with **`it(`** / **`specify(`** where those APIs appear (mirror Cypress §3 — **`context(`** groups suites, not TCs). **Other** FTR/Mocha patterns may exist — **flag** in the report if counts look inconsistent rather than inventing new heuristics here.
 
 **FTR row vs Jest units:** This row is for **FTR-style / integration paths** above. Ordinary **Jest unit** files (`*.test.ts`) under ownership are **not** mixed into the FTR **Test Cases** number unless you explicitly expand scope (see **Out of scope**).
 
@@ -166,13 +164,14 @@ The deliverable **Tests** table **always lists FTR**. If legacy suites remain on
 | Post-merge | [.buildkite/pipelines/on_merge.yml](../../../../../../../../.buildkite/pipelines/on_merge.yml) (`build_scout_tests`) |
 | Quality gates | `.buildkite/pipelines/quality-gates/`, `.buildkite/pipelines/security_solution_quality_gate/` |
 | Periodic | MKI periodic groups under `.buildkite/pipelines/security_solution_quality_gate/` |
+| Elastic Cloud / Appex QA | Scout (and related automation) may also run on Elastic Cloud pipelines documented for troubleshooting — see [Elastic Cloud pipelines](https://docs.elastic.dev/appex-qa/troubleshooting-cloud-failures#elastic-cloud-pipelines) (external). Supplements `.buildkite/` sources above. |
 
 **Deliverable (Execution phase):**
 
 - Title section: **`## Execution phase`**
 - First column header: **Execution phase**
 - Column **Executes tests:** `Yes` / `No`
-- Column **Pipeline / config:** **`../../.buildkite/...`** markdown links (comma-separated when several apply); literal **`-`** when `No`
+- Column **Pipeline / config:** **`../../.buildkite/...`** markdown links for in-repo configs (comma-separated when several apply); literal **`-`** when `No`. When Scout runs on Elastic Cloud / Appex QA only, cite that with the **external** link above (full URL in the generated report is OK — it is not under `.agents/tmp/../../`).
 
 ### 6) Markdown shape (`.agents/tmp/team-automation-<slug>.md`)
 
