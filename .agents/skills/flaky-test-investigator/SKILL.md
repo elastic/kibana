@@ -104,7 +104,7 @@ Ideally, query the AppEx QA cluster — see `appex-qa-cluster-queries.md`. Other
 Signs the environment is at fault rather than the test itself:
 
 - **The build had many unrelated failures**: a broad pattern of failures across unrelated tests in the same build points to an infrastructure issue (agent problems, network, downstream service outage).
-- **The test was polluted by another test**: most likely for Scout tests sharing a lane (see "How tests are distributed across servers"). Look at which other tests ran against the same servers in the failing build.
+- **The test was polluted by another test**: most likely for Scout tests sharing a lane (see "How tests are distributed across servers"). Look at which other tests ran against the same servers in the failing build. Check if the failing builds often share the same config run order pattern.
 - **The failure screenshot** could sometimes help. Example: it shows a loading Kibana logo, typically indicating that Kibana isn't completely operational.
 
 ## Recognize environment failures
