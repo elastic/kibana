@@ -13,6 +13,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginStart,
+} from '@kbn/workflows-management-plugin/server';
 
 export interface ThreatIntelligenceSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -20,6 +24,7 @@ export interface ThreatIntelligenceSetupDependencies {
   inference?: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ThreatIntelligenceStartDependencies {
@@ -27,6 +32,7 @@ export interface ThreatIntelligenceStartDependencies {
   inference?: InferenceServerStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
+  workflowsManagement?: WorkflowsServerPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -53,6 +53,10 @@ import type {
   WorkflowsService,
 } from './workflows_management_service';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
+import type {
+  BuiltinWorkflowCommand,
+  EnsureBuiltinWorkflowResult,
+} from '../services/builtin_workflows_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
@@ -242,6 +246,43 @@ export class WorkflowsManagementApi {
       this.notifySml(created.id, options?.overwrite ? 'update' : 'create', request);
     }
     return result;
+  }
+
+  /**
+   * Setup-time entry point for plugin-registered ("built-in") workflows.
+   *
+   * Unlike `createWorkflow` / `bulkCreateWorkflows` this method does **not**
+   * require a `KibanaRequest` and is safe to call from a plugin's `start()`
+   * lifecycle. It upserts the workflow by stable id on every call so it can
+   * be invoked unconditionally at boot.
+   *
+   * The scheduled triggers in the YAML are wired into Task Manager in
+   * "system" mode (no per-user API key). Until the workflows-execution-engine
+   * plugin accepts request-less scheduled runs, the workflow record is
+   * created and visible in the Workflows UI, but the scheduled trigger
+   * will not execute.
+   */
+  public async ensureBuiltinWorkflow(
+    workflow: BuiltinWorkflowCommand,
+    spaceId: string
+  ): Promise<EnsureBuiltinWorkflowResult> {
+    return this.workflowsService.ensureBuiltinWorkflow(workflow, spaceId);
+  }
+
+  /**
+   * Bulk variant of {@link ensureBuiltinWorkflow}. Each workflow is processed
+   * independently — a single failure does not abort the batch. The caller is
+   * expected to log any returned `failures` (typically partial-failure on a
+   * subset of bundled YAMLs) rather than throw.
+   */
+  public async bulkEnsureBuiltinWorkflows(
+    workflows: BuiltinWorkflowCommand[],
+    spaceId: string
+  ): Promise<{
+    results: EnsureBuiltinWorkflowResult[];
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    return this.workflowsService.bulkEnsureBuiltinWorkflows(workflows, spaceId);
   }
 
   public async cloneWorkflow(

@@ -24,7 +24,8 @@
     "@kbn/securitysolution-mitre-catalog",
     "@kbn/securitysolution-rules",
     "@kbn/spaces-plugin",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/workflows-management-plugin"
   ],
   "exclude": ["target/**/*"]
 }

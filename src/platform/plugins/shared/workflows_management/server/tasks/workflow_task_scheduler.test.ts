@@ -344,6 +344,51 @@ describe('WorkflowTaskScheduler', () => {
     });
   });
 
+  describe('scheduleWorkflowTask — system mode (no KibanaRequest)', () => {
+    it('schedules without `{ request }` when called without one', async () => {
+      const mockTm = makeMockTaskManager();
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      const taskId = await scheduler.scheduleWorkflowTask(
+        'test-workflow',
+        'default',
+        { type: 'scheduled', with: { every: '30s' } }
+        // no `request` — built-in workflows registered at plugin start use this path
+      );
+
+      expect(taskId).toBe('test-task-id');
+      expect(mockTm.schedule).toHaveBeenCalledTimes(1);
+      // Crucially: options is `undefined`, NOT `{ request: undefined }` — Task
+      // Manager treats the latter as a sign of incomplete plumbing and warns
+      // when security is disabled.
+      expect(mockTm.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'workflow:test-workflow:scheduled' }),
+        undefined
+      );
+    });
+
+    it('falls back to bulkUpdateSchedules without `{ request }` on 409 in system mode', async () => {
+      const conflictError = new Error('Conflict') as Error & { statusCode: number };
+      conflictError.statusCode = 409;
+      const mockTm = makeMockTaskManager();
+      mockTm.schedule.mockRejectedValueOnce(conflictError);
+      const scheduler = new WorkflowTaskScheduler(mockLogger, mockTm);
+
+      const taskId = await scheduler.scheduleWorkflowTask(
+        'test-workflow',
+        'default',
+        { type: 'scheduled', with: { every: '30s' } }
+      );
+
+      expect(taskId).toBe('workflow:test-workflow:scheduled');
+      expect(mockTm.bulkUpdateSchedules).toHaveBeenCalledWith(
+        ['workflow:test-workflow:scheduled'],
+        expect.objectContaining({ interval: '30s' }),
+        undefined
+      );
+    });
+  });
+
   describe('logging', () => {
     it('logs RRule scheduling details with readable format', async () => {
       const mockTm = makeMockTaskManager();

@@ -14,7 +14,7 @@ import type { z } from '@kbn/zod/v4';
 
 import type { WorkflowValidationDeps } from './types';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
-import { getWorkflowZodSchema } from '../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAvailableConnectors } from '../api/lib/workflow_connectors';
 
 export class WorkflowValidationService {
@@ -51,5 +51,22 @@ export class WorkflowValidationService {
     const registeredTriggerIds =
       this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
     return getWorkflowZodSchema(connectorTypes, registeredTriggerIds);
+  }
+
+  /**
+   * Build the validation schema for a built-in workflow registered at plugin
+   * setup time. Built-ins ship without a `KibanaRequest`, so we skip the
+   * per-user actions client lookup and validate against the loose schema
+   * (no dynamic connector type narrowing). The loose schema still enforces
+   * step / trigger structure, top-level fields, and built-in step types —
+   * which is all built-ins need.
+   *
+   * Connectors referenced by a built-in YAML are not type-checked here; they
+   * are resolved at execution time. Built-ins should only reference system
+   * step types or operator-installed connectors that exist before the plugin
+   * starts.
+   */
+  getBuiltinWorkflowZodSchema(): z.ZodType {
+    return getWorkflowZodSchemaLoose();
   }
 }

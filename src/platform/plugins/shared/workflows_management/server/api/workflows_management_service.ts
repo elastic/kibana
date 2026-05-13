@@ -58,6 +58,11 @@ import type {
 } from './workflows_management_api';
 
 import type { BulkFailureEntry } from '../lib/bulk_id_helpers';
+import {
+  BuiltinWorkflowsService,
+  type BuiltinWorkflowCommand,
+  type EnsureBuiltinWorkflowResult,
+} from '../services/builtin_workflows_service';
 import { WorkflowCrudService } from '../services/workflow_crud_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
@@ -90,6 +95,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private builtinService!: BuiltinWorkflowsService;
   private getActionsClient!: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest!: (
     request: KibanaRequest
@@ -146,6 +152,17 @@ export class WorkflowsService {
     });
 
     this.crudService = new WorkflowCrudService({
+      logger: this.logger,
+      esClient: this.esClient,
+      workflowStorage: this.workflowStorage,
+      getSecurity: () => this.coreStart.security,
+      workflowsExtensions: this.workflowsExtensions,
+      getTaskScheduler: () => this.taskScheduler,
+      executionQueryService: this.executionQueryService,
+      validationService: this.validationService,
+    });
+
+    this.builtinService = new BuiltinWorkflowsService({
       logger: this.logger,
       esClient: this.esClient,
       workflowStorage: this.workflowStorage,
@@ -222,6 +239,29 @@ export class WorkflowsService {
   ): Promise<{ created: WorkflowDetailDto[]; failed: BulkFailureEntry[] }> {
     await this.ensureInitialized();
     return this.crudService.bulkCreateWorkflows(workflows, spaceId, request, options);
+  }
+
+  /**
+   * Idempotently register a built-in workflow owned by a Kibana plugin.
+   * See {@link BuiltinWorkflowsService} for the contract.
+   */
+  public async ensureBuiltinWorkflow(
+    workflow: BuiltinWorkflowCommand,
+    spaceId: string
+  ): Promise<EnsureBuiltinWorkflowResult> {
+    await this.ensureInitialized();
+    return this.builtinService.ensureWorkflow(workflow, spaceId);
+  }
+
+  public async bulkEnsureBuiltinWorkflows(
+    workflows: BuiltinWorkflowCommand[],
+    spaceId: string
+  ): Promise<{
+    results: EnsureBuiltinWorkflowResult[];
+    failures: Array<{ id: string; error: string }>;
+  }> {
+    await this.ensureInitialized();
+    return this.builtinService.bulkEnsureWorkflows(workflows, spaceId);
   }
 
   public async updateWorkflow(

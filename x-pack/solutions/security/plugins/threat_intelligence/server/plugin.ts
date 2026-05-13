@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { parseExperimentalConfigValue, type ExperimentalFeatures } from '../common';
 import type { ThreatIntelligenceConfig } from './config';
 import type {
@@ -32,6 +33,7 @@ import { installIndexTemplates } from './setup/index_templates';
 import { seedDefaultSources } from './setup/seed_default_sources';
 import { threatIntelligenceUiSettings } from './ui_settings';
 import { registerIocIndicatorSyncTask, scheduleIocIndicatorSyncTask } from './tasks';
+import { installBuiltinWorkflows } from './workflows';
 
 export class ThreatIntelligencePlugin
   implements
@@ -52,6 +54,10 @@ export class ThreatIntelligencePlugin
   // `generalize_from_telemetry`) can build a `ScopedModel` per request
   // without requiring the inference plugin at the setup boundary.
   private inferenceService: InferenceServerStart | undefined;
+  // Captured during setup() so built-in workflow registration can be deferred
+  // to start(), where the WorkflowsManagementApi has finished its async
+  // initialization (the API gates every method behind its own `initPromise`).
+  private workflowsManagement: WorkflowsServerPluginSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ThreatIntelligenceConfig>) {
     this.logger = initializerContext.logger.get();
@@ -69,7 +75,8 @@ export class ThreatIntelligencePlugin
     coreSetup: CoreSetup<ThreatIntelligenceStartDependencies, ThreatIntelligencePluginStart>,
     setupDeps: ThreatIntelligenceSetupDependencies
   ): ThreatIntelligencePluginSetup {
-    const { agentBuilder, features, taskManager } = setupDeps;
+    const { agentBuilder, features, taskManager, workflowsManagement } = setupDeps;
+    this.workflowsManagement = workflowsManagement;
 
     // Register the Kibana feature with the three-tier privilege model
     // (read / write / admin) that gates route access. Routes thread the
@@ -174,6 +181,26 @@ export class ThreatIntelligencePlugin
           `Failed to install threat-intelligence index templates / seed data: ${err.message}`
         );
       });
+
+    // Built-in workflows are registered with Workflows Management when the
+    // optional plugin is available. The bundled YAMLs are upserted idempotently
+    // by stable id on every plugin start, so this call is safe to repeat across
+    // restarts and operator edits to the workflow records survive subsequent
+    // runs only when the YAML hasn't changed (see BuiltinWorkflowsService).
+    if (this.workflowsManagement) {
+      installBuiltinWorkflows({
+        workflowsManagement: this.workflowsManagement,
+        logger: this.logger,
+      }).catch((err) => {
+        this.logger.error(
+          `Failed to install threat-intelligence built-in workflows: ${err.message}`
+        );
+      });
+    } else {
+      this.logger.debug(
+        'workflowsManagement plugin not available — skipping built-in workflow registration'
+      );
+    }
 
     // Schedule the IOC indicator sync after Task Manager is up. The task
     // type itself was registered in setup; this call is idempotent on

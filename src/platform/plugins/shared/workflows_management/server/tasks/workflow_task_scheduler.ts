@@ -36,7 +36,7 @@ export class WorkflowTaskScheduler {
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request: KibanaRequest
+    request?: KibanaRequest
   ): Promise<string[]> {
     const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
@@ -63,12 +63,19 @@ export class WorkflowTaskScheduler {
    * Schedules a single workflow task for a specific trigger.
    * Idempotent: if the task already exists (409 conflict), updates the schedule in place
    * via bulkUpdateSchedules instead of failing. This handles both interval and RRule schedules.
+   *
+   * When `request` is omitted the task is scheduled in "system" mode — Task Manager
+   * does not mint a per-user API key, and the scheduled workflow runs under the
+   * internal user. Use this path for built-in workflows registered by a plugin at
+   * setup time (where no `KibanaRequest` is available). Built-in workflows that
+   * reference user-installed connectors will fail at run time; built-ins are
+   * expected to use only system-scoped step types.
    */
   async scheduleWorkflowTask(
     workflowId: string,
     spaceId: string,
     trigger: WorkflowTrigger,
-    request: KibanaRequest
+    request?: KibanaRequest
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
     const taskId = `workflow:${workflowId}:${trigger.type}`;
@@ -101,17 +108,24 @@ export class WorkflowTaskScheduler {
       enabled: true,
     };
 
+    // Only pass `{ request }` when one is available. Task Manager's `schedule()`
+    // treats `options?.request` as optional already; we keep the call shape clean
+    // so the system path is not coupled to API-key plumbing.
+    const scheduleOptions = request ? { request } : undefined;
+
     try {
-      // Use Task Manager's first-class API key support by passing the request.
-      // Task Manager will automatically create and manage the API key for user context.
-      const scheduledTask = await this.taskManager.schedule(taskInstance, { request });
+      const scheduledTask = await this.taskManager.schedule(taskInstance, scheduleOptions);
 
       return scheduledTask.id;
     } catch (err) {
       if ((err as { statusCode?: number }).statusCode === VERSION_CONFLICT_STATUS) {
         // Task already exists — update its schedule in place rather than failing.
         // This handles both interval and RRule schedule types.
-        const result = await this.taskManager.bulkUpdateSchedules([taskId], schedule, { request });
+        const result = await this.taskManager.bulkUpdateSchedules(
+          [taskId],
+          schedule,
+          scheduleOptions
+        );
         if (result.errors.length > 0) {
           const firstError = result.errors[0].error;
           // 409 (concurrent update) and 404 (task was just removed) are non-fatal
@@ -171,7 +185,7 @@ export class WorkflowTaskScheduler {
   async updateWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request: KibanaRequest
+    request?: KibanaRequest
   ): Promise<void> {
     // Schedule tasks idempotently — creates new tasks or updates existing ones in place.
     // No need to unschedule first since scheduleWorkflowTask handles 409 conflicts gracefully.
