@@ -19,15 +19,27 @@ describe('UrlValidator', () => {
       expect(validator.isHostnameAllowed('malicious.com')).toBe(true);
     });
 
-    it('should allow any URL', () => {
+    it('should allow any http/https URL', () => {
       expect(validator.isUrlAllowed('https://example.com/test')).toBe(true);
       expect(validator.isUrlAllowed('http://api.github.com/users')).toBe(true);
       expect(validator.isUrlAllowed('https://malicious.com/endpoint')).toBe(true);
     });
 
-    it('should not throw for any URL', () => {
+    it('should not throw for any http/https URL', () => {
       expect(() => validator.ensureUrlAllowed('https://example.com/test')).not.toThrow();
       expect(() => validator.ensureUrlAllowed('http://api.github.com/users')).not.toThrow();
+    });
+
+    it('should reject non-http schemes even with wildcard host', () => {
+      expect(validator.isUrlAllowed('file:///etc/passwd')).toBe(false);
+      expect(validator.isUrlAllowed('javascript://example.com/x')).toBe(false);
+      expect(validator.isUrlAllowed('data:text/html,<h1>test</h1>')).toBe(false);
+    });
+
+    it('should throw for non-http schemes with a scheme-specific message', () => {
+      expect(() => validator.ensureUrlAllowed('file:///etc/passwd')).toThrow(
+        'scheme "file" is not allowed'
+      );
     });
   });
 
@@ -48,12 +60,12 @@ describe('UrlValidator', () => {
       expect(validator.isUrlAllowed('https://github.com/users')).toBe(false);
     });
 
-    it('should throw for disallowed URLs', () => {
+    it('should throw for disallowed URLs without leaking the target host', () => {
       expect(() => validator.ensureUrlAllowed('https://malicious.com/test')).toThrow(
-        'target url "https://malicious.com/test" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
+        'Target host is not in the Kibana config workflowsExecutionEngine.http.allowedHosts'
       );
       expect(() => validator.ensureUrlAllowed('https://github.com/users')).toThrow(
-        'target url "https://github.com/users" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts'
+        'Target host is not in the Kibana config workflowsExecutionEngine.http.allowedHosts'
       );
     });
 
@@ -92,23 +104,47 @@ describe('UrlValidator', () => {
 
     it('should throw with protocol hint when URL is missing a protocol', () => {
       expect(() => validator.ensureUrlAllowed('example.com/api/endpoint')).toThrow(
-        'Invalid URL "example.com/api/endpoint". URLs must include a protocol (e.g., https://example.com/api/endpoint).'
+        'URLs must include a protocol'
       );
       expect(() => validator.ensureUrlAllowed('api.github.com/users')).toThrow(
-        'Invalid URL "api.github.com/users". URLs must include a protocol (e.g., https://api.github.com/users).'
+        'URLs must include a protocol'
       );
     });
 
     it('should throw with generic invalid URL message when protocol is present but URL is still malformed', () => {
       expect(() => validator.ensureUrlAllowed('http://')).toThrow(
-        'Invalid URL "http://". Ensure the URL is well-formed.'
+        'Invalid URL. Ensure the URL is well-formed.'
       );
     });
 
     it('should throw for empty URLs', () => {
-      expect(() => validator.ensureUrlAllowed('')).toThrow(
-        'Invalid URL "". URLs must include a protocol'
-      );
+      expect(() => validator.ensureUrlAllowed('')).toThrow('URLs must include a protocol');
+    });
+  });
+
+  describe('allowedProtocols option', () => {
+    it('should allow custom protocols', () => {
+      const validator = new UrlValidator({
+        allowedHosts: ['example.com'],
+        allowedProtocols: ['https:'],
+      });
+      expect(validator.isUrlAllowed('https://example.com/test')).toBe(true);
+      expect(validator.isUrlAllowed('http://example.com/test')).toBe(false);
+    });
+
+    it('should use http+https as defaults when not specified', () => {
+      const validator = new UrlValidator({ allowedHosts: ['example.com'] });
+      expect(validator.isUrlAllowed('https://example.com/')).toBe(true);
+      expect(validator.isUrlAllowed('http://example.com/')).toBe(true);
+    });
+  });
+
+  describe('fromConfig factory', () => {
+    it('behaves identically to constructor', () => {
+      const a = UrlValidator.fromConfig({ allowedHosts: ['example.com'] });
+      const b = new UrlValidator({ allowedHosts: ['example.com'] });
+      expect(a.isUrlAllowed('https://example.com/')).toBe(b.isUrlAllowed('https://example.com/'));
+      expect(a.isUrlAllowed('https://other.com/')).toBe(b.isUrlAllowed('https://other.com/'));
     });
   });
 
