@@ -20,7 +20,6 @@ import userEvent from '@testing-library/user-event';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 
 type DataGridColumn = Partial<Omit<EuiDataGridColumn, 'actions'>> &
   Pick<EuiDataGridColumn, 'id' | 'displayAsText'> & {
@@ -75,7 +74,8 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 4).map((hit) =>
   buildDataTableRecord(hit, dataViewWithTimefieldMock)
 );
 
-const defaultGetDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+const createDocMap = (currentDocs = docs) =>
+  new Map(currentDocs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
 
 const fieldColumnId = 'fieldColumnId';
 const selectedDocIds = ['0', '1', '2', '3'];
@@ -83,11 +83,11 @@ const selectedDocIds = ['0', '1', '2', '3'];
 const renderColumns = ({
   wrapperWidth,
   isPlainRecord = false,
-  getDocById = defaultGetDocById,
+  docMap = createDocMap(),
 }: {
   wrapperWidth?: number;
   isPlainRecord?: boolean;
-  getDocById?: (id: string) => DataTableRecord | undefined;
+  docMap?: ReturnType<typeof createDocMap>;
 } = {}) => {
   const wrapper = document.createElement('div');
   if (wrapperWidth) {
@@ -102,7 +102,7 @@ const renderColumns = ({
       isPlainRecord,
       fieldColumnId,
       selectedDocIds,
-      getDocById,
+      docMap,
       replaceSelectedDocs,
     })
   );
@@ -177,6 +177,7 @@ describe('useComparisonColumns', () => {
           grow={false}
         >
           <EuiIcon
+            aria-hidden={true}
             type="pinFill"
           />
         </EuiFlexItem>
@@ -222,28 +223,30 @@ describe('useComparisonColumns', () => {
   });
 
   it('should fall back to the plain record id when the raw id is missing', () => {
-    const getDocById = (id: string) => {
-      const doc = defaultGetDocById(id);
-      return doc
-        ? {
+    const docMap = new Map(
+      docs.map((doc, docIndex) => [
+        selectedDocIds[docIndex],
+        {
+          doc: {
             ...doc,
             raw: {
               ...doc.raw,
               _id: undefined,
             },
-          }
-        : doc;
-    };
-    const { columns } = renderColumns({ isPlainRecord: true, getDocById });
+          },
+          docIndex,
+        },
+      ])
+    );
+    const { columns } = renderColumns({ isPlainRecord: true, docMap });
     expect(columns[1].displayAsText).toBe(`Pinned result: ${docs[0].id}`);
     expect(columns[2].display).toBe(docs[1].id);
     expect(columns[2].displayAsText).toBe(`Comparison result: ${docs[1].id}`);
   });
 
   it('should skip columns for missing docs', () => {
-    const getDocById = (id: string) =>
-      id === selectedDocIds[1] ? undefined : defaultGetDocById(id);
-    const { columns } = renderColumns({ getDocById });
+    const docMap = createDocMap(docs.filter((doc) => doc.raw._id !== selectedDocIds[1]));
+    const { columns } = renderColumns({ docMap });
     expect(columns).toHaveLength(4);
     expect(columns[1].displayAsText).toBe(`Pinned document: ${selectedDocIds[0]}`);
     expect(columns[2].displayAsText).toBe(`Comparison document: ${selectedDocIds[2]}`);

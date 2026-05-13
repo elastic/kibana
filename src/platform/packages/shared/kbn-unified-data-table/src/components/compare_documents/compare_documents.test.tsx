@@ -52,7 +52,8 @@ const docs = generateEsHits(dataViewWithTimefieldMock, 5).map((hit) =>
   buildDataTableRecord(hit, dataViewWithTimefieldMock)
 );
 
-const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+const createDocMap = (currentDocs = docs) =>
+  new Map(currentDocs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
 
 const renderCompareDocuments = ({
   forceShowAllFields = false,
@@ -73,7 +74,7 @@ const renderCompareDocuments = ({
       forceShowAllFields={forceShowAllFields}
       showFullScreenButton={true}
       fieldFormats={{} as any}
-      getDocById={getDocById}
+      docMap={createDocMap()}
       replaceSelectedDocs={replaceSelectedDocs}
       setIsCompareActive={jest.fn()}
       {...props}
@@ -168,11 +169,11 @@ describe('CompareDocuments', () => {
     );
   });
 
-  it('should retain comparison docs when getDocById loses access to them', () => {
+  it('should retain comparison docs when docMap loses access to them', () => {
     const { rerender } = renderCompareDocuments();
     const visibleColumns = ['fields_generated-id', '0', '1', '2'];
     expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
-    rerender({ getDocById: () => undefined });
+    rerender({ docMap: new Map() });
     expect(mockDataGridProps?.columnVisibility.visibleColumns).toEqual(visibleColumns);
   });
 });

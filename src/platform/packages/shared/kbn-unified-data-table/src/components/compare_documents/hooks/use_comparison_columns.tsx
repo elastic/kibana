@@ -9,17 +9,17 @@
 
 import type { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useMemo } from 'react';
+import type { DocMap } from '../../../types';
 
 export interface UseComparisonColumnsProps {
   wrapper: HTMLElement | null;
   isPlainRecord: boolean;
   fieldColumnId: string;
   selectedDocIds: string[];
-  getDocById: (docId: string) => DataTableRecord | undefined;
+  docMap: DocMap;
   replaceSelectedDocs: (docIds: string[]) => void;
 }
 
@@ -34,7 +34,7 @@ export const useComparisonColumns = ({
   isPlainRecord,
   fieldColumnId,
   selectedDocIds,
-  getDocById,
+  docMap,
   replaceSelectedDocs,
 }: UseComparisonColumnsProps) => {
   const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
@@ -55,7 +55,7 @@ export const useComparisonColumns = ({
         : undefined;
 
     selectedDocIds.forEach((docId, docIndex) => {
-      const doc = getDocById(docId);
+      const doc = docMap.get(docId)?.doc;
 
       if (!doc) {
         return;
@@ -102,7 +102,7 @@ export const useComparisonColumns = ({
         docIndex === 0 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="pinFill" />
+              <EuiIcon type="pinFill" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{columnTitle}</EuiFlexItem>
           </EuiFlexGroup>
@@ -151,8 +151,8 @@ export const useComparisonColumns = ({
 
     return currentColumns;
   }, [
+    docMap,
     fieldColumnId,
-    getDocById,
     isPlainRecord,
     selectedDocIds,
     replaceSelectedDocs,
