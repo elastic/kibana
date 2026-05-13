@@ -25,7 +25,6 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       // "Add to case" action requires cases 'create' and 'update' capabilities (viewer lacks both)
       await browserAuth.loginAsPrivilegedUser();
-      // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
       await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 

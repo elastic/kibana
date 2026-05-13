@@ -28,7 +28,6 @@ const openTraceTimeline = async (pageObjects: {
     flyout: TracesFlyout;
   };
 }) => {
-  // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
   await pageObjects.discover.goto({ queryMode: 'esql' });
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`

@@ -512,8 +512,6 @@ export class DiscoverApp {
   }
 
   async selectTextBaseLang() {
-    // ES|QL may already be the active mode (e.g. when the discover.isEsqlDefault
-    // feature flag is on), so we need an early detection.
     const currentMode = await this.getCurrentQueryMode();
 
     if (currentMode === 'esql') {
@@ -648,6 +646,12 @@ export class DiscoverApp {
    * Persists the requested Discover query mode in localStorage on the next
    * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
    * feature flag being toggled at the project level.
+   *
+   * Note: this is not idempotent. Each call registers an additional init
+   * script via Playwright's `addInitScript`, and on subsequent page loads
+   * every registered script runs in order, so the value written by the
+   * last call wins. Avoid calling it multiple times in the same test
+   * unless that stacking behavior is intentional.
    */
   public setQueryMode(mode: DiscoverQueryMode) {
     return this.page.addInitScript(

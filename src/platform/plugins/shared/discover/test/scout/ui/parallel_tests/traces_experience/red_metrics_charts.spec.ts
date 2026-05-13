@@ -36,7 +36,6 @@ spaceTest.describe(
     });
 
     spaceTest('should render RED metrics charts in ESQL mode', async ({ pageObjects }) => {
-      // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
       await pageObjects.discover.goto({ queryMode: 'esql' });
 
       await spaceTest.step('run ESQL query for traces', async () => {
@@ -56,7 +55,6 @@ spaceTest.describe(
     });
 
     spaceTest('should render RED metrics charts with WHERE filter', async ({ pageObjects }) => {
-      // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
       await pageObjects.discover.goto({ queryMode: 'esql' });
 
       await spaceTest.step('run ESQL query with WHERE filter', async () => {
@@ -80,7 +78,6 @@ spaceTest.describe(
     spaceTest(
       'should not render RED metrics charts with transformative ESQL query',
       async ({ pageObjects }) => {
-        // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
         await pageObjects.discover.goto({ queryMode: 'esql' });
 
         await spaceTest.step('run transformative ESQL query', async () => {
@@ -98,7 +95,6 @@ spaceTest.describe(
     spaceTest(
       'should not render RED metrics charts in data view mode',
       async ({ page, pageObjects }) => {
-        // Enforce classic mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
         await pageObjects.discover.goto({ queryMode: 'classic' });
 
         await spaceTest.step('verify data table is loaded', async () => {

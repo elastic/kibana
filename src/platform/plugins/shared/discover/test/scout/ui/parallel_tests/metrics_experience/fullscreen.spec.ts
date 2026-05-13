@@ -32,7 +32,6 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      // Enforce ES|QL mode so the suite is independent from the `discover.isEsqlDefault` feature flag.
       await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
