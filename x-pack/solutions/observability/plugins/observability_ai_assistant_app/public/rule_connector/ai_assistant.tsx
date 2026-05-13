@@ -10,8 +10,8 @@ import { isEmpty } from 'lodash';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
+  ActionType,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { ActionType } from '@kbn/actions-types';
 import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';

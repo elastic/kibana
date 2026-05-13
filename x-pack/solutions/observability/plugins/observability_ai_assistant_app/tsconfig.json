@@ -90,8 +90,7 @@
     "@kbn/object-utils",
     "@kbn/shared-ux-ai-components",
     "@kbn/react-query",
-    "@kbn/search-inference-endpoints",
-    "@kbn/actions-types",
+    "@kbn/search-inference-endpoints"
   ],
   "exclude": ["target/**/*"]
 }

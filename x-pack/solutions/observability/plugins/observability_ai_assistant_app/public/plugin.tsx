@@ -196,6 +196,4 @@ export class ObservabilityAIAssistantAppPlugin
       RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
     };
   }
-
-  stop() {}
 }
