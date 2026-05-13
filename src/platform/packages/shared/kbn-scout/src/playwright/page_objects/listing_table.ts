@@ -9,7 +9,6 @@
 
 import type { Locator } from 'playwright/test';
 import type { ScoutPage } from '..';
-import { expect } from '..';
 
 export class ListingTable {
   private readonly table: Locator;
@@ -19,7 +18,7 @@ export class ListingTable {
   }
 
   async waitUntilTableIsLoaded(options?: { timeout?: number }) {
-    await expect(this.table).toBeVisible(options);
+    await this.table.waitFor({ state: 'visible', timeout: options?.timeout });
   }
 
   async getAllItemsNames(): Promise<string[]> {
