@@ -109,7 +109,7 @@
     "**/typescript": "5.9.3",
     "**/util": "0.12.5",
     "**/yauzl": "3.2.1",
-    "**/zod": "4.3.6",
+    "**/zod": "4.4.3",
     "@aws-sdk/client-bedrock-agent-runtime": "3.994.0",
     "@aws-sdk/client-bedrock-runtime": "3.994.0",
     "@aws-sdk/client-kendra": "3.994.0",
@@ -1575,7 +1575,7 @@
     "yaml": "2.8.3",
     "yauzl": "3.2.1",
     "yazl": "3.3.1",
-    "zod": "4.3.6",
+    "zod": "4.4.3",
     "zod-to-json-schema": "3.25.0"
   },
   "devDependencies": {
@@ -2163,7 +2163,6 @@
     "oboe": "2.1.7",
     "openapi-types": "12.1.3",
     "oxlint": "1.56.0",
-    "patch-package": "8.0.1",
     "peggy": "4.2.0",
     "picomatch": "4.0.4",
     "pirates": "4.0.7",
