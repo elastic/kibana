@@ -36,8 +36,14 @@ export const BeforeCompletionEventSchema = z
  */
 export const BeforeCompletionOutputSchema = z
   .object({
-    system: z.string().optional().describe('Potentially anonymized system prompt'),
+    // nullish() (not just optional()) because LiquidJS evalValueSync returns null (not undefined)
+    // for a path like `steps.anonymize_system.output.output` when that step was skipped.
+    system: z.string().nullish().describe('Potentially anonymized system prompt'),
     messages: z.array(MessageSchema).describe('Potentially anonymized messages'),
+    // Optional override for the [Anonymization context] system-prompt instruction.
+    // Set via systemPromptInstruction on the ai.pii step and echoed through emit_output.
+    // When present, replaces the auto-generated instruction in invoke_before_completion.ts.
+    systemPromptInstruction: z.string().optional(),
   })
   .passthrough();
 

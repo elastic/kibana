@@ -64,6 +64,33 @@ export const estimatePromptTokens = (
   return Math.ceil((systemChars + messagesChars) / 4);
 };
 
+/**
+ * Builds a short system-prompt instruction that tells the LLM about the anonymization
+ * tokens it will encounter. Without this, the LLM may hallucinate what tokens represent,
+ * attempt to "fill them in", or refuse to use them in tool calls.
+ *
+ * The instruction is injected only when tokens were actually produced in this call, and
+ * lists only the entity types present — keeping it minimal and accurate.
+ */
+export const buildAnonymizationInstruction = (
+  tokenMap: AnonymizationContext['tokenMap']
+): string => {
+  if (tokenMap.size === 0) return '';
+
+  const entityTypes = [...new Set([...tokenMap.values()].map((e) => e.entityClass))];
+
+  return [
+    '[Anonymization context]',
+    'Some values in this prompt have been replaced with privacy tokens of the form',
+    'ENTITY_TYPE_<32 hex chars> (e.g. EMAIL_a3f2c1d809e64b275fae2a8c9b1d04e7).',
+    `Entity types present: ${entityTypes.join(', ')}.`,
+    'Rules:',
+    '- Preserve tokens exactly as written; do not attempt to infer or reveal the original value.',
+    '- If instructed to use a token in an action, treat the token as the identifier — do not refuse because it looks like a placeholder.',
+    '- Do not mention that anonymization is in effect unless the user asks directly.',
+  ].join('\n');
+};
+
 const MAX_TOKEN_KEYS_LOGGED = 20;
 
 const logDebugDone = (
@@ -118,7 +145,7 @@ export const invokeBeforeCompletion = async ({
   }
 
   const anonymizationContext = await createAnonymizationContext(sessionId, anonymization);
-  const capabilities = { anonymizationContext };
+  const capabilities: Record<string, unknown> = { anonymizationContext };
 
   logger.debug(`[hook-anon] invoking inference.beforeCompletion sessionId=${sessionId}`);
 
@@ -158,9 +185,33 @@ export const invokeBeforeCompletion = async ({
   }
 
   logDebugDone(logger, sessionId, anonymizationContext, 'success');
+
+  const anonymizedSystem = parsed.data.system ?? system;
+  // Only inject an instruction when tokens were actually produced; an empty tokenMap
+  // means no PII was found and the LLM needs no guidance about anonymization tokens.
+  const instruction =
+    anonymizationContext.tokenMap.size > 0
+      ? parsed.data.systemPromptInstruction ??
+        buildAnonymizationInstruction(anonymizationContext.tokenMap)
+      : '';
+  if (instruction) {
+    logger.debug(
+      () =>
+        `[hook-anon-debug] injecting anonymization instruction sessionId=${sessionId} ` +
+        `source=${parsed.data.systemPromptInstruction ? 'workflow-override' : 'auto-generated'} ` +
+        `instructionLen=${instruction.length}`
+    );
+  }
+
+  const hookSystem = instruction
+    ? anonymizedSystem
+      ? `${anonymizedSystem}\n\n${instruction}`
+      : instruction
+    : anonymizedSystem;
+
   return {
     sessionId,
-    hookSystem: parsed.data.system ?? system,
+    hookSystem,
     // The schema uses passthrough() so messages preserve all original fields.
     // The cast is correct: the hook returns the same message shape it received.
     hookMessages: parsed.data.messages as ChatCompleteOptions['messages'],

@@ -215,13 +215,8 @@ function createChatCompletePipeline({
   config?: InferenceConfig;
 }) {
   const hookPathEnabled =
-    config?.anonymization?.enabled === true && anonymizationHookInvoker != null;
-
-  if (config?.anonymization?.enabled === true && anonymizationHookInvoker == null) {
-    logger.warn(
-      'Anonymization hook path is enabled but workflowsExtensions invoker is unavailable; falling back to legacy anonymization path'
-    );
-  }
+    config?.anonymization?.experimental_workflow_driven === true &&
+    anonymizationHookInvoker != null;
 
   return forkJoin({
     context: from(resolve()),

@@ -21,11 +21,14 @@ export const configSchema = schema.object({
   }),
   anonymization: schema.object({
     /**
-     * When true, the workflow-driven hook path is used for anonymization via
-     * `workflowsExtensions.invokeHook`. When false (default), the existing
-     * `prepareAnonymization`/`deanonymizeMessage` path runs unchanged.
+     * Enables the workflow-driven hook path (inference.beforeCompletion /
+     * inference.afterCompletion). When false (default), the legacy
+     * prepareAnonymization / deanonymizeMessage path runs unchanged.
+     *
+     * This flag is intentionally opt-in while the workflow-driven path is
+     * being validated. Set to true in kibana.yml to activate the new path.
      */
-    enabled: schema.boolean({ defaultValue: false }),
+    experimental_workflow_driven: schema.boolean({ defaultValue: false }),
     /**
      * Controls what happens when the beforeCompletion hook fails.
      * - 'block': throw `InferenceAnonymizationUnavailableError` (fail-safe)
