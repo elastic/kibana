@@ -1327,6 +1327,246 @@ steps:
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
+
+    // --- Global uniqueness + TOCTOU regression coverage ---------------------
+    //
+    // Workflow IDs are intentionally globally unique across the whole index
+    // (no per-space prefix) so that a generated "human-readable" ID stays
+    // human-readable regardless of which space the user is in. Two changes
+    // these tests guard:
+    //   1. The duplicate-ID search is no longer space-scoped — a candidate
+    //      taken in another space must still be detected.
+    //   2. index writes use op_type:'create' so a concurrent writer that
+    //      slipped between the precheck and the write surfaces as a 409 the
+    //      service can recover from (server-generated → retry; user-supplied
+    //      → fail loudly).
+    describe('global uniqueness + TOCTOU', () => {
+      const mockRequest = {
+        auth: { credentials: { username: 'test-user' } },
+      } as any;
+
+      const validYaml = `
+name: My Workflow
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`;
+
+      const makeSource = (overrides: Record<string, unknown> = {}) => ({
+        name: 'Existing',
+        enabled: true,
+        spaceId: 'default',
+        yaml: 'name: Existing',
+        valid: true,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+        createdBy: 'test-user',
+        lastUpdatedBy: 'test-user',
+        deleted_at: null,
+        ...overrides,
+      });
+
+      it('produces different IDs for the same base name in two spaces (global uniqueness)', async () => {
+        // Space A: nothing in the index yet.
+        mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+        mockEsClient.index.mockResolvedValueOnce({ _id: 'my-workflow' } as any);
+
+        const resultA = await service.createWorkflow({ yaml: validYaml }, 'space-a', mockRequest);
+
+        // Space B: the same base ID ("my-workflow") is now taken globally,
+        // so the resolver must skip it and fall through to "my-workflow-1".
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [{ _id: resultA.id, _source: makeSource({ spaceId: 'space-a' }) }],
+          },
+        } as any);
+        mockEsClient.index.mockResolvedValueOnce({ _id: 'my-workflow-1' } as any);
+
+        const resultB = await service.createWorkflow({ yaml: validYaml }, 'space-b', mockRequest);
+
+        expect(resultA.id).toBe('my-workflow');
+        expect(resultB.id).toBe('my-workflow-1');
+        expect(resultA.id).not.toBe(resultB.id);
+
+        // Both index() calls must use op_type:'create' so a concurrent writer
+        // doesn't silently overwrite the other space's document.
+        expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+        expect(mockEsClient.index).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: 'my-workflow',
+            op_type: 'create',
+            document: expect.objectContaining({ spaceId: 'space-a' }),
+          })
+        );
+        expect(mockEsClient.index).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            id: 'my-workflow-1',
+            op_type: 'create',
+            document: expect.objectContaining({ spaceId: 'space-b' }),
+          })
+        );
+      });
+
+      it('rejects a user-supplied ID that is taken in another space (global uniqueness)', async () => {
+        // The user picks "shared-id" in space-b, but it is already taken in space-a.
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [{ _id: 'shared-id', _source: makeSource({ spaceId: 'space-a' }) }],
+          },
+        } as any);
+
+        await expect(
+          service.createWorkflow({ id: 'shared-id', yaml: validYaml }, 'space-b', mockRequest)
+        ).rejects.toThrow(/already exists/);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+
+        // The ID-uniqueness check must NOT be space-scoped and must NOT
+        // exclude tombstones. Query is a flat ids query.
+        const searchArgs = mockEsClient.search.mock.calls[0][0] as any;
+        expect(searchArgs.query).toEqual({ ids: { values: ['shared-id'] } });
+      });
+
+      it('rejects a user-supplied ID that matches a soft-deleted tombstone (any space)', async () => {
+        // A workflow with this ID was soft-deleted earlier — the tombstone
+        // still owns the `_id`, so reusing it would resurrect or collide
+        // with that doc. The check must surface this case even though the
+        // document carries a `deleted_at` timestamp and lives in a different space.
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: 'recycled-id',
+                _source: makeSource({
+                  spaceId: 'space-other',
+                  deleted_at: '2024-06-01T00:00:00.000Z',
+                }),
+              },
+            ],
+          },
+        } as any);
+
+        await expect(
+          service.createWorkflow({ id: 'recycled-id', yaml: validYaml }, 'default', mockRequest)
+        ).rejects.toThrow(/already exists/);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+
+        // The check must use a flat ids query — a `bool.must_not exists deleted_at`
+        // clause would silently let the caller reuse a tombstoned ID.
+        const searchArgs = mockEsClient.search.mock.calls[0][0] as any;
+        expect(searchArgs.query).toEqual({ ids: { values: ['recycled-id'] } });
+      });
+
+      it('skips a server-generated base ID that matches a soft-deleted tombstone', async () => {
+        // The natural base ID derived from the YAML name ("my-workflow") is
+        // a tombstone in some other space. The resolver must walk past it
+        // instead of handing it back as available.
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: 'my-workflow',
+                _source: makeSource({
+                  spaceId: 'space-other',
+                  deleted_at: '2024-06-01T00:00:00.000Z',
+                }),
+              },
+            ],
+          },
+        } as any);
+        mockEsClient.index.mockResolvedValue({ _id: 'my-workflow-1' } as any);
+
+        const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
+
+        expect(result.id).toBe('my-workflow-1');
+        expect(mockEsClient.index).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'my-workflow-1', op_type: 'create' })
+        );
+      });
+
+      it('retries a server-generated ID that loses a TOCTOU race (op_type:create returns 409)', async () => {
+        // Precheck #1 (resolver): nothing exists, picks "my-workflow".
+        mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+        // Precheck #2 after the 409 (re-resolve): "my-workflow" is now taken.
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: {
+            hits: [{ _id: 'my-workflow', _source: makeSource() }],
+          },
+        } as any);
+
+        const conflict = Object.assign(new Error('version conflict'), {
+          statusCode: 409,
+          meta: { statusCode: 409 },
+        });
+        mockEsClient.index
+          .mockRejectedValueOnce(conflict) // first attempt loses the race
+          .mockResolvedValueOnce({ _id: 'my-workflow-1' } as any); // retry succeeds
+
+        const result = await service.createWorkflow({ yaml: validYaml }, 'default', mockRequest);
+
+        expect(result.id).toBe('my-workflow-1');
+        expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+        expect(mockEsClient.index).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ id: 'my-workflow', op_type: 'create' })
+        );
+        expect(mockEsClient.index).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ id: 'my-workflow-1', op_type: 'create' })
+        );
+      });
+
+      it('does NOT retry a user-supplied ID that loses a TOCTOU race (caller picked the ID)', async () => {
+        // Precheck says it is free at the moment of the call.
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+        const conflict = Object.assign(new Error('version conflict'), {
+          statusCode: 409,
+          meta: { statusCode: 409 },
+        });
+        mockEsClient.index.mockRejectedValueOnce(conflict);
+
+        await expect(
+          service.createWorkflow({ id: 'my-id', yaml: validYaml }, 'default', mockRequest)
+        ).rejects.toThrow(/already exists/);
+        // No retry: caller picked the ID and silently rewriting it would be wrong.
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('re-throws non-409 errors from index() without retrying', async () => {
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+        const serverErr = Object.assign(new Error('cluster_block_exception'), {
+          statusCode: 503,
+        });
+        mockEsClient.index.mockRejectedValueOnce(serverErr);
+
+        await expect(
+          service.createWorkflow({ yaml: validYaml }, 'default', mockRequest)
+        ).rejects.toThrow(/cluster_block_exception/);
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('gives up after the TOCTOU retry budget when every attempt loses the race', async () => {
+        // Every precheck reports the index is free, but every write loses to a concurrent writer.
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+        const conflict = Object.assign(new Error('version conflict'), {
+          statusCode: 409,
+          meta: { statusCode: 409 },
+        });
+        mockEsClient.index.mockRejectedValue(conflict);
+
+        await expect(
+          service.createWorkflow({ yaml: validYaml }, 'default', mockRequest)
+        ).rejects.toThrow(/Failed to allocate a unique workflow id/);
+        // 1 initial attempt + bounded retries — must NOT be unbounded.
+        expect(mockEsClient.index.mock.calls.length).toBeGreaterThan(1);
+        expect(mockEsClient.index.mock.calls.length).toBeLessThan(20);
+      });
+    });
   });
 
   describe('bulkCreateWorkflows', () => {
@@ -2148,6 +2388,169 @@ steps:
       expect(result.failed).toHaveLength(1);
       expect(result.failed[0].id).toBe('soft-deleted-id');
       expect(result.failed[0].error).toContain('already exists');
+    });
+
+    // --- Global uniqueness + TOCTOU regression coverage ---------------------
+    describe('global uniqueness + TOCTOU', () => {
+      const validYaml = (name: string) => `
+name: ${name}
+triggers:
+  - type: manual
+steps:
+  - type: console
+    name: step-one
+    with:
+      message: "Hello"
+`;
+
+      const makeSource = (overrides: Record<string, unknown> = {}) => ({
+        name: 'Existing',
+        enabled: true,
+        spaceId: 'default',
+        yaml: 'name: Existing',
+        valid: true,
+        created_at: '2023-01-01T00:00:00.000Z',
+        updated_at: '2023-01-01T00:00:00.000Z',
+        createdBy: 'test-user',
+        lastUpdatedBy: 'test-user',
+        deleted_at: null,
+        ...overrides,
+      });
+
+      it('rejects bulk user-supplied IDs that are taken in another space (global uniqueness)', async () => {
+        // resolveAndDeduplicateBulkIds queries existing IDs across the whole index;
+        // a hit in another space must still surface as a conflict.
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [{ _id: 'taken', _source: makeSource({ spaceId: 'space-other' }) }],
+          },
+        } as any);
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'taken', yaml: validYaml('A') }],
+          'space-current',
+          mockRequest
+        );
+
+        expect(result.created).toEqual([]);
+        expect(result.failed).toHaveLength(1);
+        expect(result.failed[0].id).toBe('taken');
+        expect(mockEsClient.bulk).not.toHaveBeenCalled();
+
+        // The lookup must NOT include a spaceId filter — flat ids query.
+        const searchArgs = mockEsClient.search.mock.calls[0][0] as any;
+        expect(searchArgs.query).toEqual({ ids: { values: ['taken'] } });
+      });
+
+      it('rejects a bulk user-supplied ID that matches a soft-deleted tombstone', async () => {
+        // The collision lookup must include tombstones — bulk reuse of a
+        // soft-deleted ID is just as wrong as direct create reuse.
+        mockEsClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: 'recycled-id',
+                _source: makeSource({
+                  spaceId: 'space-other',
+                  deleted_at: '2024-06-01T00:00:00.000Z',
+                }),
+              },
+            ],
+          },
+        } as any);
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'recycled-id', yaml: validYaml('A') }],
+          'default',
+          mockRequest
+        );
+
+        expect(result.created).toEqual([]);
+        expect(result.failed).toHaveLength(1);
+        expect(result.failed[0].id).toBe('recycled-id');
+        expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      });
+
+      it('queries the ID index globally without a spaceId filter for server-generated IDs', async () => {
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+        mockEsClient.bulk.mockResolvedValue({
+          errors: false,
+          items: [{ create: { _id: 'a', status: 201 } }],
+        } as any);
+
+        await service.bulkCreateWorkflows([{ yaml: validYaml('A') }], 'space-x', mockRequest);
+
+        // The collision query must be a flat ids query — no `bool.must` term on spaceId.
+        const searchArgs = mockEsClient.search.mock.calls[0][0] as any;
+        expect(searchArgs.query).toMatchObject({ ids: { values: expect.any(Array) } });
+        expect(searchArgs.query.bool).toBeUndefined();
+      });
+
+      it('retries server-generated bulk entries that hit a 409 in the bulk response', async () => {
+        // First lookup: nothing is taken — resolver picks "my-workflow".
+        mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+        // First bulk: the only entry loses the race with status 409.
+        mockEsClient.bulk.mockResolvedValueOnce({
+          errors: true,
+          items: [
+            {
+              create: {
+                _id: 'my-workflow',
+                status: 409,
+                error: { type: 'version_conflict_engine_exception', reason: 'exists' },
+              },
+            },
+          ],
+        } as any);
+        // Re-resolve lookup: "my-workflow" is now taken in the index.
+        mockEsClient.search.mockResolvedValueOnce({
+          hits: { hits: [{ _id: 'my-workflow', _source: makeSource() }] },
+        } as any);
+        // Second bulk: succeeds with the next candidate "my-workflow-1".
+        mockEsClient.bulk.mockResolvedValueOnce({
+          errors: false,
+          items: [{ create: { _id: 'my-workflow-1', status: 201 } }],
+        } as any);
+
+        const result = await service.bulkCreateWorkflows(
+          [{ yaml: validYaml('My Workflow') }],
+          'default',
+          mockRequest
+        );
+
+        expect(result.created).toHaveLength(1);
+        expect(result.created[0].id).toBe('my-workflow-1');
+        expect(result.failed).toHaveLength(0);
+        expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
+      });
+
+      it('does NOT retry user-supplied bulk entries that hit a 409 in the bulk response', async () => {
+        mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+        mockEsClient.bulk.mockResolvedValueOnce({
+          errors: true,
+          items: [
+            {
+              create: {
+                _id: 'fixed',
+                status: 409,
+                error: { type: 'version_conflict_engine_exception', reason: 'exists' },
+              },
+            },
+          ],
+        } as any);
+
+        const result = await service.bulkCreateWorkflows(
+          [{ id: 'fixed', yaml: validYaml('A') }],
+          'default',
+          mockRequest
+        );
+
+        expect(result.created).toEqual([]);
+        expect(result.failed).toHaveLength(1);
+        expect(result.failed[0].id).toBe('fixed');
+        // User-supplied IDs are surfaced directly — no retry, no second bulk call.
+        expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

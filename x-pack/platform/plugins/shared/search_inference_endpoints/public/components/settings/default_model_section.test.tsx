@@ -178,7 +178,7 @@ describe('DefaultModelSection', () => {
     );
 
     expect(
-      screen.getByText('Features can allow users to select other models than the default.')
+      screen.getByText('Users can choose between multiple models for each feature.')
     ).toBeInTheDocument();
   });
 

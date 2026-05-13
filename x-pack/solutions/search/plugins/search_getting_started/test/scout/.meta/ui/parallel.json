@@ -1,5 +1,5 @@
 {
-  "sha1": "1ccef901456e59e6c739f6ad24da3ca41a6a9c91",
+  "sha1": "d54c6a4209e26cd8e8095879471dd6c3f910d7b3",
   "tests": [
     {
       "id": "30a4f04aa24f29d-b2a90d16b4f88bb",
@@ -34,8 +34,8 @@
       }
     },
     {
-      "id": "ace16ea93cb8904-518e75802e05ada",
-      "title": "Getting Started - Admin Add data button navigates to correct pages",
+      "id": "ace16ea93cb8904-8a4931206ddaa79",
+      "title": "Getting Started - Admin Sample data buttons navigate to correct pages",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -45,23 +45,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 78,
-        "column": 9
-      }
-    },
-    {
-      "id": "ace16ea93cb8904-423028bf9b40edb",
-      "title": "Getting Started - Admin Skip and go to Home button navigates to home page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 97,
+        "line": 80,
         "column": 9
       }
     },
@@ -77,7 +61,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 102,
+        "line": 93,
         "column": 9
       }
     },
@@ -93,7 +77,41 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 111,
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "ace16ea93cb8904-a95735fe5505f1f",
+      "title": "Getting Started - Admin Agent install panel opens prompt modal with copy option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "id": "ace16ea93cb8904-4de33b0ee2b65b6",
+      "title": "Getting Started - Admin Agent builder panel opens agent builder flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
+        "line": 125,
         "column": 9
       }
     },
@@ -109,23 +127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 127,
-        "column": 9
-      }
-    },
-    {
-      "id": "ace16ea93cb8904-b060744ce74913b",
-      "title": "Getting Started - Admin Language selector shows correct code examples",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 149,
+        "line": 140,
         "column": 9
       }
     },

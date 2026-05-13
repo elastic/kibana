@@ -68,6 +68,9 @@ function VegaHelpMenu() {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('visTypeVega.editor.vegaHelpPopoverAriaLabel', {
+        defaultMessage: 'Vega help',
+      })}
       id="helpMenu"
       button={button}
       isOpen={isPopoverOpen}

@@ -135,27 +135,49 @@ describe('EmbeddableEditorService', () => {
     expect(service.isEmbeddedEditor()).toBe(false);
   });
 
-  it.each([TransferAction.Cancel, TransferAction.SaveSession] as const)(
-    'navigates back with no serialized state for action %s',
-    (action) => {
-      const incomingState = createIncomingState({
-        originatingPath: '/app/dashboards#/edit',
-        embeddableId: 'panel-1',
-      });
-      const { service, embeddableStateTransfer } = createService({ incomingState });
+  it('navigates back with no serialized state for cancel', () => {
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards#/edit',
+      embeddableId: 'panel-1',
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
 
-      service.transferBackToEditor(action);
+    service.transferBackToEditor(TransferAction.Cancel);
 
-      expect(embeddableStateTransfer.clearEditorState).toHaveBeenCalledWith('discover');
-      expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
-        'dashboard',
-        {
-          path: '/app/dashboards#/edit',
-          state: [],
-        }
-      );
-    }
-  );
+    expect(embeddableStateTransfer.clearEditorState).toHaveBeenCalledWith('discover');
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+      'dashboard',
+      {
+        path: '/app/dashboards#/edit',
+        state: [],
+      }
+    );
+  });
+
+  it('preserves the embeddable id when saving the session without serialized state', () => {
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards#/edit',
+      embeddableId: 'panel-1',
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
+
+    service.transferBackToEditor(TransferAction.SaveSession);
+
+    expect(embeddableStateTransfer.clearEditorState).toHaveBeenCalledWith('discover');
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+      'dashboard',
+      {
+        path: '/app/dashboards#/edit',
+        state: [
+          {
+            type: SEARCH_EMBEDDABLE_TYPE,
+            serializedState: {},
+            embeddableId: 'panel-1',
+          },
+        ],
+      }
+    );
+  });
 
   it('serializes by-value state and control packages when navigating back to the editor', () => {
     const byValueState = createByValueState();

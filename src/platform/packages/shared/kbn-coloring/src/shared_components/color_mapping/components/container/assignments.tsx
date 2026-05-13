@@ -234,6 +234,12 @@ export function Assignments({
             </EuiButton>
             {data.type === 'categories' && (
               <EuiPopover
+                aria-label={i18n.translate(
+                  'coloring.colorMapping.container.additionalActionsPopoverAriaLabel',
+                  {
+                    defaultMessage: 'Additional assignments actions',
+                  }
+                )}
                 button={
                   <EuiButtonIcon
                     iconType="boxesVertical"

@@ -896,6 +896,12 @@ export function FormulaEditor({
               {errorCount || warningCount ? (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.lens.formula.editorWarningsPopoverAriaLabel',
+                      {
+                        defaultMessage: 'Formula errors and warnings',
+                      }
+                    )}
                     ownFocus={false}
                     isOpen={isWarningOpen}
                     closePopover={() => setIsWarningOpen(false)}

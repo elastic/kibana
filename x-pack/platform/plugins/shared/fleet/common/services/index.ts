@@ -17,6 +17,11 @@ export {
   getInputEffectiveName,
   buildInputKey,
 } from './package_to_package_policy';
+export type {
+  DocumentationPageInput,
+  DocumentationPageInputStream,
+} from './documentation_page_inputs';
+export { getDocumentationPageInputs } from './documentation_page_inputs';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export {

@@ -32,9 +32,9 @@ interface RuleSpecifier {
 }
 
 /**
- * Retrieves the rule IDs (`rule_id`s) of available prebuilt rule assets matching those
- * of the specified rules. This information can be used to determine whether
- * the rule being imported is a custom rule or a prebuilt rule.
+ * Retrieves the rule IDs (`rule_id`s) of available prebuilt rule assets (including
+ * deprecated rules) matching those of the specified rules. This information can
+ * be used to determine whether the rule being imported is a custom rule or a prebuilt rule.
  *
  * @param rules - A list of {@link RuleSpecifier}s representing the rules being imported.
  * @param ruleAssetsClient - the {@link IPrebuiltRuleAssetsClient} to use for fetching the available rule assets.
@@ -50,11 +50,15 @@ const fetchAvailableRuleAssetIds = async ({
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
 }): Promise<string[]> => {
   const incomingRuleIds = rules.map((rule) => rule.rule_id);
-  const availableRuleAssetSpecifiers = await ruleAssetsClient.fetchLatestVersions({
+  const latestRuleAssetSpecifiers = await ruleAssetsClient.fetchLatestVersions({
     ruleIds: incomingRuleIds,
   });
+  const deprecatedRuleAssets = await ruleAssetsClient.fetchDeprecatedRules(incomingRuleIds);
 
-  return availableRuleAssetSpecifiers.map((specifier) => specifier.rule_id);
+  return [
+    ...latestRuleAssetSpecifiers.map((specifier) => specifier.rule_id),
+    ...deprecatedRuleAssets.map((asset) => asset.rule_id),
+  ];
 };
 
 /**

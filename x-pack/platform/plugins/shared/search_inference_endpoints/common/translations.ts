@@ -279,7 +279,7 @@ export const DISALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
 export const ALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
   {
-    defaultMessage: 'Features can allow users to select other models than the default.',
+    defaultMessage: 'Users can choose between multiple models for each feature.',
   }
 );
 

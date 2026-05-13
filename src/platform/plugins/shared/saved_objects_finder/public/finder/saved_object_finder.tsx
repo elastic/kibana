@@ -87,6 +87,7 @@ interface BaseSavedObjectFinder {
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
+  tableCaption?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
 }
 
@@ -397,9 +398,12 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
-            tableCaption={i18n.translate('savedObjectsFinder.tableCaption', {
-              defaultMessage: 'Saved objects search results',
-            })}
+            tableCaption={
+              this.props.tableCaption ??
+              i18n.translate('savedObjectsFinder.tableCaption', {
+                defaultMessage: 'Saved objects search results',
+              })
+            }
             noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}

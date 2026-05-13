@@ -253,10 +253,13 @@ export class InferencePlugin
       },
       getDefaultConnector: async (request: KibanaRequest) => {
         const esClient = core.elasticsearch.client.asInternalUser;
+        const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+        const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
         return loadDefaultConnector({
           actions: pluginsStart.actions,
           request,
           esClient,
+          uiSettingsClient,
           logger: this.logger,
         });
       },

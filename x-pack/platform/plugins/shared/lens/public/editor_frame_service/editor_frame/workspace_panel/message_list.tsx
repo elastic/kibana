@@ -70,6 +70,7 @@ export const MessageList = ({
 
   return (
     <EuiPopover
+      aria-label={buttonLabel}
       panelPaddingSize="none"
       button={
         <EuiToolTip content={buttonLabel}>

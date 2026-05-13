@@ -1011,6 +1011,9 @@ export class WorkflowsExecutionEnginePlugin
         spaceId,
         fakeRequest: request,
       });
+
+      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
+      await workflowTaskManager.forceRunIdleTasks(executionId);
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
