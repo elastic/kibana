@@ -23,6 +23,24 @@ import { ensureCaseIndex } from '../ensure_indices/case';
 
 const DATA_VIEW_SO_TYPE = 'index-pattern';
 
+/**
+ * Authorization shape for every operator route in this module. The
+ * routes are intentionally **superuser-only** — they're not customer-facing,
+ * and granting any subset of operator-route access via a Kibana feature
+ * privilege would broaden the attack surface (anyone with that feature
+ * could `/reset` the index). Cluster privilege check via `superuser`
+ * keeps the security model trivial.
+ *
+ * Not `as const` because `core.http.createRouter`'s `RouteSecurity` shape
+ * requires mutable arrays — the deep-readonly inference rejects literal
+ * assignment otherwise.
+ */
+const SUPERUSER_AUTHZ = {
+  authz: {
+    requiredPrivileges: [{ allRequired: ['superuser'] }],
+  },
+};
+
 interface RegisterArgs {
   core: CoreSetup;
   logger: Logger;
@@ -75,19 +93,14 @@ export const registerCasesAnalyticsV2Routes = ({
   router.get(
     {
       path: CASES_ANALYTICS_V2_STATE_URL,
-      security: {
-        authz: {
-          // Reading analytics-subsystem health surfaces config + last-tick
-          // counters. Doesn't expose case data. Restricted to superuser via
-          // the standard cluster privilege rather than wiring a new
-          // cases-feature privilege for support tooling.
-          requiredPrivileges: [{ allRequired: ['superuser'] }],
-        },
-      },
+      // Reading analytics-subsystem health surfaces config + last-tick
+      // counters. Doesn't expose case data. See SUPERUSER_AUTHZ for the
+      // rationale behind cluster-privilege gating vs a feature privilege.
+      security: SUPERUSER_AUTHZ,
       validate: {},
       options: { access: 'internal' },
     },
-    async (_context, _request, response) => {
+    async (context, _request, response) => {
       // Pull the live reconciliation task to surface its last run + state
       // (which holds the cursor + processed counts).
       const taskManager = getTaskManager();
@@ -125,10 +138,30 @@ export const registerCasesAnalyticsV2Routes = ({
         }
       }
 
+      // Check `.cases` existence so an operator looking at /state sees the
+      // bootstrap result, not just the config flag. `ensureCaseIndex`
+      // logs-and-continues on failure, so a misconfigured cluster can end
+      // up with `enabled: true` but no index — surfacing this here saves
+      // an on-call engineer from a wild-goose chase.
+      let indexExists = false;
+      try {
+        const coreContext = await context.core;
+        indexExists = await coreContext.elasticsearch.client.asInternalUser.indices.exists({
+          index: CASE_INDEX_NAME,
+        });
+      } catch (err) {
+        log.warn(
+          `failed to check ${CASE_INDEX_NAME} existence: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+
       return response.ok({
         body: {
           enabled,
           index: CASE_INDEX_NAME,
+          index_exists: indexExists,
           reconciliation: {
             task_type: RECONCILIATION_TASK_TYPE,
             last_run: lastRun,
@@ -142,9 +175,7 @@ export const registerCasesAnalyticsV2Routes = ({
   router.post(
     {
       path: CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
-      security: {
-        authz: { requiredPrivileges: [{ allRequired: ['superuser'] }] },
-      },
+      security: SUPERUSER_AUTHZ,
       validate: {},
       options: { access: 'internal' },
     },
@@ -188,9 +219,7 @@ export const registerCasesAnalyticsV2Routes = ({
   router.post(
     {
       path: CASES_ANALYTICS_V2_RESET_URL,
-      security: {
-        authz: { requiredPrivileges: [{ allRequired: ['superuser'] }] },
-      },
+      security: SUPERUSER_AUTHZ,
       validate: {},
       options: { access: 'internal' },
     },

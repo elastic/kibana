@@ -179,8 +179,33 @@ asserts every emitted path resolves in the mapping (see
 GET /internal/cases/_analyticsV2/state
 ```
 
-Returns the enabled flag, index alias, and the reconciliation task's last
-run + next run time. Superuser only.
+Returns the enabled flag, the `.cases` index alias, a boolean indicating
+whether the index actually exists (bootstrap can silently fail at start —
+this is the surfacing), and the reconciliation task's last run + next run
+time. Superuser only.
+
+Example response:
+
+```json
+{
+  "enabled": true,
+  "index": ".cases",
+  "index_exists": true,
+  "reconciliation": {
+    "task_type": "cases.analyticsV2.reconciliation",
+    "last_run": {
+      "last_run_at": "2026-05-13T15:30:00.000Z",
+      "runs": 0,
+      "next_run_at": "2026-05-13T16:00:00.000Z",
+      "status": "idle"
+    }
+  }
+}
+```
+
+If `enabled: true` but `index_exists: false`, plugin start's `ensureCaseIndex`
+hit an error and logged at ERROR; check Kibana logs and consider hitting
+`POST /reset`.
 
 ### Re-run reconciliation immediately
 
