@@ -114,6 +114,8 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineNumbers: 'on',
   glyphMargin: true,
   scrollBeyondLastLine: false,
+  folding: true,
+  showFoldingControls: 'mouseover',
   tabSize: 2,
   lineNumbersMinChars: 2,
   insertSpaces: true,
