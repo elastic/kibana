@@ -17,6 +17,10 @@ import {
   getDashboardBackgroundBaseTokenOptions,
   type DashboardBackgroundBaseToken,
 } from './dashboard_background_tokens';
+import {
+  DASHBOARD_LAYOUT_TWEAKPANE_CURRENT_STATE_PRESET_ID,
+  getDashboardLayoutTweakpanePresets,
+} from './dashboard_layout_tweakpane_presets';
 
 /** Parse EUI border radius tokens (e.g. `6px`, `0.375rem`) into pixels for Tweakpane. */
 export function parseCssLengthToPx(value: string | number): number {
@@ -55,7 +59,8 @@ interface DashboardLayoutTweakpanePane {
 }
 
 /**
- * Live dashboard layout tuning via [Tweakpane](https://tweakpane.github.io/docs/): grid gutter
+ * Live dashboard layout tuning via [Tweakpane](https://tweakpane.github.io/docs/): presets
+ * (named bundles of all layout values), then grid gutter
  * (when margins are on), viewport left/right padding, panel corner radius (defaults to the
  * active EUI theme `border.radius.medium` value), per-panel inner padding (vertical and horizontal,
  * 0–30 px), and dashboard canvas background using EUI `backgroundBase*` tokens (see
@@ -103,6 +108,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
       document.body.appendChild(container);
 
       const bgOptions = getDashboardBackgroundBaseTokenOptions(euiThemeRef.current.colors);
+      const presets = getDashboardLayoutTweakpanePresets(defaultPanelRadiusRef.current);
 
       const params = {
         marginGutterPx: DASHBOARD_MARGIN_SIZE,
@@ -118,6 +124,37 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         title: 'Dashboard layout',
         expanded: true,
       }) as unknown as DashboardLayoutTweakpanePane;
+
+      const applyLayoutTweakValues = (next: DashboardLayoutTweakpaneValues) => {
+        params.marginGutterPx = next.marginGutterPx;
+        params.horizontalPaddingPx = next.horizontalPaddingPx;
+        params.panelBorderRadiusPx = next.panelBorderRadiusPx;
+        params.panelPaddingVerticalPx = Math.min(30, Math.max(0, next.panelPaddingVerticalPx));
+        params.panelPaddingHorizontalPx = Math.min(30, Math.max(0, next.panelPaddingHorizontalPx));
+        params.dashboardBackgroundToken = next.dashboardBackgroundToken;
+        setMarginGutterPx(params.marginGutterPx);
+        setHorizontalPaddingPx(params.horizontalPaddingPx);
+        setPanelBorderRadiusPx(params.panelBorderRadiusPx);
+        setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
+        setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
+        setDashboardBackgroundToken(params.dashboardBackgroundToken);
+      };
+
+      const presetUi = { preset: DASHBOARD_LAYOUT_TWEAKPANE_CURRENT_STATE_PRESET_ID };
+      const presetOptions = presets.map((p) => ({ text: p.label, value: p.id }));
+
+      pane
+        .addBinding(presetUi, 'preset', {
+          label: 'Presets',
+          options: presetOptions,
+        })
+        .on('change', (ev) => {
+          const nextId = typeof ev.value === 'string' ? ev.value : presetUi.preset;
+          const match = presets.find((p) => p.id === nextId);
+          if (match) {
+            applyLayoutTweakValues(match.values);
+          }
+        });
 
       const readNumber = (value: unknown): number | undefined => {
         if (typeof value === 'number' && Number.isFinite(value)) {
@@ -139,6 +176,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         })
         .on('change', (ev) => {
           const next = readNumber(ev.value) ?? params.marginGutterPx;
+          params.marginGutterPx = next;
           setMarginGutterPx(next);
         });
 
@@ -151,6 +189,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         })
         .on('change', (ev) => {
           const next = readNumber(ev.value) ?? params.horizontalPaddingPx;
+          params.horizontalPaddingPx = next;
           setHorizontalPaddingPx(next);
         });
 
@@ -163,6 +202,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         })
         .on('change', (ev) => {
           const next = readNumber(ev.value) ?? params.panelBorderRadiusPx;
+          params.panelBorderRadiusPx = next;
           setPanelBorderRadiusPx(next);
         });
 
@@ -175,7 +215,9 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         })
         .on('change', (ev) => {
           const next = readNumber(ev.value) ?? params.panelPaddingVerticalPx;
-          setPanelPaddingVerticalPx(Math.min(30, Math.max(0, next)));
+          const clamped = Math.min(30, Math.max(0, next));
+          params.panelPaddingVerticalPx = clamped;
+          setPanelPaddingVerticalPx(clamped);
         });
 
       pane
@@ -187,7 +229,9 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         })
         .on('change', (ev) => {
           const next = readNumber(ev.value) ?? params.panelPaddingHorizontalPx;
-          setPanelPaddingHorizontalPx(Math.min(30, Math.max(0, next)));
+          const clamped = Math.min(30, Math.max(0, next));
+          params.panelPaddingHorizontalPx = clamped;
+          setPanelPaddingHorizontalPx(clamped);
         });
 
       pane
@@ -200,15 +244,11 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         })
         .on('change', (ev) => {
           const next = typeof ev.value === 'string' ? ev.value : params.dashboardBackgroundToken;
+          params.dashboardBackgroundToken = next;
           setDashboardBackgroundToken(next);
         });
 
-      setMarginGutterPx(params.marginGutterPx);
-      setHorizontalPaddingPx(params.horizontalPaddingPx);
-      setPanelBorderRadiusPx(params.panelBorderRadiusPx);
-      setPanelPaddingVerticalPx(params.panelPaddingVerticalPx);
-      setPanelPaddingHorizontalPx(params.panelPaddingHorizontalPx);
-      setDashboardBackgroundToken(params.dashboardBackgroundToken);
+      applyLayoutTweakValues(params);
 
       disposePane = () => {
         pane.dispose();
