@@ -203,7 +203,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutDescription"
-              defaultMessage="You can still register repositories, but you can’t set or change the default repository right now. Try refreshing the page."
+              defaultMessage="You can still save repositories, but you can’t set or change the default repository right now. Try refreshing the page."
             />
           </EuiCallOut>
         </>

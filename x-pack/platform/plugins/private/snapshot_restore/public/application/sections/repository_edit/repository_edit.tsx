@@ -245,7 +245,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
           >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutDescription"
-              defaultMessage="You can still edit repositories, but you can’t set or change the default repository right now. Try refreshing the page."
+              defaultMessage="You can still save repositories, but you can’t set or change the default repository right now. Try refreshing the page."
             />
           </EuiCallOut>
           <EuiSpacer size="l" />
