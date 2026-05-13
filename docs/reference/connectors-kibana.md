@@ -153,7 +153,7 @@ If a connector is missing sensitive information after the import, a **Fix** butt
 :::
 
 
-## Elastic Cloud identifier in connector `User-Agent` headers [connector-user-agent-cloud]
+## Correlate connector traffic with a deployment or project [connector-user-agent-cloud]
 
 ```{applies_to}
 stack: ga 9.5+
@@ -167,9 +167,9 @@ deployment:
 When {{kib}} runs on {{ech}} or Elastic Cloud Serverless, outbound connector HTTP requests include an Elastic Cloud deployment or serverless project identifier in the `User-Agent` header. On self-managed or on-premises deployments, connector requests **do not** add this fragment. The `User-Agent` stays at the default HTTP client value (for example, `axios/1.7.2`).
 :::
 
-For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes an identifier for the deployment or project that originated the traffic. This is automatic and does not require connector configuration, networking settings, or other administrator actions.
+IT and information security teams can match outbound connector traffic in third-party audit or access logs to the originating {{ech}} deployment or {{serverless-full}} project—for example, during incident response or when a vendor contacts Elastic about suspicious activity.
 
-IT and information security teams can use this value to correlate traffic recorded in third-party audit or access logs with a specific Elastic Cloud deployment or project. For example, when investigating incidents or working with a vendor that contacts Elastic about suspicious activity.
+For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes that identifier on {{ech}} and {{serverless-full}}. This is automatic and does not require connector configuration, networking settings, or other administrator actions.
 
 ### Header format
 
@@ -183,10 +183,12 @@ The header starts with the underlying HTTP client name and version (for example,
 
 ### Look up the deployment or project from an identifier
 
-Looking up these identifiers is limited to Elastic Cloud organization administrators. There is no {{kib}} UI or API to resolve the values shown in connector `User-Agent` headers.
+{{ecloud}} organization administrators can look up deployment and {{serverless-full}} project identifiers across their organization. Users with other roles can look them up only for deployments and projects they have access to. 
+
+{{kib}} does not provide a UI or API to resolve the deployment or project values shown in connector `User-Agent` headers. Use the following steps instead:
 
 1. Copy the identifier from the header. The identifier is the substring after `deployment:` or `project:`.
-2. Open the [Elastic Cloud console](https://cloud.elastic.co) and sign in.
+2. Open the [{{ecloud}} console](https://cloud.elastic.co) and sign in.
 3. Go to the **Hosted** (for {{ech}} deployments) or **Serverless** (for Serverless projects) page, and enter the ID in the search field to find the matching deployment or project.
 
 
