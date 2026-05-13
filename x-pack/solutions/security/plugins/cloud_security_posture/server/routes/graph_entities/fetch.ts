@@ -62,7 +62,6 @@ export const fetchEntities = async ({
       columnar: false,
       filter: buildDslFilter(entityIds, start, end),
       query,
-      // @ts-expect-error - esql helper params types are not up to date
       params: entityIds.map((id, idx) => ({ [`entity_id${idx}`]: id })),
     })
     .toRecords<EntityRecord>();

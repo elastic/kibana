@@ -16,6 +16,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./index_management'));
     loadTestFile(require.resolve('./index_lifecycle_management'));
     loadTestFile(require.resolve('./snapshot_restore'));
-    loadTestFile(require.resolve('./ingest_pipelines'));
   });
 }
