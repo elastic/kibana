@@ -41,6 +41,21 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
+  /** Separate range for the badges query. Defaults to `[rangeFrom, rangeTo]`. */
+  badgesRangeFrom?: string;
+  badgesRangeTo?: string;
+  /** KQL for the badges query only. Defaults to `kuery`. Pass `""` to aggregate across all nodes. */
+  badgesKuery?: string;
+  /** Show the popover's "Focus map" button in embedded contexts. Defaults to `!isEmbedded`. */
+  showFocusMapInPopover?: boolean;
+  /** Strip `kuery` from popover-built URLs ("Service Details" / "Focus map"); env still flows through. */
+  clearKueryOnPopoverNavigation?: boolean;
+  /** Focus button always navigates to standalone APM, even for the currently focused service. */
+  alwaysNavigateOnPopoverFocus?: boolean;
+  /** Drop cross-env spans before rendering when env is set. */
+  strictEnvironmentScope?: boolean;
+  /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
+  onEmptyStateChange?: (isEmpty: boolean) => void;
 }
 
 function LoadingSpinner() {
@@ -61,6 +76,14 @@ export function ServiceMapEmbeddable({
   serviceGroupId,
   core,
   onBlockingError,
+  badgesRangeFrom,
+  badgesRangeTo,
+  badgesKuery,
+  showFocusMapInPopover,
+  clearKueryOnPopoverNavigation,
+  alwaysNavigateOnPopoverFocus,
+  strictEnvironmentScope,
+  onEmptyStateChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -89,6 +112,17 @@ export function ServiceMapEmbeddable({
     return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
   }, [rangeFrom, rangeTo]);
 
+  const { start: badgesStart, end: badgesEnd } = useMemo(() => {
+    if (badgesRangeFrom == null || badgesRangeTo == null) {
+      return { start, end };
+    }
+    const { start: parsedStart, end: parsedEnd } = getDateRange({
+      rangeFrom: badgesRangeFrom,
+      rangeTo: badgesRangeTo,
+    });
+    return { start: parsedStart ?? badgesRangeFrom, end: parsedEnd ?? badgesRangeTo };
+  }, [badgesRangeFrom, badgesRangeTo, start, end]);
+
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
@@ -99,13 +133,21 @@ export function ServiceMapEmbeddable({
     end,
     serviceGroupId,
     serviceName,
+    strictEnvironmentScope,
   });
+
+  // Only fire on SUCCESS — loading/error states carry no emptiness signal.
+  useEffect(() => {
+    if (!onEmptyStateChange) return;
+    if (status !== FETCH_STATUS.SUCCESS) return;
+    onEmptyStateChange(data.nodes.length === 0);
+  }, [onEmptyStateChange, status, data.nodes.length]);
 
   const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
-    start,
-    end,
-    kuery,
+    start: badgesStart,
+    end: badgesEnd,
+    kuery: badgesKuery ?? kuery,
     nodes: data.nodes,
     nodesStatus: status,
   });
@@ -130,6 +172,10 @@ export function ServiceMapEmbeddable({
 
   const isEmpty = data.nodes.length === 0;
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
+    // Host owns the empty UI; skip the prompt to avoid a one-frame flash before unmount.
+    if (onEmptyStateChange) {
+      return null;
+    }
     return (
       <div data-test-subj="apmServiceMapEmbeddable">
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
@@ -218,6 +264,9 @@ export function ServiceMapEmbeddable({
           isFullscreen={false}
           fullMapHref={fullMapHref}
           isEmbedded
+          showFocusMap={showFocusMapInPopover}
+          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
         />
       </div>
       {sloOverviewFlyout && (
