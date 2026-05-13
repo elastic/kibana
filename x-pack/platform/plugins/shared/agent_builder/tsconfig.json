@@ -132,6 +132,7 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/repo-info",
     "@kbn/test",
-    "@kbn/test-es-server"
+    "@kbn/test-es-server",
+    "@kbn/react-kibana-mount"
   ]
 }

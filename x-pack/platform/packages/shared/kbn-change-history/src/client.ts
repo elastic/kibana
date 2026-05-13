@@ -19,10 +19,12 @@ import { changeHistoryMappings } from './mappings';
 import {
   FLAGS,
   DATA_STREAM_NAME,
+  ILM_POLICY_NAME,
   SEPARATOR_CHAR,
   ECS_VERSION,
   DEFAULT_RESULT_SIZE,
 } from './constants';
+import { ensureIlmPolicy } from './ilm_policy';
 import type {
   ChangeHistoryDocument,
   GetHistoryResult,
@@ -106,8 +108,22 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(error);
       throw error;
     }
-    // Step 1: Create data stream definition
-    // TODO: What about ILM policy (defaults to none = keep forever)
+    // Step 1: Ensure the ILM policy exists. Installed only when missing so
+    // cluster admins can customize the policy in place without Kibana
+    // overwriting their changes on the next startup.
+    try {
+      await ensureIlmPolicy(elasticsearchClient, this.logger);
+    } catch (error) {
+      const err = new Error(
+        `Unable to install change history ILM policy [${ILM_POLICY_NAME}]: ${error}`,
+        { cause: error }
+      );
+      this.logger.error(err);
+      throw err;
+    }
+
+    // Step 2: Create data stream definition. The `index.lifecycle.name` setting
+    // points backing indices at the policy installed above.
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
@@ -116,10 +132,13 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         template: {
           priority: 100,
           mappings: changeHistoryMappings.v1,
+          settings: {
+            'index.lifecycle.name': ILM_POLICY_NAME,
+          },
         },
       };
 
-    // Step 2: Initialize data stream
+    // Step 3: Initialize data stream
     try {
       this.client = await DataStreamClient.initialize({
         dataStream: definition,
