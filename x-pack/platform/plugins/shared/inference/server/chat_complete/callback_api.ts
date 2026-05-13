@@ -11,10 +11,12 @@ import type {
   AnonymizationRule,
   Model,
   ChatCompletionEvent,
+  ChatCompletionMessageEvent,
 } from '@kbn/inference-common';
 import {
   createInferenceRequestError,
   InferenceTaskErrorCode,
+  ChatCompletionEventType,
   getConnectorFamily,
   getConnectorProvider,
   getConnectorPlatform,
@@ -24,7 +26,18 @@ import {
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { Observable, OperatorFunction } from 'rxjs';
-import { defer, forkJoin, from, identity, share, switchMap, catchError, throwError } from 'rxjs';
+import {
+  defer,
+  forkJoin,
+  from,
+  identity,
+  lastValueFrom,
+  of,
+  share,
+  switchMap,
+  catchError,
+  throwError,
+} from 'rxjs';
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -57,7 +70,8 @@ import type { TokenUsageLogger } from '../token_usage';
 import { handleTokenUsageLogging, buildTokenUsageContext } from '../token_usage';
 import type { InferenceConfig } from '../config';
 import { invokeBeforeCompletion } from './invoke_before_completion';
-import { applyAfterCompletionHook } from './apply_after_completion_hook';
+import { applyAfterCompletionHook, restoreTokensOperator } from './apply_after_completion_hook';
+import { invokeAroundCompletion } from './invoke_around_completion';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -214,7 +228,7 @@ function createChatCompletePipeline({
   anonymizationHookInvoker?: InvokeHookFn | null;
   config?: InferenceConfig;
 }) {
-  const hookPathEnabled =
+  const aroundHookEnabled =
     config?.anonymization?.experimental_workflow_driven === true &&
     anonymizationHookInvoker != null;
 
@@ -239,7 +253,7 @@ function createChatCompletePipeline({
 
       const messages = sanitizeMessages(givenMessages);
 
-      if (hookPathEnabled) {
+      if (aroundHookEnabled) {
         return from(
           invokeBeforeCompletion({
             anonymizationHookInvoker: anonymizationHookInvoker!,
@@ -251,43 +265,123 @@ function createChatCompletePipeline({
             anonymization,
           })
         ).pipe(
-          switchMap(({ hookSystem, hookMessages, sessionId, anonymizationContext }) => {
-            const spanModel = getSpanModel(modelName);
+          switchMap(
+            ({ hookSystem, hookMessages, sessionId, anonymizationContext: beforeContext }) => {
+              const proceedFn = async (
+                input: Record<string, unknown>
+              ): Promise<Record<string, unknown>> => {
+                const pSystem = typeof input.system === 'string' ? input.system : hookSystem;
+                const pMessages = Array.isArray(input.messages)
+                  ? (input.messages as ChatCompleteOptions['messages'])
+                  : hookMessages;
 
-            return withChatCompleteSpan(
-              {
-                system: hookSystem,
-                messages: hookMessages,
-                tools,
-                toolChoice,
-                ...(spanModel ? { model: spanModel } : {}),
-                ...metadata?.attributes,
-              },
-              () =>
-                chatComplete({
+                const assembled = await lastValueFrom(
+                  chatComplete({
+                    system: pSystem,
+                    messages: pMessages,
+                    toolChoice,
+                    tools,
+                    temperature,
+                    logger,
+                    functionCalling,
+                    modelName,
+                    abortSignal,
+                    metadata,
+                    timeout,
+                    stream: false,
+                  }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
+                );
+                const msg = assembled as ChatCompletionMessageEvent;
+                return { response: msg.content ?? '' };
+              };
+
+              return from(
+                invokeAroundCompletion({
+                  anonymizationHookInvoker: anonymizationHookInvoker!,
+                  config: config!,
+                  logger,
+                  metadata,
                   system: hookSystem,
                   messages: hookMessages,
-                  toolChoice,
-                  tools,
-                  temperature,
-                  logger,
-                  functionCalling,
-                  modelName,
-                  abortSignal,
-                  metadata,
-                  timeout,
-                  stream,
-                }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
-            ).pipe(
-              applyAfterCompletionHook({
-                anonymizationHookInvoker: anonymizationHookInvoker!,
-                config: config!,
-                logger,
-                sessionId,
-                anonymizationContext,
-              })
-            );
-          }),
+                  sessionId,
+                  anonymization,
+                  proceedFn,
+                })
+              ).pipe(
+                switchMap((aroundResult) => {
+                  if (aroundResult.kind === 'buffered') {
+                    const { finalResponse, anonymizationContext: aroundContext } = aroundResult;
+
+                    const syntheticChunk: ChatCompletionEvent = {
+                      type: ChatCompletionEventType.ChatCompletionChunk,
+                      content: finalResponse,
+                      tool_calls: [],
+                    };
+                    const syntheticMessage: ChatCompletionMessageEvent = {
+                      type: ChatCompletionEventType.ChatCompletionMessage,
+                      content: finalResponse,
+                      toolCalls: [],
+                    };
+
+                    return of(syntheticChunk, syntheticMessage).pipe(
+                      restoreTokensOperator(aroundContext.tokenMap),
+                      applyAfterCompletionHook({
+                        anonymizationHookInvoker: anonymizationHookInvoker!,
+                        config: config!,
+                        logger,
+                        sessionId,
+                        anonymizationContext: beforeContext,
+                      })
+                    );
+                  }
+
+                  // Streaming path
+                  const {
+                    anonymizedSystem,
+                    anonymizedMessages,
+                    anonymizationContext: aroundContext,
+                  } = aroundResult;
+
+                  const spanModel = getSpanModel(modelName);
+
+                  return withChatCompleteSpan(
+                    {
+                      system: anonymizedSystem,
+                      messages: anonymizedMessages,
+                      tools,
+                      toolChoice,
+                      ...(spanModel ? { model: spanModel } : {}),
+                      ...metadata?.attributes,
+                    },
+                    () =>
+                      chatComplete({
+                        system: anonymizedSystem,
+                        messages: anonymizedMessages,
+                        toolChoice,
+                        tools,
+                        temperature,
+                        logger,
+                        functionCalling,
+                        modelName,
+                        abortSignal,
+                        metadata,
+                        timeout,
+                        stream,
+                      }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
+                  ).pipe(
+                    restoreTokensOperator(aroundContext.tokenMap),
+                    applyAfterCompletionHook({
+                      anonymizationHookInvoker: anonymizationHookInvoker!,
+                      config: config!,
+                      logger,
+                      sessionId,
+                      anonymizationContext: beforeContext,
+                    })
+                  );
+                })
+              );
+            }
+          ),
           buildTokenUsagePipe({
             tokenUsageLogger,
             isTokenUsageTrackingEnabled,

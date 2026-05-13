@@ -1,0 +1,27 @@
+version: '1'
+name: Default PII Anonymization (around completion)
+enabled: false
+triggers:
+  - type: inference.aroundCompletion
+
+steps:
+  - name: anonymize_system
+    type: ai.pii
+    if: 'event.system'
+    with:
+      sessionId: '{{ event.sessionId }}'
+      input: '{{ event.system }}'
+      entities:
+        - IP
+        - EMAIL
+        - HOST_NAME
+
+  - name: anonymize_messages
+    type: ai.pii
+    with:
+      sessionId: '{{ event.sessionId }}'
+      input: '${{ event.messages }}'
+      entities:
+        - IP
+        - EMAIL
+        - HOST_NAME

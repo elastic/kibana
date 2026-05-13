@@ -16,6 +16,9 @@ export const registerInferenceWorkflowExtensions = (
   workflowsExtensions.registerTriggerDefinition(() =>
     import('../triggers').then((m) => m.afterCompletionPublicTriggerDefinition)
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('../triggers').then((m) => m.aroundCompletionPublicTriggerDefinition)
+  );
 
   workflowsExtensions.registerStepDefinition(() =>
     import('../steps/ai/ai_prompt_step').then((m) => m.AiPromptStepDefinition)
@@ -33,5 +36,8 @@ export const registerInferenceWorkflowExtensions = (
     import('../steps/pii/transform_pii_restore_step').then(
       (m) => m.TransformPiiRestoreStepDefinition
     )
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('../steps/call_site/call_site_proceed_step').then((m) => m.CallSiteProceedStepDefinition)
   );
 };

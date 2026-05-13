@@ -24,6 +24,10 @@ export interface TokenEntry {
 export interface AnonymizationContextHandle {
   readonly salt: string;
   readonly tokenMap: Map<string, TokenEntry>;
+  /** Store an anonymized event field so the caller can retrieve it after the hook runs. */
+  setField(key: string, value: unknown): void;
+  /** Retrieve a value stored by setField. */
+  getField(key: string): unknown;
 }
 
 /** Key used to store the context in the capabilities map passed to hook handlers. */

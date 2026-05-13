@@ -85,6 +85,101 @@ const safeStringify = (value: unknown): string => {
   }
 };
 
+/**
+ * RxJS operator that progressively restores anonymization tokens in a chat completion
+ * stream using the same sliding hold-buffer algorithm as applyAfterCompletionHook.
+ *
+ * - Chunk events: content is buffered; safe prefixes (that cannot start a partial token)
+ *   are restored and emitted; the rest is held until the next chunk or message.
+ * - Message event: held buffer is flushed; content and tool-call arguments are fully
+ *   restored; a flush chunk (carrying tool calls in streaming format) is emitted,
+ *   followed by the restored message event.
+ *
+ * This operator does NOT invoke any hook — it is used by the around hook path to restore
+ * aroundContext tokens before the stream reaches applyAfterCompletionHook.
+ */
+export const restoreTokensOperator = (
+  tokenMap: AnonymizationContext['tokenMap']
+): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> => {
+  return (source$) => {
+    let holdBuffer = '';
+
+    return source$.pipe(
+      mergeMap((event) => {
+        if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
+          const content = event.content ?? '';
+          if (!content) return EMPTY;
+
+          holdBuffer += content;
+
+          const m = PARTIAL_TOKEN_END_RE.exec(holdBuffer);
+          let safe: string;
+          if (m !== null && m.index !== undefined) {
+            safe = holdBuffer.slice(0, m.index);
+            holdBuffer = holdBuffer.slice(m.index);
+          } else {
+            safe = holdBuffer;
+            holdBuffer = '';
+          }
+
+          if (!safe) return EMPTY;
+
+          const restoredChunk: ChatCompletionChunkEvent = {
+            ...event,
+            content: restoreInString(safe, tokenMap),
+            tool_calls: [],
+          };
+          return of(restoredChunk);
+        }
+
+        if (event.type === ChatCompletionEventType.ChatCompletionMessage) {
+          const flushed = holdBuffer;
+          holdBuffer = '';
+
+          const restoredToolCalls = event.toolCalls?.map((tc) => ({
+            ...tc,
+            function: {
+              ...tc.function,
+              arguments: restoreInValue(
+                tc.function.arguments,
+                tokenMap
+              ) as typeof tc.function.arguments,
+            },
+          }));
+
+          const flushChunk: ChatCompletionChunkEvent = {
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: restoreInString(flushed, tokenMap),
+            tool_calls: (restoredToolCalls ?? []).map((tc, idx) => {
+              let args = '';
+              try {
+                args = JSON.stringify(tc.function.arguments) ?? '';
+              } catch {
+                args = String(tc.function.arguments ?? '');
+              }
+              return {
+                index: idx,
+                toolCallId: tc.toolCallId,
+                function: { name: tc.function.name, arguments: args },
+              };
+            }),
+          };
+
+          const restoredMessage: ChatCompletionMessageEvent = {
+            ...event,
+            content: restoreInString(event.content ?? '', tokenMap),
+            ...(restoredToolCalls !== undefined ? { toolCalls: restoredToolCalls } : {}),
+          };
+
+          return of(flushChunk as ChatCompletionEvent, restoredMessage as ChatCompletionEvent);
+        }
+
+        return of(event);
+      })
+    );
+  };
+};
+
 const collectTokenPatterns = (text: string): string[] =>
   text.match(new RegExp(TOKEN_RESTORE_REGEX.source, 'g')) ?? [];
 

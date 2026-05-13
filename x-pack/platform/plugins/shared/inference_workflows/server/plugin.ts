@@ -6,16 +6,14 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import {
-  beforePromptAnonymizationWorkflow,
-  afterCompletionDeanonymizationWorkflow,
-} from '@kbn/default-anonymization-workflows';
-import { z } from '@kbn/zod/v4';
+import { aroundCompletionAnonymizationWorkflow } from '@kbn/default-anonymization-workflows';
 import {
   BEFORE_COMPLETION_TRIGGER_ID,
   AFTER_COMPLETION_TRIGGER_ID,
+  AROUND_COMPLETION_TRIGGER_ID,
   beforeCompletionEventSchema,
   afterCompletionEventSchema,
+  aroundCompletionEventSchema,
 } from '@kbn/workflows-extensions/common';
 import {
   aiClassifyStepDefinition,
@@ -23,15 +21,13 @@ import {
   aiSummarizeStepDefinition,
 } from './steps/ai';
 import { createAiPiiStepDefinition, createTransformPiiRestoreStepDefinition } from './steps/pii';
+import { callSiteProceedStepDefinition } from './steps/call_site';
 import type {
   InferenceWorkflowsServerSetup,
   InferenceWorkflowsServerSetupDeps,
   InferenceWorkflowsServerStart,
   InferenceWorkflowsServerStartDeps,
 } from './types';
-
-const messageSchema = z.object({ role: z.string(), content: z.string().optional() }).passthrough();
-const messagesSchema = z.array(messageSchema);
 
 export class InferenceWorkflowsServerPlugin
   implements
@@ -64,9 +60,6 @@ export class InferenceWorkflowsServerPlugin
       id: BEFORE_COMPLETION_TRIGGER_ID,
       eventSchema: beforeCompletionEventSchema,
       sync: {
-        outputSchema: z
-          .object({ system: z.string().optional(), messages: messagesSchema })
-          .passthrough(),
         maxTimeout: '15s',
         failurePolicy: 'closed',
         chained: true,
@@ -77,10 +70,19 @@ export class InferenceWorkflowsServerPlugin
       id: AFTER_COMPLETION_TRIGGER_ID,
       eventSchema: afterCompletionEventSchema,
       sync: {
-        outputSchema: z.object({ response: z.string() }).passthrough(),
         maxTimeout: '15s',
         failurePolicy: 'closed',
         chained: true,
+        inlineExecution: true,
+      },
+    });
+    workflowsExtensions.registerTriggerDefinition({
+      id: AROUND_COMPLETION_TRIGGER_ID,
+      eventSchema: aroundCompletionEventSchema,
+      sync: {
+        maxTimeout: '30s',
+        failurePolicy: 'closed',
+        chained: false,
         inlineExecution: true,
       },
     });
@@ -100,6 +102,7 @@ export class InferenceWorkflowsServerPlugin
     workflowsExtensions.registerStepDefinition(
       createTransformPiiRestoreStepDefinition(getCapabilities)
     );
+    workflowsExtensions.registerStepDefinition(callSiteProceedStepDefinition);
 
     return {};
   }
@@ -112,12 +115,8 @@ export class InferenceWorkflowsServerPlugin
     return {
       getDefaultWorkflows: () => [
         {
-          id: 'default-pii-anonymization-before-completion',
-          yaml: beforePromptAnonymizationWorkflow,
-        },
-        {
-          id: 'default-pii-deanonymization-after-completion',
-          yaml: afterCompletionDeanonymizationWorkflow,
+          id: 'default-pii-anonymization-around-completion',
+          yaml: aroundCompletionAnonymizationWorkflow,
         },
       ],
     };

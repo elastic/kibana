@@ -12,10 +12,17 @@ import {
 import { defaultAfterCompletionHandler, defaultBeforeCompletionHandler } from './default_handlers';
 import { anonymizeText } from '../steps/pii/ai_pii/executor';
 
-const createCtx = (salt = 'test-salt'): AnonymizationContextHandle => ({
-  salt,
-  tokenMap: new Map(),
-});
+const createCtx = (salt = 'test-salt'): AnonymizationContextHandle => {
+  const fields = new Map<string, unknown>();
+  return {
+    salt,
+    tokenMap: new Map(),
+    setField: (key: string, value: unknown) => {
+      fields.set(key, value);
+    },
+    getField: (key: string) => fields.get(key),
+  };
+};
 
 const wrap = (ctx: AnonymizationContextHandle) => ({
   [ANONYMIZATION_CONTEXT_CAPABILITY_KEY]: ctx,

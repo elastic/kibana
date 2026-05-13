@@ -47,22 +47,19 @@ describe('TriggerRegistry', () => {
       expect(registry.has('cases.updated')).toBe(true);
     });
 
-    it('throws when sync.outputSchema is not a Zod schema', () => {
-      expect(() => {
-        registry.register(
-          createValidDefinition({
-            sync: {
-              outputSchema: null as unknown as TriggerSyncBlock['outputSchema'],
-              maxTimeout: '10s',
-              failurePolicy: 'closed',
-              chained: true,
-            },
-          })
-        );
-      }).toThrow('sync.outputSchema must be a Zod schema');
+    it('registers a valid sync trigger without outputSchema (defaults to eventSchema)', () => {
+      const def = createValidDefinition({
+        sync: {
+          maxTimeout: '10s',
+          failurePolicy: 'closed',
+          chained: true,
+        },
+      });
+      registry.register(def);
+      expect(registry.has('cases.updated')).toBe(true);
     });
 
-    it('throws when sync.outputSchema is not a Zod object schema', () => {
+    it('throws when sync.outputSchema is provided but is not a Zod object schema', () => {
       expect(() => {
         registry.register(
           createValidDefinition({

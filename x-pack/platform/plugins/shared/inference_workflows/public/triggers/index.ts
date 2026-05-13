@@ -9,8 +9,10 @@ import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import {
   BEFORE_COMPLETION_TRIGGER_ID,
   AFTER_COMPLETION_TRIGGER_ID,
+  AROUND_COMPLETION_TRIGGER_ID,
   beforeCompletionEventSchema,
   afterCompletionEventSchema,
+  aroundCompletionEventSchema,
 } from '@kbn/workflows-extensions/common';
 
 export const beforeCompletionPublicTriggerDefinition: PublicTriggerDefinition = {
@@ -26,4 +28,12 @@ export const afterCompletionPublicTriggerDefinition: PublicTriggerDefinition = {
   eventSchema: afterCompletionEventSchema,
   title: 'After completion',
   description: 'Fires after an LLM response is received. Use to transform or audit the response.',
+};
+
+export const aroundCompletionPublicTriggerDefinition: PublicTriggerDefinition = {
+  id: AROUND_COMPLETION_TRIGGER_ID,
+  eventSchema: aroundCompletionEventSchema,
+  title: 'Around completion',
+  description:
+    'Wraps an LLM call. Steps run before the connector call; the trigger contract handles the call and response restoration.',
 };

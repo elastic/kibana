@@ -25,6 +25,7 @@ import type {
 import type {
   ExecuteWorkflowSyncInput,
   ExecuteWorkflowSyncResult,
+  WorkflowCheckpoint,
 } from './execution_functions/execute_workflow_sync';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
@@ -49,7 +50,7 @@ export interface TriggerEventsContract {
   maxEventChainDepth: number;
 }
 
-export type { ExecuteWorkflowSyncInput, ExecuteWorkflowSyncResult };
+export type { ExecuteWorkflowSyncInput, ExecuteWorkflowSyncResult, WorkflowCheckpoint };
 
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;

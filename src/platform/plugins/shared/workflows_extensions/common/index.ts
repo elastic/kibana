@@ -21,7 +21,9 @@ export {
   commonWorkflowExecutionFailedTriggerDefinition,
   BEFORE_COMPLETION_TRIGGER_ID,
   AFTER_COMPLETION_TRIGGER_ID,
+  AROUND_COMPLETION_TRIGGER_ID,
   beforeCompletionEventSchema,
   afterCompletionEventSchema,
+  aroundCompletionEventSchema,
 } from './triggers';
 export type { WorkflowExecutionFailedEvent } from './triggers';

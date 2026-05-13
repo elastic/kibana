@@ -9,6 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { HookResult } from '@kbn/workflows/server/types';
+import type { z } from '@kbn/zod/v4';
 import type { HookHandlerRegistry } from './hook_handler_registry';
 import type { TriggerRegistry } from './trigger_registry';
 
@@ -48,6 +49,9 @@ export const invokeHookInternal = async (
   }
 
   const { chained, failurePolicy, maxTimeout, outputSchema } = definition.sync;
+  // When no outputSchema is declared, fall back to the event schema — the hook is
+  // expected to return the same shape it received (default input = output contract).
+  const effectiveOutputSchema: z.ZodType = outputSchema ?? definition.eventSchema;
   const timeoutMs = parseTimeoutMs(maxTimeout);
   let current = payload;
 
@@ -67,7 +71,7 @@ export const invokeHookInternal = async (
           ),
         ]);
 
-        const validation = outputSchema.safeParse(rawResult);
+        const validation = effectiveOutputSchema.safeParse(rawResult);
         if (!validation.success) {
           throw new Error(
             `Handler output for trigger "${triggerId}" failed schema validation: ${validation.error.message}`

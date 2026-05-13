@@ -65,15 +65,29 @@ export const createWorkflowsClientProvider = (
         type WorkflowWithDefinition = WorkflowDetailDto & {
           definition: NonNullable<WorkflowDetailDto['definition']>;
         };
+
+        const hasAnyEnabledWorkflows = subscribedWorkflows.some((w) => w.enabled);
+        if (!hasAnyEnabledWorkflows) {
+          logger.debug(`No enabled workflows for trigger "${triggerId}".`);
+          return { status: 'pass_through', output: payload };
+        }
+
         const enabledWorkflows = subscribedWorkflows.filter(
           (w): w is WorkflowWithDefinition => w.enabled && w.definition != null
         );
 
+        if (!enabledWorkflows.length) {
+          logger.debug(
+            `Trigger "${triggerId}" has enabled workflows but no YAML definitions. Delegating to in-memory handlers.`
+          );
+          return workflowsExtensions.invokeHook(triggerId, payload, capabilities);
+        }
+
         const triggerDef = workflowsExtensions.getTriggerDefinition(triggerId);
 
-        if (!enabledWorkflows.length || !triggerDef?.sync?.inlineExecution) {
+        if (!triggerDef?.sync?.inlineExecution) {
           logger.debug(
-            `No enabled workflows or trigger "${triggerId}" does not opt in to inline execution. Delegating to in-memory handlers.`
+            `Trigger "${triggerId}" does not opt in to inline execution. Delegating to in-memory handlers.`
           );
           return workflowsExtensions.invokeHook(triggerId, payload, capabilities);
         }
@@ -88,24 +102,81 @@ export const createWorkflowsClientProvider = (
 
         const { workflowsExecutionEngine } = await workflowsService.getPluginsStart();
 
+        // around-hook: proceed function is passed as a capability by the inference plugin.
+        const proceedFn = capabilities?.proceedFn as
+          | ((input: Record<string, unknown>) => Promise<Record<string, unknown>>)
+          | undefined;
+
         let current = payload;
         try {
           for (const workflow of enabledWorkflows) {
-            const result = await workflowsExecutionEngine.executeWorkflowSync({
+            const firstResult = await workflowsExecutionEngine.executeWorkflowSync({
               workflowDefinition: workflow.definition,
               payload: current,
               maxTimeoutMs: timeoutMs,
             });
 
-            if (result.status === 'failed') {
+            if (firstResult.status === 'failed') {
               if (failurePolicy === 'closed') {
-                return { status: 'failed', output: current, error: result.error };
+                return { status: 'failed', output: current, error: firstResult.error };
               }
               logger.warn(
-                `[invokeHook] workflow "${workflow.name}" failed (open policy): ${result.error}`
+                `[invokeHook] workflow "${workflow.name}" failed (open policy): ${firstResult.error}`
               );
+            } else if (firstResult.status === 'suspended') {
+              if (!firstResult.checkpoint) {
+                return {
+                  status: 'failed',
+                  output: current,
+                  error: 'suspended result missing checkpoint',
+                };
+              }
+              if (!proceedFn) {
+                return {
+                  status: 'failed',
+                  output: current,
+                  error:
+                    '[invokeHook] around-hook workflow suspended but no proceedFn capability provided',
+                };
+              }
+
+              let proceedResult: Record<string, unknown> | undefined;
+              try {
+                proceedResult = await proceedFn(firstResult.checkpoint.proceedInput);
+              } catch (err) {
+                const message = err instanceof Error ? err.message : String(err);
+                if (failurePolicy === 'closed') {
+                  return {
+                    status: 'failed',
+                    output: current,
+                    error: `[invokeHook] proceed function failed: ${message}`,
+                  };
+                }
+                logger.warn(`[invokeHook] proceed function failed (open policy): ${message}`);
+              }
+
+              if (proceedResult !== undefined) {
+                const resumeResult = await workflowsExecutionEngine.executeWorkflowSync({
+                  workflowDefinition: workflow.definition,
+                  payload: current,
+                  maxTimeoutMs: timeoutMs,
+                  resumeFrom: firstResult.checkpoint,
+                  proceedResult,
+                });
+
+                if (resumeResult.status === 'failed') {
+                  if (failurePolicy === 'closed') {
+                    return { status: 'failed', output: current, error: resumeResult.error };
+                  }
+                  logger.warn(
+                    `[invokeHook] workflow "${workflow.name}" resume failed (open policy): ${resumeResult.error}`
+                  );
+                } else {
+                  current = resumeResult.output;
+                }
+              }
             } else if (chained) {
-              current = result.output;
+              current = firstResult.output;
             }
           }
           return { status: 'completed', output: current };

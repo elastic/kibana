@@ -27,3 +27,13 @@ export const afterCompletionDeanonymizationWorkflow: string = readFileSync(
   join(__dirname, 'src', 'after_completion_deanonymization.yaml'),
   'utf-8'
 );
+
+/**
+ * YAML definition for the default PII anonymization workflow that uses an AOP-style
+ * "around" hook — pre-proceed steps anonymize, `call_site.proceed` executes the LLM
+ * call, post-proceed steps restore. Replaces the separate before/after workflows.
+ */
+export const aroundCompletionAnonymizationWorkflow: string = readFileSync(
+  join(__dirname, 'src', 'around_completion_anonymization.yaml'),
+  'utf-8'
+);

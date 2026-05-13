@@ -38,13 +38,17 @@ function validateDefinition(definition: ServerTriggerDefinition): void {
   }
 
   if (sync !== undefined) {
-    if (!sync.outputSchema || typeof sync.outputSchema.safeParse !== 'function') {
-      throw new Error(`Trigger "${id}": sync.outputSchema must be a Zod schema.`);
-    }
-    if (!isZodObject(sync.outputSchema)) {
-      throw new Error(
-        `Trigger "${id}": sync.outputSchema must be a Zod object schema (e.g. z.object({...})).`
-      );
+    // outputSchema is optional; when provided it must be a Zod object schema.
+    // When omitted, invocation falls back to the trigger's eventSchema for output validation.
+    if (sync.outputSchema !== undefined) {
+      if (typeof sync.outputSchema.safeParse !== 'function') {
+        throw new Error(`Trigger "${id}": sync.outputSchema must be a Zod schema when provided.`);
+      }
+      if (!isZodObject(sync.outputSchema)) {
+        throw new Error(
+          `Trigger "${id}": sync.outputSchema must be a Zod object schema (e.g. z.object({...})) when provided.`
+        );
+      }
     }
     if (typeof sync.maxTimeout !== 'string' || !/^(\d+)(ms|s|m)$/.test(sync.maxTimeout)) {
       throw new Error(

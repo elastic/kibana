@@ -15,6 +15,9 @@ export interface TokenEntry {
   entityClass: string;
 }
 
+/** Matches tokens produced by generateToken: `<ENTITY_CLASS>_<32 hex chars>`. */
+const TOKEN_RESTORE_REGEX = /\b([A-Z][A-Z0-9_]*)_([0-9a-f]{32})\b/g;
+
 /**
  * Per-call context handle for the workflow-driven anonymization POC.
  *
@@ -29,6 +32,7 @@ export interface TokenEntry {
 export class AnonymizationContext {
   public readonly salt: string;
   public readonly tokenMap: Map<string, TokenEntry>;
+  private readonly _fields: Map<string, unknown> = new Map();
 
   constructor(salt: string) {
     this.salt = salt;
@@ -49,5 +53,31 @@ export class AnonymizationContext {
    */
   public resolveToken(token: string): TokenEntry | undefined {
     return this.tokenMap.get(token);
+  }
+
+  /**
+   * Store an anonymized event field value produced by an `ai.pii` step.
+   * Used by `invokeAroundCompletion` to retrieve anonymized system/messages
+   * without routing them through the YAML workflow output.
+   */
+  public setField(key: string, value: unknown): void {
+    this._fields.set(key, value);
+  }
+
+  /** Retrieve a value stored by `setField`. Returns `undefined` when absent. */
+  public getField(key: string): unknown {
+    return this._fields.get(key);
+  }
+
+  /**
+   * Replace all tokens in `text` with their original values using the token map.
+   * Tokens absent from the map are left unchanged.
+   */
+  public restore(text: string): string {
+    const re = new RegExp(TOKEN_RESTORE_REGEX.source, TOKEN_RESTORE_REGEX.flags);
+    return text.replace(re, (fullMatch) => {
+      const entry = this.tokenMap.get(fullMatch);
+      return entry ? entry.original : fullMatch;
+    });
   }
 }

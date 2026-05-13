@@ -301,6 +301,40 @@ describe('invokeHookInternal', () => {
       expect(result.status).toBe('completed');
       expect(result.output).toEqual({ value: 'ok', extra: 'field' });
     });
+
+    it('falls back to eventSchema for validation when no outputSchema is declared', async () => {
+      const triggerRegistry = new TriggerRegistry();
+      const hookHandlerRegistry = new HookHandlerRegistry();
+      const logger = createMockLogger();
+
+      triggerRegistry.register({
+        id: TRIGGER_ID,
+        eventSchema: z.object({ value: z.string() }).passthrough(),
+        sync: {
+          // no outputSchema — should default to eventSchema
+          maxTimeout: '100ms',
+          failurePolicy: 'closed',
+          chained: true,
+        },
+      });
+
+      const deps = {
+        triggerRegistry,
+        hookHandlerRegistry,
+        sessionCapabilityCache: new Map<string, Record<string, unknown>>(),
+        logger: logger as unknown as Logger,
+      };
+
+      hookHandlerRegistry.register(TRIGGER_ID, async () => ({ value: 'ok' }));
+      const valid = await invokeHookInternal(deps, TRIGGER_ID, { value: 'x' });
+      expect(valid.status).toBe('completed');
+
+      // returning a value that fails the eventSchema should be rejected
+      hookHandlerRegistry.register(TRIGGER_ID, async () => ({ value: 42 as unknown as string }));
+      const invalid = await invokeHookInternal(deps, TRIGGER_ID, { value: 'x' });
+      expect(invalid.status).toBe('failed');
+      expect(invalid.error).toContain('failed schema validation');
+    });
   });
 
   describe('sessionCapabilityCache', () => {

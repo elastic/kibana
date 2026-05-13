@@ -15,18 +15,28 @@ import { WorkflowTemplatingEngine } from '../templating_engine';
 // BaseStep only carries name/type. Real steps also have if/with — extend here for inline execution.
 type SyncStep = BaseStep & { if?: string; with?: Record<string, unknown> };
 
+export interface WorkflowCheckpoint {
+  stepIndex: number;
+  stepName: string;
+  context: Record<string, unknown>;
+  proceedInput: Record<string, unknown>;
+}
+
 export interface ExecuteWorkflowSyncInput {
   workflowDefinition: WorkflowYaml;
   payload: Record<string, unknown>;
   maxTimeoutMs: number;
   getStepDefinition: (stepType: string) => ServerStepDefinition | undefined;
   logger: Logger;
+  resumeFrom?: WorkflowCheckpoint;
+  proceedResult?: Record<string, unknown>;
 }
 
 export interface ExecuteWorkflowSyncResult {
-  status: 'completed' | 'failed';
+  status: 'completed' | 'failed' | 'suspended';
   output: Record<string, unknown>;
   error?: string;
+  checkpoint?: WorkflowCheckpoint;
 }
 
 const evaluateCondition = (
@@ -47,22 +57,44 @@ export const executeWorkflowSync = async ({
   maxTimeoutMs,
   getStepDefinition,
   logger,
+  resumeFrom,
+  proceedResult,
 }: ExecuteWorkflowSyncInput): Promise<ExecuteWorkflowSyncResult> => {
   const execute = async (): Promise<ExecuteWorkflowSyncResult> => {
     const engine = new WorkflowTemplatingEngine();
-    const context: Record<string, unknown> = {
-      event: payload,
-      steps: {},
-    };
-
+    const context: Record<string, unknown> = { event: payload, steps: {} };
     let finalOutput: Record<string, unknown> | undefined;
+    let startIndex = 0;
 
-    for (const step of workflowDefinition.steps) {
+    if (resumeFrom) {
+      Object.assign(context, resumeFrom.context);
+      (context.steps as Record<string, unknown>)[resumeFrom.stepName] = {
+        output: proceedResult ?? {},
+      };
+      startIndex = resumeFrom.stepIndex;
+    }
+
+    for (let i = startIndex; i < workflowDefinition.steps.length; i++) {
+      const step = workflowDefinition.steps[i];
       const { name: stepName, type: stepType, if: stepIf, with: stepWith } = step as SyncStep;
 
       const shouldSkip = stepIf ? !evaluateCondition(engine, stepIf, context) : false;
 
       if (!shouldSkip) {
+        if (stepType === 'call_site.proceed') {
+          const evaluatedInput = stepWith ? engine.render(stepWith, context) : {};
+          return {
+            status: 'suspended',
+            output: payload,
+            checkpoint: {
+              stepIndex: i + 1,
+              stepName,
+              context: structuredClone(context),
+              proceedInput: evaluatedInput as Record<string, unknown>,
+            },
+          };
+        }
+
         if (stepType === 'workflow.output') {
           if (stepWith) {
             finalOutput = engine.render(stepWith, context) as Record<string, unknown>;

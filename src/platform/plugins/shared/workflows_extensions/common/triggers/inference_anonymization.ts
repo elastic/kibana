@@ -11,6 +11,7 @@ import { z } from '@kbn/zod/v4';
 
 export const BEFORE_COMPLETION_TRIGGER_ID = 'inference.beforeCompletion' as const;
 export const AFTER_COMPLETION_TRIGGER_ID = 'inference.afterCompletion' as const;
+export const AROUND_COMPLETION_TRIGGER_ID = 'inference.aroundCompletion' as const;
 
 const messageSchema = z.object({ role: z.string(), content: z.string().optional() }).passthrough();
 
@@ -26,5 +27,17 @@ export const afterCompletionEventSchema = z
   .object({
     sessionId: z.string().describe('Session/conversation identifier'),
     response: z.string().describe('LLM response text'),
+  })
+  .passthrough();
+
+/**
+ * Event schema for the `inference.aroundCompletion` trigger.
+ * The workflow receives the full prompt and wraps the LLM call via `call_site.proceed`.
+ */
+export const aroundCompletionEventSchema = z
+  .object({
+    sessionId: z.string().describe('Session/conversation identifier for cross-turn determinism'),
+    system: z.string().optional().describe('System prompt, if any'),
+    messages: z.array(messageSchema).describe('Chat messages to be sent to the LLM'),
   })
   .passthrough();

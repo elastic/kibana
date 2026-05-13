@@ -22,8 +22,12 @@ export type HookFailurePolicy = 'open' | 'closed';
  * and handlers are chained in registration order.
  */
 export interface TriggerSyncBlock<OutputSchema extends z.ZodObject = z.ZodObject> {
-  /** Zod object schema for the value returned by the hook chain. */
-  outputSchema: OutputSchema;
+  /**
+   * Zod object schema for the value returned by the hook chain.
+   * When omitted, the hook output is validated against the trigger's eventSchema —
+   * i.e. the output is expected to have the same shape as the input.
+   */
+  outputSchema?: OutputSchema;
   /** Per-handler timeout (not a total chain budget). Each handler gets this window independently (e.g. '15s'). */
   maxTimeout: string;
   /** Fail-safe policy when a handler throws or times out. */

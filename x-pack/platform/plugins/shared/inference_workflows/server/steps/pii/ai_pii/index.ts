@@ -68,9 +68,16 @@ export const createAiPiiStepDefinition = (
     category: StepCategory.Ai,
     inputSchema,
     outputSchema,
-    handler: async ({
-      input: { sessionId, input, entities, customPatterns, systemPromptInstruction },
-    }) => {
+    handler: async (handlerCtx) => {
+      const { sessionId, input, entities, customPatterns, systemPromptInstruction } =
+        handlerCtx.input as {
+          sessionId: string;
+          input: string | unknown[];
+          entities?: string[];
+          customPatterns?: Array<{ pattern: string; entityClass: string }>;
+          systemPromptInstruction?: string;
+        };
+
       const ctx = getCapabilities(sessionId)?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
         | AnonymizationContextHandle
         | undefined;
@@ -91,14 +98,19 @@ export const createAiPiiStepDefinition = (
 
       const instruction = systemPromptInstruction ?? undefined;
 
+      const rawTemplate = String((handlerCtx.rawInput as Record<string, unknown>)?.input ?? '');
+      const eventField = /event\.(\w+)/.exec(rawTemplate)?.[1] ?? null;
+
       if (typeof input === 'string') {
         const anonymized = anonymizeString(input, rules, ctx);
+        if (eventField) ctx.setField(eventField, anonymized);
         return { output: { output: anonymized, systemPromptInstruction: instruction } };
       }
 
       const anonymizedMessages = (input as unknown[]).map((msg) =>
         anonymizeMessageContent(msg, rules, ctx)
       );
+      if (eventField) ctx.setField(eventField, anonymizedMessages);
       return { output: { output: anonymizedMessages, systemPromptInstruction: instruction } };
     },
   });
