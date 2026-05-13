@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
 
 import { App } from './components/app';
 import { useKibana } from './hooks/use_kibana';
@@ -14,8 +15,22 @@ import { InferenceEndpointsProvider } from './providers/inference_endpoints_prov
 
 export const InferenceEndpointsOverview: React.FC = () => {
   const {
-    services: { console: consolePlugin },
+    services: { console: consolePlugin, setBreadcrumbs, chrome },
   } = useKibana();
+
+  useEffect(() => {
+    // Only set breadcrumbs in classic chrome. In project chrome (serverless or solution spaces),
+    // the navigation tree provides the breadcrumb path automatically.
+    if (chrome.getChromeStyle() === 'classic') {
+      setBreadcrumbs([
+        {
+          text: i18n.translate('xpack.searchInferenceEndpoints.breadcrumbs.inferenceEndpoints', {
+            defaultMessage: 'External Inference',
+          }),
+        },
+      ]);
+    }
+  }, [setBreadcrumbs, chrome]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
