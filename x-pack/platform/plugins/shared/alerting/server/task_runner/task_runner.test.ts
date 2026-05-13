@@ -3683,16 +3683,10 @@ describe('Task Runner', () => {
       },
     };
 
-    alertsClient.getProcessedAlerts.mockImplementation((type) => {
-      if (type === 'active') {
-        return {
-          'alert-1': {
-            getAlertAsData: jest.fn().mockReturnValue({ 'kibana.alert.severity': 'high' }),
-          },
-        };
-      }
-      return {};
-    });
+    // Current severity ('high') differs from the snapshot ('critical') → condition met
+    alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+      instanceId === 'alert-1' ? { 'kibana.alert.severity': 'high' } : undefined
+    );
     alertsClient.getRawAlertInstancesForState.mockReturnValue({
       rawActiveAlerts: {},
       rawRecoveredAlerts: {},
@@ -3741,17 +3735,10 @@ describe('Task Runner', () => {
       },
     };
 
-    // Field value is unchanged — condition not met, instance stays snoozed
-    alertsClient.getProcessedAlerts.mockImplementation((type) => {
-      if (type === 'active') {
-        return {
-          'alert-1': {
-            getAlertAsData: jest.fn().mockReturnValue({ 'kibana.alert.severity': 'critical' }),
-          },
-        };
-      }
-      return {};
-    });
+    // Current severity matches snapshot ('critical' === 'critical') → condition not met
+    alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+      instanceId === 'alert-1' ? { 'kibana.alert.severity': 'critical' } : undefined
+    );
     alertsClient.getRawAlertInstancesForState.mockReturnValue({
       rawActiveAlerts: {},
       rawRecoveredAlerts: {},
@@ -3861,16 +3848,10 @@ describe('Task Runner', () => {
       },
     };
 
-    alertsClient.getProcessedAlerts.mockImplementation((type) => {
-      if (type === 'active') {
-        return {
-          'alert-condition-change': {
-            getAlertAsData: jest.fn().mockReturnValue({ 'kibana.alert.severity': 'high' }),
-          },
-        };
-      }
-      return {};
-    });
+    // Current severity ('high') differs from the snapshot ('critical') → condition met
+    alertsClient.getBuiltActiveAlertDataByInstanceId.mockImplementation((instanceId: string) =>
+      instanceId === 'alert-condition-change' ? { 'kibana.alert.severity': 'high' } : undefined
+    );
     alertsClient.getRawAlertInstancesForState.mockReturnValue({
       rawActiveAlerts: {},
       rawRecoveredAlerts: {},

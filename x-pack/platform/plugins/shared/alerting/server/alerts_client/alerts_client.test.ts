@@ -1969,7 +1969,7 @@ describe('Alerts Client', () => {
           expect(alertsClient.getBuiltActiveAlertDataByInstanceId('unknown-id')).toBeUndefined();
         });
 
-        test('includes recovered alert documents in the cache', async () => {
+        test('caches only active alerts needed for condition evaluation', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
@@ -1977,7 +1977,16 @@ describe('Alerts Client', () => {
           await alertsClient.initializeExecution({
             ...defaultExecutionOpts,
             activeAlertsFromState: {
-              '1': { state: {}, meta: { uuid: 'uuid-1', flappingHistory: [], flapping: false, pendingRecoveredCount: 0, activeCount: 1 } },
+              '1': {
+                state: {},
+                meta: {
+                  uuid: 'uuid-1',
+                  flappingHistory: [],
+                  flapping: false,
+                  pendingRecoveredCount: 0,
+                  activeCount: 1,
+                },
+              },
             },
           });
           // Do not schedule any actions → alert '1' recovers
@@ -1988,10 +1997,9 @@ describe('Alerts Client', () => {
 
           await alertsClient.persistAlerts();
 
-          // Recovered alert is still cached (buildAlerts returns active + recovered)
-          const doc = alertsClient.getBuiltActiveAlertDataByInstanceId('1');
-          expect(doc).toBeDefined();
-          expect(doc).toEqual(expect.objectContaining({ [ALERT_INSTANCE_ID]: '1' }));
+          // Recovered alerts are not in the cache — only active alerts matter for
+          // condition-based snooze evaluation.
+          expect(alertsClient.getBuiltActiveAlertDataByInstanceId('1')).toBeUndefined();
         });
 
         test('cache is cleared and repopulated on each persistAlerts() call', async () => {
