@@ -42,6 +42,9 @@
     "@kbn/kibana-react-plugin",
     "@kbn/search-types",
     "@kbn/user-profile-components",
-    "@kbn/unified-data-table"
+    "@kbn/unified-data-table",
+    "@kbn/charts-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/unified-doc-viewer-plugin"
   ]
 }

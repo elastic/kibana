@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import type { SortOrder } from '@kbn/unified-data-table';
+import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   ROWS_HEIGHT_OPTIONS,
@@ -27,7 +27,9 @@ import {
   type CustomGridColumnsConfiguration,
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { RowControlColumn } from '@kbn/discover-utils';
+import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/details/details_flyout';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -40,6 +42,7 @@ import {
   EpisodeTagsCell,
   EpisodeRuleCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import * as i18n from './translations';
@@ -50,7 +53,6 @@ import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_
 import { paths } from '../../constants';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
-import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 
 const PAGE_SIZE = 1000;
 
@@ -123,6 +125,31 @@ export const AlertEpisodesListPage = () => {
     'assignees',
   ]);
   const [rowHeight, setRowHeight] = useState<number>(ROWS_HEIGHT_OPTIONS.default);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+  const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
+
+  const renderDocumentView = useCallback<RenderDocumentViewCallback>(
+    (hit) => (
+      <AlertEpisodeDetailsFlyout
+        episodeId={hit.flattened['episode.id'] as string}
+        onClose={closeFlyout}
+        services={{
+          data: services.data,
+          http: services.http,
+          expressions: services.expressions,
+          userProfile: services.userProfile,
+          uiSettings: services.uiSettings,
+          unifiedDocViewer: services.unifiedDocViewer,
+          dataViews: services.dataViews,
+        }}
+        getEpisodeDetailsHref={(id) =>
+          services.http.basePath.prepend(paths.alertEpisodeDetails(id))
+        }
+        getRuleDetailsHref={(id) => services.http.basePath.prepend(paths.ruleDetails(id))}
+      />
+    ),
+    [closeFlyout, services]
+  );
 
   const {
     data: episodesData,
@@ -189,8 +216,6 @@ export const AlertEpisodesListPage = () => {
         docLinks: services.docLinks,
         expressions: services.expressions,
         queryClient,
-        getEpisodeDetailsHref: (id) =>
-          services.http.basePath.prepend(paths.alertEpisodeDetails(id)),
         getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
           getDiscoverHrefForRuleAndEpisodeTimestamp({
             share: services.share,
@@ -262,7 +287,9 @@ export const AlertEpisodesListPage = () => {
       ),
       assignees: (props) => {
         const assigneeUid = props.row.flattened.last_assignee_uid as string | undefined;
-        return <EpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={services.userProfile} />;
+        return (
+          <AlertEpisodeAssigneeCell assigneeUid={assigneeUid} userProfile={services.userProfile} />
+        );
       },
     }),
     [rulesCache, isLoadingRules, rowHeight, services.userProfile]
@@ -349,6 +376,9 @@ export const AlertEpisodesListPage = () => {
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 enableComparisonMode={false}
                 services={services}
+                expandedDoc={expandedDoc}
+                setExpandedDoc={setExpandedDoc}
+                renderDocumentView={renderDocumentView}
               />
             )}
           </CellActionsProvider>

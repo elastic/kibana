@@ -16,22 +16,35 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
-import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
-import { useFetchSameGroupEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_same_group_episodes_query';
 import { css } from '@emotion/react';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
-import { RelatedAlertEpisodesList } from './related_alert_episodes_list';
+import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
+import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
+import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
+import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
+import { RelatedAlertEpisodesList } from './related_list';
 import * as i18n from './translations';
+
+interface RelatedEpisodesGroupSubsectionServices {
+  notifications: CoreStart['notifications'];
+  expressions: ExpressionsStart;
+}
 
 export interface RelatedEpisodesGroupSubsectionProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
   rule: RuleResponse;
   ruleId: string | undefined;
+  getEpisodeDetailsHref: (episodeId: string) => string;
+  /**
+   * When `true`, drop the inner horizontal padding so the subsection sits
+   * flush with its consumer's edges. Useful when rendering inside a container
+   * that already provides outer padding (e.g. a narrow flyout body).
+   */
+  flush?: boolean;
 }
 
 /**
@@ -42,11 +55,13 @@ export function RelatedEpisodesGroupSubsection({
   groupHash,
   rule,
   ruleId,
+  getEpisodeDetailsHref,
+  flush = false,
 }: RelatedEpisodesGroupSubsectionProps) {
   const { euiTheme } = useEuiTheme();
   const {
     services: { notifications, expressions },
-  } = useKibana<AlertEpisodesKibanaServices>();
+  } = useKibana<RelatedEpisodesGroupSubsectionServices>();
   const toastDanger = useCallback(
     (message: string) => {
       notifications.toasts.addDanger(message);
@@ -92,14 +107,22 @@ export function RelatedEpisodesGroupSubsection({
   return (
     <div
       data-test-subj="alertingV2RelatedEpisodesGroupSubsection"
-      css={css`
-        padding-inline: ${euiTheme.size.m};
-      `}
+      css={
+        flush
+          ? undefined
+          : css`
+              padding-inline: ${euiTheme.size.m};
+            `
+      }
     >
-      <EuiTitle size="xs">
+      <EuiTitle size={flush ? 'xxs' : 'xs'}>
         <h4>{i18n.RELATED_SAME_GROUP_TITLE}</h4>
       </EuiTitle>
-      <EuiText size="s" color="subdued" css={{ marginBlockStart: euiTheme.size.xs }}>
+      <EuiText
+        size={flush ? 'xs' : 's'}
+        color="subdued"
+        css={{ marginBlockStart: euiTheme.size.xs }}
+      >
         {i18n.RELATED_SAME_GROUP_DESCRIPTION}
       </EuiText>
       <EuiSpacer size="s" />
@@ -129,6 +152,8 @@ export function RelatedEpisodesGroupSubsection({
           rule={rule}
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => sameGroupGroupActionsMap?.get(gh)}
+          getEpisodeDetailsHref={getEpisodeDetailsHref}
+          compact={flush}
         />
       )}
     </div>

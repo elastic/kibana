@@ -15,7 +15,6 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { EpisodeAction } from './types';
-import { createViewDetailsAction } from './view_details';
 import { createAckAction } from './ack';
 import { createUnackAction } from './unack';
 import { createSnoozeAction } from './snooze';
@@ -36,8 +35,6 @@ export interface EpisodeActionsDeps {
   docLinks: DocLinksStart;
   expressions: ExpressionsStart;
   queryClient: QueryClient;
-  /** Resolver for single-episode-page URL (caller prepends basePath). */
-  getEpisodeDetailsHref: (episodeId: string) => string;
   /** Resolver for "Open in Discover" URL; may be sync or async. Return undefined when not applicable. */
   getDiscoverHref: (args: {
     episodeIsoTimestamp: string;
@@ -47,7 +44,6 @@ export interface EpisodeActionsDeps {
 
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] =>
   [
-    createViewDetailsAction(deps),
     createAckAction(deps),
     createUnackAction(deps),
     createSnoozeAction(deps),

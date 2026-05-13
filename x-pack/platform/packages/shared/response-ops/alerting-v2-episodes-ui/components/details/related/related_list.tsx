@@ -5,38 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   RelatedAlertEpisode,
   type RelatedAlertEpisodeProps,
-} from '@kbn/alerting-v2-episodes-ui/components/related/related_alert_episode';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import { paths } from '../../constants';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+} from '../../related/related_alert_episode';
+import type { AlertEpisode } from '../../../queries/episodes_query';
+
+export interface RelatedAlertEpisodesListProps {
+  rows: AlertEpisode[];
+  rule: RuleResponse;
+  getEpisodeAction: (episodeId: string) => RelatedAlertEpisodeProps['episodeAction'];
+  getGroupAction: (groupHash: string) => RelatedAlertEpisodeProps['groupAction'];
+  getEpisodeDetailsHref: (episodeId: string) => string;
+  /**
+   * Render each card with smaller padding. Forwarded as `compact` to
+   * `RelatedAlertEpisode`.
+   */
+  compact?: boolean;
+}
 
 export function RelatedAlertEpisodesList({
   rows,
   rule,
   getEpisodeAction,
   getGroupAction,
-}: {
-  rows: AlertEpisode[];
-  rule: RuleResponse;
-  getEpisodeAction: (episodeId: string) => RelatedAlertEpisodeProps['episodeAction'];
-  getGroupAction: (groupHash: string) => RelatedAlertEpisodeProps['groupAction'];
-}) {
-  const {
-    services: { http },
-  } = useKibana<AlertEpisodesKibanaServices>();
-
-  const getEpisodeDetailsHref = useCallback(
-    (episodeId: string) => http.basePath.prepend(paths.alertEpisodeDetails(episodeId)),
-    [http]
-  );
-
+  getEpisodeDetailsHref,
+  compact = false,
+}: RelatedAlertEpisodesListProps) {
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="alertingV2RelatedEpisodesList">
       {rows.map((row) => {
@@ -50,6 +48,7 @@ export function RelatedAlertEpisodesList({
             episodeAction={getEpisodeAction(relatedId)}
             groupAction={relatedGroupHash ? getGroupAction(relatedGroupHash) : undefined}
             href={getEpisodeDetailsHref(relatedId)}
+            compact={compact}
           />
         );
       })}

@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import { RelatedEpisodesGroupSubsection } from './related_episodes_group_subsection';
-import { useFetchSameGroupEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_same_group_episodes_query';
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_same_group_episodes_query');
+import type { AlertEpisode } from '../../../queries/episodes_query';
+import { RelatedEpisodesGroupSubsection } from './group_subsection';
+import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
+jest.mock('../../../hooks/use_fetch_same_group_episodes_query');
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -22,15 +22,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => ({
+jest.mock('../../../hooks/use_fetch_episode_actions', () => ({
   useFetchEpisodeActions: () => ({ data: undefined }),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', () => ({
+jest.mock('../../../hooks/use_fetch_group_actions', () => ({
   useFetchGroupActions: () => ({ data: undefined }),
 }));
 
-jest.mock('./related_alert_episodes_list', () => ({
+jest.mock('./related_list', () => ({
   RelatedAlertEpisodesList: ({ rows }: { rows: AlertEpisode[] }) => (
     <div data-test-subj="mockEpisodesList">{rows.length} episodes</div>
   ),
@@ -39,6 +39,7 @@ jest.mock('./related_alert_episodes_list', () => ({
 const mockUseFetch = jest.mocked(useFetchSameGroupEpisodesQuery);
 
 const mockRule = { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse;
+const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
 describe('RelatedEpisodesGroupSubsection', () => {
   beforeEach(() => {
@@ -62,6 +63,7 @@ describe('RelatedEpisodesGroupSubsection', () => {
           groupHash="gh-1"
           rule={mockRule}
           ruleId="rule-1"
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
     );
@@ -80,6 +82,7 @@ describe('RelatedEpisodesGroupSubsection', () => {
           groupHash="gh-1"
           rule={mockRule}
           ruleId="rule-1"
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
     );
@@ -97,6 +100,7 @@ describe('RelatedEpisodesGroupSubsection', () => {
           groupHash="gh-1"
           rule={mockRule}
           ruleId="rule-1"
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
     );

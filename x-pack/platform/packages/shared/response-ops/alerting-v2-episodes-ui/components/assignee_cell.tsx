@@ -7,19 +7,36 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar, UserToolTip } from '@kbn/user-profile-components';
 
-import * as i18n from '../translations';
+const EMPTY_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.assigneeCell.empty', {
+  defaultMessage: '—',
+});
 
-export interface EpisodeAssigneeCellProps {
+const PROFILE_LOAD_ERROR_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeCell.profileLoadError',
+  {
+    defaultMessage: 'Could not load profile',
+  }
+);
+
+const UNKNOWN_USER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.assigneeCell.unknownUser', {
+  defaultMessage: 'Unknown user',
+});
+
+export interface AlertEpisodeAssigneeCellProps {
   assigneeUid: string | null | undefined;
   userProfile: UserProfileService;
 }
 
-export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigneeCellProps) {
+export const AlertEpisodeAssigneeCell = ({
+  assigneeUid,
+  userProfile,
+}: AlertEpisodeAssigneeCellProps) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['alertingV2EpisodeAssigneeProfile', assigneeUid],
     queryFn: () =>
@@ -35,7 +52,7 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
   if (!assigneeUid) {
     return (
       <EuiText color="subdued" size="s">
-        {i18n.EPISODES_ASSIGNEE_EMPTY}
+        {EMPTY_LABEL}
       </EuiText>
     );
   }
@@ -47,7 +64,7 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
   if (isError) {
     return (
       <EuiText color="danger" size="s" title={assigneeUid}>
-        {i18n.EPISODES_ASSIGNEE_PROFILE_LOAD_ERROR}
+        {PROFILE_LOAD_ERROR_LABEL}
       </EuiText>
     );
   }
@@ -57,7 +74,7 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
   if (!profile) {
     return (
       <EuiText color="subdued" size="s" title={assigneeUid}>
-        {i18n.EPISODES_ASSIGNEE_UNKNOWN_USER}
+        {UNKNOWN_USER_LABEL}
       </EuiText>
     );
   }
@@ -86,4 +103,4 @@ export function EpisodeAssigneeCell({ assigneeUid, userProfile }: EpisodeAssigne
       </EuiFlexGroup>
     </UserToolTip>
   );
-}
+};

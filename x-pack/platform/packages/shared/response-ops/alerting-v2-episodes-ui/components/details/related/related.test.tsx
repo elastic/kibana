@@ -9,27 +9,28 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { RelatedAlertEpisodesSection } from './related_alert_episodes_section';
+import { AlertEpisodesRelated } from './related';
 
-jest.mock('./related_episodes_group_subsection', () => ({
+jest.mock('./group_subsection', () => ({
   RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
 }));
 
-jest.mock('./related_episodes_rule_subsection', () => ({
+jest.mock('./rule_subsection', () => ({
   RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
 }));
 
 const mockRule = { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse;
 
-describe('RelatedAlertEpisodesSection', () => {
+describe('AlertEpisodesRelated', () => {
   it('renders the section heading', () => {
     render(
       <I18nProvider>
-        <RelatedAlertEpisodesSection
+        <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash={undefined}
           rule={mockRule}
           ruleId="rule-1"
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
     );
@@ -43,11 +44,12 @@ describe('RelatedAlertEpisodesSection', () => {
   it('renders the group subsection only when groupHash is provided', () => {
     render(
       <I18nProvider>
-        <RelatedAlertEpisodesSection
+        <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash="gh-1"
           rule={mockRule}
           ruleId="rule-1"
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
     );

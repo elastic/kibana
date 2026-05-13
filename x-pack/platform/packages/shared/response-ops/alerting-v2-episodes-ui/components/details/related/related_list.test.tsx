@@ -9,18 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
-import { RelatedAlertEpisodesList } from './related_alert_episodes_list';
+import type { AlertEpisode } from '../../../queries/episodes_query';
+import { RelatedAlertEpisodesList } from './related_list';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      http: { basePath: { prepend: (p: string) => `/base${p}` } },
-    },
-  }),
-}));
-
-jest.mock('@kbn/alerting-v2-episodes-ui/components/related/related_alert_episode', () => ({
+jest.mock('../../related/related_alert_episode', () => ({
   RelatedAlertEpisode: ({ episode }: { episode: AlertEpisode }) => (
     <div data-test-subj="mockRelatedAlertEpisode">{episode['episode.id']}</div>
   ),
@@ -49,6 +41,7 @@ describe('RelatedAlertEpisodesList', () => {
           rule={mockRule}
           getEpisodeAction={() => undefined}
           getGroupAction={() => undefined}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
     );
@@ -68,6 +61,7 @@ describe('RelatedAlertEpisodesList', () => {
           rule={mockRule}
           getEpisodeAction={() => undefined}
           getGroupAction={() => undefined}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
     );

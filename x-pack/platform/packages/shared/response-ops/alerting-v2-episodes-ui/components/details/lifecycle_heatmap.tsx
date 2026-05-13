@@ -18,12 +18,17 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import type { EpisodeEventRow } from '@kbn/alerting-v2-episodes-ui/queries/episode_events_query';
-import type { AlertEpisodesKibanaServices } from '../../../episodes_kibana_services';
+import type { EpisodeEventRow } from '../../queries/episode_events_query';
+import * as i18n from './translations';
+
+interface AlertEpisodeLifecycleHeatmapServices {
+  charts: ChartsPluginStart;
+}
 
 /** Short strip: one heatmap row. Timestamps are rendered outside the chart. */
 const CHART_HEIGHT = 20;
@@ -75,25 +80,15 @@ function statusFromHeatmapValue(value: number): AlertEpisodeStatus {
 function statusLabel(status: AlertEpisodeStatus): string {
   switch (status) {
     case ALERT_EPISODE_STATUS.PENDING:
-      return i18n.translate('xpack.alertingV2.episodes.pendingStatusBadgeLabel', {
-        defaultMessage: 'Pending',
-      });
+      return i18n.LIFECYCLE_HEATMAP_PENDING_STATUS_LABEL;
     case ALERT_EPISODE_STATUS.ACTIVE:
-      return i18n.translate('xpack.alertingV2.episodes.activeStatusBadgeLabel', {
-        defaultMessage: 'Active',
-      });
+      return i18n.LIFECYCLE_HEATMAP_ACTIVE_STATUS_LABEL;
     case ALERT_EPISODE_STATUS.RECOVERING:
-      return i18n.translate('xpack.alertingV2.episodes.recoveringStatusBadgeLabel', {
-        defaultMessage: 'Recovering',
-      });
+      return i18n.LIFECYCLE_HEATMAP_RECOVERING_STATUS_LABEL;
     case ALERT_EPISODE_STATUS.INACTIVE:
-      return i18n.translate('xpack.alertingV2.episodes.inactiveStatusBadgeLabel', {
-        defaultMessage: 'Inactive',
-      });
+      return i18n.LIFECYCLE_HEATMAP_INACTIVE_STATUS_LABEL;
     default:
-      return i18n.translate('xpack.alertingV2.episodes.unknownStatusBadgeLabel', {
-        defaultMessage: 'Unknown',
-      });
+      return i18n.LIFECYCLE_HEATMAP_UNKNOWN_STATUS_LABEL;
   }
 }
 
@@ -131,13 +126,13 @@ interface HeatmapTableDatum {
   originalIndex: number;
 }
 
-export interface EpisodeLifecycleHeatmapProps {
+export interface AlertEpisodeLifecycleHeatmapProps {
   eventRows: EpisodeEventRow[];
 }
 
-export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapProps) => {
+export const AlertEpisodeLifecycleHeatmap = ({ eventRows }: AlertEpisodeLifecycleHeatmapProps) => {
   const { euiTheme } = useEuiTheme();
-  const { services } = useKibana<AlertEpisodesKibanaServices>();
+  const { services } = useKibana<AlertEpisodeLifecycleHeatmapServices>();
   const baseTheme = services.charts.theme.useChartsBaseTheme();
 
   const data: HeatmapDatum[] = useMemo(() => {
@@ -211,20 +206,8 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
     return (
       <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeLifecycleHeatmapEmpty">
         <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.alertingV2.episodes.lifecycleEmptyTitle', {
-                defaultMessage: 'No events in this episode yet',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.alertingV2.episodes.lifecycleEmptyBody', {
-                defaultMessage: 'Status changes across the episode lifecycle will appear here.',
-              })}
-            </p>
-          }
+          title={<h2>{i18n.LIFECYCLE_HEATMAP_EMPTY_TITLE}</h2>}
+          body={<p>{i18n.LIFECYCLE_HEATMAP_EMPTY_BODY}</p>}
         />
       </EuiPanel>
     );
@@ -233,11 +216,7 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeLifecycleHeatmap">
       <EuiTitle size="xxs">
-        <h2>
-          {i18n.translate('xpack.alertingV2.episodes.lifecycleTitle', {
-            defaultMessage: 'Episode timeline',
-          })}
-        </h2>
+        <h2>{i18n.LIFECYCLE_HEATMAP_TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <Chart size={{ height: CHART_HEIGHT }}>
@@ -274,7 +253,7 @@ export const EpisodeLifecycleHeatmap = ({ eventRows }: EpisodeLifecycleHeatmapPr
           showLegend={false}
           theme={{ heatmap: heatmapTheme }}
           baseTheme={baseTheme}
-          locale={i18n.getLocale()}
+          locale={kbnI18n.getLocale()}
         />
         <Heatmap
           id="episode-lifecycle-heatmap"
