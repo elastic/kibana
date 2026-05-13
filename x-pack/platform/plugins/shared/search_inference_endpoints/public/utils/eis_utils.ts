@@ -232,6 +232,12 @@ export const filterGroupedModels = (
     .sort((a, b) => a.modelName.localeCompare(b.modelName));
 };
 
+export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return false;
+  if (metadata.heuristics?.status?.toLowerCase() === EisModelStatus.Deprecated) return true;
+  return false;
+}
+
 export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata | undefined) {
   const eolDate = getModelEOLDate(metadata);
   if (!eolDate) return false;

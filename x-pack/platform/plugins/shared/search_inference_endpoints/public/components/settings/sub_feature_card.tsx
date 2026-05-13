@@ -39,6 +39,8 @@ import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
 import { ResetDefaultsModal } from './reset_defaults_modal';
 import { useConnectors } from '../../hooks/use_connectors';
+import { getModelStatus, isModelDeprecated } from '../../utils/eis_utils';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
 
 const COLLAPSED_COUNT = 5;
 
@@ -107,6 +109,16 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
       ),
     [connectors]
   );
+  const deprecatedEndpointsMap = useMemo(() => {
+    return new Map(
+      connectors
+        .filter((connector) => isModelDeprecated(connector.metadata))
+        .map((connector) => [
+          connector.connectorId,
+          { status: getModelStatus(connector.metadata), metadata: connector.metadata! },
+        ])
+    );
+  }, [connectors]);
 
   const hasOtherSubFeatures = registeredFeatures.some(
     (f) => f.featureId !== featureId && f.parentFeatureId !== undefined
@@ -305,6 +317,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                             const { icon = 'compute', label = endpointId } =
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
+                            const isDeprecated = deprecatedEndpointsMap.has(endpointId);
                             return (
                               <div>
                                 <EuiSplitPanel.Inner
@@ -371,15 +384,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         </EuiText>
                                       </EuiToolTip>
                                     </EuiFlexItem>
-                                    {index === 0 && !showGlobalDefaultRow && (
-                                      <EuiFlexItem grow={false}>
-                                        <EuiBadge color="hollow">
-                                          {i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.defaultBadge',
-                                            { defaultMessage: 'Default' }
-                                          )}
-                                        </EuiBadge>
-                                      </EuiFlexItem>
+                                    {isDeprecated && (
+                                      <ModelStatusBadge
+                                        id={endpointId}
+                                        status={deprecatedEndpointsMap.get(endpointId)!.status}
+                                        metadata={deprecatedEndpointsMap.get(endpointId)!.metadata}
+                                      />
                                     )}
                                     <EuiFlexItem grow={false}>
                                       <EuiButtonIcon
