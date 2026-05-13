@@ -84,10 +84,10 @@ identifiers; behavior is durable because it's constrained by the OS.**
 ## Available Tools
 
 - **${THREAT_INTEL_TOOL_IDS.searchReports}** — Hybrid semantic + BM25 search over
-  the \`threat-reports-*\` data stream. Use as the entry point for digest/topic
+  the \`.kibana-threat-reports-*\` data stream. Use as the entry point for digest/topic
   queries. Returns the top reports across all sources.
 - **${THREAT_INTEL_TOOL_IDS.ingestReport}** — Ingest a single report (URL/text/
-  vendor advisory pasted by the user) into \`threat-reports-*\`. Content-fingerprinted
+  vendor advisory pasted by the user) into \`.kibana-threat-reports-*\`. Content-fingerprinted
   for dedup; re-pasting the same content is a no-op.
 - **${THREAT_INTEL_TOOL_IDS.huntBehavior}** — Two-step extraction: (1) LLM
   extracts candidate MITRE ATT&CK technique IDs with evidence quotes; (2) each
@@ -101,7 +101,7 @@ identifiers; behavior is durable because it's constrained by the OS.**
   \`threat-intel-finding-card\` attachment with Deploy / Dismiss /
   Investigate action buttons.
 - **${THREAT_INTEL_TOOL_IDS.coverageGap}** — Join in-the-wild ATT&CK techniques
-  in \`threat-reports-*\` against enabled Detection Engine rules and return
+  in \`.kibana-threat-reports-*\` against enabled Detection Engine rules and return
   uncovered techniques scoped to a time window + tag set. The output renders as
   a \`threat-intel-mitre-heatmap\` attachment with \`mode: "coverage"\` (covered
   cells render green, uncovered cells render red). Use when the user asks
@@ -123,7 +123,7 @@ identifiers; behavior is durable because it's constrained by the OS.**
   \`security.alerts\` first), runs the same behavioral extraction prompt as
   \`hunt_behavior\` against the alert summaries, validates candidates
   against the ATT&CK catalog, and persists a synthetic
-  \`source.type: 'telemetry'\` row to \`threat-reports-*\` so the same
+  \`source.type: 'telemetry'\` row to \`.kibana-threat-reports-*\` so the same
   finding appears in \`coverage_gap\` / \`search_reports\` / the dashboard.
   Returns the same \`behaviors\` + \`attachment_hints\` shape as
   \`hunt_behavior\` so the downstream rendering and Detection Engine handoff
@@ -233,7 +233,7 @@ Registry tools available via this skill:
    don't help characterize the behavior.
 3. Call \`${THREAT_INTEL_TOOL_IDS.generalizeFromTelemetry}\` with the
    user's analyst question and the alert samples. The tool persists a
-   synthetic \`threat-reports-*\` row and returns the same
+   synthetic \`.kibana-threat-reports-*\` row and returns the same
    \`behaviors\` + \`attachment_hints\` shape as \`hunt_behavior\`.
 4. Emit one \`threat-intel-finding-card\` per surviving behavior (the
    hints already carry \`report_title\` / \`report_source_name\`). When

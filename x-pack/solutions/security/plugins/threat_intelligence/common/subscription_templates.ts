@@ -15,7 +15,7 @@ import type { SeverityLevel } from './constants';
  * The default `Daily Threat Debrief` template mirrors the morning-brief
  * workflow that comparable products surface as a flagship preset. Adding
  * additional templates is purely additive — the `template_id` field is a
- * keyword on `.threat-intel-subscriptions` (see index_templates.ts).
+ * keyword on `.kibana-threat-intel-subscriptions` (see index_templates.ts).
  */
 export interface SubscriptionTemplate {
   id: string;

@@ -179,8 +179,8 @@ export const registerIocIndicatorSyncTask = ({
     [IOC_INDICATOR_SYNC_TASK_TYPE]: {
       title: 'Threat Intelligence — IOC indicator sync',
       description:
-        'Mirror newly extracted IOCs from threat-reports-* into ' +
-        '.threat-intel-indicators so Detection Engine Indicator Match rules ' +
+        'Mirror newly extracted IOCs from .kibana-threat-reports-* into ' +
+        '.kibana-threat-intel-indicators so Detection Engine Indicator Match rules ' +
         'can match them against alert/event data without a parallel matcher.',
       timeout: TASK_TIMEOUT,
       // One-shot semantics per scheduled run — re-running on transient
@@ -258,7 +258,7 @@ export const registerIocIndicatorSyncTask = ({
                 };
               }
               throwUnrecoverableError(
-                new Error(`Failed to scan threat-reports for IOC sync: ${message}`)
+                new Error(`Failed to scan .kibana-threat-reports for IOC sync: ${message}`)
               );
               return { state: previousState };
             }

@@ -4,18 +4,23 @@
 # Schedule: every 4 hours (matches the PRD's "feed ingestion cadence" target;
 #           previously 6h. The downstream Workflow 2 keeps its ~30-minute
 #           offset relative to this run via its own scheduled trigger).
-# Purpose:  Pull threat-intel-sources, dispatch each enabled source by
-#           adapter_type via the engine's first-class `switch` step, and write
-#           normalized documents into the `threat-reports-*` data stream
-#           (op_type: create on `content_fingerprint` so RSS-syndicated
+# Purpose:  Pull `.kibana-threat-intel-sources`, dispatch each enabled source
+#           by adapter_type via the engine's first-class `switch` step, and
+#           write normalized documents into the `.kibana-threat-reports` data
+#           stream (op_type: create on `content_fingerprint` so RSS-syndicated
 #           duplicates short-circuit).
 #
 # Note: the http body schemas below are intentionally illustrative — the real
 # adapter implementations belong to follow-up PRs. The key shape this workflow
 # pins down is the `switch` dispatch + fingerprint-and-write pattern.
+#
+# Index names mirror the constants in `common/constants.ts`. They live under
+# `.kibana-*` so the `kibana_system` reserved role can create / read / write
+# them without a custom Elasticsearch role descriptor — see
+# `dev_docs/key_concepts/kibana_system_user.mdx`.
 # =============================================================================
 name: threat_intel.source_ingestion
-description: Pull enabled threat-intel-sources and write normalized reports to threat-reports-*
+description: Pull enabled .kibana-threat-intel-sources and write normalized reports to .kibana-threat-reports
 enabled: true
 triggers:
   - type: scheduled
@@ -25,7 +30,7 @@ steps:
   - name: load_sources
     type: elasticsearch.search
     with:
-      index: threat-intel-sources
+      index: .kibana-threat-intel-sources
       size: 1000
       query:
         term:
@@ -52,7 +57,7 @@ steps:
                 - name: fingerprint_and_write_rss
                   type: elasticsearch.index
                   with:
-                    index: threat-reports
+                    index: .kibana-threat-reports
                     op_type: create
                     document:
                       "@timestamp": "{{ now }}"
@@ -90,7 +95,7 @@ steps:
                 - name: fingerprint_and_write_stix
                   type: elasticsearch.index
                   with:
-                    index: threat-reports
+                    index: .kibana-threat-reports
                     op_type: create
                     document:
                       "@timestamp": "{{ now }}"
@@ -127,7 +132,7 @@ steps:
                 - name: fingerprint_and_write_taxii
                   type: elasticsearch.index
                   with:
-                    index: threat-reports
+                    index: .kibana-threat-reports
                     op_type: create
                     document:
                       "@timestamp": "{{ now }}"
@@ -162,7 +167,7 @@ steps:
                 - name: fingerprint_and_write_vendor
                   type: elasticsearch.index
                   with:
-                    index: threat-reports
+                    index: .kibana-threat-reports
                     op_type: create
                     document:
                       "@timestamp": "{{ now }}"

@@ -22,7 +22,7 @@ severity, source-report reference) and the streams plugin's KI-identification
 pipeline produces **grounded ES|QL** that matches the customer's actual stream
 schema and sample data. The bidirectional benefits are made explicit through a
 typed `provenance` slot on `StreamQuery` and a per-behavior outcome that
-threat-intel persists back onto its own `threat-reports-*` documents.
+threat-intel persists back onto its own `.kibana-threat-reports-*` documents.
 
 The proposal asks for three additive changes on the streams side and is
 described from the streams team's perspective. The corresponding changes on
@@ -64,7 +64,7 @@ in the same change that introduced this RFC):
 - The `streamsKiMaterializationEnabled` experimental flag.
 - The Layer-3 step in `server/workflows/hit_provenance_backfill.yaml`.
 - The `layer_3_streams_ki`, `streams_ki_materialized_at`, and
-  `streams_ki_count` mappings on `threat-reports-*`.
+  `streams_ki_count` mappings on `.kibana-threat-reports-*`.
 - The `streams` entry under `optionalPlugins` in `kibana.jsonc`.
 
 The threat-intel plugin's detection model (see its README) frames Layer 3 as
@@ -312,7 +312,7 @@ On the threat-intel side this is **greenfield**: the prior
 `materialize_streams_kis` tool and Workflow 5 have been removed, so P2 below
 is an addition, not a modification. The reciprocal data-stream mappings
 (`provenance.environment_hits.layer_3_streams_ki` etc.) will be re-added to
-the `threat-reports-*` index template as part of P2.
+the `.kibana-threat-reports-*` index template as part of P2.
 
 ## Phasing
 
@@ -327,7 +327,7 @@ the `threat-reports-*` index template as part of P2.
      `ki_identification_start` with priors and polls
      `ki_identification_status` for results;
    - the `extracted.behaviors[i].streams_outcome` sibling field on the
-     `threat-reports-*` data stream;
+     `.kibana-threat-reports-*` data stream;
    - the Layer-3 step in `hit_provenance_backfill.yaml` plus the
      `provenance.environment_hits.layer_3_streams_ki` mapping;
    - the `streamsKiMaterializationEnabled` experimental flag and the

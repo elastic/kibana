@@ -6,7 +6,7 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
 
 ## What ships in v1 (Phase A + Phase C)
 
-- A `threat-reports-*` data stream (`semantic_text` + BM25 mirror fields, RRF
+- A `.kibana-threat-reports-*` data stream (`semantic_text` + BM25 mirror fields, RRF
   hybrid retriever, content-fingerprinted dedup, `extracted.ioc_set_hash` and
   `provenance.related_reports[]` slots for cross-report correlation).
 - An Agent Builder skill **`threat-intelligence`** with seven inline tools
@@ -22,7 +22,7 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
     `@kbn/securitysolution-mitre-catalog` (the same source
     `security.create_detection_rule` uses).
   - `threat_intel.coverage_gap` — joins in-the-wild ATT&CK techniques (from
-    `threat-reports-*`) against enabled Detection Engine rules and returns
+    `.kibana-threat-reports-*`) against enabled Detection Engine rules and returns
     uncovered techniques. Renders through the existing
     `threat-intel-mitre-heatmap` attachment with `mode: "coverage"`.
   - `threat_intel.hunt_for_threat` — active forward hunt across the
@@ -45,7 +45,7 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
     samples; the tool runs the same behavioral extraction prompt as
     `hunt_behavior` against the alert summaries, validates candidates
     against the ATT&CK catalog, and persists a synthetic
-    `source.type: "telemetry"` row to `threat-reports-*` so the same
+    `source.type: "telemetry"` row to `.kibana-threat-reports-*` so the same
     finding appears in `coverage_gap` / `search_reports` / the
     dashboard. Returns the same `behaviors` + `attachment_hints` shape
     as `hunt_behavior` so the downstream rendering and Detection
@@ -74,7 +74,7 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
     (`delivery.connector_id` on the subscription doc → `connector-id` on
     the workflow's `email` / `slack` step).
   - `hit_provenance_backfill` (hourly) — walk back from
-    `.alerts-security.alerts-*` to the originating `threat-reports-*` doc
+    `.alerts-security.alerts-*` to the originating `.kibana-threat-reports-*` doc
     and populate `provenance.environment_hits[]` /
     `provenance.environment_hits_total` (the "Env. hits" column on the
     report-table attachment). Joins on two keys, one per implemented
@@ -83,8 +83,8 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
     (Layer 2). A Layer-3 join is held out pending the cross-team contract
     in `docs/rfcs/0001_streams_layer3_grounded_hypothesis_flow.md`.
 - One Task Manager task — `threat_intelligence:ioc_indicator_sync` —
-  that mirrors `extracted.iocs` from `threat-reports-*` into the
-  `.threat-intel-indicators` companion index every 15 min so Detection
+  that mirrors `extracted.iocs` from `.kibana-threat-reports-*` into the
+  `.kibana-threat-intel-indicators` companion index every 15 min so Detection
   Engine **Indicator Match rules** can match them against alert/event
   data without a parallel matcher in this plugin. Each row carries
   `threat.indicator.reference = "threat-report:<report_id>"` so
@@ -149,7 +149,7 @@ proposals through the **`threat-intelligence`** Agent Builder skill.
   Reads pre-fetched alert documents (via the existing `security.alerts`
   registry tool the agent calls first), runs the same behavioral
   extraction prompt as `hunt_behavior` against alert summaries, writes a
-  synthetic `source.type: 'telemetry'` entry into `threat-reports-*`, and
+  synthetic `source.type: 'telemetry'` entry into `.kibana-threat-reports-*`, and
   returns proposals shaped for the same finding-card rendering and
   `security.create_detection_rule` handoff as `hunt_behavior`. The
   `source.type` enum value `telemetry` and the
@@ -184,7 +184,7 @@ identifiers; behavior is durable because it's constrained by the OS.**
 
 | Prerequisite | Required for | Notes |
 |---|---|---|
-| Elasticsearch 8.15+ | `semantic_text` mappings | The `threat-reports-*` data stream uses `semantic_text` for `content.title` and `content.body_text`. `hunt_behavior` does not depend on inference — it validates against the vendored ATT&CK catalog. |
+| Elasticsearch 8.15+ | `semantic_text` mappings | The `.kibana-threat-reports-*` data stream uses `semantic_text` for `content.title` and `content.body_text`. `hunt_behavior` does not depend on inference — it validates against the vendored ATT&CK catalog. |
 | Cluster-default `text_embedding` inference endpoint | `threat_intel.search_reports` semantic path only | The plugin **omits `inference_id`** from `semantic_text` mappings so ES inherits the cluster default. The current default-priority list (per `@kbn/index-management-plugin/use_compatible_inference_endpoints`) is: Jina v5 on EIS → ELSER-on-EIS → ELSER → multilingual-e5. **No customer ML node is required** when the cluster is on EIS or uses an external Jina/OpenAI endpoint. ML node is only required for self-hosted ELSER/E5. If inference is unavailable, `search_reports` falls back to its BM25 sibling fields via the RRF retriever. |
 | `aiRuleCreationEnabled` experimental flag | `security.create_detection_rule` | When off, `hunt_behavior` degrades gracefully — the skill emits proposed rule definitions as copy-paste markdown blocks instead of failing silently. |
 | `xpack.agentBuilder.enabled: true` | The skill itself | Agent Builder is the host for skills, tools, and attachment types. |
@@ -214,9 +214,12 @@ independently:
 # kibana.yml
 xpack.threatIntelligence.enableExperimental:
   - "threatIntelligenceSkillEnabled"
-  # Optional: mirror extracted IOCs to .threat-intel-indicators for
+  # Optional: mirror extracted IOCs to .kibana-threat-intel-indicators for
   # Detection Engine Indicator Match rules (Workflow 4 attributes the
-  # resulting alerts back to the originating report).
+  # resulting alerts back to the originating report). To use the resulting
+  # rows from an Indicator Match rule, the rule's owning role must also have
+  # `read` on `.kibana-threat-intel-indicators` — end-user roles do not get
+  # `.kibana-*` reads by default.
   - "iocIndicatorSyncEnabled"
 ```
 
@@ -242,13 +245,19 @@ under any of these phrasings:
 
 ## Indices owned by this plugin
 
+All plugin-owned indices live under the `.kibana-threat-*` prefix so the
+`kibana_system` reserved role's existing `.kibana*` privileges cover create
+/ read / write without an Elasticsearch role-descriptor change. See
+[Kibana System User](../../../../../dev_docs/key_concepts/kibana_system_user.mdx)
+for why non-`.kibana*` patterns are intentionally denied to `kibana_system`.
+
 | Index / data stream | Purpose | Schema notes |
 |---|---|---|
-| `threat-reports-*` (data stream) | All ingested threat-intel reports | `semantic_text` + BM25 mirrors via `copy_to`; `content_fingerprint` for dedup; `provenance.duplicate_of` and `provenance.source_doc_ref` reserved for Phase C. `provenance.environment_hits.*` + `provenance.environment_hits_total` are written by Workflow 4 (Layers 1 + 2 only; Layer 3 fields will be added when the RFC contract ships). |
-| `threat-intel-sources` | Source catalog (RSS, STIX, TAXII, vendor APIs, email) | Adapter type drives Workflow 1's `switch` dispatch. |
-| `threat-intel-subscriptions` | Per-user digest subscriptions | RRULE schedule + delivery channel. |
-| `threat-intel-digests` | Archived rendered digests | |
-| `.threat-intel-indicators` | IOC indicator mirror for Detection Engine Indicator Match rules | ECS-aligned `threat.indicator.*` shape. `threat.indicator.reference = "threat-report:<report_id>"` is the join key the `hit_provenance_backfill` workflow uses to attribute Layer-1 hits back to the originating report. Maintained by the `threat_intelligence:ioc_indicator_sync` Task Manager job. |
+| `.kibana-threat-reports-*` (data stream) | All ingested threat-intel reports | `semantic_text` + BM25 mirrors via `copy_to`; `content_fingerprint` for dedup; `provenance.duplicate_of` and `provenance.source_doc_ref` reserved for Phase C. `provenance.environment_hits.*` + `provenance.environment_hits_total` are written by Workflow 4 (Layers 1 + 2 only; Layer 3 fields will be added when the RFC contract ships). |
+| `.kibana-threat-intel-sources` | Source catalog (RSS, STIX, TAXII, vendor APIs, email) | Adapter type drives Workflow 1's `switch` dispatch. |
+| `.kibana-threat-intel-subscriptions` | Per-user digest subscriptions | RRULE schedule + delivery channel. |
+| `.kibana-threat-intel-digests` | Archived rendered digests | |
+| `.kibana-threat-intel-indicators` | IOC indicator mirror for Detection Engine Indicator Match rules | ECS-aligned `threat.indicator.*` shape. `threat.indicator.reference = "threat-report:<report_id>"` is the join key the `hit_provenance_backfill` workflow uses to attribute Layer-1 hits back to the originating report. Maintained by the `threat_intelligence:ioc_indicator_sync` Task Manager job. Note: because this lives under `.kibana-*`, end-user roles must be explicitly granted `read` to use it from an Indicator Match rule. |
 
 > **MITRE ATT&CK catalog.** The plugin does **not** own a MITRE index. `hunt_behavior` validates LLM-extracted technique IDs against the canonical, slim catalog exported by `@kbn/securitysolution-mitre-catalog`. That package's data is autogenerated from the official ATT&CK STIX bundle by `security_solution`'s `extract_tactics_techniques_mitre.js` (run via `yarn extract-mitre-attacks`), which writes both the labeled SIEM-side TS catalog and this package's slim JSON in the same invocation, so the rule-creation pipeline and `hunt_behavior` cannot disagree about which technique IDs exist.
 >

@@ -2,8 +2,9 @@
 # Workflow 3 — digest_delivery
 #
 # Schedule: per-subscription cron (the per-sub schedule lives in
-# threat-intel-subscriptions.schedule_rrule). This wrapper runs hourly and
-# fans out to subscriptions whose RRULE next-fire window matches "now".
+# .kibana-threat-intel-subscriptions.schedule_rrule). This wrapper runs
+# hourly and fans out to subscriptions whose RRULE next-fire window matches
+# "now".
 #
 # Purpose:  For each due subscription, ask the default agent to load the
 #           threat-intelligence skill, build a digest matching the
@@ -22,7 +23,7 @@ steps:
   - name: load_subscriptions
     type: elasticsearch.search
     with:
-      index: threat-intel-subscriptions
+      index: .kibana-threat-intel-subscriptions
       size: 500
 
   - name: deliver_each
@@ -56,7 +57,7 @@ steps:
       - name: archive_digest
         type: elasticsearch.index
         with:
-          index: threat-intel-digests
+          index: .kibana-threat-intel-digests
           document:
             "@timestamp": "{{ now }}"
             subscription_id: "{{ item._id }}"

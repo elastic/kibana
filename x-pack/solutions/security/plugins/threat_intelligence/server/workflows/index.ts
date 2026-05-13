@@ -25,7 +25,7 @@ export const BUILTIN_WORKFLOWS = [
   {
     id: 'threat-intel.source_ingestion',
     description:
-      'Pull enabled threat-intel-sources and write normalized reports to threat-reports-*',
+      'Pull enabled .kibana-threat-intel-sources and write normalized reports to .kibana-threat-reports',
     yamlPath: 'source_ingestion.yaml',
   },
   {
@@ -42,7 +42,7 @@ export const BUILTIN_WORKFLOWS = [
   {
     id: 'threat-intel.hit_provenance_backfill',
     description:
-      'Attribute Detection Engine alerts back to their originating threat-reports-* docs (Layers 1/2)',
+      'Attribute Detection Engine alerts back to their originating .kibana-threat-reports-* docs (Layers 1/2)',
     yamlPath: 'hit_provenance_backfill.yaml',
   },
 ] as const;

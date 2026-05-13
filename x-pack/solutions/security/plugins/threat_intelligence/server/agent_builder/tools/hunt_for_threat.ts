@@ -23,7 +23,7 @@ const huntForThreatSchema = z.object({
     .min(1)
     .optional()
     .describe(
-      'Document id in `threat-reports-*` whose extracted IOCs + ATT&CK technique IDs should be ' +
+      'Document id in `.kibana-threat-reports-*` whose extracted IOCs + ATT&CK technique IDs should be ' +
         'searched against the environment. Either `report_id` or explicit `iocs[]` / `techniques[]` ' +
         'must be provided.'
     ),

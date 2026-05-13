@@ -42,7 +42,7 @@ import {
  *   3. Candidates are validated against the static ATT&CK catalog
  *      (`@kbn/securitysolution-mitre-catalog`) — hallucinated IDs are
  *      dropped.
- *   4. A synthetic `threat-reports-*` row is written with
+ *   4. A synthetic `.kibana-threat-reports-*` row is written with
  *      `source.type = 'telemetry'`,
  *      `provenance.source_doc_ref` pointing at the alert sample, and
  *      `extraction_method = 'generalize_from_telemetry_v1'`. This makes
@@ -114,7 +114,7 @@ const generalizeFromTelemetrySchema = z.object({
     .default(true)
     .describe(
       'Whether to write the synthetic `source.type: "telemetry"` row into ' +
-        '`threat-reports-*`. Default true so downstream tools (`coverage_gap`, ' +
+        '`.kibana-threat-reports-*`. Default true so downstream tools (`coverage_gap`, ' +
         '`search_reports`) can reuse the finding.'
     ),
 });
@@ -180,7 +180,7 @@ export const generalizeFromTelemetryTool: BuiltinSkillBoundedTool<
     'detection rules. Two-step algorithm: (1) LLM extracts candidate MITRE ATT&CK technique ' +
     'IDs from the alert summaries with evidence quotes; (2) each candidate is validated ' +
     "against the vendored Kibana ATT&CK catalog. A synthetic `source.type: 'telemetry'` " +
-    'row is persisted to `threat-reports-*` for provenance so the same finding shows up ' +
+    'row is persisted to `.kibana-threat-reports-*` for provenance so the same finding shows up ' +
     'in `coverage_gap` and `search_reports`. Surviving candidates are returned as ' +
     'behavioral findings with the same `proposed_esql_rule` + `threat-intel-finding-card` ' +
     'attachment-hint shape as `hunt_behavior`, so downstream Deploy / Dismiss / Investigate ' +

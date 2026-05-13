@@ -23,35 +23,49 @@ import {
  * v2: adds `extracted.ioc_set_hash` (keyword) and
  * `provenance.related_reports*` (keyword + integer) to support the
  * Workflow 2 cross-report correlation pass, and adds `template_id` to
- * `.threat-intel-subscriptions` for pre-staged template provenance.
+ * the subscriptions companion index for pre-staged template provenance.
  *
  * v3: adds `provenance.environment_hits` (object — per-layer counts +
  * computed_at timestamp) and `provenance.environment_hits_total` (integer)
  * for the Workflow 4 hit-provenance-backfill loop, and introduces the
- * `.threat-intel-indicators` companion index template for the IOC indicator
- * sync Task Manager job.
+ * indicators companion index template for the IOC indicator sync Task
+ * Manager job.
  *
- * v4: adds `delivery.connector_id` to `.threat-intel-subscriptions` so the
- * `digest_delivery` workflow can dispatch through a configured Kibana actions
- * connector (email / slack) instead of the previous `data.set` placeholder.
+ * v4: adds `delivery.connector_id` to the subscriptions companion index so
+ * the `digest_delivery` workflow can dispatch through a configured Kibana
+ * actions connector (email / slack) instead of the previous `data.set`
+ * placeholder.
  *
  * v5: adds the 15-category `extracted.categories` keyword array and the
- * `geography.regions` macro-region keyword array to `threat-reports-*`.
- * Both fields are populated by the stage-2 LLM enrichment step in
- * `nl_extraction_behavioral` and consumed by the visual dashboard's
- * category-breakdown / "Affects You" panels and by `search_reports`'s new
- * `categories[]` / `regions[]` filters. Both arrays are closed enums
- * (see `THREAT_CATEGORIES` / `THREAT_REGIONS` in `common/constants.ts`).
+ * `geography.regions` macro-region keyword array to the threat-reports
+ * data stream. Both fields are populated by the stage-2 LLM enrichment
+ * step in `nl_extraction_behavioral` and consumed by the visual
+ * dashboard's category-breakdown / "Affects You" panels and by
+ * `search_reports`'s new `categories[]` / `regions[]` filters. Both
+ * arrays are closed enums (see `THREAT_CATEGORIES` / `THREAT_REGIONS` in
+ * `common/constants.ts`).
  *
- * v6: adds `space_id` (keyword) to `threat-reports-*` and to each
- * companion index (`.threat-intel-sources`, `.threat-intel-subscriptions`,
- * `.threat-intel-digests`). Single global index, logical per-space
- * isolation: routes filter by `request.getSpaceId()` and writes tag the
- * current space. The sentinel `'*'` means "all spaces" and is reserved
- * for built-ins (seeded sources, global subscriptions) so default content
+ * v6: adds `space_id` (keyword) to the threat-reports data stream and to
+ * each companion index. Single global index, logical per-space isolation:
+ * routes filter by `request.getSpaceId()` and writes tag the current
+ * space. The sentinel `'*'` means "all spaces" and is reserved for
+ * built-ins (seeded sources, global subscriptions) so default content
  * stays visible regardless of which space the request originated from.
+ *
+ * v7: relocates every plugin-owned index under the `.kibana-threat-*`
+ * prefix (data stream + four companion indices + their templates). The
+ * mappings are unchanged from v6. The rename is required because the
+ * `kibana_system` reserved role only grants access to Kibana-owned
+ * patterns (`.kibana*`, `.fleet*`, etc.) — the previous `threat-reports`
+ * data stream and `.threat-intel-*` companion indices fell outside that
+ * envelope and so creation and read calls from the internal user failed
+ * with `security_exception`. There is no in-place migration: previously
+ * created `threat-reports` / `.threat-intel-*` resources (none of which
+ * could have been written to in any environment that didn't elevate
+ * `kibana_system`) are abandoned. See
+ * `dev_docs/key_concepts/kibana_system_user.mdx`.
  */
-const TEMPLATE_VERSION = 6;
+const TEMPLATE_VERSION = 7;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -415,7 +429,10 @@ export const installIndexTemplates = async ({
   log.info('Installing threat intelligence index templates');
 
   await esClient.indices.putIndexTemplate({
-    name: 'threat-reports-template',
+    // Derived from the data-stream constant so the template name stays in
+    // lockstep with the data-stream name and never drifts (e.g. on the v7
+    // `.kibana-threat-*` rename).
+    name: `${THREAT_REPORTS_DATA_STREAM}-template`,
     ...threatReportsTemplate,
   });
 

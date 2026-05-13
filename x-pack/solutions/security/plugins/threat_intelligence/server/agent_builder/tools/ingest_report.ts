@@ -39,7 +39,7 @@ const ingestReportSchema = z
     language: z.string().optional().default('en').describe('IETF language tag (default "en").'),
   })
   .describe(
-    'Ingest a single threat intelligence report into the `threat-reports-*` data stream. ' +
+    'Ingest a single threat intelligence report into the `.kibana-threat-reports-*` data stream. ' +
       'Use when the analyst pastes a URL, blog post, vendor advisory, or incident postmortem ' +
       'directly into chat. The document is normalized, fingerprinted (sha256 of body_text) for ' +
       'dedup, and indexed with `source.type: "manual"`. The fingerprint key uses op_type:create ' +
@@ -54,7 +54,7 @@ export const ingestReportTool: BuiltinSkillBoundedTool<typeof ingestReportSchema
   type: ToolType.builtin,
   description:
     'Ingest one threat intelligence report (analyst paste / ad-hoc URL / vendor advisory) ' +
-    'into the source-agnostic `threat-reports-*` data stream. The report is fingerprinted ' +
+    'into the source-agnostic `.kibana-threat-reports-*` data stream. The report is fingerprinted ' +
     'for dedup so re-submitting the same content is a no-op.',
   schema: ingestReportSchema,
   handler: async (

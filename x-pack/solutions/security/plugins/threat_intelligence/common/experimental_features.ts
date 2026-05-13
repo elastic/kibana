@@ -13,9 +13,12 @@ export const allowedExperimentalValues = {
   threatIntelligenceSkillEnabled: false,
   /**
    * Schedules the IOC indicator-sync Task Manager job that mirrors
-   * `extracted.iocs` from `threat-reports-*` into the `.threat-intel-indicators`
-   * companion index. Off by default so customers opt in explicitly — once on,
-   * Indicator Match rules can point at the index without further plumbing.
+   * `extracted.iocs` from `.kibana-threat-reports-*` into the
+   * `.kibana-threat-intel-indicators` companion index. Off by default so
+   * customers opt in explicitly — once on, Indicator Match rules can point
+   * at the index without further plumbing (the operator must additionally
+   * grant their detection-rule role read on `.kibana-threat-intel-indicators`,
+   * since it lives under `.kibana-*`).
    */
   iocIndicatorSyncEnabled: false,
 } as const;

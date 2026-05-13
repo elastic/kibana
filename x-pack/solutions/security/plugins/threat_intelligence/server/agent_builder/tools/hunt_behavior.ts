@@ -28,7 +28,9 @@ const huntBehaviorSchema = z.object({
   report_id: z
     .string()
     .optional()
-    .describe('Optional `_id` of the source report in `threat-reports-*` for provenance backlink.'),
+    .describe(
+      'Optional `_id` of the source report in `.kibana-threat-reports-*` for provenance backlink.'
+    ),
   llm_confidence_threshold: z
     .number()
     .min(0)

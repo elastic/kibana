@@ -88,7 +88,7 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
   id: THREAT_INTEL_TOOL_IDS.searchReports,
   type: ToolType.builtin,
   description:
-    'Semantic + BM25 hybrid search over the `threat-reports-*` data stream. Returns the top ' +
+    'Semantic + BM25 hybrid search over the `.kibana-threat-reports-*` data stream. Returns the top ' +
     'matching threat intelligence reports across all sources (RSS feeds, STIX/TAXII, vendor ' +
     'APIs, analyst-pasted documents). Use when the user asks about threats, advisories, ' +
     'CVEs in the wild, threat actors, or wants a digest of recent intel matching a topic.',

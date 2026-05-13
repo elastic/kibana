@@ -24,7 +24,7 @@ const coverageGapSchema = z.object({
       from: z.string().describe('ISO-8601 timestamp (inclusive).'),
       to: z.string().describe('ISO-8601 timestamp (inclusive).'),
     })
-    .describe('Window of `threat-reports-*` to evaluate against current rule coverage.'),
+    .describe('Window of `.kibana-threat-reports-*` to evaluate against current rule coverage.'),
   tags: z
     .array(z.string().min(1))
     .optional()
@@ -87,7 +87,7 @@ interface RuleThreatBlock {
  * SIEM rule and returns the set of ATT&CK technique IDs the customer is
  * already detecting on. Sub-technique IDs are normalized to keyword form so
  * they can be joined directly against the in-wild technique IDs extracted
- * from `threat-reports-*`.
+ * from `.kibana-threat-reports-*`.
  */
 const collectRuleTechniques = async (
   savedObjectsClient: Parameters<
@@ -210,7 +210,7 @@ export const coverageGapTool: BuiltinSkillBoundedTool<typeof coverageGapSchema> 
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to aggregate techniques over threat-reports-*: ${
+              message: `Failed to aggregate techniques over .kibana-threat-reports-*: ${
                 (err as Error).message
               }.`,
             },

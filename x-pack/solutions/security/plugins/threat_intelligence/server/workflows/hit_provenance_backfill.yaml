@@ -3,7 +3,8 @@
 #
 # Schedule: every hour.
 # Purpose:  Walk back from Detection Engine alerts to the originating
-#           `threat-reports-*` doc and update `provenance.environment_hits[]` +
+#           `.kibana-threat-reports-*` doc and update
+#           `provenance.environment_hits[]` +
 #           `provenance.environment_hits_total` so the report-table attachment
 #           can render the already-defined "Env. hits" column with real values.
 #
@@ -18,8 +19,8 @@
 #     (`kibana.alert.rule.type == "threat_match"`). The IOC indicator-sync
 #     Task Manager task writes a `threat.indicator.reference` of the form
 #     `threat-report:<report_id>` onto every indicator it syncs from
-#     `threat-reports-*`, so Indicator Match alerts carry that backlink
-#     through to `kibana.alert.threat.indicator.reference`.
+#     `.kibana-threat-reports-*`, so Indicator Match alerts carry that
+#     backlink through to `kibana.alert.threat.indicator.reference`.
 #
 #   - **Layer 2 (behavioral DE rule)** — alerts whose
 #     `kibana.alert.rule.threat.technique[].id` overlaps with this report's
@@ -32,7 +33,7 @@
 # with neither cannot produce env hits and are skipped.
 # =============================================================================
 name: threat_intel.hit_provenance_backfill
-description: Attribute Detection Engine alerts back to their originating threat-reports-* docs (Layers 1/2)
+description: Attribute Detection Engine alerts back to their originating .kibana-threat-reports-* docs (Layers 1/2)
 enabled: true
 triggers:
   - type: scheduled
@@ -42,7 +43,7 @@ steps:
   - name: load_reports_with_extractions
     type: elasticsearch.search
     with:
-      index: threat-reports-*
+      index: .kibana-threat-reports-*
       size: 500
       _source:
         - extracted.ttps.techniques
@@ -69,7 +70,7 @@ steps:
       # Layer 1 — Indicator Match alerts that reference this report_id.
       # The indicator-sync Task Manager task writes
       # `threat.indicator.reference = "threat-report:<report_id>"` on every
-      # row in the `.threat-intel-indicators-*` index so the join is exact.
+      # row in the `.kibana-threat-intel-indicators` index so the join is exact.
       - name: count_layer1_hits
         type: elasticsearch.search
         with:
@@ -123,7 +124,7 @@ steps:
       - name: write_provenance
         type: elasticsearch.update
         with:
-          index: threat-reports-*
+          index: .kibana-threat-reports-*
           id: "{{ item._id }}"
           doc:
             provenance:

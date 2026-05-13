@@ -22,7 +22,7 @@ steps:
   - name: load_pending_reports
     type: elasticsearch.search
     with:
-      index: threat-reports-*
+      index: .kibana-threat-reports-*
       size: 200
       query:
         bool:
@@ -35,7 +35,7 @@ steps:
   - name: load_already_extracted_fingerprints
     type: elasticsearch.search
     with:
-      index: threat-reports-*
+      index: .kibana-threat-reports-*
       size: 0
       query:
         bool:
@@ -141,7 +141,7 @@ steps:
       - name: find_related_reports
         type: elasticsearch.search
         with:
-          index: threat-reports-*
+          index: .kibana-threat-reports-*
           size: 25
           _source: false
           query:
@@ -161,7 +161,7 @@ steps:
       - name: persist_extractions
         type: elasticsearch.update
         with:
-          index: threat-reports-*
+          index: .kibana-threat-reports-*
           id: "{{ item._id }}"
           doc:
             extracted:

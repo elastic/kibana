@@ -51,6 +51,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
 
+  // Threat Intelligence
+  'threat_intel.extract_iocs',
+  'threat_intel.analyse_environment',
+
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
   `${internalNamespaces.streams}.diagnose_stream`,
@@ -135,6 +139,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-rule-edit',
   'threat-hunting',
   'pci-compliance',
+  'threat-intelligence',
 
   // O11Y
   'observability.rca',

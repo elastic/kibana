@@ -34,28 +34,39 @@ export const THREAT_INTELLIGENCE_API_PRIVILEGES = {
 
 /**
  * Indices and data stream names owned by this plugin.
+ *
+ * All names live under the `.kibana-*` family so the `kibana_system` reserved
+ * role's existing index privileges cover create / read / write without an
+ * Elasticsearch role-descriptor change. See
+ * `dev_docs/key_concepts/kibana_system_user.mdx` — non-dot-prefixed (or
+ * non-`.kibana*`) patterns are treated as user-defined data indices and
+ * `kibana_system` is intentionally denied access to them.
  */
-export const THREAT_REPORTS_DATA_STREAM = 'threat-reports' as const;
-export const THREAT_REPORTS_INDEX_PATTERN = 'threat-reports-*' as const;
-export const THREAT_INTEL_SOURCES_INDEX = '.threat-intel-sources' as const;
-export const THREAT_INTEL_SUBSCRIPTIONS_INDEX = '.threat-intel-subscriptions' as const;
+export const THREAT_REPORTS_DATA_STREAM = '.kibana-threat-reports' as const;
+export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports-*' as const;
+export const THREAT_INTEL_SOURCES_INDEX = '.kibana-threat-intel-sources' as const;
+export const THREAT_INTEL_SUBSCRIPTIONS_INDEX = '.kibana-threat-intel-subscriptions' as const;
 // Recurring-query recall is intentionally not a plugin-owned capability:
 // users re-open the originating conversation via the agent-builder history
 // sidebar. Any future scheduled re-run feature must introduce its own
 // persistence layer.
-export const THREAT_INTEL_DIGESTS_INDEX = '.threat-intel-digests' as const;
+export const THREAT_INTEL_DIGESTS_INDEX = '.kibana-threat-intel-digests' as const;
 /**
- * Destination index for IOC indicators synced from `threat-reports-*` by the
- * Task Manager job (`server/tasks/ioc_indicator_sync.ts`). Detection Engine's
- * Indicator Match rule can be configured to query this index — the rows are
- * shaped to ECS `threat.indicator.*` so the rule's default field mapping
- * works without further customization.
+ * Destination index for IOC indicators synced from the threat-reports data
+ * stream by the Task Manager job (`server/tasks/ioc_indicator_sync.ts`).
+ * Detection Engine's Indicator Match rule can be configured to query this
+ * index — the rows are shaped to ECS `threat.indicator.*` so the rule's
+ * default field mapping works without further customization.
+ *
+ * Because this lives under `.kibana-*`, end-user roles do not get read
+ * access by default; operators wiring the IOC sync to Indicator Match must
+ * grant their detection-rule role read on this exact index.
  */
-export const THREAT_INTEL_INDICATORS_INDEX = '.threat-intel-indicators' as const;
+export const THREAT_INTEL_INDICATORS_INDEX = '.kibana-threat-intel-indicators' as const;
 /**
  * Prefix written to `threat.indicator.reference` on every synced indicator
  * so Workflow 4's `hit_provenance_backfill` can join Indicator Match alerts
- * back to the originating `threat-reports-*` doc by exact term match.
+ * back to the originating threat-reports doc by exact term match.
  */
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
 
@@ -93,7 +104,7 @@ export const THREAT_INTEL_TOOL_IDS = {
    * Reads a sample of alert documents already pulled by `security.alerts`,
    * runs the same behavioral extraction prompt as `hunt_behavior` against
    * the alert payloads, writes a synthetic `source.type: 'telemetry'`
-   * row into `threat-reports-*` for provenance, and returns the same
+   * row into the threat-reports data stream for provenance, and returns the same
    * validated behaviors + finding-card attachment hints as `hunt_behavior`
    * so the analyst can promote them to a durable Detection Engine rule.
    */
@@ -116,7 +127,7 @@ export const SUBMIT_SUBSCRIPTION_API_PATH =
  * aggregations the UI panels need in a single response — stats ribbon,
  * by-category breakdown, by-region "Affects You" panel, severity timeline,
  * top techniques (radar), recent-article grid, and environment-impact
- * totals. Backed by `_search` aggregations over `threat-reports-*` plus
+ * totals. Backed by `_search` aggregations over the threat-reports data stream plus
  * a tiny terms agg on `.alerts-security.alerts-*` for the env-impact pill.
  */
 export const DASHBOARD_OVERVIEW_API_PATH =
