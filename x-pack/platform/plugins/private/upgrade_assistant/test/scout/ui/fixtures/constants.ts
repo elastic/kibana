@@ -9,7 +9,6 @@ import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 
 export const UPGRADE_ASSISTANT_TAGS = tags.stateful.classic;
-export const UPGRADE_ASSISTANT_SKIP_ISSUE = 'https://github.com/elastic/kibana/issues/266002';
 
 export const UPGRADE_ASSISTANT_PATHS = {
   overview: 'management/stack/upgrade_assistant/overview',

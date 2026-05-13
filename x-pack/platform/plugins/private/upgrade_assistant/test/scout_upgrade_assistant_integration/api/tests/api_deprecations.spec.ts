@@ -16,7 +16,7 @@ import {
 } from '../fixtures/helpers';
 
 apiTest.describe.skip(
-  `Upgrade Assistant API deprecations (${testData.UPGRADE_ASSISTANT_SKIP_ISSUE})`,
+  'Upgrade Assistant API deprecations',
   { tag: testData.UPGRADE_ASSISTANT_INTEGRATION_TAGS },
   () => {
     apiTest(

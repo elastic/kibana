@@ -8,7 +8,6 @@
 import { tags } from '@kbn/scout';
 
 export const UPGRADE_ASSISTANT_INTEGRATION_TAGS = tags.stateful.classic;
-export const UPGRADE_ASSISTANT_SKIP_ISSUE = 'https://github.com/elastic/kibana/issues/266002';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

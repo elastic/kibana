@@ -18,7 +18,6 @@ export { APPS_WITH_DEPRECATION_LOGS, DEPRECATION_LOGS_INDEX, DEPRECATION_LOGS_OR
 
 export const UPGRADE_ASSISTANT_API_TAGS = tags.stateful.classic;
 export const UPGRADE_ASSISTANT_API_LOCAL_TAGS = ['@local-stateful-classic'];
-export const UPGRADE_ASSISTANT_SKIP_ISSUE = 'https://github.com/elastic/kibana/issues/266002';
 
 export const API_BASE_PATH = UPGRADE_ASSISTANT_API_BASE_PATH.replace(/^\//, '');
 
