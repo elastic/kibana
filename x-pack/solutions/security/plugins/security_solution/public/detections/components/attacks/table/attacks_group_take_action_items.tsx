@@ -37,8 +37,6 @@ interface AttacksGroupTakeActionItemsProps {
   onActionSuccess?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
-  /** Optional size for the context menu for flyout */
-  size?: 's' | 'm';
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;
   /**
@@ -58,7 +56,6 @@ export function AttacksGroupTakeActionItems({
   closePopover,
   onActionSuccess,
   showAiAssistantAction = true,
-  size,
   telemetrySource,
   isRemoteDocument,
 }: AttacksGroupTakeActionItemsProps) {
