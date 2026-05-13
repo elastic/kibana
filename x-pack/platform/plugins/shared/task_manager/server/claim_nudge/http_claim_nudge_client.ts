@@ -149,6 +149,7 @@ export class HttpClaimNudgeClient {
               'kbn-xsrf': 'task-manager-claim-nudge',
               'content-length': '2',
             },
+            ...(isHttps ? { rejectUnauthorized: false } : {}),
           },
           (response) => {
             const statusCode = response.statusCode ?? 0;
