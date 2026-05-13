@@ -10,10 +10,12 @@
 import { action } from '@storybook/addon-actions';
 import type { Decorator } from '@storybook/react';
 import React from 'react';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { CoreStart } from '@kbn/core/public';
 import { CommonGlobalAppStyles } from '@kbn/core-chrome-layout/layouts/common/global_app_styles';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { mockUiSettingsService } from '../public/shared/mocks/mock_ui_settings_service';
 
 const createMockWebStorage = () => ({
@@ -31,6 +33,21 @@ const createMockStorage = () => ({
   remove: action('STORAGE_REMOVE'),
   clear: action('STORAGE_CLEAR'),
   get: action('STORAGE_GET'),
+});
+
+const createMockTriggersActionsUi = () => ({
+  actionTypeRegistry: new TypeRegistry<ActionTypeModel>(),
+  ruleTypeRegistry: new TypeRegistry(),
+});
+
+const createMockWorkflowsExtensions = () => ({
+  getStepDefinition: () => undefined,
+  getAllStepDefinitions: () => [],
+  hasStepDefinition: () => false,
+  getTriggerDefinition: () => undefined,
+  getAllTriggerDefinitions: () => [],
+  hasTriggerDefinition: () => false,
+  isReady: () => true,
 });
 
 /**
@@ -52,11 +69,17 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
                   executeWorkflow: true,
                 },
               },
+              getUrlForApp: (
+                appId: string,
+                options?: { path?: string; deepLinkId?: string; absolute?: boolean }
+              ) => (options?.absolute ? `${window.location.origin}/app/${appId}` : `/app/${appId}`),
             },
             settings: {
               client: mockUiSettingsService(),
             },
             storage: createMockStorage(),
+            triggersActionsUi: createMockTriggersActionsUi(),
+            workflowsExtensions: createMockWorkflowsExtensions(),
           } as unknown as CoreStart
         }
       >

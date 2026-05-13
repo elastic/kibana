@@ -103,7 +103,6 @@ export const JsonWatchEditForm = () => {
           })}
         >
           <EuiFieldText
-            id="watchName"
             name="name"
             value={watch.name || ''}
             data-test-subj="nameInput"
@@ -129,7 +128,6 @@ export const JsonWatchEditForm = () => {
           errors={errors}
         >
           <EuiFieldText
-            id="id"
             name="id"
             data-test-subj="idInput"
             value={watch.id || ''}

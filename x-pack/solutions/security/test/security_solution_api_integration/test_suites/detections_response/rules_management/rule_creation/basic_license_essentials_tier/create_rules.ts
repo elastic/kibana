@@ -9,6 +9,11 @@ import expect from 'expect';
 import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
+import {
   getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutputWithoutRuleId,
@@ -18,11 +23,6 @@ import {
   updateUsername,
   getSimpleRuleOutput,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toBe(
-            '[request body]: max_signals: Number must be greater than or equal to 1'
+            '[request body]: max_signals: Too small: expected number to be >=1'
           );
         });
       });

@@ -12,17 +12,14 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { getDashboardMigrationStatsMock } from '../../__mocks__/migration_dashboard_stats';
 import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
-import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 
 jest.mock('../../../common/hooks/use_get_missing_resources');
-jest.mock('../../logic/use_get_migration_translation_stats');
 jest.mock('../../../common/components/migration_data_input_flyout_context', () => ({
   useMigrationDataInputContext: jest.fn(),
 }));
 
 const mockUseGetMissingResources = useGetMissingResources as jest.Mock;
-const mockUseGetMigrationTranslationStats = useGetMigrationTranslationStats as jest.Mock;
 const mockUseMigrationDataInputContext = useMigrationDataInputContext as jest.Mock;
 
 const missingResourcesMock: SiemMigrationResourceBase[] = [{ name: 'missing-1', type: 'macro' }];
@@ -34,21 +31,6 @@ describe('DashboardMigrationsUploadMissingPanel', () => {
 
   beforeEach(() => {
     openFlyout = jest.fn();
-    mockUseGetMigrationTranslationStats.mockReturnValue({
-      data: {
-        dashboards: {
-          failed: 1,
-          success: {
-            result: {
-              partial: 1,
-              untranslatable: 1,
-              success: 1,
-            },
-          },
-        },
-      },
-      isLoading: false,
-    });
     mockUseMigrationDataInputContext.mockReturnValue({
       openFlyout,
       closeFlyout: jest.fn(),
@@ -117,7 +99,7 @@ describe('DashboardMigrationsUploadMissingPanel', () => {
     // Description
     expect(getByTestId('uploadMissingPanelDescription')).toBeInTheDocument();
     expect(getByTestId('uploadMissingPanelDescription')).toHaveTextContent(
-      'Click Upload to continue translating 3 dashboards'
+      'Click Upload to continue translating dashboards'
     );
     // Upload button
     expect(getByTestId('uploadMissingPanelButton')).toBeInTheDocument();

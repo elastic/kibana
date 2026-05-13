@@ -9,14 +9,13 @@ import expect from '@kbn/expect';
 import {
   DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
   ENDPOINT_ACTION_RESPONSES_DS,
-  ENDPOINT_HEARTBEAT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { buildIndexNameWithNamespace } from '@kbn/security-solution-plugin/common/endpoint/utils/index_name_utilities';
 import {
   updateAgentPolicy,
   updateIntegrationPolicy,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,8 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
   const kbnClient = getService('kibanaServer');
   const log = getService('log');
   const retry = getService('retry');
-  const config = getService('config');
-  const isServerless = config.get('serverless');
 
   describe('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
     let testData: PolicyTestResourceInfo;
@@ -36,10 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
         buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace),
         buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace),
       ];
-
-      if (isServerless) {
-        indexList.push(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
-      }
 
       return indexList;
     };

@@ -1,20 +1,31 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*",],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*","test/scout/**/*"],
   "kbn_references": [
     "@kbn/css-utils",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/visualizations-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/presentation-containers",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/config-schema",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/core-http-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/scout",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/core-http-browser",
+    "@kbn/expressions-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/visualizations-common",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": ["target/**/*"]
 }

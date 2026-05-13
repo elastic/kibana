@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import type { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
-import type { PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
+import type { PhaseEvent, ProjectRoutingOverrides, ViewMode } from '@kbn/presentation-publishing';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
@@ -22,20 +22,19 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public';
-import type {
-  Datasource,
-  DatasourceMap,
-  Visualization,
-  VisualizationMap,
-  ExpressionWrapperProps,
-  LensApi,
-  LensInternalApi,
-  LensRendererProps,
-  LensRuntimeState,
-  LensSerializedState,
+import {
+  type Datasource,
+  type DatasourceMap,
+  type Visualization,
+  type VisualizationMap,
+  type ExpressionWrapperProps,
+  type LensInternalApi,
+  type LensRendererProps,
+  type LensRuntimeState,
+  type LensSerializedState,
+  LENS_EMBEDDABLE_TYPE,
 } from '@kbn/lens-common';
-import { DOC_TYPE } from '../../../common/constants';
+import type { LensApi } from '@kbn/lens-common-2';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
@@ -44,7 +43,7 @@ import type { LensEmbeddableStartServices } from '../types';
 function getDefaultLensApiMock() {
   const LensApiMock: LensApi = {
     // Static props
-    type: DOC_TYPE,
+    type: LENS_EMBEDDABLE_TYPE,
     uuid: faker.string.uuid(),
     // Shared Embeddable Observables
     title$: new BehaviorSubject<string | undefined>(faker.lorem.words()),
@@ -76,9 +75,10 @@ function getDefaultLensApiMock() {
     supportedTriggers: jest.fn(() => []),
     canLinkToLibrary: jest.fn(async () => false),
     canUnlinkFromLibrary: jest.fn(async () => false),
-    checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
+    hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
+    getLegacySerializedState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
@@ -95,7 +95,7 @@ function getDefaultLensApiMock() {
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
     updateAttributes: jest.fn(),
-    updateSavedObjectId: jest.fn(),
+    updateRefId: jest.fn(),
     updateOverrides: jest.fn(),
     getSerializedStateByReference: jest.fn(),
     getSerializedStateByValue: jest.fn(),
@@ -108,6 +108,9 @@ function getDefaultLensApiMock() {
     setDisabledActionIds: jest.fn(),
     rendered$: new BehaviorSubject<boolean>(false),
     searchSessionId$: new BehaviorSubject<string | undefined>(undefined),
+    hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+    applySerializedState: jest.fn(),
+    projectRoutingOverrides$: new BehaviorSubject<ProjectRoutingOverrides | undefined>(undefined),
   };
   return LensApiMock;
 }
@@ -135,7 +138,7 @@ export function getLensApiMock(overrides: Partial<LensApi> = {}): LensApi {
 
 export function getLensSerializedStateMock(overrides: Partial<LensSerializedState> = {}) {
   return {
-    savedObjectId: faker.string.uuid(),
+    ref_id: faker.string.uuid(),
     ...getDefaultLensSerializedStateMock(),
     ...overrides,
   };
@@ -176,6 +179,9 @@ export function makeEmbeddableServices(
     visualizations: visualizationsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     eventAnnotation: {} as LensEmbeddableStartServices['eventAnnotation'],
+    eventAnnotationService: {
+      annotationGroupUpdated$: NEVER,
+    } as unknown as LensEmbeddableStartServices['eventAnnotationService'],
     timefilter: services.data.query.timefilter.timefilter,
     coreHttp: services.http,
     coreStart: coreMock.createStart(),
@@ -195,29 +201,8 @@ export function makeEmbeddableServices(
       ...services.uiActions,
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
-    embeddableEnhanced: {
-      initializeEmbeddableDynamicActions: jest.fn(mockDynamicActionsManager),
-    },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
-}
-
-export function mockDynamicActionsManager() {
-  return {
-    api: {
-      enhancements: { dynamicActions: {} },
-      setDynamicActions: jest.fn(),
-      dynamicActionsState$: {},
-    } as unknown as EmbeddableDynamicActionsManager['api'],
-    anyStateChange$: of(undefined),
-    comparators: {
-      enhancements: jest.fn(),
-    },
-    getLatestState: jest.fn(),
-    serializeState: jest.fn(),
-    reinitializeState: jest.fn(),
-    startDynamicActions: jest.fn(),
-  } as EmbeddableDynamicActionsManager;
 }
 
 export const mockVisualizationMap = (
@@ -319,12 +304,14 @@ export function createUnifiedSearchApi(
     language: 'kuery',
   },
   filters: Filter[] = [],
-  timeRange: TimeRange = { from: 'now-7d', to: 'now' }
+  timeRange: TimeRange = { from: 'now-7d', to: 'now' },
+  projectRouting?: string
 ) {
   return {
     filters$: new BehaviorSubject<Filter[] | undefined>(filters),
     query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
     timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
+    projectRouting$: new BehaviorSubject<string | undefined>(projectRouting),
   };
 }
 

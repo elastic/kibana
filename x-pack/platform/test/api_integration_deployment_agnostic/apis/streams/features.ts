@@ -6,96 +6,65 @@
  */
 
 import expect from '@kbn/expect';
+import type { BaseFeature, Streams } from '@kbn/streams-schema';
+import { emptyAssets } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { emptyAssets, type Feature } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { disableStreams, enableStreams, putStream, deleteStream } from './helpers/requests';
+import {
+  deleteStream,
+  disableStreams,
+  enableStreams,
+  upsertFeature,
+  listFeatures,
+  bulkFeatures,
+  deleteFeature,
+  putStream,
+} from './helpers/requests';
+
+const STREAM_NAME = 'logs.otel';
+const SECOND_STREAM_NAME = 'logs.otel.features-cross-stream-test';
+
+const secondStreamDefinition: Streams.WiredStream.UpsertRequest['stream'] = {
+  type: 'wired',
+  description: '',
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [] },
+    settings: {},
+    wired: {
+      routing: [],
+      fields: {},
+    },
+    failure_store: { inherit: {} },
+  },
+};
+
+const testFeature: BaseFeature = {
+  id: 'test-feature',
+  stream_name: STREAM_NAME,
+  type: 'entity',
+  subtype: 'service',
+  title: 'Test Service',
+  description: 'A test service for FTR tests',
+  properties: { name: 'test-service' },
+  confidence: 90,
+  evidence: ['service.name=test-service'],
+  tags: ['entity', 'service'],
+};
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
-  const samlAuth = getService('samlAuth');
-  const esClient = getService('es');
-  const retry = getService('retry');
-
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Features', function () {
-    const STREAM_NAME = 'logs.features-test';
-
-    const createFeature = async (
-      featureName: string,
-      body: { description: string; filter: Condition }
-    ) => {
-      return await apiClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
-        params: {
-          path: { name: STREAM_NAME, featureName },
-          body,
-        },
-      });
-    };
-
-    const updateFeature = async (
-      featureName: string,
-      body: { description: string; filter: Condition }
-    ) => {
-      return await apiClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
-        params: {
-          path: { name: STREAM_NAME, featureName },
-          body,
-        },
-      });
-    };
-
-    const listFeatures = async (): Promise<Feature[]> => {
-      const res = await apiClient.fetch('GET /internal/streams/{name}/features', {
-        params: { path: { name: STREAM_NAME } },
-      });
-      expect(res.status).to.be(200);
-      return res.body.features as Feature[];
-    };
-
-    const bulkOps = async (
-      operations: Array<{ index: { feature: Feature } } | { delete: { feature: { name: string } } }>
-    ) => {
-      return await apiClient.fetch('POST /internal/streams/{name}/features/_bulk', {
-        params: {
-          path: { name: STREAM_NAME },
-          body: { operations },
-        },
-      });
-    };
-
-    const clearAllFeatures = async () => {
-      const features = await listFeatures();
-      if (!features.length) return;
-      const operations = features.map((s) => ({ delete: { feature: { name: s.name } } }));
-      await bulkOps(operations);
-    };
-
     before(async () => {
-      await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
-
-      // Create a basic wired stream to attach features to
-      await putStream(apiClient, STREAM_NAME, {
-        stream: {
-          description: '',
-          ingest: {
-            lifecycle: { inherit: {} },
-            processing: { steps: [] },
-            wired: { routing: [], fields: {} },
-            settings: {},
-          },
-        },
-        ...emptyAssets,
       });
     });
 
@@ -106,244 +75,258 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('single feature lifecycle', () => {
-      beforeEach(async () => {
-        const resp = await createFeature('feature-a', {
-          description: 'Initial description',
-          filter: { always: {} },
-        });
-        expect(resp.status).to.be(200);
+    describe('Exclude and restore', () => {
+      it('creates a feature and lists it', async () => {
+        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+        expect(uuid).to.be.a('string');
+
+        const { features } = await listFeatures(apiClient, STREAM_NAME);
+        const found = features.find((f) => f.id === testFeature.id);
+        expect(found).to.be.ok();
+        expect(found!.uuid).to.eql(uuid);
+
+        // Cleanup
+        await deleteFeature(apiClient, STREAM_NAME, uuid);
       });
 
-      afterEach(async () => {
-        await clearAllFeatures();
+      it('excludes a feature via bulk and hides it from default list', async () => {
+        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+
+        // Exclude it
+        await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
+
+        // Should NOT appear in default list
+        const { features } = await listFeatures(apiClient, STREAM_NAME);
+        const found = features.find((f) => f.uuid === uuid);
+        expect(found).to.be(undefined);
+
+        // Cleanup
+        await deleteFeature(apiClient, STREAM_NAME, uuid);
       });
 
-      it('gets and lists the feature', async () => {
-        const getResponse = await apiClient.fetch(
-          'GET /internal/streams/{name}/features/{featureName}',
-          {
-            params: { path: { name: STREAM_NAME, featureName: 'feature-a' } },
-          }
-        );
-        expect(getResponse.status).to.be(200);
-        expect(getResponse.body.feature).to.eql({
-          name: 'feature-a',
-          description: 'Initial description',
-          filter: { always: {} },
-        });
+      it('returns excluded features when include_excluded=true', async () => {
+        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
 
-        const features = await listFeatures();
-        expect(features).to.have.length(1);
-        expect(features[0]).to.eql({
-          name: 'feature-a',
-          description: 'Initial description',
-          filter: { always: {} },
+        await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
+
+        // Should appear with include_excluded
+        const { features } = await listFeatures(apiClient, STREAM_NAME, {
+          includeExcluded: true,
         });
+        const found = features.find((f) => f.uuid === uuid);
+        expect(found).to.be.ok();
+        expect(found!.excluded_at).to.be.a('string');
+
+        // Cleanup
+        await deleteFeature(apiClient, STREAM_NAME, uuid);
       });
 
-      it('cannot create a feature with a name starting with an underscore', async () => {
-        const resp = await createFeature('_invalid-feature', {
-          description: 'A feature with an invalid name',
-          filter: { always: {} },
-        });
-        expect(resp.status).to.be(400);
+      it('restores an excluded feature with fresh timestamps', async () => {
+        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
+
+        await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
+
+        // Restore it
+        await bulkFeatures(apiClient, STREAM_NAME, [{ restore: { id: uuid } }]);
+
+        // Should appear in default list again
+        const { features } = await listFeatures(apiClient, STREAM_NAME);
+        const found = features.find((f) => f.uuid === uuid);
+        expect(found).to.be.ok();
+        expect(found!.excluded_at).to.be(undefined);
+        expect(found!.last_seen).to.be.a('string');
+        expect(found!.expires_at).to.be.a('string');
+
+        // Cleanup
+        await deleteFeature(apiClient, STREAM_NAME, uuid);
       });
 
-      it('cannot create a feature with a name starting with a dot', async () => {
-        const resp = await createFeature('.invalid-feature', {
-          description: 'A feature with an invalid name',
-          filter: { always: {} },
-        });
-        expect(resp.status).to.be(400);
+      it('bulk excludes multiple features and restores some', async () => {
+        const feature1: BaseFeature = { ...testFeature, id: 'bulk-test-1' };
+        const feature2: BaseFeature = { ...testFeature, id: 'bulk-test-2' };
+        const feature3: BaseFeature = { ...testFeature, id: 'bulk-test-3' };
+
+        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+        const { uuid: uuid3 } = await upsertFeature(apiClient, STREAM_NAME, feature3);
+
+        // Exclude all 3
+        await bulkFeatures(apiClient, STREAM_NAME, [
+          { exclude: { id: uuid1 } },
+          { exclude: { id: uuid2 } },
+          { exclude: { id: uuid3 } },
+        ]);
+
+        // Default list should have none of the 3
+        const { features: afterExclude } = await listFeatures(apiClient, STREAM_NAME);
+        expect(afterExclude.find((f) => f.uuid === uuid1)).to.be(undefined);
+        expect(afterExclude.find((f) => f.uuid === uuid2)).to.be(undefined);
+        expect(afterExclude.find((f) => f.uuid === uuid3)).to.be(undefined);
+
+        // Restore 2 of them
+        await bulkFeatures(apiClient, STREAM_NAME, [
+          { restore: { id: uuid1 } },
+          { restore: { id: uuid2 } },
+        ]);
+
+        const { features: afterRestore } = await listFeatures(apiClient, STREAM_NAME);
+        expect(afterRestore.find((f) => f.uuid === uuid1)).to.be.ok();
+        expect(afterRestore.find((f) => f.uuid === uuid2)).to.be.ok();
+        expect(afterRestore.find((f) => f.uuid === uuid3)).to.be(undefined);
+
+        // Cleanup
+        await bulkFeatures(apiClient, STREAM_NAME, [
+          { delete: { id: uuid1 } },
+          { delete: { id: uuid2 } },
+          { delete: { id: uuid3 } },
+        ]);
       });
 
-      describe('after update', () => {
-        beforeEach(async () => {
-          const resp = await updateFeature('feature-a', {
-            description: 'Updated description',
-            filter: { field: 'message', contains: 'error' },
-          });
-          expect(resp.status).to.be(200);
-        });
+      it('hard deletes an excluded feature', async () => {
+        const { uuid } = await upsertFeature(apiClient, STREAM_NAME, testFeature);
 
-        it('reflects the updated feature', async () => {
-          const getUpdatedResponse = await apiClient.fetch(
-            'GET /internal/streams/{name}/features/{featureName}',
-            {
-              params: { path: { name: STREAM_NAME, featureName: 'feature-a' } },
-            }
-          );
-          expect(getUpdatedResponse.status).to.be(200);
-          expect(getUpdatedResponse.body.feature).to.eql({
-            name: 'feature-a',
-            description: 'Updated description',
-            filter: { field: 'message', contains: 'error' },
-          });
+        await bulkFeatures(apiClient, STREAM_NAME, [{ exclude: { id: uuid } }]);
+
+        // Hard delete
+        await deleteFeature(apiClient, STREAM_NAME, uuid);
+
+        // Should be gone entirely, even with include_excluded
+        const { features } = await listFeatures(apiClient, STREAM_NAME, {
+          includeExcluded: true,
         });
+        const found = features.find((f) => f.uuid === uuid);
+        expect(found).to.be(undefined);
       });
     });
 
-    describe('bulk operations', () => {
+    describe('POST /internal/streams/features/_bulk', () => {
       beforeEach(async () => {
-        const bulkCreate = await bulkOps([
-          { index: { feature: { name: 's1', description: 'one', filter: { always: {} } } } },
-          {
-            index: {
-              feature: {
-                name: 's2',
-                description: 'two',
-                filter: { field: 'message', contains: 'error' },
-              },
-            },
-          },
-        ]);
-        expect(bulkCreate.status).to.be(200);
-      });
-
-      afterEach(async () => {
-        await clearAllFeatures();
-      });
-
-      it('lists newly indexed features', async () => {
-        const features = await listFeatures();
-        expect(features.map((f: Feature) => f.name).sort()).to.eql(['s1', 's2']);
-      });
-
-      describe('after delete and index via bulk', () => {
-        beforeEach(async () => {
-          const bulkModify = await bulkOps([
-            { delete: { feature: { name: 's1' } } },
-            {
-              index: {
-                feature: {
-                  name: 's3',
-                  description: 'three',
-                  filter: { field: 'host.name', eq: 'web-01' },
-                },
-              },
-            },
-          ]);
-          expect(bulkModify.status).to.be(200);
-        });
-
-        it('lists updated set of features', async () => {
-          const features = await listFeatures();
-          expect(features.map((f: Feature) => f.name).sort()).to.eql(['s2', 's3']);
-        });
-      });
-    });
-
-    describe('features are removed when stream is deleted', () => {
-      beforeEach(async () => {
-        const bulkCreate = await bulkOps([
-          { index: { feature: { name: 'sd1', description: 'one', filter: { always: {} } } } },
-          { index: { feature: { name: 'sd2', description: 'two', filter: { always: {} } } } },
-        ]);
-        expect(bulkCreate.status).to.be(200);
-        const features = await listFeatures();
-        expect(features.map((f: Feature) => f.name).sort()).to.eql(['sd1', 'sd2']);
-      });
-
-      afterEach(async () => {
-        // Recreate the stream for subsequent tests
-        await putStream(apiClient, STREAM_NAME, {
-          stream: {
-            description: '',
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: { steps: [] },
-              wired: { routing: [], fields: {} },
-              settings: {},
-            },
-          },
+        await putStream(apiClient, SECOND_STREAM_NAME, {
+          stream: secondStreamDefinition,
           ...emptyAssets,
         });
-        await clearAllFeatures();
-      });
-
-      it('deletes all feature documents belonging to the stream', async () => {
-        await deleteStream(apiClient, STREAM_NAME);
-
-        // Verify via ES that no docs remain in the features index for this stream
-        await retry.tryForTime(10000, async () => {
-          const res = await esClient.search({
-            index: '.kibana_streams_systems', // Initially features were called systems
-            size: 0,
-            track_total_hits: true,
-            query: { term: { 'stream.name': STREAM_NAME } },
-          });
-          const totalVal = res.hits.total
-            ? typeof res.hits.total === 'number'
-              ? res.hits.total
-              : res.hits.total.value
-            : 0;
-          expect(totalVal).to.be(0);
-        });
-      });
-    });
-
-    describe('requires significant events setting', () => {
-      beforeEach(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        });
       });
 
       afterEach(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        });
-        await clearAllFeatures();
+        await deleteStream(apiClient, SECOND_STREAM_NAME);
       });
 
-      it('GET feature returns 403', async () => {
-        const res = await apiClient.fetch('GET /internal/streams/{name}/features/{featureName}', {
-          params: { path: { name: STREAM_NAME, featureName: 'nope' } },
-        });
-        expect(res.status).to.be(403);
-      });
+      it('deletes features across multiple streams in one request', async () => {
+        const featureA: BaseFeature = { ...testFeature, id: 'cross-stream-delete-a' };
+        const featureB: BaseFeature = {
+          ...testFeature,
+          id: 'cross-stream-delete-b',
+          stream_name: SECOND_STREAM_NAME,
+        };
 
-      it('DELETE feature returns 403', async () => {
-        const res = await apiClient.fetch(
-          'DELETE /internal/streams/{name}/features/{featureName}',
-          {
-            params: { path: { name: STREAM_NAME, featureName: 'nope' } },
-          }
-        );
-        expect(res.status).to.be(403);
-      });
+        const { uuid: uuidA } = await upsertFeature(apiClient, STREAM_NAME, featureA);
+        const { uuid: uuidB } = await upsertFeature(apiClient, SECOND_STREAM_NAME, featureB);
 
-      it('PUT feature returns 403', async () => {
-        const res = await apiClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
-          params: {
-            path: { name: STREAM_NAME, featureName: 'nope' },
-            body: { description: 'x', filter: { always: {} } },
-          },
-        });
-        expect(res.status).to.be(403);
-      });
-
-      it('GET features list returns 403', async () => {
-        const res = await apiClient.fetch('GET /internal/streams/{name}/features', {
-          params: { path: { name: STREAM_NAME } },
-        });
-        expect(res.status).to.be(403);
-      });
-
-      it('POST bulk returns 403', async () => {
-        const res = await apiClient.fetch('POST /internal/streams/{name}/features/_bulk', {
-          params: {
-            path: { name: STREAM_NAME },
-            body: {
-              operations: [
-                { index: { feature: { name: 'a', description: 'A', filter: { always: {} } } } },
-                { delete: { feature: { name: 'a' } } },
-              ],
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [{ delete: { id: uuidA } }, { delete: { id: uuidB } }],
+              },
             },
-          },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        const { features: streamAFeatures } = await listFeatures(apiClient, STREAM_NAME, {
+          includeExcluded: true,
         });
-        expect(res.status).to.be(403);
+        const { features: streamBFeatures } = await listFeatures(apiClient, SECOND_STREAM_NAME, {
+          includeExcluded: true,
+        });
+        expect(streamAFeatures.find((f) => f.uuid === uuidA)).to.be(undefined);
+        expect(streamBFeatures.find((f) => f.uuid === uuidB)).to.be(undefined);
+      });
+
+      it('deletes multiple features in one request and returns the right counts', async () => {
+        const feature1: BaseFeature = { ...testFeature, id: 'bulk-delete-1' };
+        const feature2: BaseFeature = { ...testFeature, id: 'bulk-delete-2' };
+
+        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [{ delete: { id: uuid1 } }, { delete: { id: uuid2 } }],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        const { features } = await listFeatures(apiClient, STREAM_NAME, {
+          includeExcluded: true,
+        });
+        expect(features.find((f) => f.uuid === uuid1)).to.be(undefined);
+        expect(features.find((f) => f.uuid === uuid2)).to.be(undefined);
+      });
+
+      it('excludes and restores features across streams in one request', async () => {
+        const feature1: BaseFeature = { ...testFeature, id: 'bulk-exclude-1' };
+        const feature2: BaseFeature = { ...testFeature, id: 'bulk-exclude-2' };
+
+        const { uuid: uuid1 } = await upsertFeature(apiClient, STREAM_NAME, feature1);
+        const { uuid: uuid2 } = await upsertFeature(apiClient, STREAM_NAME, feature2);
+
+        // Exclude both in one request
+        const excludeResponse = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [{ exclude: { id: uuid1 } }, { exclude: { id: uuid2 } }],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(excludeResponse).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        // Restore both in one request
+        const restoreResponse = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [{ restore: { id: uuid1 } }, { restore: { id: uuid2 } }],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(restoreResponse).to.eql({ succeeded: 2, failed: 0, skipped: 0 });
+
+        // Cleanup
+        await bulkFeatures(apiClient, STREAM_NAME, [
+          { delete: { id: uuid1 } },
+          { delete: { id: uuid2 } },
+        ]);
+      });
+
+      it('treats stale/unknown UUIDs as idempotent no-ops (succeeded=0, failed=0, skipped=1)', async () => {
+        const response = await apiClient
+          .fetch('POST /internal/streams/features/_bulk', {
+            params: {
+              body: {
+                operations: [{ delete: { id: 'non-existent-uuid' } }],
+              },
+            },
+          })
+          .expect(200)
+          .then((res) => res.body);
+
+        expect(response).to.eql({ succeeded: 0, failed: 0, skipped: 1 });
       });
     });
   });

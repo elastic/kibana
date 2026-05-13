@@ -7,19 +7,21 @@
 import Boom from '@hapi/boom';
 import { RelatedDashboardsClient } from './related_dashboards_client';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 import type { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ReferencedPanelManager } from './referenced_panel_manager';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 describe('RelatedDashboardsClient', () => {
+  const mockGetDashboard = jest.fn();
+  const mockScanDashboards = jest.fn();
   let logger: jest.Mocked<Logger>;
-  let dashboardClient: jest.Mocked<IContentClient<any>>;
   let alertsClient: jest.Mocked<InvestigateAlertsClient>;
   let alertId: string;
   let client: RelatedDashboardsClient;
+
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   const baseMockAlert = {
     getAllRelevantFields: jest.fn().mockReturnValue(['field1', 'field2']),
@@ -29,6 +31,16 @@ describe('RelatedDashboardsClient', () => {
   } as unknown as AlertData;
 
   beforeEach(() => {
+    mockGetDashboard.mockReset();
+    mockScanDashboards.mockReset();
+    mockScanDashboards.mockResolvedValue({
+      dashboards: [
+        { id: 'dashboard1', title: 'Dashboard 1', panels: [] },
+        { id: 'dashboard2', title: 'Dashboard 2', panels: [] },
+      ],
+      total: 2,
+    });
+
     logger = {
       debug: jest.fn(),
       info: jest.fn(),
@@ -38,19 +50,6 @@ describe('RelatedDashboardsClient', () => {
       trace: jest.fn(),
       log: jest.fn(),
     } as unknown as jest.Mocked<Logger>;
-
-    dashboardClient = {
-      search: jest.fn().mockReturnValue({
-        result: {
-          hits: [
-            { id: 'dashboard1', attributes: { title: 'Dashboard 1', panels: [] } },
-            { id: 'dashboard2', attributes: { title: 'Dashboard 2', panels: [] } },
-          ],
-          pagination: { total: 2 },
-        },
-      }),
-      get: jest.fn(),
-    } as unknown as jest.Mocked<IContentClient<any>>;
 
     alertsClient = {
       getAlertById: jest.fn(),
@@ -67,7 +66,8 @@ describe('RelatedDashboardsClient', () => {
 
     client = new RelatedDashboardsClient(
       logger,
-      dashboardClient,
+      mockGetDashboard,
+      mockScanDashboards,
       alertsClient,
       alertId,
       new ReferencedPanelManager(logger, soClientMock)
@@ -88,12 +88,9 @@ describe('RelatedDashboardsClient', () => {
 
     it('should fetch dashboards and return suggested dashboards', async () => {
       alertsClient.getAlertById.mockResolvedValue(baseMockAlert);
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [],
-          pagination: { total: 0 },
-        },
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [],
+        total: 0,
       });
 
       const result = await client.fetchRelatedDashboards();
@@ -114,67 +111,60 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       client.setAlert(mockAlert);
 
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [
-            {
-              id: 'dashboard1',
-              attributes: {
-                title: 'Dashboard 1',
-                panels: [
-                  {
-                    type: 'lens',
-                    config: {
-                      attributes: {
-                        references: [
-                          { name: 'indexpattern', id: 'index1' },
-                          { name: 'irrelevant', id: 'index2' },
-                        ],
-                        state: {
-                          datasourceStates: {
-                            formBased: {
-                              layers: [{ columns: [{ sourceField: 'field2' }] }],
-                            },
-                          },
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [
+          {
+            id: 'dashboard1',
+            title: 'Dashboard 1',
+            panels: [
+              {
+                type: LENS_EMBEDDABLE_TYPE,
+                config: {
+                  attributes: {
+                    references: [
+                      { name: 'indexpattern', id: 'index1' },
+                      { name: 'irrelevant', id: 'index2' },
+                    ],
+                    state: {
+                      datasourceStates: {
+                        formBased: {
+                          layers: [{ columns: [{ sourceField: 'field2' }] }],
                         },
-                        type: 'lens',
                       },
                     },
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
-                ],
+                },
               },
-            },
-            {
-              id: 'dashboard2',
-              attributes: {
-                title: 'Dashboard 2',
-                panels: [
-                  {
-                    type: 'lens',
-                    config: {
-                      attributes: {
-                        references: [
-                          { name: 'indexpattern', id: 'index1' },
-                          { name: 'irrelevant', id: 'index2' },
-                        ],
-                        state: {
-                          datasourceStates: {
-                            formBased: {
-                              layers: [{ columns: [{ sourceField: 'field1' }] }],
-                            },
-                          },
+            ],
+          },
+          {
+            id: 'dashboard2',
+            title: 'Dashboard 2',
+            panels: [
+              {
+                type: LENS_EMBEDDABLE_TYPE,
+                config: {
+                  attributes: {
+                    references: [
+                      { name: 'indexpattern', id: 'index1' },
+                      { name: 'irrelevant', id: 'index2' },
+                    ],
+                    state: {
+                      datasourceStates: {
+                        formBased: {
+                          layers: [{ columns: [{ sourceField: 'field1' }] }],
                         },
-                        type: 'lens',
                       },
                     },
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
-                ],
+                },
               },
-            },
-          ],
-          pagination: { total: 2 },
-        },
+            ],
+          },
+        ],
+        total: 2,
       });
 
       const result = await client.fetchRelatedDashboards();
@@ -204,36 +194,31 @@ describe('RelatedDashboardsClient', () => {
 
       alertsClient.getAlertById.mockResolvedValue(mockAlert);
 
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: Array.from({ length: 20 }, (_, i) => ({
-            id: `dashboard${i + 1}`,
-            attributes: {
-              title: `Dashboard ${i + 1}`,
-              panels: [
-                {
-                  type: 'lens',
-                  config: {
-                    attributes: {
-                      references: [
-                        { name: 'indexpattern', id: 'index1' },
-                        { name: 'irrelevant', id: 'index2' },
-                      ],
-                      state: {
-                        datasourceStates: {
-                          formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
-                        },
-                      },
-                      type: 'lens',
+      mockScanDashboards.mockResolvedValue({
+        dashboards: Array.from({ length: 20 }, (_, i) => ({
+          id: `dashboard${i + 1}`,
+          title: `Dashboard ${i + 1}`,
+          panels: [
+            {
+              type: LENS_EMBEDDABLE_TYPE,
+              config: {
+                attributes: {
+                  references: [
+                    { name: 'indexpattern', id: 'index1' },
+                    { name: 'irrelevant', id: 'index2' },
+                  ],
+                  state: {
+                    datasourceStates: {
+                      formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] },
                     },
                   },
+                  type: LENS_EMBEDDABLE_TYPE,
                 },
-              ],
+              },
             },
-          })),
-          pagination: { total: 20 },
-        },
+          ],
+        })),
+        total: 20,
       });
 
       const { suggestedDashboards } = await client.fetchRelatedDashboards();
@@ -253,36 +238,31 @@ describe('RelatedDashboardsClient', () => {
       // @ts-ignore next-line
       client.setAlert(mockAlert);
 
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [
-            {
-              id: 'dashboard1',
-              attributes: {
-                title: 'Dashboard 1',
-                panels: [
-                  {
-                    type: 'lens',
-                    uid: '123',
-                    config: {
-                      attributes: {
-                        references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
-                        state: {
-                          datasourceStates: {
-                            formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
-                          },
-                        },
-                        type: 'lens',
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [
+          {
+            id: 'dashboard1',
+            title: 'Dashboard 1',
+            panels: [
+              {
+                type: LENS_EMBEDDABLE_TYPE,
+                uid: '123',
+                config: {
+                  attributes: {
+                    references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
+                    state: {
+                      datasourceStates: {
+                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
                       },
                     },
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
-                ],
+                },
               },
-            },
-          ],
-          pagination: { total: 1 },
-        },
+            ],
+          },
+        ],
+        total: 1,
       });
 
       const { suggestedDashboards } = await client.fetchRelatedDashboards();
@@ -317,44 +297,36 @@ describe('RelatedDashboardsClient', () => {
 
   describe('fetchDashboards', () => {
     it('should fetch dashboards and populate dashboardsById', async () => {
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [
-            { id: 'dashboard1', attributes: { title: 'Dashboard 1', panels: [] } },
-            { id: 'dashboard2', attributes: { title: 'Dashboard 2', panels: [] } },
-          ],
-          pagination: { total: 2 },
-        },
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [
+          { id: 'dashboard1', title: 'Dashboard 1', panels: [] },
+          { id: 'dashboard2', title: 'Dashboard 2', panels: [] },
+        ],
+        total: 2,
       });
 
       // @ts-ignore next-line
       await client.fetchDashboards({ page: 1, perPage: 2 });
 
-      expect(dashboardClient.search).toHaveBeenCalledWith({ limit: 2, cursor: '1' });
+      expect(mockScanDashboards).toHaveBeenCalledWith(1, 2);
       expect(client.dashboardsById.size).toBe(2);
     });
 
     it('should fetch referenced panels when fetching dashboards', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_TYPE = 'lens';
+      const PANEL_TYPE = LENS_EMBEDDABLE_TYPE;
       const PANEL_UID = 'panelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [
-            {
-              id: 'dashboard1',
-              attributes: {
-                title: 'Dashboard 1',
-                panels: [{ config: {}, uid: PANEL_UID, type: PANEL_TYPE }],
-              },
-              references: [{ name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID }],
-            },
-          ],
-          pagination: { total: 1 },
-        },
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [
+          {
+            id: 'dashboard1',
+            title: 'Dashboard 1',
+            panels: [{ config: {}, id: PANEL_UID, type: PANEL_TYPE }],
+            references: [{ name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID }],
+          },
+        ],
+        total: 1,
       });
 
       soClientMock.bulkGet.mockResolvedValueOnce({
@@ -375,31 +347,26 @@ describe('RelatedDashboardsClient', () => {
 
     it('should not refetch a referenced panel if it was fetched before', async () => {
       const PANEL_SO_ID = 'panelSOId';
-      const PANEL_TYPE = 'lens';
+      const PANEL_TYPE = LENS_EMBEDDABLE_TYPE;
       const PANEL_UID = 'panelUid';
       const OTHER_PANEL_UID = 'otherPanelUid';
       const PANEL_SO_ATTRIBUTES = { title: 'Panel 1' };
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [
-            {
-              id: 'dashboard1',
-              attributes: {
-                title: 'Dashboard 1',
-                panels: [
-                  { config: {}, uid: PANEL_UID, type: PANEL_TYPE },
-                  { config: {}, uid: OTHER_PANEL_UID, type: PANEL_TYPE },
-                ],
-              },
-              references: [
-                { name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
-                { name: OTHER_PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
-              ],
-            },
-          ],
-          pagination: { total: 1 },
-        },
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [
+          {
+            id: 'dashboard1',
+            title: 'Dashboard 1',
+            panels: [
+              { config: {}, id: PANEL_UID, type: PANEL_TYPE },
+              { config: {}, id: OTHER_PANEL_UID, type: PANEL_TYPE },
+            ],
+            references: [
+              { name: PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
+              { name: OTHER_PANEL_UID, type: PANEL_TYPE, id: PANEL_SO_ID },
+            ],
+          },
+        ],
+        total: 1,
       });
 
       soClientMock.bulkGet.mockResolvedValueOnce({
@@ -422,23 +389,22 @@ describe('RelatedDashboardsClient', () => {
     it('should return dashboards matching the given index', () => {
       client.dashboardsById.set('dashboard1', {
         id: 'dashboard1',
-        attributes: {
-          title: 'Dashboard 1',
-          panels: [
-            {
-              type: 'lens',
-              config: {
-                attributes: {
-                  type: 'lens',
-                  references: [
-                    { name: 'indexpattern', id: 'index2' },
-                    { name: 'irrelevant', id: 'index1' },
-                  ],
-                },
+
+        title: 'Dashboard 1',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            config: {
+              attributes: {
+                type: LENS_EMBEDDABLE_TYPE,
+                references: [
+                  { name: 'indexpattern', id: 'index2' },
+                  { name: 'irrelevant', id: 'index1' },
+                ],
               },
             },
-          ],
-        },
+          },
+        ],
       } as any);
 
       // @ts-ignore next-line
@@ -457,17 +423,16 @@ describe('RelatedDashboardsClient', () => {
     it('should return an empty set when lens attributes are not available', () => {
       client.dashboardsById.set('dashboard1', {
         id: 'dashboard1',
-        attributes: {
-          title: 'Dashboard 1',
-          panels: [
-            {
-              type: 'lens',
-              config: {
-                attributes: null, // Lens attributes are not available
-              },
+
+        title: 'Dashboard 1',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            config: {
+              attributes: null, // Lens attributes are not available
             },
-          ],
-        },
+          },
+        ],
       } as any);
 
       // @ts-ignore next-line
@@ -482,16 +447,15 @@ describe('RelatedDashboardsClient', () => {
       // dashboard panel without attributes
       client.dashboardsById.set('dashboardWithMissingAttributes', {
         id: 'dashboardWithMissingAttributes',
-        attributes: {
-          title: 'Dashboard missing attributes',
-          panels: [
-            {
-              type: 'lens',
-              uid: PANEL_UID,
-              config: {},
-            },
-          ],
-        },
+
+        title: 'Dashboard missing attributes',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: PANEL_UID,
+            config: {},
+          },
+        ],
       } as any);
 
       // populate fallback map with references for the panelUid
@@ -514,17 +478,16 @@ describe('RelatedDashboardsClient', () => {
     it('should return an empty set when lens attributes are not available', () => {
       client.dashboardsById.set('dashboard1', {
         id: 'dashboard1',
-        attributes: {
-          title: 'Dashboard 1',
-          panels: [
-            {
-              type: 'lens',
-              config: {
-                attributes: null, // Lens attributes are not available
-              },
+
+        title: 'Dashboard 1',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            config: {
+              attributes: null, // Lens attributes are not available
             },
-          ],
-        },
+          },
+        ],
       } as any);
 
       // @ts-ignore next-line
@@ -538,16 +501,14 @@ describe('RelatedDashboardsClient', () => {
 
       client.dashboardsById.set('dashboardMissingState', {
         id: 'dashboardMissingState',
-        attributes: {
-          title: 'Dashboard missing state',
-          panels: [
-            {
-              type: 'lens',
-              uid: PANEL_UID,
-              config: {},
-            },
-          ],
-        },
+        title: 'Dashboard missing state',
+        panels: [
+          {
+            type: LENS_EMBEDDABLE_TYPE,
+            id: PANEL_UID,
+            config: {},
+          },
+        ],
       } as any);
 
       // @ts-ignore private field access for testing only
@@ -666,13 +627,18 @@ describe('RelatedDashboardsClient', () => {
           },
         });
 
-        dashboardClient.get = jest
-          .fn()
+        mockGetDashboard
           .mockResolvedValueOnce({
-            result: { item: { id: 'dashboard1', attributes: { title: 'Dashboard 1' } } },
+            id: 'dashboard1',
+            data: {
+              title: 'Dashboard 1',
+            },
           })
           .mockResolvedValueOnce({
-            result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
+            id: 'dashboard2',
+            data: {
+              title: 'Dashboard 2',
+            },
           });
 
         // @ts-ignore next-line
@@ -698,10 +664,12 @@ describe('RelatedDashboardsClient', () => {
           },
         });
 
-        dashboardClient.get = jest
-          .fn()
+        mockGetDashboard
           .mockResolvedValueOnce({
-            result: { item: { id: 'dashboard1', attributes: { title: 'Dashboard 1' } } },
+            id: 'dashboard1',
+            data: {
+              title: 'Dashboard 1',
+            },
           })
           .mockRejectedValueOnce(new Boom.Boom('Dashboard not found', { statusCode: 404 }));
 
@@ -719,13 +687,18 @@ describe('RelatedDashboardsClient', () => {
 
     describe('getLinkedDashboardsByIds', () => {
       it('should return linked dashboards by IDs', async () => {
-        dashboardClient.get = jest
-          .fn()
+        mockGetDashboard
           .mockResolvedValueOnce({
-            result: { item: { id: 'dashboard1', attributes: { title: 'Dashboard 1' } } },
+            id: 'dashboard1',
+            data: {
+              title: 'Dashboard 1',
+            },
           })
           .mockResolvedValueOnce({
-            result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
+            id: 'dashboard2',
+            data: {
+              title: 'Dashboard 2',
+            },
           });
         // @ts-ignore next-line
         const result = await client.getLinkedDashboardsByIds(['dashboard1', 'dashboard2']);
@@ -734,24 +707,23 @@ describe('RelatedDashboardsClient', () => {
           { id: 'dashboard1', title: 'Dashboard 1', matchedBy: { linked: true } },
           { id: 'dashboard2', title: 'Dashboard 2', matchedBy: { linked: true } },
         ]);
-        expect(dashboardClient.get).toHaveBeenCalledTimes(2);
-        expect(dashboardClient.get).toHaveBeenCalledWith('dashboard1');
-        expect(dashboardClient.get).toHaveBeenCalledWith('dashboard2');
+        expect(mockGetDashboard).toHaveBeenCalledTimes(2);
+        expect(mockGetDashboard).toHaveBeenCalledWith('dashboard1');
+        expect(mockGetDashboard).toHaveBeenCalledWith('dashboard2');
       });
 
       it('should handle empty IDs array gracefully', async () => {
-        dashboardClient.get = jest.fn();
         // @ts-ignore next-line
         const result = await client.getLinkedDashboardsByIds([]);
 
         expect(result).toEqual([]);
-        expect(dashboardClient.get).not.toHaveBeenCalled();
+        expect(mockGetDashboard).not.toHaveBeenCalled();
       });
 
       it('should handle errors when fetching dashboards', async () => {
-        dashboardClient.get = jest
-          .fn()
-          .mockRejectedValue(new Boom.Boom('Dashboard fetch failed', { statusCode: 500 }));
+        mockGetDashboard.mockRejectedValue(
+          new Boom.Boom('Dashboard fetch failed', { statusCode: 500 })
+        );
 
         // @ts-ignore next-line
         await expect(client.getLinkedDashboardsByIds(['dashboard1'])).rejects.toThrow(
@@ -777,63 +749,59 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      dashboardClient.get = jest.fn().mockResolvedValueOnce({
-        result: { item: { id: 'dashboard2', attributes: { title: 'Dashboard 2' } } },
+      mockGetDashboard.mockResolvedValueOnce({
+        id: 'dashboard2',
+        data: {
+          title: 'Dashboard 2',
+        },
       });
 
-      dashboardClient.search.mockResolvedValue({
-        contentTypeId: 'dashboard',
-        result: {
-          hits: [
-            {
-              id: 'dashboard1',
-              attributes: {
-                title: 'Dashboard 1',
-                panels: [
-                  {
-                    type: 'lens',
-                    uid: '123',
-                    config: {
-                      attributes: {
-                        references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
-                        state: {
-                          datasourceStates: {
-                            formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
-                          },
-                        },
-                        type: 'lens',
+      mockScanDashboards.mockResolvedValue({
+        dashboards: [
+          {
+            id: 'dashboard1',
+            title: 'Dashboard 1',
+            panels: [
+              {
+                type: LENS_EMBEDDABLE_TYPE,
+                uid: '123',
+                config: {
+                  attributes: {
+                    references: [{ name: 'indexpattern', id: 'index1' }], // matches by index which is handled by getDashboardsByIndex
+                    state: {
+                      datasourceStates: {
+                        formBased: { layers: [{ columns: [{ sourceField: 'field1' }] }] }, // matches by field which is handled by getDashboardsByField
                       },
                     },
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
-                ],
+                },
               },
-            },
-            {
-              id: 'dashboard2',
-              attributes: {
-                title: 'Dashboard 2',
-                panels: [
-                  {
-                    type: 'lens',
-                    uid: '123',
-                    config: {
-                      attributes: {
-                        references: [{ name: 'indexpattern', id: 'index1' }],
-                        state: {
-                          datasourceStates: {
-                            formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
-                          },
-                        },
-                        type: 'lens',
+            ],
+          },
+          {
+            id: 'dashboard2',
+            title: 'Dashboard 2',
+            panels: [
+              {
+                type: LENS_EMBEDDABLE_TYPE,
+                uid: '123',
+                config: {
+                  attributes: {
+                    references: [{ name: 'indexpattern', id: 'index1' }],
+                    state: {
+                      datasourceStates: {
+                        formBased: { layers: [{ columns: [{ sourceField: 'field2' }] }] },
                       },
                     },
+                    type: LENS_EMBEDDABLE_TYPE,
                   },
-                ],
+                },
               },
-            },
-          ],
-          pagination: { total: 1 },
-        },
+            ],
+          },
+        ],
+        total: 1,
       });
 
       const { suggestedDashboards, linkedDashboards } = await client.fetchRelatedDashboards();

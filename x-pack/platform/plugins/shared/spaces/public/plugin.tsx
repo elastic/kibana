@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { combineLatest, type Subscription } from 'rxjs';
+
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
@@ -16,7 +19,7 @@ import { EventTracker, registerAnalyticsContext, registerSpacesEventTypes } from
 import type { ConfigType } from './config';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { ManagementService } from './management';
-import { initSpacesNavControl, TourManager } from './nav_control';
+import { initSpacesNavControl } from './nav_control';
 import { spaceSelectorApp } from './space_selector';
 import { SpacesManager } from './spaces_manager';
 import type { SpacesApi } from './types';
@@ -32,6 +35,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -47,12 +51,13 @@ export type SpacesPluginStart = ReturnType<SpacesPlugin['start']>;
 export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart> {
   private spacesManager!: SpacesManager;
   private spacesApi!: SpacesApi;
-  private solutionViewTourManager!: TourManager;
   private eventTracker!: EventTracker;
 
   private managementService?: ManagementService;
   private config: ConfigType;
   private readonly isServerless: boolean;
+
+  private spaceAndExecutionContextSyncSubscription?: Subscription;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -67,10 +72,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     const hasOnlyDefaultSpace = this.config.maxSpaces === 1;
 
     this.spacesManager = new SpacesManager(core.http);
-    this.solutionViewTourManager = new TourManager(
-      () => core.getStartServices().then(([coreStart]) => coreStart),
-      this.spacesManager
-    );
     this.spacesApi = {
       ui: getUiApi({
         spacesManager: this.spacesManager,
@@ -80,7 +81,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       getActiveSpace: () => this.spacesManager.getActiveSpace(),
       hasOnlyDefaultSpace,
       isSolutionViewEnabled: this.config.allowSolutionVisibility,
-      solutionViewTourManager: this.solutionViewTourManager,
     };
 
     registerSpacesEventTypes(core);
@@ -163,6 +163,16 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       });
     }
 
+    // Ensures the space property in the execution context is always in sync with the active space.
+    this.spaceAndExecutionContextSyncSubscription = combineLatest([
+      this.spacesManager.onActiveSpaceChange$,
+      core.executionContext.context$,
+    ]).subscribe(([latestSpace, latestContext]) => {
+      if (latestContext.space !== latestSpace.id) {
+        core.executionContext.set({ space: latestSpace.id });
+      }
+    });
+
     registerAnalyticsContext(core.analytics, this.spacesManager.onActiveSpaceChange$);
 
     return { hasOnlyDefaultSpace, isSolutionViewEnabled: this.config.allowSolutionVisibility };
@@ -171,13 +181,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
   public start(core: CoreStart) {
     // Only skip spaces navigation if serverless and only one space is allowed
     if (!(this.isServerless && this.config.maxSpaces === 1)) {
-      initSpacesNavControl(
-        this.spacesManager,
-        core,
-        this.config,
-        this.eventTracker,
-        this.solutionViewTourManager
-      );
+      initSpacesNavControl(this.spacesManager, core, this.config, this.eventTracker);
     }
 
     return this.spacesApi;
@@ -188,5 +192,6 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService.stop();
       this.managementService = undefined;
     }
+    this.spaceAndExecutionContextSyncSubscription?.unsubscribe();
   }
 }

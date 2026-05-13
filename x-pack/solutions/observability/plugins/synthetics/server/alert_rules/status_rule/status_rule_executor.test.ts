@@ -24,6 +24,11 @@ import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
+// Mock the step information functions
+jest.mock('./queries/get_step_information', () => ({
+  getStepInformation: jest.fn().mockResolvedValue(null),
+}));
+
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
   Date.now = jest.fn(() => new Date('2024-05-13T12:33:37.000Z'));
@@ -87,6 +92,11 @@ describe('StatusRuleExecutor', () => {
     },
   } as any);
   const configRepo = statusRule.monitorConfigRepository;
+
+  afterEach(() => {
+    statusRule.params = {};
+    jest.clearAllMocks();
+  });
 
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
@@ -319,13 +329,12 @@ describe('StatusRuleExecutor', () => {
   });
 
   describe('handleDownMonitorThresholdAlert', () => {
-    afterEach(() => {
+    beforeEach(() => {
       jest.clearAllMocks();
     });
-
     it('should alert if monitor meet location threshold', async () => {
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -353,7 +362,9 @@ describe('StatusRuleExecutor', () => {
           configId: 'id1',
           downThreshold: 1,
           hostName: undefined,
+          labels: undefined,
           lastErrorMessage: undefined,
+          lastErrorStack: undefined,
           locationId: 'us_central_qa',
           locationName: 'Test location',
           locationNames: 'Test location',
@@ -365,8 +376,10 @@ describe('StatusRuleExecutor', () => {
           monitorUrlLabel: 'URL',
           reason:
             'Monitor "test monitor" from Test location is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
+          serviceName: undefined,
           stateId: undefined,
           status: 'down',
+          failedStepInfo: '',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
         statusConfig: {
@@ -394,7 +407,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -424,7 +437,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -467,7 +480,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -508,7 +521,9 @@ describe('StatusRuleExecutor', () => {
           configId: 'id1',
           downThreshold: 1,
           hostName: undefined,
+          labels: undefined,
           lastErrorMessage: undefined,
+          lastErrorStack: undefined,
           locationId: 'test and test',
           locationName: 'Test location',
           locationNames: 'Test location and Test location',
@@ -520,19 +535,252 @@ describe('StatusRuleExecutor', () => {
           monitorUrlLabel: 'URL',
           reason:
             'Monitor "test monitor" is down 1 time from Test location and 1 time from Test location. Alert when down 1 time out of the last 1 checks from at least 1 location.',
+          serviceName: undefined,
           status: 'down',
+          failedStepInfo: '',
           timestamp: '2024-05-13T12:33:37.000Z',
         },
-        statusConfig: {
-          checks: { down: 1, downWithinXChecks: 1 },
-          configId: 'id1',
-          locationId: 'us_central_qa',
-          monitorQueryId: 'test',
-          latestPing: testPing,
-          status: 'down',
-          timestamp: '2021-06-01T00:00:00.000Z',
+        configId: 'id1',
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            latestPing: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+          'id1-us_central_dev': {
+            locationId: 'us_central_dev',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            latestPing: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
         },
         useLatestChecks: true,
+      });
+    });
+
+    describe('filtering configs with missing latestPing.monitor', () => {
+      it('should skip configs where latestPing is undefined', async () => {
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it('should skip configs where latestPing.monitor is undefined', async () => {
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: { '@timestamp': '2024-05-13T12:33:37.000Z' } as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it('should log a debug message for each skipped config', async () => {
+        const debugSpy = jest.spyOn(statusRule, 'debug');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id2-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id2',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test2',
+              latestPing: { '@timestamp': '2024-05-13T12:33:37.000Z' } as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(debugSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping down config id1-us_central_qa')
+        );
+        expect(debugSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping down config id2-us_central_dev')
+        );
+      });
+
+      it('should only alert for valid configs when mixed with invalid ones (grouped by location)', async () => {
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: testPing,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id2-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id2',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test2',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alertId: 'id1-us_central_qa',
+          })
+        );
+      });
+
+      it('should only alert for valid configs when mixed with invalid ones (ungrouped)', async () => {
+        statusRule.params = {
+          condition: {
+            groupBy: 'none',
+            window: {
+              numberOfChecks: 1,
+            },
+            downThreshold: 1,
+            locationsThreshold: 1,
+          },
+        };
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: testPing,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id1-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alertId: 'id1',
+            locationNames: ['Test location'],
+            locationIds: ['test'],
+          })
+        );
+      });
+
+      it('should not alert when all configs have missing latestPing (ungrouped)', async () => {
+        statusRule.params = {
+          condition: {
+            groupBy: 'none',
+            window: {
+              numberOfChecks: 1,
+            },
+            downThreshold: 1,
+            locationsThreshold: 1,
+          },
+        };
+        const spy = jest.spyOn(statusRule, 'scheduleAlert');
+        await statusRule.handleDownMonitorThresholdAlert({
+          downConfigs: {
+            'id1-us_central_qa': {
+              locationId: 'us_central_qa',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: undefined as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+            'id1-us_central_dev': {
+              locationId: 'us_central_dev',
+              configId: 'id1',
+              status: 'down',
+              timestamp: '2021-06-01T00:00:00.000Z',
+              monitorQueryId: 'test',
+              latestPing: { '@timestamp': '2024-05-13T12:33:37.000Z' } as any,
+              checks: {
+                downWithinXChecks: 1,
+                down: 1,
+              },
+            },
+          },
+        });
+        expect(spy).not.toHaveBeenCalled();
       });
     });
 
@@ -548,7 +796,7 @@ describe('StatusRuleExecutor', () => {
         },
       };
       const spy = jest.spyOn(statusRule, 'scheduleAlert');
-      statusRule.handleDownMonitorThresholdAlert({
+      await statusRule.handleDownMonitorThresholdAlert({
         downConfigs: {
           'id1-us_central_qa': {
             locationId: 'us_central_qa',
@@ -735,11 +983,7 @@ describe('StatusRuleExecutor', () => {
       );
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should call schedulePendingAlertPerConfigId when alertOnNoData is true and groupBy is not locationId', () => {
+    it('should call schedulePendingAlertPerConfigId when alertOnNoData is true and groupBy is not locationId', async () => {
       // Set up params with alertOnNoData=true and groupBy='monitor'
       statusRule.params = {
         condition: {
@@ -749,7 +993,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify schedulePendingAlertPerConfigId was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdSpy).toHaveBeenCalledTimes(1);
@@ -761,7 +1005,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
     });
 
-    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is locationId', () => {
+    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is locationId', async () => {
       // Set up params with alertOnNoData=true and groupBy='locationId'
       statusRule.params = {
         condition: {
@@ -771,7 +1015,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify schedulePendingAlertPerConfigIdPerLocation was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
@@ -783,7 +1027,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
     });
 
-    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is undefined', () => {
+    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is undefined', async () => {
       // Set up params with alertOnNoData=true and groupBy undefined
       statusRule.params = {
         condition: {
@@ -792,7 +1036,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify schedulePendingAlertPerConfigIdPerLocation was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
@@ -804,7 +1048,7 @@ describe('StatusRuleExecutor', () => {
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
     });
 
-    it('should not call any scheduling methods when alertOnNoData is false', () => {
+    it('should not call any scheduling methods when alertOnNoData is false', async () => {
       // Set up params with alertOnNoData=false
       statusRule.params = {
         condition: {
@@ -814,7 +1058,7 @@ describe('StatusRuleExecutor', () => {
       };
 
       // Call the method
-      statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
       // Verify neither method was called
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
@@ -841,9 +1085,9 @@ describe('StatusRuleExecutor', () => {
         jest.clearAllMocks();
       });
 
-      it('should call scheduleAlert for each pending config with correct parameters', () => {
+      it('should call scheduleAlert for each pending config with correct parameters', async () => {
         // Call the method
-        statusRule.schedulePendingAlertPerConfigIdPerLocation({
+        await statusRule.schedulePendingAlertPerConfigIdPerLocation({
           pendingConfigs: mockPendingConfigs,
         });
 
@@ -870,6 +1114,16 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_FIRST_MONITOR.name}" from ${MOCK_FIRST_LOCATION.name} is pending.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            failedStepInfo: '',
+            timestamp: undefined,
           },
         });
         expect(scheduleAlertSpy).toHaveBeenNthCalledWith(2, {
@@ -892,13 +1146,23 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_SECOND_MONITOR.name}" from ${MOCK_SECOND_LOCATION.name} is pending.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            failedStepInfo: '',
+            timestamp: undefined,
           },
         });
       });
 
-      it('should do nothing if pendingConfigs is empty', () => {
+      it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
-        statusRule.schedulePendingAlertPerConfigIdPerLocation({ pendingConfigs: {} });
+        await statusRule.schedulePendingAlertPerConfigIdPerLocation({ pendingConfigs: {} });
 
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();
@@ -925,9 +1189,9 @@ describe('StatusRuleExecutor', () => {
         jest.clearAllMocks();
       });
 
-      it('should group configs by configId and call scheduleAlert with combined location information', () => {
+      it('should group configs by configId and call scheduleAlert with combined location information', async () => {
         // Call the method
-        statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: mockPendingConfigs });
+        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: mockPendingConfigs });
 
         // Verify scheduleAlert was called twice (once for each unique configId)
         expect(scheduleAlertSpy).toHaveBeenCalledTimes(2);
@@ -952,6 +1216,16 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_FIRST_MONITOR.name}" is pending 1 time from ${MOCK_FIRST_LOCATION.name}.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            failedStepInfo: '',
+            timestamp: undefined,
           },
         });
         expect(scheduleAlertSpy).toHaveBeenNthCalledWith(2, {
@@ -974,13 +1248,23 @@ describe('StatusRuleExecutor', () => {
             monitorUrlLabel: 'URL',
             reason: `Monitor "${MOCK_SECOND_MONITOR.name}" is pending 1 time from ${MOCK_SECOND_LOCATION.name}.`,
             status: 'pending',
+            checkedAt: undefined,
+            checks: undefined,
+            hostName: undefined,
+            labels: undefined,
+            lastErrorMessage: undefined,
+            lastErrorStack: undefined,
+            serviceName: undefined,
+            stateId: undefined,
+            failedStepInfo: '',
+            timestamp: undefined,
           },
         });
       });
 
-      it('should do nothing if pendingConfigs is empty', () => {
+      it('should do nothing if pendingConfigs is empty', async () => {
         // Call the method with empty pendingConfigs
-        statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {} });
+        await statusRule.schedulePendingAlertPerConfigId({ pendingConfigs: {} });
 
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();
@@ -1008,7 +1292,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('adds grouping to both context and alert document when only one location', async () => {
-      statusRule.scheduleAlert({
+      await statusRule.scheduleAlert({
         idWithLocation: 'config1-loc1',
         alertId: 'alert-1',
         monitorSummary: {

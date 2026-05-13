@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 export type SettingsSection = 'AGENT_POLICY_ADVANCED_SETTINGS';
 
@@ -34,4 +34,7 @@ export interface SettingsConfig {
     text: string;
   }>;
   example_value?: string | number | boolean;
+  type?: 'yaml';
+  /** Custom label for boolean checkbox (default: "Enable") */
+  checkboxLabel?: string;
 }

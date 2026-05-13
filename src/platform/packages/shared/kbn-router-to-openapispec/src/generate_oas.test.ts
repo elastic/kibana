@@ -172,6 +172,56 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
+    it('propagates field availability metadata to the generated OpenAPI document', async () => {
+      const oas = await generateOpenApiDocument(
+        {
+          routers: [
+            createRouter({
+              routes: [
+                {
+                  isVersioned: false,
+                  path: '/availability',
+                  method: 'post',
+                  validationSchemas: {
+                    request: {
+                      body: schema.object({
+                        foo: schema.string({
+                          meta: { availability: { stability: 'stable', since: '9.4.0' } },
+                        }),
+                      }),
+                    },
+                  },
+                  options: { tags: ['foo'], access: 'public' },
+                  handler: jest.fn(),
+                },
+              ],
+            }),
+          ],
+          versionedRouters: [],
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(
+        get(oas, [
+          'paths',
+          '/availability',
+          'post',
+          'requestBody',
+          'content',
+          'application/json',
+          'schema',
+          'properties',
+          'foo',
+          'x-state',
+        ])
+      ).toBe('Generally available; added in 9.4.0');
+    });
+
     it('handles recursive schemas', async () => {
       const id = 'recursive';
       const recursiveSchema: Type<RecursiveType> = schema.object(
@@ -208,6 +258,76 @@ describe('generateOpenApiDocument', () => {
               }),
             ],
             versionedRouters: [],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('handles discriminator schemas', async () => {
+      const discriminatorSchema = schema.discriminatedUnion('type', [
+        schema.object(
+          { type: schema.literal('a'), value: schema.string() },
+          { meta: { id: 'my-a-my-team' } }
+        ),
+        schema.object(
+          { type: schema.literal('b'), value: schema.number() },
+          { meta: { id: 'my-b-my-team' } }
+        ),
+        schema.object(
+          { type: schema.string(), value: schema.boolean() },
+          { meta: { id: 'my-catch-all-my-team' } }
+        ),
+      ]);
+
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [
+              {
+                method: 'get',
+                path: '/foo/{id}',
+                options: { access: 'public' },
+                validationSchemas: {
+                  request: {
+                    body: discriminatorSchema,
+                  },
+                },
+                handler: jest.fn(),
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              {
+                method: 'get',
+                path: '/foo/{id}',
+                options: { access: 'public', security: { authz: { requiredPrivileges: ['foo'] } } },
+                handlers: [
+                  {
+                    fn: jest.fn(),
+                    options: {
+                      version: '99.99.99',
+                      validate: { request: { body: discriminatorSchema } },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+      expect(
+        await generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
           },
           {
             title: 'test',

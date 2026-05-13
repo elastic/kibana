@@ -25,6 +25,7 @@ import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
@@ -54,6 +55,7 @@ export interface AppDependencies {
     isFleetEnabled: boolean;
     share: SharePluginStart;
     cloud?: CloudSetup;
+    cloudConnect?: CloudConnectedPluginStart;
     console?: ConsolePluginStart;
     licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
@@ -78,6 +80,8 @@ export interface AppDependencies {
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
+    enableFailureStoreRetentionDisabling: boolean;
+    isServerless: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;

@@ -13,6 +13,7 @@ import type {
   CountIndexPatternColumn,
   CounterRateIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
+  DataType,
   DerivativeIndexPatternColumn,
   FormulaIndexPatternColumn,
   LastValueIndexPatternColumn,
@@ -26,11 +27,10 @@ import type {
   StaticValueIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
-import { v4 as uuid } from 'uuid';
 
 import { fromCountAPItoLensState, fromCountLensStateToAPI } from './count';
 import type {
-  LensApiAllMetricOperations,
+  LensApiAllMetricOrFormulaOperations,
   LensApiCountMetricOperation,
   LensApiCounterRateOperation,
   LensApiCumulativeSumOperation,
@@ -68,7 +68,6 @@ import { fromMovingAverageAPItoLensState, fromMovingAverageLensStateToAPI } from
 import type {
   AnyLensStateColumn,
   AnyMetricLensStateColumn,
-  ReferableMetricLensStateColumn,
   ReferenceMetricLensStateColumn,
 } from './types';
 import {
@@ -84,7 +83,8 @@ import {
  * Specialized function signatures for transforming metric API operations to Lens state columns
  */
 export function fromMetricAPItoLensState(
-  options: LensApiAllMetricOperations
+  options: LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation,
+  dataType?: DataType
 ): AnyMetricLensStateColumn[] {
   if (isAPIColumnOfType<LensApiCountMetricOperation>('count', options)) {
     return [fromCountAPItoLensState(options)];
@@ -111,7 +111,7 @@ export function fromMetricAPItoLensState(
     return [fromFormulaAPItoLensState(options)];
   }
   if (isAPIColumnOfType<LensApiLastValueOperation>('last_value', options)) {
-    return [fromLastValueAPItoLensState(options)];
+    return [fromLastValueAPItoLensState(options, dataType)];
   }
   if (isAPIColumnOfType<LensApiPercentileOperation>('percentile', options)) {
     return [fromPercentileAPItoLensState(options)];
@@ -121,15 +121,8 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiMovingAverageOperation>('moving_average', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
-      return [
-        fromMovingAverageAPItoLensState(options, {
-          id: uuid(),
-          field: options.of.field,
-          label: options.of.label,
-        }),
-        refColumn,
-      ];
+      const [refColumn] = fromMetricAPItoLensState(options.of);
+      return [fromMovingAverageAPItoLensState(options), refColumn];
     }
   }
   if (isAPIColumnOfType<LensApiCounterRateOperation>('counter_rate', options)) {
@@ -137,10 +130,7 @@ export function fromMetricAPItoLensState(
     if (!refColumn || !('sourceField' in refColumn)) {
       return [];
     }
-    return [
-      fromCounterRateAPItoLensState(options, { id: uuid(), field: refColumn.sourceField }),
-      refColumn,
-    ];
+    return [fromCounterRateAPItoLensState(options), refColumn];
   }
   if (isAPIColumnOfType<LensApiCumulativeSumOperation>('cumulative_sum', options)) {
     const [refColumn] = fromMetricAPItoLensState({
@@ -151,25 +141,15 @@ export function fromMetricAPItoLensState(
     if (!refColumn || !('sourceField' in refColumn)) {
       return [];
     }
-    return [
-      fromCumulativeSumAPItoLensState(options, {
-        id: uuid(),
-        field: refColumn.sourceField,
-      }),
-      refColumn,
-    ];
+    return [fromCumulativeSumAPItoLensState(options), refColumn];
   }
   if (isAPIColumnOfType<LensApiDifferencesOperation>('differences', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
-      return [
-        fromDifferencesAPItoLensState(options, {
-          id: uuid(),
-          field: refColumn.sourceField,
-          label: refColumn.label,
-        }),
-        refColumn,
-      ];
+      const [refColumn] = fromMetricAPItoLensState(options.of);
+      if (!refColumn || !isColumnOfReferableType(refColumn)) {
+        return [];
+      }
+      return [fromDifferencesAPItoLensState(options), refColumn];
     }
   }
   throw new Error(`Unsupported metric operation: ${options.operation}`);
@@ -202,7 +182,7 @@ export function getMetricReferableApiColumnFromLensState(
 export function getMetricApiColumnFromLensState(
   options: AnyMetricLensStateColumn,
   columns: Record<string, AnyLensStateColumn>
-): LensApiAllMetricOperations {
+): LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation {
   if (isLensStateColumnOfType<CountIndexPatternColumn>('count', options)) {
     return fromCountLensStateToAPI(options);
   }

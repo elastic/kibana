@@ -9,7 +9,8 @@ import { sum } from 'lodash';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import type { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { SupertestReturnType } from '../../../services/apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
@@ -135,7 +136,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               metric: 'throughput',
             });
 
-            expect(avg(response.body.currentTimeseries)).to.eql(REDIS_SET_RATE);
+            expect(avg(response.body.currentTimeseries)).to.eql(
+              REDIS_SET_RATE * SPANS_PER_DESTINATION_METRIC
+            );
           });
 
           it('returns the correct failure rate', async () => {
@@ -187,7 +190,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const searchRate = ES_SEARCH_UNKNOWN_RATE;
             const bulkRate = ES_BULK_RATE;
 
-            expect(avg(response.body.currentTimeseries)).to.eql(roundNumber(searchRate + bulkRate));
+            expect(avg(response.body.currentTimeseries)).to.eql(
+              roundNumber((searchRate + bulkRate) * SPANS_PER_DESTINATION_METRIC)
+            );
           });
 
           it('returns the correct failure rate', async () => {
@@ -238,7 +243,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_UNKNOWN_RATE;
             const bulkRate = 0;
 
-            expect(avg(response.body.currentTimeseries)).to.eql(roundNumber(searchRate + bulkRate));
+            expect(avg(response.body.currentTimeseries)).to.eql(
+              roundNumber((searchRate + bulkRate) * SPANS_PER_DESTINATION_METRIC)
+            );
           });
 
           it('returns the correct failure rate', async () => {

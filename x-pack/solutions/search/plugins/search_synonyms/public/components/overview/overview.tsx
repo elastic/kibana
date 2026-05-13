@@ -54,7 +54,6 @@ export const SearchSynonymsOverview = () => {
         <KibanaPageTemplate.Header
           pageTitle={PLUGIN_TITLE}
           restrictWidth
-          color="primary"
           rightSideItems={[
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
@@ -74,7 +73,7 @@ export const SearchSynonymsOverview = () => {
                 <EuiButton
                   data-test-subj="searchSynonymsSearchSynonymsOverviewCreateButton"
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => {
                     setIsCreateModalVisible(true);
                   }}

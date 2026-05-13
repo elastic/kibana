@@ -33,6 +33,7 @@ import {
   INDEX_STATS_EVENT,
   INDEX_TEMPLATES_EVENT,
 } from '../ebt/events';
+import { createMockTelemetryConfigProvider } from '../__mocks__';
 
 jest.mock('./receiver');
 jest.mock('./sender');
@@ -48,7 +49,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   let receiver: jest.Mocked<MetadataReceiver>;
   let sender: jest.Mocked<MetadataSender>;
   let subscription: jest.Mocked<Subscription>;
-
+  const telemetryConfigProvider = createMockTelemetryConfigProvider();
   const mockConfiguration: IndicesMetadataConfiguration = {
     indices_threshold: 100,
     datastreams_threshold: 50,
@@ -71,6 +72,10 @@ describe('Indices Metadata - IndicesMetadataService', () => {
   const mockDataStreams: DataStream[] = [
     {
       datastream_name: 'test-datastream',
+      dsl: {
+        enabled: true,
+        data_retention: '30d',
+      },
       indices: [{ index_name: 'test-index-1', ilm_policy: 'policy1' }],
     },
   ];
@@ -197,9 +202,9 @@ describe('Indices Metadata - IndicesMetadataService', () => {
     });
 
     it('should initialize receiver and sender', () => {
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
-      expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient);
+      expect(MetadataReceiver).toHaveBeenCalledWith(expect.any(Object), esClient, false);
       expect(MetadataSender).toHaveBeenCalledWith(expect.any(Object), analytics);
     });
 
@@ -209,14 +214,14 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: mockSubscribe,
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       expect(configurationService.getIndicesMetadataConfiguration$).toHaveBeenCalled();
       expect(mockSubscribe).toHaveBeenCalledWith(expect.any(Function));
     });
 
     it('should schedule indices metadata task', async () => {
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -235,7 +240,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       const error = new Error('Failed to schedule task');
       taskManagerStart.ensureScheduled.mockRejectedValue(error);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       await new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -250,7 +255,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: mockSubscribe,
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       const configurationCallback = mockSubscribe.mock.calls[0][0];
       configurationCallback(mockConfiguration);
@@ -267,7 +272,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         subscribe: jest.fn().mockReturnValue(subscription),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
       service.stop();
 
       expect(subscription.unsubscribe).toHaveBeenCalled();
@@ -288,7 +293,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
 
       receiver.getIndices.mockResolvedValue(mockIndexSettings);
       receiver.getDataStreams.mockResolvedValue(mockDataStreams);
@@ -365,6 +370,60 @@ describe('Indices Metadata - IndicesMetadataService', () => {
       expect(receiver.getIlmsStats).toHaveBeenCalledWith(['test-index-1']);
     });
 
+    it('should publish datastreams with DSL through full metadata flow', async () => {
+      const datastreamsWithDsl: DataStream[] = [
+        {
+          datastream_name: 'logs-test',
+          dsl: {
+            enabled: true,
+            data_retention: '90d',
+          },
+          indices: [
+            {
+              index_name: '.ds-logs-test-000001',
+              ilm_policy: 'logs-policy',
+            },
+          ],
+        },
+      ];
+
+      receiver.getIndices.mockResolvedValue(mockIndexSettings);
+      receiver.getDataStreams.mockResolvedValue(datastreamsWithDsl);
+      receiver.getIndexTemplatesStats.mockResolvedValue(mockIndexTemplates);
+      receiver.getIndicesStats.mockImplementation(async function* () {
+        yield* mockIndexStats;
+      });
+      receiver.isIlmStatsAvailable.mockResolvedValue(true);
+      receiver.getIlmsStats.mockImplementation(async function* () {
+        yield {
+          index_name: '.ds-logs-test-000001',
+          phase: 'hot',
+          age: '1d',
+          policy_name: 'logs-policy',
+        };
+      });
+      receiver.getIlmsPolicies.mockImplementation(async function* () {
+        yield { policy_name: 'logs-policy', modified_date: '2023-01-01', phases: {} };
+      });
+
+      await service['publishIndicesMetadata'](); // eslint-disable-line dot-notation
+
+      expect(sender.reportEBT).toHaveBeenCalledWith(
+        expect.objectContaining({ eventType: DATA_STREAM_EVENT.eventType }),
+        {
+          items: expect.arrayContaining([
+            expect.objectContaining({
+              datastream_name: 'logs-test',
+              dsl: {
+                enabled: true,
+                data_retention: '90d',
+              },
+            }),
+          ]),
+        }
+      );
+    });
+
     it('should throw error when not initialized', async () => {
       const uninitializedService = new IndicesMetadataService(logger, configurationService);
 
@@ -396,16 +455,27 @@ describe('Indices Metadata - IndicesMetadataService', () => {
           return subscription;
         }),
       } as any);
-
-      service.start(taskManagerStart, analytics, esClient);
     });
 
     it('should run publishIndicesMetadata and return state', async () => {
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
       jest.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
 
       const result = await taskRunner.run();
 
       expect(service['publishIndicesMetadata']).toHaveBeenCalled(); // eslint-disable-line dot-notation
+      expect(result).toEqual({ state: taskInstance.state });
+    });
+
+    it('should skip publishIndicesMetadata when telemetry is opted out', async () => {
+      const optedOutProvider = createMockTelemetryConfigProvider(false);
+      service.start(taskManagerStart, analytics, esClient, false, optedOutProvider);
+      jest.spyOn(service as any, 'publishIndicesMetadata').mockResolvedValue(undefined);
+
+      const result = await taskRunner.run();
+
+      expect(service['publishIndicesMetadata']).not.toHaveBeenCalled(); // eslint-disable-line dot-notation
+      expect(logger.debug).toHaveBeenCalledWith('Telemetry opted out, skipping task run');
       expect(result).toEqual({ state: taskInstance.state });
     });
 
@@ -427,7 +497,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
     });
 
     describe('publishDatastreamsStats', () => {
@@ -440,6 +510,116 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         );
         expect(result).toBe(1);
         expect(logger.debug).toHaveBeenCalledWith('Data streams events sent', { count: 1 });
+      });
+
+      it('should publish datastreams with DSL enabled and retention', () => {
+        const datastreamsWithDsl: DataStream[] = [
+          {
+            datastream_name: 'logs-app-prod',
+            dsl: {
+              enabled: true,
+              data_retention: '7d',
+            },
+            indices: [{ index_name: '.ds-logs-app-prod-000001' }],
+          },
+          {
+            datastream_name: 'metrics-system',
+            dsl: {
+              enabled: false,
+              data_retention: undefined,
+            },
+            indices: [{ index_name: '.ds-metrics-system-000001' }],
+          },
+        ];
+
+        const result = service['publishDatastreamsStats'](datastreamsWithDsl); // eslint-disable-line dot-notation
+
+        expect(sender.reportEBT).toHaveBeenCalledWith(
+          expect.objectContaining({ eventType: DATA_STREAM_EVENT.eventType }),
+          {
+            items: [
+              expect.objectContaining({
+                datastream_name: 'logs-app-prod',
+                dsl: {
+                  enabled: true,
+                  data_retention: '7d',
+                },
+              }),
+              expect.objectContaining({
+                datastream_name: 'metrics-system',
+                dsl: {
+                  enabled: false,
+                  data_retention: undefined,
+                },
+              }),
+            ],
+          }
+        );
+        expect(result).toBe(2);
+      });
+
+      it('should handle datastreams without DSL field', () => {
+        const datastreamsWithoutDsl: DataStream[] = [
+          {
+            datastream_name: 'legacy-datastream',
+            indices: [{ index_name: '.ds-legacy-000001' }],
+          },
+        ];
+
+        const result = service['publishDatastreamsStats'](datastreamsWithoutDsl); // eslint-disable-line dot-notation
+
+        expect(sender.reportEBT).toHaveBeenCalledWith(
+          expect.objectContaining({ eventType: DATA_STREAM_EVENT.eventType }),
+          {
+            items: [
+              {
+                datastream_name: 'legacy-datastream',
+                indices: [{ index_name: '.ds-legacy-000001' }],
+              },
+            ],
+          }
+        );
+        expect(result).toBe(1);
+      });
+
+      it('should publish mixed DSL configurations', () => {
+        const mixedDatastreams: DataStream[] = [
+          {
+            datastream_name: 'with-retention',
+            dsl: { enabled: true, data_retention: '365d' },
+            indices: [],
+          },
+          {
+            datastream_name: 'enabled-no-retention',
+            dsl: { enabled: true, data_retention: undefined },
+            indices: [],
+          },
+          {
+            datastream_name: 'disabled',
+            dsl: { enabled: false, data_retention: undefined },
+            indices: [],
+          },
+        ];
+
+        const result = service['publishDatastreamsStats'](mixedDatastreams); // eslint-disable-line dot-notation
+
+        expect(sender.reportEBT).toHaveBeenCalledWith(
+          expect.objectContaining({ eventType: DATA_STREAM_EVENT.eventType }),
+          {
+            items: expect.arrayContaining([
+              expect.objectContaining({
+                dsl: { enabled: true, data_retention: '365d' },
+              }),
+              expect.objectContaining({
+                dsl: { enabled: true, data_retention: undefined },
+              }),
+              expect.objectContaining({
+                dsl: { enabled: false, data_retention: undefined },
+              }),
+            ]),
+          }
+        );
+        expect(result).toBe(3);
       });
     });
 
@@ -577,7 +757,7 @@ describe('Indices Metadata - IndicesMetadataService', () => {
         }),
       } as any);
 
-      service.start(taskManagerStart, analytics, esClient);
+      service.start(taskManagerStart, analytics, esClient, false, telemetryConfigProvider);
     });
 
     it('should handle receiver errors during publishIndicesMetadata', async () => {

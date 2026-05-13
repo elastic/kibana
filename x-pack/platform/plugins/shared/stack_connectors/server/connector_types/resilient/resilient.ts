@@ -6,10 +6,10 @@
  */
 
 import type { AxiosError } from 'axios';
-import { omitBy, isNil } from 'lodash/fp';
+import { omitBy, isNil, isObject } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type {
@@ -75,6 +75,9 @@ export class ResilientConnector extends CaseConnector<
     }
     if (error.response.status === 401) {
       return i18n.UNAUTHORIZED_API_ERROR;
+    }
+    if (isObject(error.response?.data) && 'message' in error.response.data) {
+      return `API Error: ${error.response.data.message}`;
     }
     return `API Error: ${error.response?.statusText}`;
   }

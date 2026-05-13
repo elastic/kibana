@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-ast';
-import type { ESQLAstCommand, ESQLAstItem } from '@kbn/esql-ast';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand, ESQLAstItem } from '@elastic/esql/types';
 import type { Condition } from '../../../../types/conditions';
 import type { DissectGrokPatternField } from '../../../../types/formats';
 
@@ -78,24 +78,43 @@ export function combineOr(predicates: ESQLAstItem[]): ESQLAstItem | null {
  * - ES|QL can only simulate the missing field case with WHERE filtering
  * - Pattern mismatch failures cannot be (in a reasonable fashion) simulated in ES|QL (they nullify target fields instead)
  *
- * @param sourceField - The source field name to check for NULL/missing values
  * @param ignoreMissing - If false, returns WHERE command to filter missing fields
+ * @param sourceFields - The source field names to check for NULL/missing values
  * @returns WHERE command if filtering needed, undefined otherwise
+ *
+ * @example
+ * // Single field
+ * buildIgnoreMissingFilter(false, 'message')
+ * // → WHERE NOT(`message` IS NULL)
+ *
+ * @example
+ * // Multiple fields (e.g., network_direction)
+ * buildIgnoreMissingFilter(false, 'source.ip', 'destination.ip')
+ * // → WHERE NOT(`source.ip` IS NULL) AND NOT(`destination.ip` IS NULL)
  */
 export function buildIgnoreMissingFilter(
-  sourceField: string,
-  ignoreMissing: boolean
+  ignoreMissing: boolean,
+  ...sourceFields: string[]
 ): ESQLAstCommand | undefined {
-  if (ignoreMissing) {
+  if (ignoreMissing || sourceFields.length === 0) {
     return undefined; // No filtering needed when ignore_missing = true
   }
 
-  const fromColumn = Builder.expression.column(sourceField);
+  const notNullPredicates = sourceFields.map((field) =>
+    Builder.expression.func.call('NOT', [
+      Builder.expression.func.postfix('IS NULL', Builder.expression.column(field)),
+    ])
+  );
+
+  const combinedPredicate = combineAnd(notNullPredicates);
+
+  if (!combinedPredicate) {
+    return undefined;
+  }
+
   return Builder.command({
     name: 'where',
-    args: [
-      Builder.expression.func.call('NOT', [Builder.expression.func.postfix('IS NULL', fromColumn)]),
-    ],
+    args: [combinedPredicate],
   });
 }
 

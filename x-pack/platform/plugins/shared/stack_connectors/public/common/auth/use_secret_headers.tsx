@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { useQuery } from '@kbn/react-query';
+import { useQuery, type UseQueryOptions } from '@kbn/react-query';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
@@ -13,7 +13,11 @@ import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../common';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useSecretHeaders(connectorId?: string) {
+export function useSecretHeaders(
+  connectorId?: string,
+  isEdit: boolean = false,
+  queryOptions?: UseQueryOptions<string[], ServerError>
+) {
   const {
     http,
     notifications: { toasts },
@@ -27,7 +31,7 @@ export function useSecretHeaders(connectorId?: string) {
       );
     },
     {
-      enabled: Boolean(connectorId),
+      enabled: isEdit && Boolean(connectorId),
       initialData: [],
       refetchOnMount: 'always',
       onError: (error: ServerError) => {
@@ -37,6 +41,7 @@ export function useSecretHeaders(connectorId?: string) {
           }),
         });
       },
+      ...queryOptions,
     }
   );
 }

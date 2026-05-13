@@ -17,7 +17,7 @@ export interface LangModuleType {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
-  onLanguage?: () => void;
+  onLanguage?: () => void | Promise<void>;
   languageThemeResolver?: (args: UseEuiTheme) => monaco.editor.IStandaloneThemeData;
 }
 
@@ -32,12 +32,15 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
   validate: (
     model: monaco.editor.ITextModel,
     code: string,
-    callbacks?: Deps
+    callbacks?: Deps,
+    options?: { invalidateColumnsCache?: boolean }
   ) => Promise<{ errors: MarkerDataType[]; warnings: MarkerDataType[] }>;
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+  getInlineCompletionsProvider?: (callbacks?: Deps) => monaco.languages.InlineCompletionsProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
+  getDocumentHighlightProvider?: (callbacks?: Deps) => monaco.languages.DocumentHighlightProvider;
 }
 
 export interface CustomLangModuleType<Deps = unknown, MarkerDataType = monaco.editor.IMarkerData>

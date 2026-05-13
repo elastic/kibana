@@ -28,11 +28,19 @@ export function flattenKeyPaths(
 
   function flatten(val: JsonValue, key: string = ''): void {
     if (Array.isArray(val)) {
-      val.forEach((item, index) => flatten(item, appendKeyPath(key, `[${index}]`)));
+      if (val.length > 0) {
+        val.forEach((item, index) => flatten(item, appendKeyPath(key, `[${index}]`)));
+      } else {
+        flat[key] = null; // null will be displayed as '-' in the table
+      }
     } else if (typeof val === 'object' && val !== null) {
-      Object.entries(val).forEach(([childKey, item]) => {
-        flatten(item, appendKeyPath(key, childKey));
-      });
+      if (Object.keys(val).length > 0) {
+        Object.entries(val).forEach(([childKey, item]) => {
+          flatten(item, appendKeyPath(key, childKey));
+        });
+      } else {
+        flat[key] = null; // null will be displayed as '-' in the table
+      }
     } else {
       flat[key] = val;
     }

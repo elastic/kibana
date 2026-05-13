@@ -9,8 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import { EuiText, type EuiStepProps, type EuiStepStatus } from '@elastic/eui';
 import { useGetMissingResources } from '../../../../../../../common/hooks/use_get_missing_resources';
 import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { OnMissingResourcesFetched } from '../../../../types';
 import * as i18n from './translations';
+import type { OnMissingResourcesFetched } from '../../../../../../../common/types';
 
 export interface CheckResourcesStepProps {
   status: EuiStepStatus;
@@ -46,6 +46,8 @@ export const useCheckResourcesStep = ({
   return {
     title: i18n.RULES_DATA_INPUT_CHECK_RESOURCES_TITLE,
     status: uploadStepStatus,
-    children: <EuiText size="s">{i18n.RULES_DATA_INPUT_CHECK_RESOURCES_DESCRIPTION}</EuiText>,
+    children: (
+      <EuiText size="s">{i18n.RULES_DATA_INPUT_CHECK_RESOURCES_SPLUNK_DESCRIPTION}</EuiText>
+    ),
   };
 };

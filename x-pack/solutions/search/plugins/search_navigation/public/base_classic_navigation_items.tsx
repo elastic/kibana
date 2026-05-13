@@ -8,7 +8,11 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import { SEARCH_HOMEPAGE, SEARCH_GETTING_STARTED } from '@kbn/deeplinks-search';
+import {
+  SEARCH_HOMEPAGE,
+  SEARCH_GETTING_STARTED,
+  SEARCH_INDEX_MANAGEMENT,
+} from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { ClassicNavItem } from './types';
@@ -56,9 +60,10 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
       {
         'data-test-subj': 'searchSideNav-Indices',
         deepLink: {
-          link: 'elasticsearchIndexManagement',
+          link: SEARCH_INDEX_MANAGEMENT,
+          shouldShowActiveForSubroutes: true,
         },
-        id: 'search_indices',
+        id: 'index_management',
       },
       {
         'data-test-subj': 'searchSideNav-Playground',
@@ -74,6 +79,13 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
           link: 'enterpriseSearchApplications:searchApplications',
         },
         id: 'searchApplications',
+      },
+      {
+        'data-test-subj': 'searchSideNav-Agents',
+        deepLink: {
+          link: 'agent_builder',
+        },
+        id: 'agent_builder',
       },
     ],
     name: i18n.translate('xpack.searchNavigation.classicNav.applicationsTitle', {
@@ -99,14 +111,6 @@ export const BaseClassicNavItems: ClassicNavItem[] = [
           shouldShowActiveForSubroutes: true,
         },
         id: 'searchQueryRules',
-      },
-      {
-        'data-test-subj': 'searchSideNav-InferenceEndpoints',
-        deepLink: {
-          link: 'searchInferenceEndpoints:inferenceEndpoints',
-          shouldShowActiveForSubroutes: true,
-        },
-        id: 'inference_endpoints',
       },
     ],
     name: i18n.translate('xpack.searchNavigation.classicNav.relevanceTitle', {

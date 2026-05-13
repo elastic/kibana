@@ -96,6 +96,9 @@ export function TimeShift({
   const parsedLocalValue = localValue && parseTimeShift(localValue);
   const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
   const warnings = getColumnTimeShiftWarnings(dateHistogramInterval, localValue);
+  const timeShiftLabel = i18n.translate('xpack.lens.indexPattern.timeShift.label', {
+    defaultMessage: 'Time shift',
+  });
 
   function getSelectedOption() {
     const goodPick = timeShiftOptions.filter(({ value }) => value === localValue);
@@ -118,9 +121,7 @@ export function TimeShift({
         display="rowCompressed"
         fullWidth
         data-test-subj="indexPattern-dimension-time-shift-row"
-        label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
-          defaultMessage: 'Time shift',
-        })}
+        label={timeShiftLabel}
         helpText={i18n.translate('xpack.lens.indexPattern.timeShift.help', {
           defaultMessage: 'Enter the time shift number and unit',
         })}
@@ -175,6 +176,7 @@ export function TimeShift({
                   setLocalValue(choice);
                 }
               }}
+              aria-label={timeShiftLabel}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

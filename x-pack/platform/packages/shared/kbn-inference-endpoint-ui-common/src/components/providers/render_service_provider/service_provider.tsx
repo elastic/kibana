@@ -19,8 +19,7 @@ import elasticIcon from '../assets/images/elastic.svg';
 import huggingFaceIcon from '../assets/images/hugging_face.svg';
 import cohereIcon from '../assets/images/cohere.svg';
 import openAIIcon from '../assets/images/open_ai.svg';
-import azureAIStudioIcon from '../assets/images/azure_ai_studio.svg';
-import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
+import azureIcon from '../assets/images/azure_ai_studio.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
@@ -35,6 +34,9 @@ import ai21Icon from '../assets/images/ai21_labs_default.svg';
 import llamaIcon from '../assets/images/llama_stack_default.svg';
 import defaultIcon from '../assets/images/default_connector_icon.svg';
 import contextualAiIcon from '../assets/images/contextual_ai_icon.svg';
+import fireworksIcon from '../assets/images/fireworks.svg';
+import groqIcon from '../assets/images/grok.svg';
+import nvidiaIcon from '../assets/images/nvidia.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -71,12 +73,12 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     solutions: ['Search'],
   },
   [ServiceProviderKeys.azureaistudio]: {
-    icon: azureAIStudioIcon,
+    icon: azureIcon,
     name: 'Azure AI Studio',
     solutions: ['Search'],
   },
   [ServiceProviderKeys.azureopenai]: {
-    icon: azureOpenAIIcon,
+    icon: azureIcon,
     name: 'Azure OpenAI',
     solutions: ['Observability', 'Security', 'Search'],
   },
@@ -105,6 +107,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Elastic Inference Service',
     solutions: ['Observability', 'Security', 'Search'],
   },
+  [ServiceProviderKeys.fireworksai]: {
+    icon: fireworksIcon,
+    name: 'Fireworks AI',
+    solutions: ['Search'],
+  },
   [ServiceProviderKeys.googleaistudio]: {
     icon: googleAIStudioIcon,
     name: 'Google AI Studio',
@@ -123,6 +130,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.mistral]: {
     icon: mistralIcon,
     name: 'Mistral',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.nvidia]: {
+    icon: nvidiaIcon,
+    name: 'NVIDIA',
     solutions: ['Search'],
   },
   [ServiceProviderKeys.openai]: {
@@ -165,6 +177,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Llama Stack',
     solutions: ['Search'],
   },
+  [ServiceProviderKeys.groq]: {
+    icon: groqIcon,
+    name: 'Groq',
+    solutions: ['Observability', 'Security', 'Search'],
+  },
 };
 
 export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKey }) => {
@@ -176,7 +193,7 @@ export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKe
       name={providerKey}
       data-test-subj={`icon-service-provider-${providerKey}`}
       iconType={iconType}
-      color="#fff"
+      color="plain"
       size="s"
       type="space"
     />
@@ -190,5 +207,9 @@ export const ServiceProviderName: React.FC<ServiceProviderProps> = ({
   const provider = SERVICE_PROVIDERS[providerKey];
   const providerName = provider ? provider.name : providerKey;
 
-  return <EuiHighlight search={searchValue ?? ''}>{providerName}</EuiHighlight>;
+  return (
+    <EuiHighlight data-test-subj={`${providerName}-provider`} search={searchValue ?? ''}>
+      {providerName}
+    </EuiHighlight>
+  );
 };

@@ -8,7 +8,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -29,7 +29,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
                 <span
                   aria-hidden="true"
                   class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
+                  data-euiicon-type="magnify"
                 />
               </span>
             </div>
@@ -69,7 +69,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
                 Add item
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>
@@ -105,7 +105,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -126,7 +126,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
                 <span
                   aria-hidden="true"
                   class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
+                  data-euiicon-type="magnify"
                 />
               </span>
             </div>
@@ -166,7 +166,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
                 Add item
                 <span
                   color="inherit"
-                  data-euiicon-type="arrowDown"
+                  data-euiicon-type="chevronSingleDown"
                 />
               </span>
             </button>

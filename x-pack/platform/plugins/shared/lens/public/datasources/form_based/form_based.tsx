@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import React from 'react';
 import type { Reference } from '@kbn/content-management-utils';
 import type { CoreStart } from '@kbn/core/public';
@@ -53,6 +55,7 @@ import type {
   LastValueIndexPatternColumn,
   FormBasedLayer,
 } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -217,6 +220,7 @@ export function getFormBasedDatasource({
   data,
   unifiedSearch,
   share,
+  kql,
   dataViews,
   fieldFormats,
   charts,
@@ -227,6 +231,7 @@ export function getFormBasedDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   share?: SharePluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -234,9 +239,9 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings, featureFlags } = core;
+  const { uiSettings } = core;
 
-  const DATASOURCE_ID = 'formBased';
+  const DATASOURCE_ID = LENS_DATASOURCE_ID.FORM_BASED;
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
@@ -491,7 +496,6 @@ export function getFormBasedDatasource({
         layerId,
         indexPatterns,
         uiSettings,
-        featureFlags,
         dateRange,
         nowInstant,
         searchSessionId,
@@ -564,6 +568,7 @@ export function getFormBasedDatasource({
           http={core.http}
           data={data}
           unifiedSearch={unifiedSearch}
+          kql={kql}
           dataViews={dataViews}
           uniqueLabel={columnLabelMap[props.columnId]}
           notifications={core.notifications}

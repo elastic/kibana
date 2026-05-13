@@ -10,6 +10,8 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { Observable } from 'rxjs';
 import type { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -142,6 +144,8 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
 export interface ObservabilityAIAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  evals?: EvalsPublicStart;
 }
 
 export interface ObservabilityAIAssistantPublicSetup {}

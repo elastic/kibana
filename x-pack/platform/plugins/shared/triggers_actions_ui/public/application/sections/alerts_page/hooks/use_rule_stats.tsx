@@ -40,10 +40,8 @@ export const useRuleStats = ({ ruleTypeIds, consumers }: Props = {}) => {
     error: 0,
     snoozed: 0,
   });
-  const manageRulesHref = useMemo(
-    () => http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
-    [http.basePath]
-  );
+
+  const manageRulesHref = http.basePath.prepend('/app/rules');
 
   const loadRuleStats = useCallback(async () => {
     setLoading(true);

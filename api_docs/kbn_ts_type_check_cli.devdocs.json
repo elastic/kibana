@@ -1,0 +1,332 @@
+{
+  "id": "@kbn/ts-type-check-cli",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ts-type-check-cli",
+        "id": "def-common.executeTypeCheckValidation",
+        "type": "Function",
+        "tags": [],
+        "label": "executeTypeCheckValidation",
+        "description": [
+          "\nResolves the type-check scope from the validation contract, prepares the\ngenerated configs, and runs `tsc -b` for the selected projects."
+        ],
+        "signature": [
+          "({ baseContext, log, procRunner, cleanup, extendedDiagnostics, pretty, verbose, withArchive, }: ",
+          {
+            "pluginId": "@kbn/ts-type-check-cli",
+            "scope": "common",
+            "docId": "kibKbnTsTypeCheckCliPluginApi",
+            "section": "def-common.ExecuteTypeCheckValidationOptions",
+            "text": "ExecuteTypeCheckValidationOptions"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/ts-type-check-cli",
+            "scope": "common",
+            "docId": "kibKbnTsTypeCheckCliPluginApi",
+            "section": "def-common.TscValidationResult",
+            "text": "TscValidationResult"
+          },
+          " | null>"
+        ],
+        "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+        "lineNumber": 178,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.executeTypeCheckValidation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseContext,\n  log,\n  procRunner,\n  cleanup = false,\n  extendedDiagnostics = false,\n  pretty = true,\n  verbose = false,\n  withArchive = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ts-type-check-cli",
+                "scope": "common",
+                "docId": "kibKbnTsTypeCheckCliPluginApi",
+                "section": "def-common.ExecuteTypeCheckValidationOptions",
+                "text": "ExecuteTypeCheckValidationOptions"
+              }
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 178,
+            "columnNumber": 50,
+            "deprecated": false,
+            "docsReferencedTypeName": "ExecuteTypeCheckValidationOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ts-type-check-cli",
+        "id": "def-common.runLegacyTypeCheckCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runLegacyTypeCheckCli",
+        "description": [
+          "Runs the legacy direct-target `scripts/type_check` CLI flow."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-ts-type-check-cli/run_type_check_legacy_cli.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ts-type-check-cli",
+        "id": "def-common.runTypeCheckContractCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runTypeCheckContractCli",
+        "description": [
+          "Runs the validation-contract-aware `scripts/type_check` CLI entrypoint."
+        ],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-ts-type-check-cli/run_type_check_contract_cli.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ts-type-check-cli",
+        "id": "def-common.ExecuteTypeCheckValidationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecuteTypeCheckValidationOptions",
+        "description": [],
+        "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+        "lineNumber": 163,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.baseContext",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "baseContext",
+            "description": [],
+            "signature": [
+              "ValidationDirectTargetContext",
+              " | ",
+              "ValidationContractContext"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.procRunner",
+            "type": "Object",
+            "tags": [],
+            "label": "procRunner",
+            "description": [],
+            "signature": [
+              "{ run: (name: string, options: RunOptions) => Promise<void>; }"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 166,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.cleanup",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cleanup",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.extendedDiagnostics",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "extendedDiagnostics",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.pretty",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pretty",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.verbose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verbose",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.ExecuteTypeCheckValidationOptions.withArchive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "withArchive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ts-type-check-cli",
+        "id": "def-common.TscValidationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "TscValidationResult",
+        "description": [],
+        "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ts-type-check-cli",
+            "id": "def-common.TscValidationResult.projectCount",
+            "type": "number",
+            "tags": [],
+            "label": "projectCount",
+            "description": [],
+            "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ts-type-check-cli",
+        "id": "def-common.TSC_LABEL",
+        "type": "string",
+        "tags": [],
+        "label": "TSC_LABEL",
+        "description": [],
+        "signature": [
+          "\"tsc\""
+        ],
+        "path": "packages/kbn-ts-type-check-cli/execute_type_check_validation.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

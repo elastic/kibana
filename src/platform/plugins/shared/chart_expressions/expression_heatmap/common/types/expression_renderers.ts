@@ -18,6 +18,7 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { CoreSetup } from '@kbn/core/public';
 import type { HeatmapExpressionProps } from './expression_functions';
 
 export interface FilterEvent {
@@ -52,4 +53,5 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   syncTooltips: boolean;
   syncCursor: boolean;
   renderComplete: IInterpreterRenderHandlers['done'];
+  uiSettings?: CoreSetup['uiSettings'];
 };

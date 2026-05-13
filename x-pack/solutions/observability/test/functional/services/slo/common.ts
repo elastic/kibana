@@ -12,6 +12,8 @@ import { sloData } from './fixtures/create_slo';
 const OVERVIEW_MODE_SELECTOR = 'sloOverviewModeSelector';
 const SLO_CONFIRM_BUTTON = 'sloConfirmButton';
 const SINGLE_SLO_SELECTOR = 'singleSloSelector';
+const SLO_DEFINITION_SELECTOR = 'sloDefinitionSelector';
+const SLO_INSTANCE_SELECTOR = 'sloInstanceSelector';
 const SLO_SINGLE_OVERVIEW_CONFIGURATION = 'sloSingleOverviewConfiguration';
 const SLO_GROUP_OVERVIEW_CONFIGURATION = 'sloGroupOverviewConfiguration';
 const SLO_GROUP_OVERVIEW_CONFIGURATION_GROUP_BY = 'sloGroupOverviewConfigurationGroupBy';
@@ -33,6 +35,16 @@ export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
         await testSubjects.existOrFail(SLO_SINGLE_OVERVIEW_CONFIGURATION);
       });
     },
+    async assertSloDefinitionSelectorExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_DEFINITION_SELECTOR);
+      });
+    },
+    async assertSloInstanceSelectorExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_INSTANCE_SELECTOR);
+      });
+    },
     async assertOverviewSloSelectorExists() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(SINGLE_SLO_SELECTOR);
@@ -42,6 +54,18 @@ export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('sloSelector');
         await comboBox.set('sloSelector > comboBoxInput', sloData.name);
+      });
+    },
+    async setComboBoxSloDefinitionSelection() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.click(SLO_DEFINITION_SELECTOR);
+        await comboBox.set(`${SLO_DEFINITION_SELECTOR} > comboBoxInput`, sloData.name);
+      });
+    },
+    async setComboBoxSloInstanceSelection() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.click(SLO_INSTANCE_SELECTOR);
+        await comboBox.set(`${SLO_INSTANCE_SELECTOR} > comboBoxInput`, 'All instances');
       });
     },
     async assertOverviewConfigurationSaveButtonIsEnabled(subj: string) {

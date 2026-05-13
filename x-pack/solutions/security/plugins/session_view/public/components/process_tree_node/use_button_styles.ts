@@ -94,7 +94,7 @@ export const useButtonStyles = () => {
         textDecoration: 'none',
       },
       '&.isExpanded': {
-        color: colors.ghost,
+        color: colors.textGhost,
         background: colors.backgroundFilledAccentSecondary,
         '&:hover, &:focus': {
           background: `${colors.backgroundFilledAccentSecondary}`,

@@ -9,8 +9,10 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { type ComponentType, lazy, type Ref } from 'react';
-import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { AIChatExperience, type AssistantScope } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';
@@ -21,6 +23,8 @@ import { createUseChat } from './hooks/use_chat';
 import { createService } from './service/create_service';
 import { createScreenContextAction } from './utils/create_screen_context_action';
 import { getContextualInsightMessages } from './utils/get_contextual_insight_messages';
+
+const queryClient = new QueryClient();
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -61,13 +65,18 @@ export class ObservabilityAIAssistantPlugin
     coreStart: CoreStart,
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPublicStart {
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(
+      AI_CHAT_EXPERIENCE_TYPE,
+      AIChatExperience.Classic
+    );
+
     const service = (this.service = createService({
       analytics: coreStart.analytics,
       coreStart,
       enabled:
         coreStart.application.capabilities.observabilityAIAssistant[
           aiAssistantCapabilities.show
-        ] === true,
+        ] === true && chatExperience !== AIChatExperience.Agent,
       scopes: this.scopeFromConfig ? [this.scopeFromConfig] : ['all'],
       scopeIsMutable: !!this.scopeFromConfig,
     }));
@@ -80,9 +89,11 @@ export class ObservabilityAIAssistantPlugin
     ) =>
       React.forwardRef((props: P, ref: Ref<R>) => (
         <KibanaContextProvider services={services}>
-          <ObservabilityAIAssistantProvider value={service}>
-            <Component {...props} ref={ref} />
-          </ObservabilityAIAssistantProvider>
+          <QueryClientProvider client={queryClient}>
+            <ObservabilityAIAssistantProvider value={service}>
+              <Component {...props} ref={ref} />
+            </ObservabilityAIAssistantProvider>
+          </QueryClientProvider>
         </KibanaContextProvider>
       ));
 
@@ -97,7 +108,7 @@ export class ObservabilityAIAssistantPlugin
 
     return {
       service,
-      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(),
       useChat: createUseChat({
         notifications: coreStart.notifications,
       }),

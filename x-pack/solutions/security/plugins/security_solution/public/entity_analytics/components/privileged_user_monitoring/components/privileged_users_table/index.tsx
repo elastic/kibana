@@ -68,7 +68,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
 
   const openUserFlyout = useOpenUserFlyout();
 
-  const columns = buildPrivilegedUsersTableColumns(openUserFlyout, euiTheme);
+  const columns = buildPrivilegedUsersTableColumns(openUserFlyout);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { visibleRecords, isLoading, hasError, refetch, inspect, hasNextPage } =
     usePrivilegedUsersTableData(spaceId, currentPage, toggleStatus);
@@ -134,6 +134,10 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
                 <EuiHorizontalRule margin="none" css={{ height: 2 }} />
                 <EuiBasicTable
                   id={PRIVILEGED_USERS_TABLE_QUERY_ID}
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.tableCaption',
+                    { defaultMessage: 'Privileged users list' }
+                  )}
                   loading={isLoading}
                   items={visibleRecords || []}
                   columns={columns}

@@ -10,6 +10,8 @@ import path from 'path';
 import type { Logger } from '@kbn/core/server';
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
+import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
+import { hasValidIndexPattern } from '../../../../helpers/has_valid_index_pattern';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
@@ -21,8 +23,21 @@ interface GetTranslationResultNodeParams {
 
 export const getTranslationResultNode = (params: GetTranslationResultNodeParams): GraphNode => {
   return async (state) => {
-    const query = state.esql_query;
-    if (!query) {
+    if (state.parsed_panel.viz_type === 'markdown') {
+      const panelJSON = createMarkdownPanel(state.parsed_panel.query, state.parsed_panel);
+
+      return {
+        elastic_panel: panelJSON,
+        comments: [
+          generateAssistantComment(
+            `Successfully translated Markdown Panel: <b>${state.parsed_panel.title}</b>`
+          ),
+        ],
+        translation_result: MigrationTranslationResult.FULL,
+      };
+    }
+    const rawQuery = state.esql_query;
+    if (!rawQuery) {
       const message = 'SPL query unsupported or missing, cannot translate panel';
       const panelJSON = createMarkdownPanel(message, state.parsed_panel);
       return {
@@ -30,6 +45,10 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
         translation_result: MigrationTranslationResult.UNTRANSLATABLE,
       };
     }
+
+    const query = !hasValidIndexPattern(state.index_pattern)
+      ? rawQuery.replaceAll(TRANSLATION_INDEX_PATTERN, MISSING_INDEX_PATTERN_PLACEHOLDER)
+      : rawQuery;
 
     let translationResult;
     if (query.startsWith(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER}`)) {
@@ -67,6 +86,7 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
     return {
       elastic_panel: panelJSON,
       translation_result: translationResult,
+      comments: [generateAssistantComment(`## Final ES|QL Query\n\n\`\`\`esql\n${query}\n\`\`\``)],
     };
   };
 };

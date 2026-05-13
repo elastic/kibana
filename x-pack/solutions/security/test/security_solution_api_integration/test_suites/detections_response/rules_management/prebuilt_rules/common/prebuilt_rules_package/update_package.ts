@@ -9,9 +9,10 @@ import path from 'path';
 import getMajorVersion from 'semver/functions/major';
 import getMinorVersion from 'semver/functions/minor';
 import { REPO_ROOT } from '@kbn/repo-info';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import expect from 'expect';
 import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -22,7 +23,6 @@ import {
   performUpgradePrebuiltRules,
   reviewPrebuiltRulesToInstall,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');
 
-      const parsedFleetPackages: PackageSpecManifest[] = JSON5.parse(fleetPackages);
+      const parsedFleetPackages: PackageSpecManifest[] = parse(fleetPackages);
 
       const securityDetectionEnginePackage = parsedFleetPackages.find(
         (fleetPackage) => fleetPackage.name === 'security_detection_engine'

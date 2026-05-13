@@ -6,22 +6,19 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonGroup, EuiCallOut, EuiFlyout, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
+import {
+  DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -47,6 +44,8 @@ export interface CreateConnectorFlyoutProps {
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
   isServerless?: boolean;
+  initialConnector?: Partial<Omit<ActionConnector, 'secrets'>> & { actionTypeId: string };
+  icon?: IconType;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -55,6 +54,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onClose,
   onConnectorCreated,
   onTestConnector,
+  initialConnector,
+  icon,
 }) => {
   const {
     application: { capabilities },
@@ -80,23 +81,40 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     preSubmitValidator: null,
   });
 
-  const initialConnector = {
-    actionTypeId: actionType?.id ?? '',
-    isDeprecated: false,
-    config: {},
-    secrets: {},
-    isMissingSecrets: false,
-    isConnectorTypeDeprecated: false,
-  };
+  useEffect(() => {
+    if (initialConnector && allActionTypes && !actionType) {
+      const foundActionType = allActionTypes[initialConnector.actionTypeId];
+      if (foundActionType) {
+        setActionType(foundActionType);
+      }
+    }
+  }, [initialConnector, allActionTypes, actionType]);
+
+  const defaultConnector = useMemo(() => {
+    const empty = {
+      actionTypeId: actionType?.id ?? '',
+      isDeprecated: false,
+      config: {},
+      secrets: {},
+      isMissingSecrets: false,
+      isConnectorTypeDeprecated: false,
+    };
+    return initialConnector ? { ...empty, ...initialConnector } : empty;
+  }, [actionType?.id, initialConnector]);
 
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
+  const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
+  const disabled = hasErrors || !canSave;
 
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
+
+  const isTestable =
+    !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
 
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
@@ -119,10 +137,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
-  const setResetForm = (reset: ResetForm) => {
+  const setResetForm = useCallback((reset: ResetForm) => {
     resetConnectorForm.current = reset;
     setShowFormErrors(false);
-  };
+  }, []);
 
   const onChangeGroupAction = (id: string) => {
     if (allActionTypes && allActionTypes[id]) {
@@ -165,12 +183,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-      const { actionTypeId, name, config, secrets } = data;
+      const { actionTypeId, name, config, secrets, id } = data;
       const validConnector = {
         actionTypeId,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
+        id: id ?? '',
       };
 
       const createdConnector = await createConnector(validConnector);
@@ -220,18 +239,35 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       isMounted.current = false;
     };
   }, []);
+  const [flyoutHeaderName, setFlyoutHeaderName] = useState<string>('Select a connector');
+  useEffect(() => {
+    if (actionType) {
+      if (!actionType.name.toLowerCase().includes('connector')) {
+        setFlyoutHeaderName(`${actionType.name} connector`);
+      } else {
+        setFlyoutHeaderName(actionType.name);
+      }
+    }
+  }, [actionType]);
+
+  const handleErrorFocus = useCallback((node: HTMLDivElement) => {
+    node?.focus();
+  }, []);
 
   return (
     <EuiFlyout
       onClose={onClose}
       data-test-subj="create-connector-flyout"
       aria-label={i18n.translate('xpack.triggersActionsUI.createConnectorFlyout', {
-        defaultMessage: 'create connector flyout',
+        defaultMessage: '{headerName} flyout',
+        values: {
+          headerName: flyoutHeaderName,
+        },
       })}
     >
       <FlyoutHeader
-        icon={actionTypeModel?.iconClass}
-        actionTypeName={actionType?.name}
+        icon={icon ?? actionTypeModel?.iconClass}
+        actionTypeName={flyoutHeaderName}
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
@@ -267,10 +303,28 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
+            {isLLMConnectorTypeId(actionType.id) && (
+              <>
+                <EuiCallOut
+                  announceOnMount={false}
+                  size="s"
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="deprecatedLLMConnectorCallout"
+                  title={DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE}
+                >
+                  {DEPRECATED_LLM_CONNECTOR_INFO}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
             {showFormErrors && (
               <>
                 <EuiCallOut
+                  tabIndex={-1}
                   announceOnMount
+                  ref={handleErrorFocus}
                   size="s"
                   color="danger"
                   iconType="warning"
@@ -294,52 +348,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             )}
             <ConnectorForm
               actionTypeModel={actionTypeModel}
-              connector={initialConnector}
+              connector={defaultConnector}
               isEdit={false}
               onChange={setFormState}
               setResetForm={setResetForm}
             />
             {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <>
-                  {onTestConnector && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="primary"
-                        data-test-subj="create-connector-flyout-save-test-btn"
-                        type="submit"
-                        isLoading={isSaving}
-                        disabled={hasErrors || !canSave}
-                        onClick={onTestConnector != null ? testConnector : undefined}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                          defaultMessage="Save & test"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      color="primary"
-                      data-test-subj="create-connector-flyout-save-btn"
-                      type="submit"
-                      isLoading={isSaving}
-                      disabled={hasErrors || !canSave}
-                      onClick={onSubmit}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                        defaultMessage="Save"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem />
-                </>
-              </EuiFlexGroup>
-            </EuiFlexItem>
           </>
         ) : (
           <ActionTypeMenu
@@ -356,6 +370,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         hasConnectorTypeSelected={hasConnectorTypeSelected}
         onBack={resetActionType}
         onCancel={onClose}
+        isUsingInitialConnector={isUsingInitialConnector}
+        onTestConnector={onTestConnector}
+        disabled={disabled}
+        isSaving={isSaving}
+        onSubmit={onSubmit}
+        testConnector={testConnector}
+        isTestable={isTestable}
       />
     </EuiFlyout>
   );

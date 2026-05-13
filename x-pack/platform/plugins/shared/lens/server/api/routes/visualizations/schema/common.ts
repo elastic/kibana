@@ -6,35 +6,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensItemDataSchema, lensSavedObjectSchema } from '../../../../content_management';
-import { pickFromObjectSchema } from '../../../../utils';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
+import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 
-/**
- * The Lens item meta returned from the server
- */
-export const lensItemMetaSchema = schema.object(
-  {
-    ...pickFromObjectSchema(lensSavedObjectSchema.getPropSchemas(), [
-      'type',
-      'createdAt',
-      'updatedAt',
-      'createdBy',
-      'updatedBy',
-      'originId',
-      'managed',
-    ]),
-  },
-  { unknowns: 'forbid' }
-);
+import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management';
+
+const savedObjectProps = lensCommonSavedObjectSchemaV2.getPropSchemas();
 
 /**
  * The Lens response item returned from the server
  */
 export const lensResponseItemSchema = schema.object(
   {
-    id: lensSavedObjectSchema.getPropSchemas().id,
-    data: lensItemDataSchema,
-    meta: lensItemMetaSchema,
+    id: savedObjectProps.id,
+    data: lensApiConfigSchemaNoESQL,
+    meta: asCodeMetaSchema,
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'forbid', meta: { id: 'lensResponseItem', title: 'Visualization Response' } }
 );

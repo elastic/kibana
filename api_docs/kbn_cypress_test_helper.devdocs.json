@@ -38,6 +38,8 @@
           "<MetaType> extends Error"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -66,6 +70,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+                "lineNumber": 15,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -81,7 +87,10 @@
                   "MetaType | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+                "lineNumber": 15,
+                "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetaType",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -117,6 +126,8 @@
           "<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -131,6 +142,8 @@
               "{ method: string; url: string; data: unknown; }"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +158,8 @@
               "{ status: number; statusText: string; data: any; }"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,6 +174,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -174,7 +191,10 @@
                   "<unknown, any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AxiosError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -192,6 +212,8 @@
               "() => { message: string; request: { method: string; url: string; data: unknown; }; response: { status: number; statusText: string; data: any; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -208,6 +230,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -231,6 +255,8 @@
           "(error: Error) => never"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+        "lineNumber": 68,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -245,7 +271,10 @@
               "Error"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/format_axios_error.ts",
+            "lineNumber": 68,
+            "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -266,6 +295,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/stack_services.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -280,7 +311,10 @@
               "CreateRuntimeServicesOptions"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/stack_services.ts",
+            "lineNumber": 112,
+            "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateRuntimeServicesOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -309,6 +343,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -323,7 +359,10 @@
               "default"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -338,6 +377,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -353,6 +394,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -371,7 +414,7 @@
           "\nCreates an instance of `ToolingLog` that outputs to `stdout`.\nThe default log `level` for all instances can be set by setting the function's `defaultLogLevel`\nproperty. Default logging level can also be set from CLI scripts that use the `@kbn/dev-cli-runner`\nby calling the `setDefaultLogLevelFromCliFlags(flags)` and passing in the `flags` property.\n"
         ],
         "signature": [
-          "{ (level: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined): ",
+          "{ (level: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined): ",
           {
             "pluginId": "@kbn/tooling-log",
             "scope": "common",
@@ -379,7 +422,7 @@
             "section": "def-common.ToolingLog",
             "text": "ToolingLog"
           },
-          "; defaultLogLevel: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; setDefaultLogLevelFromCliFlags(flags: ",
+          "; defaultLogLevel: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; setDefaultLogLevelFromCliFlags(flags: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
             "scope": "common",
@@ -390,6 +433,8 @@
           "): void; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/logger.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -401,9 +446,11 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
+              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/logger.ts",
+            "lineNumber": 44,
+            "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -424,15 +471,17 @@
         "signature": [
           "((kbnClient: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
           ") => Promise<void>) & _.MemoizedFunction"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/fleet_services.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -446,15 +495,18 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/fleet_services.ts",
+            "lineNumber": 18,
+            "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false
           }
         ],
@@ -470,9 +522,9 @@
         "signature": [
           "(kbnClient: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -481,6 +533,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -493,15 +547,18 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+            "lineNumber": 15,
+            "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -520,6 +577,8 @@
           "() => { user: any; pass: any; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -537,6 +596,8 @@
           "() => string"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/network_services.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -564,6 +625,8 @@
           "<unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -578,7 +641,10 @@
               "Error"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/error/errors.ts",
+            "lineNumber": 30,
+            "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -597,6 +663,8 @@
           "(hostname: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/is_localhost.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -611,6 +679,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/is_localhost.ts",
+            "lineNumber": 18,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -633,15 +703,17 @@
           "default",
           " | ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
           ") => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -656,14 +728,16 @@
               "default",
               " | ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/kibana_status.ts",
+            "lineNumber": 31,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -701,6 +775,8 @@
           "): Cypress.Chainable<{ username: string; password: string; }>; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/login.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -721,7 +797,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/login.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SecurityTestUser",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -740,6 +819,8 @@
           "<T = unknown>({ headers, ...options }: Partial<Cypress.RequestOptions>) => Cypress.Chainable<Cypress.Response<T>>"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -754,7 +835,10 @@
               "Partial<Cypress.RequestOptions>"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+            "lineNumber": 21,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -773,6 +857,8 @@
           "(filename: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -787,6 +873,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+            "lineNumber": 31,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -806,6 +894,8 @@
           "(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -820,6 +910,8 @@
               "Cypress.PluginEvents"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -835,6 +927,8 @@
               "Cypress.PluginConfigOptions"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -854,6 +948,8 @@
           "(alertCountThreshold?: number) => void"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/alerting_services.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -868,6 +964,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/alerting_services.ts",
+            "lineNumber": 54,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -886,6 +984,8 @@
         "label": "CreatedSecuritySuperuser",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -897,6 +997,8 @@
             "label": "username",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -908,6 +1010,8 @@
             "label": "password",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -919,6 +1023,8 @@
             "label": "created",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/services/security_user_services.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1059,6 +1165,8 @@
           "; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1074,6 +1182,8 @@
           "\"hunter\" | \"t1_analyst\" | \"t2_analyst\" | \"t3_analyst\" | \"threat_intelligence_analyst\" | \"rule_author\" | \"soc_manager\" | \"detections_admin\" | \"platform_engineer\" | \"endpoint_operations_analyst\" | \"endpoint_policy_manager\" | \"endpoint_response_actions_access\" | \"endpoint_response_actions_no_access\" | \"endpoint_security_policy_management_read\" | \"artifact_read_privileges\""
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1089,6 +1199,8 @@
           "(string | undefined)[]"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/saml_auth.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1104,6 +1216,8 @@
           "\"elastic\" | \"admin\" | \"system_indices_superuser\" | \"elastic_serverless\""
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1119,6 +1233,8 @@
           "{ readonly license?: string | undefined; readonly kbnServerArgs?: string[] | undefined; readonly productTypes?: Readonly<{} & { product_line: \"security\" | \"cloud\" | \"endpoint\"; product_tier: \"complete\" | \"essentials\"; }>[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/utils.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1134,6 +1250,8 @@
           "\"elastic\" | \"admin\" | \"hunter\" | \"system_indices_superuser\" | \"t1_analyst\" | \"t2_analyst\" | \"t3_analyst\" | \"threat_intelligence_analyst\" | \"rule_author\" | \"soc_manager\" | \"detections_admin\" | \"platform_engineer\" | \"endpoint_operations_analyst\" | \"endpoint_policy_manager\" | \"endpoint_response_actions_access\" | \"endpoint_response_actions_no_access\" | \"endpoint_security_policy_management_read\" | \"artifact_read_privileges\" | \"elastic_serverless\""
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1151,6 +1269,8 @@
           "{ readonly 'kbn-xsrf': \"cypress\"; readonly 'x-elastic-internal-origin': \"security-solution\"; readonly 'elastic-api-version': \"2023-10-31\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/api.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1166,6 +1286,8 @@
           "{ readonly hunter: \"hunter\"; readonly endpoint_response_actions_access: \"endpoint_response_actions_access\"; readonly endpoint_response_actions_no_access: \"endpoint_response_actions_no_access\"; readonly endpoint_security_policy_management_read: \"endpoint_security_policy_management_read\"; readonly artifact_read_privileges: \"artifact_read_privileges\"; readonly t1_analyst: \"t1_analyst\"; readonly t2_analyst: \"t2_analyst\"; readonly t3_analyst: \"t3_analyst\"; readonly threat_intelligence_analyst: \"threat_intelligence_analyst\"; readonly rule_author: \"rule_author\"; readonly soc_manager: \"soc_manager\"; readonly detections_admin: \"detections_admin\"; readonly platform_engineer: \"platform_engineer\"; readonly endpoint_operations_analyst: \"endpoint_operations_analyst\"; readonly endpoint_policy_manager: \"endpoint_policy_manager\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1183,6 +1305,8 @@
           "{ readonly elastic: \"elastic\"; readonly elastic_serverless: \"elastic_serverless\"; readonly system_indices_superuser: \"system_indices_superuser\"; readonly admin: \"admin\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1203,6 +1327,8 @@
           "{ readonly t1_analyst: \"t1_analyst\"; readonly t2_analyst: \"t2_analyst\"; readonly t3_analyst: \"t3_analyst\"; readonly threat_intelligence_analyst: \"threat_intelligence_analyst\"; readonly rule_author: \"rule_author\"; readonly soc_manager: \"soc_manager\"; readonly detections_admin: \"detections_admin\"; readonly platform_engineer: \"platform_engineer\"; readonly endpoint_operations_analyst: \"endpoint_operations_analyst\"; readonly endpoint_policy_manager: \"endpoint_policy_manager\"; }"
         ],
         "path": "src/platform/packages/shared/kbn-cypress-test-helper/src/auth/roles_and_users.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

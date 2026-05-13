@@ -88,7 +88,7 @@ export function ClustersTable({ clusters }: Props) {
                       defaultMessage: 'Expand table row to view cluster details',
                     })
               }
-              iconType={name in expandedRows ? 'arrowDown' : 'arrowRight'}
+              iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
             />
             <EuiText size="xs" color="subdued">
               {name === LOCAL_CLUSTER_KEY
@@ -135,6 +135,9 @@ export function ClustersTable({ clusters }: Props) {
 
   return (
     <EuiBasicTable
+      tableCaption={i18n.translate('inspector.requests.clusters.table.caption', {
+        defaultMessage: 'Cluster details',
+      })}
       items={
         sortField
           ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))

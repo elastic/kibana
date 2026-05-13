@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  type Filter,
+  type Query,
+  type TimeRange,
+  isOfAggregateQueryType,
+} from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiIsPresentationContainer,
+  apiPublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
+import {
+  convertFiltersToESQLExpression,
+  convertQueryToESQLExpression,
+  getEsqlControls,
+  injectWhereClauseAfterSourceCommand,
+} from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -59,25 +75,65 @@ async function getDiscoverLocationParams({
     throw new Error('Underlying data is not ready');
   }
   const dataView = await dataViews.get(args.dataViewSpec.id!);
-  // we don't want to pass the DSL filters when navigating from an ES|SQL embeddable
-  let filtersToApply = embeddable.isTextBasedLanguage()
-    ? []
-    : [...(filters || []), ...args.filters];
+  let filtersToApply = [...(filters || []), ...args.filters];
   let timeRangeToApply = args.timeRange;
+  let queryToApply = args.query;
   // if the target data view is time based, attempt to split out a time range from the provided filters
   if (dataView.isTimeBased() && dataView.timeFieldName === timeFieldName) {
     const { extractTimeRange } = await import('@kbn/es-query');
-    const { restOfFilters, timeRange } = extractTimeRange(filters || [], timeFieldName);
+    const { restOfFilters, timeRange } = extractTimeRange(filtersToApply, timeFieldName);
     filtersToApply = restOfFilters;
     if (timeRange) {
       timeRangeToApply = timeRange;
     }
   }
 
+  if (embeddable.isTextBasedLanguage()) {
+    // Discover ES|QL mode can't accept DSL filters or a separate KQL/Lucene query —
+    // translate what we can to ES|QL (filters via convertFiltersToESQLExpression,
+    // dashboard query bar via KQL(...)/QSTR(...)) and inject as a WHERE right after
+    // the source command. Untranslatable filters are dropped.
+    if (isOfAggregateQueryType(args.query)) {
+      const expressions: string[] = [];
+
+      const dashboardQuery =
+        apiPublishesUnifiedSearch(embeddable.parentApi) && embeddable.parentApi.query$?.getValue();
+      if (dashboardQuery && !isOfAggregateQueryType(dashboardQuery)) {
+        const queryExpression = convertQueryToESQLExpression(dashboardQuery);
+        if (queryExpression) {
+          expressions.push(queryExpression);
+        }
+      }
+
+      if (filtersToApply.length) {
+        const { esqlExpression } = convertFiltersToESQLExpression(filtersToApply);
+        if (esqlExpression) {
+          expressions.push(esqlExpression);
+        }
+      }
+
+      if (expressions.length) {
+        queryToApply = {
+          ...args.query,
+          esql: injectWhereClauseAfterSourceCommand(args.query.esql, expressions.join(' AND ')),
+        };
+      }
+    }
+    filtersToApply = [];
+  }
+
+  const presentationContainer = apiIsPresentationContainer(embeddable.parentApi)
+    ? embeddable.parentApi
+    : undefined;
+
   return {
     ...args,
+    query: queryToApply,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
+    esqlControls: presentationContainer
+      ? getEsqlControls(presentationContainer, args.query)
+      : undefined,
   };
 }
 

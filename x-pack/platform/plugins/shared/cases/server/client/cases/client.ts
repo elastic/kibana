@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Case, CaseCustomField, Cases, User } from '../../../common/types/domain';
+import type { Case, CaseCustomField, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
@@ -20,11 +20,13 @@ import type {
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
   CasesSearchRequest,
+  CasesFindRequestWithCustomFields,
   SimilarCasesSearchRequest,
   CasesSimilarResponse,
   AddObservableRequest,
   UpdateObservableRequest,
   BulkAddObservablesRequest,
+  CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientInternal } from '../client_internal';
@@ -33,6 +35,7 @@ import { bulkGet } from './bulk_get';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { search } from './search';
+import { find } from './find';
 import type { CasesByAlertIDParams, GetParams } from './get';
 import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
 import type { PushParams } from './push';
@@ -62,9 +65,15 @@ export interface CasesSubClient {
    */
   bulkCreate(data: BulkCreateCasesRequest): Promise<BulkCreateCasesResponse>;
   /**
-   * Returns cases that match the search criteria.
+   * Returns cases using Saved Objects find API (uses Kuery queries).
    *
    * If the `owner` field is left empty then all the cases that the user has access to will be returned.
+   */
+  find(params: CasesFindRequestWithCustomFields): Promise<CasesFindResponse>;
+  /**
+   * Returns cases using Saved Objects search API (uses raw Elasticsearch queries).
+   * Supports nested fields and attachment filtering.
+   * Owner field is required.
    */
   search(params: CasesSearchRequest): Promise<CasesFindResponse>;
   /**
@@ -87,7 +96,7 @@ export interface CasesSubClient {
   /**
    * Update the specified cases with the passed in values.
    */
-  bulkUpdate(cases: CasesPatchRequest): Promise<Cases>;
+  bulkUpdate(cases: CasesPatchRequest): Promise<CasesPatchResponse>;
   /**
    * Delete a case and all its comments.
    *
@@ -153,6 +162,7 @@ export const createCasesSubClient = (
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs, casesClient),
     bulkCreate: (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient),
+    find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
     get: (params: GetParams) => get(params, clientArgs),
     resolve: (params: GetParams) => resolve(params, clientArgs),

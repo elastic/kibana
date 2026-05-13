@@ -104,17 +104,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Organization members', function () {
-        // Cannot test cloud link on MKI (will redirect to login)
-        this.tags(['skipMKI']);
-
-        it('displays the organization members management card, and will navigate to the cloud organization URL', async () => {
-          // The org members nav card is always visible because there is no way to check if a user has approprite privileges
-          await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
-          await pageObjects.svlManagementPage.clickOrgMembersManagementCard();
-
-          const url = await browser.getCurrentUrl();
-          // `--xpack.cloud.organization_url: '/account/members'`,
-          expect(url).to.contain('/account/members');
+        it('should not display the organization members management card', async () => {
+          await retry.waitFor('page to be visible', async () => {
+            return await testSubjects.exists('cards-navigation-page');
+          });
+          await pageObjects.svlManagementPage.assertOrgMembersManagementCardDoesNotExist();
         });
       });
 

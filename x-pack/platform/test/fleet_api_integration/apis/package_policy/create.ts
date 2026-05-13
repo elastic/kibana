@@ -306,6 +306,59 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
+    it('should not allow an individual_policies package with enabled inputs from multiple policy templates', async function () {
+      await apiClient.installPackage({
+        pkgName: 'individual_policies_test',
+        pkgVersion: '0.1.0',
+      });
+
+      const { body } = await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'individual-policies-multi-test',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            { type: 'logfile', policy_template: 'template_a', enabled: true, streams: [] },
+            { type: 'httpjson', policy_template: 'template_b', enabled: true, streams: [] },
+          ],
+          package: {
+            name: 'individual_policies_test',
+            title: 'Individual Policies Test',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.contain('cannot have enabled inputs from multiple policy templates');
+    });
+
+    it('should allow an individual_policies package when only one policy template has enabled inputs', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'individual-policies-single-test',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            { type: 'logfile', policy_template: 'template_a', enabled: true, streams: [] },
+            { type: 'httpjson', policy_template: 'template_b', enabled: false, streams: [] },
+          ],
+          package: {
+            name: 'individual_policies_test',
+            title: 'Individual Policies Test',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
+    });
+
     it('should return a 409 if there is another package policy with the same name', async function () {
       await supertest
         .post(`/api/fleet/package_policies`)

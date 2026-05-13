@@ -44,7 +44,7 @@ export const MyAddItemButton = styled(EuiButtonEmpty)`
 
 MyAddItemButton.defaultProps = {
   flush: 'left',
-  iconType: 'plusInCircle',
+  iconType: 'plusCircle',
   size: 's',
 };
 

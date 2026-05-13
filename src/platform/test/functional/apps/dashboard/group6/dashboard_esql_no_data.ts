@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await panelActions.clickEdit();
       const editorValue = await monacoEditor.getCodeEditorValue();
-      expect(editorValue).to.eql(`FROM logs* | LIMIT 10`);
+      expect(editorValue).to.eql(`FROM logs*`);
     });
   });
 }

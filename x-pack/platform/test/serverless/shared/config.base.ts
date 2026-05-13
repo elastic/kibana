@@ -16,11 +16,21 @@ import {
   kibanaTestSuperuserServerless,
   getDockerFileMountPath,
 } from '@kbn/test';
-import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
-import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import {
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_UIAM_CLOUD_ID,
+  MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_PROJECT_ID,
+  MOCK_IDP_UIAM_SERVICE_URL,
+  MOCK_IDP_UIAM_SHARED_SECRET,
+} from '@kbn/mock-idp-utils';
 import path from 'path';
 import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services as svlServices } from './services';
+
+// Indicates whether the config is used on CI or locally.
+const isRunOnCI = process.env.CI;
 
 export default async () => {
   const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
@@ -66,7 +76,8 @@ export default async () => {
         port: dockerRegistryPort,
         args: dockerArgs,
         waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
+        waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+        preferCached: true,
       },
     }),
     browser: {
@@ -89,7 +100,6 @@ export default async () => {
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
-        'serverless.indices.validate_dot_prefixes=true',
         // controller cluster-settings
         `cluster.service.slow_task_logging_threshold=15s`,
         `cluster.service.slow_task_thread_dump_timeout=5s`,
@@ -97,7 +107,7 @@ export default async () => {
       ],
       ssl: true, // SSL is required for SAML realm
     },
-
+    esServerlessOptions: { uiam: true },
     kbnTestServer: {
       buildArgs: [],
       env: {
@@ -163,12 +173,12 @@ export default async () => {
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
-        // configure security reponse header report-to settings to mimic MKI configuration
+        // configure security response header report-to settings to mimic MKI configuration
         `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
         `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
-        // normally below is injected by control plane
-        '--xpack.cloud.id=ftr_fake_cloud_id',
-        `--xpack.cloud.serverless.project_id=fakeprojectid`,
+        `--xpack.cloud.id=${MOCK_IDP_UIAM_CLOUD_ID}`,
+        `--xpack.cloud.organization_id=${MOCK_IDP_UIAM_ORGANIZATION_ID}`,
+        `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
         `--xpack.cloud.base_url=https://fake-cloud.elastic.co`,
         `--xpack.cloud.projects_url=/projects/`,
         `--xpack.cloud.profile_url=/user/settings/`,
@@ -176,6 +186,13 @@ export default async () => {
         `--xpack.cloud.deployments_url=/deployments`,
         `--xpack.cloud.organization_url=/account/`,
         `--xpack.cloud.users_and_roles_url=/account/members/`,
+        ...(isRunOnCI ? [] : ['--mockIdpPlugin.uiam.enabled=true']),
+        `--xpack.security.uiam.enabled=true`,
+        `--xpack.security.uiam.url=${MOCK_IDP_UIAM_SERVICE_URL}`,
+        `--xpack.security.uiam.sharedSecret=${MOCK_IDP_UIAM_SHARED_SECRET}`,
+        `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
+        `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
+        '--xpack.security.uiam.ssl.verificationMode=none',
       ],
     },
 

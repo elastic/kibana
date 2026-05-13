@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import type { AnomalySwimlaneEmbeddableStateViewBy } from '@kbn/ml-plugin/public/embeddables/anomaly_swimlane/types';
-import { SWIMLANE_TYPE } from '@kbn/ml-plugin/server/embeddable/schemas';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type {
+  AnomalySwimLaneEmbeddableState,
+  AnomalySwimlaneEmbeddableStateViewBy,
+} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -51,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
 
   describe('anomaly detection result views - cases attachments', function () {
-    this.tags(['ml', 'cases', 'dima']);
+    this.tags(['ml', 'cases']);
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
@@ -96,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
             swimlaneType: SWIMLANE_TYPE.VIEW_BY,
             viewBy: 'airline',
             jobIds: [JOB_CONFIG.job_id],
-            timeRange: {
+            time_range: {
               from: '2016-02-07T00:00:00.000Z',
               to: '2016-02-11T23:59:54.000Z',
             },

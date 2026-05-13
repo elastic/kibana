@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils';
 import type { DataSchemaFormat } from './types';
 import type {
   AggregationConfig,

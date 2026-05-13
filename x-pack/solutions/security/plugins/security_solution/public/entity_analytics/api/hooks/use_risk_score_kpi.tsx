@@ -31,10 +31,10 @@ interface RiskScoreKpi {
   timerange?: { to: string; from: string };
 }
 
-interface UseRiskScoreKpiProps {
+export interface UseRiskScoreKpiProps {
   filterQuery?: string | ESQuery;
   skip?: boolean;
-  riskEntity: EntityType;
+  riskEntity: EntityType | EntityType[];
   timerange?: { to: string; from: string };
 }
 

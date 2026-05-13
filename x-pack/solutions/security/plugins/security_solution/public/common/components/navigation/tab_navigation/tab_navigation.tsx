@@ -28,18 +28,18 @@ const TabNavigationItemComponent = ({
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
-  const handleClick = useCallback(
-    (ev: React.SyntheticEvent) => {
-      ev.preventDefault();
-      navigateTo({ path: hrefWithSearch, restoreScroll: true });
-      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
-    },
-    [navigateTo, hrefWithSearch, id]
-  );
-
   const appHref = getAppUrl({
     path: hrefWithSearch,
   });
+
+  const handleClick = useCallback(
+    (ev: React.SyntheticEvent) => {
+      ev.preventDefault();
+      navigateTo({ url: appHref, restoreScroll: true });
+      track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.TAB_CLICKED}${id}`);
+    },
+    [navigateTo, appHref, id]
+  );
 
   return (
     <EuiTab
@@ -87,11 +87,17 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }
     () =>
       Object.values(navTabs).map((tab) => {
         const isSelected = selectedTabId === tab.id;
+        /**
+         * Detail pages (host/user) bake `location.search` into `tab.href` via merge helpers.
+         * Appending `search` again would emit a second `?`, duplicate timeline/timerange, and
+         * corrupt values (e.g. `identityFields` absorbing a trailing `?entityId=...`).
+         */
+        const hrefWithSearch = tab.href.includes('?') ? tab.href : `${tab.href}${search}`;
         return (
           <TabNavigationItem
             key={`navigation-${tab.id}`}
             id={tab.id}
-            hrefWithSearch={tab.href + search}
+            hrefWithSearch={hrefWithSearch}
             name={tab.name}
             disabled={tab.disabled}
             isSelected={isSelected}

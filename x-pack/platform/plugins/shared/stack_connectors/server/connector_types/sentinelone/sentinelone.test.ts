@@ -10,7 +10,7 @@ import type {
   SentinelOneDownloadAgentFileParams,
   SentinelOneFetchAgentFilesParams,
   SentinelOneGetActivitiesParams,
-} from '../../../common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import { API_PATH } from './sentinelone';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';

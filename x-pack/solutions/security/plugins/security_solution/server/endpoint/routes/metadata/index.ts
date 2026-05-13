@@ -38,7 +38,8 @@ export const endpointFilters = schema.object({
         schema.literal(HostStatus.UPDATING.toString()),
         schema.literal(HostStatus.UNHEALTHY.toString()),
         schema.literal(HostStatus.INACTIVE.toString()),
-      ])
+      ]),
+      { maxSize: 20 }
     )
   ),
 });
@@ -58,7 +59,6 @@ export function registerEndpointRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -78,7 +78,6 @@ export function registerEndpointRoutes(
     .get({
       access: 'public',
       path: HOST_METADATA_GET_ROUTE,
-      options: { authRequired: true },
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -108,7 +107,6 @@ export function registerEndpointRoutes(
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

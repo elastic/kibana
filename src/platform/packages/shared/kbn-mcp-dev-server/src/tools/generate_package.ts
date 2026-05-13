@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -20,7 +20,7 @@ const generatePackageInputSchema = z.object({
     .describe(
       'The owning Github team of the package. Use list_teams before this to find the appropriate owner'
     ),
-  group: z.enum(['workplaceai', 'search', 'observability', 'security', 'platform']),
+  group: z.enum(['vectordb', 'workplaceai', 'search', 'observability', 'security', 'platform']),
 });
 
 async function generatePackage(input: z.infer<typeof generatePackageInputSchema>): Promise<string> {

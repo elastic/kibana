@@ -30,7 +30,8 @@ import { visitRuleEditPage } from '../../../../tasks/edit_rule';
 
 const expectedValidEsqlQuery = 'from auditbeat* METADATA _id';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/253598
+describe.skip(
   'Detection rules, preview',
   {
     tags: ['@ess', '@serverless'],

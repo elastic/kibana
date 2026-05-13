@@ -14,7 +14,7 @@ import type {
   StorageClientIndexResponse,
   StorageDocumentOf,
 } from '../../..';
-import { StorageIndexAdapter, type StorageSettings } from '../../..';
+import { BulkOperationError, StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { Logger } from '@kbn/core/server';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
@@ -254,6 +254,36 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    it('bulk create fails when the document id already exists', async () => {
+      await client.index({
+        id: 'existing-doc',
+        document: { foo: 'first' },
+      });
+
+      const conflictResponse = await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          {
+            create: {
+              _id: 'existing-doc',
+              document: { foo: 'second' },
+            },
+          },
+        ],
+      });
+
+      expect(conflictResponse.errors).toBe(true);
+      expect(conflictResponse.items).toHaveLength(1);
+      expect(conflictResponse.items[0].create?.status).toBe(409);
+      expect(conflictResponse.items[0].create?.error).toEqual(
+        expect.objectContaining({
+          type: expect.stringMatching(
+            /version_conflict_engine_exception|document_already_exists_exception/
+          ),
+        })
+      );
+    });
+
     describe('migrates a document with a legacy property', () => {
       let migratingClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {
@@ -345,6 +375,149 @@ describe('StorageIndexAdapter', () => {
 
     it('deletes the documents', async () => {
       await verifyClean();
+    });
+  });
+
+  describe('when bulk operation encounters errors', () => {
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('throws BulkOperationError when bulk operation contains document-level errors', async () => {
+      // Create an adapter with strict mapping to trigger mapping errors
+      const strictAdapter = createStorageIndexAdapter({
+        name: 'test_strict_index',
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+      const strictClient = strictAdapter.getClient();
+
+      // First create the index with strict mapping
+      await strictClient.index({
+        id: 'doc1',
+        document: { foo: 'bar' },
+      });
+
+      // Try to bulk index with an invalid field (should fail due to dynamic: strict)
+      await expect(
+        strictClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc2',
+                document: { foo: 'baz', invalid_field: 'value' } as any,
+              },
+            },
+          ],
+          refresh: 'wait_for',
+          throwOnFail: true,
+        })
+      ).rejects.toThrow(BulkOperationError);
+
+      await strictClient.clean();
+    });
+
+    it('includes error details in the thrown BulkOperationError', async () => {
+      const strictAdapter = createStorageIndexAdapter({
+        name: 'test_strict_index_2',
+        schema: {
+          properties: {
+            foo: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+      const strictClient = strictAdapter.getClient();
+
+      // Create the index
+      await strictClient.index({
+        id: 'doc1',
+        document: { foo: 'bar' },
+      });
+
+      try {
+        await strictClient.bulk({
+          operations: [
+            {
+              index: {
+                _id: 'doc2',
+                document: { foo: 'baz', invalid_field: 'value' } as any,
+              },
+            },
+          ],
+          throwOnFail: true,
+          refresh: 'wait_for',
+        });
+        fail('Expected BulkOperationError to be thrown');
+      } catch (err) {
+        const error = err as BulkOperationError;
+        expect(error).toBeInstanceOf(BulkOperationError);
+        expect(error.message).toContain('Bulk operation failed');
+        expect(error.message).toContain('1 out of 1 items');
+        expect(error.response).toBeDefined();
+        expect(error.response.errors).toBe(true);
+        expect(error.response.items).toHaveLength(1);
+        expect(error.response.items[0].index?.error).toBeDefined();
+        expect(error.response.items[0].index?.error?.type).toBe('strict_dynamic_mapping_exception');
+      }
+
+      await strictClient.clean();
+    });
+  });
+
+  describe('automatic mapping reconciliation on read', () => {
+    const updatedStorageSettings = {
+      name: TEST_INDEX_NAME,
+      schema: {
+        properties: {
+          foo: { type: 'keyword' as const },
+          bar: { type: 'keyword' as const },
+        },
+      },
+    } satisfies StorageSettings;
+
+    afterAll(async () => {
+      await client?.clean();
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+    });
+
+    it('updates stale mappings before the first search', async () => {
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+      await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      await verifyIndex();
+
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('read_updated');
+
+      const updatedAdapter = createStorageIndexAdapter(updatedStorageSettings);
+      const updatedClient = updatedAdapter.getClient();
+
+      await updatedClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      const getIndicesResponse = await esClient.indices.get({ index: TEST_INDEX_NAME });
+      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
+
+      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('read_updated');
+      expect(getIndicesResponse[writeIndexName].mappings?.properties).toMatchObject({
+        foo: { type: 'keyword' },
+        bar: { type: 'keyword' },
+      });
+    });
+
+    it('does not create resources when searching on a clean instance', async () => {
+      await client.clean();
+
+      const freshAdapter = createStorageIndexAdapter(storageSettings);
+      const freshClient = freshAdapter.getClient();
+
+      await freshClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      await verifyNoIndex();
     });
   });
 
@@ -483,6 +656,10 @@ describe('StorageIndexAdapter', () => {
         is_write_index: true,
       },
     });
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.number_of_shards).toEqual('1');
   }
 
   async function verifyClean() {

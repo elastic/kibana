@@ -6,35 +6,41 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
-import { lazy } from 'react';
 import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-const LazyIconEntityAnalytics = lazy(() =>
-  import('./v2_icons/entity_analytics').then(({ iconEntityAnalytics }) => ({
-    default: iconEntityAnalytics,
-  }))
-);
-
 export const createEntityAnalyticsNavigationTree = (
-  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
-    sideNavVersion: 'v1',
+  isNewHomePageEnabled?: boolean
+): NodeDefinition => {
+  const newHomePageEnabled = isNewHomePageEnabled ?? false;
+  if (newHomePageEnabled) {
+    return {
+      id: SecurityPageName.entityAnalyticsHomePage,
+      icon: 'chartBarVerticalStack',
+      link: securityLink(SecurityPageName.entityAnalyticsHomePage),
+      badgeType: 'new',
+    };
+  } else {
+    return {
+      id: SecurityGroupName.entityAnalytics,
+      icon: 'chartBarVerticalStack',
+      title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
+      renderAs: 'panelOpener',
+      children: [
+        {
+          id: SecurityPageName.entityAnalyticsOverview,
+          link: securityLink(SecurityPageName.entityAnalyticsOverview),
+        },
+        {
+          id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
+          link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
+        },
+        {
+          id: SecurityPageName.entityAnalyticsHomePage,
+          link: securityLink(SecurityPageName.entityAnalyticsHomePage),
+        },
+      ],
+    };
   }
-): NodeDefinition => ({
-  id: SecurityGroupName.entityAnalytics,
-  iconV2: LazyIconEntityAnalytics,
-  title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
-  renderAs: 'panelOpener',
-  sideNavVersion,
-  children: [
-    {
-      id: SecurityPageName.entityAnalyticsOverview,
-      link: securityLink(SecurityPageName.entityAnalyticsOverview),
-    },
-    {
-      id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
-      link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
-    },
-  ],
-});
+};

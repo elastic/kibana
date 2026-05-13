@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 var command = process.argv[2];
 
 switch (command) {
   case 'snapshot':
-    require('../src/dev/so_migration/so_migration_snapshot_cli');
+    require('@kbn/check-saved-objects-cli').runSoMigrationSnapshotCli();
     break;
   case 'compare':
-    require('../src/dev/so_migration/so_migration_compare_cli');
+    require('@kbn/check-saved-objects-cli').runSoMigrationCompareCli();
     break;
   default:
     printHelp();

@@ -9,9 +9,12 @@
 
 import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
 import {
+  EuiAvatar,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -20,10 +23,12 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations';
+import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 
@@ -38,13 +43,27 @@ export const getExecutionTitleColor = (
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
+  executedBy?: string;
+  triggeredBy?: string;
+  showExecutor?: boolean;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, startedAt, duration, selected, onClick }) => {
+  ({
+    status,
+    isTestRun,
+    startedAt,
+    duration,
+    executedBy,
+    triggeredBy,
+    showExecutor = false,
+    selected,
+    onClick,
+  }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -66,7 +85,14 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     }, [selected, onClick, styles]);
 
     return (
-      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
+      <EuiPanel
+        onClick={onClick}
+        hasShadow={false}
+        paddingSize="m"
+        hasBorder
+        css={panelCss}
+        data-test-subj="workflowExecutionListItem"
+      >
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
@@ -88,7 +114,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
                     <EuiText size="xs" tabIndex={0} color="subdued">
-                      <FormattedRelative value={startedAt} />
+                      <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>
                 ) : (
@@ -102,20 +128,70 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {formattedDuration && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+          <EuiFlexItem grow={false} css={styles.metadataContainer}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap={false}>
+              {status === ExecutionStatus.WAITING_FOR_INPUT && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="clock" color="subdued" />
+                  <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
+                    {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                      defaultMessage: 'Action is required',
+                    })}
+                  </EuiBadge>
                 </EuiFlexItem>
+              )}
+              {isTestRun && (
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {formattedDuration}
-                  </EuiText>
+                  <EuiIconTip
+                    type="flask"
+                    color={euiTheme.colors.backgroundFilledText}
+                    title={i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
+                      defaultMessage: 'Test Run',
+                    })}
+                  />
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
+              )}
+              {showExecutor && (
+                <EuiFlexItem grow={false} css={styles.executedByContainer}>
+                  {executedBy && (
+                    <EuiFlexGroup
+                      alignItems="center"
+                      justifyContent="flexEnd"
+                      gutterSize="xs"
+                      wrap={false}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiAvatar name={executedBy} size="s" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {executedBy}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={styles.durationContainer}>
+                {formattedDuration && (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    gutterSize="xs"
+                    wrap={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="clock" color="subdued" aria-hidden={true} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {formattedDuration}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -137,4 +213,15 @@ const componentStyles = {
         transform: 'none',
       },
     }),
+  metadataContainer: css({
+    minWidth: '200px',
+  }),
+  executedByContainer: css({
+    minWidth: '80px',
+    justifyContent: 'flex-end',
+  }),
+  durationContainer: css({
+    minWidth: '70px',
+    justifyContent: 'flex-end',
+  }),
 };

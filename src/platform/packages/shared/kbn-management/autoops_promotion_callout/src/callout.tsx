@@ -10,14 +10,22 @@
 import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCallOutProps } from '@elastic/eui';
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-export type AutoOpsPromotionCalloutProps = EuiCallOutProps;
+export interface AutoOpsPromotionCalloutProps {
+  cloudConnectUrl?: string;
+  onConnectClick?: (e: React.MouseEvent) => void;
+  hasCloudConnectPermission?: boolean;
+  overrideCalloutProps?: Partial<Omit<EuiCallOutProps, 'children' | 'title' | 'onDismiss'>>;
+}
 
-const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
+export const AUTOOPS_CALLOUT_DISMISSED_KEY = 'kibana.autoOpsPromotionCallout.dismissed';
 
 export const AutoOpsPromotionCallout = ({
-  ...overrideCalloutProps
+  cloudConnectUrl = '/app/cloud_connect',
+  onConnectClick,
+  hasCloudConnectPermission,
+  overrideCalloutProps = {},
 }: AutoOpsPromotionCalloutProps) => {
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -37,16 +45,30 @@ export const AutoOpsPromotionCallout = ({
     return null;
   }
 
+  // Determine Cloud Connect link behavior based on cloudConnect permission
+  const cloudConnectLinkProps =
+    hasCloudConnectPermission === false
+      ? {
+          href: 'https://cloud.elastic.co/connect-cluster-services-portal',
+          target: '_blank' as const,
+          rel: 'noopener noreferrer' as const,
+          external: true,
+        }
+      : {
+          href: cloudConnectUrl,
+          onClick: onConnectClick,
+        };
+
   return (
     <EuiCallOut
       title={
         <FormattedMessage
           id="management.autoOpsPromotionCallout.title"
-          defaultMessage="New! Connect AutoOps to this self-managed cluster"
+          defaultMessage="New! Connect this cluster to AutoOps"
         />
       }
-      color="accent"
-      iconType="alert"
+      color="primary"
+      iconType="info"
       data-test-subj="autoOpsPromotionCallout"
       onDismiss={handleDismiss}
       {...overrideCalloutProps}
@@ -54,36 +76,22 @@ export const AutoOpsPromotionCallout = ({
       <p>
         <FormattedMessage
           id="management.autoOpsPromotionCallout.description"
-          defaultMessage="Connect this cluster to Elastic Cloud to get real-time issue detection, resolution paths, and enable Elastic Support to use AutoOps to assist you better. {learnMoreLink}"
+          defaultMessage="Unlock advanced monitoring of ECE, ECK, and self-managed clusters with AutoOps, now available for free across all license types. Set it up today using {cloudConnectLink}."
           values={{
-            learnMoreLink: (
-              <a
-                href="https://www.elastic.co/blog/elasticsearch-autoops-on-prem"
-                target="_blank"
-                rel="noopener noreferrer"
+            cloudConnectLink: (
+              <EuiLink
+                {...cloudConnectLinkProps}
+                data-test-subj="autoOpsPromotionCalloutCloudConnectLink"
               >
                 <FormattedMessage
-                  id="management.autoOpsPromotionCallout.learnMore"
-                  defaultMessage="Learn more"
+                  id="management.autoOpsPromotionCallout.cloudConnectLink"
+                  defaultMessage="Cloud Connect"
                 />
-              </a>
+              </EuiLink>
             ),
           }}
         />
       </p>
-      <EuiButton
-        color="accent"
-        fill
-        size="s"
-        href="https://cloud.elastic.co/connect-cluster-services-portal"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <FormattedMessage
-          id="management.autoOpsPromotionCallout.openButton"
-          defaultMessage="Connect this cluster"
-        />
-      </EuiButton>
     </EuiCallOut>
   );
 };

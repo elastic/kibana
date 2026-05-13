@@ -17,6 +17,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart, FieldFormatsSetup } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { EditorFrameSetup } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 
 export type { PersistedIndexPatternLayer, FormulaPublicApi } from '@kbn/lens-common';
 
@@ -31,6 +32,7 @@ export interface FormBasedDatasourceSetupPlugins {
 export interface FormBasedDatasourceStartPlugins {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   share?: SharePluginStart;
   fieldFormats: FieldFormatsStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
@@ -64,7 +66,16 @@ export class FormBasedDatasource {
 
       const [
         coreStart,
-        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch, share },
+        {
+          dataViewFieldEditor,
+          uiActions,
+          data,
+          fieldFormats,
+          dataViews,
+          unifiedSearch,
+          share,
+          kql,
+        },
       ] = await core.getStartServices();
 
       return getFormBasedDatasource({
@@ -73,6 +84,7 @@ export class FormBasedDatasource {
         storage: new Storage(localStorage),
         data,
         unifiedSearch,
+        kql,
         share,
         dataViews,
         charts,

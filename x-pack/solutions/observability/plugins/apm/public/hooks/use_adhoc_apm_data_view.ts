@@ -9,31 +9,35 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import type { ApmPluginStartDeps } from '../plugin';
 import { callApmApi } from '../services/rest/create_call_apm_api';
 
 export async function getApmDataViewIndexPattern() {
-  const res = await callApmApi('GET /internal/apm/data_view/index_pattern', {
+  return callApmApi('GET /internal/apm/data_view/index_pattern', {
     signal: null,
   });
-  return res.apmDataViewIndexPattern;
 }
 
 export function useAdHocApmDataView() {
   const { services } = useKibana<ApmPluginStartDeps>();
   const [dataView, setDataView] = useState<DataView | undefined>();
+  const [apmIndices, setApmIndices] = useState<APMIndices | undefined>();
 
   useEffect(() => {
     async function fetchDataView() {
-      const indexPattern = await getApmDataViewIndexPattern();
+      const { apmDataViewIndexPattern, apmIndices: indices } = await getApmDataViewIndexPattern();
 
       try {
         const displayError = false;
-        return await services.dataViews.create(
-          { title: indexPattern, timeFieldName: '@timestamp' },
+
+        const adHocDataView = await services.dataViews.create(
+          { title: apmDataViewIndexPattern, timeFieldName: '@timestamp' },
           undefined,
           displayError
         );
+
+        return { dataView: adHocDataView, apmIndices: indices };
       } catch (e) {
         const noDataScreen = e.message.includes('No matching indices found');
         if (noDataScreen) {
@@ -51,8 +55,14 @@ export function useAdHocApmDataView() {
       }
     }
 
-    fetchDataView().then(setDataView);
+    fetchDataView().then((result) => {
+      if (!result) {
+        return;
+      }
+      setDataView(result.dataView);
+      setApmIndices(result.apmIndices);
+    });
   }, [services.notifications.toasts, services.dataViews]);
 
-  return { dataView };
+  return { dataView, apmIndices };
 }

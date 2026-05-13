@@ -7,7 +7,9 @@
 
 import type { ResourceInstaller } from '../resource_installer';
 import type { BurnRatesClient } from '../burn_rates_client';
-import type { SLORepository } from '../slo_repository';
+import type { CompositeSLORepository } from '../composite_slo_repository';
+import type { SLODefinitionRepository } from '../slo_definition_repository';
+import type { SLOTemplateRepository } from '../slo_template_repository';
 import type { SummaryClient } from '../summary_client';
 import type { SummarySearchClient } from '../summary_search_client/types';
 import type { TransformManager } from '../transform_manager';
@@ -42,7 +44,7 @@ const createSummaryTransformManagerMock = (): jest.Mocked<TransformManager> => {
   };
 };
 
-const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
+const createSLODefinitionRepositoryMock = (): jest.Mocked<SLODefinitionRepository> => {
   return {
     create: jest.fn(),
     update: jest.fn(),
@@ -56,6 +58,7 @@ const createSLORepositoryMock = (): jest.Mocked<SLORepository> => {
 const createSummaryClientMock = (): jest.Mocked<SummaryClient> => {
   return {
     computeSummary: jest.fn(),
+    computeSummaries: jest.fn(),
   };
 };
 
@@ -68,6 +71,26 @@ const createSummarySearchClientMock = (): jest.Mocked<SummarySearchClient> => {
 const createBurnRatesClientMock = (): jest.Mocked<BurnRatesClient> => {
   return {
     calculate: jest.fn(),
+    calculateBatch: jest.fn(),
+  };
+};
+
+const createCompositeSLORepositoryMock = (): jest.Mocked<CompositeSLORepository> => {
+  return {
+    create: jest.fn(),
+    update: jest.fn(),
+    findById: jest.fn(),
+    findAllByIds: jest.fn(),
+    deleteById: jest.fn(),
+    search: jest.fn(),
+  };
+};
+
+const createSLOTemplateRepositoryMock = (): jest.Mocked<SLOTemplateRepository> => {
+  return {
+    findById: jest.fn(),
+    search: jest.fn(),
+    tags: jest.fn(),
   };
 };
 
@@ -75,8 +98,10 @@ export {
   createResourceInstallerMock,
   createTransformManagerMock,
   createSummaryTransformManagerMock,
-  createSLORepositoryMock,
+  createSLODefinitionRepositoryMock as createSLORepositoryMock,
+  createSLOTemplateRepositoryMock,
   createSummaryClientMock,
   createSummarySearchClientMock,
   createBurnRatesClientMock,
+  createCompositeSLORepositoryMock,
 };

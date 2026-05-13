@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash/fp';
 
@@ -142,6 +141,7 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern,
       anonymizationFields,
+      connectorId: connector.id,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
@@ -151,9 +151,7 @@ describe('getRequestBody', () => {
       anonymizationFields: anonymizationFields.data,
       apiConfig: {
         actionTypeId: '',
-        connectorId: '',
-        model: undefined,
-        provider: undefined,
+        connectorId: connector.id,
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
@@ -167,6 +165,7 @@ describe('getRequestBody', () => {
     const result = getRequestBody({
       alertsIndexPattern: undefined,
       anonymizationFields,
+      connectorId: connector.id,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions,
     });
@@ -176,9 +175,7 @@ describe('getRequestBody', () => {
       anonymizationFields: anonymizationFields.data,
       apiConfig: {
         actionTypeId: '',
-        connectorId: '',
-        model: undefined,
-        provider: undefined,
+        connectorId: connector.id,
       },
       langSmithProject: undefined,
       langSmithApiKey: undefined,
@@ -192,6 +189,7 @@ describe('getRequestBody', () => {
     const withLangSmith = {
       alertsIndexPattern,
       anonymizationFields,
+      connectorId: connector.id,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       traceOptions: {
         apmUrl: '/app/apm',
@@ -207,72 +205,12 @@ describe('getRequestBody', () => {
       anonymizationFields: anonymizationFields.data,
       apiConfig: {
         actionTypeId: '',
-        connectorId: '',
-        model: undefined,
-        provider: undefined,
+        connectorId: connector.id,
       },
       langSmithApiKey: withLangSmith.traceOptions.langSmithApiKey,
       langSmithProject: withLangSmith.traceOptions.langSmithProject,
       size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       replacements: {},
-      subAction: 'invokeAI',
-    });
-  });
-
-  it('returns the expected AttackDiscoveryPostRequestBody with the expected apiConfig when selectedConnector is provided', () => {
-    const result = getRequestBody({
-      alertsIndexPattern,
-      anonymizationFields,
-      selectedConnector: connector, // <-- selectedConnector is provided
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-      traceOptions,
-    });
-
-    expect(result).toEqual({
-      alertsIndexPattern,
-      anonymizationFields: anonymizationFields.data,
-      apiConfig: {
-        actionTypeId: connector.actionTypeId,
-        connectorId: connector.id,
-        model: undefined,
-        provider: undefined,
-      },
-      langSmithProject: undefined,
-      langSmithApiKey: undefined,
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-      replacements: {},
-      subAction: 'invokeAI',
-    });
-  });
-
-  it('returns the expected AttackDiscoveryPostRequestBody with the expected apiConfig when genAiConfig is provided', () => {
-    const genAiConfig = {
-      apiProvider: OpenAiProviderType.AzureAi,
-      defaultModel: '2024-02-15-preview',
-    };
-
-    const result = getRequestBody({
-      alertsIndexPattern,
-      anonymizationFields,
-      genAiConfig, // <-- genAiConfig is provided
-      selectedConnector: connector, // <-- selectedConnector is provided
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
-      traceOptions,
-    });
-
-    expect(result).toEqual({
-      alertsIndexPattern,
-      anonymizationFields: anonymizationFields.data,
-      apiConfig: {
-        actionTypeId: connector.actionTypeId,
-        connectorId: connector.id,
-        model: genAiConfig.defaultModel,
-        provider: genAiConfig.apiProvider,
-      },
-      langSmithProject: undefined,
-      langSmithApiKey: undefined,
-      replacements: {},
-      size: DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
       subAction: 'invokeAI',
     });
   });

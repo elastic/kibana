@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestPipeline,
+  IngestPutPipelineRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
@@ -25,18 +28,27 @@ export const detachMlInferencePipeline = async (
     id: parentPipelineId,
   });
 
-  const parentPipeline = pipelineResponse[parentPipelineId];
+  const parentPipeline: IngestPipeline | undefined = pipelineResponse[parentPipelineId];
 
   if (parentPipeline !== undefined) {
     // remove sub-pipeline from parent pipeline
     if (parentPipeline.processors !== undefined) {
       const updatedProcessors = parentPipeline.processors.filter(
-        (p) => !(p.pipeline !== undefined && p.pipeline.name === pipelineName)
+        (p) => !(p?.pipeline !== undefined && p.pipeline.name === pipelineName)
       );
       // only update if we changed something
       if (updatedProcessors.length !== parentPipeline.processors.length) {
+        // Remove system-managed properties (dates) that cannot be set during create/update of ingest pipelines
+        const {
+          created_date: _createdDate,
+          created_date_millis: _createdDateMillis,
+          modified_date: _modifiedDate,
+          modified_date_millis: _modifiedDateMillis,
+          ...pipelineWithoutManagedFields
+        } = parentPipeline;
+
         const updatedPipeline: IngestPutPipelineRequest = {
-          ...parentPipeline,
+          ...pipelineWithoutManagedFields,
           id: parentPipelineId,
           processors: updatedProcessors,
         };

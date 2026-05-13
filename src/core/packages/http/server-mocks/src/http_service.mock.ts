@@ -27,7 +27,14 @@ import { AuthStatus } from '@kbn/core-http-server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
-import { CspConfig, ExternalUrlConfig, config } from '@kbn/core-http-server-internal';
+import {
+  CspConfig,
+  ExternalUrlConfig,
+  HttpConfig,
+  config,
+  cspConfig,
+  permissionsPolicyConfig,
+} from '@kbn/core-http-server-internal';
 import type {
   HttpService,
   InternalHttpServicePreboot,
@@ -186,6 +193,12 @@ const createInternalSetupContractMock = () => {
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     registerStaticDir: jest.fn(),
     basePath,
+    config: new HttpConfig(
+      config.schema.validate({}),
+      cspConfig.schema.validate({}),
+      ExternalUrlConfig.DEFAULT,
+      permissionsPolicyConfig.schema.validate({})
+    ),
     csp: CspConfig.DEFAULT,
     prototypeHardening: false,
     staticAssets: createInternalStaticAssetsMock(basePath),
@@ -256,6 +269,7 @@ const createInternalStartContractMock = () => {
     generateOas: jest.fn(),
     staticAssets: createInternalStaticAssetsMock(basePath),
     isListening: jest.fn(),
+    setRedactedSessionIdGetter: jest.fn(),
   };
 
   mock.isListening.mockReturnValue(true);

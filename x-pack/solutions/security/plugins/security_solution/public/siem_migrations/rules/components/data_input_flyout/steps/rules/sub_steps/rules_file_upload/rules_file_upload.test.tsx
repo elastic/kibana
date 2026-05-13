@@ -17,6 +17,7 @@ import path from 'path';
 import os from 'os';
 import { splunkTestRules } from './splunk_rules.test.data';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { MigrationSource } from '../../../../../../../common/types';
 
 const mockCreateMigration: CreateMigration = jest.fn();
 const mockOnRulesFileChanged = jest.fn();
@@ -115,7 +116,11 @@ describe('RulesFileUpload', () => {
       severity: rule['alert.severity'] as OriginalRule['severity'],
     }));
 
-    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, migrationName, rulesToExpect);
+    expect(mockCreateMigration).toHaveBeenNthCalledWith(1, {
+      migrationName,
+      rules: rulesToExpect,
+      vendor: MigrationSource.SPLUNK,
+    });
   });
 
   describe('Error Handling', () => {

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
@@ -8,10 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
-    { "path": "../tsconfig.json" },
     "@kbn/core",
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",

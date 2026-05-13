@@ -20,9 +20,6 @@ interface ServerlessPluginStart {
   // Set breadcrumbs for the current page
   setBreadcrumbs: (breadcrumbs, params) => void;
 
-  // Set the project home URL
-  setProjectHome: (homeHref: string) => void;
-
   // Get navigation cards for a Stack Management landing page
   getNavigationCards: (
     roleManagementEnabled: boolean,

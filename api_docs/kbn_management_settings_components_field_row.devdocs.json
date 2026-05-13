@@ -10,7 +10,23 @@
         "tags": [],
         "label": "FieldRow",
         "description": [
-          "\nComponent for displaying a {@link FieldDefinition} in a form row, using a {@link FieldInput}."
+          "\nComponent for displaying a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " in a form row, using a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          "."
         ],
         "signature": [
           "(props: ",
@@ -24,6 +40,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+        "lineNumber": 80,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -34,7 +52,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "The {@link FieldRowProps } for the {@link FieldRow } component."
+              "The {@link FieldRowProps} for the {@link FieldRow} component."
             ],
             "signature": [
               {
@@ -46,7 +64,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 80,
+            "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldRowProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -61,7 +82,15 @@
         "tags": [],
         "label": "FieldRowKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
+          "\nKibana-specific Provider that maps Kibana plugins and services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRowProvider",
+            "text": "FieldRowProvider"
+          },
+          "."
         ],
         "signature": [
           "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
@@ -75,6 +104,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,6 +128,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 46,
+            "columnNumber": 91,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -112,7 +145,15 @@
         "tags": [],
         "label": "FieldRowProvider",
         "description": [
-          "\nReact Provider that provides services to a {@link FieldRow} component and its dependents.\\"
+          "\nReact Provider that provides services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component and its dependents.\\"
         ],
         "signature": [
           "({ children, ...services }: ",
@@ -126,6 +167,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,7 +189,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 31,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldRowProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -163,9 +209,19 @@
         "tags": [],
         "label": "FieldRowProps",
         "description": [
-          "\nProps for a {@link FieldRow} component."
+          "\nProps for a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -176,16 +232,26 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The {@link FieldDefinition} corresponding the setting."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              " corresponding the setting."
             ],
             "signature": [
               "{ id: string; type: ",
               "UiSettingsType",
-              "; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; name: string; groupId: string; displayName: string; technicalPreview?: ",
+              "; name: string; defaultValue?: string | number | boolean | (string | number)[] | null | undefined; groupId: string; displayName: string; technicalPreview?: ",
               "TechnicalPreviewSettings",
               " | undefined; isCustom: boolean; isOverridden: boolean; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; savedValue?: string | number | boolean | (string | number)[] | null | undefined; defaultValueDisplay: string; isDefaultValue: boolean; unsavedFieldId: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -199,6 +265,8 @@
               "True if saving settings is enabled, false otherwise."
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,7 +277,15 @@
             "tags": [],
             "label": "onFieldChange",
             "description": [
-              "The {@link OnInputChangeFn} handler."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-public.OnInputChangeFn",
+                "text": "OnInputChangeFn"
+              },
+              " handler."
             ],
             "signature": [
               "(id: string, change?: ",
@@ -225,6 +301,8 @@
               "> | undefined) => void"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -237,6 +315,8 @@
                 "label": "id",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 95,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -258,7 +338,10 @@
                   "<T> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
+                "lineNumber": 96,
+                "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]
@@ -276,6 +359,8 @@
               "((id: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -292,6 +377,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+                "lineNumber": 71,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -306,7 +393,15 @@
             "tags": [],
             "label": "unsavedChange",
             "description": [
-              "The {@link UnsavedFieldChange} corresponding to any unsaved change to the field."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              " corresponding to any unsaved change to the field."
             ],
             "signature": [
               {
@@ -321,6 +416,8 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -334,7 +431,15 @@
         "tags": [],
         "label": "FieldRowProviderProps",
         "description": [
-          "\nProps for {@link FieldRowProvider}."
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRowProvider",
+            "text": "FieldRowProvider"
+          },
+          "."
         ],
         "signature": [
           {
@@ -354,6 +459,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,9 +472,11 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/services.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -381,9 +490,19 @@
         "tags": [],
         "label": "KibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldRow} component."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -398,6 +517,8 @@
               "{ links: { management: Record<string, string>; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -411,9 +532,19 @@
         "tags": [],
         "label": "Services",
         "description": [
-          "\nContextual services used by a {@link FieldRow} component."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -428,6 +559,8 @@
               "{ [key: string]: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -444,7 +577,15 @@
         "tags": [],
         "label": "FieldRowKibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldRow} component and its dependents."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -464,6 +605,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -475,7 +618,15 @@
         "tags": [],
         "label": "FieldRowServices",
         "description": [
-          "\nContextual services used by a {@link FieldRow} component and its dependents."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -495,6 +646,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

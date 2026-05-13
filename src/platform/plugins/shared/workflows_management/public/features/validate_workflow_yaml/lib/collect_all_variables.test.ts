@@ -84,8 +84,9 @@ steps:
     const yaml = `name: Test Workflow
 steps:
   - name: Foreach Step
-    foreach: items
-    do:
+    foreach: "{{items}}"
+    type: foreach
+    steps:
       - name: Inner Step
         action: test`;
 
@@ -100,7 +101,7 @@ steps:
         {
           name: 'Foreach Step',
           type: 'foreach',
-          foreach: 'items',
+          foreach: '{{items}}',
           steps: [
             {
               name: 'Inner Step',
@@ -345,5 +346,145 @@ steps:
     expect(result[0].id).not.toBe(result[1].id);
     expect(result[0].key).toBe('myVar');
     expect(result[1].key).toBe('myVar');
+  });
+
+  it('should NOT collect variables from YAML comment lines', () => {
+    const yaml = `
+name: Test Workflow
+# This is a comment with {{commentedVar}}
+steps:
+  - name: Test Step
+    action: test
+    params:
+      value: "{{activeVar}}"
+`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: {
+            value: '{{activeVar}}',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('activeVar');
+  });
+
+  it('should NOT collect variables from indented YAML comment lines', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: Test Step
+    action: test
+    params:
+      # old value: "{{deprecatedVar}}"
+      value: "{{currentVar}}"`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: {
+            value: '{{currentVar}}',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('currentVar');
+  });
+
+  it('should collect variables from non-comment lines while skipping comment lines in mixed content', () => {
+    const yaml = `
+name: Test Workflow
+# {{commentVar1}}
+steps:
+  - name: Test Step
+    action: test
+    # {{commentVar2}}
+    params:
+      value: "{{realVar1}} and {{realVar2}}"
+`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: {
+            value: '{{realVar1}} and {{realVar2}}',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(2);
+    expect(result.map((v) => v.key)).toEqual(['realVar1', 'realVar2']);
+  });
+
+  it('should NOT collect variables from inline YAML comments', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: Test Step
+    action: test
+    params:
+      value: "{{activeVar}}" # {{inlineCommentVar}}`;
+
+    const model = createMockModel(yaml);
+    const yamlDocument = parseDocument(yaml);
+    const workflowDefinition: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'Test Step',
+          type: 'test.action',
+          with: {
+            value: '{{activeVar}}',
+          },
+        },
+      ],
+    };
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+
+    const result = collectAllVariables(model, yamlDocument, workflowGraph);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toBe('activeVar');
   });
 });

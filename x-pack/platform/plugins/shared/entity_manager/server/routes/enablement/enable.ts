@@ -6,7 +6,7 @@
  */
 
 import { createEntityDefinitionQuerySchema } from '@kbn/entities-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ERROR_API_KEY_SERVICE_DISABLED } from '../../../common/errors';
 import {
   canEnableEntityDiscovery,

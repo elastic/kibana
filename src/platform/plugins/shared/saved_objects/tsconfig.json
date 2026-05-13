@@ -1,14 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*",
-    // Emotion theme typing
-    "../../../../../typings/emotion.d.ts"
+    "server/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

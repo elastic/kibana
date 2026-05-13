@@ -7,6 +7,12 @@
 
 import expect from 'expect';
 
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  createRule,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
@@ -19,12 +25,6 @@ import {
   getSimpleRule,
   updateUsername,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  createRule,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -278,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toEqual(
-            '[request body]: max_signals: Number must be greater than or equal to 1'
+            '[request body]: max_signals: Too small: expected number to be >=1'
           );
         });
       });

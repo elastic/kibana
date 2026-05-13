@@ -13,6 +13,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   GetPrebuiltRuleBaseVersionRequest,
@@ -22,20 +23,24 @@ import type {
   PerformRuleInstallationResponseBody,
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  ReviewRuleDeprecationRequestBody,
+  ReviewRuleDeprecationResponseBody,
   RevertPrebuiltRulesRequest,
   RevertPrebuiltRulesResponseBody,
+  ReviewRuleInstallationRequestBody,
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
+  BOOTSTRAP_EASE_RULES_URL,
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
   PERFORM_RULE_UPGRADE_URL,
   PREBUILT_RULES_STATUS_URL,
   REVERT_PREBUILT_RULES_URL,
+  REVIEW_RULE_DEPRECATION_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
@@ -54,6 +59,7 @@ import {
   BulkActionTypeEnum,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   RULE_MANAGEMENT_FILTERS_URL,
+  RULE_MANAGEMENT_RULES_URL_SEARCH,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -70,12 +76,15 @@ import type { RulePreviewResponse, RuleResponse } from '../../../../common/api/d
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../common/translations';
+import { getGapRange } from '../../rule_gaps/api/hooks/utils';
 import type {
   CreateRulesProps,
   ExportDocumentsProps,
   FetchCoverageOverviewProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
+  FetchSearchRulesProps,
+  FetchSearchRulesResponse,
   FetchRulesProps,
   FetchRulesResponse,
   FindRulesReferencedByExceptionsProps,
@@ -87,7 +96,8 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { RuleBootstrapResults } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
+import { defaultRangeValue } from '../../rule_gaps/constants';
 
 /**
  * Create provided Rule
@@ -193,18 +203,27 @@ export const fetchRules = async ({
     page: 1,
     perPage: 20,
   },
-  gapsRange,
   signal,
+  schedulerId,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
+
+  const shouldApplyDefaultGapsRange = Boolean(filterOptions?.gapFillStatuses?.length);
+  const defaultGapsRange = shouldApplyDefaultGapsRange ? getGapRange(defaultRangeValue) : undefined;
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
-    ...(gapsRange ? { gaps_range_start: gapsRange.start, gaps_range_end: gapsRange.end } : {}),
+    ...(filterOptions?.gapFillStatuses?.length
+      ? { gap_fill_statuses: filterOptions.gapFillStatuses }
+      : {}),
+    ...(defaultGapsRange
+      ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
+      : {}),
     ...(kql !== '' ? { filter: kql } : {}),
+    ...(schedulerId ? { gap_auto_fill_scheduler_id: schedulerId } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
@@ -213,6 +232,67 @@ export const fetchRules = async ({
     query,
     signal,
   });
+};
+
+/**
+ * Fetches all rules from the Detection Engine API with the option to include aggregations
+ * and deep pagination via `search_after`.
+ *
+ * @param fields subset of rule attributes to return (omit for all attributes)
+ * @param filter structured KQL filter
+ * @param search free-text search (e.g. `{ term, mode }`)
+ * @param sort_field field to sort by
+ * @param sort_order sort order (e.g. `asc` or `desc`)
+ * @param aggregations aggregations to include (e.g. `{ counts: ['tags', 'enabled'] }`)
+ * @param pagination pagination options (e.g. `{ page, perPage }`)
+ * @param search_after for deep pagination
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const fetchSearchRules = async ({
+  fields,
+  filter = '',
+  search,
+  sort_field = 'enabled',
+  sort_order = 'desc',
+  pagination = {
+    page: 1,
+    perPage: 20,
+  },
+  signal,
+  aggregations,
+  search_after,
+  gap_fill_statuses,
+  gaps_range_start,
+  gaps_range_end,
+  gap_auto_fill_scheduler_id,
+}: FetchSearchRulesProps): Promise<FetchSearchRulesResponse> => {
+  const body = {
+    page: pagination.page,
+    per_page: pagination.perPage,
+    sort_field,
+    sort_order,
+    fields,
+    ...(filter.trim() !== '' ? { filter: filter.trim() } : {}),
+    search,
+    aggregations,
+    search_after,
+    ...(gap_fill_statuses?.length ? { gap_fill_statuses } : {}),
+    ...(gaps_range_start ? { gaps_range_start } : {}),
+    ...(gaps_range_end ? { gaps_range_end } : {}),
+    ...(gap_auto_fill_scheduler_id ? { gap_auto_fill_scheduler_id } : {}),
+  };
+
+  return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(
+    RULE_MANAGEMENT_RULES_URL_SEARCH,
+    {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 };
 
 /**
@@ -349,7 +429,13 @@ export interface BulkActionErrorResponse {
 }
 
 export type QueryOrIds =
-  | { query: string; ids?: undefined; gapRange?: { start: string; end: string } }
+  | {
+      query: string;
+      ids?: undefined;
+      gapRange?: { start: string; end: string };
+      gapFillStatuses?: GapFillStatus[];
+      schedulerId?: string;
+    }
   | { query?: undefined; ids: string[] };
 
 type PlainBulkAction = {
@@ -417,8 +503,13 @@ export async function performBulkAction({
     run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
     gaps_range_start: 'gapRange' in bulkAction ? bulkAction.gapRange?.start : undefined,
     gaps_range_end: 'gapRange' in bulkAction ? bulkAction.gapRange?.end : undefined,
+    gap_fill_statuses:
+      'gapFillStatuses' in bulkAction && bulkAction.gapFillStatuses?.length
+        ? bulkAction.gapFillStatuses
+        : undefined,
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
+    gap_auto_fill_scheduler_id: 'schedulerId' in bulkAction ? bulkAction.schedulerId : undefined,
   };
 
   return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
@@ -649,6 +740,27 @@ export const getPrebuiltRulesStatus = async ({
   );
 
 /**
+ * Review deprecated prebuilt rules
+ *
+ * @param signal AbortSignal for cancelling request
+ *
+ * @throws An error if response is not OK
+ */
+export const reviewRuleDeprecation = async ({
+  signal,
+  request,
+}: {
+  signal: AbortSignal | undefined;
+  request: ReviewRuleDeprecationRequestBody;
+}): Promise<ReviewRuleDeprecationResponseBody> =>
+  KibanaServices.get().http.fetch<ReviewRuleDeprecationResponseBody>(REVIEW_RULE_DEPRECATION_URL, {
+    method: 'POST',
+    version: '1',
+    signal,
+    body: JSON.stringify(request),
+  });
+
+/**
  * Review prebuilt rules upgrade
  *
  * @param signal AbortSignal for cancelling request
@@ -678,13 +790,16 @@ export const reviewRuleUpgrade = async ({
  */
 export const reviewRuleInstall = async ({
   signal,
+  request,
 }: {
   signal: AbortSignal | undefined;
+  request: ReviewRuleInstallationRequestBody;
 }): Promise<ReviewRuleInstallationResponseBody> =>
   KibanaServices.get().http.fetch(REVIEW_RULE_INSTALLATION_URL, {
     method: 'POST',
     version: '1',
     signal,
+    body: JSON.stringify(request),
   });
 
 export const performInstallAllRules = async (): Promise<PerformRuleInstallationResponseBody> =>
@@ -717,8 +832,8 @@ export const performUpgradeRules = async (
     body: JSON.stringify(body),
   });
 
-export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesResponse> =>
-  KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
+export const bootstrapEaseRules = async (): Promise<RuleBootstrapResults> =>
+  KibanaServices.get().http.fetch(BOOTSTRAP_EASE_RULES_URL, {
     method: 'POST',
     version: '1',
   });

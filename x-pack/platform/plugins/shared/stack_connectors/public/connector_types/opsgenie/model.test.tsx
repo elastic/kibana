@@ -39,7 +39,7 @@ describe('opsgenie action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],
@@ -56,7 +56,7 @@ describe('opsgenie action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],
@@ -71,7 +71,7 @@ describe('opsgenie action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': ['Message is required.'],
         'subActionParams.alias': [],
@@ -86,7 +86,7 @@ describe('opsgenie action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': ['Alias is required.'],
@@ -100,7 +100,7 @@ describe('opsgenie action params validation', () => {
       jsonEditorError: true,
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],

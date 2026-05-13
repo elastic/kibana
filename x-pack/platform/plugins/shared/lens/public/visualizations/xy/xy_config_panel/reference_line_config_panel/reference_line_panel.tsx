@@ -21,7 +21,7 @@ import type { KbnPalettes } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { referenceLineIconsSet } from '../../../../shared_components/icon_set';
-import type { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
+import type { XYVisualizationState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import type { FormatFactory } from '../../../../../common/types';
 
 import { updateLayer } from '../../toolbar';
@@ -31,7 +31,7 @@ import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';
 import { defaultReferenceLineColor } from '../../color_assignment';
 
 export const ReferenceLinePanel = (
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYVisualizationState> & {
     formatFactory: FormatFactory;
     paletteService: PaletteRegistry;
     palettes: KbnPalettes;
@@ -42,10 +42,11 @@ export const ReferenceLinePanel = (
   const isHorizontal = isHorizontalChart(state.layers);
   const index = state.layers.findIndex((l) => l.layerId === layerId);
 
-  const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
-    value: state,
-    onChange: setState,
-  });
+  const { inputValue: localState, handleInputChange: setLocalState } =
+    useDebouncedValue<XYVisualizationState>({
+      value: state,
+      onChange: setState,
+    });
 
   const localLayer = localState.layers.find(
     (l) => l.layerId === layerId
@@ -77,7 +78,7 @@ export const ReferenceLinePanel = (
   );
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <TextDecorationSetting
         idPrefix={idPrefix}
         setConfig={setConfig}
@@ -106,7 +107,7 @@ export const ReferenceLinePanel = (
           defaultMessage: 'Color',
         })}
       />
-    </>
+    </div>
   );
 };
 

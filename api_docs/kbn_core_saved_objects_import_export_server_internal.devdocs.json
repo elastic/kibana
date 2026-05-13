@@ -22,6 +22,8 @@
           " extends Error"
         ],
         "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,6 +38,8 @@
               "any"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -50,6 +54,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -65,6 +71,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 18,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -80,7 +88,10 @@
                   "Record<string, any> | undefined"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 19,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -99,6 +110,8 @@
               "SavedObjectsExportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -113,6 +126,8 @@
                   "number"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 28,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -134,6 +149,8 @@
               "SavedObjectsExportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -149,6 +166,8 @@
                   "<unknown>[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 37,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -163,7 +182,15 @@
             "tags": [],
             "label": "objectTransformError",
             "description": [
-              "\nError returned when a {@link SavedObjectsExportTransform | export transform} threw an error"
+              "\nError returned when a ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-server.SavedObjectsExportTransform",
+                "text": "export transform"
+              },
+              " threw an error"
             ],
             "signature": [
               "(objects: ",
@@ -172,6 +199,8 @@
               "SavedObjectsExportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -187,6 +216,8 @@
                   "<unknown>[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 46,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -202,7 +233,10 @@
                   "Error"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 46,
+                "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -216,13 +250,23 @@
             "tags": [],
             "label": "invalidTransformError",
             "description": [
-              "\nError returned when a {@link SavedObjectsExportTransform | export transform} performed an invalid operation\nduring the transform, such as removing objects from the export, or changing an object's type or id."
+              "\nError returned when a ",
+              {
+                "pluginId": "@kbn/core-saved-objects-import-export-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsImportExportServerInternalPluginApi",
+                "section": "def-server.SavedObjectsExportTransform",
+                "text": "export transform"
+              },
+              " performed an invalid operation\nduring the transform, such as removing objects from the export, or changing an object's type or id."
             ],
             "signature": [
               "(objectKeys: string[]) => ",
               "SavedObjectsExportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -237,6 +281,8 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/errors.ts",
+                "lineNumber": 61,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -259,6 +305,8 @@
           " extends Error"
         ],
         "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,6 +322,8 @@
               "SavedObjectsImportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -288,6 +338,8 @@
                   "number"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+                "lineNumber": 28,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -307,6 +359,8 @@
               "SavedObjectsImportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -321,6 +375,8 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+                "lineNumber": 35,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -340,6 +396,8 @@
               "SavedObjectsImportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -354,6 +412,8 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+                "lineNumber": 42,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -373,6 +433,8 @@
               "SavedObjectsImportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -387,6 +449,8 @@
                   "string[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+                "lineNumber": 49,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -408,6 +472,8 @@
               "SavedObjectsImportError"
             ],
             "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -423,6 +489,8 @@
                   "<unknown>[]"
                 ],
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts",
+                "lineNumber": 56,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -451,6 +519,8 @@
           "\"*\""
         ],
         "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

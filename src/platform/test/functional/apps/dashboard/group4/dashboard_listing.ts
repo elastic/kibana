@@ -168,11 +168,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
-      it('stays on listing page if title matches two dashboards', async function () {
+      it('allows dashboards that differ only by casing', async function () {
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('two words', {
           saveAsNew: true,
-          needsConfirm: true,
+          needsConfirm: false,
         });
         await dashboard.gotoDashboardLandingPage();
         const currentUrl = await browser.getCurrentUrl();
@@ -212,7 +212,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('edit meta data', () => {
+    describe('edit meta data', function () {
+      // FIPS mode upgrades the license to trial which triggers a toast notification when
+      // saving a dashboard, blocking the save button click
+      this.tags('skipFIPS');
       it('saves changes to dashboard metadata', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickCreateDashboardPrompt();

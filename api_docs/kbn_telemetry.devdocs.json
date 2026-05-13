@@ -13,6 +13,50 @@
     "functions": [
       {
         "parentPluginId": "@kbn/telemetry",
+        "id": "def-server.buildOtelResources",
+        "type": "Function",
+        "tags": [],
+        "label": "buildOtelResources",
+        "description": [
+          "\nUnified function to build the OpenTelemetry resource for all services."
+        ],
+        "signature": [
+          "(serviceName: string) => ",
+          "Resource"
+        ],
+        "path": "src/platform/packages/shared/kbn-telemetry/src/build_otel_resources.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/telemetry",
+            "id": "def-server.buildOtelResources.$1",
+            "type": "string",
+            "tags": [],
+            "label": "serviceName",
+            "description": [
+              "The service name used to look up APM config (defaults to 'kibana')."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-telemetry/src/build_otel_resources.ts",
+            "lineNumber": 23,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The OpenTelemetry resource"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/telemetry",
         "id": "def-server.initTelemetry",
         "type": "Function",
         "tags": [],
@@ -24,6 +68,8 @@
           "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +86,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -57,6 +105,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -74,6 +124,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,6 +143,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -108,7 +162,15 @@
         "tags": [],
         "label": "setDiagLogger",
         "description": [
-          "\nHelper to make it easier to configure OTel's {@link DiagLogger}."
+          "\nHelper to make it easier to configure OTel's ",
+          {
+            "pluginId": "@kbn/telemetry",
+            "scope": "server",
+            "docId": "kibKbnTelemetryPluginApi",
+            "section": "def-server.DiagLogger",
+            "text": "DiagLogger"
+          },
+          "."
         ],
         "signature": [
           "(logger: ",
@@ -124,6 +186,8 @@
           " | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -134,7 +198,7 @@
             "tags": [],
             "label": "logger",
             "description": [
-              "{@link Logger }"
+              "{@link Logger}"
             ],
             "signature": [
               {
@@ -146,7 +210,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -157,14 +224,17 @@
             "tags": [],
             "label": "logLevel",
             "description": [
-              "The {@link LogLevelId } to set the Diag logger to."
+              "The {@link LogLevelId} to set the Diag logger to."
             ],
             "signature": [
               "LogLevelId",
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-telemetry/src/set_diag_logger.ts",
+            "lineNumber": 20,
+            "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevelId",
             "trackAdoption": false,
             "isRequired": false
           }

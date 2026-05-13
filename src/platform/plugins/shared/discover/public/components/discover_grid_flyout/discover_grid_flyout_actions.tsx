@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { slice } from 'lodash';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { css } from '@emotion/react';
 import type { EuiContextMenuItemIcon, EuiPopoverProps } from '@elastic/eui';
 import {
@@ -26,9 +27,18 @@ import {
   useResizeObserver,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import type { FlyoutActionItem } from '../../customizations';
+import type { FlyoutActionItem } from './types';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
+
+const guardedOnClick = (action: FlyoutActionItem): FlyoutActionItem['onClick'] => {
+  return (e: React.MouseEvent) => {
+    if (action.href && hasActiveModifierKey(e)) return;
+    if (typeof action.onClick === 'function') {
+      (action.onClick as (e: React.MouseEvent) => void)(e);
+    }
+  };
+};
 
 export interface DiscoverGridFlyoutActionsProps {
   flyoutActions: FlyoutActionItem[];
@@ -72,7 +82,7 @@ function FlyoutActions({
           <EuiButtonEmpty
             size="s"
             iconSize="s"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             flush="left"
             data-test-subj="docViewerMobileActionsButton"
@@ -133,11 +143,11 @@ function FlyoutActions({
                 data-test-subj={action.dataTestSubj}
                 aria-label={action.label}
                 href={action.href}
-                onClick={action.onClick}
+                onClick={guardedOnClick(action)}
               />
             </EuiToolTip>
           ) : (
-            <EuiToolTip content={action.helpText} delay="long">
+            <EuiToolTip content={action.helpText}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 size="s"
@@ -146,7 +156,7 @@ function FlyoutActions({
                 iconType={action.iconType}
                 data-test-subj={action.dataTestSubj}
                 href={action.href}
-                onClick={action.onClick}
+                onClick={guardedOnClick(action)}
               >
                 {action.label}
               </EuiButtonEmpty>
@@ -199,6 +209,9 @@ function FlyoutActionsPopover({
   return (
     <EuiPopover
       id="docViewerMoreFlyoutActions"
+      aria-label={i18n.translate('discover.grid.tableRow.moreFlyoutActionsPopoverAriaLabel', {
+        defaultMessage: 'More actions',
+      })}
       button={button}
       isOpen={isOpen}
       closePopover={closePopover}
@@ -213,7 +226,7 @@ function FlyoutActionsPopover({
             icon={action.iconType as EuiContextMenuItemIcon}
             data-test-subj={action.dataTestSubj}
             href={action.href}
-            onClick={action.onClick}
+            onClick={guardedOnClick(action)}
           >
             {action.label}
           </EuiContextMenuItem>

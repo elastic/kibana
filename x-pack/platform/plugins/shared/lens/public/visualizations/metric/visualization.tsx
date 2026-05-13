@@ -11,7 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -23,32 +23,34 @@ import type {
   Suggestion,
   UserMessage,
   FormBasedPersistedState,
+  MetricVisualizationState,
+  SecondaryTrend,
+  DatasourcePublicAPI,
 } from '@kbn/lens-common';
-import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
+import {
+  LENS_LAYER_TYPES as layerTypes,
+  LENS_METRIC_ID,
+  LENS_METRIC_GROUP_ID,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
+} from '@kbn/lens-common';
+import { getUpdatedMetricState as getUpdatedMetricStateV1 } from '../../../common/content_management/v1/transforms/metric';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
-import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
-import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import type { MetricVisualizationState, SecondaryTrend } from './types';
-import {
-  getColorMode,
-  getDefaultConfigForMode,
-  getTrendPalette,
-  isSecondaryTrendConfigInvalid,
-} from './helpers';
+import { getColorMode, getTrendPalette, isSecondaryTrendConfigInvalid } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { getAccessorType } from '../../shared_components';
-import { convertToRunTimeState } from './runtime_state';
-import { MetricAppearanceSettings } from './toolbar/appearance_settings';
+import { MetricAppearanceSettings } from './toolbar';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { getColumnFromActiveData } from '../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -59,7 +61,7 @@ export const showingBar = (
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   if (showingBar(state) && isMetricNumeric) {
-    return euiLightVars.euiColorPrimary;
+    return euiThemeVars.euiColorVis2;
   }
   if (state.applyColorTo === 'value') {
     return euiThemeVars.euiColorVisText0;
@@ -79,6 +81,18 @@ export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
 });
 
+type MetricVisualizationStateWithLegacyTitleWeight = MetricVisualizationState & {
+  titleWeight?: unknown;
+};
+
+const removeLegacyTitleWeight = (
+  state: MetricVisualizationStateWithLegacyTitleWeight
+): MetricVisualizationState => {
+  const { titleWeight: _titleWeight, ...updatedState } = state;
+
+  return updatedState;
+};
+
 const getMetricLayerConfiguration = (
   paletteService: PaletteRegistry,
   theme: ThemeServiceStart,
@@ -87,8 +101,14 @@ const getMetricLayerConfiguration = (
   groups: VisualizationDimensionGroupConfig[];
 } => {
   const datasource = props.frame.datasourceLayers[props.state.layerId];
+  const primaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: props.state.metricAccessor,
+    layerId: props.state.layerId,
+    activeData: props.frame.activeData,
+  })?.meta?.type;
   const isPrimaryMetricNumeric = Boolean(
-    props.state.metricAccessor && getAccessorType(datasource, props.state.metricAccessor).isNumeric
+    props.state.metricAccessor &&
+      getAccessorType(datasource, props.state.metricAccessor, primaryMetricTypeFallback).isNumeric
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -109,9 +129,16 @@ const getMetricLayerConfiguration = (
     };
   };
 
+  const secondaryMetricTypeFallback = getColumnFromActiveData({
+    accessor: props.state.secondaryMetricAccessor,
+    layerId: props.state.layerId,
+    activeData: props.frame.activeData,
+  })?.meta?.type;
+
   const isSecondaryMetricNumeric = Boolean(
     props.state.secondaryMetricAccessor &&
-      getAccessorType(datasource, props.state.secondaryMetricAccessor).isNumeric
+      getAccessorType(datasource, props.state.secondaryMetricAccessor, secondaryMetricTypeFallback)
+        .isNumeric
   );
 
   const getSecondaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
@@ -149,7 +176,7 @@ const getMetricLayerConfiguration = (
   return {
     groups: [
       {
-        groupId: GROUP_ID.METRIC,
+        groupId: LENS_METRIC_GROUP_ID.METRIC,
         dataTestSubj: 'lnsMetric_primaryMetricDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
@@ -175,7 +202,7 @@ const getMetricLayerConfiguration = (
         requiredMinDimensionCount: 1,
       },
       {
-        groupId: GROUP_ID.SECONDARY_METRIC,
+        groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
         dataTestSubj: 'lnsMetric_secondaryMetricDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
           defaultMessage: 'Secondary metric',
@@ -200,7 +227,7 @@ const getMetricLayerConfiguration = (
         enableFormatSelector: true,
       },
       {
-        groupId: GROUP_ID.MAX,
+        groupId: LENS_METRIC_GROUP_ID.MAX,
         dataTestSubj: 'lnsMetric_maxDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
         paramEditorCustomProps: {
@@ -227,7 +254,7 @@ const getMetricLayerConfiguration = (
         }),
       },
       {
-        groupId: GROUP_ID.BREAKDOWN_BY,
+        groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
         dataTestSubj: 'lnsMetric_breakdownByDimensionPanel',
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
@@ -259,7 +286,7 @@ const getTrendlineLayerConfiguration = (
     hidden: true,
     groups: [
       {
-        groupId: GROUP_ID.TREND_METRIC,
+        groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
         groupLabel: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
         }),
@@ -276,7 +303,7 @@ const getTrendlineLayerConfiguration = (
         nestingOrder: 3,
       },
       {
-        groupId: GROUP_ID.TREND_SECONDARY_METRIC,
+        groupId: LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC,
         groupLabel: i18n.translate('xpack.lens.metric.secondaryMetric', {
           defaultMessage: 'Secondary metric',
         }),
@@ -293,7 +320,7 @@ const getTrendlineLayerConfiguration = (
         nestingOrder: 2,
       },
       {
-        groupId: GROUP_ID.TREND_TIME,
+        groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
         groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
         accessors: props.state.trendlineTimeAccessor
           ? [
@@ -308,7 +335,7 @@ const getTrendlineLayerConfiguration = (
         nestingOrder: 1,
       },
       {
-        groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+        groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
@@ -351,6 +378,40 @@ const removeBreakdownByDimension = (state: MetricVisualizationState) => {
   delete state.breakdownByAccessor;
   delete state.collapseFn;
   delete state.maxCols;
+};
+
+const cleanupMetricState = (
+  state: MetricVisualizationState,
+  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId' | 'isTextBasedLanguage'>
+): MetricVisualizationState => {
+  const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
+    datasource,
+    state.secondaryMetricAccessor
+  );
+
+  let updatedState = state;
+
+  // Clear primary metric palette when it becomes non-numeric
+  if (!isPrimaryMetricNumeric && state.palette) {
+    updatedState = {
+      ...updatedState,
+      palette: undefined,
+    };
+  }
+
+  // Fix secondary metric coloring when it becomes non-numeric or when the trend configuration is invalid
+  const colorMode = getColorMode(updatedState.secondaryTrend, isSecondaryMetricNumeric);
+  if (
+    isSecondaryTrendConfigInvalid(updatedState.secondaryTrend, colorMode, isPrimaryMetricNumeric)
+  ) {
+    return {
+      ...updatedState,
+      secondaryTrend: getDefaultConfigForMode(colorMode),
+    };
+  }
+
+  return updatedState;
 };
 
 export const getMetricVisualization = ({
@@ -403,11 +464,12 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return convertToRunTimeState(state);
+    if (state) return removeLegacyTitleWeight(getUpdatedMetricStateV1(state));
 
     return {
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
+      ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
   },
@@ -454,7 +516,7 @@ export const getMetricVisualization = ({
           defaultMessage: 'Trendline',
         }),
         initialDimensions: [
-          { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
+          { groupId: LENS_METRIC_GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
       },
@@ -509,12 +571,12 @@ export const getMetricVisualization = ({
       links.push({
         from: {
           columnId: state.metricAccessor,
-          groupId: GROUP_ID.METRIC,
+          groupId: LENS_METRIC_GROUP_ID.METRIC,
           layerId: state.layerId,
         },
         to: {
           columnId: state.trendlineMetricAccessor,
-          groupId: GROUP_ID.TREND_METRIC,
+          groupId: LENS_METRIC_GROUP_ID.TREND_METRIC,
           layerId: state.trendlineLayerId,
         },
       });
@@ -524,12 +586,12 @@ export const getMetricVisualization = ({
       links.push({
         from: {
           columnId: state.secondaryMetricAccessor,
-          groupId: GROUP_ID.SECONDARY_METRIC,
+          groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
           layerId: state.layerId,
         },
         to: {
           columnId: state.trendlineSecondaryMetricAccessor,
-          groupId: GROUP_ID.TREND_SECONDARY_METRIC,
+          groupId: LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC,
           layerId: state.trendlineLayerId,
         },
       });
@@ -539,12 +601,12 @@ export const getMetricVisualization = ({
       links.push({
         from: {
           columnId: state.breakdownByAccessor,
-          groupId: GROUP_ID.BREAKDOWN_BY,
+          groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY,
           layerId: state.layerId,
         },
         to: {
           columnId: state.trendlineBreakdownByAccessor,
-          groupId: GROUP_ID.TREND_BREAKDOWN_BY,
+          groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
           layerId: state.trendlineLayerId,
         },
       });
@@ -560,6 +622,15 @@ export const getMetricVisualization = ({
   toExpression: (state, datasourceLayers, _attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers, theme),
 
+  onDatasourceUpdate(state, frame) {
+    const datasource = frame?.datasourceLayers?.[state.layerId];
+    if (!datasource) {
+      return state;
+    }
+
+    return cleanupMetricState(state, datasource);
+  },
+
   getPersistableState: (state, datasource, datasourceState) => {
     const datasourceLayer = datasource?.getPublicAPI({
       state: datasourceState?.state,
@@ -571,61 +642,38 @@ export const getMetricVisualization = ({
       return { state, references: [] };
     }
 
-    // this should clean up the secondary trend state if in conflict
-    const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
-      datasourceLayer,
-      state.metricAccessor
-    );
-    const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
-      datasourceLayer,
-      state.secondaryMetricAccessor
-    );
-    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
-
-    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
-      return {
-        state: {
-          ...state,
-          secondaryLabel: undefined,
-          secondaryTrend: getDefaultConfigForMode(colorMode),
-          secondaryLabelPosition: 'before',
-        },
-        references: [],
-      };
-    }
-    // if there are no conflicts, it's all persistable as is
-    return { state, references: [] };
+    return { state: cleanupMetricState(state, datasourceLayer), references: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {
     const updated = { ...prevState };
 
     switch (groupId) {
-      case GROUP_ID.METRIC:
+      case LENS_METRIC_GROUP_ID.METRIC:
         updated.metricAccessor = columnId;
         break;
-      case GROUP_ID.SECONDARY_METRIC:
+      case LENS_METRIC_GROUP_ID.SECONDARY_METRIC:
         updated.secondaryMetricAccessor = columnId;
         break;
-      case GROUP_ID.MAX:
+      case LENS_METRIC_GROUP_ID.MAX:
         updated.maxAccessor = columnId;
         if (!prevState.trendlineLayerId) {
           updated.showBar = true;
         }
         break;
-      case GROUP_ID.BREAKDOWN_BY:
+      case LENS_METRIC_GROUP_ID.BREAKDOWN_BY:
         updated.breakdownByAccessor = columnId;
         break;
-      case GROUP_ID.TREND_TIME:
+      case LENS_METRIC_GROUP_ID.TREND_TIME:
         updated.trendlineTimeAccessor = columnId;
         break;
-      case GROUP_ID.TREND_METRIC:
+      case LENS_METRIC_GROUP_ID.TREND_METRIC:
         updated.trendlineMetricAccessor = columnId;
         break;
-      case GROUP_ID.TREND_SECONDARY_METRIC:
+      case LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC:
         updated.trendlineSecondaryMetricAccessor = columnId;
         break;
-      case GROUP_ID.TREND_BREAKDOWN_BY:
+      case LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY:
         updated.trendlineBreakdownByAccessor = columnId;
         break;
     }
@@ -665,10 +713,6 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  ToolbarComponent(props) {
-    return <Toolbar {...props} />;
-  },
-
   FlyoutToolbarComponent(props) {
     return <FlyoutToolbar {...props} contentMap={{ style: MetricAppearanceSettings }} />;
   },
@@ -678,11 +722,11 @@ export const getMetricVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    return <DimensionEditor {...props} paletteService={paletteService} />;
+    return <DimensionEditor {...props} />;
   },
 
   DimensionEditorAdditionalSectionComponent(props) {
-    return <DimensionEditorAdditionalSection {...props} />;
+    return <DimensionEditorAdditionalSection {...props} paletteService={paletteService} />;
   },
 
   getDisplayOptions() {
@@ -762,7 +806,12 @@ export const getMetricVisualization = ({
 
     const { isNumeric: isMetricNumeric } = getAccessorType(
       frame?.datasourceLayers[state.layerId],
-      state.metricAccessor
+      state.metricAccessor,
+      getColumnFromActiveData({
+        accessor: state.metricAccessor,
+        layerId: state.layerId,
+        activeData: frame?.activeData,
+      })?.meta?.type
     );
 
     return {

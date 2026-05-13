@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod/v4';
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
@@ -28,6 +29,20 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'original_rule.annotations': { type: 'object', required: false },
   'original_rule.annotations.mitre_attack': { type: 'keyword', array: true, required: false },
   'original_rule.severity': { type: 'keyword', required: false },
+  'original_rule.threat': { type: 'object', required: false },
+  'original_rule.threat.framework': { type: 'keyword', required: false },
+  'original_rule.threat.tactic': { type: 'object', required: false },
+  'original_rule.threat.tactic.id': { type: 'keyword', required: false },
+  'original_rule.threat.tactic.name': { type: 'keyword', required: false },
+  'original_rule.threat.tactic.reference': { type: 'keyword', required: false },
+  'original_rule.threat.technique': { type: 'object', array: true, required: false },
+  'original_rule.threat.technique.id': { type: 'keyword', required: false },
+  'original_rule.threat.technique.name': { type: 'keyword', required: false },
+  'original_rule.threat.technique.reference': { type: 'keyword', required: false },
+  'original_rule.threat.technique.subtechnique': { type: 'object', array: true, required: false },
+  'original_rule.threat.technique.subtechnique.id': { type: 'keyword', required: false },
+  'original_rule.threat.technique.subtechnique.name': { type: 'keyword', required: false },
+  'original_rule.threat.technique.subtechnique.reference': { type: 'keyword', required: false },
   elastic_rule: { type: 'object', required: false },
   'elastic_rule.title': { type: 'text', required: true, fields: { keyword: { type: 'keyword' } } },
   'elastic_rule.integration_ids': { type: 'keyword', required: false, array: true },
@@ -38,6 +53,20 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'elastic_rule.severity': { type: 'keyword', required: false },
   'elastic_rule.prebuilt_rule_id': { type: 'keyword', required: false },
   'elastic_rule.id': { type: 'keyword', required: false },
+  'elastic_rule.threat': { type: 'object', required: false },
+  'elastic_rule.threat.framework': { type: 'keyword', required: false },
+  'elastic_rule.threat.tactic': { type: 'object', required: false },
+  'elastic_rule.threat.tactic.id': { type: 'keyword', required: false },
+  'elastic_rule.threat.tactic.name': { type: 'keyword', required: false },
+  'elastic_rule.threat.tactic.reference': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique': { type: 'object', array: true, required: false },
+  'elastic_rule.threat.technique.id': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.name': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.reference': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.subtechnique': { type: 'object', array: true, required: false },
+  'elastic_rule.threat.technique.subtechnique.id': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.subtechnique.name': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.subtechnique.reference': { type: 'keyword', required: false },
   translation_result: { type: 'keyword', required: false },
   comments: { type: 'object', array: true, required: false },
   'comments.message': { type: 'keyword', required: true },
@@ -47,8 +76,15 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   updated_by: { type: 'keyword', required: false },
 };
 
+type SiemMigrationResourceWithoutId = Omit<
+  z.infer<typeof SiemMigrationResource>,
+  'id' | 'metadata'
+> & {
+  metadata?: Record<string, unknown>;
+};
+
 export const ruleMigrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
+  SchemaFieldMapKeys<SiemMigrationResourceWithoutId>
 > = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },
@@ -63,7 +99,9 @@ export const getIntegrationsFieldMap: ({
   elserInferenceId,
 }: {
   elserInferenceId?: string;
-}) => FieldMap<SchemaFieldMapKeys<RuleMigrationIntegration>> = ({ elserInferenceId }) => ({
+}) => FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationIntegration, 'knowledge_base'>>> = ({
+  elserInferenceId,
+}) => ({
   id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },
@@ -76,6 +114,7 @@ export const getIntegrationsFieldMap: ({
     required: true,
     ...(elserInferenceId ? { inference_id: elserInferenceId } : {}),
   },
+  fields_metadata: { type: 'object', required: false },
 });
 
 export const getPrebuiltRulesFieldMap: ({

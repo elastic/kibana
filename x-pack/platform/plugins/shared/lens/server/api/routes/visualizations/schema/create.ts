@@ -6,22 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
-import {
-  lensCMCreateOptionsSchema,
-  lensItemDataSchema,
-  lensItemSchema,
-} from '../../../../content_management';
-import { lensItemDataSchemaV0 } from '../../../../content_management/v0';
+import { lensCMCreateOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
 import { lensResponseItemSchema } from './common';
-
-export const lensCreateRequestParamsSchema = schema.object(
-  {
-    id: schema.maybe(lensItemSchema.getPropSchemas().id),
-  },
-  { unknowns: 'forbid' }
-);
 
 export const lensCreateRequestQuerySchema = schema.object(
   {
@@ -30,9 +19,6 @@ export const lensCreateRequestQuerySchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const lensCreateRequestBodySchema = schema.oneOf([
-  lensItemDataSchema,
-  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
-]);
+export const lensCreateRequestBodySchema = lensApiConfigSchemaNoESQL;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

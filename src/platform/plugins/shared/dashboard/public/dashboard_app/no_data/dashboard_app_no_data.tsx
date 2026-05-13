@@ -19,6 +19,8 @@ import {
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   coreServices,
   dataService,
@@ -28,7 +30,7 @@ import {
   shareService,
   lensService,
 } from '../../services/kibana_services';
-import { getDashboardBackupService } from '../../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { dashboardClient } from '../../dashboard_client';
 
 export const DashboardAppNoDataPage = ({
@@ -59,17 +61,20 @@ export const DashboardAppNoDataPage = ({
 
   useEffect(() => {
     return () => {
-      abortController?.abort();
+      abortController?.abort(AbortReason.CLEANUP);
     };
   }, [abortController]);
 
   const onTryESQL = useCallback(async () => {
-    abortController?.abort();
+    abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
-      const { dataViews } = dataService;
-      const indexName = (await getIndexForESQLQuery({ dataViews })) ?? '*';
-      const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+      const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: dataService.dataViews,
+        query: `FROM ${indexName}`,
+        http: coreServices.http,
+      });
       const esqlQuery = getInitialESQLQuery(dataView);
 
       try {
@@ -99,18 +104,16 @@ export const DashboardAppNoDataPage = ({
             .navigateToWithEmbeddablePackages<LensSerializedState>('dashboards', {
               state: [
                 {
-                  type: 'lens',
+                  type: LENS_EMBEDDABLE_TYPE,
                   serializedState: {
-                    rawState: {
-                      attributes: getLensAttributesFromSuggestion({
-                        filters: [],
-                        query: {
-                          esql: esqlQuery,
-                        },
-                        suggestion,
-                        dataView,
-                      }),
-                    },
+                    attributes: getLensAttributesFromSuggestion({
+                      filters: [],
+                      query: {
+                        esql: esqlQuery,
+                      },
+                      suggestion,
+                      dataView,
+                    }),
                   },
                 },
               ],
@@ -154,7 +157,7 @@ export const isDashboardAppInNoDataState = async () => {
 
   // consider has data if there is at least one dashboard
   const { total } = await dashboardClient
-    .search({ search: '', size: 1 })
+    .search({ query: '', per_page: 1 })
     .catch(() => ({ total: 0 }));
   if (total > 0) return false;
 

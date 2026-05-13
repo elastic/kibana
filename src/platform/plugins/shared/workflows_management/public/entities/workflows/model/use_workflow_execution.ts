@@ -9,15 +9,29 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
-export function useWorkflowExecution(workflowExecutionId: string | null) {
-  const { http } = useKibana().services;
+interface UseWorkflowExecutionParams {
+  executionId: string | null;
+  enabled?: boolean;
+  includeInput?: boolean;
+  includeOutput?: boolean;
+}
 
-  return useQuery<WorkflowExecutionDto, Error>({
-    networkMode: 'always',
-    queryKey: ['stepExecutions', workflowExecutionId],
-    queryFn: () => http.get(`/api/workflowExecutions/${workflowExecutionId}`),
-    enabled: workflowExecutionId !== null,
+export function useWorkflowExecution({
+  executionId,
+  enabled = true,
+  includeInput,
+  includeOutput,
+}: UseWorkflowExecutionParams) {
+  const api = useWorkflowsApi();
+
+  return useQuery<WorkflowExecutionDto | null>({
+    queryKey: ['workflowExecution', executionId, includeInput, includeOutput],
+    queryFn: async () => {
+      if (!executionId) return null;
+      return api.getExecution(executionId, { includeInput, includeOutput });
+    },
+    enabled: enabled && executionId !== null,
   });
 }

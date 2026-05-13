@@ -8,18 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import type {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
-  PublishesDescription,
-  PublishesTitle,
-} from '@kbn/presentation-publishing';
 import {
+  type PresentationContainer,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasParentApi,
+  type HasUniqueId,
+  type PublishesDescription,
+  type PublishesTitle,
   apiCanAccessViewMode,
+  apiIsPresentationContainer,
   apiHasParentApi,
   apiHasUniqueId,
   getInheritedViewMode,
@@ -61,13 +59,15 @@ export const getConvertLegacyMarkdownAction = () => ({
   order: 49,
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    const legacyContent = embeddable.getVis().params.markdown;
+    const { markdown: legacyContent, openLinksInNewTab } = embeddable.getVis().params;
 
     await embeddable.parentApi.replacePanel(embeddable.uuid, {
       panelType: MARKDOWN_EMBEDDABLE_TYPE,
       serializedState: {
-        rawState: {
-          content: legacyContent,
+        content: legacyContent,
+        settings: {
+          // New default is true, but we should preserve the legacy default of false if it's missing
+          open_links_in_new_tab: openLinksInNewTab ?? false,
         },
       },
     });

@@ -6,10 +6,14 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { useMemo } from 'react';
+import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
-import { type IWaterfallLegend, WaterfallLegendType } from '../../../../common/waterfall/legend';
+import { useMemo } from 'react';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
+import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { OnErrorClick } from './trace_waterfall_context';
+import type { ErrorMark } from '../charts/timeline/marker/error_marker';
 
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
@@ -38,30 +42,56 @@ export interface TraceWaterfallItem extends TraceItem {
 export function useTraceWaterfall({
   traceItems,
   isFiltered = false,
+  errors,
+  onErrorClick,
+  entryTransactionId,
 }: {
   traceItems: TraceItem[];
   isFiltered?: boolean;
+  errors?: Error[];
+  onErrorClick?: OnErrorClick;
+  entryTransactionId?: string;
 }) {
   const waterfall = useMemo(() => {
     try {
-      const legends = getLegends(traceItems);
-      const colorBy = getColorByType(legends);
-      const colorMap = createColorLookupMap(legends);
       const traceParentChildrenMap = getTraceParentChildrenMap(traceItems, isFiltered);
       const { rootItem, traceState, orphans } = getRootItemOrFallback(
         traceParentChildrenMap,
-        traceItems
+        traceItems,
+        entryTransactionId
       );
 
-      const traceWaterfall = rootItem
+      // Why this strategy? Build the filtered subtree first, then use it to derive legends and colors.
+      // This ensures legends only contain services/types from the visible subtree,
+      // not from the entire trace (which may include unrelated roots or excluded items).
+      const rawWaterfall = rootItem
         ? getTraceWaterfall({
             rootItem,
             parentChildMap: traceParentChildrenMap,
             orphans,
-            colorMap,
-            colorBy,
           })
         : [];
+
+      const legends = getLegends(rawWaterfall);
+      const colorBy = getColorByType(legends);
+      const colorMap = createColorLookupMap(legends);
+      const traceWaterfall: TraceWaterfallItem[] = rawWaterfall.map((item) => ({
+        ...item,
+        color:
+          colorBy === WaterfallLegendType.ServiceName
+            ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`) ?? ''
+            : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`) ?? '',
+      }));
+
+      const errorMarks =
+        rootItem && errors
+          ? getWaterfallErrorsMarks({
+              errors,
+              traceItems: traceWaterfall,
+              rootItem,
+              onErrorClick,
+            })
+          : [];
 
       return {
         rootItem,
@@ -72,6 +102,7 @@ export function useTraceWaterfall({
         maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
         legends,
         colorBy,
+        errorMarks,
       };
     } catch (e) {
       return {
@@ -82,19 +113,65 @@ export function useTraceWaterfall({
         duration: 0,
         maxDepth: 0,
         colorBy: WaterfallLegendType.Type,
+        errorMarks: [],
       };
     }
-  }, [traceItems, isFiltered]);
+  }, [traceItems, isFiltered, errors, onErrorClick, entryTransactionId]);
 
   return waterfall;
 }
 
+function getWaterfallErrorsMarks({
+  errors,
+  traceItems,
+  rootItem,
+  onErrorClick,
+}: {
+  errors: Error[];
+  traceItems: TraceWaterfallItem[];
+  rootItem: TraceItem;
+  onErrorClick?: OnErrorClick;
+}): ErrorMark[] {
+  const rootTimestampUs = rootItem.timestampUs;
+  const traceItemsByIdMap = new Map(traceItems.map((item) => [item.id, item]));
+  return errors.map((error) => {
+    const parent = error.parent?.id ? traceItemsByIdMap.get(error.parent?.id) : undefined;
+    const docId = error.transaction?.id || error.span?.id;
+    return {
+      type: 'errorMark',
+      error,
+      id: error.id,
+      verticalLine: false,
+      offset: getTimestampUs(error) - rootTimestampUs,
+      skew: getClockSkew({ itemTimestamp: getTimestampUs(error), itemDuration: 0, parent }),
+      serviceColor: parent?.color ?? '',
+      onClick:
+        onErrorClick && docId
+          ? () => {
+              onErrorClick({
+                traceId: rootItem.traceId,
+                docId,
+                errorCount: 1,
+                errorDocId: error.id,
+                docIndex: error.index,
+              });
+            }
+          : undefined,
+    };
+  });
+}
+
 export function getColorByType(legends: IWaterfallLegend[]) {
-  let count = 0;
-  for (const { type } of legends) {
-    if (type === WaterfallLegendType.ServiceName) count++;
-    if (count > 1) return WaterfallLegendType.ServiceName;
+  let serviceCount = 0;
+  let hasEmptyType = false;
+
+  for (const legend of legends) {
+    if (legend.type === WaterfallLegendType.ServiceName) serviceCount++;
+    if (legend.type === WaterfallLegendType.Type && !legend.value) hasEmptyType = true;
   }
+
+  if (serviceCount > 1 || hasEmptyType) return WaterfallLegendType.ServiceName;
+
   return WaterfallLegendType.Type;
 }
 
@@ -172,7 +249,8 @@ export enum TraceDataState {
 
 export function getRootItemOrFallback(
   traceParentChildrenMap: Record<string, TraceItem[]>,
-  traceItems: TraceItem[]
+  traceItems: TraceItem[],
+  entryTransactionId?: string
 ) {
   if (traceItems.length === 0) {
     return {
@@ -180,7 +258,13 @@ export function getRootItemOrFallback(
     };
   }
 
-  const rootItem = traceParentChildrenMap.root?.[0];
+  const entryTransactionRootItem = entryTransactionId
+    ? traceItems?.find((item) => item.id === entryTransactionId)
+    : undefined;
+
+  const rootItem = entryTransactionRootItem
+    ? entryTransactionRootItem
+    : traceParentChildrenMap.root?.[0];
 
   const parentIds = new Set(traceItems.map(({ id }) => id));
   // TODO: Reuse waterfall util methods where possible or if logic is the same
@@ -221,47 +305,56 @@ function reparentOrphansToRoot(
   children.push(...orphans.map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true })));
 }
 
+type RawTraceWaterfallItem = Omit<TraceWaterfallItem, 'color'>;
+
+interface TraversalFrame {
+  item: TraceItem;
+  depth: number;
+  parent?: RawTraceWaterfallItem;
+}
+
 export function getTraceWaterfall({
   rootItem,
   parentChildMap,
   orphans,
-  colorMap,
-  colorBy,
 }: {
   rootItem: TraceItem;
   parentChildMap: Record<string, TraceItem[]>;
   orphans: TraceItem[];
-  colorMap: Map<string, string>;
-  colorBy: WaterfallLegendType;
-}): TraceWaterfallItem[] {
+}): RawTraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
   const visitor = new Set<string>([rootItem.id]);
 
   reparentOrphansToRoot(rootItem, parentChildMap, orphans);
 
-  function getTraceWaterfallItem(
-    item: TraceItem,
-    depth: number,
-    parent?: TraceWaterfallItem
-  ): TraceWaterfallItem[] {
+  const flattenedTraceWaterfall: RawTraceWaterfallItem[] = [];
+  const stack: TraversalFrame[] = [{ item: rootItem, depth: 0 }];
+
+  while (stack.length > 0) {
+    const frame = stack.pop();
+    if (!frame) {
+      continue;
+    }
+
+    const { item, depth, parent } = frame;
     const startMicroseconds = item.timestampUs;
-    const color =
-      colorBy === WaterfallLegendType.ServiceName && item.serviceName
-        ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`)!
-        : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`)!;
-    const traceWaterfallItem: TraceWaterfallItem = {
+    const traceWaterfallItem: RawTraceWaterfallItem = {
       ...item,
       depth,
       offset: startMicroseconds - rootStartMicroseconds,
       skew: getClockSkew({ itemTimestamp: startMicroseconds, itemDuration: item.duration, parent }),
-      color,
     };
 
-    const sortedChildren =
-      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) || [];
+    flattenedTraceWaterfall.push(traceWaterfallItem);
 
-    const flattenedChildren = sortedChildren.flatMap((child) => {
+    const sortedChildren =
+      parentChildMap[item.id]?.sort((a, b) => a.timestampUs - b.timestampUs) ?? [];
+
+    // Push children in reverse so pop order matches recursive ascending traversal.
+    for (let i = sortedChildren.length - 1; i >= 0; i--) {
+      const child = sortedChildren[i];
+
       // Check if we have encountered the trace item before.
       // If we have visited the trace item before, then the child waterfall items are already
       // present in the flattened list, so we throw an error to alert the user of duplicated
@@ -272,13 +365,11 @@ export function getTraceWaterfall({
 
       // If we haven't visited it before, then we can process the waterfall item.
       visitor.add(child.id);
-      return getTraceWaterfallItem(child, depth + 1, traceWaterfallItem);
-    });
-
-    return [traceWaterfallItem, ...flattenedChildren];
+      stack.push({ item: child, depth: depth + 1, parent: traceWaterfallItem });
+    }
   }
 
-  return getTraceWaterfallItem(rootItem, 0);
+  return flattenedTraceWaterfall;
 }
 
 export function getClockSkew({
@@ -288,7 +379,7 @@ export function getClockSkew({
 }: {
   itemTimestamp: number;
   itemDuration: number;
-  parent?: TraceWaterfallItem;
+  parent?: RawTraceWaterfallItem;
 }) {
   let skew = 0;
   if (parent) {
@@ -309,4 +400,20 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
     ...flattenedTraceWaterfall.map((item) => item.offset + item.skew + item.duration),
     0
   );
+}
+
+export function getSubtreeIds(
+  parentChildMap: Record<string, TraceItem[]>,
+  rootId: string
+): string[] {
+  const ids: string[] = [];
+  const stack = [rootId];
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    ids.push(current);
+    for (const child of parentChildMap[current] ?? []) {
+      stack.push(child.id);
+    }
+  }
+  return ids;
 }

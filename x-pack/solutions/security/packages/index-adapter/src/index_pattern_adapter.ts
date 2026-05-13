@@ -10,12 +10,21 @@ import { IndexAdapter, type IndexAdapterParams, type InstallParams } from './ind
 
 export type InstallIndex = (indexSuffix: string) => Promise<void>;
 
+export type IndexPatternAdapterParams = IndexAdapterParams & {
+  /** should expand the list of indices based on pattern */
+  expandIndexPattern?: boolean;
+};
+
 export class IndexPatternAdapter extends IndexAdapter {
   protected installationPromises: Map<string, Promise<void>>;
   protected installIndexPromise?: Promise<InstallIndex>;
+  protected readonly expandIndexPattern: boolean;
 
-  constructor(protected readonly prefix: string, options: IndexAdapterParams) {
-    super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all index names
+  constructor(protected readonly prefix: string, options: IndexPatternAdapterParams) {
+    const { expandIndexPattern = false, ...restOptions } = options;
+    super(`${prefix}-*`, restOptions); // make indexTemplate `indexPatterns` match all index names
+    this.expandIndexPattern = expandIndexPattern;
+
     this.installationPromises = new Map();
   }
 
@@ -41,6 +50,7 @@ export class IndexPatternAdapter extends IndexAdapter {
         logger,
         totalFieldsLimit: this.totalFieldsLimit,
         writeIndexOnly: this.writeIndexOnly,
+        expandIndexPattern: this.expandIndexPattern,
       }),
       `update specific indices`
     );

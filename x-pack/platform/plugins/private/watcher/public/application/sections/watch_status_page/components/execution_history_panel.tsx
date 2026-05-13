@@ -156,7 +156,13 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -179,7 +185,13 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -192,7 +204,16 @@ export const ExecutionHistoryPanel = () => {
         } = item;
 
         if (startTime.isSame(lastExecution)) {
-          return <EuiIcon color="green" type="check" />;
+          return (
+            <EuiIcon
+              color="green"
+              type="check"
+              aria-label={i18n.translate(
+                'xpack.watcher.sections.watchHistory.watchTable.conditionMetAriaLabel',
+                { defaultMessage: 'Condition met' }
+              )}
+            />
+          );
         }
       },
     },
@@ -212,7 +233,13 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -291,7 +318,13 @@ export const ExecutionHistoryPanel = () => {
                     defaultMessage: 'State',
                   }
                 )}{' '}
-                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="question"
+                  className="eui-alignTop"
+                  aria-hidden={true}
+                />
               </span>
             </EuiToolTip>
           ),
@@ -330,10 +363,17 @@ export const ExecutionHistoryPanel = () => {
               </h4>
             </EuiTitle>
             <EuiInMemoryTable
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTableCaption',
+                {
+                  defaultMessage: 'Action statuses for execution on {date}',
+                  values: { date: watchHistoryDetails.startTime?.format() },
+                }
+              )}
               items={(watchHistoryDetails.watchStatus as any).actionStatuses}
               itemId="id"
               columns={detailColumns}
-              message={
+              noItemsMessage={
                 <FormattedMessage
                   id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
                   defaultMessage="No current status to show"
@@ -379,13 +419,16 @@ export const ExecutionHistoryPanel = () => {
       <EuiSpacer size="s" />
 
       <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.watcher.sections.watchHistory.watchTable.caption', {
+          defaultMessage: 'Watch execution history',
+        })}
         items={history || []}
         columns={columns}
         pagination={PAGINATION}
         sorting={true}
         loading={isLoading}
         data-test-subj="watchHistoryTable"
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchHistory.watchTable.noCurrentStatus"
             defaultMessage="No execution history to show"

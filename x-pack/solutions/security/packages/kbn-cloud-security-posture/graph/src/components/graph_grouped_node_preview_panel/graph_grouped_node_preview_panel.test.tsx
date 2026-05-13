@@ -23,14 +23,22 @@ import {
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY } from './use_pagination';
+import { getOrCreateFilterStore, destroyFilterStore } from '../filters/filter_store';
 
 // Mock the hook
 jest.mock('./use_fetch_document_details');
 
+// Mock expandable flyout API
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openPreviewPanel: jest.fn(),
+  }),
+}));
+
 const mockUseFetchDocumentDetails = useFetchDocumentDetails as jest.MockedFunction<
   typeof useFetchDocumentDetails
 >;
-
 const createMockHookResult = (
   overrides?: Partial<ReturnType<typeof useFetchDocumentDetails>>
 ): ReturnType<typeof useFetchDocumentDetails> => ({
@@ -43,28 +51,45 @@ const createMockHookResult = (
   ...overrides,
 });
 
-describe('GraphGroupedNodePreviewPanel', () => {
-  const defaultProps = {
-    docMode: 'grouped-entities' as const,
-    dataViewId: 'test-data-view-id',
-    documentIds: ['doc-1', 'doc-2', 'doc-3'],
-    entityItems: [] as EntityItem[],
-  };
+const TEST_DATA_VIEW_ID = 'test-data-view-id';
 
+// Use unique scopeId per test run to prevent cross-test pollution
+let TEST_SCOPE_ID: string;
+let defaultProps: {
+  scopeId: string;
+  docMode: 'grouped-entities';
+  dataViewId: string;
+  documentIds: string[];
+  entityItems: EntityItem[];
+};
+
+describe('GraphGroupedNodePreviewPanel', () => {
   let entityIdCounter = 0;
 
   const createEntityItem = (overrides?: Partial<EntityItem>): EntityItem => {
     entityIdCounter += 1;
     return {
       id: `entity-${entityIdCounter}`,
-      type: 'host',
+      itemType: 'entity',
       icon: 'storage',
       label: 'Test Host',
+      entity: { type: 'host' },
       ...overrides,
-    } as EntityItem;
+    };
   };
 
   beforeEach(() => {
+    // Generate unique scopeId for each test
+    TEST_SCOPE_ID = `test-scope-${Math.random().toString(36).substring(7)}`;
+    // Set defaultProps with the new scopeId
+    defaultProps = {
+      scopeId: TEST_SCOPE_ID,
+      docMode: 'grouped-entities' as const,
+      dataViewId: TEST_DATA_VIEW_ID,
+      documentIds: ['doc-1', 'doc-2', 'doc-3'],
+      entityItems: [] as EntityItem[],
+    };
+    getOrCreateFilterStore(TEST_SCOPE_ID);
     jest.clearAllMocks();
     localStorage.clear();
     entityIdCounter = 0;
@@ -73,6 +98,10 @@ describe('GraphGroupedNodePreviewPanel', () => {
         data: undefined as unknown as { page: (EventItem | AlertItem)[]; total: number },
       })
     );
+  });
+
+  afterEach(() => {
+    destroyFilterStore(TEST_SCOPE_ID);
   });
 
   describe('Rendering States', () => {
@@ -149,7 +178,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should render icon, title, and grouped type in ContentBody', () => {
-        const entityItems = [createEntityItem({ icon: 'test-icon', type: 'host' })];
+        const entityItems = [createEntityItem({ icon: 'test-icon', entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(TOTAL_HITS_TEST_ID)).toBeInTheDocument();
@@ -171,7 +200,7 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display correct groupedItemsType label', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
@@ -278,6 +307,58 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
     });
 
+    describe('Remount Behavior', () => {
+      it('should always reset to page 1 (pageIndex: 0) on mount, even with valid pageIndex in localStorage (grouped-entities)', () => {
+        const entityItems = Array.from({ length: 50 }, (_, i) =>
+          createEntityItem({ id: `entity-${i}` })
+        );
+
+        // Simulate localStorage with pageSize=20
+        // pageIndex is no longer stored in localStorage, always starts at 0
+        localStorage.setItem(
+          GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
+          JSON.stringify({ pageSize: 20 })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
+
+        // Should ALWAYS start at page 1 (pageIndex=0), regardless of localStorage
+        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Page 1/)).toBeInTheDocument();
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            options: expect.objectContaining({ pageIndex: 0 }),
+          })
+        );
+        expect(screen.getByTestId(PAGE_SIZE_BTN_TEST_ID)).toHaveTextContent('Rows per page: 20');
+      });
+
+      it('should always reset to page 1 (pageIndex: 0) on mount with pageSize from localStorage (grouped-events)', () => {
+        // Simulate localStorage with pageSize=10
+        // pageIndex is no longer stored in localStorage
+        localStorage.setItem(
+          GROUPED_PREVIEW_PAGINATION_SETTINGS_KEY,
+          JSON.stringify({ pageSize: 10 })
+        );
+
+        const mockData = {
+          page: [{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT }],
+          total: 5,
+        };
+        mockUseFetchDocumentDetails.mockReturnValue(createMockHookResult({ data: mockData }));
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        // Should show content and call hook with pageIndex=0 (server-side pagination)
+        expect(screen.getByTestId(CONTENT_BODY_TEST_ID)).toBeInTheDocument();
+        expect(mockUseFetchDocumentDetails).toHaveBeenCalledWith(
+          expect.objectContaining({
+            options: expect.objectContaining({ pageIndex: 0 }),
+          })
+        );
+      });
+    });
+
     describe('Pagination Edge Cases', () => {
       it('should hide pagination when total items less than MIN_PAGE_SIZE (single page)', () => {
         const entityItems = Array.from({ length: 5 }, (_, i) =>
@@ -368,8 +449,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
 
       it('should derive groupedItemsType from first entity type - this should never happened', () => {
         const entityItems = [
-          createEntityItem({ type: 'host' }),
-          createEntityItem({ type: 'user' }),
+          createEntityItem({ entity: { type: 'host' } }),
+          createEntityItem({ entity: { type: 'user' } }),
         ];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
@@ -377,30 +458,28 @@ describe('GraphGroupedNodePreviewPanel', () => {
       });
 
       it('should display "Hosts" label for host type', () => {
-        const entityItems = [createEntityItem({ type: 'host' })];
+        const entityItems = [createEntityItem({ entity: { type: 'host' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Hosts');
       });
 
       it('should display "Users" label for user type', () => {
-        const entityItems = [createEntityItem({ type: 'user' })];
+        const entityItems = [createEntityItem({ entity: { type: 'user' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Users');
       });
 
       it('should display "Entities" label for unknown type', () => {
-        const entityItems = [
-          createEntityItem({ type: 'unknown' as unknown as EntityItem['type'] }),
-        ];
+        const entityItems = [createEntityItem({ entity: { type: 'unknown' } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');
       });
 
       it('should display "Entities" label when type is undefined', () => {
-        const entityItems = [createEntityItem({ type: undefined })];
+        const entityItems = [createEntityItem({ entity: { type: undefined } })];
         render(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={entityItems} />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Entities');

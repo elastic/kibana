@@ -43,6 +43,8 @@ export interface FlyoutThresholdData {
   threshold: string[];
   comparator: string;
   pctAboveThreshold: string;
+  warningThreshold?: string;
+  warningComparator?: string;
 }
 
 const getI18nComparator = (comparator?: COMPARATORS) => {
@@ -59,12 +61,21 @@ const getI18nComparator = (comparator?: COMPARATORS) => {
       return comparator;
   }
 };
+
 const getPctAboveThreshold = (
   threshold: number[],
   comparator: COMPARATORS,
-  observedValue?: number
+  observedValue?: number,
+  isThereAWarningThreshold?: boolean
 ): string => {
-  if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
+  if (
+    !observedValue ||
+    !threshold ||
+    threshold.length > 1 ||
+    threshold[0] <= 0 ||
+    isThereAWarningThreshold === true
+  )
+    return '';
 
   return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
     defaultMessage: ' ({pctValue}% {comparator} the threshold)',
@@ -75,6 +86,69 @@ const getPctAboveThreshold = (
       comparator: getI18nComparator(convertToBuiltInComparators(comparator)),
     },
   });
+};
+
+// Helper function to convert threshold values (divide by 100 for percent, by 8 for bits)
+const convertThresholdValues = (
+  threshold: number[],
+  metricField: string,
+  metric: string
+): number[] => {
+  return threshold.map((thresholdToFormat) => {
+    if (
+      metricField.endsWith('.pct') ||
+      (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'percent')
+    ) {
+      thresholdToFormat = thresholdToFormat / 100;
+    } else if (
+      metricField.endsWith('.bytes') ||
+      (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'bits')
+    ) {
+      thresholdToFormat = thresholdToFormat / 8;
+    }
+    return thresholdToFormat;
+  });
+};
+
+// Helper function to format threshold values using metricValueFormatter
+const formatThresholdValues = (threshold: number[], field: string): string => {
+  return threshold
+    .map((thresholdValue) => metricValueFormatter(thresholdValue, field))
+    .join(' AND ');
+};
+
+// Helper function to format inventory value based on custom metric field
+const formatInventoryValue = (
+  value: number,
+  customMetricField: string | undefined,
+  metric: string
+): string => {
+  if (customMetricField) {
+    return metricValueFormatter(value, customMetricField);
+  } else {
+    const infraType = METRIC_FORMATTERS[metric].formatter;
+    const formatter = createFormatter(infraType);
+    return formatter(value);
+  }
+};
+
+// Helper function to format inventory threshold based on custom metric field
+const formatInventoryThreshold = (
+  threshold: number[],
+  customMetricField: string | undefined,
+  metricField: string,
+  metric: string
+): string => {
+  if (customMetricField) {
+    return threshold
+      .map((thresholdValue) => metricValueFormatter(thresholdValue, metricField))
+      .join(' AND ');
+  } else {
+    const thresholdFormatted = convertThresholdValues(threshold, metricField, metric);
+    const infraType = METRIC_FORMATTERS[metric].formatter;
+    const formatter = createFormatter(infraType);
+    return thresholdFormatted.map(formatter).join(' AND ');
+  }
 };
 
 export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] | undefined => {
@@ -100,11 +174,10 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue as number,
           isSameFieldsType ? fields[0] : 'noType'
         );
-        const thresholdFormattedAsString = threshold
-          .map((thresholdWithRange) =>
-            metricValueFormatter(thresholdWithRange, isSameFieldsType ? fields[0] : 'noType')
-          )
-          .join(' AND ');
+        const thresholdFormattedAsString = formatThresholdValues(
+          threshold,
+          isSameFieldsType ? fields[0] : 'noType'
+        );
 
         return {
           observedValue: formattedValue,
@@ -126,12 +199,16 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
               customMetrics: Array<{
                 field?: string;
               }>;
+              warningThreshold?: number[];
+              warningComparator?: string;
             })
           : (ruleCriteria as BaseMetricExpressionParams & {
               metric: string;
               customMetrics: Array<{
                 field?: string;
               }>;
+              warningThreshold?: number[];
+              warningComparator?: string;
             });
 
         let fields: string[] = [];
@@ -147,22 +224,36 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue as number,
           isSameFieldsType ? fields[0] : 'noType'
         );
-        const thresholdFormattedAsString = threshold
-          .map((thresholdWithRange) =>
-            metricValueFormatter(thresholdWithRange, isSameFieldsType ? fields[0] : 'noType')
-          )
-          .join(' AND ');
+        const thresholdFormattedAsString = formatThresholdValues(
+          threshold,
+          isSameFieldsType ? fields[0] : 'noType'
+        );
 
-        return {
+        const result: FlyoutThresholdData = {
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
           pctAboveThreshold: getPctAboveThreshold(
             threshold,
             convertToBuiltInComparators(comparator),
-            observedValue
+            observedValue,
+            criteria.warningThreshold !== undefined && criteria.warningComparator !== undefined
+              ? true
+              : false
           ),
         } as unknown as FlyoutThresholdData;
+
+        if (criteria.warningThreshold && criteria.warningComparator) {
+          const warningThresholdFormattedAsString = formatThresholdValues(
+            criteria.warningThreshold,
+            isSameFieldsType ? fields[0] : 'noType'
+          );
+
+          result.warningThreshold = warningThresholdFormattedAsString;
+          result.warningComparator = criteria.warningComparator;
+        }
+
+        return result;
       });
 
     case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
@@ -173,60 +264,63 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
               customMetric: {
                 field: string;
               };
+              warningThreshold?: number[];
+              warningComparator?: string;
             })
           : (ruleCriteria as BaseMetricExpressionParams & {
               metric: string;
               customMetric: {
                 field: string;
               };
+              warningThreshold?: number[];
+              warningComparator?: string;
             });
 
         const { threshold, customMetric, metric, comparator } = criteria;
         const metricField = customMetric?.field || metric;
-        const thresholdFormatted = threshold.map((thresholdToFormat) => {
-          if (
-            metricField.endsWith('.pct') ||
-            (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'percent')
-          ) {
-            thresholdToFormat = thresholdToFormat / 100;
-          } else if (
-            metricField.endsWith('.bytes') ||
-            (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'bits')
-          ) {
-            thresholdToFormat = thresholdToFormat / 8;
-          }
-          return thresholdToFormat;
-        });
 
-        let observedValueFormatted: string;
-        let thresholdFormattedAsString: string;
-        if (customMetric.field) {
-          observedValueFormatted = metricValueFormatter(
-            observedValue as number,
-            customMetric.field
-          );
-          thresholdFormattedAsString = threshold
-            .map((thresholdToStringFormat) =>
-              metricValueFormatter(thresholdToStringFormat, metricField)
-            )
-            .join(' AND ');
-        } else {
-          const infraType = METRIC_FORMATTERS[metric].formatter;
-          const formatter = createFormatter(infraType);
-          observedValueFormatted = formatter(observedValue);
-          thresholdFormattedAsString = thresholdFormatted.map(formatter).join(' AND ');
-        }
+        const thresholdFormatted = convertThresholdValues(threshold, metricField, metric);
 
-        return {
+        const observedValueFormatted = formatInventoryValue(
+          observedValue as number,
+          customMetric.field,
+          metric
+        );
+
+        const thresholdFormattedAsString = formatInventoryThreshold(
+          threshold,
+          customMetric.field,
+          metricField,
+          metric
+        );
+
+        const result: FlyoutThresholdData = {
           observedValue: observedValueFormatted,
           threshold: thresholdFormattedAsString,
           comparator,
           pctAboveThreshold: getPctAboveThreshold(
             thresholdFormatted,
             convertToBuiltInComparators(comparator),
-            observedValue
+            observedValue,
+            criteria.warningThreshold !== undefined && criteria.warningComparator !== undefined
+              ? true
+              : false
           ),
         } as unknown as FlyoutThresholdData;
+
+        // If warning thresholds exist, add them to the same entry
+        // Use the same formatting approach as critical threshold
+        if (criteria.warningThreshold && criteria.warningComparator) {
+          result.warningThreshold = formatInventoryThreshold(
+            criteria.warningThreshold,
+            customMetric.field,
+            metricField,
+            metric
+          );
+          result.warningComparator = criteria.warningComparator;
+        }
+
+        return result;
       });
 
     case LOG_THRESHOLD_ALERT_TYPE_ID:

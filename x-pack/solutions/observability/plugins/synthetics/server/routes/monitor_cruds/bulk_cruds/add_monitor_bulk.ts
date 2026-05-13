@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { getPackagePolicySavedObjectType } from '@kbn/fleet-plugin/server/services/package_policy';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext } from '../../types';
@@ -42,8 +43,17 @@ export const syncNewMonitorBulk = async ({
   const { query } = request;
   let newMonitors: CreatedMonitors | null = null;
 
+  const packagePolicySoType = await getPackagePolicySavedObjectType();
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
     const monitorSavedObjectId = uuidV4();
+    const monitorPrivateLocations = monitor[ConfigKey.LOCATIONS].filter(
+      (loc) => !loc.isServiceManaged
+    );
+    const references = monitorPrivateLocations.map((loc) => ({
+      id: `${monitorSavedObjectId}-${loc.id}`,
+      name: `${monitorSavedObjectId}-${loc.id}`,
+      type: packagePolicySoType,
+    }));
     return {
       id: monitorSavedObjectId,
       monitor: {
@@ -52,6 +62,7 @@ export const syncNewMonitorBulk = async ({
         [ConfigKey.MONITOR_QUERY_ID]:
           monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
       } as MonitorFields,
+      ...(references.length > 0 && { references }),
     };
   });
 

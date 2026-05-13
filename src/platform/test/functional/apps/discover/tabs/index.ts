@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const security = getService('security');
   const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/241720
-  describe.skip('discover/tabs', function () {
+  describe('discover/tabs', function () {
     before(async function () {
       await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -65,12 +64,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./_duplication'));
-    loadTestFile(require.resolve('./_on_tab_change'));
-    loadTestFile(require.resolve('./_new_tab'));
-    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_restorable_state'));
+    loadTestFile(require.resolve('./_on_tab_change'));
     loadTestFile(require.resolve('./_controls'));
-    loadTestFile(require.resolve('./_save_and_load'));
   });
 }

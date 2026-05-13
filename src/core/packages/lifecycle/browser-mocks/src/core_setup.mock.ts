@@ -23,6 +23,7 @@ import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreSetupMock({
@@ -37,6 +38,7 @@ export function createCoreSetupMock({
   const mock = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     application: applicationServiceMock.createSetupContract(),
+    chrome: chromeServiceMock.createSetupContract(),
     customBranding: customBrandingServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     executionContext: executionContextServiceMock.createSetupContract(),

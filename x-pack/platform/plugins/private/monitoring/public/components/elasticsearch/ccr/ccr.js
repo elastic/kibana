@@ -59,6 +59,10 @@ export const Ccr = (props) => {
       itemIdToExpandedRowMapValues[index] = (
         <EuiInMemoryTable
           items={shards}
+          tableCaption={i18n.translate('xpack.monitoring.elasticsearch.ccr.shardsTable.caption', {
+            defaultMessage: 'Shard details for {index}',
+            values: { index },
+          })}
           columns={[
             {
               field: 'shardId',
@@ -207,6 +211,9 @@ export const Ccr = (props) => {
     return (
       <EuiInMemoryTable
         css={ccrListingTableStyle}
+        tableCaption={i18n.translate('xpack.monitoring.elasticsearch.ccr.ccrListingTable.caption', {
+          defaultMessage: 'CCR follower indices',
+        })}
         columns={[
           {
             field: 'index',
@@ -223,7 +230,11 @@ export const Ccr = (props) => {
                 <EuiLink onClick={() => toggleShards(index, shards)}>
                   {index}
                   &nbsp;
-                  {expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" />}
+                  {expanded ? (
+                    <EuiIcon type="chevronSingleUp" />
+                  ) : (
+                    <EuiIcon type="chevronSingleDown" />
+                  )}
                 </EuiLink>
               );
             },

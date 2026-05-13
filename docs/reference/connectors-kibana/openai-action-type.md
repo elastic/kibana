@@ -24,12 +24,6 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For 
 :screenshot:
 :::
 
-::::{important}
-Elastic provides no official support for connecting to the Azure OpenAI service through a proxy. However if you must use a proxy, ensure that the proxy supports streaming and is SSE-compatible. Elastic will only parse streamed responses.
-
-To validate that your connectivity problems are caused by using a proxy, you can attempt to set up the connector and access the Azure OpenAI service without using a proxy.
-::::
-
 ### Connector configuration [openai-connector-configuration]
 
 OpenAI connectors have the following configuration properties:

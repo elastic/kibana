@@ -25,7 +25,7 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) =>
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       color="text"
       aria-label={strings.getMoreActionsLabel()}
       onClick={onMoreActionsButtonClick}
@@ -33,7 +33,13 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) =>
   );
 
   return (
-    <EuiPopover ownFocus={false} button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      ownFocus={false}
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={strings.getMoreActionsLabel()}
+    >
       <FilterItemActions {...props} minimizePaddings={true} />
     </EuiPopover>
   );

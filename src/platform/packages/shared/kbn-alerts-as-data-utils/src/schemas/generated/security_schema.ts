@@ -120,6 +120,9 @@ const SecurityAlertRequired = rt.type({
 });
 // prettier-ignore
 const SecurityAlertOptional = rt.partial({
+  'data_stream.dataset': schemaString,
+  'data_stream.namespace': schemaString,
+  'data_stream.type': schemaString,
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
@@ -127,6 +130,7 @@ const SecurityAlertOptional = rt.partial({
   'host.asset.criticality': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,
+  'kibana.alert.attack_ids': schemaStringArray,
   'kibana.alert.building_block_type': schemaString,
   'kibana.alert.case_ids': schemaStringArray,
   'kibana.alert.consecutive_matches': schemaStringOrNumber,
@@ -141,6 +145,8 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.intended_timestamp': schemaDate,
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
+  'kibana.alert.maintenance_window_names': schemaStringArray,
+  'kibana.alert.muted': schemaBoolean,
   'kibana.alert.new_terms': schemaStringArray,
   'kibana.alert.original_data_stream.dataset': schemaString,
   'kibana.alert.original_data_stream.namespace': schemaString,
@@ -226,6 +232,7 @@ const SecurityAlertOptional = rt.partial({
   'service.risk.calculated_level': schemaString,
   'service.risk.calculated_score_norm': schemaNumber,
   tags: schemaStringArray,
+  'threat.enrichments': schemaUnknown,
   'user.asset.criticality': schemaString,
 });
 

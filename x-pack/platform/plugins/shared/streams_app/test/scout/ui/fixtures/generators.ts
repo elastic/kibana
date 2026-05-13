@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SynthtraceFixture } from '@kbn/scout';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { log, timerange } from '@kbn/synthtrace-client';
 
 export const DATE_RANGE = {
   from: 'Jan 1, 2025 @ 00:00:00.000',
@@ -35,6 +35,7 @@ export function generateLogsData(
     endTime = TEST_END_TIME,
     docsPerMinute = 10,
     isMalformed = false,
+    defaults = {},
   }) => {
     const logsData = timerange(startTime, endTime)
       .interval('1m')
@@ -48,6 +49,7 @@ export function generateLogsData(
           .setHostIp('127.0.0.1')
           .defaults({
             'service.name': 'test-service',
+            ...defaults,
           })
       );
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PinnedControlState } from '@kbn/controls-schemas';
 import { deserializeLayout } from './deserialize_layout';
 
 describe('deserializeLayout', () => {
@@ -16,7 +17,7 @@ describe('deserializeLayout', () => {
         {
           grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel One' },
-          uid: '1',
+          id: '1',
           type: 'testPanelType',
         },
         {
@@ -25,18 +26,31 @@ describe('deserializeLayout', () => {
           grid: {
             y: 6,
           },
-          uid: 'section1',
+          id: 'section1',
           panels: [
             {
               grid: { x: 0, y: 0, w: 6, h: 6 },
               config: { title: 'panel Three' },
-              uid: '3',
+              id: '3',
               type: 'testPanelType',
             },
           ],
         },
       ],
-      () => []
+      [
+        {
+          id: 'control1',
+          type: 'someType',
+          width: 'small',
+          grow: true,
+          config: { someValue: 'test' },
+        } as unknown as PinnedControlState,
+        {
+          id: 'control2',
+          type: 'anotherType',
+          config: { anotherValue: 1 },
+        } as unknown as PinnedControlState,
+      ]
     );
     expect(layout.panels).toMatchInlineSnapshot(`
       Object {
@@ -72,19 +86,35 @@ describe('deserializeLayout', () => {
         },
       }
     `);
+    expect(layout.pinnedPanels).toMatchInlineSnapshot(`
+      Object {
+        "control1": Object {
+          "grow": true,
+          "order": 0,
+          "type": "someType",
+          "width": "small",
+        },
+        "control2": Object {
+          "grow": undefined,
+          "order": 1,
+          "type": "anotherType",
+          "width": undefined,
+        },
+      }
+    `);
     expect(childState).toMatchInlineSnapshot(`
       Object {
         "1": Object {
-          "rawState": Object {
-            "title": "panel One",
-          },
-          "references": Array [],
+          "title": "panel One",
         },
         "3": Object {
-          "rawState": Object {
-            "title": "panel Three",
-          },
-          "references": Array [],
+          "title": "panel Three",
+        },
+        "control1": Object {
+          "someValue": "test",
+        },
+        "control2": Object {
+          "anotherValue": 1,
         },
       }
     `);

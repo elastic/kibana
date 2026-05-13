@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { PrebuiltRulesFilter } from './prebuilt_rules_filter';
-
-export enum RuleCustomizationStatus {
-  CUSTOMIZED = 'CUSTOMIZED',
-  NOT_CUSTOMIZED = 'NOT_CUSTOMIZED',
-}
 
 export type ReviewPrebuiltRuleUpgradeFilter = z.infer<typeof ReviewPrebuiltRuleUpgradeFilter>;
 export const ReviewPrebuiltRuleUpgradeFilter = PrebuiltRulesFilter.merge(

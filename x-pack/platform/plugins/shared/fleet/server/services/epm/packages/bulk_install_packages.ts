@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from '@kbn/core/server';
 
 import pLimit from 'p-limit';
 import { uniqBy } from 'lodash';
-
-import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
@@ -31,7 +33,7 @@ interface BulkInstallPackagesParams {
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
   prerelease?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   skipIfInstalled?: boolean;
 }
 
@@ -42,7 +44,7 @@ export async function bulkInstallPackages({
   spaceId,
   force,
   prerelease,
-  authorizationHeader,
+  request,
   skipIfInstalled,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
@@ -144,7 +146,7 @@ export async function bulkInstallPackages({
         spaceId,
         force,
         prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
-        authorizationHeader,
+        request,
         skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,
       });
 

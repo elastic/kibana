@@ -188,7 +188,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                               onClick={togglePopover}
                               size="xs"
                               iconSide="right"
-                              iconType="arrowDown"
+                              iconType="chevronSingleDown"
                               flush="left"
                               data-test-subj="case-table-bulk-actions-link-icon"
                             >
@@ -205,18 +205,6 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                       </EuiFlexItem>
                     </>
                   )}
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      onClick={onRefresh}
-                      size="xs"
-                      iconSide="left"
-                      iconType="refresh"
-                      flush="left"
-                      data-test-subj="all-cases-refresh-link-icon"
-                    >
-                      {i18n.REFRESH}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
                   {showClearFiltersButton ? (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty

@@ -12,7 +12,6 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
-import { skip, take } from 'rxjs';
 import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
 import { tracksOverlays } from './tracks_overlays';
@@ -37,12 +36,11 @@ interface OpenLazyFlyoutParams {
  * This helper handles:
  * - Mounting a flyout panel with async content.
  * - Automatically focusing the flyout when content is ready.
- * - Closing the flyout when the user navigates to a different app.
  * - Tracking the flyout if `parentApi` supports overlay tracking.
  * - Returning focus to a trigger element when the flyout closes.
  *
  * @param params - Configuration object.
- * @param params.core - The `CoreStart` contract, used for overlays, app lifecycle, and notifications.
+ * @param params.core - The `CoreStart` contract, used for overlays and notifications.
  * @param params.loadContent - Async function that loads the flyout content. Must return a valid React element.
  *                             If it resolves to `null` or `undefined`, the flyout will close automatically.
  * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
@@ -65,14 +63,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       focusFirstFocusable(document.getElementById(triggerId));
     }
   };
-
-  /**
-   * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
-   * Dashboard app (`overlayTracker` is not available)
-   */
-  core.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
-    onClose();
-  });
 
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(

@@ -8,19 +8,19 @@
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/response-ops-alerts-fields-browser/types';
+import type { PageScope } from '../../../data_view_manager/constants';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useDataView as useDataViewOld } from '../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';
-import { sourcererSelectors } from '../../../common/store';
 import type { State } from '../../../common/store';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { sourcererSelectors } from '../../../common/store';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { useCreateFieldButton } from './create_field_button';
@@ -35,7 +35,7 @@ export type OpenFieldEditor = (fieldName?: string) => void;
 export type OpenDeleteFieldModal = (fieldName: string) => void;
 
 export interface UseFieldBrowserOptionsProps {
-  sourcererScope: SourcererScopeName;
+  sourcererScope: PageScope;
   removeColumn: (columnId: string) => void;
   upsertColumn: (column: ColumnHeaderOptions, index: number) => void;
   editorActionsRef?: FieldEditorActionsRef;
@@ -63,6 +63,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
   const { indexFieldsSearch } = useDataViewOld();
   const {
     dataViewFieldEditor,
+    notifications,
     data: { dataViews },
   } = useKibana().services;
   const missingPatterns = useSelector((state: State) => {
@@ -83,9 +84,17 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
         if (experimentalDataView) setDataView(experimentalDataView);
         return;
       }
-      const aDatView = await dataViews.get(dataViewId);
-      if (ignore) return;
-      setDataView(aDatView);
+      // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+      try {
+        const aDatView = await dataViews.get(dataViewId);
+        if (ignore) return;
+        setDataView(aDatView);
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: 'Error retrieving data view',
+          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+        });
+      }
     };
     if (selectedDataViewId != null && !missingPatterns.length) {
       fetchAndSetDataView(selectedDataViewId);
@@ -98,6 +107,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     selectedDataViewId,
     missingPatterns,
     dataViews,
+    notifications,
     newDataViewPickerEnabled,
     experimentalDataView,
   ]);

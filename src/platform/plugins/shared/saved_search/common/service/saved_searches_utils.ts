@@ -42,6 +42,7 @@ export const toSavedSearchAttributes = (
     description: savedSearch.description ?? '',
     grid: savedSearch.grid ?? {},
     hideChart: savedSearch.hideChart ?? false,
+    hideTable: savedSearch.hideTable ?? false,
     viewMode: savedSearch.viewMode,
     hideAggregatedPreview: savedSearch.hideAggregatedPreview,
     rowHeight: savedSearch.rowHeight,
@@ -56,5 +57,6 @@ export const toSavedSearchAttributes = (
     sampleSize: savedSearch.sampleSize,
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
+    chartInterval: savedSearch.chartInterval,
     visContext: savedSearch.visContext,
   });

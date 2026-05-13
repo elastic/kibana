@@ -126,6 +126,9 @@ export class FilterEditor extends Component<Props, State> {
         closePopover={this._close}
         anchorPosition="leftCenter"
         ownFocus
+        aria-label={i18n.translate('xpack.maps.layerPanel.filterEditor.popoverAriaLabel', {
+          defaultMessage: 'Layer filter',
+        })}
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
@@ -194,7 +197,7 @@ export class FilterEditor extends Component<Props, State> {
         : i18n.translate('xpack.maps.layerPanel.filterEditor.addFilterButtonLabel', {
             defaultMessage: 'Set filter',
           });
-    const openButtonIcon = query && query.query ? 'pencil' : 'plusInCircleFilled';
+    const openButtonIcon = query && query.query ? 'pencil' : 'plusCircle';
 
     return (
       <EuiButtonEmpty

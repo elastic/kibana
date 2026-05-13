@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -15,9 +23,13 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
-import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import {
+  PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+  PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
+} from '../common/ui_setting_keys';
 import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
+import { chatExperienceSetting } from './src/settings/chat_experience_setting';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -29,13 +41,18 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     this.registerUiSettings(core, plugins);
@@ -44,7 +61,10 @@ export class AIAssistantManagementSelectionPlugin
   }
 
   private registerUiSettings(
-    core: CoreSetup,
+    core: CoreSetup<
+      AIAssistantManagementSelectionPluginServerDependenciesStart,
+      AIAssistantManagementSelectionPluginServerStart
+    >,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
     const { cloud } = plugins;
@@ -56,6 +76,45 @@ export class AIAssistantManagementSelectionPlugin
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
           ...classicSetting,
           value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
+        },
+      });
+    }
+
+    // Register chat experience setting for both stateful and serverless (except workplaceai)
+    if (serverlessProjectType !== 'workplaceai') {
+      // Agent is the default chat experience for Elasticsearch, Security, Observability,
+      // and Kibana Classic solution spaces. Other non-null space solutions (for example
+      // future or specialized views) use Classic unless overridden in config.
+      core.uiSettings.register({
+        [PREFERRED_CHAT_EXPERIENCE_SETTING_KEY]: {
+          ...chatExperienceSetting,
+          getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
+            try {
+              const [, startServices] = await core.getStartServices();
+              // Avoid security exceptions before login - only check space when authenticated
+              if (startServices.spaces && request?.auth.isAuthenticated) {
+                const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
+                  request
+                );
+                const solution = activeSpace?.solution;
+                if (
+                  solution === 'es' ||
+                  solution === 'security' ||
+                  solution === 'oblt' ||
+                  solution === 'classic'
+                ) {
+                  return AIChatExperience.Agent;
+                }
+                if (solution != null) {
+                  return AIChatExperience.Classic;
+                }
+              }
+            } catch (e) {
+              this.logger.error('Error getting active space:');
+              this.logger.error(e);
+            }
+            return this.config.preferredChatExperience ?? AIChatExperience.Agent;
+          },
         },
       });
     }

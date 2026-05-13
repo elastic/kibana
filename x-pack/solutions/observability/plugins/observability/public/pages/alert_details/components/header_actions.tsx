@@ -91,7 +91,7 @@ export function HeaderActions({
               href={discoverUrl}
               iconType="discoverApp"
               target="_blank"
-              data-test-subj="view-in-discover-button"
+              data-test-subj={`alertDetailsPage_viewInDiscover${rule ? `_${rule.ruleTypeId}` : ''}`}
             >
               <EuiText size="s">
                 {i18n.translate('xpack.observability.alertDetails.viewInDiscover', {
@@ -172,7 +172,7 @@ export function HeaderActions({
                 <EuiButtonEmpty
                   size="s"
                   color="text"
-                  iconType="eyeClosed"
+                  iconType="eyeSlash"
                   onClick={handleUntrackAlert}
                   data-test-subj="untrack-alert-button"
                   disabled={alertStatus !== ALERT_STATUS_ACTIVE}

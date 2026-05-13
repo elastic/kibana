@@ -7,16 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, EuiIconTip } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import { css } from '@emotion/react';
 import type {
   VisualizationLayerHeaderContentProps,
   VisualizationLayerWidgetProps,
 } from '@kbn/lens-common';
 import { getIgnoreGlobalFilterIcon } from '../../../shared_components/ignore_global_filter/data_view_picker_icon';
-import type { State, XYAnnotationLayerConfig } from '../types';
-import { annotationLayerHasUnsavedChanges } from '../state_helpers';
+import type { XYVisualizationState, XYAnnotationLayerConfig } from '../types';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import {
   getAnnotationLayerTitle,
@@ -24,7 +22,7 @@ import {
   isReferenceLayer,
 } from '../visualization_helpers';
 
-export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
+export function LayerHeader(props: VisualizationLayerWidgetProps<XYVisualizationState>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
   if (!layer) {
     return null;
@@ -33,17 +31,14 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return <ReferenceLayerHeader />;
   }
   if (isAnnotationsLayer(layer)) {
-    return (
-      <AnnotationsLayerHeader
-        title={getAnnotationLayerTitle(layer)}
-        hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
-      />
-    );
+    return <AnnotationsLayerHeader title={getAnnotationLayerTitle(layer)} />;
   }
   return null;
 }
 
-export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
+export function LayerHeaderContent(
+  props: VisualizationLayerHeaderContentProps<XYVisualizationState>
+) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
   if (layer && isAnnotationsLayer(layer)) {
     return <AnnotationLayerHeaderContent {...props} />;
@@ -62,14 +57,7 @@ export function ReferenceLayerHeader() {
   );
 }
 
-export function AnnotationsLayerHeader({
-  title,
-  hasUnsavedChanges,
-}: {
-  title: string | undefined;
-  hasUnsavedChanges: boolean;
-}) {
-  const { euiTheme } = useEuiTheme();
+export function AnnotationsLayerHeader({ title }: { title: string | undefined }) {
   return (
     <StaticHeader
       icon={IconChartBarAnnotations}
@@ -78,24 +66,6 @@ export function AnnotationsLayerHeader({
         i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
           defaultMessage: 'Annotations',
         })
-      }
-      indicator={
-        hasUnsavedChanges && (
-          <div
-            css={css`
-              padding-bottom: 3px;
-              padding-left: 4px;
-            `}
-          >
-            <EuiIconTip
-              content={i18n.translate('xpack.lens.xyChart.unsavedChanges', {
-                defaultMessage: 'Unsaved changes',
-              })}
-              type="dot"
-              color={euiTheme.colors.success}
-            />
-          </div>
-        )
       }
     />
   );
@@ -106,7 +76,7 @@ function AnnotationLayerHeaderContent({
   state,
   layerId,
   onChangeIndexPattern,
-}: VisualizationLayerHeaderContentProps<State>) {
+}: VisualizationLayerHeaderContentProps<XYVisualizationState>) {
   const { euiTheme } = useEuiTheme();
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',

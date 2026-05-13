@@ -7,12 +7,14 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
+  SERVICE_RUNTIME_VERSION,
+  PROCESS_RUNTIME_VERSION,
   CLOUD_PROVIDER,
   CLOUD_SERVICE_NAME,
   TELEMETRY_SDK_NAME,
@@ -26,6 +28,7 @@ import { maybe } from '../../../common/utils/maybe';
 export interface ServiceAgentResponse {
   agentName?: string;
   runtimeName?: string;
+  runtimeVersion?: string;
   telemetrySdkName?: string;
   telemetrySdkLanguage?: string;
   serverlessType?: ServerlessType;
@@ -47,6 +50,8 @@ export async function getServiceAgent({
     TELEMETRY_SDK_NAME,
     TELEMETRY_SDK_LANGUAGE,
     SERVICE_RUNTIME_NAME,
+    SERVICE_RUNTIME_VERSION,
+    PROCESS_RUNTIME_VERSION,
     CLOUD_PROVIDER,
     CLOUD_SERVICE_NAME,
   ] as const);
@@ -58,7 +63,13 @@ export async function getServiceAgent({
     },
     track_total_hits: 1,
     size: 1,
-    _source: [AGENT_NAME, SERVICE_RUNTIME_NAME, CLOUD_PROVIDER, CLOUD_SERVICE_NAME],
+    _source: [
+      AGENT_NAME,
+      SERVICE_RUNTIME_NAME,
+      SERVICE_RUNTIME_VERSION,
+      CLOUD_PROVIDER,
+      CLOUD_SERVICE_NAME,
+    ],
     query: {
       bool: {
         filter: [
@@ -101,16 +112,23 @@ export async function getServiceAgent({
     return {};
   }
 
-  const event = unflattenKnownApmEventFields(hit.fields);
+  const event = accessKnownApmEventFields(hit.fields);
 
-  const { agent, service, cloud, telemetry } = event;
-  const serverlessType = getServerlessTypeFromCloudData(cloud?.provider, cloud?.service?.name);
+  const serverlessType = getServerlessTypeFromCloudData(
+    event[CLOUD_PROVIDER],
+    event[CLOUD_SERVICE_NAME]
+  );
+
+  const runtimeVersion =
+    event[SERVICE_RUNTIME_VERSION] ??
+    (hit.fields?.[PROCESS_RUNTIME_VERSION]?.[0] as string | undefined);
 
   return {
-    agentName: agent?.name,
-    telemetrySdkName: telemetry?.sdk?.name,
-    telemetrySdkLanguage: telemetry?.sdk?.language,
-    runtimeName: service?.runtime?.name,
+    agentName: event[AGENT_NAME],
+    telemetrySdkName: event[TELEMETRY_SDK_NAME],
+    telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
+    runtimeName: event[SERVICE_RUNTIME_NAME],
+    runtimeVersion,
     serverlessType,
   };
 }

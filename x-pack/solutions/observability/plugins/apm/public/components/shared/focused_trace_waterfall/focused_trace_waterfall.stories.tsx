@@ -36,6 +36,8 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
             duration: 50000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 3, outgoing: 5 },
+            docType: 'transaction',
           },
 
           focusedTraceDoc: {
@@ -46,6 +48,8 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
             duration: 5000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 3, outgoing: 5 },
+            docType: 'transaction',
           },
           focusedTraceTree: [
             {
@@ -58,6 +62,8 @@ export const FocusedIdIsRoot: StoryFn<any> = () => {
                 errors: [],
                 parentId: 'foo',
                 serviceName: 'flagd',
+                spanLinksCount: { incoming: 0, outgoing: 0 },
+                docType: 'span',
               },
               children: [],
             },
@@ -82,6 +88,8 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
             duration: 50000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'transaction',
           },
           parentDoc: {
             id: 'foo',
@@ -91,6 +99,8 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
             duration: 50000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'transaction',
           },
           focusedTraceDoc: {
             id: 'bar',
@@ -101,6 +111,8 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
             parentId: 'foo',
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span',
           },
           focusedTraceTree: [
             {
@@ -113,6 +125,8 @@ export const ParentIdIsRoot: StoryFn<any> = () => {
                 errors: [],
                 parentId: 'bar',
                 serviceName: 'flagd',
+                spanLinksCount: { incoming: 0, outgoing: 0 },
+                docType: 'span',
               },
               children: [],
             },
@@ -137,6 +151,8 @@ export const FocusedWithParent: StoryFn<any> = () => {
             duration: 50000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'transaction',
           },
           parentDoc: {
             id: 'parent',
@@ -146,6 +162,8 @@ export const FocusedWithParent: StoryFn<any> = () => {
             duration: 30000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span',
           },
           focusedTraceDoc: {
             id: 'bar',
@@ -156,6 +174,8 @@ export const FocusedWithParent: StoryFn<any> = () => {
             parentId: 'foo',
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span',
           },
           focusedTraceTree: [
             {
@@ -168,6 +188,8 @@ export const FocusedWithParent: StoryFn<any> = () => {
                 errors: [],
                 parentId: 'bar',
                 serviceName: 'flagd',
+                spanLinksCount: { incoming: 0, outgoing: 0 },
+                docType: 'span',
               },
               children: [],
             },
@@ -192,6 +214,8 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
             duration: 50000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'transaction',
           },
           parentDoc: {
             id: 'parent',
@@ -201,6 +225,8 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
             duration: 40000,
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span',
           },
           focusedTraceDoc: {
             id: 'bar',
@@ -211,6 +237,8 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
             parentId: 'foo',
             errors: [],
             serviceName: 'recommendation',
+            spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span',
           },
           focusedTraceTree: [
             {
@@ -223,6 +251,8 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
                 errors: [],
                 parentId: 'bar',
                 serviceName: 'flagd',
+                spanLinksCount: { incoming: 0, outgoing: 0 },
+                docType: 'span',
               },
               children: [
                 {
@@ -235,6 +265,8 @@ export const FocusedWithMultipleChildren: StoryFn<any> = () => {
                     errors: [],
                     parentId: 'child1',
                     serviceName: 'flagd',
+                    spanLinksCount: { incoming: 0, outgoing: 0 },
+                    docType: 'span',
                   },
                 },
               ],

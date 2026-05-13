@@ -40,6 +40,8 @@
           "; }; }; setPageIndex: React.Dispatch<React.SetStateAction<number>>; }"
         ],
         "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,6 +58,8 @@
               "T[]"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -73,6 +77,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,6 +96,8 @@
               "\"asc\" | \"desc\""
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,7 +115,10 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -137,6 +148,8 @@
           "<T>"
         ],
         "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -155,6 +168,8 @@
               "<T>) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -164,14 +179,17 @@
                 "id": "def-common.UseTableState.onTableChange.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ page, sort }",
                 "description": [],
                 "signature": [
                   "Criteria",
                   "<T>"
                 ],
                 "path": "node_modules/@elastic/eui/eui.d.ts",
+                "lineNumber": 33727,
+                "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "Criteria",
                 "trackAdoption": false
               }
             ]
@@ -189,6 +207,8 @@
               "Pagination"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -207,6 +227,8 @@
               "; }; }"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -223,6 +245,8 @@
               "(value: React.SetStateAction<number>) => void"
             ],
             "path": "x-pack/platform/packages/private/ml/in_memory_table/hooks/use_table_state.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -238,7 +262,10 @@
                   "A"
                 ],
                 "path": "node_modules/@types/react/ts5.0/index.d.ts",
+                "lineNumber": 1792,
+                "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "A",
                 "trackAdoption": false
               }
             ]

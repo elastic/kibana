@@ -18,10 +18,10 @@ describe('<IndicatorsFlyout />', () => {
   it('should render expand button', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={mockIndicator} onOpen={jest.fn()} />
+        <OpenIndicatorFlyoutButton indicator={mockIndicator} />
       </TestProvidersComponent>
     );
 
-    expect(getByTestId(BUTTON_TEST_ID).innerHTML).toContain('expand');
+    expect(getByTestId(BUTTON_TEST_ID).innerHTML).toContain('maximize');
   });
 });

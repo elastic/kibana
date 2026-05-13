@@ -4,137 +4,145 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
-import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, Feature } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
-import { IdentifySystemsPrompt } from './prompt';
-import { clusterLogs } from '../cluster_logs/cluster_logs';
-import conditionSchemaText from '../shared/condition_schema.text';
 
-/**
- * Identifies features in a stream, by:
- * - describing the dataset (via sampled documents)
- * - clustering docs together on similarity
- * - asking the LLM to identify features by creating
- * queries and validating the resulting clusters
- */
-export async function identifyFeatures({
-  stream,
-  features,
-  start,
-  end,
-  esClient,
-  kql,
-  inferenceClient,
-  logger,
-  signal,
-  dropUnmapped = false,
-  maxSteps: initialMaxSteps,
-}: {
-  stream: Streams.all.Definition;
-  features?: Feature[];
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
-  kql?: string;
+import { compact, uniqBy } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import {
+  type BaseFeature,
+  type IgnoredFeature,
+  identifiedFeatureSchema,
+  ignoredFeatureSchema,
+} from '@kbn/streams-schema';
+import { withSpan } from '@kbn/apm-utils';
+import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
+import { createIdentifyFeaturesPrompt } from './prompt';
+import { formatRawDocument } from './utils/format_raw_document';
+import { sumTokens } from '../helpers/sum_tokens';
+
+export interface PreviouslyIdentifiedFeature {
+  id: string;
+  type: string;
+  subtype?: string;
+  title?: string;
+  description?: string;
+  properties: Record<string, unknown>;
+}
+
+export const toPreviouslyIdentifiedFeature = (
+  feature: BaseFeature
+): PreviouslyIdentifiedFeature => ({
+  id: feature.id,
+  type: feature.type,
+  subtype: feature.subtype,
+  title: feature.title,
+  description: feature.description,
+  properties: feature.properties,
+});
+export type { IgnoredFeature } from '@kbn/streams-schema';
+
+export interface ExcludedFeatureSummary {
+  id: string;
+  type: string;
+  subtype?: string;
+  title?: string;
+  description?: string;
+  properties: Record<string, unknown>;
+}
+
+export interface IdentifyFeaturesOptions {
+  streamName: string;
+  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  excludedFeatures?: ExcludedFeatureSummary[];
   inferenceClient: BoundInferenceClient;
+  systemPrompt: string;
   logger: Logger;
   signal: AbortSignal;
-  dropUnmapped?: boolean;
-  maxSteps?: number;
-}): Promise<{ features: Omit<Feature, 'description'>[] }> {
-  const [analysis, initialClustering] = await Promise.all([
-    describeDataset({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      kql: kql || undefined,
-    }),
-    clusterLogs({
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      partitions:
-        features?.map((feature) => {
-          return {
-            name: feature.name,
-            condition: feature.filter,
-          };
-        }) ?? [],
-      logger,
-      dropUnmapped,
-    }),
-  ]);
+  previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
+}
 
-  const response = await executeAsReasoningAgent({
-    maxSteps: initialMaxSteps,
-    input: {
-      stream: {
-        name: stream.name,
-        description: stream.description || 'This stream has no description.',
-      },
-      dataset_analysis: JSON.stringify(
-        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
-      ),
-      initial_clustering: JSON.stringify(initialClustering),
-      condition_schema: conditionSchemaText,
-    },
-    prompt: IdentifySystemsPrompt,
-    inferenceClient,
-    finalToolChoice: {
-      function: 'finalize_systems',
-    },
-    toolCallbacks: {
-      validate_systems: async (toolCall) => {
-        const clustering = await clusterLogs({
-          start,
-          end,
-          esClient,
-          index: stream.name,
-          logger,
-          partitions: toolCall.function.arguments.systems.map((system) => {
-            return {
-              name: system.name,
-              condition: system.filter as Condition,
-            };
-          }),
-          dropUnmapped,
-        });
+export async function identifyFeatures({
+  streamName,
+  sampleDocuments,
+  excludedFeatures,
+  systemPrompt,
+  inferenceClient,
+  signal,
+  previouslyIdentifiedFeatures = [],
+}: IdentifyFeaturesOptions): Promise<{
+  features: BaseFeature[];
+  ignoredFeatures: IgnoredFeature[];
+  tokensUsed: ChatCompletionTokenCount;
+}> {
+  const formattedDocuments = compact(
+    sampleDocuments.map((hit) =>
+      formatRawDocument({
+        hit,
+        shouldNotTruncate(key: string) {
+          return key.includes('tags');
+        },
+      })
+    )
+  );
 
-        return {
-          response: {
-            systems: clustering.map((cluster) => {
-              return {
-                name: cluster.name,
-                clustering: cluster.clustering,
-              };
-            }),
-          },
-        };
+  const previousFeaturesContext =
+    previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
+
+  const response = await withSpan('invoke_prompt', () =>
+    inferenceClient.prompt({
+      input: {
+        sample_documents: JSON.stringify(formattedDocuments),
+        previously_identified_features: previousFeaturesContext,
+        excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
       },
-      finalize_systems: async (toolCall) => {
+      prompt: createIdentifyFeaturesPrompt({ systemPrompt }),
+      abortSignal: signal,
+    })
+  );
+
+  const features = uniqBy(
+    response.toolCalls
+      .flatMap((toolCall) => toolCall.function.arguments.features)
+      .map((feature) => {
         return {
-          response: {},
+          ...feature,
+          stream_name: streamName,
+          filter: tryParseFilter(feature.filter),
         };
-      },
-    },
-    abortSignal: signal,
-  });
+      })
+      .filter((feature) => {
+        const result = identifiedFeatureSchema.safeParse(feature);
+        if (!result.success) {
+          return false;
+        }
+
+        // ensure that the feature has at least one stable identifying property
+        return Object.keys(feature.properties).length > 0;
+      }),
+    (feature) => feature.id
+  );
+
+  const ignoredFeatures = response.toolCalls
+    .flatMap((toolCall) => toolCall.function.arguments.ignored_features ?? [])
+    .filter((item): item is IgnoredFeature => ignoredFeatureSchema.safeParse(item).success);
 
   return {
-    features: response.toolCalls.flatMap((toolCall) =>
-      toolCall.function.arguments.systems.map((args) => {
-        const feature = {
-          ...args,
-          filter: args.filter as Condition,
-        };
-        return feature;
-      })
-    ),
+    features,
+    ignoredFeatures,
+    tokensUsed: sumTokens({ added: response.tokens }),
   };
+}
+
+function tryParseFilter(maybeFilter: unknown): Condition | undefined {
+  if (!maybeFilter) {
+    return undefined;
+  }
+
+  const result = conditionSchema.safeParse(maybeFilter);
+  if (!result.success) {
+    return undefined;
+  }
+
+  return isConditionComplete(result.data) ? result.data : undefined;
 }

@@ -5,29 +5,53 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { Condition } from '@kbn/streamlang';
-import { conditionSchema } from '@kbn/streamlang';
+import { z } from '@kbn/zod/v4';
+import { featureStatusSchema } from '@kbn/streams-schema/src/feature';
+import { conditionSchema } from '@kbn/streamlang/types/conditions';
 import {
   STREAM_NAME,
   FEATURE_UUID,
   FEATURE_DESCRIPTION,
+  FEATURE_CONFIDENCE,
+  FEATURE_EVIDENCE,
+  FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_STATUS,
+  FEATURE_LAST_SEEN,
+  FEATURE_TITLE,
+  FEATURE_TYPE,
+  FEATURE_TAGS,
+  FEATURE_META,
+  FEATURE_EXPIRES_AT,
+  FEATURE_EXCLUDED_AT,
+  FEATURE_ID,
+  FEATURE_PROPERTIES,
+  FEATURE_SUBTYPE,
   FEATURE_FILTER,
-  FEATURE_NAME,
+  FEATURE_RUN_ID,
+  FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
-export interface StoredFeature {
-  [FEATURE_UUID]: string;
-  [FEATURE_NAME]: string;
-  [FEATURE_DESCRIPTION]: string;
-  [FEATURE_FILTER]: Condition;
-  [STREAM_NAME]: string;
-}
-
-export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
+export const storedFeatureSchema = z.object({
+  [FEATURE_TYPE]: z.string(),
+  [FEATURE_ID]: z.string(),
   [FEATURE_UUID]: z.string(),
-  [FEATURE_NAME]: z.string(),
+  [FEATURE_SUBTYPE]: z.string().optional(),
   [FEATURE_DESCRIPTION]: z.string(),
-  [FEATURE_FILTER]: conditionSchema,
   [STREAM_NAME]: z.string(),
+  [FEATURE_PROPERTIES]: z.record(z.string(), z.any()),
+  [FEATURE_CONFIDENCE]: z.number(),
+  [FEATURE_EVIDENCE]: z.array(z.string()).optional(),
+  [FEATURE_EVIDENCE_DOC_IDS]: z.array(z.string()).optional(),
+  [FEATURE_STATUS]: featureStatusSchema,
+  [FEATURE_LAST_SEEN]: z.string(),
+  [FEATURE_TAGS]: z.array(z.string()).optional(),
+  [FEATURE_META]: z.record(z.string(), z.any()).optional(),
+  [FEATURE_EXPIRES_AT]: z.string().optional(),
+  [FEATURE_EXCLUDED_AT]: z.string().optional(),
+  [FEATURE_TITLE]: z.string().optional(),
+  [FEATURE_FILTER]: conditionSchema.optional(),
+  [FEATURE_RUN_ID]: z.string().optional(),
+  [FEATURE_SEARCH_EMBEDDING]: z.string().optional(),
 });
+
+export type StoredFeature = z.infer<typeof storedFeatureSchema>;

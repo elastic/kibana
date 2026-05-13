@@ -5,88 +5,110 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useState } from 'react';
-import { toDuration } from '../../../../utils/slo/duration';
+import React from 'react';
 import type { TimeBounds } from '../../types';
 
 interface Props {
-  slo: SLOWithSummaryResponse;
+  period: 'week' | 'month';
+  range: TimeBounds;
   onChange: (range: TimeBounds) => void;
+  onReset?: () => void;
+  isResetDisabled?: boolean;
 }
 
-export function CalendarPeriodPicker({ slo, onChange }: Props) {
-  const [periodOffset, setPeriodOffset] = useState<number>(0);
+export function CalendarPeriodPicker({
+  period,
+  range,
+  onChange,
+  onReset,
+  isResetDisabled = true,
+}: Props) {
+  const { euiTheme } = useEuiTheme();
+  const isWeeklyPeriod = period === 'week';
+  const durationUnit = isWeeklyPeriod ? 'week' : 'month';
+  const unit = isWeeklyPeriod ? 'isoWeek' : 'month';
 
-  function handleChangePeriod(offset: number) {
-    const now = moment();
-    const duration = toDuration(slo.timeWindow.duration);
-    const unit = duration.unit === 'w' ? 'isoWeek' : 'month';
-    const durationUnit = duration.unit === 'w' ? 'week' : 'month';
-
-    setPeriodOffset((curr) => {
-      const newOffset = curr + offset;
-
-      onChange({
-        from: moment.utc(now).subtract(newOffset, durationUnit).startOf(unit).toDate(),
-        to: moment.utc(now).subtract(newOffset, durationUnit).endOf(unit).toDate(),
-      });
-
-      return newOffset;
+  function handlePrevious() {
+    const start = moment.utc(range.from).subtract(1, durationUnit);
+    onChange({
+      from: start.startOf(unit).toDate(),
+      to: start.endOf(unit).toDate(),
     });
   }
 
+  function handleNext() {
+    const start = moment.utc(range.from).add(1, durationUnit);
+    onChange({
+      from: start.startOf(unit).toDate(),
+      to: start.endOf(unit).toDate(),
+    });
+  }
+
+  function getCalendarPeriodLabel() {
+    const start = moment.utc(range.from);
+    return `${start.startOf(unit).format('ll')} - ${start.endOf(unit).format('ll')}`;
+  }
+
   return (
-    <EuiFlexGroup direction="row" justifyContent="spaceEvenly" alignItems="center">
+    <EuiFlexGroup
+      direction="row"
+      justifyContent="spaceBetween"
+      alignItems="center"
+      responsive={false}
+      wrap={false}
+      gutterSize="s"
+      css={{ paddingRight: euiTheme.size.s }}
+    >
       <EuiButton
         size="s"
         data-test-subj="sloSloDetailsHistoryPreviousButton"
-        onClick={() => {
-          handleChangePeriod(+1);
-        }}
-        iconType="arrowLeft"
+        onClick={() => handlePrevious()}
+        iconType="chevronSingleLeft"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
           defaultMessage: 'Previous',
         })}
       </EuiButton>
-      <EuiText size="s" textAlign="center">
-        <p>{getCalendarPeriodLabel(slo, periodOffset)}</p>
+
+      <EuiText size="s" textAlign="center" css={{ whiteSpace: 'nowrap' }}>
+        <p>{getCalendarPeriodLabel()}</p>
       </EuiText>
-      <EuiButton
-        size="s"
-        data-test-subj="sloSloDetailsHistoryNextButton"
-        disabled={periodOffset <= 0}
-        onClick={() => {
-          handleChangePeriod(-1);
-        }}
-        iconType="arrowRight"
-        iconSide="right"
+
+      <EuiFlexGroup
+        direction="row"
+        alignItems="center"
+        responsive={false}
+        wrap={false}
+        gutterSize="xs"
       >
-        {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
-          defaultMessage: 'Next',
-        })}
-      </EuiButton>
+        <EuiButton
+          size="s"
+          data-test-subj="sloSloDetailsHistoryNextButton"
+          onClick={() => handleNext()}
+          iconType="chevronSingleRight"
+          iconSide="right"
+        >
+          {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
+            defaultMessage: 'Next',
+          })}
+        </EuiButton>
+        {onReset ? (
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="sloSloDetailsHistoryResetButton"
+            iconType="refresh"
+            onClick={onReset}
+            isDisabled={isResetDisabled}
+          >
+            {i18n.translate('xpack.slo.sloDetailsHistory.resetPeriodButtonLabel', {
+              defaultMessage: 'Reset',
+            })}
+          </EuiButtonEmpty>
+        ) : null}
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
-}
-
-function getCalendarPeriodLabel(slo: SLOWithSummaryResponse, calendarPeriod: number): string {
-  const duration = toDuration(slo.timeWindow.duration);
-  const isWeeklyCalendarAligned = duration.unit === 'w';
-  const now = moment().utc();
-
-  const start = now
-    .clone()
-    .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
-    .startOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
-  const end = now
-    .clone()
-    .subtract(calendarPeriod, isWeeklyCalendarAligned ? 'week' : 'month')
-    .endOf(isWeeklyCalendarAligned ? 'isoWeek' : 'month');
-
-  return `${start.format('ll')} - ${end.format('ll')}`;
 }

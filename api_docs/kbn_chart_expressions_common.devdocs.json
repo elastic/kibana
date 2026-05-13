@@ -32,6 +32,8 @@
           " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +49,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 12,
+            "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -68,6 +73,8 @@
           " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -83,7 +90,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 50,
+            "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -118,6 +128,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -132,6 +144,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +168,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -189,6 +205,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -203,6 +221,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -225,6 +245,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +282,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -269,11 +293,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "accessor",
-            "description": [],
+            "description": [
+              "// eslint-disable-next-line @typescript-eslint/unified-signatures"
+            ],
             "signature": [
               "string | number"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -296,6 +324,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -331,6 +361,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -345,6 +377,8 @@
               "string | number"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -367,6 +401,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -401,6 +437,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -415,6 +453,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 43,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -437,6 +477,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 43,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -471,6 +513,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -485,6 +529,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -507,6 +553,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -541,6 +589,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -550,11 +600,15 @@
             "type": "CompoundType",
             "tags": [],
             "label": "accessor",
-            "description": [],
+            "description": [
+              "// eslint-disable-next-line @typescript-eslint/unified-signatures"
+            ],
             "signature": [
               "string | number"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -577,6 +631,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -611,6 +667,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 53,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -625,6 +683,8 @@
               "string | number"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -647,6 +707,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -681,6 +743,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 98,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -702,6 +766,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 98,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -737,6 +803,8 @@
           "[]) => string"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -758,6 +826,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -780,6 +850,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -806,9 +878,11 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined, exclude: unknown[] | undefined, legacyMode: boolean) => unknown[]"
+          "[], accessors: string[], exclude: unknown[] | undefined, legacyMode: boolean) => unknown[]"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -830,6 +904,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -837,17 +913,19 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getColorCategories.$2",
-            "type": "string",
+            "type": "Array",
             "tags": [],
-            "label": "accessor",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           },
           {
             "parentPluginId": "@kbn/chart-expressions-common",
@@ -860,6 +938,8 @@
               "unknown[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -875,6 +955,8 @@
               "boolean"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -918,6 +1000,8 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -939,6 +1023,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -961,6 +1047,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1028,6 +1116,8 @@
           "> | undefined"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1049,6 +1139,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1071,6 +1163,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1101,7 +1195,10 @@
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SerializedFieldFormat",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1127,9 +1224,11 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[] | undefined, accessor: string | undefined, exclude: unknown[] | undefined) => string[]"
+          "[] | undefined, accessors: string[] | undefined, exclude: unknown[] | undefined) => string[]"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1151,6 +1250,8 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1158,14 +1259,16 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getLegacyColorCategories.$2",
-            "type": "string",
+            "type": "Array",
             "tags": [],
-            "label": "accessor",
+            "label": "accessors",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1181,9 +1284,120 @@
               "unknown[] | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getLegendLayout",
+        "type": "Function",
+        "tags": [],
+        "label": "getLegendLayout",
+        "description": [],
+        "signature": [
+          "({\n  isInside,\n  position,\n  layout,\n}: { isInside?: boolean | undefined; position?: ",
+          "Position",
+          " | undefined; layout?: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.LegendLayout",
+            "text": "LegendLayout"
+          },
+          " | undefined; }) => ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.LegendLayout",
+            "text": "LegendLayout"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getLegendLayout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isInside,\n  position,\n  layout,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+            "lineNumber": 28,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/chart-expressions-common",
+                "id": "def-common.getLegendLayout.$1.isInside",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isInside",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/chart-expressions-common",
+                "id": "def-common.getLegendLayout.$1.position",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "position",
+                "description": [],
+                "signature": [
+                  "Position",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/chart-expressions-common",
+                "id": "def-common.getLegendLayout.$1.layout",
+                "type": "string",
+                "tags": [],
+                "label": "layout",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/chart-expressions-common",
+                    "scope": "common",
+                    "docId": "kibKbnChartExpressionsCommonPluginApi",
+                    "section": "def-common.LegendLayout",
+                    "text": "LegendLayout"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+                "lineNumber": 31,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1202,6 +1416,8 @@
           "(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1218,6 +1434,8 @@
               "O | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1235,7 +1453,10 @@
               "K"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 76,
+            "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1264,6 +1485,8 @@
           ") => boolean"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1284,7 +1507,10 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "ExpressionRendererEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1305,6 +1531,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1320,7 +1548,10 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
+            "lineNumber": 38,
+            "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaExecutionContext",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1347,6 +1578,8 @@
           " | undefined) => boolean"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1369,6 +1602,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1404,6 +1639,8 @@
           "[]) => void"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+        "lineNumber": 89,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1426,6 +1663,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1448,6 +1687,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/accessors.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1483,6 +1724,8 @@
           }
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1497,6 +1740,8 @@
               "\"chartSize\""
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1517,6 +1762,8 @@
               }
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1531,6 +1778,8 @@
         "label": "ChartSizeSpec",
         "description": [],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1545,6 +1794,8 @@
               "ChartSizeDimensions | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1559,6 +1810,8 @@
               "ChartSizeDimensions | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1573,6 +1826,8 @@
               "{ x: number; y: number; } | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1587,6 +1842,8 @@
         "label": "DateHistogramParams",
         "description": [],
         "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1598,6 +1855,8 @@
             "label": "date",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1609,6 +1868,8 @@
             "label": "interval",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1620,6 +1881,8 @@
             "label": "intervalESValue",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1631,6 +1894,8 @@
             "label": "intervalESUnit",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1642,6 +1907,8 @@
             "label": "format",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1656,6 +1923,8 @@
               "{ min: string | number; max: string | number; } | undefined"
             ],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1670,6 +1939,8 @@
         "label": "FakeParams",
         "description": [],
         "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1681,6 +1952,8 @@
             "label": "defaultValue",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1695,6 +1968,8 @@
         "label": "HistogramParams",
         "description": [],
         "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1706,6 +1981,8 @@
             "label": "interval",
             "description": [],
             "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1716,24 +1993,14 @@
     "enums": [
       {
         "parentPluginId": "@kbn/chart-expressions-common",
-        "id": "def-common.LegendLayout",
-        "type": "Enum",
-        "tags": [],
-        "label": "LegendLayout",
-        "description": [],
-        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/chart-expressions-common",
         "id": "def-common.LegendSize",
         "type": "Enum",
         "tags": [],
         "label": "LegendSize",
         "description": [],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1758,6 +2025,8 @@
           ".MEDIUM"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1781,6 +2050,8 @@
           "; format: { id?: string | undefined; params?: Record<string, any> | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/expression_value_dimension.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1844,6 +2115,22 @@
           ">; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/expression_xy_value_dimension.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.LegendLayout",
+        "type": "string",
+        "tags": [],
+        "label": "LegendLayout",
+        "description": [],
+        "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1856,7 +2143,7 @@
         "label": "MakeOverridesSerializable",
         "description": [],
         "signature": [
-          "{ [KeyType in keyof T]: NonNullable<T[KeyType]> extends Function ? \"ignore\" : NonNullable<T[KeyType]> extends React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactChildren ? never : NonNullable<T[KeyType]> extends object ? ",
+          "{ [KeyType in keyof T]: NonNullable<T[KeyType]> extends Function ? \"ignore\" : NonNullable<T[KeyType]> extends React.ReactElement<any> | React.ReactChildren ? never : NonNullable<T[KeyType]> extends object ? ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -1867,6 +2154,8 @@
           "<T[KeyType]> : NonNullable<T[KeyType]>; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1882,6 +2171,8 @@
           "{ [KeyType in keyof T]: T[KeyType]; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1896,9 +2187,11 @@
           "\nThis is a shared type between XY Expression and Annotation plugins.\nWe've put it here to avoid a circular dependency between the two plugins."
         ],
         "signature": [
-          "\"min\" | \"max\" | \"median\" | \"count\" | \"total\" | \"range\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
+          "\"count\" | \"min\" | \"range\" | \"max\" | \"median\" | \"total\" | \"currentAndLastValue\" | \"lastValue\" | \"lastNonNullValue\" | \"average\" | \"firstValue\" | \"firstNonNullValue\" | \"distinctCount\" | \"variance\" | \"stdDeviation\" | \"difference\" | \"differencePercent\""
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1916,6 +2209,8 @@
           "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/legend.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

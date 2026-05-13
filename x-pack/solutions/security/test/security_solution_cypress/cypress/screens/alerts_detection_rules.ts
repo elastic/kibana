@@ -42,6 +42,12 @@ export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
 export const CONFIRM_FILL_RULE_GAPS_WARNING_BTN =
   '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
+export const CONFIRM_BULK_MANUAL_RULE_RUN_BTN =
+  '[data-test-subj="schedule-bulk-action-modal"] [data-test-subj="confirmModalConfirmButton"]';
+
+export const CONFIRM_BULK_GAP_FILL_BTN =
+  '[data-test-subj="schedule-bulk-action-modal"] [data-test-subj="confirmModalConfirmButton"]';
+
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
@@ -112,6 +118,10 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 export const RULES_ROW = '.euiTableRow';
 
 export const SEVERITY = '[data-test-subj="severity"]';
+
+export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
+
+export const ENABLE_RULE_TOGGLE = '[data-test-subj="ruleSwitch"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 

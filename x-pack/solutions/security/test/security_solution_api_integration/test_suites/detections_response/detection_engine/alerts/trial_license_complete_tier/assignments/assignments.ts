@@ -14,7 +14,6 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { setAlertAssignees } from '../../../../utils';
 import {
   createAlertsIndex,
   createRule,
@@ -25,7 +24,8 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { setAlertAssignees } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.eql({
           error: 'Bad Request',
-          message: '[request body]: ids: Array must contain at least 1 element(s)',
+          message: '[request body]: ids: Too small: expected array to have >=1 items',
           statusCode: 400,
         });
       });
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).to.eql({
           error: 'Bad Request',
           message:
-            '[request body]: ids.1: String must contain at least 1 character(s), ids.1: No empty strings allowed',
+            '[request body]: ids.1: Too small: expected string to have >=1 characters, ids.1: No empty strings allowed',
           statusCode: 400,
         });
       });

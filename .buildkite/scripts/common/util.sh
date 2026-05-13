@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -26,6 +27,16 @@ is_auto_commit_disabled() {
   is_pr_with_label "ci:no-auto-commit"
 }
 
+should_enable_fips() {
+  case "${TEST_ENABLE_FIPS_VERSION:-}" in
+    140-2|140-3)
+      return 0
+      ;;
+  esac
+
+  is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -40,19 +51,23 @@ check_for_changed_files() {
       echo "'$1' caused changes to the following files:"
       echo "$GIT_CHANGES"
       echo ""
-      echo "Auto-committing & pushing these changes now."
 
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
       git add -A -- . ':!config/node.options' ':!config/kibana.yml'
-
       git commit -m "$CUSTOM_FIX_MESSAGE"
-      git push
 
-      # Wait to ensure all commits arrive before we terminate the build
-      sleep 300
-      # Still exit with error to fail the current build, a new build should be started after the push
+      # If COLLECT_COMMITS_MARKER_FILE is set, we're in batch mode (e.g., called from quick checks runner)
+      # Just record the commit for later batch push
+      # Otherwise, commit and push immediately (standalone usage)
+      if [[ -n "${COLLECT_COMMITS_MARKER_FILE:-}" ]]; then
+        echo "Auto-committing these changes (will push after all checks complete)."
+        echo "$CUSTOM_FIX_MESSAGE" >> "$COLLECT_COMMITS_MARKER_FILE"
+      else
+        echo "Auto-committing and pushing these changes."
+        git push
+      fi
       exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
@@ -120,45 +135,90 @@ set_git_merge_base() {
   GITHUB_PR_MERGE_BASE="$(buildkite-agent meta-data get merge-base --default '')"
 
   if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
-    git fetch origin "$GITHUB_PR_TARGET_BRANCH"
-    GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD)"
+    if git fetch origin "$GITHUB_PR_TARGET_BRANCH" 2>/dev/null; then
+      GITHUB_PR_MERGE_BASE="$(git merge-base HEAD FETCH_HEAD 2>/dev/null || true)"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      local compare_target="${GITHUB_PR_HEAD_SHA:-}"
+      local github_token="${GITHUB_TOKEN:-${VAULT_GITHUB_TOKEN:-}}"
+      local compare_ref
+
+      if [[ ! "$compare_target" && "${GITHUB_PR_OWNER:-}" && "${GITHUB_PR_BRANCH:-}" ]]; then
+        compare_target="${GITHUB_PR_OWNER}:${GITHUB_PR_BRANCH}"
+      fi
+
+      if [[ ! "$compare_target" ]]; then
+        echo "Failed to resolve PR merge base: PR head ref is not available for gh api fallback" >&2
+        return 1
+      fi
+
+      echo "Falling back to GitHub compare API for PR merge-base"
+      compare_ref="$(
+        jq -rn \
+          --arg base "$GITHUB_PR_TARGET_BRANCH" \
+          --arg head "$compare_target" \
+          '$base + "..." + $head | @uri'
+      )"
+
+      GITHUB_PR_MERGE_BASE="$(
+        curl -fsSL \
+          -H 'Accept: application/vnd.github+json' \
+          -H "Authorization: Bearer ${github_token}" \
+          "https://api.github.com/repos/${GITHUB_PR_BASE_OWNER}/${GITHUB_PR_BASE_REPO}/compare/${compare_ref}" |
+          jq -r '.merge_base_commit.sha // empty' || true
+      )"
+    fi
+
+    if [[ ! "$GITHUB_PR_MERGE_BASE" ]]; then
+      echo "Failed to resolve PR merge base" >&2
+      return 1
+    fi
+
     buildkite-agent meta-data set merge-base "$GITHUB_PR_MERGE_BASE"
   fi
 
   export GITHUB_PR_MERGE_BASE
 }
 
-# If npm install is terminated early, e.g. because the build was cancelled in buildkite,
-# a package directory is left behind in a bad state that can cause all subsequent installs to fail
-# So this function contains some cleanup/retry logic to try to recover from this kind of situation
-npm_install_global() {
-  package="$1"
-  version="${2:-latest}"
-  toInstall="$package@$version"
-
-  npmRoot=$(npm root -g)
-  packageRoot="${npmRoot:?}/$package"
-
-  # The success flag file exists just to try to make sure we know that the full install was done
-  # For example, if a job terminates in the middle of npm install, a directory could be left behind that we don't know the state of
-  successFlag="${packageRoot:?}/.install-success"
-
-  if [[ -d "$packageRoot" && ! -f "$successFlag" ]]; then
-    echo "Removing existing package directory $packageRoot before install, seems previous installation was not successful"
-    rm -rf "$packageRoot"
-  fi
-
-  if [[ ! $(npm install -g "$toInstall" && touch "$successFlag") ]]; then
-    rm -rf "$packageRoot"
-    echo "Trying again to install $toInstall..."
-    npm install -g "$toInstall" && touch "$successFlag"
-  fi
-}
-
 # Download an artifact using the buildkite-agent, takes the same arguments as https://buildkite.com/docs/agent/v3/cli-artifact#downloading-artifacts-usage
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+}
+
+GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
+download_tmp_artifact() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local region use_gcs=false
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
+      use_gcs=true
+      break
+    fi
+  done
+
+  if [[ "$use_gcs" == "true" ]]; then
+    "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
+    if gcloud storage cp \
+      "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
+      "${dest_dir}/${artifact_name}"; then
+      return 0
+    fi
+    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+  fi
+
+  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+}
+upload_tmp_artifact() {
+  local local_path="$1" artifact_name="$2" build_id="$3"
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
+
+  printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
+    gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
 }
 
 print_if_dry_run() {
@@ -194,4 +254,49 @@ docker_with_retry () {
       sleep $sleep_time
     fi
   done
+}
+
+force_clean_ports() {
+  set +e
+
+  echo "LSOF: $(which lsof)"
+  for port in "$@"; do
+    echo "Force cleaning port: '$port'"
+
+    PORT_PID=$(lsof -i ":$port" -t)
+    if [[ "$PORT_PID" != "" ]]; then
+      echo "Found process using port '$port': $PORT_PID - sending SIGTERM..."
+      kill -15 "$PORT_PID" || true
+      sleep 5
+
+      PORT_PID=$(lsof -i ":$port" -t)
+      if [[ "$PORT_PID" != "" ]]; then
+        echo "Process $PORT_PID is still using port '$port', force killing..."
+        kill -9 "$PORT_PID" || true
+      fi
+    else
+      echo "No process found using port '$port', checking docker..."
+
+      ENTRY_WITH_PORT=$(docker ps -a | grep -E ":$port->")
+      if [[ -z "$ENTRY_WITH_PORT" ]]; then
+        echo "No docker container found using port $port"
+        continue
+      else
+        CONTAINER_ID=$(echo "$ENTRY_WITH_PORT" | awk '{print $1}')
+        echo "Found docker container using port $port: $CONTAINER_ID"
+        echo "Stopping and removing container $CONTAINER_ID"
+        docker stop "$CONTAINER_ID" || true
+        docker rm "$CONTAINER_ID" || true
+        continue
+      fi
+    fi
+  done
+
+  set -e
+}
+
+
+clean_cached_images() {
+  docker images -q | sort -u | xargs -r docker rmi -f || true
+  docker image prune -af || true
 }

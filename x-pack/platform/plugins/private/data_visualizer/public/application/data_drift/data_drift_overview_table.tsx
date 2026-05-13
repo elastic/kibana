@@ -104,7 +104,11 @@ export const DataDriftOverviewTable = ({
             }`}
             onClick={() => toggleDetails(item)}
             aria-label={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
-            iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'arrowDown' : 'arrowRight'}
+            iconType={
+              itemIdToExpandedRowMapValues[item.featureName]
+                ? 'chevronSingleDown'
+                : 'chevronSingleRight'
+            }
           />
         );
       },
@@ -291,7 +295,7 @@ export const DataDriftOverviewTable = ({
       onChange={onTableChange}
       pagination={pagination}
       loading={status === FETCH_STATUS.LOADING}
-      message={tableMessage}
+      noItemsMessage={tableMessage}
     />
   );
 };

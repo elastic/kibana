@@ -6,15 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -38,6 +30,8 @@ import {
 import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
+import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
+
 const REFRESH_INTERVAL_MS = 30000;
 
 export const AgentlessPackagePoliciesTable = ({
@@ -46,6 +40,7 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal,
   refreshPackagePolicies,
   pagination,
+  from,
 }: {
   isLoading: boolean;
   packagePolicies: Array<{
@@ -56,6 +51,7 @@ export const AgentlessPackagePoliciesTable = ({
   packagePoliciesTotal: number;
   refreshPackagePolicies: () => void;
   pagination: ReturnType<typeof usePagination>;
+  from?: 'installed-integrations';
 }) => {
   const core = useStartServices();
   const { notifications } = core;
@@ -64,7 +60,6 @@ export const AgentlessPackagePoliciesTable = ({
   const [isAgentsLoading, setIsAgentsLoading] = useState<boolean>(false);
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
-  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
 
   // Kuery for all agents enrolled into the agent policies associated with the package policies
   // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
@@ -154,13 +149,14 @@ export const AgentlessPackagePoliciesTable = ({
               defaultMessage: 'Integration policy',
             }),
             render(_, { agentPolicies, packagePolicy }) {
+              const editHref = getHref('integration_policy_edit', {
+                packagePolicyId: packagePolicy.id,
+              });
               return (
                 <EuiLink
                   className="eui-textTruncate"
                   data-test-subj="agentlessIntegrationNameLink"
-                  href={getHref('integration_policy_edit', {
-                    packagePolicyId: packagePolicy.id,
-                  })}
+                  href={from ? `${editHref}?from=${from}` : editHref}
                 >
                   {packagePolicy.name}
                 </EuiLink>
@@ -189,25 +185,11 @@ export const AgentlessPackagePoliciesTable = ({
                     </EuiText>
                   </EuiFlexItem>
 
-                  {agentPolicies.length > 0 && packagePolicy.hasUpgrade && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        minWidth="0"
-                        href={`${getHref('upgrade_package_policy', {
-                          policyId: agentPolicies[0].id,
-                          packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`}
-                        data-test-subj="integrationPolicyUpgradeBtn"
-                        isDisabled={!canWriteIntegrationPolicies}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                          defaultMessage="Upgrade"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
+                  <PackagePolicyUpgradeCell
+                    packagePolicy={packagePolicy}
+                    agentPolicies={agentPolicies}
+                    from={from || 'integrations-policy-list'}
+                  />
                 </EuiFlexGroup>
               );
             },
@@ -309,6 +291,7 @@ export const AgentlessPackagePoliciesTable = ({
               packagePolicy: InMemoryPackagePolicy;
             }) {
               const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
+              const upgradeFrom = from || 'integrations-policy-list';
               return (
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
@@ -319,14 +302,21 @@ export const AgentlessPackagePoliciesTable = ({
                       ? `${getHref('upgrade_package_policy', {
                           policyId: agentPolicy.id,
                           packagePolicyId: packagePolicy.id,
-                        })}?from=integrations-policy-list`
+                        })}?from=${upgradeFrom}`
                       : undefined
                   }
+                  from={from}
                 />
               );
             },
           },
         ]}
+        tableCaption={i18n.translate(
+          'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
+          {
+            defaultMessage: 'Agentless integration policies',
+          }
+        )}
         loading={isLoading}
         data-test-subj="integrationPolicyTable"
         pagination={{

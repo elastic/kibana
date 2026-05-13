@@ -13,12 +13,12 @@ import {
   GetAttackDiscoveryGenerationRequestParams,
   GetAttackDiscoveryGenerationRequestQuery,
 } from '@kbn/elastic-assistant-common';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { getGeneration } from './helpers/get_generation';
@@ -34,7 +34,7 @@ export const getAttackDiscoveryGenerationRoute = (
       path: ATTACK_DISCOVERY_GENERATIONS_BY_ID,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
@@ -70,8 +70,6 @@ export const getAttackDiscoveryGenerationRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const { execution_uuid: executionUuid } = request.params;
           const enableFieldRendering = request.query?.enable_field_rendering ?? false; // public APIs default to NOT rendering fields as a convenience to non-Kibana clients
           const withReplacements = request.query?.with_replacements ?? true; // public APIs default to applying replacements in responses as a convenience to non-Kibana clients

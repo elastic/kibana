@@ -7,7 +7,10 @@
 
 import { DATA_VIEW_PATH, INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
+import type {
+  GetAllConnectorsResponse,
+  ConnectorResponse,
+} from '@kbn/actions-plugin/common/routes/connector/response';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
@@ -53,6 +56,19 @@ export const rootRequest = <T = unknown>({
   }
 };
 
+/**
+ * Persist `hideAnnouncements` globally so agent-builder announcement modals do not block UI.
+ * Call after operations that reload Kibana saved objects (e.g. esArchiver), which can reset
+ * persisted global settings, and after login when tests do not go through `initializeDataViews`.
+ */
+export const suppressGlobalAnnouncements = (): Cypress.Chainable<Cypress.Response<unknown>> =>
+  rootRequest({
+    method: 'POST',
+    url: '/internal/kibana/global_settings',
+    body: { changes: { hideAnnouncements: true } },
+    failOnStatusCode: false,
+  });
+
 // a helper function to wait for the root request to be successful
 // defaults to 5 second intervals for 3 attempts
 // can be helpful when waiting for a resource to be created before proceeding
@@ -90,7 +106,7 @@ export const deleteAlertsAndRules = () => {
 };
 
 export const getConnectors = () =>
-  rootRequest<AllConnectorsResponse[]>({
+  rootRequest<GetAllConnectorsResponse>({
     method: 'GET',
     url: 'api/actions/connectors',
   });
@@ -112,7 +128,7 @@ export const deleteConnectors = () => {
   });
 };
 
-const deleteConnector = (spaceId: string, connector: AllConnectorsResponse) => {
+const deleteConnector = (spaceId: string, connector: ConnectorResponse) => {
   if (connector.is_preconfigured) {
     // NOTE: Preconfigured connectors can't be deleted.
     // https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html

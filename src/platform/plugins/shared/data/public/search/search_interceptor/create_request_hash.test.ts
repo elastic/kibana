@@ -7,18 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createRequestHash } from './create_request_hash';
+import { createRequestHashForBackgroundSearches } from './create_request_hash';
 
-describe('createRequestHash', () => {
-  it('ignores `preference`', () => {
+describe('createRequestHashForBackgroundSearches', () => {
+  it('ignores `preference` and sessionId', () => {
     const request = {
       foo: 'bar',
     };
     const withPreference = {
       ...request,
       preference: 1234,
+      sessionId: 'abcd',
     };
 
-    expect(createRequestHash(request)).toEqual(createRequestHash(withPreference));
+    expect(createRequestHashForBackgroundSearches(request)).not.toBeUndefined();
+
+    expect(createRequestHashForBackgroundSearches(request)).toEqual(
+      createRequestHashForBackgroundSearches(withPreference)
+    );
   });
 });

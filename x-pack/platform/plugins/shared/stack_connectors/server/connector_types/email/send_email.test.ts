@@ -10,10 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
-import type { ProxySettings } from '@kbn/actions-plugin/server/types';
+import type { CustomHostSettings, ProxySettings } from '@kbn/actions-utils';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { sendEmailGraphApi } from './send_email_graph_api';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
@@ -983,6 +982,75 @@ describe('send_email module', () => {
     await expect(() => mockResponseCallback(errorResponse)).rejects.toEqual(errorResponse);
 
     expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
+  });
+
+  test('includes replyTo when provided', async () => {
+    const sendEmailOptions = getSendEmailOptions({
+      routing: { replyTo: ['reply@example.com'] },
+    });
+
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
+
+    const sentEmail = sendMailMock.mock.calls[0][0];
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "replyTo": Array [
+            "reply@example.com",
+          ],
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+
+    expect(sentEmail.replyTo).toEqual(['reply@example.com']);
+  });
+
+  test('works with multiple replyTo addresses', async () => {
+    const sendEmailOptions = getSendEmailOptions({
+      routing: { replyTo: ['reply1@example.com', 'reply2@example.com'] },
+    });
+
+    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient, connectorUsageCollector);
+
+    const sentEmail = sendMailMock.mock.calls[0][0];
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "replyTo": Array [
+            "reply1@example.com",
+            "reply2@example.com",
+          ],
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+
+    expect(sentEmail.replyTo).toEqual(['reply1@example.com', 'reply2@example.com']);
   });
 });
 

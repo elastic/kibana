@@ -38,6 +38,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,10 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+            "lineNumber": 29,
+            "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "SplitButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -101,6 +106,8 @@
           "; secondaryButtonAriaLabel?: string | undefined; secondaryButtonTitle?: string | undefined; secondaryButtonFill?: boolean | undefined; onSecondaryButtonClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; }"
         ],
         "path": "src/platform/packages/private/kbn-split-button/src/split_button.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

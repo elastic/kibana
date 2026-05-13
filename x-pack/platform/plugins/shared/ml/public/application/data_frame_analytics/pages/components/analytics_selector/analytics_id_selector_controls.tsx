@@ -18,7 +18,9 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   FlyoutType,
@@ -85,6 +87,12 @@ const SelectorControl = ({ analyticsId, 'data-test-subj': dataTestSubj }: Select
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate(
+        'xpack.ml.overview.dataFrameAnalytics.analyticsDetailsPopoverAriaLabel',
+        {
+          defaultMessage: 'Job details',
+        }
+      )}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
@@ -95,6 +103,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [canGetDataFrameAnalytics, canCreateDataFrameAnalytics] = usePermissionCheck([
     'canGetDataFrameAnalytics',
     'canCreateDataFrameAnalytics',
@@ -104,7 +113,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           {selectedId ? (
             <SelectorControl
@@ -114,7 +123,12 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             />
           ) : null}
           {!selectedId ? (
-            <EuiText size={'xs'}>
+            <EuiText
+              size="s"
+              css={css`
+                color: ${euiTheme.colors.textSubdued};
+              `}
+            >
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.noIdsSelectedLabel"
                 defaultMessage="No Analytics ID selected"
@@ -124,7 +138,7 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            size="xs"
+            size="s"
             iconType="pencil"
             onClick={setIsIdSelectorFlyoutVisible.bind(null, true)}
             data-test-subj="mlButtonEditAnalyticsIdSelection"

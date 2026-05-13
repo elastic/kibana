@@ -59,7 +59,7 @@ export function TransactionDetailsByNameLink() {
         `}
       >
         <EuiEmptyPrompt
-          iconType="apmTrace"
+          iconType="chartWaterfall"
           title={
             <h2>
               {i18n.translate('xpack.apm.transactionDetailsLink.h2.transactionNotFound', {
@@ -80,7 +80,7 @@ export function TransactionDetailsByNameLink() {
       `}
     >
       <EuiEmptyPrompt
-        iconType="apmTrace"
+        iconType="chartWaterfall"
         title={
           <h2>
             {i18n.translate('xpack.apm.transactionDetailsLink.h2.fetchingTransactionLabel', {

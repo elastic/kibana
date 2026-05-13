@@ -6,24 +6,16 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type {
-  AdvancedUiActionsSetup,
-  AdvancedUiActionsStart,
-} from '@kbn/ui-actions-enhanced-plugin/public';
-import { urlDrilldownGlobalScopeProvider } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { UrlDrilldown } from './lib';
+import { URL_DRILLDOWN_TYPE } from '../common/constants';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
-  uiActionsEnhanced: AdvancedUiActionsSetup;
 }
 
-export interface StartDependencies {
-  embeddable: EmbeddableStart;
-  uiActionsEnhanced: AdvancedUiActionsStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
@@ -38,10 +30,14 @@ export class UrlDrilldownPlugin
 
   public setup(core: CoreSetup<StartDependencies>, plugins: SetupDependencies): SetupContract {
     const startServices = createStartServicesGetter(core.getStartServices);
-    plugins.uiActionsEnhanced.registerDrilldown(
-      new UrlDrilldown({
+
+    plugins.embeddable.registerDrilldown(URL_DRILLDOWN_TYPE, async () => {
+      const { getUrlDrilldown } = await import('./lib/get_url_drilldown');
+      return getUrlDrilldown({
         externalUrl: core.http.externalUrl,
-        getGlobalScope: urlDrilldownGlobalScopeProvider({ core }),
+        getGlobalScope: () => ({
+          kibanaUrl: window.location.origin + core.http.basePath.get(),
+        }),
         navigateToUrl: (url: string) =>
           core.getStartServices().then(([{ application }]) => application.navigateToUrl(url)),
         getSyntaxHelpDocsLink: () =>
@@ -50,8 +46,8 @@ export class UrlDrilldownPlugin
           startServices().core.docLinks.links.dashboard.urlDrilldownVariables,
         settings: core.settings,
         theme: () => startServices().core.theme,
-      })
-    );
+      });
+    });
 
     return {};
   }

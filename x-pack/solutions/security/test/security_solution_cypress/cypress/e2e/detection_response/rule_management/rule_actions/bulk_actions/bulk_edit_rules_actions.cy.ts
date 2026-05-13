@@ -73,7 +73,6 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// https://github.com/elastic/kibana/issues/179958
 describe(
   'Detection rules, bulk edit of rule actions',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
@@ -150,7 +149,7 @@ describe(
     });
 
     context('Restricted action privileges', () => {
-      it("User with no privileges can't add rule actions", () => {
+      it('User with read-only privileges can see bulk actions menu', () => {
         login(ROLES.t1_analyst);
         visitRulesManagementTable();
 
@@ -167,7 +166,7 @@ describe(
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        cy.get(BULK_ACTIONS_BTN).should('not.exist');
+        cy.get(BULK_ACTIONS_BTN).should('exist');
       });
     });
 

@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    hideAnnouncements: true,
   };
 
   async function findFirstColumnTokens() {
@@ -95,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
+      await discover.resetQueryMode();
       await common.navigateToApp('discover');
       await discover.waitUntilSearchingHasFinished();
     });
@@ -153,15 +153,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await findFirstDocViewerTokens()).to.eql([
         'Text',
+        'Keyword',
         'Text',
+        'Keyword',
         'Date',
         'Text',
+        'Keyword',
         'Number',
         'IP address',
         'Text',
-        'Geo point',
-        'Keyword',
-        'Keyword',
       ]);
     });
 

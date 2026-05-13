@@ -8,10 +8,16 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
 import { loadWorkflowThunk } from './load_workflow_thunk';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 const mockWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-1',
@@ -38,7 +44,7 @@ describe('loadWorkflowThunk', () => {
   });
 
   it('should load workflow successfully', async () => {
-    mockServices.http.get.mockResolvedValue(mockWorkflow);
+    mockWorkflowApi.getWorkflow.mockResolvedValue(mockWorkflow);
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
@@ -51,7 +57,7 @@ describe('loadWorkflowThunk', () => {
       message: 'Network Error',
     };
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 
@@ -65,7 +71,7 @@ describe('loadWorkflowThunk', () => {
   it('should handle error without message', async () => {
     const error = {};
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getWorkflow.mockRejectedValue(error);
 
     const result = await store.dispatch(loadWorkflowThunk({ id: 'test-workflow-1' }));
 

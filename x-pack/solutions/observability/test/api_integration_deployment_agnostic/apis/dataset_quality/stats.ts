@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
+import type { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/synthtrace';
+import { log, syntheticsMonitor, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -54,8 +54,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/239999
-  describe.skip('Stats', function () {
+  describe('Stats', function () {
     // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
     // These versions are not expected to work together.
     // The tests raise "unknown index privilege [read_failure_store]" error in ES 9.0.
@@ -259,6 +258,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           true
         );
         expect(stats.body.dataStreamsStats[0].creationDate).greaterThan(0);
+      });
+    });
+
+    describe('query schema accepts types and datasetQuery together', () => {
+      let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
+        supertestDatasetQualityMonitorWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+      });
+
+      it('accepts both types and datasetQuery in a single request', async () => {
+        const resp = await supertestDatasetQualityMonitorWithCookieCredentials
+          .get('/internal/dataset_quality/data_streams/stats')
+          .query({
+            types: rison.encodeArray(['logs']),
+            datasetQuery: 'synth',
+          });
+
+        expect(resp.status).to.be(200);
       });
     });
 

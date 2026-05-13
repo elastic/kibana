@@ -73,7 +73,7 @@ export const OPEN_TIMELINE_ICON = '[data-test-subj="timeline-modal-open-timeline
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
-export const PIN_EVENT = '[data-test-subj="pin"]';
+export const PIN_EVENT = '[data-test-subj="timeline-pin-event-button"]';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
@@ -223,6 +223,8 @@ export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.ale
 export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[data-test-subj="dataGridRowCell"]`; // empty column for the test data
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
+
+export const TIMELINE_EVENT_COUNT_BADGE = '[data-test-subj="timeline-event-count-badge"]';
 
 // timeline table grid cell
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>

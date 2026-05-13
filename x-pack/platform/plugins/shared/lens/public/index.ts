@@ -11,17 +11,16 @@ import { LensPlugin } from './plugin';
 export { isLensApi } from './react_embeddable/type_guards';
 export { type EmbeddableComponent } from './react_embeddable/renderer/lens_custom_renderer_component';
 export type {
-  LensApi,
   LensSerializedState,
   LensRuntimeState,
   LensByValueInput,
   LensByReferenceInput,
   TypedLensByValueInput,
   LensEmbeddableInput,
-  LensEmbeddableOutput,
   LensSavedObjectAttributes,
   LensRendererProps as EmbeddableComponentProps,
 } from '@kbn/lens-common';
+export type { LensApi, LensEmbeddableOutput } from '@kbn/lens-common-2';
 
 // Datasource and User message types
 export type {
@@ -71,7 +70,7 @@ export type {
 
 // Chart types
 export type {
-  XYState,
+  XYVisualizationState,
   XYReferenceLineLayerConfig,
   XYLayerConfig,
   ValidLayer,
@@ -123,7 +122,6 @@ export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_len
 export type { ChartInfo } from './chart_info_api';
 
 export { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
-export { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 
 export {
   EditorFrameServiceProvider,

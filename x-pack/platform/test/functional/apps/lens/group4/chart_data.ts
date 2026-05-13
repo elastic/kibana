@@ -24,7 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
+        keepOpen: true,
       });
+      await lens.setTermsNumberOfValues(5);
+      await lens.closeDimensionEditor();
 
       await lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -115,9 +118,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // assert legend
       expect(debugState?.legend!.items).to.eql([
         { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#61a2ff' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c8deff' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#cfe1ff' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffccc6' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffd4cf' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });

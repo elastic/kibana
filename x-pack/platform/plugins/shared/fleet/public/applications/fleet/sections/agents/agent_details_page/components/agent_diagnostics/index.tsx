@@ -178,7 +178,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         const currentItem = allDiagnosticsEntries.find((item) => item.id === id);
         return currentItem?.status === 'READY' ? (
           <EuiLink href={getAbsolutePath(currentItem?.filePath)} download target="_blank">
-            <EuiIcon type="download" /> &nbsp; {currentItem?.name}
+            <EuiIcon type="download" aria-hidden={true} /> &nbsp; {currentItem?.name}
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' || currentItem?.status === 'AWAITING_UPLOAD' ? (
           <EuiLink color="subdued" disabled>
@@ -346,7 +346,16 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       {isLoading ? (
         <EuiSkeletonText lines={3} />
       ) : (
-        <EuiBasicTable<AgentDiagnostics> items={visibleDiagnosticsEntries} columns={columns} />
+        <EuiBasicTable<AgentDiagnostics>
+          items={visibleDiagnosticsEntries}
+          columns={columns}
+          tableCaption={i18n.translate(
+            'xpack.fleet.requestDiagnostics.agentDiagnosticsUploads.tableCaption',
+            {
+              defaultMessage: 'Agent diagnostics uploads',
+            }
+          )}
+        />
       )}
     </>
   );

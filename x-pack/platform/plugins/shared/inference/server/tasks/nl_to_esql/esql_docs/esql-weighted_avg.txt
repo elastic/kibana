@@ -1,6 +1,6 @@
-## WEIGHTED_AVG
+# WEIGHTED_AVG
 
-Calculates the weighted average of a numeric expression.
+Calculates the weighted average of a numeric expression using specified weights.
 
 ## Syntax
 
@@ -8,15 +8,17 @@ Calculates the weighted average of a numeric expression.
 
 ### Parameters
 
-#### `number`
+#### number
 
-A numeric value.
+A numeric value to be averaged.
 
-#### `weight`
+#### weight
 
-A numeric weight.
+A numeric value representing the weight for each corresponding number.
 
 ## Examples
+
+Calculates the weighted average salary for each language group, using height as the weight, rounds the result, and displays the weighted average alongside the language, sorted by language.
 
 ```esql
 FROM employees
@@ -25,5 +27,3 @@ FROM employees
 | KEEP w_avg, languages
 | SORT languages
 ```
-
-This example calculates the weighted average of employee salaries using their heights as weights, grouped by languages. The result is rounded and sorted by language.

@@ -10,23 +10,16 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
-import { type HasSerializableState, type SerializedPanelState } from '@kbn/presentation-publishing';
+import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
 import type {
-  GetStateType,
-  LensByRefSerializedState,
-  LensByValueSerializedState,
-  LensRuntimeState,
-  LensSerializedState,
-  IntegrationCallbacks,
-} from '@kbn/lens-common';
-import { isTextBasedLanguage, transformOutputState } from '../helper';
-
-function cleanupSerializedState(state: LensRuntimeState) {
-  const cleanedState = omit(state, 'searchSessionId');
-
-  return cleanedState;
-}
+  LegacyLensStateApi,
+  LensByRefSerializedAPIConfig,
+  LensWireAPIConfig,
+} from '@kbn/lens-common-2';
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { stripInheritedContext } from '../../../common/transforms/helpers';
+import { flattenAPIConfig } from '../../../common/transforms/utils';
+import { isTextBasedLanguage, transformToApiConfig } from '../helper';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
@@ -34,12 +27,13 @@ export function initializeIntegrations(getLatestState: GetStateType): {
     | 'updateState'
     | 'updateAttributes'
     | 'updateDataViews'
-    | 'updateSavedObjectId'
+    | 'updateRefId'
     | 'updateOverrides'
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState<LensSerializedState>;
+    Pick<HasSerializableState<LensWireAPIConfig>, 'serializeState'> &
+    LegacyLensStateApi;
 } {
   return {
     api: {
@@ -47,25 +41,34 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: (): SerializedPanelState<LensSerializedState> => {
-        const currentState = cleanupSerializedState(getLatestState());
+      serializeState: (): LensWireAPIConfig => {
+        const currentState = stripInheritedContext(getLatestState());
 
-        const { savedObjectId, attributes, ...state } = currentState;
-
-        if (savedObjectId) {
+        const { ref_id: refId, attributes, ...state } = currentState;
+        if (refId) {
           return {
-            rawState: {
-              ...state,
-              savedObjectId,
-            },
-          } satisfies SerializedPanelState<LensByRefSerializedState>;
+            ...state,
+            ref_id: refId,
+          } satisfies LensByRefSerializedAPIConfig;
         }
 
-        const transformedState = transformOutputState(currentState);
+        return flattenAPIConfig(transformToApiConfig(currentState));
+      },
+      getLegacySerializedState: (): LensSerializedState => {
+        const currentState = getLatestState();
+        const { ref_id: refId, attributes, ...state } = currentState;
+
+        if (refId) {
+          return {
+            ...state,
+            ref_id: refId,
+          };
+        }
 
         return {
-          rawState: transformedState,
-        } satisfies SerializedPanelState<LensByValueSerializedState>;
+          ...state,
+          attributes,
+        };
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

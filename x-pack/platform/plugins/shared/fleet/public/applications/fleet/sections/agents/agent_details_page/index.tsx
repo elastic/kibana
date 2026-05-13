@@ -8,13 +8,24 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiText,
+  EuiSpacer,
+} from '@elastic/eui';
+
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { OutputsForAgentPolicy } from '../../../../../../server/types';
+
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
@@ -25,9 +36,10 @@ import {
   useIntraAppState,
   sendGetAgentTagsForRq,
   useAgentlessResources,
+  useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-
+import { ExperimentalFeaturesService } from '../../../services';
 import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
@@ -38,6 +50,7 @@ import {
   AgentDiagnosticsTab,
 } from './components';
 import { AgentSettings } from './components/agent_settings';
+import { CollectorDetailsContent } from './components/collector_detail';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -61,7 +74,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     isLoading: isAgentPolicyLoading,
     data: agentPolicyData,
     sendRequest: sendAgentPolicyRequest,
-  } = useGetOneAgentPolicy(agentData?.item?.policy_id);
+  } = useGetOneAgentPolicy(
+    agentData?.item?.policy_id
+      ? removeVersionSuffixFromPolicyId(agentData.item.policy_id)
+      : undefined
+  );
+
+  const { data: outputsData } = useGetInfoOutputsForPolicy(agentPolicyData?.item?.id);
 
   const {
     application: { navigateToApp },
@@ -82,12 +101,16 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     agentData?.item && (isAgentlessAgent ? showAgentless : true) ? agentData.item : null;
   const host = agent && agent.local_metadata?.host;
 
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+  const classicView = queryParams.get('classic') === 'true';
+  const isCollector = enableOtelUI && agent?.type === 'OPAMP' && !classicView;
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={getHref('agent_list')}
             flush="left"
             size="xs"
@@ -100,27 +123,41 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText className="eui-textBreakWord">
-            <h1>
-              {isLoading && isInitialRequest ? (
-                <Loading />
-              ) : typeof host === 'object' && typeof host?.hostname === 'string' ? (
-                host.hostname
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.agentDetails.agentDetailsTitle"
-                  defaultMessage="Agent ''{id}''"
-                  values={{
-                    id: agentId,
-                  }}
-                />
-              )}
-            </h1>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText className="eui-textBreakWord">
+                <h1>
+                  {isLoading && isInitialRequest ? (
+                    <Loading />
+                  ) : typeof host === 'object' && typeof host?.hostname === 'string' ? (
+                    host.hostname
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.agentDetails.agentDetailsTitle"
+                      defaultMessage="Agent ''{id}''"
+                      values={{
+                        id: agentId,
+                      }}
+                    />
+                  )}
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            {isCollector && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  <FormattedMessage
+                    id="xpack.fleet.agentDetails.collectorBadge"
+                    defaultMessage="Collector (OpAMP)"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [host, agentId, getHref, isInitialRequest, isLoading]
+    [host, agentId, getHref, isInitialRequest, isLoading, isCollector]
   );
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
@@ -183,12 +220,16 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   );
 
   const headerTabs = useMemo(() => {
-    const tabs = [
+    return [
       {
         id: 'details',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
-          defaultMessage: 'Agent details',
-        }),
+        name: isCollector
+          ? i18n.translate('xpack.fleet.agentDetails.subTabs.collectorDetailsTab', {
+              defaultMessage: 'Collector details',
+            })
+          : i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
+              defaultMessage: 'Agent details',
+            }),
         href: getHref('agent_details', { agentId, tabId: 'details' }),
         isSelected: !tabId || tabId === 'details',
       },
@@ -217,8 +258,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         isSelected: tabId === 'settings',
       },
     ];
-    return tabs;
-  }, [getHref, agentId, tabId]);
+  }, [getHref, agentId, tabId, isCollector]);
 
   return (
     <AgentRefreshContext.Provider
@@ -248,7 +288,12 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           />
         ) : agent ? (
           <>
-            <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+            <AgentDetailsPageContent
+              agent={agent}
+              agentPolicy={agentPolicyData?.item}
+              outputs={outputsData?.item}
+              isCollector={isCollector}
+            />
             {showTagsAddRemove && (
               <TagsAddRemove
                 agentId={agent?.id!}
@@ -291,7 +336,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = ({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+  isCollector: boolean;
+}> = ({ agent, agentPolicy, outputs, isCollector }) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -299,6 +346,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         ? agent.local_metadata.host.hostname
         : '-',
   });
+
   return (
     <Routes>
       <Route
@@ -322,7 +370,11 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
+          return isCollector ? (
+            <CollectorDetailsContent agent={agent} />
+          ) : (
+            <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} outputs={outputs} />
+          );
         }}
       />
     </Routes>

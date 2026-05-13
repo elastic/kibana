@@ -23,6 +23,8 @@
         "label": "nodeServiceMock",
         "description": [],
         "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,6 +39,8 @@
               "() => jest.Mocked<NodeServiceContract>"
             ],
             "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               ">"
             ],
             "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,6 +79,8 @@
               ">"
             ],
             "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -82,12 +90,14 @@
                 "id": "def-server.nodeServiceMock.createInternalStartContract.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n    ui,\n    backgroundTasks,\n    migrator,\n  }",
                 "description": [],
                 "signature": [
                   "{ ui: boolean; backgroundTasks: boolean; migrator: boolean; }"
                 ],
                 "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

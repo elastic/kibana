@@ -15,6 +15,7 @@ import type {
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  MANAGE_TEMPLATES_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -36,6 +37,8 @@ import type {
   Configuration,
   CustomFieldTypes,
   EventAttachment,
+  UnifiedAttachment,
+  AttachmentV2,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -54,7 +57,13 @@ import type {
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    sync?: boolean;
+    enabled?: boolean;
+    isExperimental?: boolean;
+    read?: boolean;
+    all?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
   observables?: { enabled: boolean; autoExtract?: boolean };
   events?: { enabled: boolean };
@@ -65,6 +74,9 @@ export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
+  attachments?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -76,6 +88,9 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
   incrementalId: {
+    enabled: boolean;
+  };
+  templates: {
     enabled: boolean;
   };
 }
@@ -98,6 +113,9 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
+export type AttachmentUIV2 = SnakeToCamelCase<AttachmentV2>;
+
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
@@ -108,12 +126,12 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
 export type EventAttachmentUI = SnakeToCamelCase<EventAttachment>;
 
 export interface InternalFindCaseUserActions extends FindCaseUserActions {
-  latestAttachments: AttachmentUI[];
+  latestAttachments: AttachmentUIV2[];
 }
 
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
 export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
-  comments: AttachmentUI[];
+  comments: AttachmentUIV2[];
 };
 export type ObservableUI = CaseUI['observables'][0];
 
@@ -179,6 +197,11 @@ export interface SystemFilterOptions {
   category: string[];
 }
 
+export interface ExtendedFieldFilter {
+  label: string;
+  value: string;
+}
+
 export interface FilterOptions extends SystemFilterOptions {
   customFields: {
     [key: string]: {
@@ -186,6 +209,9 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  extendedFieldFilters: ExtendedFieldFilter[];
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
@@ -247,6 +273,7 @@ export type UpdateKey = keyof Pick<
   | 'assignees'
   | 'category'
   | 'customFields'
+  | 'extended_fields'
 >;
 
 export interface UpdateByKey {
@@ -335,6 +362,7 @@ export interface CasesPermissions {
   reopenCase: boolean;
   createComment: boolean;
   assign: boolean;
+  manageTemplates: boolean;
 }
 
 export interface CasesCapabilities {
@@ -348,8 +376,5 @@ export interface CasesCapabilities {
   [CREATE_COMMENT_CAPABILITY]: boolean;
   [CASES_REOPEN_CAPABILITY]: boolean;
   [ASSIGN_CASE_CAPABILITY]: boolean;
-}
-
-export interface CaseViewEventsTableProps {
-  events: { eventId: string | string[]; index: string | string[] }[];
+  [MANAGE_TEMPLATES_CAPABILITY]: boolean;
 }

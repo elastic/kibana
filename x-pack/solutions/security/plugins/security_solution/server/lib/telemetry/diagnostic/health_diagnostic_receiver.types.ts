@@ -7,20 +7,10 @@
 
 import type { Observable } from 'rxjs';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
-import { type HealthDiagnosticQuery } from './health_diagnostic_service.types';
+import type { ExecutableQuery } from './health_diagnostic_service.types';
 
-/**
- * Configuration for executing a search query, including any associated circuit breakers.
- */
 export interface QueryConfig {
-  /**
-   * The Elasticsearch query to execute.
-   */
-  query: HealthDiagnosticQuery;
-
-  /**
-   * A list of circuit breakers that must pass validation while the query is executed.
-   */
+  query: ExecutableQuery;
   circuitBreakers: CircuitBreaker[];
 }
 

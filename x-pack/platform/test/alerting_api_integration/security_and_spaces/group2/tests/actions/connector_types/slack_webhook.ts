@@ -86,6 +86,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         connector_type_id: '.slack',
         config: {},
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -103,7 +104,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: `error validating connector type secrets: Field \"webhookUrl\": Required`,
+            message: `error validating connector type secrets: ✖ Invalid input: expected string, received undefined\n  → at webhookUrl`,
           });
         });
     });
@@ -210,7 +211,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.message).to.eql(
-        `error validating action params: Field "message": String must contain at least 1 character(s)`
+        `error validating action params: ✖ Too small: expected string to have >=1 characters\n  → at message`
       );
     });
 

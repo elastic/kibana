@@ -119,6 +119,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
     dataViews: props.dataViews,
+    kql: props.kql,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
@@ -947,6 +948,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
   const hasButtonGroups = !isFullscreen && (hasFormula || supportStaticValue);
+
   const initialMethod = useMemo(() => {
     let methodId = '';
     if (showStaticValueFunction) {
@@ -1064,6 +1066,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedOperationDefinition.timeScalingMode ||
       selectedOperationDefinition.filterable ||
       selectedOperationDefinition.shiftable);
+
+  const activeTable = props.activeData?.[layerId];
+  const activeColumnMeta = activeTable?.columns.find((col) => col.id === columnId)?.meta;
+  const resolvedDataType = activeColumnMeta?.type ?? selectedColumn?.dataType;
 
   return (
     <div id={columnId}>
@@ -1213,7 +1219,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             {enableFormatSelector &&
             !isFullscreen &&
             selectedColumn &&
-            (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
+            (resolvedDataType === 'number' || selectedColumn.operationType === 'range') ? (
               <FormatSelector
                 selectedColumn={selectedColumn}
                 onChange={onFormatChange}

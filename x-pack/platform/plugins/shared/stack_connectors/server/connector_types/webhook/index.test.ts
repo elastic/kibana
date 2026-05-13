@@ -101,7 +101,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 
@@ -175,12 +175,12 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 });
@@ -225,9 +225,10 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"method\\": Invalid enum value. Expected 'post' | 'put' | 'patch' | 'get' | 'delete', received 'https'"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid option: expected one of \\"post\\"|\\"put\\"|\\"patch\\"|\\"get\\"|\\"delete\\"
+        → at method"
+    `);
   });
 
   test('config validation passes when a url is specified', () => {
@@ -277,9 +278,10 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"headers\\": Expected object, received string"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected record, received string
+        → at headers"
+    `);
   });
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {
@@ -357,6 +359,58 @@ describe('config validation', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"error validating connector type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
       );
+    });
+
+    test('throws if OAuth2 accessTokenUrl is not added to allowedHosts', () => {
+      const disallowedTokenUrl = 'http://token.not.in.allowlist/oauth';
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (uri: string) => {
+          if (uri === disallowedTokenUrl) {
+            throw new Error(
+              `target url "${disallowedTokenUrl}" is not added to the Kibana config xpack.actions.allowedHosts`
+            );
+          }
+        },
+      };
+
+      const config = {
+        method: 'post',
+        url: 'https://webhook.example/webhook',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: disallowedTokenUrl,
+        clientId: 'client-id',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities: configUtils });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation webhook action config: target url \\"http://token.not.in.allowlist/oauth\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      );
+    });
+
+    test('calls ensureUriAllowed for main url and accessTokenUrl when OAuth2 config is valid', () => {
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: jest.fn(),
+      };
+      const mainUrl = 'https://webhook.example/webhook';
+      const tokenUrl = 'https://token.example/oauth';
+      const config = {
+        method: 'post',
+        url: mainUrl,
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: tokenUrl,
+        clientId: 'client-id',
+      };
+
+      validateConfig(connectorType, config, { configurationUtilities: configUtils });
+
+      expect(configUtils.ensureUriAllowed).toHaveBeenCalledTimes(2);
+      expect(configUtils.ensureUriAllowed).toHaveBeenNthCalledWith(1, mainUrl);
+      expect(configUtils.ensureUriAllowed).toHaveBeenNthCalledWith(2, tokenUrl);
     });
 
     test('throws when additionalFields is no valid JSON', async () => {

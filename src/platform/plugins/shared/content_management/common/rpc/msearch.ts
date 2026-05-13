@@ -22,6 +22,7 @@ export const mSearchSchemas = {
         schema.object({ contentTypeId: schema.string(), version: versionSchema }),
         {
           minSize: 1,
+          maxSize: 100,
         }
       ),
       query: searchQuerySchema,
@@ -30,6 +31,7 @@ export const mSearchSchemas = {
   ),
   out: schema.object(
     {
+      // codeql[js/kibana/unbounded-array-in-schema] output schema — server controls the response size
       contentTypes: schema.arrayOf(
         schema.object({ contentTypeId: schema.string(), version: versionSchema })
       ),

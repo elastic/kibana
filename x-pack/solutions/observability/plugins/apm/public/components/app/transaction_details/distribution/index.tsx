@@ -7,13 +7,15 @@
 
 import type { XYBrushEvent } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { AT_TIMESTAMP } from '@kbn/apm-types';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-import { useWaterfallFetcher } from '../use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -43,7 +45,7 @@ export function TransactionDistribution({
   const { traceId, transactionId } = urlParams;
 
   const {
-    query: { rangeFrom, rangeTo, showCriticalPath, environment },
+    query: { rangeFrom, rangeTo, showCriticalPath },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view'
@@ -52,18 +54,20 @@ export function TransactionDistribution({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
-  const waterfallFetchResult = useWaterfallFetcher({
-    traceId,
-    transactionId,
-    start,
-    end,
-  });
+
   const { waterfallItemId, detailTab } = urlParams;
 
   const { serviceName } = useApmServiceContext();
 
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId,
+    entryTransactionId: transactionId,
+  });
+
   const markerCurrentEvent =
-    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+    unifiedWaterfallFetchResult.entryTransaction?.transaction?.duration?.us;
 
   const { chartData, hasData, percentileThresholdValue, status, totalDocCount } =
     useTransactionDistributionChartData();
@@ -106,6 +110,70 @@ export function TransactionDistribution({
     [history]
   );
 
+  // Parse logs state from URL params
+  const { logsColumns, logsSort, logsGrid, logsRowHeight, logsRowsPerPage, logsDensity } =
+    urlParams;
+
+  const logsTableConfig = useMemo(
+    () => ({
+      columns: logsColumns ? JSON.parse(logsColumns) : undefined,
+      sort: logsSort ? JSON.parse(logsSort) : undefined,
+      grid: logsGrid ? JSON.parse(logsGrid) : undefined,
+      rowHeight: logsRowHeight,
+      rowsPerPage: logsRowsPerPage,
+      density: logsDensity as SavedSearchTableConfig['density'],
+    }),
+    [logsColumns, logsSort, logsGrid, logsRowHeight, logsRowsPerPage, logsDensity]
+  );
+
+  // Handle logs table config changes and sync to URL
+  const onLogsTableConfigChange = useCallback(
+    (config: SavedSearchTableConfig) => {
+      const currentQuery = toQuery(history.location.search);
+
+      const isFieldIncludedInColumns = (fieldName: string) =>
+        fieldName === AT_TIMESTAMP || (config.columns && config.columns.includes(fieldName));
+
+      // Clean up sort configuration to only include columns that exist
+      const cleanedSort = config.sort?.filter((sortEntry) => {
+        const [fieldName] = sortEntry;
+        return isFieldIncludedInColumns(fieldName);
+      });
+
+      // Clean up grid configuration to only include columns that exist
+      const cleanedGrid = config.grid?.columns
+        ? {
+            ...config.grid,
+            columns: Object.fromEntries(
+              Object.entries(config.grid.columns).filter(([fieldName]) =>
+                isFieldIncludedInColumns(fieldName)
+              )
+            ),
+          }
+        : config.grid;
+
+      // Only include logs params with actual values to keep URLs clean
+      const hasColumns = config.columns && config.columns.length > 0;
+      const hasSort = cleanedSort && cleanedSort.length > 0;
+      const hasGrid = cleanedGrid && Object.keys(cleanedGrid).length > 0;
+
+      history.replace({
+        ...history.location,
+        search: fromQuery({
+          ...currentQuery,
+          // Only include params that have meaningful values
+          logsColumns: hasColumns ? JSON.stringify(config.columns) : undefined,
+          logsSort: hasSort ? JSON.stringify(cleanedSort) : undefined,
+          logsGrid: hasGrid ? JSON.stringify(cleanedGrid) : undefined,
+          logsRowHeight: config.rowHeight,
+          logsRowsPerPage: config.rowsPerPage,
+          logsDensity: config.density,
+        }),
+      });
+    },
+    [history]
+  );
+
   return (
     <ResettingHeightRetainer reset={!traceId}>
       <div data-test-subj="apmTransactionDistributionTabContent">
@@ -124,18 +192,22 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          environment={environment}
           onSampleClick={onSampleClick}
           onTabClick={onTabClick}
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfallFetchResult={waterfallFetchResult.waterfall}
-          waterfallFetchStatus={waterfallFetchResult.status}
           traceSamplesFetchStatus={traceSamplesFetchResult.status}
           traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={onShowCriticalPathChange}
+          logsTableConfig={logsTableConfig}
+          onLogsTableConfigChange={onLogsTableConfigChange}
+          unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+          entryTransactionId={transactionId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          traceId={traceId}
         />
       </div>
     </ResettingHeightRetainer>

@@ -13,42 +13,107 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
+import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
-import { setYamlString } from '../../../entities/workflows/store';
-import { selectWorkflowName } from '../../../entities/workflows/store/workflow_detail/selectors';
+import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
+import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
+import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
+import {
+  selectActiveTab,
+  selectWorkflowId,
+  selectWorkflowName,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 import { loadConnectorsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk';
 import { loadWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk';
+import { loadWorkflowsThunk } from '../../../entities/workflows/store/workflow_detail/thunks/load_workflows_thunk';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
-import { useAsyncThunk, useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export function WorkflowDetailPage({ id }: { id?: string }) {
   const dispatch = useDispatch();
-  const loadConnectors = useAsyncThunk(loadConnectorsThunk);
-  const [loadWorkflow, { isLoading, error }] = useAsyncThunkState(loadWorkflowThunk);
+  const [loadConnectors, { isLoading: isLoadingConnectors }] =
+    useAsyncThunkState(loadConnectorsThunk);
+  const [loadWorkflows] = useAsyncThunkState(loadWorkflowsThunk);
+  const [loadWorkflow, { isLoading: isLoadingWorkflow, error }] =
+    useAsyncThunkState(loadWorkflowThunk);
+  const telemetry = useTelemetry();
+
+  const isReady = !isLoadingWorkflow && !isLoadingConnectors;
+
+  const activeTabInStore = useSelector(selectActiveTab);
+  const workflowId = useSelector(selectWorkflowId);
+  const workflowName = useSelector(selectWorkflowName);
+
+  useWorkflowsBreadcrumbs(workflowName);
+
+  const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const {
+    activeTab,
+    selectedExecutionId,
+    setSelectedExecution,
+    setActiveTab: setUrlTab,
+  } = useWorkflowUrlState();
+
+  useEffect(() => {
+    if (!canReadWorkflowExecution) {
+      if (activeTab === 'executions') {
+        setUrlTab('workflow');
+      }
+      if (selectedExecutionId) {
+        setSelectedExecution(null);
+      }
+    }
+  }, [canReadWorkflowExecution, activeTab, selectedExecutionId, setUrlTab, setSelectedExecution]);
+
+  // Report detail viewed telemetry when page is ready
+  useEffect(() => {
+    if (isReady && workflowId && activeTab) {
+      const tab: WorkflowDetailTab = activeTab;
+      telemetry.reportWorkflowDetailViewed({
+        workflowId,
+        tab,
+        editorType: 'yaml',
+      });
+    }
+  }, [isReady, workflowId, activeTab, telemetry]);
 
   useEffect(() => {
     loadConnectors(); // dispatch load connectors on mount
-  }, [loadConnectors]);
+    loadWorkflows(); // dispatch load workflows on mount
+  }, [loadConnectors, loadWorkflows]);
 
+  // Load workflow when id changes
   useEffect(() => {
     if (id) {
       loadWorkflow({ id }); // sets loaded yaml string
     } else {
       dispatch(setYamlString(workflowDefaultYaml));
+      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
     }
-  }, [loadWorkflow, id, dispatch]);
+  }, [loadWorkflow, id, dispatch, telemetry]);
 
-  const workflowName = useSelector(selectWorkflowName);
-  useWorkflowsBreadcrumbs(workflowName);
+  // Sync activeTab from URL state to store
+  useEffect(() => {
+    if (activeTabInStore !== activeTab) {
+      dispatch(setActiveTab(activeTab));
+    }
+  }, [activeTab, activeTabInStore, dispatch]);
 
-  const { activeTab, selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  // Load execution when selectedExecutionId changes
+  useEffect(() => {
+    if (!selectedExecutionId) {
+      dispatch(setExecution(undefined));
+    }
+  }, [selectedExecutionId, dispatch]);
 
   // TODO: manage it in a workflow state context
   const [highlightDiff, setHighlightDiff] = useState(false);
@@ -75,7 +140,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
             <FormattedMessage
               id="workflows.workflowDetail.error.body"
               defaultMessage="There was an error loading the workflow. {error}"
-              values={{ error }}
+              values={{ error: error.toString() }}
             />
           </p>
         }
@@ -87,29 +152,37 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
       <EuiFlexItem grow={false}>
         <WorkflowDetailHeader
-          isLoading={isLoading}
+          isLoading={isLoadingWorkflow}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
         />
       </EuiFlexItem>
       <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
-        <WorkflowEditorLayout
-          editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
-          executionList={
-            id && activeTab === 'executions' && !selectedExecutionId ? (
-              <WorkflowExecutionList workflowId={id} />
-            ) : null
-          }
-          executionDetail={
-            selectedExecutionId ? (
-              <WorkflowExecutionDetail
-                executionId={selectedExecutionId}
-                onClose={onCloseExecutionDetail}
-              />
-            ) : null
-          }
-        />
+        {!isReady ? (
+          <WorkflowDetailLoadingState />
+        ) : (
+          <WorkflowEditorLayout
+            editor={<WorkflowDetailEditor highlightDiff={highlightDiff} />}
+            executionList={
+              id &&
+              activeTab === 'executions' &&
+              !selectedExecutionId &&
+              canReadWorkflowExecution ? (
+                <WorkflowExecutionList workflowId={id} />
+              ) : null
+            }
+            executionDetail={
+              selectedExecutionId && canReadWorkflowExecution ? (
+                <WorkflowExecutionDetail
+                  executionId={selectedExecutionId}
+                  onClose={onCloseExecutionDetail}
+                />
+              ) : null
+            }
+          />
+        )}
         <WorkflowDetailTestModal />
+        <WorkflowDetailTestStepModal />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

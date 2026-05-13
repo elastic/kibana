@@ -15,6 +15,7 @@ import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -28,6 +29,9 @@ import { getPolicyDetailPath } from '../../common/routing';
 
 export const PolicyContainer = memo(() => {
   const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const isEndpointExceptionsMovedUnderManagementFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
   const isEnterprise = useLicense().isEnterprise();
 
   return (
@@ -42,6 +46,9 @@ export const PolicyContainer = memo(() => {
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+          ...(isEndpointExceptionsMovedUnderManagementFeatureEnabled
+            ? [MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH]
+            : []),
           ...(isEnterprise ? [MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH] : []),
         ]}
         exact

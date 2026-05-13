@@ -177,3 +177,10 @@ export const AFFECTED_RULES = (numRules: number) =>
     values: { numRules },
     defaultMessage: 'Affects {numRules} {numRules, plural, =1 {rule} other {rules}}',
   });
+
+export const AFFECTED_RULES_ARIA_LABEL = i18n.translate(
+  'exceptionList-components.exceptions.card.exceptionItem.affectedRulesAriaLabel',
+  {
+    defaultMessage: 'View affected rules',
+  }
+);

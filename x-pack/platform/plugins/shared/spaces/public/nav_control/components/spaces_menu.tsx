@@ -7,10 +7,12 @@
 
 import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiSpacer,
   EuiText,
   withEuiTheme,
 } from '@elastic/eui';
@@ -121,16 +123,30 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           {(list, search) => (
             <Fragment>
               <EuiPopoverTitle paddingSize="s">
-                {search ||
-                  i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                    defaultMessage: 'Spaces',
-                  })}
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      padding-left: ${this.props.theme.euiTheme.size.s};
+                    `}
+                  >
+                    {i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
+                      defaultMessage: 'Spaces',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{this.renderManageButton()}</EuiFlexItem>
+                </EuiFlexGroup>
+                {search && (
+                  <>
+                    <EuiSpacer size="s" />
+                    {search}
+                  </>
+                )}
               </EuiPopoverTitle>
               {list}
             </Fragment>
           )}
         </EuiSelectable>
-        <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
       </Fragment>
     );
   }
@@ -223,7 +239,6 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
     return (
       <ManageSpacesButton
         key="manageSpacesButton"
-        size="s"
         onClick={this.props.onClickManageSpaceBtn}
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}

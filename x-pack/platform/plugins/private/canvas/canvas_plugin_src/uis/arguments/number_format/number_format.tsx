@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { FormatSelect } from '../../../../public/components/format_select/format_select';
 import type { ArgumentProps } from '../../../../types/arguments';
 
@@ -43,12 +42,3 @@ export const NumberFormatArgInput: FunctionComponent<Props> = ({
     defaultCustomFormat="0.0a"
   />
 );
-
-NumberFormatArgInput.propTypes = {
-  numberFormats: PropTypes.arrayOf(
-    PropTypes.shape({ value: PropTypes.string, text: PropTypes.string })
-  ).isRequired,
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]).isRequired,
-  argId: PropTypes.string.isRequired,
-};

@@ -10,14 +10,13 @@
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiCallOut, EuiSpacer, EuiSwitch, EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   convertRelativeTimeStringToAbsoluteTimeDate,
   getRelativeTimeValueAndUnitFromTimeString,
-  isTimeRangeAbsoluteTime,
 } from '../../../lib/time_utils';
 
 const BoldText = ({ children }: { children: ReactNode }) => {
@@ -33,8 +32,10 @@ const BoldText = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const AbsoluteTimeText = ({ date }: { date: string }) => {
-  const absoluteDate = convertRelativeTimeStringToAbsoluteTimeDate(date);
+const AbsoluteTimeText = ({ date, isToDate }: { date: string; isToDate?: boolean }) => {
+  const absoluteDate = convertRelativeTimeStringToAbsoluteTimeDate(date, {
+    roundUp: isToDate,
+  });
 
   return (
     <BoldText>
@@ -55,28 +56,72 @@ const RelativeTimeText = ({
   value,
   unit,
   roundingUnit,
+  isToDate,
 }: {
   value?: number;
   unit?: string;
   roundingUnit?: string;
-}) => (
-  <BoldText>
-    <FormattedRelativeTime
-      value={value}
-      // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
-      unit={unit}
-    />
-    {roundingUnit && (
+  isToDate?: boolean;
+}) => {
+  // Handle "now/d" (start/end of day), "now/w" (start/end of week), etc.
+  // When used as "to" date, it means "end of the period" (with roundUp)
+  if (value === 0 && unit === 'second' && roundingUnit) {
+    if (isToDate) {
+      return (
+        <FormattedMessage
+          id="share.link.timeRange.endOfRoundingUnit"
+          defaultMessage="<bold>the end of the {roundingUnit}</bold>"
+          values={{
+            roundingUnit,
+            bold: (chunks) => <BoldText>{chunks}</BoldText>,
+          }}
+        />
+      );
+    }
+    return (
       <FormattedMessage
-        id="share.link.timeRange.relativeTimeInfoText.roundingUnit"
-        defaultMessage=" rounded to the {roundingUnit}"
+        id="share.link.timeRange.startOfRoundingUnit"
+        defaultMessage="<bold>the start of the {roundingUnit}</bold>"
         values={{
           roundingUnit,
+          bold: (chunks) => <BoldText>{chunks}</BoldText>,
         }}
       />
-    )}
-  </BoldText>
-);
+    );
+  }
+
+  // Handle plain "now" case - FormattedRelativeTime can't render it properly
+  if (value === 0 && unit === 'second' && !roundingUnit) {
+    return (
+      <FormattedMessage
+        id="share.link.timeRange.now"
+        defaultMessage="<bold>now</bold>"
+        values={{
+          bold: (chunks) => <BoldText>{chunks}</BoldText>,
+        }}
+      />
+    );
+  }
+
+  return (
+    <BoldText>
+      <FormattedRelativeTime
+        value={value}
+        // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
+        unit={unit}
+      />
+      {roundingUnit && (
+        <FormattedMessage
+          id="share.link.timeRange.relativeTimeInfoText.roundingUnit"
+          defaultMessage=" rounded to the {roundingUnit}"
+          values={{
+            roundingUnit,
+          }}
+        />
+      )}
+    </BoldText>
+  );
+};
 
 interface TimeRange {
   from: string;
@@ -85,81 +130,52 @@ interface TimeRange {
 
 interface Props {
   timeRange?: TimeRange;
-  isAbsoluteTime: boolean;
-  changeTimeType: (e: EuiSwitchEvent) => void;
+  isAbsoluteTimeByDefault: boolean;
+  onTimeTypeChange?: (isAbsolute: boolean) => void;
 }
 
-const getRelativeTimeText = (timeRange: TimeRange) => {
-  // FormattedRelativeTime doesn't support "now" as a value, it will render "0 seconds" instead
+const getTimeRangeText = (timeRange: TimeRange) => {
+  const fromIsRelative = timeRange.from.includes('now');
+  const toIsRelative = timeRange.to.includes('now');
   const from = getRelativeTimeValueAndUnitFromTimeString(timeRange.from);
   const to = getRelativeTimeValueAndUnitFromTimeString(timeRange.to);
 
-  if (!from?.value) {
-    return (
-      <div data-test-subj="relativeTimeInfoTextFromNow">
-        <FormattedMessage
-          id="share.link.timeRange.relativeTimeInfoText.fromNow"
-          defaultMessage="The users will see all data from <bold>now</bold> to {to}, based on when they view it."
-          values={{
-            to: (
-              <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} />
-            ),
-            bold: (chunks) => <BoldText>{chunks}</BoldText>,
-          }}
-        />
-      </div>
-    );
-  }
+  const fromValue = fromIsRelative ? (
+    <RelativeTimeText value={from?.value} unit={from?.unit} roundingUnit={from?.roundingUnit} />
+  ) : (
+    <AbsoluteTimeText date={timeRange.from} />
+  );
 
-  if (!to?.value) {
-    return (
-      <div data-test-subj="relativeTimeInfoTextToNow">
-        <FormattedMessage
-          id="share.link.timeRange.relativeTimeInfoText"
-          defaultMessage="The users will see all data from {from} to <bold>now</bold>, based on when they view it."
-          values={{
-            from: (
-              <RelativeTimeText
-                value={from?.value}
-                unit={from?.unit}
-                roundingUnit={from?.roundingUnit}
-              />
-            ),
-            bold: (chunks) => <BoldText>{chunks}</BoldText>,
-          }}
-        />
-      </div>
-    );
-  }
+  const toValue = toIsRelative ? (
+    <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} isToDate />
+  ) : (
+    <AbsoluteTimeText date={timeRange.to} isToDate />
+  );
 
   return (
-    <div data-test-subj="relativeTimeInfoTextDefault">
-      <FormattedMessage
-        id="share.link.timeRange.relativeTimeInfoText.default"
-        defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
-        values={{
-          from: (
-            <RelativeTimeText
-              value={from?.value}
-              unit={from?.unit}
-              roundingUnit={from?.roundingUnit}
-            />
-          ),
-          to: (
-            <RelativeTimeText value={to?.value} unit={to?.unit} roundingUnit={to?.roundingUnit} />
-          ),
-        }}
-      />
-    </div>
+    <FormattedMessage
+      id="share.link.timeRange.relativeTimeInfoText"
+      defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
+      values={{
+        from: fromValue,
+        to: toValue,
+      }}
+    />
   );
 };
 
-export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: Props) => {
-  const [isAbsoluteTimeByDefault, setIsAbsoluteTimeByDefault] = useState(false);
+export const TimeTypeSection = ({
+  timeRange,
+  onTimeTypeChange,
+  isAbsoluteTimeByDefault,
+}: Props) => {
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
-  useEffect(() => {
-    setIsAbsoluteTimeByDefault(isTimeRangeAbsoluteTime(timeRange));
-  }, [timeRange]);
+  const handleTimeTypeChange = (e: EuiSwitchEvent) => {
+    const newIsAbsolute = e.target.checked;
+    setIsAbsoluteTime(newIsAbsolute);
+    onTimeTypeChange?.(newIsAbsolute);
+  };
 
   if (!timeRange) {
     return null;
@@ -174,7 +190,8 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
               defaultMessage: 'Use absolute time range',
             })}
             checked={isAbsoluteTime}
-            onChange={changeTimeType}
+            onChange={handleTimeTypeChange}
+            data-test-subj="timeRangeSwitch"
           />
           <EuiSpacer size="m" />
         </>
@@ -187,12 +204,12 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
               defaultMessage="The users will see all data from {from} to {to}."
               values={{
                 from: <AbsoluteTimeText date={timeRange?.from} />,
-                to: <AbsoluteTimeText date={timeRange?.to} />,
+                to: <AbsoluteTimeText date={timeRange?.to} isToDate />,
               }}
             />
           </div>
         ) : (
-          getRelativeTimeText(timeRange)
+          getTimeRangeText(timeRange)
         )}
       </EuiText>
       <EuiSpacer size="m" />
@@ -203,6 +220,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
           title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
             defaultMessage: 'To use a relative time range, select it in the time picker first.',
           })}
+          data-test-subj="relativeTimeCallout"
         />
       )}
     </>

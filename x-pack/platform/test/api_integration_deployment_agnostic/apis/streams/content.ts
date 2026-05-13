@@ -36,16 +36,18 @@ const upsertRequest = ({
   fields?: FieldDefinition;
   routing?: RoutingDefinition[];
   queries?: StreamQuery[];
-}) => ({
+}): Streams.WiredStream.UpsertRequest => ({
   ...emptyAssets,
   queries,
   stream: {
+    type: 'wired',
     description: 'Test stream',
     ingest: {
       processing: { steps: [] },
       settings: {},
       wired: { fields, routing },
       lifecycle: { inherit: {} },
+      failure_store: { inherit: {} },
     },
   },
 });
@@ -67,44 +69,53 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await putStream(
         apiClient,
-        'logs.branch_a.child1.nested',
+        'logs.otel.branch_a.child1.nested',
         upsertRequest({
           queries: [
-            { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+            {
+              id: 'my-error-query',
+              type: 'match',
+              title: 'error query',
+              description: '',
+              esql: {
+                query:
+                  'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
+              },
+            },
           ],
         })
       );
       await putStream(
         apiClient,
-        'logs.branch_a.child1',
+        'logs.otel.branch_a.child1',
         upsertRequest({
           routing: [
             {
-              destination: 'logs.branch_a.child1.nested',
+              destination: 'logs.otel.branch_a.child1.nested',
               where: { field: 'resource.attributes.hello', eq: 'yes' },
               status: 'enabled',
             },
           ],
         })
       );
-      await putStream(apiClient, 'logs.branch_a.child2', upsertRequest({}));
-      await putStream(apiClient, 'logs.branch_b.child1', upsertRequest({}));
-      await putStream(apiClient, 'logs.branch_b.child2', upsertRequest({}));
+      await putStream(apiClient, 'logs.otel.branch_a.child2', upsertRequest({}));
+      await putStream(apiClient, 'logs.otel.branch_b.child1', upsertRequest({}));
+      await putStream(apiClient, 'logs.otel.branch_b.child2', upsertRequest({}));
       await putStream(
         apiClient,
-        'logs.branch_a',
+        'logs.otel.branch_a',
         upsertRequest({
           fields: {
             'resource.attributes.foo.bar': { type: 'keyword' },
           },
           routing: [
             {
-              destination: 'logs.branch_a.child1',
+              destination: 'logs.otel.branch_a.child1',
               where: { field: 'resource.attributes.foo', eq: 'bar' },
               status: 'enabled',
             },
             {
-              destination: 'logs.branch_a.child2',
+              destination: 'logs.otel.branch_a.child2',
               where: { field: 'resource.attributes.bar', eq: 'foo' },
               status: 'enabled',
             },
@@ -113,16 +124,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
       await putStream(
         apiClient,
-        'logs.branch_b',
+        'logs.otel.branch_b',
         upsertRequest({
           routing: [
             {
-              destination: 'logs.branch_b.child1',
+              destination: 'logs.otel.branch_b.child1',
               where: { field: 'resource.attributes.foo', eq: 'bar' },
               status: 'enabled',
             },
             {
-              destination: 'logs.branch_b.child2',
+              destination: 'logs.otel.branch_b.child2',
               where: { field: 'resource.attributes.bar', eq: 'foo' },
               status: 'enabled',
             },
@@ -140,19 +151,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Export', () => {
-      it('exports all streams from logs', async () => {
+      it('exports all streams from logs.otel', async () => {
         const exportBody = {
           name: 'logs_content_pack',
-          description: 'Content pack with all logs streams',
+          description: 'Content pack with all logs.otel streams',
           version: '1.0.0',
           include: { objects: { all: {} } },
         };
 
-        const archiveBuffer = await exportContent(apiClient, 'logs', exportBody);
+        const archiveBuffer = await exportContent(apiClient, 'logs.otel', exportBody);
         const contentPack = await parseArchive(Readable.from(archiveBuffer));
 
         expect(contentPack.name).to.eql('logs_content_pack');
-        expect(contentPack.description).to.eql('Content pack with all logs streams');
+        expect(contentPack.description).to.eql('Content pack with all logs.otel streams');
         expect(contentPack.version).to.eql('1.0.0');
         expect(contentPack.entries.length).to.be.greaterThan(0);
 
@@ -175,10 +186,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
       });
 
-      it('exports selected streams from logs', async () => {
+      it('exports selected streams from logs.otel', async () => {
         const exportBody = {
           name: 'selective_logs_content_pack',
-          description: 'Content pack with selected logs streams',
+          description: 'Content pack with selected logs.otel streams',
           version: '1.0.0',
           include: {
             objects: {
@@ -216,7 +227,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
 
-        const archiveBuffer = await exportContent(apiClient, 'logs', exportBody);
+        const archiveBuffer = await exportContent(apiClient, 'logs.otel', exportBody);
         const contentPack = await parseArchive(Readable.from(archiveBuffer));
 
         expect(contentPack.name).to.eql('selective_logs_content_pack');
@@ -250,8 +261,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(leafEntry.request.queries).to.eql([
           {
             id: 'my-error-query',
+            type: 'match',
             title: 'error query',
-            kql: { query: 'message: ERROR' },
+            description: '',
+            esql: {
+              query:
+                'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
+            },
           },
         ]);
       });
@@ -269,7 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('respects mappings inclusion', async () => {
         const contentPackWithoutMappings = await parseArchive(
           Readable.from(
-            await exportContent(apiClient, 'logs.branch_a', {
+            await exportContent(apiClient, 'logs.otel.branch_a', {
               name: 'check-mappings',
               description: '',
               version: '1.0.0',
@@ -287,7 +303,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const contentPackWithMappings = await parseArchive(
           Readable.from(
-            await exportContent(apiClient, 'logs.branch_a', {
+            await exportContent(apiClient, 'logs.otel.branch_a', {
               name: 'check-mappings',
               description: '',
               version: '1.0.0',
@@ -308,10 +324,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('pulls inherited mappings in the exported root', async () => {
-        // mapping is set on logs.branch_a parent
+        // mapping is set on logs.otel.branch_a parent
         const contentPack = await parseArchive(
           Readable.from(
-            await exportContent(apiClient, 'logs.branch_a.child1', {
+            await exportContent(apiClient, 'logs.otel.branch_a.child1', {
               name: 'check-mappings',
               description: '',
               version: '1.0.0',
@@ -328,7 +344,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('does not export base fields', async () => {
         const contentPack = await parseArchive(
           Readable.from(
-            await exportContent(apiClient, 'logs', {
+            await exportContent(apiClient, 'logs.otel', {
               name: 'check-mappings',
               description: '',
               version: '1.0.0',
@@ -370,7 +386,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         };
 
-        await exportContent(apiClient, 'logs.branch_a', exportBody, 400);
+        await exportContent(apiClient, 'logs.otel.branch_a', exportBody, 400);
       });
     });
 
@@ -389,12 +405,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'a.regular.stream',
               request: {
                 stream: {
+                  type: 'wired',
                   description: 'ok',
                   ingest: {
                     processing: { steps: [] },
                     settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
                   },
                 },
                 ...emptyAssets,
@@ -405,12 +423,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'a.big.stream',
               request: {
                 stream: {
+                  type: 'wired',
                   description: 'a'.repeat(twoMB),
                   ingest: {
                     processing: { steps: [] },
                     settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
                   },
                 },
                 ...emptyAssets,
@@ -421,7 +441,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await importContent(
           apiClient,
-          'logs',
+          'logs.otel',
           {
             include: { objects: { all: {} } },
             content: Readable.from(archive),
@@ -453,25 +473,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        const archiveBuffer = await exportContent(apiClient, 'logs.branch_a.child1', exportBody);
+        const archiveBuffer = await exportContent(
+          apiClient,
+          'logs.otel.branch_a.child1',
+          exportBody
+        );
 
-        await putStream(apiClient, 'logs.branch_c', upsertRequest({}));
+        await putStream(apiClient, 'logs.otel.branch_c', upsertRequest({}));
 
-        const importResponse = await importContent(apiClient, 'logs.branch_c', {
+        const importResponse = await importContent(apiClient, 'logs.otel.branch_c', {
           include: { objects: { all: {} } },
           content: Readable.from(archiveBuffer),
           filename: 'branch_a_content_pack-1.0.0.zip',
         });
-        expect(importResponse.result.created).to.eql(['logs.branch_c.nested']);
+        expect(importResponse.result.created).to.eql(['logs.otel.branch_c.nested']);
 
         const updatedStream = (await getStream(
           apiClient,
-          'logs.branch_c'
+          'logs.otel.branch_c'
         )) as Streams.WiredStream.GetResponse;
 
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
-            destination: 'logs.branch_c.nested',
+            destination: 'logs.otel.branch_c.nested',
             status: 'enabled',
             where: {
               field: 'resource.attributes.hello',
@@ -479,7 +503,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         ]);
-        // check if the mapping set on unexported logs.branch_a are correctly exported
+        // check if the mapping set on unexported logs.otel.branch_a are correctly exported
         expect(updatedStream.stream.ingest.wired.fields['resource.attributes.foo.bar']).to.eql({
           type: 'keyword',
         });
@@ -487,13 +511,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // check that the created stream includes the queries
         const createdStream = (await getStream(
           apiClient,
-          'logs.branch_c.nested'
+          'logs.otel.branch_c.nested'
         )) as Streams.WiredStream.GetResponse;
         expect(createdStream.queries).to.eql([
           {
             id: 'my-error-query',
+            type: 'match',
             title: 'error query',
-            kql: { query: 'message: ERROR' },
+            description: '',
+            esql: {
+              query:
+                'FROM logs.otel.branch_c.nested, logs.otel.branch_c.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
+            },
           },
         ]);
       });
@@ -501,15 +530,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('imports selected streams', async () => {
         const exportBody = {
           name: 'complete_tree',
-          description: 'Content pack from logs',
+          description: 'Content pack from logs.otel',
           version: '1.0.0',
           include: { objects: { all: {} } },
         };
-        const archiveBuffer = await exportContent(apiClient, 'logs', exportBody);
+        const archiveBuffer = await exportContent(apiClient, 'logs.otel', exportBody);
 
-        await putStream(apiClient, 'logs.branch_d', upsertRequest({}));
+        await putStream(apiClient, 'logs.otel.branch_d', upsertRequest({}));
 
-        const importResponse = await importContent(apiClient, 'logs.branch_d', {
+        const importResponse = await importContent(apiClient, 'logs.otel.branch_d', {
           include: {
             objects: {
               mappings: true,
@@ -536,18 +565,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(importResponse.result.created).to.eql([
-          'logs.branch_d.branch_b',
-          'logs.branch_d.branch_b.child1',
+          'logs.otel.branch_d.branch_b',
+          'logs.otel.branch_d.branch_b.child1',
         ]);
 
         const updatedStream = (await getStream(
           apiClient,
-          'logs.branch_d'
+          'logs.otel.branch_d'
         )) as Streams.WiredStream.GetResponse;
 
         expect(updatedStream.stream.ingest.wired.routing).to.eql([
           {
-            destination: 'logs.branch_d.branch_b',
+            destination: 'logs.otel.branch_d.branch_b',
             where: { never: {} },
             status: 'disabled',
           },
@@ -568,6 +597,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 name: ROOT_STREAM_ID,
                 request: {
                   stream: {
+                    type: 'wired',
                     description: '',
                     ingest: {
                       processing: { steps: [] },
@@ -577,6 +607,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         routing: [],
                       },
                       lifecycle: { inherit: {} },
+                      failure_store: { inherit: {} },
                     },
                   },
                   ...emptyAssets,
@@ -585,7 +616,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ]
           );
 
-        const targetStreamName = 'logs.branch_a';
+        const targetStreamName = 'logs.otel.branch_a';
 
         // fails when the field type changes
         let response = await importContent(
@@ -604,7 +635,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
+          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.otel.branch_a]'
         );
 
         // fails when field configuration changes
@@ -624,7 +655,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.branch_a]'
+          'Cannot change mapping of [resource.attributes.foo.bar] for [logs.otel.branch_a]'
         );
 
         // succeeds when the field configuration is unchanged
@@ -645,7 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('fails when importing overlapping child', async () => {
-        const targetStreamName = 'logs.overlapping.child';
+        const targetStreamName = 'logs.otel.overlapping.child';
         await putStream(apiClient, targetStreamName, upsertRequest({}));
 
         const archive = await generateArchive(
@@ -660,6 +691,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ROOT_STREAM_ID,
               request: {
                 stream: {
+                  type: 'wired',
                   description: '',
                   ingest: {
                     processing: { steps: [] },
@@ -675,6 +707,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ],
                     },
                     lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
                   },
                 },
                 ...emptyAssets,
@@ -685,12 +718,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: 'child',
               request: {
                 stream: {
+                  type: 'wired',
                   description: '',
                   ingest: {
                     processing: { steps: [] },
                     settings: {},
                     wired: { fields: {}, routing: [] },
                     lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
                   },
                 },
                 ...emptyAssets,
@@ -701,7 +736,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await importContent(
           apiClient,
-          'logs.overlapping',
+          'logs.otel.overlapping',
           {
             include: { objects: { all: {} } },
             content: Readable.from(archive),
@@ -711,7 +746,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          '[logs.overlapping.child] already exists'
+          '[logs.otel.overlapping.child] already exists'
         );
       });
 
@@ -728,6 +763,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: ROOT_STREAM_ID,
               request: {
                 stream: {
+                  type: 'wired',
                   description: '',
                   ingest: {
                     processing: { steps: [] },
@@ -737,11 +773,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       routing: [],
                     },
                     lifecycle: { inherit: {} },
+                    failure_store: { inherit: {} },
                   },
                 },
                 ...emptyAssets,
                 queries: [
-                  { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+                  {
+                    id: 'my-error-query',
+                    type: 'match',
+                    title: 'error query',
+                    description: '',
+                    esql: {
+                      query:
+                        'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
+                    },
+                  },
                 ],
               },
             },
@@ -750,7 +796,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await importContent(
           apiClient,
-          'logs.branch_a.child1.nested',
+          'logs.otel.branch_a.child1.nested',
           {
             include: { objects: { all: {} } },
             content: Readable.from(archive),
@@ -760,7 +806,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect((response as unknown as { message: string }).message).to.eql(
-          'Query [my-error-query | error query] already exists on [logs.branch_a.child1.nested]'
+          'Query [my-error-query | error query] already exists on [logs.otel.branch_a.child1.nested]'
         );
       });
     });

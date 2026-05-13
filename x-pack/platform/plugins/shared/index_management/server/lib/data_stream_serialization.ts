@@ -10,6 +10,24 @@ import { LOGSDB_INDEX_MODE, STANDARD_INDEX_MODE } from '../../common/constants';
 import type { IndexMode } from '../../common/types/data_streams';
 import type { DataStream, EnhancedDataStreamFromEs, Health } from '../../common';
 
+const toLowercaseHealth = (status: EnhancedDataStreamFromEs['status']): Health => {
+  switch (status) {
+    case 'green':
+    case 'GREEN':
+      return 'green';
+    case 'yellow':
+    case 'YELLOW':
+      return 'yellow';
+    case 'red':
+    case 'RED':
+      return 'red';
+    case 'unknown':
+      return 'unknown';
+    case 'unavailable':
+      return 'unavailable';
+  }
+};
+
 export function deserializeDataStream(
   dataStreamFromEs: EnhancedDataStreamFromEs,
   isLogsdbEnabled: boolean,
@@ -68,6 +86,7 @@ export function deserializeDataStream(
   if (failureStore?.enabled === true) {
     failureStoreEnabled = true;
   }
+  const failureStoreLifecycle = failureStore?.lifecycle;
 
   return {
     name,
@@ -91,7 +110,7 @@ export function deserializeDataStream(
       })
     ),
     generation,
-    health: status.toLowerCase() as Health, // ES typically returns status in all-caps
+    health: toLowercaseHealth(status),
     indexTemplateName: template,
     ilmPolicyName,
     storageSize,
@@ -110,9 +129,12 @@ export function deserializeDataStream(
     nextGenerationManagedBy,
     failureStoreEnabled,
     failureStoreRetention: {
-      // @ts-expect-error
-      customRetentionPeriod: failureStore?.lifecycle?.data_retention ?? undefined,
+      customRetentionPeriod:
+        failureStoreLifecycle?.enabled && failureStoreLifecycle?.data_retention
+          ? failureStoreLifecycle.data_retention
+          : undefined,
       defaultRetentionPeriod: failureStoreSettings?.defaultRetentionPeriod,
+      retentionDisabled: failureStoreLifecycle?.enabled === false,
     },
     indexMode: (indexMode ??
       (isLogsdbEnabled && /^logs-[^-]+-[^-]+$/.test(name)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { cloneDeep, uniqBy } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
 
@@ -17,14 +17,20 @@ export const injectLensReferences = (
 ): LensSerializedState => {
   const clonedState = cloneDeep(state);
 
-  if (clonedState.savedObjectId || !clonedState.attributes) {
+  if (clonedState.ref_id || !clonedState.attributes) {
     return clonedState;
   }
 
-  // TODO: find a way to cull erroneous dashboard references
-  const combinedReferences = uniqBy([...references, ...clonedState.attributes.references], 'name');
+  const panelReferencesMap = references.reduce<Map<string, Reference>>((acc, reference) => {
+    return acc.set(reference.name, reference);
+  }, new Map());
 
-  clonedState.attributes.references = combinedReferences;
+  const newReferences = clonedState.attributes.references.map((lensRef) => {
+    const panelReference = panelReferencesMap.get(lensRef.name);
+    return panelReference?.type === lensRef.type ? panelReference : lensRef;
+  });
+
+  clonedState.attributes.references = newReferences;
 
   return clonedState;
 };

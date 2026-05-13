@@ -4,18 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { streamlangDSLSchema } from '@kbn/streamlang';
-import type { ModelValidation } from '../validation/model_validation';
-import { modelValidation } from '../validation/model_validation';
+import { z } from '@kbn/zod/v4';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import { ingestStreamLifecycleSchema } from './lifecycle';
-import { BaseStream } from '../base';
+import {
+  baseStreamDefinitionSchema,
+  baseStreamGetResponseSchema,
+  baseStreamUpsertDefinitionSchema,
+  baseStreamUpsertRequestSchema,
+} from '../base';
+import type { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
+import type { FailureStore } from './failure_store';
+import { failureStoreSchema } from './failure_store';
+import type { IngestStreamProcessing } from './processing';
+import { ingestStreamProcessingSchema } from './processing';
+import type { StrictOmit } from '../core';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -34,6 +41,8 @@ interface IngestStreamPrivileges {
   read_failure_store: boolean;
   // User can manage failure store information
   manage_failure_store: boolean;
+  // User can create snapshot repositories (needed for frozen phase searchable snapshots)
+  create_snapshot_repository: boolean;
 }
 
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
@@ -45,22 +54,58 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   text_structure: z.boolean(),
   read_failure_store: z.boolean(),
   manage_failure_store: z.boolean(),
+  create_snapshot_repository: z.boolean(),
 });
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
-  processing: StreamlangDSL;
+  processing: IngestStreamProcessing;
   settings: IngestStreamSettings;
+  failure_store: FailureStore;
 }
+
+export const ingestBaseSchemaFields = {
+  lifecycle: ingestStreamLifecycleSchema,
+  processing: ingestStreamProcessingSchema,
+  settings: ingestStreamSettingsSchema,
+  failure_store: failureStoreSchema,
+};
+
+export const ingestBaseUpsertSchemaFields = {
+  ...ingestBaseSchemaFields,
+  processing: ingestStreamProcessingSchema.merge(
+    z.object({ updated_at: z.undefined().optional() })
+  ),
+};
 
 export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
-  z.object({
-    lifecycle: ingestStreamLifecycleSchema,
-    processing: streamlangDSLSchema,
-    settings: ingestStreamSettingsSchema,
-  })
+  z.object(ingestBaseSchemaFields)
 );
+
+type OmitIngestBaseUpsertProps<
+  T extends {
+    processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: string };
+  }
+> = Omit<T, 'processing'> & {
+  processing: StrictOmit<IngestBase['processing'], 'updated_at'>;
+};
+
+export type IngestBaseUpsertRequest = OmitIngestBaseUpsertProps<IngestBase>;
+
+export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertRequest> = validation(
+  z.unknown(),
+  z.object(ingestBaseUpsertSchemaFields)
+);
+
+export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
+
+const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
+  'standard',
+  'time_series',
+  'logsdb',
+  'lookup',
+]);
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {
@@ -76,10 +121,12 @@ export namespace IngestBaseStream {
     TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
   > extends BaseStream.GetResponse<TDefinition> {
     privileges: IngestStreamPrivileges;
+    index_mode?: IngestStreamIndexMode;
+    replicated?: boolean;
   }
 
   export type UpsertRequest<
-    TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
+    TDefinition extends OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition> = OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition>
   > = BaseStream.UpsertRequest<TDefinition>;
 
   export interface Model {
@@ -90,14 +137,33 @@ export namespace IngestBaseStream {
   }
 }
 
-export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
-  modelValidation(BaseStream, {
-    Source: z.object({}),
-    Definition: z.object({
-      ingest: IngestBase.right,
-    }),
-    GetResponse: z.object({
-      privileges: ingestStreamPrivilegesSchema,
-    }),
-    UpsertRequest: z.object({}),
-  });
+type OmitIngestBaseStreamUpsertProps<
+  T extends {
+    ingest: Omit<IngestBase, 'processing'> & {
+      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<IngestBase, 'processing'> & {
+    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
+
+export const ingestBaseStreamDefinitionSchema = baseStreamDefinitionSchema.extend({
+  ingest: IngestBase.right,
+});
+
+export const ingestBaseStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
+  stream: ingestBaseStreamDefinitionSchema,
+  privileges: ingestStreamPrivilegesSchema,
+  index_mode: z.optional(ingestStreamIndexModeSchema),
+  replicated: z.optional(z.boolean()),
+});
+
+export const ingestBaseStreamUpsertDefinitionSchema = baseStreamUpsertDefinitionSchema.extend({
+  ingest: IngestBaseUpsertRequest.right,
+});
+
+export const ingestBaseStreamUpsertRequestSchema = baseStreamUpsertRequestSchema.extend({
+  stream: ingestBaseStreamUpsertDefinitionSchema,
+});

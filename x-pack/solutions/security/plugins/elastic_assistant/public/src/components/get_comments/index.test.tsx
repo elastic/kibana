@@ -6,7 +6,7 @@
  */
 
 import type { MessageRole } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { getComments } from '.';
 
 const user: MessageRole = 'user';

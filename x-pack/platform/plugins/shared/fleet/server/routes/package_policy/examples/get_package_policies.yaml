@@ -1,0 +1,37 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getPackagePoliciesExample:
+            description: 'List of package policies'
+            value:
+              items:
+                - id: 'package-policy-id-1'
+                  name: 'nginx-1'
+                  namespace: 'default'
+                  enabled: true
+                  policy_ids:
+                    - 'agent-policy-id-1'
+                  package:
+                    name: 'nginx'
+                    title: 'Nginx'
+                    version: '1.20.0'
+                  inputs: []
+                  created_at: '2024-01-15T10:00:00.000Z'
+                  updated_at: '2024-01-15T10:00:00.000Z'
+              total: 1
+              page: 1
+              perPage: 20
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

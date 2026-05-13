@@ -20,6 +20,8 @@ export type KibanaExecutionContext = {
   readonly type?: string; // 'visualization' | 'actions' | 'server' | ..;
   /** public name of an application or a user-facing feature */
   readonly name?: string; // 'TSVB' | 'Lens' |  'action_execution' | ..;
+  /** id of the current space */
+  readonly space?: string;
   /**
    * a stand alone, logical unit such as an application page or tab
    * @remarks This value should NOT include unique identifiers like IDs or names.

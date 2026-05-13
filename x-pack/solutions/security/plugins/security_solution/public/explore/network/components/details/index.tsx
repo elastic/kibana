@@ -8,6 +8,7 @@
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
+import type { PageScope } from '../../../../data_view_manager/constants';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import type {
   FlowTargetSourceDest,
@@ -17,8 +18,8 @@ import type { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
   autonomousSystemRenderer,
-  hostIdRenderer,
-  hostNameRenderer,
+  HostIdRenderer,
+  HostNameRenderer,
   locationRenderer,
   reputationRenderer,
   whoisRenderer,
@@ -36,7 +37,6 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export interface IpOverviewProps {
   anomaliesData: Anomalies | null;
@@ -50,7 +50,7 @@ export interface IpOverviewProps {
   isLoadingAnomaliesData: boolean;
   loading: boolean;
   narrowDateRange: NarrowDateRange;
-  scopeId: SourcererScopeName;
+  scopeId: PageScope;
   startDate: string;
   type: networkModel.NetworkType;
   indexPatterns: string[];
@@ -147,27 +147,31 @@ export const IpOverview = React.memo<IpOverviewProps>(
         {
           title: i18n.HOST_ID,
           description:
-            typeData && data.host
-              ? hostIdRenderer({
-                  host: data.host,
-                  ipFilter: ip,
-                  contextID,
-                  scopeId,
-                  isFlyoutOpen,
-                })
-              : getEmptyTagValue(),
+            typeData && data.host ? (
+              <HostIdRenderer
+                host={data.host}
+                ipFilter={ip}
+                contextID={contextID}
+                scopeId={scopeId}
+                isFlyoutOpen={isFlyoutOpen}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
         {
           title: i18n.HOST_NAME,
           description:
-            typeData && data.host
-              ? hostNameRenderer({
-                  scopeId,
-                  host: data.host,
-                  ipFilter: ip,
-                  isFlyoutOpen,
-                })
-              : getEmptyTagValue(),
+            typeData && data.host ? (
+              <HostNameRenderer
+                scopeId={scopeId}
+                host={data.host}
+                ipFilter={ip}
+                isFlyoutOpen={isFlyoutOpen}
+              />
+            ) : (
+              getEmptyTagValue()
+            ),
         },
       ],
       [

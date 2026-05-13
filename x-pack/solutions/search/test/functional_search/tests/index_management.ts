@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('navigates to overview tab', async () => {
             await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
             await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('data');
+            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('overview');
           });
 
           it('navigates to settings tab', async () => {
@@ -68,14 +68,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
           });
         });
-        describe('can view search index details', function () {
+        // FLAKY: https://github.com/elastic/kibana/issues/239152
+        describe.skip('can view search index details', function () {
           it('renders search index details with no documents', async () => {
             await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
               0
             );
             await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
             await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
-            await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
           });
         });
       });

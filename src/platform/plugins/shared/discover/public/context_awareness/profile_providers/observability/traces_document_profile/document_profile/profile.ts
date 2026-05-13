@@ -29,13 +29,16 @@ export const createObservabilityTracesDocumentProfileProvider = ({
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer({
-      apm: {
-        errors: apmContextService.errorsService.getErrorsIndexPattern(),
-        traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+    getDocViewer: createGetDocViewer(
+      {
+        apm: {
+          errors: apmContextService.errorsService.getErrorsIndexPattern(),
+          traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+        },
+        logs: logsContextService.getAllLogsIndexPattern(),
       },
-      logs: logsContextService.getAllLogsIndexPattern(),
-    }),
+      OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID
+    ),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
@@ -75,5 +78,5 @@ const getFieldValues = <TRecord extends DataTableRecord, TField extends string>(
   field: TField & keyof TRecord['flattened']
 ): TRecord['flattened'][TField][] => {
   const value = record.flattened[field];
-  return Array.isArray(value) ? value : [value];
+  return (Array.isArray(value) ? value : [value]) as TRecord['flattened'][TField][];
 };

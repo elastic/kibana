@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useRef } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiPanel,
   EuiButton,
@@ -27,7 +26,7 @@ import { Shortcuts } from 'react-shortcuts';
 import type {
   ExpressionInputEditorRef,
   OnExpressionInputEditorDidMount,
-} from '@kbn/presentation-util-plugin/public';
+} from '../expression_input/types';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import type { ExpressionFunction } from '../../../types';
@@ -208,13 +207,4 @@ export const Expression: FC<Props> = ({
     // Portal is required to show above the navigation
     return <EuiPortal>{expressionPanel}</EuiPortal>;
   }
-};
-
-Expression.propTypes = {
-  functionDefinitions: PropTypes.array,
-  formState: PropTypes.object,
-  updateValue: PropTypes.func,
-  setExpression: PropTypes.func,
-  done: PropTypes.func,
-  error: PropTypes.string,
 };

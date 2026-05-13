@@ -46,7 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const sampleData = getService('sampleData');
   const rules = getService('rules');
 
-  describe('Embeddable alerts panel', () => {
+  describe('Embeddable alerts panel', function () {
+    this.tags('skipFIPS');
+
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -73,7 +75,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    describe('Config editor', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/258426
+    describe.skip('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
         await dashboardAddPanel.openAddPanelFlyout();
@@ -102,7 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     for (const solution of ['stack', 'observability', 'security']) {
-      describe(`with ${solution} role`, () => {
+      describe(`with ${solution} role`, function () {
         const ruleName = `${solution}-rule`;
 
         before(async () => {

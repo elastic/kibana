@@ -28,7 +28,7 @@ export const BothIcons = {
   name: 'Both icons',
   args: {
     secondaryButtonIcon: DEFAULT_SECONDARY_ICON,
-    iconType: 'search',
+    iconType: 'magnify',
   },
   render: (args: { secondaryButtonIcon: string; iconType: string }) => (
     <SplitButton {...args}>Both icons</SplitButton>

@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
 
@@ -14,27 +14,63 @@ export class AlertsTablePage {
   public detectionsAlertsWrapper: Locator;
   public alertRow: Locator;
   public alertsTable: Locator;
+  public contextMenuButton: Locator;
+  public actionsContextMenu: Locator;
+  public runWorkflowMenuItem: Locator;
+  public workflowPanel: Locator;
+  public executeWorkflowButton: Locator;
+  public bulkRunWorkflowMenuItem: Locator;
+  public bulkWorkflowPanel: Locator;
+  public selectedShowBulkActionsButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
-    this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
+    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
+    this.contextMenuButton = this.page.testSubj.locator('timeline-context-menu-button');
+    this.actionsContextMenu = this.page.testSubj.locator('actions-context-menu');
+    this.runWorkflowMenuItem = this.page.testSubj.locator('run-workflow-action');
+    this.workflowPanel = this.page.testSubj.locator('alert-workflow-context-menu-panel');
+    this.executeWorkflowButton = this.page.testSubj.locator('execute-alert-workflow-button');
+    this.bulkRunWorkflowMenuItem = this.page.testSubj.locator('bulk-run-alert-workflow-action');
+    this.bulkWorkflowPanel = this.page.testSubj.locator('bulk-alert-workflow-context-menu-panel');
+    this.selectedShowBulkActionsButton = this.page.testSubj.locator(
+      'selectedShowBulkActionsButton'
+    );
   }
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
   }
 
+  async openAlertContextMenu(ruleName: string) {
+    await this.alertsTable.waitFor({ state: 'visible' });
+    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+
+    await expect(
+      ruleNameCell,
+      `Alert with rule '${ruleName}' is not displayed in the alerts table`
+    ).toHaveCount(1);
+
+    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByTestId('timeline-context-menu-button').click();
+  }
+
   async expandAlertDetailsFlyout(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // Filter alert by unique rule name
-    const row = this.alertRow.filter({ hasText: ruleName });
-    await expect(
-      row,
-      `Alert with rule '${ruleName}' is not displayed in the alerts table`
-    ).toBeVisible();
+    // 1. Find the rule name cell (unique per alert)
+    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
 
-    return row.locator(`[data-test-subj='expand-event']`).click();
+    await expect(
+      ruleNameCell,
+      `Alert with rule '${ruleName}' is not displayed in the alerts table`
+    ).toHaveCount(1);
+
+    // 2. Climb up to the DataGrid row
+    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+
+    // 3. Click expand button in the row
+    await row.getByTestId('expand-event').click();
   }
 
   async waitForDetectionsAlertsWrapper() {

@@ -28,10 +28,14 @@ export function useStreamDataViewFieldTypes(streamName: string) {
   const { value: dataView } = useAbortableAsync(
     async ({ signal }) => {
       try {
-        return await data.dataViews.create({
-          title: streamName,
-          timeFieldName: '@timestamp',
-        });
+        return await data.dataViews.create(
+          {
+            title: streamName,
+            timeFieldName: '@timestamp',
+          },
+          undefined,
+          false
+        );
       } catch (err) {
         // Silently handle errors for new streams that don't have indices yet
         return undefined;

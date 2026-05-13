@@ -116,6 +116,13 @@ describe('KibanaEuiProvider', () => {
         componentDefaults: {
           EuiFlyout: {
             includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
+            container: '#app-main-scroll',
+          },
+          EuiPopover: {
+            repositionOnScroll: true,
+          },
+          EuiToolTip: {
+            repositionOnScroll: true,
           },
         },
       }),

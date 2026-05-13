@@ -35,18 +35,16 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { SwimlaneType } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { getDefaultSwimlanePanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import type { AnomalySwimLaneEmbeddableState } from '../..';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
-import type { SwimlaneType } from './explorer_constants';
-import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { useMlKibana } from '../contexts/kibana';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
@@ -77,8 +75,6 @@ function mapSwimlaneOptionsToEuiOptions(options: string[]) {
     text: option,
   }));
 }
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
@@ -229,7 +225,7 @@ export const AnomalyTimeline: FC = () => {
           : {}),
         // For cases attachment, pass just the job IDs to maintain stale data
         jobIds: selectedJobs?.map((v) => v.id),
-        timeRange: globalTimeRange,
+        time_range: globalTimeRange,
         ...(isDefined(queryString) && queryString !== ''
           ? {
               query: {
@@ -404,7 +400,7 @@ export const AnomalyTimeline: FC = () => {
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
+        serializedState: embeddableInput,
         type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
       };
 
@@ -450,6 +446,9 @@ export const AnomalyTimeline: FC = () => {
               css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
             >
               <EuiPopover
+                aria-label={i18n.translate('xpack.ml.explorer.swimlane.actionsPopoverAriaLabel', {
+                  defaultMessage: 'Anomaly swim lane actions menu',
+                })}
                 button={
                   <EuiButtonIcon
                     size="s"
@@ -459,7 +458,7 @@ export const AnomalyTimeline: FC = () => {
                     color="text"
                     display="base"
                     isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                     data-test-subj="mlAnomalyTimelinePanelMenu"
                   />
@@ -580,10 +579,10 @@ export const AnomalyTimeline: FC = () => {
             onResize={onResize}
             isLoading={loading}
             noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
+              <EuiText textAlign={'center'} size="s">
+                <strong>
                   <NoOverallData />
-                </h5>
+                </strong>
               </EuiText>
             }
             showTimeline={false}
@@ -625,8 +624,8 @@ export const AnomalyTimeline: FC = () => {
             isLoading={loading || viewBySwimlaneDataLoading}
             yAxisWidth={Y_AXIS_LABEL_WIDTH}
             noDataWarning={
-              <EuiText textAlign={'center'}>
-                <h5>
+              <EuiText textAlign={'center'} size="s">
+                <strong>
                   {typeof viewBySwimlaneFieldName === 'string' ? (
                     viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
                       <FormattedMessage
@@ -641,7 +640,7 @@ export const AnomalyTimeline: FC = () => {
                       />
                     )
                   ) : null}
-                </h5>
+                </strong>
               </EuiText>
             }
           />

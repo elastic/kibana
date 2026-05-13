@@ -38,6 +38,8 @@
           ") => { patterns: string[]; fields: Record<string, { type: string; }>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +60,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 35,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentPackSavedObject",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -77,6 +82,8 @@
           "(rootDir: string, filepath: string) => \"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +98,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +115,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 53,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,6 +136,8 @@
           "(rootDir: string, filepath: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -139,6 +152,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 27,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -154,6 +169,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 27,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -188,6 +205,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,7 +227,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+            "lineNumber": 28,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentPackIncludedObjects",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -227,6 +249,8 @@
           "(index: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -241,6 +265,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 27,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -260,6 +286,8 @@
           "(type: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,6 +302,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -293,6 +323,8 @@
           "(rootDir: string, filepath: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -307,6 +339,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -322,6 +356,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 25,
+            "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -341,6 +377,8 @@
           "(type: string) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -355,6 +393,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 32,
+            "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -391,6 +431,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -413,6 +455,8 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -447,6 +491,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -467,7 +513,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentPackSavedObject",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -482,7 +531,10 @@
               "Record<string, string>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -517,6 +569,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 61,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -538,6 +592,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -552,6 +608,8 @@
         "label": "ContentPackIncludeAll",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -566,6 +624,8 @@
               "{ all: {}; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -580,6 +640,8 @@
         "label": "ContentPackManifest",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -591,6 +653,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -602,6 +666,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -613,6 +679,8 @@
             "label": "version",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -644,6 +712,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -665,6 +735,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -679,6 +751,8 @@
         "label": "ContentPackPreviewEntry",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -690,6 +764,8 @@
             "label": "type",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -701,6 +777,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -712,6 +790,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -726,6 +806,8 @@
               "{ severity: \"warning\" | \"fatal\"; message: string; }[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -740,6 +822,8 @@
         "label": "ContentPackSavedObjectLinks",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -761,6 +845,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -775,6 +861,8 @@
         "label": "ContentPackStream",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -789,6 +877,8 @@
               "\"stream\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -800,6 +890,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -812,11 +904,19 @@
             "description": [],
             "signature": [
               "BaseStream",
-              ".UpsertRequest<",
-              "WiredStream",
-              ".Definition>"
+              ".UpsertRequest<OmitWiredStreamUpsertProps<",
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStream",
+                "text": "WiredStream"
+              },
+              ".Definition>>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -831,6 +931,8 @@
         "label": "SavedObjectLink",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -842,6 +944,8 @@
             "label": "source_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -853,6 +957,8 @@
             "label": "target_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -871,9 +977,19 @@
         "description": [],
         "signature": [
           "SavedObject",
-          "<Readonly<{ version?: number | undefined; timeRestore?: boolean | undefined; refreshInterval?: Readonly<{ section?: number | undefined; display?: string | undefined; } & { value: number; pause: boolean; }> | undefined; sections?: Readonly<{ collapsed?: boolean | undefined; } & { title: string; gridData: Readonly<{} & { i: string; y: number; }>; }>[] | undefined; hits?: number | undefined; controlGroupInput?: Readonly<{ chainingSystem?: string | undefined; panelsJSON?: string | undefined; controlStyle?: string | undefined; ignoreParentSettingsJSON?: string | undefined; showApplySelections?: boolean | undefined; } & {}> | undefined; timeFrom?: string | undefined; timeTo?: string | undefined; optionsJSON?: string | undefined; } & { title: string; description: string; kibanaSavedObjectMeta: Readonly<{ searchSourceJSON?: string | undefined; } & {}>; panelsJSON: string; }>> & { type: \"dashboard\"; }"
+          "<",
+          {
+            "pluginId": "dashboard",
+            "scope": "server",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-server.DashboardAttributes",
+            "text": "DashboardAttributes"
+          },
+          "> & { type: \"dashboard\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -898,6 +1014,8 @@
           "> & { type: \"index-pattern\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -927,6 +1045,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -957,6 +1077,8 @@
           ")[]; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -970,7 +1092,7 @@
         "description": [],
         "signature": [
           "SavedObject",
-          "<{ version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "<{ version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -978,7 +1100,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsXY\"; state: { query: ",
+          "[]; visualizationType: \"lnsXY\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -994,15 +1124,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1039,10 +1161,10 @@
             "pluginId": "@kbn/lens-common",
             "scope": "common",
             "docId": "kibKbnLensCommonPluginApi",
-            "section": "def-common.XYState",
-            "text": "XYState"
+            "section": "def-common.XYPersistedState",
+            "text": "XYPersistedState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1050,7 +1172,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsPie\"; state: { query: ",
+          "[]; visualizationType: \"lnsPie\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1066,15 +1196,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1114,7 +1236,7 @@
             "section": "def-common.LensPartitionVisualizationState",
             "text": "LensPartitionVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1122,7 +1244,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
+          "[]; visualizationType: \"lnsHeatmap\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1138,15 +1268,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1186,7 +1308,7 @@
             "section": "def-common.HeatmapVisualizationState",
             "text": "HeatmapVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1194,7 +1316,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsGauge\"; state: { query: ",
+          "[]; visualizationType: \"lnsGauge\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1210,15 +1340,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1258,7 +1380,7 @@
             "section": "def-common.GaugeVisualizationState",
             "text": "GaugeVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1266,7 +1388,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
+          "[]; visualizationType: \"lnsDatatable\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1282,15 +1412,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1330,7 +1452,7 @@
             "section": "def-common.DatatableVisualizationState",
             "text": "DatatableVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1338,7 +1460,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
+          "[]; visualizationType: \"lnsLegacyMetric\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1354,15 +1484,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1444,7 +1566,7 @@
             "section": "def-common.CustomPaletteParams",
             "text": "CustomPaletteParams"
           },
-          "> | undefined; }; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "> | undefined; }; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1452,7 +1574,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: \"lnsMetric\"; state: { query: ",
+          "[]; visualizationType: \"lnsMetric\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1468,15 +1598,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1516,7 +1638,7 @@
             "section": "def-common.MetricVisualizationState",
             "text": "MetricVisualizationState"
           },
-          "; }; } | { version?: 1 | undefined; title: string; description?: string | undefined; references: ",
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -1524,7 +1646,15 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[]; visualizationType: string; state: { query: ",
+          "[]; visualizationType: \"lnsChoropleth\"; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1540,7 +1670,55 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; filters: ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.ChoroplethChartState",
+            "text": "ChoroplethChartState"
+          },
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; visualizationType: \"lnsTagcloud\"; state: { filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1548,7 +1726,95 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          "[]; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined; datasourceStates: { formBased?: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.FormBasedPersistedState",
+            "text": "FormBasedPersistedState"
+          },
+          " | undefined; textBased?: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.TextBasedPersistedState",
+            "text": "TextBasedPersistedState"
+          },
+          " | undefined; }; visualization: ",
+          {
+            "pluginId": "@kbn/lens-common",
+            "scope": "common",
+            "docId": "kibKbnLensCommonPluginApi",
+            "section": "def-common.LensTagCloudState",
+            "text": "LensTagCloudState"
+          },
+          "; }; } | { version?: 2 | undefined; description?: string | undefined; title: string; references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[]; visualizationType: string; state: { filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1583,6 +1849,8 @@
           " | undefined; }; visualization: unknown; }; }> & { type: \"lens\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1620,6 +1888,8 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1635,6 +1905,8 @@
           "\"<stream_name_placeholder>\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index_pattern.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1650,6 +1922,8 @@
           "\"__ROOT__\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/stream.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1680,6 +1954,8 @@
           "[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1695,6 +1971,8 @@
           "\"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1718,9 +1996,9 @@
             "section": "def-common.ContentPackIncludedObjects",
             "text": "ContentPackIncludedObjects"
           },
-          ", ",
-          "ZodTypeDef",
-          ", ",
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -1728,9 +2006,11 @@
             "section": "def-common.ContentPackIncludedObjects",
             "text": "ContentPackIncludedObjects"
           },
-          ">"
+          ", unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/api.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1752,9 +2032,9 @@
             "section": "def-common.ContentPackManifest",
             "text": "ContentPackManifest"
           },
-          ", ",
-          "ZodTypeDef",
-          ", ",
+          ", unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<",
           {
             "pluginId": "@kbn/content-packs-schema",
             "scope": "common",
@@ -1762,9 +2042,11 @@
             "section": "def-common.ContentPackManifest",
             "text": "ContentPackManifest"
           },
-          ">"
+          ", unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1777,6 +2059,8 @@
         "label": "SUPPORTED_ENTRY_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1791,6 +2075,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1802,6 +2088,8 @@
             "label": "stream",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1816,6 +2104,8 @@
         "label": "SUPPORTED_SAVED_OBJECT_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1827,6 +2117,8 @@
             "label": "dashboard",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1838,6 +2130,8 @@
             "label": "'index-pattern'",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1849,6 +2143,8 @@
             "label": "lens",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/saved_object.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

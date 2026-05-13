@@ -14,10 +14,6 @@ import {
   OPEN_RISK_INFORMATION_FLYOUT_BUTTON,
 } from '../screens/entity_analytics';
 import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
-import {
-  RISK_SCORE_SWITCH,
-  RISK_PREVIEW_ERROR_BUTTON,
-} from '../screens/entity_analytics_management';
 import { visitWithTimeRange } from './navigation';
 import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
 import { REFRESH_BUTTON } from '../screens/security_header';
@@ -53,11 +49,6 @@ export const navigateToNextPage = () => {
   cy.get(ANOMALIES_TABLE_NEXT_PAGE_BUTTON).click();
 };
 
-export const riskEngineStatusChange = () => {
-  cy.get(RISK_SCORE_SWITCH).should('not.have.attr', 'disabled');
-  cy.get(RISK_SCORE_SWITCH).click();
-};
-
 export const mockRiskEngineEnabled = () => {
   // mock the risk engine status
   cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
@@ -68,19 +59,20 @@ export const mockRiskEngineEnabled = () => {
   }).as('riskEngineStatus');
 };
 
-export const previewErrorButtonClick = () => {
-  cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
-};
-
 export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
 
 export const openEntityStoreEnablementModal = () => {
   cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
   cy.get(ENTITY_STORE_ENABLEMENT_MODAL).contains('Entity Analytics Enablement');
+
+  cy.wait('@riskEnginePrivileges', { timeout: 120000 });
+  cy.wait('@entityStorePrivileges', { timeout: 120000 });
 };
 
 export const confirmEntityStoreEnablement = () => {
   cy.get(ENABLEMENT_MODAL_CONFIRM_BUTTON).click();
+
+  cy.get(ENTITY_STORE_ENABLEMENT_MODAL).should('not.exist');
 };
 
 export const waitForEntitiesListToAppear = () => {

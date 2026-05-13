@@ -7,13 +7,16 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import { generateLayer } from './generate_layer';
+import { otelEquivalentLookupMap } from './logs_layer';
 
 describe('generateLayer', () => {
   const definition: Streams.WiredStream.Definition = {
+    type: 'wired',
     name: 'logs.abc',
     description: '',
+    updated_at: new Date().toISOString(),
     ingest: {
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       wired: {
         routing: [],
         fields: {
@@ -27,10 +30,11 @@ describe('generateLayer', () => {
         dsl: { data_retention: '30d' },
       },
       settings: {},
+      failure_store: { inherit: {} },
     },
   };
 
-  it('should generate mappings with proper handling of fields and aliases', () => {
+  it('should generate mappings with proper handling of fields using passthrough', () => {
     const result = generateLayer('logs.abc', definition, false);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -48,15 +52,17 @@ describe('generateLayer', () => {
                 "ignore_malformed": false,
                 "type": "date",
               },
-              "attributes.myfield": Object {
-                "type": "keyword",
+              "attributes": Object {
+                "priority": 20,
+                "properties": Object {
+                  "myfield": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "passthrough",
               },
               "message": Object {
                 "type": "match_only_text",
-              },
-              "myfield": Object {
-                "path": "attributes.myfield",
-                "type": "alias",
               },
             },
           },
@@ -67,7 +73,7 @@ describe('generateLayer', () => {
     `);
   });
 
-  it('should generate mappings for root stream', () => {
+  it('should generate mappings for root stream with passthrough namespaces', () => {
     const result = generateLayer('logs', { ...definition, name: 'logs' }, true);
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -86,17 +92,19 @@ describe('generateLayer', () => {
                 "type": "date",
               },
               "attributes": Object {
-                "subobjects": false,
-                "type": "object",
-              },
-              "attributes.myfield": Object {
-                "type": "keyword",
+                "priority": 20,
+                "properties": Object {
+                  "myfield": Object {
+                    "type": "keyword",
+                  },
+                },
+                "type": "passthrough",
               },
               "body": Object {
                 "properties": Object {
                   "structured": Object {
-                    "subobjects": false,
-                    "type": "object",
+                    "priority": 10,
+                    "type": "passthrough",
                   },
                 },
                 "type": "object",
@@ -108,15 +116,19 @@ describe('generateLayer', () => {
               "message": Object {
                 "type": "match_only_text",
               },
-              "myfield": Object {
-                "path": "attributes.myfield",
-                "type": "alias",
-              },
               "resource": Object {
                 "properties": Object {
                   "attributes": Object {
-                    "subobjects": false,
-                    "type": "object",
+                    "priority": 40,
+                    "properties": Object {
+                      "host.name": Object {
+                        "type": "keyword",
+                      },
+                      "service.name": Object {
+                        "type": "keyword",
+                      },
+                    },
+                    "type": "passthrough",
                   },
                 },
                 "type": "object",
@@ -124,8 +136,8 @@ describe('generateLayer', () => {
               "scope": Object {
                 "properties": Object {
                   "attributes": Object {
-                    "subobjects": false,
-                    "type": "object",
+                    "priority": 30,
+                    "type": "passthrough",
                   },
                 },
                 "type": "object",
@@ -166,5 +178,330 @@ describe('generateLayer', () => {
         "version": 1,
       }
     `);
+  });
+
+  it('should generate valid mappings with hierarchical field names using passthrough', () => {
+    // This test verifies that passthrough type is used for namespace objects,
+    // which allows Elasticsearch to handle field patterns like "client" + "client.ip"
+    // and automatically creates aliases.
+    const definitionWithHierarchicalFields: Streams.WiredStream.Definition = {
+      type: 'wired',
+      name: 'logs.test',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date' },
+            'attributes.client': { type: 'keyword' },
+            'attributes.client.ip': { type: 'ip' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.test', definitionWithHierarchicalFields, false);
+
+    // Verify the structure uses passthrough for the attributes namespace
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+    const attributes = properties.attributes as {
+      type: string;
+      priority: number;
+      properties: Record<string, unknown>;
+    };
+
+    expect(attributes.type).toBe('passthrough');
+    expect(attributes.priority).toBe(20); // Fixed priority for attributes namespace
+    expect(attributes.properties.client).toEqual({ type: 'keyword' });
+    expect(attributes.properties['client.ip']).toEqual({ type: 'ip' });
+  });
+
+  it('should create OTel-to-ECS equivalent aliases when applicable', () => {
+    // Find a real OTel → ECS mapping from the lookup map
+    const otelMappings = Object.entries(otelEquivalentLookupMap);
+
+    if (otelMappings.length === 0) {
+      return;
+    }
+
+    const [otelField, ecsField] = otelMappings[0];
+    const fullOtelField = `attributes.${otelField}`;
+
+    const definitionWithOtelField: Streams.WiredStream.Definition = {
+      type: 'wired',
+      name: 'logs.otel',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date' },
+            [fullOtelField]: { type: 'keyword' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.otel', definitionWithOtelField, false);
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+    // Verify the ECS equivalent alias was created
+    expect(properties[ecsField]).toEqual({
+      type: 'alias',
+      path: fullOtelField,
+    });
+  });
+
+  it('should skip doc-only fields (no type) and not include them in mappings', () => {
+    const definitionWithDocOnlyField: Streams.WiredStream.Definition = {
+      type: 'wired',
+      name: 'logs.test',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'match_only_text' },
+            'attributes.documented_field': {
+              description: 'This field is only documented, not mapped',
+            },
+            'attributes.regular_field': { type: 'keyword' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.test', definitionWithDocOnlyField, false);
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+    // Verify @timestamp and message are in the mappings
+    expect(properties['@timestamp']).toBeDefined();
+    expect(properties.message).toBeDefined();
+
+    // Verify the doc-only field is NOT in the mappings
+    const attributes = properties.attributes as { properties: Record<string, unknown> };
+    expect(attributes.properties.documented_field).toBeUndefined();
+
+    // Verify regular field IS in the mappings
+    expect(attributes.properties.regular_field).toEqual({ type: 'keyword' });
+  });
+
+  it('should not include description in ES mappings', () => {
+    const definitionWithDescription: Streams.WiredStream.Definition = {
+      type: 'wired',
+      name: 'logs.test',
+      description: '',
+      updated_at: new Date().toISOString(),
+      ingest: {
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        wired: {
+          routing: [],
+          fields: {
+            '@timestamp': { type: 'date', description: 'Event timestamp' },
+            message: { type: 'match_only_text', description: 'Log message content' },
+          },
+        },
+        lifecycle: { inherit: {} },
+        settings: {},
+        failure_store: { inherit: {} },
+      },
+    };
+
+    const result = generateLayer('logs.test', definitionWithDescription, false);
+    const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+    // Verify description is not present in the ES mapping properties
+    const timestamp = properties['@timestamp'] as Record<string, unknown>;
+    const message = properties.message as Record<string, unknown>;
+
+    expect(timestamp.description).toBeUndefined();
+    expect(message.description).toBeUndefined();
+    expect(timestamp.type).toBe('date');
+    expect(message.type).toBe('match_only_text');
+  });
+
+  describe('Root stream mappings', () => {
+    it('should use OTel mappings for OTel-based root streams (logs, logs.otel)', () => {
+      const otelStreams = ['logs', 'logs.otel'];
+
+      otelStreams.forEach((streamName) => {
+        // Create definition without explicit message field to test alias behavior
+        const rootDefinition: Streams.WiredStream.Definition = {
+          type: 'wired',
+          name: streamName,
+          description: '',
+          updated_at: new Date().toISOString(),
+          ingest: {
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            wired: {
+              routing: [],
+              fields: {
+                '@timestamp': { type: 'date' },
+                'attributes.myfield': { type: 'keyword' },
+              },
+            },
+            lifecycle: { dsl: { data_retention: '30d' } },
+            settings: {},
+            failure_store: { inherit: {} },
+          },
+        };
+
+        const result = generateLayer(streamName, rootDefinition, false);
+        const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+        // OTel streams use OTel mappings with passthrough namespaces
+        expect(properties.body).toBeDefined();
+        expect(properties.resource).toBeDefined();
+        expect(properties.scope).toBeDefined();
+        expect(properties.attributes).toBeDefined();
+
+        // OTel streams include ECS aliases
+        expect(properties['log.level']).toEqual({
+          path: 'severity_text',
+          type: 'alias',
+        });
+        expect(properties.message).toEqual({
+          path: 'body.text',
+          type: 'alias',
+        });
+      });
+    });
+
+    it('should NOT use OTel mappings for logs.ecs root stream', () => {
+      const rootDefinition: Streams.WiredStream.Definition = {
+        ...definition,
+        name: 'logs.ecs',
+      };
+
+      const result = generateLayer('logs.ecs', rootDefinition, false);
+      const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+      // logs.ecs should NOT have OTel passthrough namespaces
+      expect(properties.body).toBeUndefined();
+      expect(properties.resource).toBeUndefined();
+      expect(properties.scope).toBeUndefined();
+
+      // logs.ecs should NOT have OTel aliases (log.level -> severity_text)
+      expect(properties['log.level']).toBeUndefined();
+
+      // logs.ecs only has raw fields from the stream definition (no OTel passthrough transformation)
+      expect(properties.message).toEqual({
+        type: 'match_only_text',
+      });
+      expect(properties['@timestamp']).toEqual({
+        format: 'strict_date_optional_time',
+        ignore_malformed: false,
+        type: 'date',
+      });
+      // Raw field from stream definition (not transformed into passthrough structure)
+      expect(properties['attributes.myfield']).toEqual({
+        type: 'keyword',
+      });
+      // No attributes passthrough object for ECS streams
+      expect(properties.attributes).toBeUndefined();
+
+      // ECS streams use subobjects: false to keep dotted field names as flat keys
+      expect(result.template.mappings?.subobjects).toBe(false);
+    });
+
+    it('should use OTel settings for OTel-based root streams', () => {
+      const otelStreams = ['logs', 'logs.otel'];
+
+      otelStreams.forEach((streamName) => {
+        const rootDefinition: Streams.WiredStream.Definition = {
+          ...definition,
+          name: streamName,
+        };
+
+        const result = generateLayer(streamName, rootDefinition, false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const settings = result.template.settings as any;
+
+        // OTel streams use logsdb mode with OTel sort fields
+        expect(settings.index.mode).toBe('logsdb');
+        expect(settings.index.sort.field).toEqual(['resource.attributes.host.name', '@timestamp']);
+      });
+    });
+
+    it('should use ECS settings for logs.ecs root stream', () => {
+      const rootDefinition: Streams.WiredStream.Definition = {
+        ...definition,
+        name: 'logs.ecs',
+      };
+
+      const result = generateLayer('logs.ecs', rootDefinition, false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const settings = result.template.settings as any;
+
+      expect(settings.index.mode).toBe('logsdb');
+      expect(settings.index.sort.field).toEqual(['host.name', '@timestamp']);
+    });
+
+    it('should include OTel aliases for child streams of OTel-based roots', () => {
+      const otelChildStreams = ['logs.child', 'logs.otel.child'];
+
+      otelChildStreams.forEach((streamName) => {
+        const childDefinition: Streams.WiredStream.Definition = {
+          ...definition,
+          name: streamName,
+        };
+
+        const result = generateLayer(streamName, childDefinition, false);
+        const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+        // Child streams of OTel roots inherit OTel alias behavior
+        const hasOtelAliases =
+          Object.values(properties).some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (prop: any) => prop?.type === 'alias' && prop?.path?.includes('attributes.')
+          ) || properties.attributes;
+
+        expect(hasOtelAliases).toBeTruthy();
+      });
+    });
+
+    it('should NOT include OTel aliases for child streams of logs.ecs', () => {
+      const ecsChildDefinition: Streams.WiredStream.Definition = {
+        ...definition,
+        name: 'logs.ecs.child',
+      };
+
+      const result = generateLayer('logs.ecs.child', ecsChildDefinition, false);
+      const properties = result.template.mappings?.properties as Record<string, unknown>;
+
+      // Child streams of logs.ecs should NOT have OTel-to-ECS aliases
+      const hasOtelAliases = Object.values(properties).some(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (prop: any) => prop?.type === 'alias' && prop?.path?.includes('attributes.')
+      );
+
+      expect(hasOtelAliases).toBeFalsy();
+
+      // ECS child streams use raw properties (no passthrough transformation)
+      expect(properties['attributes.myfield']).toEqual({
+        type: 'keyword',
+      });
+      // No attributes passthrough object for ECS streams
+      expect(properties.attributes).toBeUndefined();
+
+      // ECS child streams also use subobjects: false
+      expect(result.template.mappings?.subobjects).toBe(false);
+    });
   });
 });

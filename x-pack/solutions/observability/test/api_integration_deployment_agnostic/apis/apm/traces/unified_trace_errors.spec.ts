@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, otelLog, timerange, generateLongId } from '@kbn/apm-synthtrace-client';
+import { apm, otelLog, timerange, generateLongId } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import { Readable } from 'stream';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 

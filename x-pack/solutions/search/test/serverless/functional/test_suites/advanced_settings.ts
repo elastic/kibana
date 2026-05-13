@@ -10,8 +10,11 @@ import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
+  AI_CHAT_EXPERIENCE_TYPE,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -19,7 +22,10 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
+  AI_CHAT_EXPERIENCE_TYPE,
+  AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

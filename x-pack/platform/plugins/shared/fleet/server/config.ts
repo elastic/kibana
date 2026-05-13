@@ -27,9 +27,12 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.5';
+const REGISTRY_SPEC_MAX_VERSION = '3.6';
 
 export const config: PluginConfigDescriptor = {
+  dynamicConfig: {
+    experimentalFeatures: true, // To allow to be changed for tests
+  },
   exposeToBrowser: {
     epm: true,
     agents: {
@@ -56,6 +59,7 @@ export const config: PluginConfigDescriptor = {
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
     hideDashboards: true,
+    isAirGapped: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -218,6 +222,13 @@ export const config: PluginConfigDescriptor = {
               enabled: schema.maybe(schema.boolean({ defaultValue: false })),
             })
           ),
+          backgroundSync: schema.maybe(
+            schema.object({
+              enabled: schema.boolean({ defaultValue: true }),
+              dryRun: schema.boolean({ defaultValue: false }),
+              interval: schema.maybe(schema.string({ defaultValue: '10m' })),
+            })
+          ),
         })
       ),
       packages: PreconfiguredPackagesSchema,
@@ -232,6 +243,19 @@ export const config: PluginConfigDescriptor = {
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
           uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
+        })
+      ),
+      /**
+       * Startup optimization settings to reduce memory usage during Fleet initialization.
+       */
+      startupOptimization: schema.maybe(
+        schema.object({
+          /** Defer package install version bump operations to background tasks */
+          deferPackageBumpInstallVersion: schema.boolean({ defaultValue: false }),
+          /** Maximum packages to process concurrently during startup */
+          maxConcurrentPackageOperations: schema.number({ defaultValue: 10, min: 1, max: 20 }),
+          /** Batch size for package upgrade operations */
+          packageUpgradeBatchSize: schema.number({ defaultValue: 50, min: 10, max: 200 }),
         })
       ),
       developer: schema.object({
@@ -382,6 +406,23 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       autoInstallContentPackages: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      fleetPolicyRevisionsCleanup: schema.maybe(
+        schema.object({
+          maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
+          interval: schema.string({ defaultValue: '1h' }),
+          maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
+        })
+      ),
+      versionSpecificPolicyAssignment: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      unenrollInactiveAgents: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
         })

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { MAX_ALERTS_PER_CASE, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_DOCS_PER_PAGE,
+  ABSOLUTE_MAX_CASES_PER_RUN,
+} from '../../../common/constants';
 import { CasesConnectorRunParamsSchema } from './schema';
 
 describe('CasesConnectorRunParamsSchema', () => {
@@ -26,6 +30,7 @@ describe('CasesConnectorRunParamsSchema', () => {
             "_index": "alert-index",
           },
         ],
+        "autoPushCase": null,
         "groupedAlerts": null,
         "groupingBy": Array [
           "host.name",
@@ -192,14 +197,18 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
-    it('does not accept maximumCasesToOpen to be more than 20', () => {
-      const params = getParams();
+    it('accepts maximumCasesToOpen values above the default maximum', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ maximumCasesToOpen: 21 }))
+          .maximumCasesToOpen
+      ).toBe(21);
+    });
 
+    it('does not accept maximumCasesToOpen above ABSOLUTE_MAX_CASES_PER_RUN', () => {
       expect(() =>
-        CasesConnectorRunParamsSchema.validate({
-          ...params,
-          maximumCasesToOpen: 21,
-        })
+        CasesConnectorRunParamsSchema.validate(
+          getParams({ maximumCasesToOpen: ABSOLUTE_MAX_CASES_PER_RUN + 1 })
+        )
       ).toThrow();
     });
   });

@@ -22,6 +22,7 @@ import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
 export * from './selectors';
+export { getUpdatedFrameWithDatasourceState } from './utils';
 
 export const {
   loadInitial,
@@ -48,9 +49,11 @@ export const {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
   cloneLayer,
   addLayer,
   onDropToDimension,
+  setDimensionAndUpdateDatasource,
   setLayerDefaultDimension,
   removeDimension,
   setIsLoadLibraryVisible,

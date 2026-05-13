@@ -17,7 +17,7 @@ import type {
   LensMosaicConfig,
   LensLegendConfig,
 } from '../types';
-import { DEFAULT_LAYER_ID } from '../types';
+import { DEFAULT_LAYER_ID } from '../constants';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 

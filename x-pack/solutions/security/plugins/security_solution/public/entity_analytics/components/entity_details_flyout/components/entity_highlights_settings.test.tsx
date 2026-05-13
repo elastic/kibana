@@ -7,35 +7,39 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { TestProviders } from '../../../../common/mock';
 
-const mockShowAssistantOverlay = jest.fn();
-const mockOnRegenerate = jest.fn();
 const mockOnChangeShowAnonymizedValues = jest.fn();
 const mockSetConnectorId = jest.fn();
 const mockClosePopover = jest.fn();
 const mockOpenPopover = jest.fn();
 
-jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
-  useAskAiAssistant: () => ({
-    showAssistantOverlay: mockShowAssistantOverlay,
-  }),
-}));
+jest.mock(
+  '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
+  () => ({
+    AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="anonymizationSettingsModal">
+        <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  })
+);
 
 describe('EntityHighlightsSettings', () => {
   const defaultProps = {
-    onRegenerate: mockOnRegenerate,
     showAnonymizedValues: false,
     onChangeShowAnonymizedValues: mockOnChangeShowAnonymizedValues,
     setConnectorId: mockSetConnectorId,
     connectorId: 'test-connector',
-    entityType: 'user',
-    entityIdentifier: 'test-user',
+    connectorName: 'Elastic Managed LLM',
     assistantResult: {
       aiResponse: 'Test AI response',
       replacements: { anonymized_user: 'test-user' },
-      formattedEntitySummary: '{"user": "test-user"}',
+      summaryAsText: '{"user": "test-user"}',
     },
     closePopover: mockClosePopover,
     openPopover: mockOpenPopover,
@@ -64,39 +68,6 @@ describe('EntityHighlightsSettings', () => {
     expect(mockOpenPopover).toHaveBeenCalled();
   });
 
-  it('renders regenerate menu item', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByText('Regenerate')).toBeInTheDocument();
-  });
-
-  it('calls onRegenerate when regenerate is clicked', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    fireEvent.click(screen.getByLabelText('Regenerate'));
-    expect(mockOnRegenerate).toHaveBeenCalled();
-  });
-
-  it('disables regenerate button when loading', () => {
-    render(<EntityHighlightsSettings {...defaultProps} isLoading={true} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Regenerate')).toBeDisabled();
-  });
-
-  it('disables regenerate button when no assistant result', () => {
-    render(<EntityHighlightsSettings {...defaultProps} assistantResult={null} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Regenerate')).toBeDisabled();
-  });
-
   it('renders anonymized values switch', () => {
     render(<EntityHighlightsSettings {...defaultProps} />, {
       wrapper: TestProviders,
@@ -121,7 +92,7 @@ describe('EntityHighlightsSettings', () => {
       assistantResult: {
         aiResponse: 'Test AI response',
         replacements: {},
-        formattedEntitySummary: '{"user": "test-user"}',
+        summaryAsText: '{"user": "test-user"}',
       },
     };
 
@@ -132,41 +103,16 @@ describe('EntityHighlightsSettings', () => {
     expect(screen.getByRole('switch')).toBeDisabled();
   });
 
-  it('renders Ask AI Assistant menu item', () => {
+  it('renders connector selector', async () => {
     render(<EntityHighlightsSettings {...defaultProps} />, {
       wrapper: TestProviders,
     });
 
-    expect(screen.getByText('Ask AI Assistant')).toBeInTheDocument();
-  });
-
-  it('shows assistant overlay and closes popover when Ask AI Assistant is clicked', async () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    fireEvent.click(screen.getByLabelText('Ask AI Assistant'));
+    fireEvent.click(screen.getByTestId('entity-highlights-settings-connector'));
 
     await waitFor(() => {
-      expect(mockShowAssistantOverlay).toHaveBeenCalled();
-      expect(mockClosePopover).toHaveBeenCalled();
+      expect(screen.getByTestId('addNewConnectorButton')).toBeInTheDocument();
     });
-  });
-
-  it('disables Ask AI Assistant when loading', () => {
-    render(<EntityHighlightsSettings {...defaultProps} isLoading={true} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByLabelText('Ask AI Assistant')).toBeDisabled();
-  });
-
-  it('renders connector selector', () => {
-    render(<EntityHighlightsSettings {...defaultProps} />, {
-      wrapper: TestProviders,
-    });
-
-    expect(screen.getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
 
   it('disables settings button when loading', () => {
@@ -191,5 +137,38 @@ describe('EntityHighlightsSettings', () => {
     });
 
     expect(screen.getByRole('switch')).not.toBeChecked();
+  });
+
+  it('renders the anonymization settings button', () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(screen.getByTestId('anonymizationSettings')).toBeInTheDocument();
+  });
+
+  it('opens the anonymization settings modal when the settings button is clicked', async () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    await userEvent.click(screen.getByTestId('anonymizationSettings'));
+    await waitFor(() =>
+      expect(screen.getByTestId('anonymizationSettingsModal')).toBeInTheDocument()
+    );
+  });
+
+  it('closes the anonymization settings modal when onClose is triggered', async () => {
+    render(<EntityHighlightsSettings {...defaultProps} />, {
+      wrapper: TestProviders,
+    });
+
+    await userEvent.click(screen.getByTestId('anonymizationSettings'));
+    await waitFor(() => expect(screen.getByTestId('anonymizationSettingsModal')).toBeVisible());
+
+    await userEvent.click(screen.getByTestId('closeAnonymizationSettingsModal'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('anonymizationSettingsModal')).not.toBeInTheDocument()
+    );
   });
 });

@@ -9,24 +9,18 @@
 
 import { renderHook } from '@testing-library/react';
 import { useUnsavedChanges } from './use_unsaved_changes';
-import type { DiscoverStateContainer } from '../discover_state';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import type { DiscoverServices } from '../../../../build_services';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AppMountParameters } from '@kbn/core/public';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
-import {
-  fromSavedSearchToSavedObjectTab,
-  internalStateActions,
-  selectAllTabs,
-  selectHasUnsavedChanges,
-  selectRecentlyClosedTabs,
-} from '../redux';
-import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
-import { getConnectedCustomizationService } from '../../../../customizations';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { internalStateActions, selectHasUnsavedChanges } from '../redux';
+import { getPersistedTabMock, getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
+import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 const mockSelectHasUnsavedChanges = jest.mocked(selectHasUnsavedChanges);
 
@@ -39,125 +33,192 @@ jest.mock('../redux/selectors', () => {
 });
 
 describe('useUnsavedChanges', () => {
+  const getPersistedDiscoverSession = ({ services }: { services: DiscoverServices }) => {
+    const persistedTab = getPersistedTabMock({
+      tabId: 'persisted-tab',
+      dataView: dataViewWithTimefieldMock,
+      services,
+    });
+
+    return createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
+    });
+  };
+
   const setup = async ({
-    stateContainer = getDiscoverStateMock(),
     services = createDiscoverServicesMock(),
     onAppLeave,
   }: {
-    stateContainer?: DiscoverStateContainer;
     services?: DiscoverServices;
     onAppLeave?: AppMountParameters['onAppLeave'];
   } = {}) => {
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock, dataViewWithTimefieldMock],
+    });
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: getPersistedDiscoverSession({ services }),
+    });
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
     const result = renderHook(useUnsavedChanges, {
       initialProps: {
-        internalState: stateContainer.internalState,
-        runtimeStateManager: stateContainer.runtimeStateManager,
+        internalState: toolkit.internalState,
+        runtimeStateManager: toolkit.runtimeStateManager,
         onAppLeave,
       },
       wrapper: ({ children }) => (
-        <DiscoverTestProvider services={services} stateContainer={stateContainer}>
-          {children}
-        </DiscoverTestProvider>
+        <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
       ),
     });
-    return { result, stateContainer, services };
+
+    return {
+      result,
+      ...toolkit,
+    };
   };
 
-  const changeTabs = async (stateContainer: DiscoverStateContainer) => {
-    const newTab = getTabStateMock({ id: 'newTab' });
-    await stateContainer.internalState.dispatch(
-      internalStateActions.updateTabs({
-        items: [newTab],
-        selectedItem: newTab,
-      })
-    );
-    stateContainer.internalState.dispatch(
-      internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
-    );
-    await stateContainer.internalState.dispatch(
-      internalStateActions.initializeSingleTab({
-        tabId: newTab.id,
-        initializeSingleTabParams: {
-          stateContainer,
-          customizationService: await getConnectedCustomizationService({
-            customizationCallbacks: [],
-            stateContainer,
-          }),
-          dataViewSpec: undefined,
-          defaultUrlState: undefined,
-        },
-      })
-    );
-    return { newTab };
-  };
+  const newTab = getTabStateMock({ id: 'newTab' });
 
   beforeEach(() => {
     mockSelectHasUnsavedChanges.mockClear();
   });
 
   it('should detect changes on mount', async () => {
-    const { stateContainer, services } = await setup();
+    const { internalState, runtimeStateManager, services } = await setup();
     expect(mockSelectHasUnsavedChanges).toHaveBeenCalledTimes(1);
-    expect(mockSelectHasUnsavedChanges).toHaveBeenCalledWith(
-      stateContainer.internalState.getState(),
-      { runtimeStateManager: stateContainer.runtimeStateManager, services }
-    );
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
+    expect(mockSelectHasUnsavedChanges).toHaveBeenCalledWith(internalState.getState(), {
+      runtimeStateManager,
+      services,
+    });
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
   });
 
-  it('should detect changes when saved search changes', async () => {
-    const { stateContainer } = await setup();
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
-    const savedSearch = stateContainer.savedSearchState.getState();
-    stateContainer.savedSearchState.assignNextSavedSearch({
-      ...savedSearch,
-      columns: ['newColumn'],
-    });
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(true);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([
-      stateContainer.getCurrentTab().id,
-    ]);
+  it('should detect changes when app state changes', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    const prevAppState = getCurrentTab().appState;
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          query: { query: 'new query', language: 'kuery' },
+        },
+      })
+    );
+    expect(internalState.getState().hasUnsavedChanges).toBe(true);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([getCurrentTab().id]);
+
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          query: prevAppState?.query,
+        },
+      })
+    );
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+  });
+
+  it('should detect changes when global state changes', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    const prevGlobalState = getCurrentTab().globalState;
+
+    internalState.dispatch(
+      internalStateActions.updateGlobalState({
+        tabId: getCurrentTab().id,
+        globalState: {
+          filters: [{ meta: { alias: 'new filter' }, query: { match_all: {} } }],
+        },
+      })
+    );
+
+    expect(internalState.getState().hasUnsavedChanges).toBe(true);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([getCurrentTab().id]);
+
+    internalState.dispatch(
+      internalStateActions.updateGlobalState({
+        tabId: getCurrentTab().id,
+        globalState: {
+          filters: prevGlobalState?.filters,
+        },
+      })
+    );
+
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+  });
+
+  it('should detect changes when attributes change', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    const prevAttributes = getCurrentTab().attributes;
+    internalState.dispatch(
+      internalStateActions.updateAttributes({
+        tabId: getCurrentTab().id,
+        attributes: {
+          visContext: { some: 'new vis context' },
+        },
+      })
+    );
+    expect(internalState.getState().hasUnsavedChanges).toBe(true);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([getCurrentTab().id]);
+
+    internalState.dispatch(
+      internalStateActions.updateAttributes({
+        tabId: getCurrentTab().id,
+        attributes: {
+          visContext: prevAttributes?.visContext,
+        },
+      })
+    );
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+  });
+
+  it('should detect changes when data view changes', async () => {
+    const { internalState, getCurrentTab } = await setup();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    await internalState.dispatch(
+      internalStateActions.changeDataView({
+        tabId: getCurrentTab().id,
+        dataViewOrDataViewId: dataViewMock.id!,
+      })
+    );
+    expect(internalState.getState().hasUnsavedChanges).toBe(true);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([getCurrentTab().id]);
   });
 
   it('should detect changes when tabs change', async () => {
-    const { stateContainer } = await setup();
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
-    const { newTab } = await changeTabs(stateContainer);
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(true);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
+    const { internalState, initializeSingleTab, addNewTab } = await setup();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    await addNewTab({ tab: newTab });
+    await initializeSingleTab({ tabId: newTab.id });
+    expect(internalState.getState().hasUnsavedChanges).toBe(true);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
   });
 
   it('should detect changes when persisted discover session changes', async () => {
-    const { stateContainer, services } = await setup();
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
-    const { newTab } = await changeTabs(stateContainer);
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(true);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
-    const newDiscoverSession: DiscoverSession = {
-      ...stateContainer.internalState.getState().persistedDiscoverSession!,
-      tabs: [
-        fromSavedSearchToSavedObjectTab({
-          tab: newTab,
-          savedSearch: stateContainer.savedSearchState.getState(),
-          services,
-        }),
-      ],
-    };
-    const state = stateContainer.internalState.getState();
-    stateContainer.internalState.dispatch(
-      internalStateActions.setTabs({
-        allTabs: selectAllTabs(state),
-        selectedTabId: state.tabs.unsafeCurrentId,
-        recentlyClosedTabs: selectRecentlyClosedTabs(state),
-        updatedDiscoverSession: newDiscoverSession,
-      })
-    );
-    expect(stateContainer.internalState.getState().hasUnsavedChanges).toBe(false);
-    expect(stateContainer.internalState.getState().tabs.unsavedIds).toEqual([]);
+    const { internalState, initializeSingleTab, addNewTab, saveDiscoverSession } = await setup();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
+    await addNewTab({ tab: newTab });
+    await initializeSingleTab({ tabId: newTab.id });
+    expect(internalState.getState().hasUnsavedChanges).toBe(true);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
+    await saveDiscoverSession();
+    expect(internalState.getState().hasUnsavedChanges).toBe(false);
+    expect(internalState.getState().tabs.unsavedIds).toEqual([]);
   });
 
   it('should call the onAppLeave default action when there are no unsaved changes', async () => {
@@ -181,12 +242,15 @@ describe('useUnsavedChanges', () => {
     const onAppLeave = jest.fn().mockImplementation((callback: typeof onAppLeaveCallback) => {
       onAppLeaveCallback = callback;
     });
-    const { stateContainer } = await setup({ onAppLeave });
-    const savedSearch = stateContainer.savedSearchState.getState();
-    stateContainer.savedSearchState.assignNextSavedSearch({
-      ...savedSearch,
-      columns: ['newColumn'],
-    });
+    const { internalState, getCurrentTab } = await setup({ onAppLeave });
+    internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: getCurrentTab().id,
+        appState: {
+          columns: ['newColumn'],
+        },
+      })
+    );
     const defaultFn = jest.fn();
     const confirmFn = jest.fn();
     onAppLeaveCallback({

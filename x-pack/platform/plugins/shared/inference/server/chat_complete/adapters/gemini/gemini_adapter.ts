@@ -10,11 +10,17 @@ import { defer, map } from 'rxjs';
 import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorResponse } from '../../utils';
+import { handleConnectorDataResponse, handleConnectorStreamResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { processVertexStream } from './process_vertex_stream';
-import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
+import { processVertexStream, processVertexResponse } from './process_vertex_stream';
+import type {
+  GenerateContentResponseChunk,
+  GeminiMessage,
+  GeminiToolConfig,
+  GenerateContentResponse,
+} from './types';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { mustUseThoughtSignature } from './utils';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -27,13 +33,19 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
+    stream = false,
   }) => {
     const connector = executor.getConnector();
-    return defer(() => {
+    const useThoughtSignature = mustUseThoughtSignature(
+      modelName ?? connector.config?.defaultModel
+    );
+
+    const connectorResult$ = defer(() => {
       return executor.invoke({
-        subAction: 'invokeStream',
+        subAction: stream ? 'invokeStream' : 'invokeAIRaw',
         subActionParams: {
-          messages: messagesToGemini({ messages }),
+          messages: messagesToGemini({ messages, useThoughtSignature }),
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
@@ -44,15 +56,25 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
-    }).pipe(
-      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
-      map((line) => {
-        return JSON.parse(line) as GenerateContentResponseChunk;
-      }),
-      processVertexStream()
-    );
+    });
+
+    if (stream) {
+      return connectorResult$.pipe(
+        handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
+        map((line) => JSON.parse(line) as GenerateContentResponseChunk),
+        processVertexStream(modelName)
+      );
+    } else {
+      return connectorResult$.pipe(
+        handleConnectorDataResponse({
+          parseData: (data) => data as GenerateContentResponse,
+        }),
+        processVertexResponse(modelName)
+      );
+    }
   },
 };
 
@@ -112,7 +134,8 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }),
+          // @ts-expect-error - items is optional (empty object means any)
+          items: def.items ? convertSchemaType({ def: def.items }) : {},
         };
       case 'object':
         return {
@@ -163,9 +186,10 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   };
 }
 
-function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[] {
-  return messages.map(messageToGeminiMapper()).reduce<GeminiMessage[]>((output, message) => {
-    // merging consecutive messages from the same user, as Gemini requires multi-turn messages
+const skipThoughtSignatureHash = 'skip_thought_signature_validator';
+
+function mergeConsecutiveSameRole(messages: GeminiMessage[]): GeminiMessage[] {
+  return messages.reduce<GeminiMessage[]>((output, message) => {
     const previousMessage = output.length ? output[output.length - 1] : undefined;
     if (previousMessage?.role === message.role) {
       previousMessage.parts.push(...message.parts);
@@ -175,6 +199,39 @@ function messagesToGemini({ messages }: { messages: Message[] }): GeminiMessage[
     return output;
   }, []);
 }
+
+function messagesToGemini({
+  messages,
+  useThoughtSignature,
+}: {
+  messages: Message[];
+  useThoughtSignature: boolean;
+}): GeminiMessage[] {
+  // Filter empty-part messages first, then merge so roles always alternate.
+  const mapped = mergeConsecutiveSameRole(
+    messages.map(messageToGeminiMapper()).filter((message) => message.parts.length > 0)
+  );
+
+  if (useThoughtSignature) {
+    mapped.forEach((message, index) => {
+      if (index < mapped.length - 1) {
+        addThoughtSignatureToFirstFunctionCall(message);
+      }
+    });
+  }
+
+  return mapped;
+}
+
+const addThoughtSignatureToFirstFunctionCall = (message: GeminiMessage) => {
+  for (const part of message.parts) {
+    if (part.functionCall) {
+      // @ts-expect-error - Gemini types are not up to date, this is a valid property
+      part.thoughtSignature = skipThoughtSignatureHash;
+      break;
+    }
+  }
+};
 
 function messageToGeminiMapper() {
   return (message: Message): GeminiMessage => {

@@ -7,12 +7,24 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
+import {
+  DeprecationInfoSchema,
+  ExperimentalDataStreamFeaturesSchema,
+} from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
-    include_policy_templates: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, include prerelease packages in the results' },
+      })
+    ),
+    include_policy_templates: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, include categories that only contain policy templates' },
+      })
+    ),
   }),
 };
 
@@ -25,15 +37,29 @@ const CategorySummaryItemSchema = schema.object({
 });
 
 export const GetCategoriesResponseSchema = schema.object({
-  items: schema.arrayOf(CategorySummaryItemSchema),
+  items: schema.arrayOf(CategorySummaryItemSchema, { maxSize: 10000 }),
 });
 
 export const GetPackagesRequestSchema = {
   query: schema.object({
-    category: schema.maybe(schema.string()),
-    prerelease: schema.maybe(schema.boolean()),
-    excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
-    withPackagePoliciesCount: schema.maybe(schema.boolean({ defaultValue: false })),
+    category: schema.maybe(schema.string({ meta: { description: 'Filter packages by category' } })),
+    prerelease: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, include prerelease packages in the results' },
+      })
+    ),
+    excludeInstallStatus: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, exclude the install status from the response' },
+      })
+    ),
+    withPackagePoliciesCount: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: { description: 'When true, include the number of package policies per package' },
+      })
+    ),
   }),
 };
 
@@ -72,6 +98,7 @@ export const EsAssetReferenceSchema = schema.object({
     schema.literal('transform'),
     schema.literal('ml_model'),
     schema.literal('knowledge_base'),
+    schema.literal('esql_view'),
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
@@ -81,12 +108,12 @@ export const InstallationInfoSchema = schema.object({
   type: schema.string(),
   created_at: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
-  installed_kibana: schema.arrayOf(KibanaAssetReferenceSchema),
+  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  installed_kibana: schema.arrayOf(KibanaAssetReferenceSchema, { maxSize: 10000 }),
   additional_spaces_installed_kibana: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(KibanaAssetReferenceSchema))
+    schema.recordOf(schema.string(), schema.arrayOf(KibanaAssetReferenceSchema, { maxSize: 100 }))
   ),
-  installed_es: schema.arrayOf(EsAssetReferenceSchema),
+  installed_es: schema.arrayOf(EsAssetReferenceSchema, { maxSize: 10000 }),
   name: schema.string(),
   version: schema.string(),
   install_status: schema.oneOf([
@@ -119,7 +146,8 @@ export const InstallationInfoSchema = schema.object({
           message: schema.string(),
           stack: schema.maybe(schema.string()),
         }),
-      })
+      }),
+      { maxSize: 10 }
     )
   ),
   latest_executed_state: schema.maybe(
@@ -151,16 +179,18 @@ export const PackageInfoSchema = schema
     version: schema.string(),
     description: schema.maybe(schema.string()),
     title: schema.string(),
-    icons: schema.maybe(schema.arrayOf(PackageIconSchema)),
+    icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
+    deprecated: schema.maybe(DeprecationInfoSchema),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
         elastic: schema.maybe(
           schema.object({
             subscription: schema.maybe(schema.string()),
-            capabilities: schema.maybe(schema.arrayOf(schema.string())),
+            capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
           })
         ),
+        deprecated: schema.maybe(DeprecationInfoSchema),
       })
     ),
     release: schema.maybe(
@@ -177,9 +207,13 @@ export const PackageInfoSchema = schema
     path: schema.maybe(schema.string()),
     download: schema.maybe(schema.string()),
     internal: schema.maybe(schema.boolean()),
-    data_streams: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
-    policy_templates: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
-    categories: schema.maybe(schema.arrayOf(schema.string())),
+    data_streams: schema.maybe(
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    policy_templates: schema.maybe(
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    categories: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
     owner: schema.maybe(
       schema.object({
         github: schema.maybe(schema.string()),
@@ -200,12 +234,46 @@ export const PackageInfoSchema = schema
       })
     ),
     format_version: schema.maybe(schema.string()),
-    vars: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+    vars: schema.maybe(
+      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+    ),
+    var_groups: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          selector_title: schema.string(),
+          description: schema.maybe(schema.string()),
+          options: schema.arrayOf(
+            schema
+              .object({
+                name: schema.string(),
+                title: schema.string(),
+                description: schema.maybe(schema.string()),
+                vars: schema.arrayOf(schema.string(), { maxSize: 100 }),
+                hide_in_deployment_modes: schema.maybe(
+                  schema.arrayOf(
+                    schema.oneOf([schema.literal('default'), schema.literal('agentless')]),
+                    { maxSize: 2 }
+                  )
+                ),
+              })
+              .extendsDeep({ unknowns: 'allow' }),
+            { maxSize: 100 }
+          ),
+        }),
+        { maxSize: 100 }
+      )
+    ),
     latestVersion: schema.maybe(schema.string()),
     discovery: schema.maybe(
       schema.object({
-        fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
-        datasets: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+        fields: schema.maybe(
+          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 100 })
+        ),
+        datasets: schema.maybe(
+          schema.arrayOf(schema.object({ name: schema.string() }), { maxSize: 100 })
+        ),
       })
     ),
   })
@@ -220,7 +288,7 @@ export const PackageListItemSchema = PackageInfoSchema.extends({
 });
 
 export const GetPackagesResponseSchema = schema.object({
-  items: schema.arrayOf(PackageListItemSchema),
+  items: schema.arrayOf(PackageListItemSchema, { maxSize: 10000 }),
 });
 
 export const InstalledPackageSchema = schema.object({
@@ -229,17 +297,18 @@ export const InstalledPackageSchema = schema.object({
   status: schema.string(),
   title: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
-  icons: schema.maybe(schema.arrayOf(PackageIconSchema)),
+  icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
   dataStreams: schema.arrayOf(
     schema.object({
       name: schema.string(),
       title: schema.string(),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
 export const GetInstalledPackagesResponseSchema = schema.object({
-  items: schema.arrayOf(InstalledPackageSchema),
+  items: schema.arrayOf(InstalledPackageSchema, { maxSize: 10000 }),
   total: schema.number(),
   searchAfter: schema.maybe(
     schema.arrayOf(
@@ -249,13 +318,14 @@ export const GetInstalledPackagesResponseSchema = schema.object({
         schema.boolean(),
         schema.literal(null),
         schema.any(),
-      ])
+      ]),
+      { maxSize: 2 }
     )
   ),
 });
 
 export const GetLimitedPackagesResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string()),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const GetStatsResponseSchema = schema.object({
@@ -284,11 +354,14 @@ export const GetInputsResponseSchema = schema.oneOf([
               })
               .extendsDeep({
                 unknowns: 'allow',
-              })
+              }),
+            { maxSize: 10000 }
           )
         ),
-      })
+      }),
+      { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 
@@ -304,7 +377,7 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
   licensePath: schema.maybe(schema.string()),
   keepPoliciesUpToDate: schema.maybe(schema.boolean()),
   license: schema.maybe(schema.string()),
-  screenshots: schema.maybe(schema.arrayOf(PackageIconSchema)),
+  screenshots: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 100 })),
   elasticsearch: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   agent: schema.maybe(
     schema.object({
@@ -319,9 +392,10 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
     schema.arrayOf(
       schema.object({
         text: schema.string(),
-        asset_types: schema.maybe(schema.arrayOf(schema.string())),
-        asset_ids: schema.maybe(schema.arrayOf(schema.string())),
-      })
+        asset_types: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+        asset_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+      }),
+      { maxSize: 1000 }
     )
   ),
 });
@@ -341,7 +415,8 @@ export const GetKnowledgeBaseResponseSchema = schema.object({
       path: schema.string(),
       installed_at: schema.string(),
       version: schema.string(),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
@@ -355,7 +430,7 @@ export const AssetReferenceSchema = schema.oneOf([
 ]);
 
 export const InstallPackageResponseSchema = schema.object({
-  items: schema.arrayOf(AssetReferenceSchema),
+  items: schema.arrayOf(AssetReferenceSchema, { maxSize: 10000 }),
   _meta: schema.object({
     install_source: schema.string(),
     name: schema.string(),
@@ -375,7 +450,7 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
     name: schema.string(),
     version: schema.string(),
     result: schema.object({
-      assets: schema.maybe(schema.arrayOf(AssetReferenceSchema)),
+      assets: schema.maybe(schema.arrayOf(AssetReferenceSchema, { maxSize: 10000 })),
       status: schema.maybe(
         schema.oneOf([schema.literal('installed'), schema.literal('already_installed')])
       ),
@@ -392,7 +467,7 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
 ]);
 
 export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
-  items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
+  items: schema.arrayOf(BulkInstallPackagesResponseItemSchema, { maxSize: 10000 }),
 });
 
 export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
@@ -408,13 +483,14 @@ export const GetOneBulkOperationPackagesResponseSchema = schema.object({
         name: schema.string(),
         success: schema.boolean(),
         error: schema.maybe(schema.object({ message: schema.string() })),
-      })
+      }),
+      { maxSize: 10000 }
     )
   ),
 });
 
 export const DeletePackageResponseSchema = schema.object({
-  items: schema.arrayOf(AssetReferenceSchema),
+  items: schema.arrayOf(AssetReferenceSchema, { maxSize: 10000 }),
 });
 
 export const GetVerificationKeyIdResponseSchema = schema.object({
@@ -425,7 +501,8 @@ export const GetDataStreamsResponseSchema = schema.object({
   items: schema.arrayOf(
     schema.object({
       name: schema.string(),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
@@ -441,7 +518,8 @@ export const GetBulkAssetsResponseSchema = schema.object({
         title: schema.maybe(schema.string()),
         description: schema.maybe(schema.string()),
       }),
-    })
+    }),
+    { maxSize: 10000 }
   ),
 });
 
@@ -450,7 +528,8 @@ export const ReauthorizeTransformResponseSchema = schema.arrayOf(
     transformId: schema.string(),
     success: schema.boolean(),
     error: schema.oneOf([schema.literal(null), schema.any()]),
-  })
+  }),
+  { maxSize: 10000 }
 );
 
 export const RollbackPackageResponseSchema = schema.object({
@@ -461,20 +540,36 @@ export const RollbackPackageResponseSchema = schema.object({
 export const GetInstalledPackagesRequestSchema = {
   query: schema.object({
     dataStreamType: schema.maybe(
-      schema.oneOf([
-        schema.literal('logs'),
-        schema.literal('metrics'),
-        schema.literal('traces'),
-        schema.literal('synthetics'),
-        schema.literal('profiling'),
-      ])
+      schema.oneOf(
+        [
+          schema.literal('logs'),
+          schema.literal('metrics'),
+          schema.literal('traces'),
+          schema.literal('synthetics'),
+          schema.literal('profiling'),
+        ],
+        { meta: { description: 'Filter by data stream type' } }
+      )
     ),
-    showOnlyActiveDataStreams: schema.maybe(schema.boolean()),
-    nameQuery: schema.maybe(schema.string()),
-    searchAfter: schema.maybe(schema.arrayOf(schema.oneOf([schema.string(), schema.number()]))),
-    perPage: schema.number({ defaultValue: 15 }),
+    showOnlyActiveDataStreams: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, only return packages with active data streams' },
+      })
+    ),
+    nameQuery: schema.maybe(schema.string({ meta: { description: 'Filter packages by name' } })),
+    searchAfter: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.string(), schema.number()]), {
+        maxSize: 10,
+        meta: { description: 'Sort values from the previous page for `search_after` pagination' },
+      })
+    ),
+    perPage: schema.number({
+      defaultValue: 15,
+      meta: { description: 'Number of results per page' },
+    }),
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
+      meta: { description: 'Sort order, ascending or descending' },
     }),
   }),
 };
@@ -482,85 +577,264 @@ export const GetInstalledPackagesRequestSchema = {
 export const GetDataStreamsRequestSchema = {
   query: schema.object({
     type: schema.maybe(
-      schema.oneOf([
-        schema.literal('logs'),
-        schema.literal('metrics'),
-        schema.literal('traces'),
-        schema.literal('synthetics'),
-        schema.literal('profiling'),
-      ])
+      schema.oneOf(
+        [
+          schema.literal('logs'),
+          schema.literal('metrics'),
+          schema.literal('traces'),
+          schema.literal('synthetics'),
+          schema.literal('profiling'),
+        ],
+        { meta: { description: 'Filter by data stream type' } }
+      )
     ),
-    datasetQuery: schema.maybe(schema.string()),
+    datasetQuery: schema.maybe(
+      schema.string({ meta: { description: 'Filter data streams by dataset name' } })
+    ),
     sortOrder: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
       defaultValue: 'asc',
+      meta: { description: 'Sort order, ascending or descending' },
     }),
-    uncategorisedOnly: schema.boolean({ defaultValue: false }),
+    uncategorisedOnly: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description: 'When true, only return data streams that are not associated with a package',
+      },
+    }),
   }),
 };
 
 export const GetLimitedPackagesRequestSchema = {
   query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(
+      schema.boolean({
+        meta: { description: 'When true, include prerelease packages in the results' },
+      })
+    ),
   }),
 };
 
 export const GetFileRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
-    filePath: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    filePath: schema.string({ meta: { description: 'File path within the package' } }),
   }),
 };
 
+const PackageRequestParamsSchema = schema.object({
+  pkgName: schema.string({ meta: { description: 'Package name' } }),
+});
+
+const PackageVersionRequestParamsSchema = schema.object({
+  pkgName: schema.string({ meta: { description: 'Package name' } }),
+  pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+});
+
+const GetInfoQuerySchema = schema.object({
+  ignoreUnverified: schema.maybe(
+    schema.boolean({
+      meta: {
+        description: 'When true, returns the package even if the signature cannot be verified',
+      },
+    })
+  ),
+  prerelease: schema.maybe(
+    schema.boolean({ meta: { description: 'When true, include prerelease versions' } })
+  ),
+  full: schema.maybe(
+    schema.boolean({
+      meta: { description: 'When true, return the full package info including assets' },
+    })
+  ),
+  withMetadata: schema.boolean({
+    defaultValue: false,
+    meta: {
+      description: 'When true, include package metadata such as whether it has package policies',
+    },
+  }),
+});
+
 export const GetInfoRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
-  query: schema.object({
-    ignoreUnverified: schema.maybe(schema.boolean()),
-    prerelease: schema.maybe(schema.boolean()),
-    full: schema.maybe(schema.boolean()),
-    withMetadata: schema.boolean({ defaultValue: false }),
-  }),
+  params: PackageVersionRequestParamsSchema,
+  query: GetInfoQuerySchema,
+};
+
+export const GetInfoWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  query: GetInfoQuerySchema,
 };
 export const GetKnowledgeBaseRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
   }),
 };
 
 export const GetBulkAssetsRequestSchema = {
   body: schema.object({
-    assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() })),
+    assetIds: schema.arrayOf(schema.object({ id: schema.string(), type: schema.string() }), {
+      maxSize: 10000,
+    }),
   }),
 };
 
 export const UpdatePackageRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
+  params: PackageVersionRequestParamsSchema,
   body: schema.object({
-    keepPoliciesUpToDate: schema.boolean(),
+    keepPoliciesUpToDate: schema.maybe(schema.boolean()),
+    namespace_customization_enabled_for: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (!v.length) {
+              return 'Must not be empty';
+            }
+            if (!/^[a-z0-9_]+$/.test(v)) {
+              return 'Must only contain lowercase letters, numbers, and underscores';
+            }
+          },
+        }),
+        {
+          maxSize: 100,
+          meta: {
+            description:
+              'Namespaces for which namespace-level customization is enabled on this package.',
+          },
+        }
+      )
+    ),
   }),
 };
+
+export const UpdatePackageWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  body: UpdatePackageRequestSchema.body,
+};
+
+export const BulkNamespaceCustomizationRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(schema.string(), {
+      minSize: 1,
+      maxSize: 1000,
+      meta: {
+        description: 'Package names to apply the customization changes to.',
+      },
+    }),
+    enable: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          validate: (v) => {
+            if (!v.length) {
+              return 'Must not be empty';
+            }
+            if (!/^[a-z0-9_]+$/.test(v)) {
+              return 'Must only contain lowercase letters, numbers, and underscores';
+            }
+          },
+        }),
+        {
+          maxSize: 100,
+          meta: {
+            description: 'Namespaces to enable namespace-level customization for on each package.',
+          },
+        }
+      )
+    ),
+    disable: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        maxSize: 100,
+        meta: {
+          description: 'Namespaces to disable namespace-level customization for on each package.',
+        },
+      })
+    ),
+  }),
+};
+
+export const BulkNamespaceCustomizationResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      success: schema.boolean(),
+      namespace_customization_enabled_for: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          maxSize: 100,
+          meta: {
+            description:
+              'The opt-in list on the package. Returned whenever the package is installed: the new list on success, or the unchanged list when the request is rejected (for example, because of a namespace-prefix restriction).',
+          },
+        })
+      ),
+      error: schema.maybe(schema.string()),
+    }),
+    { maxSize: 1000 }
+  ),
+});
+
+export const ReviewUpgradeRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string({
+      meta: { description: 'Package name to review upgrade for' },
+    }),
+  }),
+  body: schema.object({
+    action: schema.oneOf([
+      schema.literal('accept'),
+      schema.literal('decline'),
+      schema.literal('pending'),
+    ]),
+    target_version: schema.string(),
+  }),
+};
+
+export const ReviewUpgradeResponseSchema = schema.object({
+  success: schema.boolean(),
+});
 
 export const GetStatsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
   }),
 };
 
-export const InstallPackageFromRegistryRequestSchema = {
+export const GetDependenciesRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
+};
+
+export const GetDependenciesResponseSchema = schema.object({
+  items: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      version: schema.string(),
+      title: schema.string(),
+    }),
+    { maxSize: 1000 }
+  ),
+});
+
+export const InstallPackageFromRegistryRequestSchema = {
+  params: PackageVersionRequestParamsSchema,
   query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
-    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
-    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+    prerelease: schema.maybe(
+      schema.boolean({ meta: { description: 'When true, allow installing prerelease versions' } })
+    ),
+    ignoreMappingUpdateErrors: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, ignore mapping update errors during installation' },
+    }),
+    skipDataStreamRollover: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, skip data stream rollover after installation' },
+    }),
+    skipDependencyCheck: schema.boolean({
+      defaultValue: false,
+      meta: {
+        description: 'Skip dependency validation when installing a package with dependencies',
+      },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -570,22 +844,32 @@ export const InstallPackageFromRegistryRequestSchema = {
   ),
 };
 
+export const InstallPackageFromRegistryWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  query: InstallPackageFromRegistryRequestSchema.query,
+  body: InstallPackageFromRegistryRequestSchema.body,
+};
+
 export const ReauthorizeTransformRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.maybe(schema.string({ meta: { description: 'Package version' } })),
   }),
   query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(
+      schema.boolean({ meta: { description: 'When true, allow prerelease versions' } })
+    ),
   }),
   body: schema.object({
-    transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
+    transforms: schema.arrayOf(schema.object({ transformId: schema.string() }), { maxSize: 1000 }),
   }),
 };
 
 export const BulkInstallPackagesFromRegistryRequestSchema = {
   query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(
+      schema.boolean({ meta: { description: 'When true, allow installing prerelease versions' } })
+    ),
   }),
   body: schema.object({
     packages: schema.arrayOf(
@@ -597,7 +881,7 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
           prerelease: schema.maybe(schema.boolean()),
         }),
       ]),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 1000 }
     ),
     force: schema.boolean({ defaultValue: false }),
   }),
@@ -620,7 +904,7 @@ export const BulkUpgradePackagesRequestSchema = {
         name: schema.string(),
         version: schema.maybe(schema.string()),
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 1000 }
     ),
     prerelease: schema.maybe(schema.boolean()),
     force: schema.boolean({ defaultValue: false }),
@@ -635,7 +919,7 @@ export const BulkUninstallPackagesRequestSchema = {
         name: schema.string(),
         version: schema.string(),
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 1000 }
     ),
     force: schema.boolean({ defaultValue: false }),
   }),
@@ -651,15 +935,21 @@ export const BulkRollbackPackagesRequestSchema = {
           },
         }),
       }),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 1000 }
     ),
   }),
 };
 
 export const InstallPackageByUploadRequestSchema = {
   query: schema.object({
-    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
-    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+    ignoreMappingUpdateErrors: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, ignore mapping update errors during installation' },
+    }),
+    skipDataStreamRollover: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, skip data stream rollover after installation' },
+    }),
   }),
   body: schema.buffer(),
 };
@@ -677,26 +967,35 @@ export const CreateCustomIntegrationRequestSchema = {
           schema.literal('synthetics'),
           schema.literal('profiling'),
         ]),
-      })
+      }),
+      { maxSize: 10 }
     ),
     force: schema.maybe(schema.boolean()),
   }),
 };
 
 export const DeletePackageRequestSchema = {
-  params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.maybe(schema.string()),
-  }),
+  params: PackageVersionRequestParamsSchema,
   query: schema.object({
-    force: schema.maybe(schema.boolean()),
+    force: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When true, delete the package even if it has active package policies',
+        },
+      })
+    ),
   }),
+};
+
+export const DeletePackageWithoutVersionRequestSchema = {
+  params: PackageRequestParamsSchema,
+  query: DeletePackageRequestSchema.query,
 };
 
 export const InstallKibanaAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
     schema.object({
@@ -704,6 +1003,7 @@ export const InstallKibanaAssetsRequestSchema = {
       space_ids: schema.maybe(
         schema.arrayOf(schema.string(), {
           minSize: 1,
+          maxSize: 100,
           meta: {
             description:
               'When provided install assets in the specified spaces instead of the current space.',
@@ -716,8 +1016,8 @@ export const InstallKibanaAssetsRequestSchema = {
 
 export const InstallRuleAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
     schema.object({
@@ -728,32 +1028,41 @@ export const InstallRuleAssetsRequestSchema = {
 
 export const DeleteKibanaAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
 };
 
 export const DeletePackageDatastreamAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   query: schema.object({
-    packagePolicyId: schema.string(),
+    packagePolicyId: schema.string({ meta: { description: 'The ID of the package policy' } }),
   }),
 };
 
 export const GetInputsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgName: schema.string({ meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
   }),
   query: schema.object({
     format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')], {
       defaultValue: 'json',
+      meta: { description: 'Output format for the inputs template: json, yml, or yaml' },
     }),
-    prerelease: schema.maybe(schema.boolean()),
-    ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(
+      schema.boolean({ meta: { description: 'When true, allow prerelease versions' } })
+    ),
+    ignoreUnverified: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When true, return inputs even if the package signature cannot be verified',
+        },
+      })
+    ),
   }),
 };
 

@@ -6,5 +6,16 @@
  */
 
 import type { RouteDependencies } from './types';
+import {
+  registerExchangeCodeRoute,
+  registerRefreshTokenRoute,
+  registerRevokeTokenRoute,
+} from './ears';
+export const registerRoutes = (dependencies: RouteDependencies) => {
+  const { router, logger, config } = dependencies;
 
-export const registerRoutes = (dependencies: RouteDependencies) => {};
+  // EARS OAuth routes
+  registerExchangeCodeRoute({ router, logger, config });
+  registerRefreshTokenRoute({ router, logger, config });
+  registerRevokeTokenRoute({ router, logger, config });
+};

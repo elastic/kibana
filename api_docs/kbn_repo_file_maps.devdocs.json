@@ -26,6 +26,8 @@
         "label": "PackageFileMap",
         "description": [],
         "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,6 +59,8 @@
                   "[]"
                 ],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "lineNumber": 22,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -78,7 +84,10 @@
                   ">"
                 ],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "lineNumber": 22,
+                "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "Iterable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -104,6 +113,8 @@
               "[]"
             ],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -130,6 +141,8 @@
               ">"
             ],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -144,7 +157,10 @@
                   "Package"
                 ],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "lineNumber": 59,
+                "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Package",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -164,6 +180,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -178,6 +196,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "lineNumber": 63,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -204,6 +224,8 @@
               ">"
             ],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -236,6 +258,8 @@
               ">"
             ],
             "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -256,7 +280,10 @@
                   }
                 ],
                 "path": "packages/kbn-repo-file-maps/package_file_map.ts",
+                "lineNumber": 71,
+                "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "LintTarget",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -274,6 +301,8 @@
         "label": "TsProjectFileMap",
         "description": [],
         "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -288,6 +317,8 @@
               "any"
             ],
             "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -308,7 +339,10 @@
                   }
                 ],
                 "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+                "lineNumber": 23,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackageFileMap",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -330,6 +364,8 @@
                   "[]"
                 ],
                 "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+                "lineNumber": 23,
+                "columnNumber": 43,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -364,6 +400,8 @@
               ">"
             ],
             "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -384,7 +422,10 @@
                   }
                 ],
                 "path": "packages/kbn-repo-file-maps/ts_project_file_map.ts",
+                "lineNumber": 70,
+                "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProject",
                 "trackAdoption": false,
                 "isRequired": true
               }

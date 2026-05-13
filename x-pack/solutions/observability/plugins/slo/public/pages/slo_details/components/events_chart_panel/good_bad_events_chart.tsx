@@ -11,25 +11,26 @@ import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
-import type { TimeBounds } from '../../types';
-import { openInDiscover } from '../../utils/get_discover_link';
+import type { SloEventType, TimeBounds } from '../../types';
 import type { GetPreviewDataResponseResults } from './types';
 
 export interface Props {
   data: GetPreviewDataResponseResults;
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
+  onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
 }
 
 const DEFAULT_INTERVAL = 10 * 60 * 1_000; // 10 minutes in milliseconds
 
-export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
-  const { charts, uiSettings, discover } = useKibana().services;
+export function GoodBadEventsChart({ data, slo, onBrushed, onBarClick }: Props) {
+  const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
@@ -58,19 +59,13 @@ export function GoodBadEventsChart({ data, slo, onBrushed }: Props) {
     const [datum, eventDetail] = params[0];
     const isGoodEventClicked = eventDetail.specId === goodEventId;
     const isBadEventClicked = eventDetail.specId === badEventId;
-    const timeRange = {
+    const timeRange: TimeRange = {
       from: moment(datum.x).startOf('minute').toISOString(),
       to: moment(datum.x).add(intervalInMilliseconds, 'ms').startOf('minute').toISOString(),
       mode: 'absolute' as const,
     };
-    openInDiscover({
-      slo,
-      showBad: isBadEventClicked,
-      showGood: isGoodEventClicked,
-      timeRange,
-      discover,
-      uiSettings,
-    });
+    const eventType: SloEventType = isGoodEventClicked ? 'Good' : isBadEventClicked ? 'Bad' : 'All';
+    onBarClick?.(timeRange, eventType);
   };
 
   return (

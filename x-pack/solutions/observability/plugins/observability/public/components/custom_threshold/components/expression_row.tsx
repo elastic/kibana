@@ -22,6 +22,8 @@ import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import { builtInComparatorsWithInclusive } from '../../../constants/comparators';
 import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import type { MetricExpression } from '../types';
@@ -42,6 +44,7 @@ interface ExpressionRowProps {
   setRuleParams(id: number, params: MetricExpression): void;
   dataView: DataViewBase;
   children?: React.ReactNode;
+  kql: KqlPluginStart;
 }
 
 // eslint-disable-next-line react/function-component-definition
@@ -57,6 +60,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     fields,
     canDelete,
     title,
+    kql,
   } = props;
 
   const { metrics, comparator = COMPARATORS.GREATER_THAN, threshold = [] } = expression;
@@ -157,6 +161,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               onChange={handleCustomMetricChange}
               errors={errors}
               dataView={dataView}
+              kql={kql}
             />
             {criticalThresholdExpression}
             <EuiSpacer size={'s'} />
@@ -206,6 +211,7 @@ const ThresholdElement: React.FC<{
   return (
     <>
       <ThresholdExpression
+        customComparators={builtInComparatorsWithInclusive}
         thresholdComparator={thresholdComparator()}
         threshold={displayedThreshold}
         onChangeSelectedThresholdComparator={updateComparator}
@@ -251,6 +257,17 @@ export const aggregationType: { [key: string]: AggregationType } = {
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
     value: Aggregators.MIN,
+  },
+  median: {
+    text: i18n.translate(
+      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.median',
+      {
+        defaultMessage: 'Median',
+      }
+    ),
+    fieldRequired: true,
+    validNormalizedTypes: ['number', 'histogram'],
+    value: Aggregators.MED,
   },
   cardinality: {
     text: i18n.translate(

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -15,33 +15,57 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
 import {
+  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
 import { HoverActionPopover } from '../hover_popover_action';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export const ContentBreakdown = ({
+  dataView,
   formattedDoc,
   hit,
   renderFlyoutStreamProcessingLink,
+  renderCpsWarning,
 }: {
+  dataView: DataView;
   formattedDoc: LogDocumentOverview;
   hit: DataTableRecord;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  renderCpsWarning?: boolean;
 }) => {
-  const { field, value, formattedValue } = getMessageFieldWithFallbacks(formattedDoc, {
+  const { fieldFormats } = getUnifiedDocViewerServices();
+  const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
   });
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
 
-  const messageCodeBlockProps = formattedValue
-    ? { language: 'json', children: formattedValue }
-    : { language: 'txt', dangerouslySetInnerHTML: { __html: value ?? '' } };
+  const messageCodeBlockProps = useMemo(
+    () =>
+      formattedValue
+        ? { language: 'json', children: formattedValue }
+        : {
+            language: 'txt',
+            // Pass field name for highlight lookup in hit.highlight.
+            // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
+            children: formatFieldStringValueWithHighlights({
+              value: value ?? '',
+              hit: hit.raw,
+              fieldFormats,
+              dataView,
+              fieldName: field,
+            }),
+          },
+    [dataView, field, fieldFormats, formattedValue, hit.raw, value]
+  );
   const hasMessageField = field && value;
 
   return (
@@ -63,10 +87,12 @@ export const ContentBreakdown = ({
             </EuiText>
             <EuiFlexItem grow={false}>
               <Badges
+                dataView={dataView}
                 hasMessageField={Boolean(hasMessageField)}
                 hit={hit}
                 formattedDoc={formattedDoc}
                 renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+                renderCpsWarning={renderCpsWarning}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

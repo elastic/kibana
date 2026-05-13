@@ -18,7 +18,7 @@ import {
 } from './lists';
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
@@ -69,7 +69,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -115,7 +115,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -166,7 +166,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -219,7 +219,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -271,7 +271,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -314,7 +314,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -357,7 +357,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual({
@@ -386,7 +386,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
@@ -402,7 +402,7 @@ describe('artifacts lists', () => {
       const resp = await getFilteredEndpointExceptionListRaw({
         elClient: mockExceptionClient,
         filter: TEST_FILTER,
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated.entries.length).toEqual(0);
@@ -453,13 +453,13 @@ describe('artifacts lists', () => {
         translatedExceptionList,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       const artifact2 = await buildArtifact(
         translatedExceptionListReversed,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
@@ -508,13 +508,13 @@ describe('artifacts lists', () => {
         translatedExceptionList,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       const artifact2 = await buildArtifact(
         translatedExceptionListReversed,
         'v1',
         'linux',
-        ArtifactConstants.GLOBAL_ALLOWLIST_NAME
+        ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
     });
@@ -555,7 +555,7 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
         const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
@@ -612,7 +612,7 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
         const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
@@ -671,7 +671,7 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
         const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
@@ -719,7 +719,7 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
         const translated = convertExceptionsToEndpointFormat(resp, 'v1', {
           filterProcessDescendantsForTrustedAppsEnabled: false,
@@ -763,7 +763,7 @@ describe('artifacts lists', () => {
         const resp = await getFilteredEndpointExceptionListRaw({
           elClient: mockExceptionClient,
           filter: TEST_FILTER,
-          listId: ENDPOINT_LIST_ID,
+          listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         });
         const translated = convertExceptionsToEndpointFormat(
           resp,
@@ -1012,14 +1012,14 @@ describe('artifacts lists', () => {
       const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
         os: 'windows',
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       });
 
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"windows"',
         perPage: 1000,

@@ -23,6 +23,8 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
@@ -31,7 +33,7 @@ import { mockDataView } from '../mock/data_view.mock';
 
 setProjectAnnotations(previewAnnotations);
 
-const { Investigation } = composeStories(stories);
+const { SingleActor, GroupedActor, GroupedTarget } = composeStories(stories);
 
 // Mock the useFetchGraphData hook, which is used by the GraphInvestigation component
 // Callbacks replaced with storybook actions, therefore we mock storybook's action function as well for testing
@@ -53,10 +55,32 @@ jest.mock('@storybook/addon-actions', () => ({
 const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
     <IntlProvider locale="en">
-      <Investigation {...args} />
+      <SingleActor {...args} />
     </IntlProvider>,
     {
       // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedActorStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedActor {...args} />
+    </IntlProvider>,
+    {
+      legacyRoot: true,
+    }
+  );
+};
+
+const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) => {
+  return render(
+    <IntlProvider locale="en">
+      <GroupedTarget {...args} />
+    </IntlProvider>,
+    {
       legacyRoot: true,
     }
   );
@@ -232,7 +256,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toBeInTheDocument();
     });
 
-    it('shows the option `Show entity details` as enabled when entity node has documentsData', async () => {
+    it('shows the option `Show entity details` as enabled when entity node has documentsData with entity data', async () => {
       const { container, getByTestId } = renderStory();
 
       await expandNode(container, 'projects/your-project-id/roles/customRole');
@@ -252,7 +276,7 @@ describe('GraphInvestigation Component', () => {
 
       // can't use userEvent.hover since we get the following error:
       // 'Unable to perform pointer interaction as the element has pointer-events: none:'
-      await fireEvent.mouseOver(showDetailsItem);
+      fireEvent.mouseOver(showDetailsItem);
 
       // Wait for tooltip and execute validation
       await waitAndExecute(() => {
@@ -260,6 +284,51 @@ describe('GraphInvestigation Component', () => {
         expect(tooltip).toBeInTheDocument();
         expect(tooltip).toHaveTextContent('Details not available');
       });
+    });
+
+    it('shows the option `Show entity relationships` as enabled when entity node is enriched', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(container, 'projects/your-project-id/roles/customRole');
+
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).not.toHaveAttribute('disabled');
+    });
+
+    it('shows the option `Show entity relationships` as disabled when entity node is not enriched', async () => {
+      const { container, getByTestId, queryByTestId } = renderStory();
+
+      await expandNode(container, 'admin@example.com');
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).toHaveAttribute('disabled');
+
+      // can't use userEvent.hover since we get the following error:
+      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
+      fireEvent.mouseOver(showRelationshipsItem);
+
+      // Wait for tooltip and execute validation
+      await waitAndExecute(() => {
+        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID);
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Entity relationships not available');
+      });
+    });
+
+    it('does not show `Show entity relationships` option for grouped entities', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showRelationshipsItem = queryByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).not.toBeInTheDocument();
     });
   });
 
@@ -336,7 +405,7 @@ describe('GraphInvestigation Component', () => {
       await expandNode(container, 'admin@example.com');
       getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID).click();
 
-      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
     });
 
     it('hide filters counter when node filter is toggled off', async () => {
@@ -345,7 +414,7 @@ describe('GraphInvestigation Component', () => {
       });
       await showActionsByNode(container, 'admin@example.com');
 
-      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
 
       await hideActionsByNode(container, 'admin@example.com');
 
@@ -363,7 +432,7 @@ describe('GraphInvestigation Component', () => {
       });
       await showActionsByNode(container, 'admin@example.com');
 
-      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
 
       disableFilter(container, 0);
 
@@ -484,9 +553,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'actor.entity.id',
+                  field: 'user.email',
                   index: '1235',
-                  key: 'actor.entity.id',
+                  key: 'user.email',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -495,16 +564,34 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'actor.entity.id': entityIdFilter,
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
                   },
                 },
               },
               ...['1', '2'].map((eventId) => ({
                 meta: {
                   controlledBy: 'graph-investigation',
+                  disabled: false,
                   field: 'event.id',
-                  index: eventId === '1' ? '1235' : undefined,
-                  ...(eventId === '2' ? { disabled: false } : {}),
+                  index: '1235',
                   key: 'event.id',
                   negate: false,
                   params: {
@@ -565,9 +652,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'actor.entity.id',
+                  field: 'user.email',
                   index: '1235',
-                  key: 'actor.entity.id',
+                  key: 'user.email',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -576,16 +663,34 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'actor.entity.id': entityIdFilter,
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
                   },
                 },
               },
               ...['1', '2'].map((eventId) => ({
                 meta: {
                   controlledBy: 'graph-investigation',
+                  disabled: false,
                   field: 'event.id',
-                  index: eventId === '1' ? '1235' : undefined,
-                  ...(eventId === '2' ? { disabled: false } : {}),
+                  index: '1235',
                   key: 'event.id',
                   negate: false,
                   params: {
@@ -708,18 +813,47 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'actor.entity.id',
-            key: 'actor.entity.id',
-            params: {
-              query: entityIdFilter,
-            },
-            type: 'phrase',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.email',
+                  index: '1235',
+                  key: 'user.email',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
+                  },
+                },
+              },
+            ],
+            type: 'combined',
+            relation: 'OR',
           }),
-          query: {
-            match_phrase: {
-              'actor.entity.id': entityIdFilter,
-            },
-          },
         },
       ]);
     });
@@ -766,20 +900,181 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'actor.entity.id',
-            key: 'actor.entity.id',
-            params: {
-              query: entityIdFilter,
-            },
-            type: 'phrase',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.email',
+                  index: '1235',
+                  key: 'user.email',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
+                  },
+                },
+              },
+            ],
+            type: 'combined',
+            relation: 'OR',
           }),
-          query: {
-            match_phrase: {
-              'actor.entity.id': entityIdFilter,
-            },
-          },
         },
       ]);
+    });
+  });
+
+  describe('grouped-actor scenario - mixed namespaces as actor', () => {
+    it('renders graph with grouped actor node', async () => {
+      const { container } = renderGroupedActorStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, grouped-actor, target, label
+      });
+    });
+
+    it('grouped actor node with mixed namespaces falls back to generic entity.id filter', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container } = renderGroupedActorStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Since the node has no entity details (all availableInEntityStore = false),
+      // we cannot add filters via "Show actions by entity"
+      // This scenario tests the fallback behavior
+      await waitFor(() => {
+        const nodeElement = container.querySelector(
+          `.react-flow__nodes .react-flow__node[data-id="mixed-entities"]`
+        );
+        expect(nodeElement).not.toBeNull();
+      });
+    });
+
+    it('grouped actor node does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      // Grouped entities should not have "Show actions by entity" option
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped actor node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
+    });
+  });
+
+  describe('grouped-target scenario - mixed namespaces as target', () => {
+    it('renders graph with grouped target node', async () => {
+      const { container } = renderGroupedTargetStory();
+
+      await waitFor(() => {
+        const nodes = container.querySelectorAll('.react-flow__nodes .react-flow__node');
+        expect(nodes).toHaveLength(4); // group, actor, grouped-target, label
+      });
+    });
+
+    it('single actor node uses sourceFields for filters', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { container, getByTestId } = renderGroupedTargetStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+
+      // Act - Click "Show actions by entity" on single-actor node
+      await showActionsByNode(container, 'single-actor');
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert - Should use sourceFields (user.id, user.email, user.name) as OR combined filter
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: expect.arrayContaining([
+              expect.objectContaining({
+                meta: expect.objectContaining({
+                  field: 'user.id',
+                  key: 'user.id',
+                }),
+                query: {
+                  match_phrase: {
+                    'user.id': 'single-actor',
+                  },
+                },
+              }),
+              expect.objectContaining({
+                meta: expect.objectContaining({
+                  field: 'user.email',
+                  key: 'user.email',
+                }),
+                query: {
+                  match_phrase: {
+                    'user.email': 'actor@example.com',
+                  },
+                },
+              }),
+            ]),
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('grouped target node with mixed namespaces does not show filter actions in popover', async () => {
+      const { container, queryByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      // Grouped entities should not have "Show actions by entity" or "Show actions on entity" options
+      const showActionsBy = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      expect(showActionsBy).not.toBeInTheDocument();
+    });
+
+    it('grouped target node shows entity details option', async () => {
+      const { container, getByTestId } = renderGroupedTargetStory();
+
+      await expandNode(container, 'mixed-targets');
+
+      const showDetailsItem = getByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
+      expect(showDetailsItem).toBeInTheDocument();
     });
   });
 });

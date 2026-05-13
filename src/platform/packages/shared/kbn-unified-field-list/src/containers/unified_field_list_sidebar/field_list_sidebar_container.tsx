@@ -37,8 +37,11 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { prepareDataViewForEditing } from '@kbn/discover-utils';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   useExistingFieldsFetcher,
+  type ExistingFieldsFetcherParams,
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
@@ -55,7 +58,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   SearchMode,
 } from '../../types';
-import { withRestorableState } from '../../restorable_state';
+import { useRestorableRef, withRestorableState } from '../../restorable_state';
 
 const RESPONSIVE_BREAKPOINTS = ['xs', 's'];
 
@@ -73,6 +76,15 @@ const InternalUnifiedFieldListSidebarContainer: React.FC<
   InternalUnifiedFieldListSidebarContainerProps
 > = (props) => {
   const { variant, commonSidebarProps } = props;
+  const isSidebarCollapsedRef = useRestorableRef(
+    'isCollapsed',
+    commonSidebarProps.isSidebarCollapsed ?? false,
+    {
+      shouldStoreDefaultValueRightAway: true, // otherwise, it would re-initialize with the localStorage value which might override tab-scoped state
+    }
+  );
+
+  isSidebarCollapsedRef.current = commonSidebarProps.isSidebarCollapsed ?? false;
 
   if (variant === 'button-and-flyout-always') {
     return <ButtonVariant {...props} />;
@@ -154,6 +166,12 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
 
   initialState?: UnifiedFieldListSidebarContainerPropsWithRestorableState['initialState'];
   onInitialStateChange?: UnifiedFieldListSidebarContainerPropsWithRestorableState['onInitialStateChange'];
+
+  /**
+   * Custom container for existing fields info map
+   */
+  initialExistingFieldsInfo?: ExistingFieldsFetcherParams['initialExistingFieldsInfo'];
+  onInitialExistingFieldsInfoChange?: ExistingFieldsFetcherParams['onInitialExistingFieldsInfoChange'];
 };
 
 /**
@@ -177,6 +195,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     variant = 'responsive',
     onFieldEdited,
     additionalFilters,
+    initialExistingFieldsInfo,
+    onInitialExistingFieldsInfoChange,
   } = props;
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
@@ -230,6 +250,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     fromDate: querySubscriberResult.fromDate,
     toDate: querySubscriberResult.toDate,
     services,
+    initialExistingFieldsInfo,
+    onInitialExistingFieldsInfoChange,
   });
 
   const editField = useMemo(
@@ -332,6 +354,18 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     [sidebarVisibility, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
   );
 
+  const streamNames = useMemo(() => {
+    const query = querySubscriberResult.query;
+    if (isOfAggregateQueryType(query)) {
+      const indexPattern = getIndexPatternFromESQLQuery(query.esql);
+      // Don't return if it contains wildcards
+      if (indexPattern && !indexPattern.includes('*')) {
+        return indexPattern.split(',');
+      }
+    }
+    return undefined;
+  }, [querySubscriberResult.query]);
+
   const commonSidebarProps: UnifiedFieldListSidebarProps = useMemo(() => {
     const commonProps: UnifiedFieldListSidebarProps = {
       ...props,
@@ -339,14 +373,15 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       stateService,
       isProcessing,
       isAffectedByGlobalFilter,
+      isSidebarCollapsed,
       onEditField: editField,
       onDeleteField: deleteField,
       compressed: stateService.creationOptions.compressed ?? false,
       buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
+      streamNames,
     };
 
     if (stateService.creationOptions.showSidebarToggleButton) {
-      commonProps.isSidebarCollapsed = isSidebarCollapsed;
       commonProps.onToggleSidebar = sidebarVisibility.toggle;
     }
 
@@ -361,6 +396,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     searchMode,
     sidebarVisibility.toggle,
     stateService,
+    streamNames,
   ]);
 
   if (!dataView) {
@@ -448,7 +484,7 @@ function ButtonVariant({
                           defaultMessage: 'Back',
                         }
                       )}
-                      type="arrowLeft"
+                      type="chevronSingleLeft"
                     />{' '}
                     <strong>
                       {i18n.translate('unifiedFieldList.fieldListSidebar.flyoutHeading', {

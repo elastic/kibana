@@ -84,7 +84,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </button>
               </div>
@@ -159,7 +159,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </button>
               </div>
@@ -197,156 +197,163 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
         class="euiBasicTable"
         data-test-subj="mlCalendarEventsTable"
       >
-        <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
-          id="__table_generated-id"
-          tabindex="-1"
+        <div
+          class="emotion-euiContainerCSS"
         >
-          <caption
-            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-          />
-          <thead>
-            <tr>
-              <th
-                aria-sort="none"
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_description_0"
-                role="columnheader"
-                scope="col"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                >
-                  <button
-                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                    data-test-subj="tableHeaderSortButton"
-                    type="button"
-                  >
-                    <div
-                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                    >
-                      <span
-                        class="eui-textTruncate"
-                        title="Description"
-                      >
-                        Description
-                      </span>
-                      <span
-                        class="euiTableSortIcon euiTableSortIcon--sortable"
-                        color="subdued"
-                        data-euiicon-type="sortable"
-                      />
-                    </div>
-                  </button>
-                </span>
-              </th>
-              <th
-                aria-sort="ascending"
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_start_time_1"
-                role="columnheader"
-                scope="col"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                >
-                  <button
-                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                    data-test-subj="tableHeaderSortButton"
-                    type="button"
-                  >
-                    <div
-                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                    >
-                      <span
-                        class="eui-textTruncate"
-                        title="Start"
-                      >
-                        <span>
-                          Start
-                        </span>
-                      </span>
-                      <span
-                        class="euiTableSortIcon"
-                        data-euiicon-type="sortUp"
-                      />
-                    </div>
-                  </button>
-                </span>
-              </th>
-              <th
-                aria-sort="none"
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_end_time_2"
-                role="columnheader"
-                scope="col"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                >
-                  <button
-                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                    data-test-subj="tableHeaderSortButton"
-                    type="button"
-                  >
-                    <div
-                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                    >
-                      <span
-                        class="eui-textTruncate"
-                        title="End"
-                      >
-                        <span>
-                          End
-                        </span>
-                      </span>
-                      <span
-                        class="euiTableSortIcon euiTableSortIcon--sortable"
-                        color="subdued"
-                        data-euiicon-type="sortable"
-                      />
-                    </div>
-                  </button>
-                </span>
-              </th>
-              <td
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell__3"
-                role="columnheader"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                  />
-                </div>
-              </td>
-            </tr>
-          </thead>
-          <tbody
-            class="css-0"
+          <table
+            class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+            id="__table_generated-id"
+            tabindex="-1"
           >
-            <tr
-              class="euiTableRow emotion-euiTableRow-desktop"
-            >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-                colspan="4"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+            <caption
+              class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+            />
+            <thead>
+              <tr>
+                <th
+                  aria-sort="none"
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_description_0"
+                  role="columnheader"
+                  scope="col"
                 >
                   <span
-                    class="euiTableCellContent__text"
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                    id="generated-id-wrapper"
                   >
-                    No items found
+                    <button
+                      class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <div
+                        class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                      >
+                        <span
+                          class="eui-textTruncate"
+                          title="Description"
+                        >
+                          Description
+                        </span>
+                        <span
+                          class="euiTableSortIcon euiTableSortIcon--sortable"
+                          color="subdued"
+                          data-euiicon-type="sortable"
+                        />
+                      </div>
+                    </button>
                   </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </th>
+                <th
+                  aria-sort="ascending"
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_start_time_1"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                    id="generated-id-wrapper"
+                  >
+                    <button
+                      class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <div
+                        class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                      >
+                        <span
+                          class="eui-textTruncate"
+                          title="Start"
+                        >
+                          <span>
+                            Start
+                          </span>
+                        </span>
+                        <span
+                          class="euiTableSortIcon"
+                          data-euiicon-type="sortUp"
+                        />
+                      </div>
+                    </button>
+                  </span>
+                </th>
+                <th
+                  aria-sort="none"
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_end_time_2"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                    id="generated-id-wrapper"
+                  >
+                    <button
+                      class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <div
+                        class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                      >
+                        <span
+                          class="eui-textTruncate"
+                          title="End"
+                        >
+                          <span>
+                            End
+                          </span>
+                        </span>
+                        <span
+                          class="euiTableSortIcon euiTableSortIcon--sortable"
+                          color="subdued"
+                          data-euiicon-type="sortable"
+                        />
+                      </div>
+                    </button>
+                  </span>
+                </th>
+                <td
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell__3"
+                  role="columnheader"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    />
+                  </div>
+                </td>
+              </tr>
+            </thead>
+            <tbody
+              class="css-0"
+            >
+              <tr
+                class="euiTableRow emotion-euiTableRow-desktop"
+              >
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                  colspan="4"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      No items found
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -354,7 +361,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -521,7 +528,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </button>
               </div>
@@ -596,7 +603,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
                   <span
                     aria-hidden="true"
                     class="euiFormControlLayoutCustomIcon__icon"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </button>
               </div>
@@ -634,156 +641,163 @@ exports[`CalendarForm Renders calendar form 1`] = `
         class="euiBasicTable"
         data-test-subj="mlCalendarEventsTable"
       >
-        <table
-          class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
-          id="__table_generated-id"
-          tabindex="-1"
+        <div
+          class="emotion-euiContainerCSS"
         >
-          <caption
-            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-          />
-          <thead>
-            <tr>
-              <th
-                aria-sort="none"
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_description_0"
-                role="columnheader"
-                scope="col"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                >
-                  <button
-                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                    data-test-subj="tableHeaderSortButton"
-                    type="button"
-                  >
-                    <div
-                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                    >
-                      <span
-                        class="eui-textTruncate"
-                        title="Description"
-                      >
-                        Description
-                      </span>
-                      <span
-                        class="euiTableSortIcon euiTableSortIcon--sortable"
-                        color="subdued"
-                        data-euiicon-type="sortable"
-                      />
-                    </div>
-                  </button>
-                </span>
-              </th>
-              <th
-                aria-sort="ascending"
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_start_time_1"
-                role="columnheader"
-                scope="col"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                >
-                  <button
-                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                    data-test-subj="tableHeaderSortButton"
-                    type="button"
-                  >
-                    <div
-                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                    >
-                      <span
-                        class="eui-textTruncate"
-                        title="Start"
-                      >
-                        <span>
-                          Start
-                        </span>
-                      </span>
-                      <span
-                        class="euiTableSortIcon"
-                        data-euiicon-type="sortUp"
-                      />
-                    </div>
-                  </button>
-                </span>
-              </th>
-              <th
-                aria-sort="none"
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell_end_time_2"
-                role="columnheader"
-                scope="col"
-              >
-                <span
-                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                >
-                  <button
-                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                    data-test-subj="tableHeaderSortButton"
-                    type="button"
-                  >
-                    <div
-                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                    >
-                      <span
-                        class="eui-textTruncate"
-                        title="End"
-                      >
-                        <span>
-                          End
-                        </span>
-                      </span>
-                      <span
-                        class="euiTableSortIcon euiTableSortIcon--sortable"
-                        color="subdued"
-                        data-euiicon-type="sortable"
-                      />
-                    </div>
-                  </button>
-                </span>
-              </th>
-              <td
-                class="euiTableHeaderCell emotion-euiTableHeaderCell"
-                data-test-subj="tableHeaderCell__3"
-                role="columnheader"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                >
-                  <span
-                    class="eui-textTruncate"
-                  />
-                </div>
-              </td>
-            </tr>
-          </thead>
-          <tbody
-            class="css-0"
+          <table
+            class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+            id="__table_generated-id"
+            tabindex="-1"
           >
-            <tr
-              class="euiTableRow emotion-euiTableRow-desktop"
-            >
-              <td
-                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-                colspan="4"
-              >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+            <caption
+              class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+            />
+            <thead>
+              <tr>
+                <th
+                  aria-sort="none"
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_description_0"
+                  role="columnheader"
+                  scope="col"
                 >
                   <span
-                    class="euiTableCellContent__text"
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                    id="generated-id-wrapper"
                   >
-                    No items found
+                    <button
+                      class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <div
+                        class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                      >
+                        <span
+                          class="eui-textTruncate"
+                          title="Description"
+                        >
+                          Description
+                        </span>
+                        <span
+                          class="euiTableSortIcon euiTableSortIcon--sortable"
+                          color="subdued"
+                          data-euiicon-type="sortable"
+                        />
+                      </div>
+                    </button>
                   </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </th>
+                <th
+                  aria-sort="ascending"
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_start_time_1"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                    id="generated-id-wrapper"
+                  >
+                    <button
+                      class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <div
+                        class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                      >
+                        <span
+                          class="eui-textTruncate"
+                          title="Start"
+                        >
+                          <span>
+                            Start
+                          </span>
+                        </span>
+                        <span
+                          class="euiTableSortIcon"
+                          data-euiicon-type="sortUp"
+                        />
+                      </div>
+                    </button>
+                  </span>
+                </th>
+                <th
+                  aria-sort="none"
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_end_time_2"
+                  role="columnheader"
+                  scope="col"
+                >
+                  <span
+                    class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                    id="generated-id-wrapper"
+                  >
+                    <button
+                      class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <div
+                        class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                      >
+                        <span
+                          class="eui-textTruncate"
+                          title="End"
+                        >
+                          <span>
+                            End
+                          </span>
+                        </span>
+                        <span
+                          class="euiTableSortIcon euiTableSortIcon--sortable"
+                          color="subdued"
+                          data-euiicon-type="sortable"
+                        />
+                      </div>
+                    </button>
+                  </span>
+                </th>
+                <td
+                  class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell__3"
+                  role="columnheader"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    />
+                  </div>
+                </td>
+              </tr>
+            </thead>
+            <tbody
+              class="css-0"
+            >
+              <tr
+                class="euiTableRow emotion-euiTableRow-desktop"
+              >
+                <td
+                  class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                  colspan="4"
+                >
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-center-wrapText"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      No items found
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -791,7 +805,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
   <div
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexEnd-stretch-row"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexEnd-stretch-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

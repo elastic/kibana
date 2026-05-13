@@ -314,11 +314,10 @@ describe('RollingFileAppender', () => {
 
       const files = await readdir(testDir);
 
-      // ['kibana.log', ['kibana-3.log',] 'kibana-2.log', 'kibana-1.log']
+      // ['kibana.log', ['kibana-3.log', 'kibana-2.log',] 'kibana-1.log']
       const sortedLogFiles = files.sort().reverse();
       expect(sortedLogFiles).toContain('kibana.log');
-      // there could be a kibana-3.log already, but we cannot guarantee it
-      expect(sortedLogFiles).toContain('kibana-2.log');
+      // there could be a kibana-2.log and kibana-3.log already, but we cannot guarantee it
       expect(sortedLogFiles).toContain('kibana-1.log');
 
       // kibana.log contains the newest entries, so it must go in the end

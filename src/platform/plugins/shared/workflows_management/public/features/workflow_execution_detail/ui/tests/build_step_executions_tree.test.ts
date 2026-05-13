@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { buildStepExecutionsTree } from '../build_step_executions_tree';
+import { ExecutionStatus } from '@kbn/workflows';
+import type { ChildWorkflowExecutionsMap } from '../../model/use_child_workflow_executions';
+import { buildStepExecutionsTree, injectChildWorkflowSteps } from '../build_step_executions_tree';
 
 // Helper function to create a valid WorkflowStepExecutionDto with all required properties
 const createStepExecution = (
@@ -726,5 +727,537 @@ describe('buildStepExecutionsTree', () => {
       expect(result[1].children[0].stepId).toBe('0');
       expect(result[1].children[0].status).toBe(ExecutionStatus.SKIPPED);
     });
+  });
+
+  describe('with execution context (pseudo-steps)', () => {
+    it('should prepend trigger pseudo-step when event data exists', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          workflowRunId: 'workflow-run-1',
+        }),
+      ];
+
+      const executionContext = {
+        event: {
+          alerts: { data: [{ id: 'alert-1' }] },
+          rule: { id: 'rule-1', name: 'Test Rule' },
+        },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[0].stepType).toBe('__trigger');
+      expect(result[0].stepExecutionId).toBe('__pseudo_trigger__');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
+      expect(result[0].children).toEqual([]);
+
+      expect(result[1].stepId).toBe('step-1');
+      expect(result[1].isTriggerPseudoStep).toBeUndefined();
+    });
+
+    it('should prepend inputs pseudo-step when inputs data exists', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          workflowRunId: 'workflow-run-1',
+        }),
+      ];
+
+      const executionContext = {
+        inputs: {
+          name: 'John Doe',
+          count: 42,
+        },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Inputs');
+      expect(result[0].stepType).toBe('__inputs');
+      expect(result[0].stepExecutionId).toBe('__pseudo_inputs__');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
+      expect(result[0].children).toEqual([]);
+
+      expect(result[1].stepId).toBe('step-1');
+    });
+
+    it('should prepend only trigger pseudo-step when both event and inputs exist', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          workflowRunId: 'workflow-run-1',
+        }),
+      ];
+
+      const executionContext = {
+        event: {
+          alerts: { data: [{ id: 'alert-1' }] },
+        },
+        inputs: {
+          name: 'Jane Doe',
+        },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[0].stepType).toBe('__trigger');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+
+      expect(result[1].stepId).toBe('step-1');
+      expect(result[1].isTriggerPseudoStep).toBeUndefined();
+    });
+
+    it('should not add pseudo-steps when context is missing', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('step-1');
+      expect(result[0].isTriggerPseudoStep).toBeUndefined();
+    });
+
+    it('should not add pseudo-steps when context is empty', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions, {});
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('step-1');
+    });
+
+    it('should add inputs pseudo-step even when inputs object is empty', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const executionContext = {
+        inputs: {},
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Inputs');
+      expect(result[0].stepType).toBe('__inputs');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[1].stepId).toBe('step-1');
+    });
+
+    it('should prepend pseudo-steps before complex nested structures', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'foreach',
+          stepType: 'foreach',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [],
+        }),
+        createStepExecution({
+          id: 'exec-2',
+          stepId: 'nested-step',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [
+            {
+              stepId: 'foreach',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
+        }),
+      ];
+
+      const executionContext = {
+        event: { trigger: 'test' },
+      };
+
+      const result = buildStepExecutionsTree(stepExecutions, executionContext);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Event');
+      expect(result[0].isTriggerPseudoStep).toBe(true);
+      expect(result[1].stepId).toBe('foreach');
+      expect(result[1].children).toHaveLength(1);
+    });
+
+    it('should handle empty step executions with context', () => {
+      const executionContext = {
+        event: { alert: 'data' },
+        inputs: { value: 1 },
+      };
+
+      const result = buildStepExecutionsTree([], executionContext);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('Event');
+    });
+  });
+
+  describe('with executionStatus parameter (overview pseudo-step)', () => {
+    it('should add overview pseudo-step when executionStatus is provided', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions, undefined, ExecutionStatus.COMPLETED);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Overview');
+      expect(result[0].stepType).toBe('__overview');
+      expect(result[0].stepExecutionId).toBe('__overview');
+      expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
+      expect(result[0].children).toEqual([]);
+      expect(result[1].stepId).toBe('step-1');
+    });
+
+    it('should not add overview pseudo-step when executionStatus is undefined', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions, undefined, undefined);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('step-1');
+    });
+
+    it('should place overview pseudo-step at position 0 before other pseudo-steps', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const executionContext = {
+        event: { alerts: [{ id: 'alert-1' }] },
+        inputs: { name: 'test' },
+      };
+
+      const result = buildStepExecutionsTree(
+        stepExecutions,
+        executionContext,
+        ExecutionStatus.RUNNING
+      );
+
+      expect(result).toHaveLength(3);
+      expect(result[0].stepId).toBe('Overview');
+      expect(result[0].stepType).toBe('__overview');
+      expect(result[0].status).toBe(ExecutionStatus.RUNNING);
+      expect(result[1].stepId).toBe('Event');
+      expect(result[1].stepType).toBe('__trigger');
+      expect(result[2].stepId).toBe('step-1');
+    });
+
+    it.each([
+      ExecutionStatus.PENDING,
+      ExecutionStatus.RUNNING,
+      ExecutionStatus.COMPLETED,
+      ExecutionStatus.FAILED,
+      ExecutionStatus.CANCELLED,
+      ExecutionStatus.SKIPPED,
+    ])('should set overview status to %s when executionStatus is %s', (status) => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'step-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions, undefined, status);
+
+      expect(result[0].stepId).toBe('Overview');
+      expect(result[0].status).toBe(status);
+    });
+
+    it('should add overview pseudo-step even when step executions are empty', () => {
+      const result = buildStepExecutionsTree([], undefined, ExecutionStatus.PENDING);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].stepId).toBe('Overview');
+      expect(result[0].stepType).toBe('__overview');
+      expect(result[0].status).toBe(ExecutionStatus.PENDING);
+    });
+
+    it('should add overview pseudo-step with context and empty step executions', () => {
+      const executionContext = {
+        event: { trigger: 'alert' },
+      };
+
+      const result = buildStepExecutionsTree([], executionContext, ExecutionStatus.FAILED);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Overview');
+      expect(result[0].status).toBe(ExecutionStatus.FAILED);
+      expect(result[1].stepId).toBe('Event');
+    });
+
+    it('should place overview before nested structures', () => {
+      const stepExecutions: WorkflowStepExecutionDto[] = [
+        createStepExecution({
+          id: 'exec-1',
+          stepId: 'foreach-1',
+          stepType: 'foreach',
+          status: ExecutionStatus.RUNNING,
+          scopeStack: [],
+        }),
+        createStepExecution({
+          id: 'exec-2',
+          stepId: 'action-1',
+          stepType: 'action',
+          status: ExecutionStatus.COMPLETED,
+          scopeStack: [
+            {
+              stepId: 'foreach-1',
+              nestedScopes: [{ nodeId: 'foreach-1', nodeType: 'foreach', scopeId: '0' }],
+            },
+          ],
+        }),
+      ];
+
+      const result = buildStepExecutionsTree(stepExecutions, undefined, ExecutionStatus.RUNNING);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].stepId).toBe('Overview');
+      expect(result[0].stepType).toBe('__overview');
+      expect(result[1].stepId).toBe('foreach-1');
+      expect(result[1].children).toHaveLength(1);
+    });
+  });
+
+  describe('triggeredBy fallback when context lacks inputs/event keys', () => {
+    it('should fall back to triggeredBy for manual execution when context has no inputs key', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { spaceId: 'default' },
+        ExecutionStatus.FAILED,
+        'manual'
+      );
+
+      const inputsStep = result.find((s) => s.stepType === '__inputs');
+      expect(inputsStep).toBeDefined();
+      expect(inputsStep?.stepId).toBe('Inputs');
+      expect(inputsStep?.isTriggerPseudoStep).toBe(true);
+    });
+
+    it('should fall back to triggeredBy for alert execution when context has no event key', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { spaceId: 'default' },
+        ExecutionStatus.FAILED,
+        'alert'
+      );
+
+      const triggerStep = result.find((s) => s.stepType === '__trigger');
+      expect(triggerStep).toBeDefined();
+      expect(triggerStep?.stepId).toBe('Event');
+      expect(triggerStep?.isTriggerPseudoStep).toBe(true);
+    });
+
+    it('should not use triggeredBy fallback when context already has inputs', () => {
+      const result = buildStepExecutionsTree(
+        [],
+        { inputs: { name: 'test' } },
+        ExecutionStatus.FAILED,
+        'manual'
+      );
+
+      const inputsSteps = result.filter(
+        (s) => s.stepType === '__inputs' || s.stepType === '__trigger'
+      );
+      expect(inputsSteps).toHaveLength(1);
+    });
+
+    it('should not create trigger pseudo-step when triggeredBy is undefined', () => {
+      const result = buildStepExecutionsTree([], { spaceId: 'default' }, ExecutionStatus.FAILED);
+
+      const triggerSteps = result.filter(
+        (s) => s.stepType === '__inputs' || s.stepType === '__trigger'
+      );
+      expect(triggerSteps).toHaveLength(0);
+    });
+  });
+});
+
+describe('injectChildWorkflowSteps', () => {
+  const makeTreeNode = (
+    overrides: Partial<{
+      stepId: string;
+      stepType: string;
+      stepExecutionId: string | null;
+      status: ExecutionStatus | null;
+      children: any[];
+    }> = {}
+  ) => ({
+    stepId: 'step-1',
+    stepType: 'action',
+    executionIndex: 0,
+    stepExecutionId: 'exec-1' as string | null,
+    status: ExecutionStatus.COMPLETED as ExecutionStatus | null,
+    children: [] as any[],
+    ...overrides,
+  });
+
+  it('should return tree unchanged when no workflow.execute steps exist', () => {
+    const tree = [makeTreeNode({ stepType: 'action' })];
+    const { tree: result, childStepExecutions } = injectChildWorkflowSteps(tree, new Map(), false);
+
+    expect(result).toEqual(tree);
+    expect(childStepExecutions).toEqual([]);
+  });
+
+  it('should inject child steps into workflow.execute nodes', () => {
+    const tree = [
+      makeTreeNode({
+        stepId: 'run-child',
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+      }),
+    ];
+
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'wf-exec-step-1',
+        {
+          parentStepExecutionId: 'wf-exec-step-1',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({
+              id: 'child-step-1',
+              stepId: 'do_thing',
+              stepType: 'action',
+              status: ExecutionStatus.COMPLETED,
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const { tree: result, childStepExecutions } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result[0].children).toHaveLength(1);
+    expect(result[0].children[0].stepId).toBe('do_thing');
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+    expect(childStepExecutions).toHaveLength(1);
+    expect(childStepExecutions[0].id).toBe('child-step-1');
+  });
+
+  it('should add loading placeholder when data is loading for terminal workflow.execute steps', () => {
+    const tree = [
+      makeTreeNode({
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+        status: ExecutionStatus.COMPLETED,
+      }),
+    ];
+
+    const { tree: result } = injectChildWorkflowSteps(tree, new Map(), true);
+
+    expect(result[0].children).toHaveLength(1);
+    expect(result[0].children[0].stepType).toBe('__loading');
+    expect(result[0].children[0].isChildWorkflowStep).toBe(true);
+  });
+
+  it('should not add loading placeholder for non-terminal workflow.execute steps', () => {
+    const tree = [
+      makeTreeNode({
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+        status: ExecutionStatus.RUNNING,
+      }),
+    ];
+
+    const { tree: result } = injectChildWorkflowSteps(tree, new Map(), true);
+
+    expect(result[0].children).toHaveLength(0);
+  });
+
+  it('should filter out workflow_level_timeout steps from children', () => {
+    const childMap: ChildWorkflowExecutionsMap = new Map([
+      [
+        'wf-exec-step-1',
+        {
+          parentStepExecutionId: 'wf-exec-step-1',
+          workflowId: 'child-wf',
+          workflowName: 'Child',
+          executionId: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [
+            createStepExecution({ id: 'cs-1', stepId: 'real_step', stepType: 'action' }),
+            createStepExecution({
+              id: 'cs-2',
+              stepId: 'timeout',
+              stepType: 'workflow_level_timeout',
+            }),
+          ],
+        },
+      ],
+    ]);
+
+    const tree = [
+      makeTreeNode({
+        stepType: 'workflow.execute',
+        stepExecutionId: 'wf-exec-step-1',
+      }),
+    ];
+
+    const { tree: result, childStepExecutions } = injectChildWorkflowSteps(tree, childMap, false);
+
+    expect(result[0].children).toHaveLength(1);
+    expect(result[0].children[0].stepId).toBe('real_step');
+    expect(childStepExecutions).toHaveLength(1);
   });
 });

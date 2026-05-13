@@ -7,7 +7,6 @@
 
 import type { FunctionComponent, ChangeEvent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { ArgTypesStrings } from '../../../../i18n';
 
@@ -88,16 +87,4 @@ export const AppearanceForm: FunctionComponent<Props> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-AppearanceForm.propTypes = {
-  padding: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  opacity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  overflow: PropTypes.oneOf(['hidden', 'visible']),
-  onChange: PropTypes.func.isRequired,
-};
-
-AppearanceForm.defaultProps = {
-  opacity: 1,
-  overflow: 'hidden',
 };

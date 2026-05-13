@@ -4,93 +4,191 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
-import { merge } from 'lodash';
-import systemPromptTemplate from './system_prompt.text';
-import userPromptTemplate from './user_prompt.text';
 
-const systemsSchemaBase = {
+import { createPrompt } from '@kbn/inference-common';
+import { z } from '@kbn/zod/v4';
+import featuresUserPrompt from './user_prompt.text';
+import featuresSystemPrompt from './system_prompt.text';
+
+export { featuresSystemPrompt as featuresPrompt };
+
+const featuresSchema = {
   type: 'object',
   properties: {
-    systems: {
+    features: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
-          name: {
+          id: {
             type: 'string',
+            description: 'Unique identifier for the feature.',
+          },
+          type: {
+            type: 'string',
+          },
+          subtype: {
+            type: 'string',
+          },
+          description: {
+            type: 'string',
+            description: 'A summary of the feature.',
+          },
+          title: {
+            type: 'string',
+            description: 'Very short human-readable title for UI (e.g. table, flyout header).',
+          },
+          properties: {
+            type: 'object',
+            properties: {},
+            minProperties: 1,
+            description:
+              'Core identifying properties of the feature (e.g. {"name": "order-service"}). Empty properties are invalid — every feature must have at least one stable identifying property.',
+            additionalProperties: true,
+          },
+          confidence: {
+            type: 'number',
+            minimum: 0,
+            maximum: 100,
+          },
+          evidence: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'Supporting evidence from logs. Use `field.path=value` format for key-value pairs. For direct quotes, use plain unescaped text.',
+          },
+          evidence_doc_ids: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description:
+              'Evidence sources for traceability. This must be the Elasticsearch document `_id` values of sample documents that directly support the listed evidence. Keep an empty array when not applicable.',
+          },
+          tags: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'The tags that describe the feature.',
           },
           filter: {
             type: 'object',
+            properties: {
+              field: {
+                type: 'string',
+                description: 'Field name for single equality filter.',
+              },
+              eq: {
+                type: 'string',
+                description:
+                  'Equality value for single filter. For numbers/booleans, string representation is allowed.',
+              },
+              and: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    eq: { type: 'string' },
+                  },
+                  required: ['field', 'eq'],
+                },
+              },
+              or: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    eq: { type: 'string' },
+                  },
+                  required: ['field', 'eq'],
+                },
+              },
+            },
+            description:
+              'Optional condition used to scope filtering to the corresponding feature. Allowed forms: single equality `{field, eq}` or one-level `{and: [...]}` / `{or: [...]}` of equality conditions.',
+          },
+          meta: {
+            type: 'object',
             properties: {},
+            description: 'Useful metadata that is not captured in other properties.',
+            additionalProperties: true,
           },
         },
+        required: [
+          'id',
+          'type',
+          'subtype',
+          'description',
+          'title',
+          'properties',
+          'confidence',
+          'evidence',
+          'tags',
+        ],
       },
     },
+    ignored_features: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          feature_id: {
+            type: 'string',
+            description: 'The id of the new feature that matched an excluded one.',
+          },
+          feature_title: {
+            type: 'string',
+            description: 'The title of the matched new feature.',
+          },
+          excluded_feature_id: {
+            type: 'string',
+            description: 'The id of the excluded feature it matched.',
+          },
+          reason: {
+            type: 'string',
+            description: 'Why this feature matches the excluded one.',
+          },
+        },
+        required: ['feature_id', 'feature_title', 'excluded_feature_id', 'reason'],
+      },
+      description:
+        'Features not generated because they match an excluded feature. Empty array if no excluded features were provided or no matches found.',
+    },
   },
-  required: ['systems'],
+  required: ['features'],
 } as const;
 
-const systemsSchema = merge({}, systemsSchemaBase, {
-  properties: {
-    systems: {
-      items: {
-        required: ['name', 'filter'],
-      },
-    },
-  },
-} as const);
-
-const finalSystemsSchema = merge({}, systemsSchema);
-
-export interface ValidateSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-  }>;
-}
-
-export interface FinalizeSystemsResponse {
-  systems: Array<{
-    name: string;
-    filter: string;
-    description: string;
-  }>;
-}
-
-export const IdentifySystemsPrompt = createPrompt({
-  name: 'identify_systems',
-  input: z.object({
-    stream: z.object({
-      name: z.string(),
-      description: z.string(),
+export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: string }) {
+  return createPrompt({
+    name: 'identify_features',
+    input: z.object({
+      sample_documents: z.string(),
+      previously_identified_features: z.string(),
+      excluded_features: z.string(),
     }),
-    dataset_analysis: z.string(),
-    initial_clustering: z.string(),
-    condition_schema: z.string(),
-  }),
-})
-  .version({
-    system: {
-      mustache: {
-        template: systemPromptTemplate,
-      },
-    },
-    template: {
-      mustache: {
-        template: userPromptTemplate,
-      },
-    },
-    tools: {
-      validate_systems: {
-        description: `Validate systems before finalizing`,
-        schema: systemsSchema,
-      },
-      finalize_systems: {
-        description: 'Finalize system identification',
-        schema: finalSystemsSchema,
-      },
-    },
   })
-  .get();
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: featuresUserPrompt,
+        },
+      },
+      tools: {
+        finalize_features: {
+          description: 'Finalize features identification',
+          schema: featuresSchema,
+        },
+      },
+    })
+    .get();
+}

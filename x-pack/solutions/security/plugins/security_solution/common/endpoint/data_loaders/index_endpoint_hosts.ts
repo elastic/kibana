@@ -336,7 +336,7 @@ export interface DeleteIndexedEndpointHostsResponse
 export const deleteIndexedEndpointHosts = async (
   esClient: Client,
   kbnClient: KbnClient,
-  indexedData: IndexedHostsResponse
+  indexedData: IndexedHostsResponse | undefined
 ): Promise<DeleteIndexedEndpointHostsResponse> => {
   const response: DeleteIndexedEndpointHostsResponse = {
     hosts: undefined,
@@ -349,6 +349,10 @@ export const deleteIndexedEndpointHosts = async (
     integrationPolicies: undefined,
     agentPolicies: undefined,
   };
+
+  if (!indexedData) {
+    return response;
+  }
 
   if (indexedData.hosts.length) {
     const query = {

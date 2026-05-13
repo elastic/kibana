@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import { waitForApmMainContainer } from '../page_helpers';
 
 export class AgentExplorerPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -16,9 +17,9 @@ export class AgentExplorerPage {
         'apm'
       )}/settings/agent-explorer?kuery=&agentLanguage=&serviceName=&comparisonEnabled=true&environment=ENVIRONMENT_ALL`
     );
-    await this.page.waitForLoadingIndicatorHidden();
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
+    await waitForApmMainContainer(this.page);
 
-    return this.page;
+    // Wait for the page content to load
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 }

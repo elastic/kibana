@@ -11,6 +11,7 @@ import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/common';
 import type { CancellableTask, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { TaskPriority } from '@kbn/task-manager-plugin/server/task';
@@ -75,6 +76,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
   private adHocRunSchedule: AdHocRunSchedule[] = [];
   private adHocRange: { start: string; end: string | undefined } | null = null;
+  private adHocRunData: AdHocRun | null = null;
   private alertingEventLogger: AlertingEventLogger;
   private cancelled = false;
   private logger: Logger;
@@ -188,6 +190,7 @@ export class AdHocTaskRunner implements CancellableTask {
       ruleRunMetricsStore,
       spaceId: adHocRunData.spaceId,
       isServerless: this.context.isServerless,
+      shouldGrantUiam: this.context.shouldGrantUiam,
     };
     const alertsClient = await initializeAlertsClient<
       RuleTypeParams,
@@ -209,6 +212,8 @@ export class AdHocTaskRunner implements CancellableTask {
         consumer: rule.consumer,
         revision: rule.revision,
         params: rule.params,
+        muteAll: false,
+        mutedInstanceIds: [],
       },
       ruleType,
       runTimestamp: this.runDate,
@@ -260,6 +265,11 @@ export class AdHocTaskRunner implements CancellableTask {
       throw error;
     }
 
+    // Get alerts affected by maintenance windows here,
+    // so we can have the maintenance windows on in-memory alerts before scheduling actions
+    const alertsToUpdateWithMaintenanceWindows =
+      await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
+
     const actionScheduler = new ActionScheduler({
       rule: {
         ...rule,
@@ -285,10 +295,27 @@ export class AdHocTaskRunner implements CancellableTask {
       priority: TaskPriority.Low,
     });
 
-    await actionScheduler.run({
-      activeAlerts: alertsClient.getProcessedAlerts('active'),
-      recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
-    });
+    if (this.shouldLogAndScheduleActionsForAlerts(ruleType)) {
+      await actionScheduler.run({
+        activeAlerts: alertsClient.getProcessedAlerts('active'),
+        recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
+      });
+    } else {
+      this.logger.debug(
+        `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
+      );
+    }
+
+    if (this.shouldLogAndScheduleActionsForAlerts(ruleType)) {
+      await alertsClient.updatePersistedAlerts({
+        alertsToUpdateWithLastScheduledActions: {},
+        alertsToUpdateWithMaintenanceWindows,
+      });
+    } else {
+      this.logger.debug(
+        `skipping updating alerts for rule ${ruleTypeRunnerContext.ruleLogPrefix}: rule execution has been cancelled.`
+      );
+    }
 
     return ruleRunMetricsStore.getMetrics();
   }
@@ -354,6 +381,7 @@ export class AdHocTaskRunner implements CancellableTask {
 
       const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
       this.apiKeyToUse = apiKeyToUse;
+      this.adHocRunData = adHocRunData;
 
       let ruleType: UntypedNormalizedRuleType;
       try {
@@ -369,6 +397,10 @@ export class AdHocTaskRunner implements CancellableTask {
       this.ruleId = rule.id;
       this.alertingEventLogger.addOrUpdateRuleData({
         id: rule.id,
+        uuid:
+          ruleType.solution === 'security' && typeof rule.params.ruleId === 'string'
+            ? rule.params.ruleId
+            : undefined,
         type: ruleType,
         name: rule.name,
         consumer: rule.consumer,
@@ -399,16 +431,17 @@ export class AdHocTaskRunner implements CancellableTask {
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Backfill for Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: rule.id,
-          alerting_rule_consumer: rule.consumer,
-          alerting_rule_name: rule.name,
-          alerting_rule_tags: rule.tags.join(', '),
-          alerting_rule_type_id: rule.alertTypeId,
-          alerting_rule_params: JSON.stringify(rule.params),
-        });
       }
+
+      addSpanLabels({
+        alerting_rule_space_id: spaceId,
+        alerting_rule_id: rule.id,
+        alerting_rule_consumer: rule.consumer,
+        alerting_rule_name: rule.name,
+        alerting_rule_tags: rule.tags.join(', '),
+        alerting_rule_type_id: rule.alertTypeId,
+        alerting_rule_params: JSON.stringify(rule.params),
+      });
 
       if (startedAt) {
         // Capture how long it took for the task to start running after being claimed
@@ -456,83 +489,100 @@ export class AdHocTaskRunner implements CancellableTask {
     } = this.taskInstance;
     const namespace = this.context.spaceIdToNamespace(spaceId);
 
-    const { executionStatus: execStatus, executionMetrics: execMetrics } =
-      await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
-        const { executionStatus, executionMetrics, outcome } = processRunResults({
-          result: this.ruleResult,
-          runDate: this.runDate,
-          runRuleResult,
-        });
-
-        if (!isOk(runRuleResult)) {
-          const error = this.stackTraceLog ? this.stackTraceLog.message : runRuleResult.error;
-          const stack = this.stackTraceLog
-            ? this.stackTraceLog.stackTrace
-            : runRuleResult.error.stack;
-          const message = `Executing ad hoc run with id "${adHocRunParamsId}" has resulted in Error: ${getEsErrorMessage(
-            error
-          )} - ${stack ?? ''}`;
-          const tags = [adHocRunParamsId, 'rule-ad-hoc-run-failed'];
-          if (this.ruleTypeId.length > 0) {
-            tags.push(this.ruleTypeId);
-          }
-          if (this.ruleId.length > 0) {
-            tags.push(this.ruleId);
-          }
-          this.logger.error(message, { tags, error: { stack_trace: stack } });
-        }
-
-        if (apm.currentTransaction) {
-          apm.currentTransaction.setOutcome(outcome);
-        }
-
-        // set start and duration based on event log
-        const { start, duration } = this.alertingEventLogger.getStartAndDuration();
-        if (null != start) {
-          executionStatus.lastExecutionDate = start;
-        }
-        if (null != duration) {
-          executionStatus.lastDuration = nanosToMillis(duration);
-        }
-
-        if (this.scheduleToRunIndex > -1) {
-          let updatedStatus: AdHocRunStatus = adHocRunStatus.COMPLETE;
-          if (this.cancelled) {
-            updatedStatus = adHocRunStatus.TIMEOUT;
-          } else if (outcome === 'failure') {
-            updatedStatus = adHocRunStatus.ERROR;
-          }
-          this.adHocRunSchedule[this.scheduleToRunIndex].status = updatedStatus;
-        }
-
-        // If execution failed due to decrypt error, we should stop running the task
-        // If the user wants to rerun it, they can reschedule
-        // In the future, we can consider saving the task in an error state when we
-        // have one or both of the following abilities
-        // - ability to rerun a failed ad hoc run
-        // - ability to clean up failed ad hoc runs (either manually or automatically)
-        this.shouldDeleteTask =
-          executionStatus.status === 'error' &&
-          (executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Decrypt ||
-            executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Read ||
-            executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.License ||
-            executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Validate);
-
-        await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
-          ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
-          ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
-        });
-
-        if (startedAt) {
-          // Capture how long it took for the rule to run after being claimed
-          this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
-        }
-
-        return { executionStatus, executionMetrics };
+    const result = await this.timer.runWithTimer(TaskRunnerTimerSpan.ProcessRuleRun, async () => {
+      const { executionStatus, executionMetrics, outcome } = processRunResults({
+        result: this.ruleResult,
+        runDate: this.runDate,
+        runRuleResult,
       });
+
+      if (!isOk(runRuleResult)) {
+        const error = this.stackTraceLog ? this.stackTraceLog.message : runRuleResult.error;
+        const stack = this.stackTraceLog
+          ? this.stackTraceLog.stackTrace
+          : runRuleResult.error.stack;
+        const message = `Executing ad hoc run with id "${adHocRunParamsId}" has resulted in Error: ${getEsErrorMessage(
+          error
+        )} - ${stack ?? ''}`;
+        const tags = [adHocRunParamsId, 'rule-ad-hoc-run-failed'];
+        if (this.ruleTypeId.length > 0) {
+          tags.push(this.ruleTypeId);
+        }
+        if (this.ruleId.length > 0) {
+          tags.push(this.ruleId);
+        }
+        this.logger.error(message, { tags, error: { stack_trace: stack } });
+      }
+
+      if (apm.currentTransaction) {
+        apm.currentTransaction.setOutcome(outcome);
+        apm.setCustomContext({
+          execution_outcome: {
+            ...this.ruleMonitoring.getExecutorMetrics(),
+            error: executionStatus.error,
+            warning: executionStatus.warning,
+          },
+        });
+      }
+
+      // set start and duration based on event log
+      const { start, duration } = this.alertingEventLogger.getStartAndDuration();
+      if (null != start) {
+        executionStatus.lastExecutionDate = start;
+      }
+      if (null != duration) {
+        executionStatus.lastDuration = nanosToMillis(duration);
+      }
+
+      if (executionMetrics) {
+        this.ruleMonitoring.addFrameworkMetrics({
+          total_search_duration_ms: executionMetrics.totalSearchDurationMs,
+        });
+      }
+
+      if (this.scheduleToRunIndex > -1) {
+        let updatedStatus: AdHocRunStatus = adHocRunStatus.COMPLETE;
+        if (this.cancelled) {
+          updatedStatus = adHocRunStatus.TIMEOUT;
+        } else if (outcome === 'failure') {
+          updatedStatus = adHocRunStatus.ERROR;
+        }
+        this.adHocRunSchedule[this.scheduleToRunIndex].status = updatedStatus;
+      }
+
+      // If execution failed due to decrypt error, we should stop running the task
+      // If the user wants to rerun it, they can reschedule
+      // In the future, we can consider saving the task in an error state when we
+      // have one or both of the following abilities
+      // - ability to rerun a failed ad hoc run
+      // - ability to clean up failed ad hoc runs (either manually or automatically)
+      this.shouldDeleteTask =
+        executionStatus.status === 'error' &&
+        (executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Decrypt ||
+          executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Read ||
+          executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.License ||
+          executionStatus?.error?.reason === RuleExecutionStatusErrorReasons.Validate);
+
+      await this.updateAdHocRunSavedObjectPostRun(adHocRunParamsId, namespace, {
+        ...(this.shouldDeleteTask ? { status: adHocRunStatus.ERROR } : {}),
+        ...(this.scheduleToRunIndex > -1 ? { schedule: this.adHocRunSchedule } : {}),
+      });
+
+      if (startedAt) {
+        // Capture how long it took for the rule to run after being claimed
+        this.timer.setDuration(TaskRunnerTimerSpan.TotalRunDuration, startedAt);
+      }
+
+      return {
+        executionStatus,
+        executionMetrics,
+        consumerExecutionMetrics: this.ruleMonitoring.getExecutorMetrics(),
+      };
+    });
     this.alertingEventLogger.done({
-      status: execStatus,
-      metrics: execMetrics,
+      status: result.executionStatus,
+      metrics: result.executionMetrics,
+      consumerMetrics: result.consumerExecutionMetrics,
       // in the future if we have other types of ad hoc runs (like preview)
       // we can differentiate and pass in different info
       backfill: {
@@ -663,6 +713,17 @@ export class AdHocTaskRunner implements CancellableTask {
       savedObjectsRepository: this.internalSavedObjectsRepository,
       backfillClient: this.context.backfillClient,
       actionsClient,
+      initiator: this.adHocRunData?.initiator,
     });
+  }
+
+  private shouldLogAndScheduleActionsForAlerts(ruleType: UntypedNormalizedRuleType) {
+    // if execution hasn't been cancelled, return true
+    if (!this.cancelled) {
+      return true;
+    }
+
+    // if execution has been cancelled, return true if EITHER alerting config or rule type indicate to proceed with scheduling actions
+    return !this.context.cancelAlertsOnRuleTimeout || !ruleType.cancelAlertsOnRuleTimeout;
   }
 }

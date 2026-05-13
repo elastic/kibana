@@ -6,16 +6,19 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+
 import WebhookParamsFields from './webhook_params';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 
 describe('WebhookParamsFields renders', () => {
-  test('all params fields is rendered', () => {
-    const actionParams = {
-      body: 'test message',
-    };
+  const actionParams = {
+    body: 'test message',
+  };
 
-    const wrapper = mountWithIntl(
+  it('all params fields are rendered when config is missing', async () => {
+    renderWithKibanaRenderContext(
       <WebhookParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
@@ -30,10 +33,95 @@ describe('WebhookParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').first().prop('value')).toStrictEqual(
-      'test message'
+
+    const jsonEditor = await screen.findByTestId('bodyJsonEditor');
+
+    expect(jsonEditor).toBeInTheDocument();
+    expect(jsonEditor.textContent).toBe('test message');
+    expect(await screen.findByTestId('bodyAddVariableButton')).toBeInTheDocument();
+  });
+
+  it('all params fields are rendered when method is POST', async () => {
+    const actionConnector = {
+      config: { method: 'post' },
+    } as unknown as ActionConnector;
+
+    renderWithKibanaRenderContext(
+      <WebhookParamsFields
+        actionParams={actionParams}
+        actionConnector={actionConnector}
+        errors={{ body: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
+      />
     );
-    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
+
+    const jsonEditor = await screen.findByTestId('bodyJsonEditor');
+
+    expect(jsonEditor).toBeInTheDocument();
+    expect(jsonEditor.textContent).toBe('test message');
+    expect(await screen.findByTestId('bodyAddVariableButton')).toBeInTheDocument();
+  });
+
+  it('all params fields are rendered when method is DELETE', async () => {
+    const actionConnector = {
+      config: { method: 'delete' },
+    } as unknown as ActionConnector;
+
+    renderWithKibanaRenderContext(
+      <WebhookParamsFields
+        actionParams={actionParams}
+        actionConnector={actionConnector}
+        errors={{ body: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
+      />
+    );
+
+    const jsonEditor = await screen.findByTestId('bodyJsonEditor');
+
+    expect(jsonEditor).toBeInTheDocument();
+    expect(await screen.findByText('Optional')).toBeInTheDocument();
+  });
+
+  it('banner displays HTTP method configured', async () => {
+    const actionConnector = {
+      config: { method: 'get' },
+    } as unknown as ActionConnector;
+
+    renderWithKibanaRenderContext(
+      <WebhookParamsFields
+        actionParams={actionParams}
+        actionConnector={actionConnector}
+        errors={{ body: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+            useWithTripleBracesInTemplates: true,
+          },
+        ]}
+      />
+    );
+
+    expect(await screen.findByTestId('placeholderCallout')).toHaveTextContent(
+      'This connector is configured to use HTTP GET requests.'
+    );
   });
 });

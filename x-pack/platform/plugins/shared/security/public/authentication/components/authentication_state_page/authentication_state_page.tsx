@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiImage, EuiSpacer, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiImage, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css, type SerializedStyles } from '@emotion/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
@@ -23,7 +23,14 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
   const kbnFullScreenBgCss = useKbnFullScreenBgCss();
   const theme = useEuiTheme();
   const { euiTheme } = theme;
-  const euiBottomShadowM = useEuiShadow('m');
+  const customLogo = props.logo;
+  const logo = customLogo ? (
+    <EuiImage src={customLogo} size={40} alt="logo" />
+  ) : (
+    <EuiIcon type="logoElastic" size="xxl" />
+  );
+  // custom logo needs to be centered
+  const logoStyle = customLogo ? { padding: 0 } : {};
 
   return (
     <div css={kbnFullScreenBgCss} data-test-subj="secAuthenticationStatePage">
@@ -31,7 +38,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         data-test-subj="secAuthenticationStatePageHeader"
         css={css`
           position: relative;
-          padding: ${euiTheme.size.xl};
+          padding: ${euiTheme.size.m};
           z-index: 10;
         `}
       >
@@ -52,21 +59,16 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
           <span
             data-test-subj="secAuthenticationStatePageLogo"
             css={css`
-              margin-bottom: ${euiTheme.size.xl};
+              margin-bottom: ${euiTheme.size.m};
               display: inline-block;
-              ${euiBottomShadowM};
             `}
+            style={logoStyle}
           >
-            {props.logo ? (
-              <EuiImage src={props.logo} size={40} alt={'logo'} />
-            ) : (
-              <EuiIcon type="logoElastic" size="xxl" />
-            )}
+            {logo}
           </span>
           <EuiTitle size="l">
             <h1>{props.title}</h1>
           </EuiTitle>
-          <EuiSpacer size="xl" />
         </div>
       </header>
       <div

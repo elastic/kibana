@@ -16,15 +16,23 @@ import {
   type ActionConnectorFieldsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { WebhookMethods } from '@kbn/connector-schemas/common/auth/constants';
 import * as i18n from './translations';
 
-const HTTP_VERBS = ['post', 'put'];
+const HTTP_VERBS = [
+  WebhookMethods.POST,
+  WebhookMethods.PUT,
+  WebhookMethods.PATCH,
+  WebhookMethods.GET,
+  WebhookMethods.DELETE,
+];
 const { emptyField, urlField } = fieldValidators;
 
 const LazyLoadedAuthConfig = React.lazy(() => import('../../common/auth/auth_config'));
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
+  isEdit,
 }) => {
   const {
     services: { isWebhookSslWithPfxEnabled: isPfxEnabled },
@@ -38,7 +46,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
             component={SelectField}
             config={{
               label: i18n.METHOD_LABEL,
-              defaultValue: 'post',
+              defaultValue: WebhookMethods.POST,
               validations: [
                 {
                   validator: emptyField(i18n.METHOD_REQUIRED),
@@ -77,6 +85,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       <React.Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazyLoadedAuthConfig
           readOnly={readOnly}
+          isEdit={isEdit}
           isPfxEnabled={isPfxEnabled}
           isOAuth2Enabled={true}
         />

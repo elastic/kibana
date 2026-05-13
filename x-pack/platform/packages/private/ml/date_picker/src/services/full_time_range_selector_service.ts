@@ -44,7 +44,8 @@ export async function setFullTimeRange(
   http: HttpStart,
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean,
-  path: SetFullTimeRangeApiPath = '/internal/file_upload/time_field_range'
+  path: SetFullTimeRangeApiPath = '/internal/file_upload/time_field_range',
+  projectRouting?: string
 ): Promise<GetTimeFieldRangeResponse | undefined> {
   try {
     const runtimeMappings = dataView.getRuntimeMappings();
@@ -53,6 +54,7 @@ export async function setFullTimeRange(
       timeFieldName: dataView.timeFieldName,
       query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
+      ...(projectRouting ? { projectRouting } : {}),
       http,
       path,
     });

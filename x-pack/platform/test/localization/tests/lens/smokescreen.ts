@@ -55,11 +55,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `Maximum de ${field}` : 'Maximum';
       case 'terms':
-        return field
-          ? `${values} valeurs les plus élevées de ${field}`
-          : 'Valeurs les plus élevées';
+        return field ? `Top ${values} valeurs de ${field}` : 'Valeurs les plus élevées';
       case 'sum':
         return 'somme';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '(null)';
       default:
         return term;
     }
@@ -97,9 +98,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'max':
         return field ? `${field} の最高値` : '最高';
       case 'terms':
-        return field ? `${field}の上位${values} の値` : 'トップの値';
+        return field ? `${values} の上位値${field}` : 'トップの値';
       case 'sum':
         return '合計';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '（null）';
       default:
         return term;
     }
@@ -140,6 +144,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} 的排名前 ${values} 的值` : `排名最前值`;
       case 'sum':
         return '求和';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '（空）';
       default:
         return term;
     }
@@ -194,6 +201,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'sum':
         // xpack.maps.aggType.sumLabel
         return 'Summe';
+      case 'null':
+        // fieldFormats.nullLabel
+        return '(Null)';
       default:
         return term;
     }
@@ -210,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       case 'de-DE':
         return getTranslationDe;
       default:
-        return (v: string, field?: string) => v;
+        return (v: string, field?: string) => (v === 'null' ? NULL_LABEL : v);
     }
   }
 
@@ -269,8 +279,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      // 4th item is the other bucket
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
+      // 10th item is the other bucket (9 top values + Other)
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(10);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
@@ -325,8 +335,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.switchToVisualization('line', termTranslator('line'));
 
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('line'));
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql(termTranslator('line'));
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -340,9 +352,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
+      await lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -363,7 +376,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.createLayer('data', undefined, 'bar');
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('bar'));
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -379,16 +392,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // only changes one layer for compatible chart
       await lens.switchToVisualization('line', termTranslator('line'), 1);
 
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('bar'));
-      expect(await lens.getLayerType(1)).to.eql(termTranslator('line'));
+      await lens.ensureLayerTabIsActive(0);
+      expect(await lens.getLayerType()).to.eql(termTranslator('bar'));
+      await lens.ensureLayerTabIsActive(1);
+      expect(await lens.getLayerType()).to.eql(termTranslator('line'));
 
       // generates new one layer chart based on selected layer
       await lens.switchToVisualization('pie', termTranslator('pie'), 1);
-      expect(await lens.getLayerType(0)).to.eql(termTranslator('pie'));
+      expect(await lens.getLayerType()).to.eql(termTranslator('pie'));
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel');
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel');
 
-      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 5));
+      expect(sliceByText).to.be(termTranslator('terms', 'geo.src', 9));
       expect(sizeByText).to.be(termTranslator('average', 'machine.ram'));
     });
 
@@ -707,7 +722,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        NULL_LABEL,
+        termTranslator('null'),
         '222,420.00',
         '702,050.00',
         '1,879,613.33',

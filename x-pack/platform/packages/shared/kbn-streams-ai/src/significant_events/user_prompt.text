@@ -4,5 +4,7 @@
 `description`:
 {{{description}}}
 
-`dataset_analysis`:
-{{{dataset_analysis}}}
+{{#existing_queries}}
+`existing_queries`:
+{{{existing_queries}}}
+{{/existing_queries}}

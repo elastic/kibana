@@ -104,7 +104,7 @@ export const Conversations = memo(({ alertId }: ConversationsProps) => {
                     <EuiButtonEmpty
                       data-test-subj={VIEW_CONVERSATIONS_BUTTON_TEST_ID}
                       iconSide="right"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       onClick={togglePopover}
                     >
                       {VIEW}

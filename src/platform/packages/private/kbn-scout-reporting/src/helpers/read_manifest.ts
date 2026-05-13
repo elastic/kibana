@@ -15,7 +15,7 @@ export interface KibanaJsoncMetadata {
   id: string;
   type: string;
   group: string;
-  owner: string[];
+  owner: string | string[];
   visibility: string;
   plugin?: { id: string };
 }
@@ -32,16 +32,18 @@ export interface KibanaModuleMetadata {
  * Resolves the path to the `kibana.jsonc` manifest based on the Playwright configuration file path.
  * @param configPath - Absolute path to the Playwright configuration file.
  * @returns Absolute path to the `kibana.jsonc` file.
- * @throws Error if `scout` is not found in the path.
+ * @throws Error if `scout` or `scout_*` is not found in the path.
  */
 export const getKibanaModulePath = (configPath: string): string => {
   const pathSegments = configPath.split(path.sep);
-  const testDirIndex = pathSegments.indexOf('scout');
+  const testDirIndex = pathSegments.findIndex(
+    (segment) => segment === 'scout' || segment.startsWith('scout_')
+  );
 
   if (testDirIndex === -1) {
     throw new Error(
-      `Invalid path: "scout" directory not found in ${configPath}.
-  Ensure playwright configuration file is in the plugin directory: '/plugins/<plugin-name>/test/scout/ui/<config-file>'`
+      `Invalid path: "scout" or "scout_*" directory not found in ${configPath}.
+  Ensure Playwright configuration file is in the plugin directory: '/plugins/<plugin-name>/test/{scout,scout_*}/ui/<config-file>'`
     );
   }
 
@@ -83,7 +85,8 @@ export const readKibanaModuleManifest = (filePath: string): KibanaModuleMetadata
     );
   }
 
-  return { id, type, group, visibility, owner: owner || [] };
+  const normalizedOwner = Array.isArray(owner) ? owner : owner ? [owner] : [];
+  return { id, type, group, visibility, owner: normalizedOwner };
 };
 
 /**

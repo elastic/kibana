@@ -55,7 +55,7 @@ describe('useSecretHeaders', () => {
 
   it('fetches secret headers successfully', async () => {
     getMock.mockResolvedValue(['secretHeader1', 'secretHeader2']);
-    const { result } = renderHook(() => useSecretHeaders('connector1'), {
+    const { result } = renderHook(() => useSecretHeaders('connector1', true), {
       wrapper: customWrapper(),
     });
 
@@ -67,7 +67,18 @@ describe('useSecretHeaders', () => {
   });
 
   it('returns empty array if connectorId is undefined', async () => {
-    const { result } = renderHook(() => useSecretHeaders(undefined), { wrapper: customWrapper() });
+    const { result } = renderHook(() => useSecretHeaders(undefined, true), {
+      wrapper: customWrapper(),
+    });
+
+    expect(result.current.data).toEqual([]);
+    expect(getMock).not.toHaveBeenCalled();
+  });
+
+  it('returns empty array if isEdit is false', async () => {
+    const { result } = renderHook(() => useSecretHeaders('connector1', false), {
+      wrapper: customWrapper(),
+    });
 
     expect(result.current.data).toEqual([]);
     expect(getMock).not.toHaveBeenCalled();
@@ -77,7 +88,7 @@ describe('useSecretHeaders', () => {
     const error = { body: { message: 'Failed' }, name: 'Error' };
     getMock.mockRejectedValue(error);
 
-    renderHook(() => useSecretHeaders('connector1'), { wrapper: customWrapper() });
+    renderHook(() => useSecretHeaders('connector1', true), { wrapper: customWrapper() });
 
     await waitFor(() => {
       expect(addErrorMock).toHaveBeenCalledWith(

@@ -6,8 +6,15 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useState, useEffect } from 'react';
-import { EuiPopover, EuiSelectable, EuiBadge, type UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  EuiPopover,
+  EuiSelectable,
+  EuiBadge,
+  type EuiBadgeProps,
+  type UseEuiTheme,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
@@ -50,8 +57,24 @@ export function FieldPicker({
     defaultMessage: 'Add fields',
   });
 
+  const onClickCallback: EuiBadgeProps['onClick'] = useCallback(() => {
+    setOpen(!open);
+  }, [open, setOpen]);
+
+  const onClickProps = useMemo(
+    () =>
+      hasFields
+        ? {
+            onClick: onClickCallback,
+            onClickAriaLabel: badgeDescription,
+          }
+        : {},
+    [badgeDescription, hasFields, onClickCallback]
+  );
+
   return (
     <EuiPopover
+      aria-label={badgeDescription}
       id="graphFieldPicker"
       anchorPosition="downCenter"
       ownFocus
@@ -60,14 +83,9 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           color="hollow"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           aria-disabled={!hasFields}
-          onClick={() => {
-            if (hasFields) {
-              setOpen(!open);
-            }
-          }}
-          onClickAriaLabel={badgeDescription}
+          {...onClickProps}
           css={[
             gphFieldBadgeSizeStyles(euiThemeContext),
             css({

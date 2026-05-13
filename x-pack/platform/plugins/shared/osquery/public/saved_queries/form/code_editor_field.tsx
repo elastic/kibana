@@ -12,6 +12,7 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
+import { useOsquerySchema } from '../../common/hooks/use_osquery_schema';
 import { OsqueryEditor } from '../../editor';
 
 const euiCodeBlockCss = {
@@ -29,6 +30,7 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
   labelAppend,
   helpText,
 }) => {
+  const { osqueryVersion } = useOsquerySchema();
   const {
     field: { onChange, value },
     fieldState: { error },
@@ -50,7 +52,9 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
       label={i18n.translate('xpack.osquery.savedQuery.queryEditorLabel', {
         defaultMessage: 'Query',
       })}
-      labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
+      labelAppend={
+        !isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink osqueryVersion={osqueryVersion} />
+      }
       helpText={helpText}
       isInvalid={!!error?.message}
       error={error?.message}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import { type CoreSetup, type CoreStart, type Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
@@ -37,8 +38,6 @@ export class InterceptTriggerService {
     this.logger = logger;
     this.kibanaVersion = kibanaVersion;
     this.counter = getCounters(usageCollector);
-
-    core.savedObjects.registerType(this.savedObjectRef);
 
     return {
       fetchRegisteredTask: this.fetchRegisteredTask.bind(this),
@@ -84,62 +83,72 @@ export class InterceptTriggerService {
       isRecurrent?: boolean;
     }
   ) {
-    const existingTriggerDefinition = await this.fetchRegisteredTask(triggerId);
+    try {
+      const existingTriggerDefinition = await this.fetchRegisteredTask(triggerId);
 
-    const { triggerAfter, isRecurrent } = cb({
-      existingTriggerDefinition,
-    });
+      const { triggerAfter, isRecurrent } = cb({
+        existingTriggerDefinition,
+      });
 
-    if (!triggerAfter) {
-      this.logger?.error('Trigger interval is not defined');
-      return;
-    }
+      if (!triggerAfter) {
+        this.logger?.error('Trigger interval is not defined');
+        return;
+      }
 
-    if (!existingTriggerDefinition) {
-      const contextName = `productInterceptTriggerCreation:${triggerId}` as const;
+      if (!existingTriggerDefinition) {
+        const contextName = `productInterceptTriggerCreation:${triggerId}` as const;
 
-      await this.savedObjectsClient
-        ?.create<InterceptTriggerRecord>(
-          this.savedObjectRef.name,
-          {
-            firstRegisteredAt: new Date().toISOString(),
+        await this.savedObjectsClient
+          ?.create<InterceptTriggerRecord>(
+            this.savedObjectRef.name,
+            {
+              firstRegisteredAt: new Date().toISOString(),
+              triggerAfter,
+              installedOn: this.kibanaVersion!,
+              recurrent: isRecurrent ?? true,
+            },
+            { id: triggerId }
+          )
+          .then((result) => {
+            this.counter?.usageCounter(contextName);
+            return result;
+          })
+          .catch((err) => {
+            if (SavedObjectsErrorHelpers.isConflictError(err)) {
+              this.logger?.debug(`Conflict error creating registered task: ${err.message}`);
+              return null;
+            }
+
+            this.counter?.errorCounter(contextName);
+            throw err;
+          });
+        return;
+      } else if (
+        // only support updating the trigger interval for existing trigger definitions
+        existingTriggerDefinition &&
+        existingTriggerDefinition.triggerAfter !== triggerAfter
+      ) {
+        const contextName = `productInterceptTriggerUpdate:${triggerId}` as const;
+
+        await this.savedObjectsClient
+          ?.update<InterceptTriggerRecord>(this.savedObjectRef.name, triggerId, {
             triggerAfter,
-            installedOn: this.kibanaVersion!,
-            recurrent: isRecurrent ?? true,
-          },
-          { id: triggerId }
-        )
-        .then((result) => {
-          this.counter?.usageCounter(contextName);
-          return result;
-        })
-        .catch((err) => {
-          this.logger?.error(err.message);
-          this.counter?.errorCounter(contextName);
-        });
-      return;
-    } else if (
-      // only support updating the trigger interval for existing trigger definitions
-      existingTriggerDefinition &&
-      existingTriggerDefinition.triggerAfter !== triggerAfter
-    ) {
-      const contextName = `productInterceptTriggerUpdate:${triggerId}` as const;
+          })
+          .then((result) => {
+            this.counter?.usageCounter(contextName);
+            return result;
+          })
+          .catch((err) => {
+            this.counter?.errorCounter(contextName);
+            throw err;
+          });
+        return;
+      }
 
-      await this.savedObjectsClient
-        ?.update<InterceptTriggerRecord>(this.savedObjectRef.name, triggerId, {
-          triggerAfter,
-        })
-        .then((result) => {
-          this.counter?.usageCounter(contextName);
-          return result;
-        })
-        .catch((err) => {
-          this.logger?.error(err.message);
-          this.counter?.errorCounter(contextName);
-        });
-      return;
+      // Nothing to do if the trigger interval is the same
+    } catch (err) {
+      this.logger?.error(`Error registering trigger definition: ${err.message}`);
+      apm.captureError(err);
     }
-
-    // Nothing to do if the trigger interval is the same
   }
 }

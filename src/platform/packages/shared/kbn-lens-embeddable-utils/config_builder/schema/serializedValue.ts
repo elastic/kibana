@@ -12,19 +12,30 @@ import { schema } from '@kbn/config-schema';
 
 const rangeValueSchema = schema.oneOf([schema.string(), schema.number()]);
 
-const rangeKeySchema = schema.object({
-  type: schema.literal('RangeKey'),
-  from: rangeValueSchema,
-  to: rangeValueSchema,
-  ranges: schema.arrayOf(
-    schema.object({ from: rangeValueSchema, to: rangeValueSchema, label: schema.string() })
-  ),
-});
+const rangeKeySchema = schema.object(
+  {
+    type: schema.literal('range_key'),
+    from: rangeValueSchema,
+    to: rangeValueSchema,
+    ranges: schema.arrayOf(
+      schema.object({
+        from: rangeValueSchema,
+        to: rangeValueSchema,
+        label: schema.string(),
+      }),
+      { maxSize: 100 }
+    ),
+  },
+  { meta: { id: 'range_key', title: 'Range Key' } }
+);
 
-const multiFieldKeySchema = schema.object({
-  type: schema.literal('multiFieldKey'),
-  keys: schema.arrayOf(schema.string()),
-});
+const multiFieldKeySchema = schema.object(
+  {
+    type: schema.literal('multi_field_key'),
+    keys: schema.arrayOf(schema.string(), { maxSize: 100 }),
+  },
+  { meta: { id: 'multi_field_key', title: 'Multi Field Key' } }
+);
 
 export const serializedValueSchema = schema.oneOf([
   schema.string(),

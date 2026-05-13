@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { lensCommonSavedObjectSchema } from './common';
+import { lensCommonSavedObjectSchemaV1 } from './common';
 
-export const lensCMMSearchResultSchema = lensCommonSavedObjectSchema;
+export const lensCMMSearchResultSchema = lensCommonSavedObjectSchemaV1;

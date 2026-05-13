@@ -37,6 +37,8 @@ import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
 import {
   AUDITBEAT_DATA_SOURCE,
   AUDITBEAT_INDEX,
+  CLOUD_DEFEND_DATA_SOURCE,
+  CLOUD_DEFEND_INDEX,
   ELASTIC_DEFEND_DATA_SOURCE,
   ENDPOINT_INDEX,
 } from '../../methods';
@@ -70,6 +72,7 @@ export const SessionView = ({
   // track session open telemetry
   useEffect(() => {
     const sourceMap: Record<string, SessionViewIndices> = {
+      [CLOUD_DEFEND_INDEX]: CLOUD_DEFEND_DATA_SOURCE,
       [ENDPOINT_INDEX]: ELASTIC_DEFEND_DATA_SOURCE,
       [AUDITBEAT_INDEX]: AUDITBEAT_DATA_SOURCE,
     };
@@ -260,9 +263,9 @@ export const SessionView = ({
   }, [openDetails, selectedProcess]);
 
   const onShowAlertDetails = useCallback(
-    (alertUuid: string) => {
+    (alertId: string, alertIndex: string) => {
       if (loadAlertDetails) {
-        loadAlertDetails(alertUuid, () => handleOnAlertDetailsClosed(alertUuid));
+        loadAlertDetails(alertId, alertIndex, () => handleOnAlertDetailsClosed(alertId));
         trackEvent('alert_details_loaded');
       }
     },
@@ -437,7 +440,7 @@ export const SessionView = ({
               <EuiButtonIcon
                 isSelected={showTTY}
                 display={showTTY ? 'fill' : 'empty'}
-                iconType="apmTrace"
+                iconType="chartWaterfall"
                 onClick={onToggleTTY}
                 size="m"
                 aria-label={TOGGLE_TTY_PLAYER}
@@ -470,7 +473,7 @@ export const SessionView = ({
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               onClick={toggleDetailPanel}
-              iconType="list"
+              iconType="listBullet"
               aria-label={i18n.translate('xpack.sessionView.detailsPanelButton.ariaLabel', {
                 defaultMessage: 'Open details panel',
               })}

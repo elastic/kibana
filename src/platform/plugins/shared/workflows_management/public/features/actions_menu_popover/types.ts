@@ -7,17 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSelectableOption, IconType } from '@elastic/eui';
+import type { StepStabilityLevel } from '@kbn/workflows';
+
+export interface EditorCommand {
+  id: string;
+  label: string;
+  iconType: IconType;
+  description?: string;
+}
+
+export interface JumpToStepEntry {
+  id: string;
+  label: string;
+  lineStart: number;
+}
+
+export type MenuItemData =
+  | { kind: 'action'; action: ActionOptionData }
+  | { kind: 'command'; command: EditorCommand }
+  | { kind: 'jump'; entry: JumpToStepEntry }
+  | { kind: 'nav'; target: 'viewAll' | 'viewExisting' };
+
+/**
+ * Options passed to EuiSelectable carry MenuItemData inside the standard
+ * `data` bag. EUI strips `data` from DOM props and spreads its contents
+ * into the object handed to `renderOption`, so:
+ *   - in renderOption:  (option as any).menuItem   ← spread from data
+ *   - in onChange:       (option as any).data.menuItem  ← original objec
+ * t
+ * Use {@link getMenuItemData} to abstract over both contexts.
+ */
+export type MenuSelectableOption = EuiSelectableOption & {
+  data?: { menuItem: MenuItemData };
+};
+
+export const getMenuItemData = (option: EuiSelectableOption): MenuItemData | undefined => {
+  const o = option as unknown as Record<string, unknown>;
+  return (
+    (o.menuItem as MenuItemData | undefined) ??
+    ((o.data as Record<string, unknown> | undefined)?.menuItem as MenuItemData | undefined)
+  );
+};
+
 interface ActionBase {
   id: string;
   label: string;
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
+  stability?: StepStabilityLevel;
+  /**
+   * Ids from the root menu down through this row (for groups: path to open this group).
+   * Set in `getActionOptions` for O(1) navigation when selecting from search.
+   */
+  pathIds?: readonly string[];
 }
 
 export interface ActionGroup extends ActionBase {
-  iconType: string;
+  iconType: IconType;
   options: ActionOptionData[];
+  nestedGroups?: ActionGroup[];
 }
 
 export interface ActionConnectorGroup extends ActionBase {
@@ -27,7 +77,7 @@ export interface ActionConnectorGroup extends ActionBase {
 
 export interface ActionOption extends ActionBase {
   id: string;
-  iconType: string;
+  iconType: IconType;
 }
 
 export interface ActionConnectorOption extends ActionBase {

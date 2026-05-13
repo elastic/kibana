@@ -7,13 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { ExecutionError } from '@kbn/workflows/server';
+import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
+import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
+
+/**
+ * Builds a `StepIoService` test double that owns its own IO maps — mirrors
+ * the production split where state holds metadata only and the service is
+ * sovereign over `input` / `output`. Lifecycle writes still go through
+ * `state.upsertStep`; the runtime tests assert against those calls directly.
+ */
+function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoService {
+  const inputs = new Map<string, JsonValue>();
+  const outputs = new Map<string, JsonValue | null>();
+  const sizes = new Map<string, number>();
+  return {
+    setStepInput: (id: string, input: JsonValue) => {
+      inputs.set(id, input);
+    },
+    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
+      outputs.set(id, output);
+      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+        sizes.set(id, sizeBytes);
+      }
+    },
+    getStepInput: jest.fn((id: string) => inputs.get(id)),
+    getStepOutput: jest.fn((id: string) => outputs.get(id)),
+    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      const latest = state.getLatestStepExecution(stepId);
+      if (!latest) return undefined;
+      return {
+        input: inputs.get(latest.id),
+        output: outputs.get(latest.id),
+        error: latest.error,
+      };
+    }),
+    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
+    getOutputSizeStats: jest.fn(() => {
+      let totalBytes = 0;
+      for (const bytes of sizes.values()) totalBytes += bytes;
+      return { totalBytes, stepCount: sizes.size };
+    }),
+    hasEvictedOutputs: jest.fn().mockReturnValue(false),
+    rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+    prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
+  } as unknown as StepIoService;
+}
 
 describe('StepExecutionRuntime', () => {
   let underTest: StepExecutionRuntime;
@@ -21,6 +70,7 @@ describe('StepExecutionRuntime', () => {
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
   let workflowExecutionState: WorkflowExecutionState;
+  let stepIoService: StepIoService;
   let workflowContextManager: WorkflowContextManager;
   const fakeStepExecutionId = 'fake_step_execution_id';
   const fakeNode = {
@@ -46,6 +96,7 @@ describe('StepExecutionRuntime', () => {
   });
 
   beforeEach(() => {
+    workflowLogger = createMockWorkflowEventLogger();
     workflowContextManager = {} as unknown as WorkflowContextManager;
     mockDateNow = new Date('2025-07-05T20:00:00.000Z');
     workflowExecution = {
@@ -60,13 +111,6 @@ describe('StepExecutionRuntime', () => {
       startedAt: new Date('2025-08-05T20:00:00.000Z').toISOString(),
     } as EsWorkflowExecution;
 
-    workflowLogger = {
-      logInfo: jest.fn(),
-      logWarn: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
-    } as unknown as IWorkflowEventLogger;
-
     workflowExecutionState = {
       getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       updateWorkflowExecution: jest.fn(),
@@ -77,6 +121,8 @@ describe('StepExecutionRuntime', () => {
       load: jest.fn(),
       flush: jest.fn(),
       flushStepChanges: jest.fn(),
+      setLastFailedStepContext: jest.fn(),
+      getLastFailedStepContext: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
@@ -106,6 +152,8 @@ describe('StepExecutionRuntime', () => {
       }
     });
 
+    stepIoService = createPassthroughStepIoService(workflowExecutionState);
+
     underTest = new StepExecutionRuntime({
       node: fakeNode,
       stackFrames: fakeStackFrames,
@@ -114,6 +162,7 @@ describe('StepExecutionRuntime', () => {
       workflowExecutionGraph,
       stepLogger: workflowLogger,
       workflowExecutionState,
+      stepIoService,
     });
   });
 
@@ -132,10 +181,12 @@ describe('StepExecutionRuntime', () => {
     it('should be able to retrieve the step result', () => {
       (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
-        input: {},
-        output: { success: true, data: {} },
-        error: 'Fake error',
+        error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
+      // IO lives in the service now — seed it through the passthrough mock.
+      stepIoService.setStepInput(fakeStepExecutionId, {});
+      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
+
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(
         `fake_step_execution_id`
@@ -143,7 +194,7 @@ describe('StepExecutionRuntime', () => {
       expect(stepResult).toEqual({
         input: {},
         output: { success: true, data: {} },
-        error: 'Fake error',
+        error: new ExecutionError({ type: 'Error', message: 'Fake error' }),
       });
     });
   });
@@ -160,8 +211,8 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should upsertStep with the fake step execution id', async () => {
-      await underTest.setCurrentStepState({});
+    it('should upsertStep with the fake step execution id', () => {
+      underTest.setCurrentStepState({});
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'fake_step_execution_id',
@@ -169,13 +220,13 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should update the step execution with the state and be able to retrieve it', async () => {
+    it('should update the step execution with the state and be able to retrieve it', () => {
       (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
         state: { success: true, data: {} },
       } as Partial<EsWorkflowStepExecution>);
       const fakeState = { success: true, data: {} };
-      await underTest.setCurrentStepState(fakeState);
+      underTest.setCurrentStepState(fakeState);
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -212,8 +263,8 @@ describe('StepExecutionRuntime', () => {
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
     });
 
-    it('should upsertStep with the fake step execution id', async () => {
-      await underTest.startStep();
+    it('should upsertStep with the fake step execution id', () => {
+      underTest.startStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -222,8 +273,8 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should create a step execution with "RUNNING" status', async () => {
-      await underTest.startStep();
+    it('should create a step execution with "RUNNING" status', () => {
+      underTest.startStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -235,8 +286,8 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should log the start of step execution', async () => {
-      await underTest.startStep();
+    it('should log the start of step execution', () => {
+      underTest.startStep();
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' started`, {
         event: { action: 'step-start', category: ['workflow', 'step'] },
         tags: ['workflow', 'step', 'start'],
@@ -253,8 +304,8 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should save step path from the workflow execution stack', async () => {
-      await underTest.startStep();
+    it('should save step path from the workflow execution stack', () => {
+      underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeStack: [
@@ -265,11 +316,29 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should save step type', async () => {
-      await underTest.startStep();
+    it('should save step type', () => {
+      underTest.startStep();
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
           stepType: 'fakeStepType1',
+        })
+      );
+    });
+
+    it('should preserve startedAt when step execution already exists (e.g. poll resume)', () => {
+      const originalStartedAt = '2025-08-05T00:00:00.000Z';
+      (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+        id: 'fake_step_execution_id',
+        stepId: 'fakeStepId1',
+        startedAt: originalStartedAt,
+      } as Partial<EsWorkflowStepExecution>);
+      mockDateNow = new Date('2025-08-06T00:00:00.000Z');
+
+      underTest.startStep();
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          startedAt: originalStartedAt,
         })
       );
     });
@@ -298,21 +367,21 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should correctly calculate step completedAt and executionTimeMs', async () => {
-      const expectedCompletedAt = new Date('2025-08-06T00:00:02.000Z');
-      mockDateNow = expectedCompletedAt;
-      await underTest.finishStep();
+    it('should correctly calculate step finishedAt and executionTimeMs', () => {
+      const expectedFinishedAt = new Date('2025-08-06T00:00:02.000Z');
+      mockDateNow = expectedFinishedAt;
+      underTest.finishStep();
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
-          completedAt: expectedCompletedAt.toISOString(),
+          finishedAt: expectedFinishedAt.toISOString(),
           executionTimeMs: 2000,
         })
       );
     });
 
     describe('step execution succeeds', () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
           (stepExecutionId) => {
             if (stepExecutionId === 'fake_step_execution_id') {
@@ -320,15 +389,15 @@ describe('StepExecutionRuntime', () => {
                 stepId: 'node1',
                 startedAt: '2025-08-05T00:00:00.000Z',
                 output: { success: true, data: {} },
-                error: null,
+                error: undefined,
               } as Partial<EsWorkflowStepExecution>;
             }
           }
         );
       });
 
-      it('should upsert step with the fake step execution id', async () => {
-        await underTest.finishStep();
+      it('should upsert step with the fake step execution id', () => {
+        underTest.finishStep();
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -337,8 +406,8 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should finish a step execution with "COMPLETED" status', async () => {
-        await underTest.finishStep();
+      it('should finish a step execution with "COMPLETED" status', () => {
+        underTest.finishStep();
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -347,8 +416,8 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should finish a step execution executionTime', async () => {
-        await underTest.finishStep();
+      it('should finish a step execution executionTime', () => {
+        underTest.finishStep();
 
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -357,8 +426,8 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should log successful step execution', async () => {
-        await underTest.finishStep();
+      it('should log successful step execution', () => {
+        underTest.finishStep();
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Step 'fakeStepId1' completed`, {
           event: {
             action: 'step-complete',
@@ -382,6 +451,113 @@ describe('StepExecutionRuntime', () => {
     });
   });
 
+  describe('tryEnterWaitUntil', () => {
+    beforeEach(() => {
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        ...workflowExecution,
+        currentNodeId: 'node1',
+      });
+    });
+
+    describe('timer-based wait (resumeDate provided)', () => {
+      it('should enter wait state and store resumeAt on first call', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        const resumeDate = new Date('2025-12-31T00:00:00.000Z');
+        const entered = underTest.tryEnterWaitUntil(resumeDate);
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.WAITING,
+            state: expect.objectContaining({ resumeAt: resumeDate.toISOString() }),
+          })
+        );
+      });
+
+      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+
+        expect(entered).toBe(false);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ state: undefined })
+        );
+      });
+
+      it('should enter wait state even when status is WAITING but resumeAt is absent', () => {
+        // Guards against the broad-detection bug: status alone must not trigger exit
+        // for timer-based waits — only resumeAt is authoritative.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: {},
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+
+        expect(entered).toBe(true);
+      });
+    });
+
+    describe('indefinite wait (resumeDate omitted)', () => {
+      it('should enter wait state with WAITING_FOR_INPUT status on first call', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ status: ExecutionStatus.WAITING_FOR_INPUT })
+        );
+      });
+
+      it('should exit wait state on resume call when step status is already WAITING_FOR_INPUT', () => {
+        // Simulates the resume run: stepExecution already has WAITING_FOR_INPUT status
+        // and no resumeAt in state. Without the status-based check this would return true
+        // (re-entering wait) instead of false (exiting wait) — the core bug being tested.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          state: {},
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(entered).toBe(false);
+      });
+
+      it('should not store resumeAt in state for indefinite waits', () => {
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue(undefined);
+
+        underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.not.objectContaining({
+            state: expect.objectContaining({ resumeAt: expect.anything() }),
+          })
+        );
+      });
+
+      it('should strip a residual resumeAt from prior state when entering an indefinite wait', () => {
+        // Guards against a prior timer-based run leaving a resumeAt that leaks into
+        // a subsequent indefinite wait record and confuses the scheduler.
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.RUNNING,
+          state: { resumeAt: '2025-12-31T00:00:00.000Z', otherKey: 'kept' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        underTest.tryEnterWaitUntil(undefined, ExecutionStatus.WAITING_FOR_INPUT);
+
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({ state: { otherKey: 'kept' } })
+        );
+      });
+    });
+  });
+
   describe('failStep', () => {
     beforeEach(() => {
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
@@ -394,9 +570,9 @@ describe('StepExecutionRuntime', () => {
       });
     });
 
-    it('should upsert step with the fake step execution id', async () => {
+    it('should upsert step with the fake step execution id', () => {
       const error = new Error('Step execution failed');
-      await underTest.failStep(error);
+      underTest.failStep(error);
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -405,21 +581,35 @@ describe('StepExecutionRuntime', () => {
       );
     });
 
-    it('should mark the step as failed', async () => {
-      const error = new Error('Step execution failed');
-      await underTest.failStep(error);
+    it.each([
+      {
+        testName: 'JS error',
+        inputError: new Error('Step execution failed'),
+        expectedError: { type: 'Error', message: 'Step execution failed' },
+      },
+      {
+        testName: 'execution error',
+        inputError: new ExecutionError({ type: 'CustomError', message: 'Custom step error' }),
+        expectedError: { type: 'CustomError', message: 'Custom step error' },
+      },
+    ])(
+      'should mark the step as failed and map "$testName" error to execution error',
+      async (testCase) => {
+        const { inputError, expectedError } = testCase;
+        await underTest.failStep(inputError);
 
-      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: ExecutionStatus.FAILED,
-          error: String(error),
-        })
-      );
-    });
+        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+            error: expectedError,
+          })
+        );
+      }
+    );
 
-    it('should log the failure of the step', async () => {
+    it('should log the failure of the step', () => {
       const error = new Error('Step execution failed');
-      await underTest.failStep(error);
+      underTest.failStep(error);
 
       expect(workflowLogger.logError).toHaveBeenCalledWith(
         `Step 'fakeStepId1' failed: Step execution failed`,
@@ -439,6 +629,58 @@ describe('StepExecutionRuntime', () => {
           },
         }
       );
+    });
+
+    it('should use stepId as stepName for setLastFailedStepContext when configuration.name is not a string', () => {
+      const nodeWithNonStringName = {
+        ...fakeNode,
+        configuration: { name: 42 },
+      } as GraphNodeUnion;
+
+      const runtime = new StepExecutionRuntime({
+        node: nodeWithNonStringName,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+      runtime.failStep(new Error('fail'));
+
+      expect(workflowExecutionState.setLastFailedStepContext).toHaveBeenCalledWith({
+        stepId: 'fakeStepId1',
+        stepName: 'fakeStepId1',
+        stepExecutionId: fakeStepExecutionId,
+      });
+    });
+
+    it('should use configuration.name for setLastFailedStepContext when it is a string', () => {
+      const nodeWithDisplayName = {
+        ...fakeNode,
+        configuration: { name: 'Display name' },
+      } as GraphNodeUnion;
+
+      const runtime = new StepExecutionRuntime({
+        node: nodeWithDisplayName,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: workflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+      runtime.failStep(new Error('fail'));
+
+      expect(workflowExecutionState.setLastFailedStepContext).toHaveBeenCalledWith({
+        stepId: 'fakeStepId1',
+        stepName: 'Display name',
+        stepExecutionId: fakeStepExecutionId,
+      });
     });
   });
 });

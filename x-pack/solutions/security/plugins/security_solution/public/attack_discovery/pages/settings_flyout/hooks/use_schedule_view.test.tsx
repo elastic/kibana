@@ -16,7 +16,6 @@ import { TestProviders } from '../../../../common/mock';
 import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -28,13 +27,6 @@ jest.mock('react-router', () => ({
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
 jest.mock('../schedule/logic/use_find_schedules');
-
-const mockUseKibanaFeatureFlags = jest
-  .fn()
-  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
-jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
-}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
@@ -179,7 +171,6 @@ describe('useScheduleView', () => {
 
       const createButton = screen.getByTestId('createSchedule');
       fireEvent.mouseOver(createButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

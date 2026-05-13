@@ -49,8 +49,9 @@ export const memoryUsage: SchemaBasedFormula = {
   label: MEMORY_USAGE_LABEL,
   value: {
     ecs: 'average(system.memory.actual.used.pct)',
-    semconv:
-      "average(system.memory.utilization, kql='state: used') + average(system.memory.utilization, kql='state: buffered') + average(system.memory.utilization, kql='state: slab_reclaimable') + average(system.memory.utilization, kql='state: slab_unreclaimable')",
+    // OTel collectors may omit buffered/slab states; computing usage from the
+    // required `used` state avoids null results in Hosts metric cards.
+    semconv: "average(system.memory.utilization, kql='state: used')",
   },
   format: 'percent',
 

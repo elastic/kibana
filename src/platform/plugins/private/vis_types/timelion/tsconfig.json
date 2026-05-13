@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -37,6 +37,7 @@
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/vis-type-timeseries-plugin",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

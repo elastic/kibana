@@ -5,47 +5,30 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { PageScope } from '../../data_view_manager/constants';
 import { sourcererActions, sourcererSelectors } from '../store';
-import { SourcererScopeName } from '../store/model';
 import { useUserInfo } from '../../detections/components/user_info';
 import { timelineSelectors } from '../../timelines/store';
 import { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { getScopePatternListSelection } from '../store/helpers';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
-import { createSourcererDataView } from './create_sourcerer_data_view';
 import { useDataView } from '../../common/containers/source/use_data_view';
 import type { State } from '../../common/store/types';
-import { useKibana } from '../../common/lib/kibana';
 import { useSourcererDataView } from '.';
 import { useSyncSourcererUrlState } from '../../data_view_manager/hooks/use_sync_url_state';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-const defaultInitResult = { browserFields: {} };
 
 export const useInitSourcerer = (
   scopeId:
-    | SourcererScopeName.default
-    | SourcererScopeName.detections
-    | SourcererScopeName.explore = SourcererScopeName.default
+    | PageScope.default
+    | PageScope.alerts
+    | PageScope.attacks
+    | PageScope.explore = PageScope.default
 ) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  /* eslint-disable react-hooks/rules-of-hooks */
-  // NOTE: skipping the entire hook on purpose when the new picker is enabled
-  // will be removed as part of the cleanup in https://github.com/elastic/security-team/issues/11959
-  if (newDataViewPickerEnabled) {
-    return defaultInitResult;
-  }
-
   const dispatch = useDispatch();
-  const {
-    data: { dataViews },
-  } = useKibana().services;
-  const abortCtrl = useRef(new AbortController());
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
   const { loading: loadingSignalIndex, isSignalIndexExists, signalIndexName } = useUserInfo();
@@ -54,7 +37,7 @@ export const useInitSourcerer = (
 
   const signalIndexNameSourcerer = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
-  const { addError, addWarning } = useAppToasts();
+  const { addWarning } = useAppToasts();
 
   useEffect(() => {
     if (defaultDataView.error != null) {
@@ -87,13 +70,13 @@ export const useInitSourcerer = (
 
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const timelineDataViewId = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, SourcererScopeName.timeline);
+    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, PageScope.timeline);
   });
   const timelineSelectedPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.timeline);
+    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.timeline);
   });
   const timelineMissingPatterns = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeMissingPatterns(state, SourcererScopeName.timeline);
+    return sourcererSelectors.sourcererScopeMissingPatterns(state, PageScope.timeline);
   });
   const timelineSelectedDataView = useMemo(() => {
     return kibanaDataViews.find((dataView) => dataView.id === timelineDataViewId);
@@ -118,7 +101,7 @@ export const useInitSourcerer = (
       if (id != null && id.length > 0 && !searchedIds.current.includes(id)) {
         searchedIds.current = [...searchedIds.current, id];
 
-        const currentScope = i === 0 ? SourcererScopeName.default : SourcererScopeName.timeline;
+        const currentScope = i === 0 ? PageScope.default : PageScope.timeline;
 
         const needToBeInit =
           id === scopeDataViewId
@@ -132,7 +115,7 @@ export const useInitSourcerer = (
           dataViewId: id,
           scopeId: currentScope,
           needToBeInit,
-          ...(needToBeInit && currentScope === SourcererScopeName.timeline
+          ...(needToBeInit && currentScope === PageScope.timeline
             ? {
                 skipScopeUpdate: timelineSelectedPatterns.length > 0,
               }
@@ -164,11 +147,11 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
-            SourcererScopeName.timeline,
+            PageScope.timeline,
             signalIndexName,
             true
           ),
@@ -176,11 +159,11 @@ export const useInitSourcerer = (
       );
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.analyzer,
+          id: PageScope.analyzer,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
-            SourcererScopeName.analyzer,
+            PageScope.analyzer,
             signalIndexName,
             true
           ),
@@ -195,11 +178,11 @@ export const useInitSourcerer = (
       initialTimelineSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
-            SourcererScopeName.timeline,
+            PageScope.timeline,
             signalIndexNameSourcerer,
             true
           ),
@@ -207,11 +190,11 @@ export const useInitSourcerer = (
       );
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.analyzer,
+          id: PageScope.analyzer,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
-            SourcererScopeName.analyzer,
+            PageScope.analyzer,
             signalIndexNameSourcerer,
             true
           ),
@@ -226,87 +209,12 @@ export const useInitSourcerer = (
     signalIndexName,
     signalIndexNameSourcerer,
   ]);
-  const { dataViewId, browserFields } = useSourcererDataView(scopeId);
-
-  const updateSourcererDataView = useCallback(
-    (newSignalsIndex: string) => {
-      const asyncSearch = async (newPatternList: string[]) => {
-        abortCtrl.current = new AbortController();
-
-        dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
-
-        try {
-          const response = await createSourcererDataView({
-            dataViewService: dataViews,
-            defaultDetails: {
-              dataViewId,
-              patternList: newPatternList,
-            },
-            alertDetails: {},
-          });
-
-          if (response?.defaultDataView.patternList.includes(newSignalsIndex)) {
-            // first time signals is defined and validated in the sourcerer
-            // redo indexFieldsSearch
-            indexFieldsSearch({ dataViewId: response.defaultDataView.id });
-            dispatch(sourcererActions.setSourcererDataViews(response));
-          }
-          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
-        } catch (err) {
-          if (err.name === 'AbortError') {
-            // the fetch was canceled, we don't need to do anything about it
-          } else {
-            addError(err, {
-              title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-                defaultMessage: 'Error updating Security Data View',
-              }),
-              toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-                defaultMessage: 'Refresh the page',
-              }),
-            });
-          }
-          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
-        }
-      };
-
-      if (defaultDataView.title.indexOf(newSignalsIndex) === -1) {
-        abortCtrl.current.abort();
-        asyncSearch([...defaultDataView.title.split(','), newSignalsIndex]);
-      }
-    },
-    [defaultDataView.title, dispatch, dataViews, dataViewId, indexFieldsSearch, addError]
-  );
-
-  const onSignalIndexUpdated = useCallback(() => {
-    if (
-      !loadingSignalIndex &&
-      signalIndexName != null &&
-      signalIndexNameSourcerer == null &&
-      defaultDataView.id.length > 0
-    ) {
-      updateSourcererDataView(signalIndexName);
-      dispatch(sourcererActions.setSignalIndexName({ signalIndexName }));
-    }
-  }, [
-    defaultDataView.id.length,
-    dispatch,
-    loadingSignalIndex,
-    signalIndexName,
-    signalIndexNameSourcerer,
-    updateSourcererDataView,
-  ]);
-
-  useEffect(() => {
-    onSignalIndexUpdated();
-    // because we only want onSignalIndexUpdated to run when signalIndexName updates,
-    // but we want to know about the updates from the dependencies of onSignalIndexUpdated
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signalIndexName]);
+  const { browserFields } = useSourcererDataView(scopeId);
 
   // Related to the detection page
   useEffect(() => {
     if (
-      scopeId === SourcererScopeName.detections &&
+      scopeId === PageScope.alerts &&
       isSignalIndexExists &&
       signalIndexName != null &&
       initialDetectionSourcerer.current &&
@@ -315,33 +223,35 @@ export const useInitSourcerer = (
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.detections,
+          id: PageScope.alerts,
           selectedDataViewId: defaultDataView.id,
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
-            SourcererScopeName.detections,
+            PageScope.alerts,
             signalIndexName,
             true
           ),
         })
       );
     } else if (
-      scopeId === SourcererScopeName.detections &&
+      scopeId === PageScope.alerts &&
       signalIndexNameSourcerer != null &&
-      initialTimelineSourcerer.current &&
+      initialDetectionSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
       initialDetectionSourcerer.current = false;
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.detections,
-        selectedDataViewId: defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          defaultDataView,
-          SourcererScopeName.detections,
-          signalIndexNameSourcerer,
-          true
-        ),
-      });
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: PageScope.alerts,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            PageScope.alerts,
+            signalIndexNameSourcerer,
+            true
+          ),
+        })
+      );
     }
   }, [
     defaultDataView,

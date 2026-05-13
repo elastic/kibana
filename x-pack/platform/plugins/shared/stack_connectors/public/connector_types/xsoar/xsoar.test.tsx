@@ -44,7 +44,7 @@ describe('XSOAR RUN action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         name: [],
       },
@@ -63,7 +63,7 @@ describe('XSOAR RUN action params validation', () => {
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         name: [translations.NAME_REQUIRED],
       },

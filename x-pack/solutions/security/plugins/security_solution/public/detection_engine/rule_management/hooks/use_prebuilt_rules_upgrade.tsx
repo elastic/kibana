@@ -7,11 +7,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
-import { useIsUpgradingSecurityPackages } from '../logic/use_upgrade_security_packages';
+import { useIsInitializingPrebuiltRulesPackage } from '../logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { usePrebuiltRulesCustomizationStatus } from '../logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { usePerformUpgradeRules } from '../logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
@@ -70,9 +71,10 @@ export function usePrebuiltRulesUpgrade({
   onUpgrade,
 }: UsePrebuiltRulesUpgradeParams) {
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const { telemetry } = useKibana().services;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const {
     data: upgradeReviewResponse,
@@ -254,9 +256,10 @@ export function usePrebuiltRulesUpgrade({
       return (
         <EuiButton
           disabled={
+            !canEditRules ||
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
-            isUpgradingSecurityPackages ||
+            isInitializingPrebuiltRulesPackage ||
             (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
             isEditingRule
           }
@@ -278,9 +281,10 @@ export function usePrebuiltRulesUpgrade({
     },
     [
       rulesUpgradeState,
+      canEditRules,
       loadingRules,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       isRulesCustomizationEnabled,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
@@ -414,7 +418,7 @@ export function usePrebuiltRulesUpgrade({
     isLoading: isLoading || areMlJobsLoading,
     isFetching,
     isRefetching,
-    isUpgradingSecurityPackages,
+    isInitializingPrebuiltRulesPackage,
     loadingRules,
     lastUpdated: dataUpdatedAt,
     rulePreviewFlyout,

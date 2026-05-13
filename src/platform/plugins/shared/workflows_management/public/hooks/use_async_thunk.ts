@@ -19,19 +19,19 @@ type AsyncThunkDispatch = <R, P, C extends {}>(
 interface AsyncState<R> {
   result: R | undefined;
   isLoading: boolean;
-  error: string | null;
+  error: Error | null;
 }
 const initialState = <R>(): AsyncState<R> => ({ result: undefined, isLoading: false, error: null });
 
 type AsyncAction<R> =
   | { type: 'START' }
   | { type: 'SUCCESS'; payload: R }
-  | { type: 'ERROR'; payload: string | null };
+  | { type: 'ERROR'; payload: Error };
 
 function asyncReducer<R>(state: AsyncState<R>, action: AsyncAction<R>): AsyncState<R> {
   switch (action.type) {
     case 'START':
-      return { ...state, result: undefined, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null };
     case 'SUCCESS':
       return { ...state, result: action.payload, isLoading: false, error: null };
     case 'ERROR':
@@ -46,7 +46,7 @@ export const useAsyncThunkState = <R, P, C extends {}>(
   asyncThunk: AsyncThunk<R, P, C>
 ): [
   start: (params: P) => Promise<void>,
-  { result: R | undefined; isLoading: boolean; error: string | null }
+  { result: R | undefined; isLoading: boolean; error: Error | null }
 ] => {
   const dispatchAsyncThunk = useDispatch<AsyncThunkDispatch>();
   const [state, dispatch] = useReducer(asyncReducer<R>, initialState<R>());

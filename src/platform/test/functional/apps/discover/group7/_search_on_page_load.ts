@@ -17,7 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'header',
@@ -159,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(true);
 
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));

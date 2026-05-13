@@ -26,7 +26,8 @@ export const registerBulkDeleteRoute = (router: IRouter) => {
           schema.object({
             type: schema.string(),
             id: schema.string(),
-          })
+          }),
+          { maxSize: 10_000 }
         ),
       },
     },

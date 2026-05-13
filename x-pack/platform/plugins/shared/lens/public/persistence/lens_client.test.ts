@@ -9,6 +9,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 
 import type { LooseLensAttributes } from './lens_client';
 import { LensClient } from './lens_client';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 const mockResponse = {
   data: {},
@@ -21,7 +22,7 @@ const mockAttributes: LooseLensAttributes = {
   state: {
     visualization: {},
   },
-  version: 1,
+  version: LENS_ITEM_LATEST_VERSION,
   description: 'bar',
 };
 

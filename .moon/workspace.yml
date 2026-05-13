@@ -2,25 +2,24 @@
 $schema: https://moonrepo.dev/schemas/workspace.json
 
 projects:
-    # for now we can list explicitly, it's faster than resolving globs
   globs:
-    - src/platform/packages/shared/kbn-monaco/moon.yml
-    - src/platform/packages/private/kbn-ui-shared-deps-src/moon.yml
-    - src/platform/packages/private/kbn-ui-shared-deps-npm/moon.yml
-    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
+    - src/**/moon.yml
+    - x-pack/**/moon.yml
+    - examples/**/moon.yml
+    - packages/**/moon.yml
 vcs:
   defaultBranch: main
-  manager: git
-
-hasher:
-  batchSize: 1500
+  client: git
 
 pipeline:
   installDependencies: false
+  syncWorkspace: false
+  syncProjectDependencies: false
+  syncProjects: false
 
 # https://moonrepo.dev/docs/guides/remote-cache
 # Auth credentials will be missing on local environments, but that's OK.
-unstable_remote:
+remote:
   host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
   api: http
   cache:
@@ -28,5 +27,6 @@ unstable_remote:
   auth:
     headers:
       Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
+
 
 telemetry: false

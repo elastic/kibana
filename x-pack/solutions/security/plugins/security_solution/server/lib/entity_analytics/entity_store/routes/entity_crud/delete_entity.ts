@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { DeleteSingleEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/delete_entity.gen';
 import {
@@ -21,8 +21,14 @@ import {
   EntityNotFoundError,
 } from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
+import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
+import { ENTITY_STORE_API_CALL_EVENT } from '../../../../telemetry/event_based/events';
 
-export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
+export const deleteEntity = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  telemetry: ITelemetryEventsSender,
+  logger: Logger
+) => {
   router.versioned
     .delete({
       access: 'public',
@@ -56,13 +62,19 @@ export const deleteEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
           await secSol
             .getEntityStoreCrudClient()
             .deleteEntity(request.params.entityType, request.body);
-
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+          });
           return response.ok({
             body: {
               deleted: true,
             },
           });
         } catch (error) {
+          telemetry.reportEBT(ENTITY_STORE_API_CALL_EVENT, {
+            endpoint: request.route.path,
+            error: (error as Error).message,
+          });
           if (
             error instanceof EngineNotRunningError ||
             error instanceof CapabilityNotEnabledError

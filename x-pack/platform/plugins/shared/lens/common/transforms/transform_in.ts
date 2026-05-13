@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { LensTransformDependencies } from '.';
+import {
+  isLensAPIFormat,
+  isLensLegacyFormat,
+  type LensConfigBuilder,
+} from '@kbn/lens-embeddable-utils';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DOC_TYPE } from '../constants';
 import { extractLensReferences } from '../references';
 import type {
@@ -13,41 +18,72 @@ import type {
   LensByValueTransformInResult,
   LensTransformIn,
 } from './types';
-import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensState } from './utils';
+import { LENS_SAVED_OBJECT_REF_NAME, isByRefLensConfig } from './utils';
+import type { LensSerializedState } from '../../public';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from './utils';
 
 /**
  * Transform from Lens API format to Lens Serialized State
  */
-export const getTransformIn = ({
-  transformEnhancementsIn,
-}: LensTransformDependencies): LensTransformIn => {
-  return function transformIn(state) {
-    const { enhancementsState: enhancements = null, enhancementsReferences = [] } =
-      state.enhancements ? transformEnhancementsIn?.(state.enhancements) ?? {} : {};
-    const enhancementsState = enhancements ? { enhancements } : {};
+export const getTransformIn = (
+  builder: LensConfigBuilder,
+  transformDrilldownsIn: DrilldownTransforms['transformIn'],
+  isDashboardAppRequest: boolean
+): LensTransformIn => {
+  return function transformIn(config) {
+    const { state: storedConfig, references: drilldownReferences } = transformDrilldownsIn(config);
 
-    if (isByRefLensState(state)) {
-      const { savedObjectId: id, ...rest } = state;
+    if (isByRefLensConfig(storedConfig)) {
+      const { ref_id, ...rest } = storedConfig;
       return {
+        // ref_id is extracted to references, so the stored state doesn't include it
         state: rest,
-        ...enhancementsState,
         references: [
           {
             name: LENS_SAVED_OBJECT_REF_NAME,
             type: DOC_TYPE,
-            id: id!,
+            id: ref_id!,
           },
-          ...enhancementsReferences,
+          ...drilldownReferences,
         ],
       } satisfies LensByRefTransformInResult;
     }
 
-    const { state: lensState, references: lensReferences } = extractLensReferences(state);
+    if (isDashboardAppRequest && !builder.isEnabled) {
+      const { state, references } = extractLensReferences(storedConfig as LensSerializedState);
+      return {
+        state,
+        references: [...references, ...drilldownReferences],
+      } satisfies LensByValueTransformInResult;
+    }
+
+    const lensConfig =
+      isFlattenedAPIConfig(storedConfig) && !isLensLegacyFormat(storedConfig)
+        ? unflattenAPIConfig(storedConfig)
+        : storedConfig;
+
+    if (!('attributes' in lensConfig)) {
+      // Not sure if this is possible
+      throw new Error('attributes are missing');
+    }
+
+    const chartType = builder.getType(lensConfig.attributes);
+    // should be filtered out my unmapped panel check
+    if (!builder.isSupported(chartType)) {
+      throw new Error(`Lens "${chartType}" chart type is not supported`);
+    }
+
+    const attributes = isLensAPIFormat(lensConfig.attributes)
+      ? builder.fromAPIFormat(lensConfig.attributes)
+      : lensConfig.attributes;
+    const { state, references } = extractLensReferences({
+      ...lensConfig,
+      attributes,
+    });
 
     return {
-      state: lensState,
-      ...enhancementsState,
-      references: [...lensReferences, ...enhancementsReferences],
+      state,
+      references: [...references, ...drilldownReferences],
     } satisfies LensByValueTransformInResult;
   };
 };

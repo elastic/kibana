@@ -13,9 +13,14 @@ describe('MigrationDataInputContext', () => {
   it('provides the context', () => {
     const openFlyout = jest.fn();
     const closeFlyout = jest.fn();
+    const isFlyoutOpen = true;
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <MigrationDataInputContextProvider openFlyout={openFlyout} closeFlyout={closeFlyout}>
+      <MigrationDataInputContextProvider
+        openFlyout={openFlyout}
+        closeFlyout={closeFlyout}
+        isFlyoutOpen={isFlyoutOpen}
+      >
         {children}
       </MigrationDataInputContextProvider>
     );
@@ -24,6 +29,7 @@ describe('MigrationDataInputContext', () => {
 
     expect(result.current.openFlyout).toBe(openFlyout);
     expect(result.current.closeFlyout).toBe(closeFlyout);
+    expect(result.current.isFlyoutOpen).toBe(isFlyoutOpen);
   });
 
   it('throws an error when used outside of the provider', () => {

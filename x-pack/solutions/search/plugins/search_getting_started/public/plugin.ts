@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
-
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AppStatus, DEFAULT_APP_CATEGORIES, type AppUpdater } from '@kbn/core/public';
+import type {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { QueryClient } from '@kbn/react-query';
-import { SEARCH_GETTING_STARTED_FEATURE_FLAG } from '@kbn/search-shared-ui/src/constants';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 
 import type {
@@ -30,8 +33,11 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
-  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private featureFlagSubscription: Subscription | undefined;
+  private readonly kibanaVersion: string;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+  }
 
   public setup(
     core: CoreSetup<
@@ -41,6 +47,7 @@ export class SearchGettingStartedPlugin
     deps: {}
   ): SearchGettingStartedPluginSetup {
     const queryClient = new QueryClient({});
+    const kibanaVersion = this.kibanaVersion;
     core.application.register({
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
@@ -57,10 +64,8 @@ export class SearchGettingStartedPlugin
           usageCollection: depsStart.usageCollection,
         };
 
-        return renderApp(coreStart, services, element, queryClient);
+        return renderApp(coreStart, services, element, queryClient, kibanaVersion);
       },
-      status: AppStatus.inaccessible,
-      updater$: this.appUpdater$,
       order: 1,
       visibleIn: ['globalSearch', 'sideNav'],
     });
@@ -69,25 +74,8 @@ export class SearchGettingStartedPlugin
   }
 
   public start(core: CoreStart) {
-    // Create a subscription for the value of our feature flag
-    this.featureFlagSubscription = core.featureFlags
-      .getBooleanValue$(SEARCH_GETTING_STARTED_FEATURE_FLAG, false)
-      .subscribe((featureFlagEnabled) => {
-        const status: AppStatus = featureFlagEnabled
-          ? AppStatus.accessible
-          : AppStatus.inaccessible;
-        // This will update the Kibana application's status based on the current value of the feature flag
-        this.appUpdater$.next(() => ({
-          status,
-        }));
-      });
     return {};
   }
 
-  public stop() {
-    if (this.featureFlagSubscription) {
-      this.featureFlagSubscription.unsubscribe();
-      this.featureFlagSubscription = undefined;
-    }
-  }
+  public stop() {}
 }

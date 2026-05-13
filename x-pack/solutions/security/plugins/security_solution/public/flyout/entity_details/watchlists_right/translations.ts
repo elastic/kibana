@@ -1,0 +1,76 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const WATCHLIST_NAME_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameLabel',
+  { defaultMessage: 'Name' }
+);
+
+export const WATCHLIST_DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.descriptionLabel',
+  { defaultMessage: 'Description' }
+);
+
+export const WATCHLIST_RISK_SCORE_WEIGHTING_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.riskScoreWeightingLabel',
+  { defaultMessage: 'Risk Score Weighting' }
+);
+
+export const WATCHLIST_RISK_SCORE_WEIGHTING_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.riskScoreWeightingInvalid',
+  {
+    defaultMessage:
+      'Enter a number between 0 and 2 in steps of 0.5 (for example 0, 0.5, 1, 1.5, or 2).',
+  }
+);
+
+export const WATCHLIST_FILTER_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.filterQueryLabel',
+  { defaultMessage: 'Watchlist filter' }
+);
+
+export const WATCHLIST_IDENTIFY_ENTITIES_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.identifyEntitiesByLabel',
+  { defaultMessage: 'Identify entities by' }
+);
+
+export const WATCHLIST_ENTITY_FIELD_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.entityFieldPlaceholder',
+  { defaultMessage: 'Select a field' }
+);
+
+export const WATCHLIST_ENTITY_FIELD_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.entityFieldAriaLabel',
+  { defaultMessage: 'Watchlist entity field selector' }
+);
+
+export const WATCHLIST_INDEX_PATTERN_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternLabel',
+  { defaultMessage: 'Index pattern' }
+);
+
+export const WATCHLIST_INDEX_PATTERN_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.indexPatternPlaceholder',
+  { defaultMessage: 'Search for an index pattern' }
+);
+
+export const WATCHLIST_LOOKBACK_PERIOD_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.lookbackPeriodLabel',
+  { defaultMessage: 'Lookback period' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceTitle',
+  { defaultMessage: 'CSV Data Source' }
+);
+
+export const WATCHLIST_CSV_DATA_SOURCE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceDescription',
+  { defaultMessage: 'Add entities to this watchlist by uploading a CSV file.' }
+);

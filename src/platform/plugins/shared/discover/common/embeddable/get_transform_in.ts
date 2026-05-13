@@ -7,79 +7,83 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import { extractReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
+import { isSearchEmbeddableByValueState, isSearchEmbeddableLegacyPanelState } from './type_guards';
+import { toStoredSearchEmbeddable } from './transform_utils';
 import type {
-  SearchEmbeddableByReferenceState,
+  SearchEmbeddablePanelApiState,
   SearchEmbeddableState,
-  StoredSearchEmbeddableByReferenceState,
-  StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
-import { extract } from './search_inject_extract';
 
-export const SAVED_SEARCH_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
-
-function isByRefState(state: SearchEmbeddableState): state is SearchEmbeddableByReferenceState {
-  return 'savedObjectId' in state;
-}
-
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
-  function transformIn(state: SearchEmbeddableState): {
+export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
+  return function transformIn(apiState: SearchEmbeddablePanelApiState): {
     state: StoredSearchEmbeddableState;
     references: SavedObjectReference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+    const { state, references } = transformDrilldownsIn(apiState);
+    return isSearchEmbeddableLegacyPanelState(state)
+      ? legacyTransformIn(state, references)
+      : toStoredSearchEmbeddable(state, references);
+  };
+}
 
-    if (isByRefState(state)) {
-      const { savedObjectId, ...rest } = state;
-      return {
-        state: {
-          ...rest,
-          ...(enhancementsState
-            ? {
-                enhancements:
-                  enhancementsState as StoredSearchEmbeddableByReferenceState['enhancements'],
-              }
-            : {}),
-        },
-        references: [
-          {
-            name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
-            type: SavedSearchType,
-            id: savedObjectId,
-          },
-          ...enhancementsReferences,
-        ],
-      };
-    }
-
-    // by value
-    const { state: extractedState, references } = extract({
-      type: SavedSearchType,
-      attributes: state.attributes,
-    });
-
+function legacyTransformIn(
+  storedState: SearchEmbeddableState,
+  drilldownReferences: SavedObjectReference[] = []
+): { state: StoredSearchEmbeddableState; references: SavedObjectReference[] } {
+  if (!isSearchEmbeddableByValueState(storedState)) {
+    const { savedObjectId, ...rest } = storedState;
     return {
-      state: {
-        ...state,
-        ...(enhancementsState
-          ? {
-              enhancements: enhancementsState as StoredSearchEmbeddableByValueState['enhancements'],
-            }
-          : {}),
-        attributes: {
-          ...state.attributes,
-          ...extractedState.attributes,
-          // discover session stores references as part of attributes
-          references,
+      state: rest,
+      references: [
+        {
+          name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
+          type: SavedSearchType,
+          id: savedObjectId,
         },
-      },
-      references: [...references, ...enhancementsReferences],
+        ...drilldownReferences,
+      ],
     };
   }
-  return transformIn;
+
+  // by value
+  const tabReferences: SavedObjectReference[] = [];
+  const tabs = storedState.attributes.tabs.map((tab) => {
+    try {
+      const searchSourceValues = parseSearchSourceJSON(
+        tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const [searchSourceFields, searchSourceReferences] = extractReferences(searchSourceValues);
+      tabReferences.push(...searchSourceReferences);
+      return {
+        ...tab,
+        attributes: {
+          ...tab.attributes,
+          kibanaSavedObjectMeta: {
+            ...tab.attributes.kibanaSavedObjectMeta,
+            searchSourceJSON: JSON.stringify(searchSourceFields),
+          },
+        },
+      };
+    } catch (e) {
+      return tab;
+    }
+  });
+
+  const { references = [], ...otherAttrs } = storedState.attributes;
+  return {
+    state: {
+      ...storedState,
+      attributes: {
+        ...otherAttrs,
+        tabs,
+      },
+    },
+    references: [...references, ...tabReferences, ...drilldownReferences],
+  };
 }

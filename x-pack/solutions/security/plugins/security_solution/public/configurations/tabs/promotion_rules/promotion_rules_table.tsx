@@ -19,11 +19,10 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FindRulesSortField } from '../../../../common/api/detection_engine';
 import { Loader } from '../../../common/components/loader';
-import { hasUserCRUDPermission } from '../../../common/utils/privileges';
 import type { EuiBasicTableOnChange } from '../../../detection_engine/common/types';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 import { useRuleManagementFilters } from '../../../detection_engine/rule_management/logic/use_rule_management_filters';
-import { useIsUpgradingSecurityPackages } from '../../../detection_engine/rule_management/logic/use_upgrade_security_packages';
+import { useIsBootstrappingEaseRules } from './use_bootstrap_ease_rules';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../../../detection_engine/rule_management_ui/components/rules_table/constants';
 import { useRulesTableContext } from '../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import {
@@ -34,7 +33,6 @@ import {
   useEnabledColumn,
   useRuleExecutionStatusColumn,
 } from '../../../detection_engine/rule_management_ui/components/rules_table/use_columns';
-import { useUserData } from '../../../detections/components/user_info';
 import * as i18n from './translations';
 
 const INITIAL_SORT_FIELD = 'name';
@@ -49,7 +47,7 @@ export enum PromotionRuleTabs {
 }
 
 export const PromotionRulesTable = () => {
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isBootstrappingEaseRules = useIsBootstrappingEaseRules();
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const [currentTab, setCurrentTab] = useState(PromotionRuleTabs.management);
@@ -129,7 +127,7 @@ export const PromotionRulesTable = () => {
     [currentTab, handleTabClick, installedTotal]
   );
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLinearProgress = (isFetched && isRefetching) || isBootstrappingEaseRules;
   const shouldShowLoadingOverlay = !isFetched && isRefetching;
 
   return (
@@ -154,6 +152,11 @@ export const PromotionRulesTable = () => {
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
       <EuiBasicTable
+        tableCaption={
+          currentTab === PromotionRuleTabs.management
+            ? i18n.INSTALLED_RULES_TAB
+            : i18n.RULE_MONITORING_TAB
+        }
         itemId="id"
         items={rules}
         noItemsMessage={NO_ITEMS_MESSAGE}
@@ -177,18 +180,13 @@ interface ColumnsProps {
 }
 
 const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColumn<Rule>> => {
-  const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
-
   const enabledColumn = useEnabledColumn({
-    hasCRUDPermissions: hasPermissions,
     isLoadingJobs: false,
     mlJobs: [],
     startMlJobs: async (jobIds: string[] | undefined) => {},
   });
   const executionStatusColumn = useRuleExecutionStatusColumn({
     sortable: true,
-    width: '16%',
     isLoadingJobs: false,
     mlJobs: [],
   });

@@ -30,6 +30,7 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type {
   ActionConnector,
   UserConfiguredActionConnector,
@@ -65,6 +66,7 @@ export interface AppPluginStartDependencies {
   cloud?: CloudStart;
   console?: ConsolePluginStart;
   data: DataPublicPluginStart;
+  evals?: EvalsPublicStart;
   searchNavigation?: SearchNavigationPluginStart;
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
@@ -187,8 +189,6 @@ export interface ElasticsearchIndex {
   };
   uuid?: Uuid;
 }
-
-export type JSONValue = null | string | number | boolean | { [x: string]: JSONValue } | JSONValue[];
 
 export interface ChatRequestOptions {
   options?: RequestOptions;

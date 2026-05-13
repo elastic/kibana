@@ -40,11 +40,21 @@ function getIntegrationStatus(
         item.installationInfo && semverLt(item.installationInfo.version, attempt.target_version)
     );
 
+    const review = item?.installationInfo?.pending_upgrade_review;
+    const keepUpToDate = item?.installationInfo?.keep_policies_up_to_date === true;
+    const hasPendingUpgradeReview =
+      keepUpToDate && !!review && (!review.action || review.action === 'pending');
+    const hasDeclinedReview = keepUpToDate && !!review && review.action === 'declined';
+
     const isUpgradeAvailable =
       (item?.installationInfo && semverLt(item.installationInfo.version, item.version)) ?? false;
 
     return isUpgradeFailed
       ? 'upgrade_failed'
+      : hasPendingUpgradeReview
+      ? 'pending_upgrade_review'
+      : hasDeclinedReview
+      ? 'declined_review'
       : isUpgradeAvailable
       ? 'upgrade_available'
       : 'installed';
@@ -104,7 +114,7 @@ export function useInstalledIntegrations(
           const validSearchTerms = filters.q ? searchResults.find((s) => s.id === item.id) : true;
 
           const validCustomIntegrations = filters.customIntegrations
-            ? item?.installationInfo?.install_source === 'custom'
+            ? item.categories?.includes('custom')
             : true;
 
           return validInstalationStatus && validSearchTerms && validCustomIntegrations;
@@ -124,10 +134,10 @@ export function useInstalledIntegrations(
   }, [internalInstalledPackagesFiltered]);
 
   const customIntegrationsCount = useMemo(() => {
-    return internalInstalledPackagesFiltered.reduce((acc, item) => {
-      return item?.installationInfo?.install_source === 'custom' ? acc + 1 : acc;
+    return internalInstalledPackages.reduce((acc, item) => {
+      return item.categories?.includes('custom') ? acc + 1 : acc;
     }, 0);
-  }, [internalInstalledPackagesFiltered]);
+  }, [internalInstalledPackages]);
 
   const installedPackages: InstalledPackageUIPackageListItem[] = useMemo(() => {
     // Pagination

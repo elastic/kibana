@@ -34,7 +34,11 @@ export const RuleMigrationDataInputWrapper = React.memo<
   }, []);
 
   return (
-    <MigrationDataInputContextProvider openFlyout={openFlyout} closeFlyout={closeFlyout}>
+    <MigrationDataInputContextProvider
+      openFlyout={openFlyout}
+      closeFlyout={closeFlyout}
+      isFlyoutOpen={!!isFlyoutOpen}
+    >
       {children}
       {isFlyoutOpen && (
         <MigrationDataInputFlyout onClose={closeFlyout} migrationStats={flyoutMigrationStats} />

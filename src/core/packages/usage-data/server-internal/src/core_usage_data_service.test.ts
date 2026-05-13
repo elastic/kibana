@@ -213,27 +213,45 @@ describe('CoreUsageDataService', () => {
         });
         service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
         const elasticsearch = elasticsearchServiceMock.createStart();
-        elasticsearch.client.asInternalUser.cat.indices.mockResponseOnce([
-          {
-            name: '.kibana_task_manager_1',
-            'docs.count': '10',
-            'docs.deleted': '10',
-            'store.size': '1000',
-            'pri.store.size': '2000',
+        elasticsearch.client.asInternalUser.indices.stats.mockResponseOnce({
+          _all: {
+            primaries: {
+              docs: {
+                count: 10,
+                deleted: 10,
+              },
+              store: {
+                size_in_bytes: 2000,
+              },
+            },
+            total: {
+              store: {
+                size_in_bytes: 1000,
+              },
+            },
           },
-        ] as any);
+        } as any);
         elasticsearch.client.asInternalUser.count.mockResponseOnce({
           count: '15',
         } as any);
-        elasticsearch.client.asInternalUser.cat.indices.mockResponseOnce([
-          {
-            name: '.kibana_1',
-            'docs.count': '20',
-            'docs.deleted': '20',
-            'store.size': '2000',
-            'pri.store.size': '4000',
+        elasticsearch.client.asInternalUser.indices.stats.mockResponseOnce({
+          _all: {
+            primaries: {
+              docs: {
+                count: 20,
+                deleted: 20,
+              },
+              store: {
+                size_in_bytes: 4000,
+              },
+            },
+            total: {
+              store: {
+                size_in_bytes: 2000,
+              },
+            },
           },
-        ] as any);
+        } as any);
         elasticsearch.client.asInternalUser.count.mockResponseOnce({
           count: '10',
         } as any);
@@ -415,6 +433,214 @@ describe('CoreUsageDataService', () => {
             },
           }
         `);
+      });
+
+      it('calls indices.stats with expected telemetry request args', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = new BehaviorSubject({
+          set: ['new.path'],
+          unset: ['deprecated.path'],
+        });
+        service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
+        const elasticsearch = elasticsearchServiceMock.createStart();
+        elasticsearch.client.asInternalUser.indices.stats.mockResponseOnce({
+          _all: {
+            primaries: {
+              docs: {
+                count: 10,
+                deleted: 10,
+              },
+              store: {
+                size_in_bytes: 2000,
+              },
+            },
+            total: {
+              store: {
+                size_in_bytes: 1000,
+              },
+            },
+          },
+        } as any);
+        elasticsearch.client.asInternalUser.count.mockResponseOnce({ count: '15' } as any);
+        elasticsearch.client.asInternalUser.indices.stats.mockResponseOnce({
+          _all: {
+            primaries: {
+              docs: {
+                count: 20,
+                deleted: 20,
+              },
+              store: {
+                size_in_bytes: 4000,
+              },
+            },
+            total: {
+              store: {
+                size_in_bytes: 2000,
+              },
+            },
+          },
+        } as any);
+        elasticsearch.client.asInternalUser.count.mockResponseOnce({ count: '10' } as any);
+        elasticsearch.client.asInternalUser.search.mockResponseOnce({
+          hits: { total: { value: 6 } },
+          aggregations: {
+            aliases: {
+              buckets: {
+                active: { doc_count: 1 },
+                disabled: { doc_count: 2 },
+              },
+            },
+          },
+        } as any);
+
+        const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+        typeRegistry.getAllTypes.mockReturnValue([
+          { name: 'type 1', indexPattern: '.kibana' },
+          { name: 'type 2', indexPattern: '.kibana_task_manager' },
+        ] as any);
+
+        const { getCoreUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage: new Map(),
+          elasticsearch,
+        });
+
+        await getCoreUsageData();
+
+        expect(elasticsearch.client.asInternalUser.indices.stats).toHaveBeenNthCalledWith(1, {
+          index: '.kibana',
+          metric: ['docs', 'store'],
+          filter_path: [
+            '_all.primaries.docs.count',
+            '_all.primaries.docs.deleted',
+            '_all.total.store.size_in_bytes',
+            '_all.primaries.store.size_in_bytes',
+          ],
+        });
+        expect(elasticsearch.client.asInternalUser.indices.stats).toHaveBeenNthCalledWith(2, {
+          index: '.kibana_task_manager',
+          metric: ['docs', 'store'],
+          filter_path: [
+            '_all.primaries.docs.count',
+            '_all.primaries.docs.deleted',
+            '_all.total.store.size_in_bytes',
+            '_all.primaries.store.size_in_bytes',
+          ],
+        });
+      });
+
+      it('returns zeroed index stats when indices stats are unavailable', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = new BehaviorSubject({
+          set: ['new.path'],
+          unset: ['deprecated.path'],
+        });
+        service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
+        const elasticsearch = elasticsearchServiceMock.createStart();
+        elasticsearch.client.asInternalUser.indices.stats.mockResponseOnce({} as any);
+        elasticsearch.client.asInternalUser.count.mockResponseOnce({
+          count: '15',
+        } as any);
+        elasticsearch.client.asInternalUser.indices.stats.mockResponseOnce({} as any);
+        elasticsearch.client.asInternalUser.count.mockResponseOnce({
+          count: '10',
+        } as any);
+        elasticsearch.client.asInternalUser.search.mockResponseOnce({
+          hits: { total: { value: 6 } },
+          aggregations: {
+            aliases: {
+              buckets: {
+                active: { doc_count: 1 },
+                disabled: { doc_count: 2 },
+              },
+            },
+          },
+        } as any);
+        const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+        typeRegistry.getAllTypes.mockReturnValue([
+          { name: 'type 1', indexPattern: '.kibana' },
+          { name: 'type 2', indexPattern: '.kibana_task_manager' },
+        ] as any);
+
+        const { getCoreUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage: new Map(),
+          elasticsearch,
+        });
+
+        await expect(getCoreUsageData()).resolves.toEqual(
+          expect.objectContaining({
+            services: {
+              savedObjects: expect.objectContaining({
+                indices: [
+                  expect.objectContaining({
+                    alias: '.kibana',
+                    docsCount: 0,
+                    docsDeleted: 0,
+                    storeSizeBytes: 0,
+                    primaryStoreSizeBytes: 0,
+                  }),
+                  expect.objectContaining({
+                    alias: '.kibana_task_manager',
+                    docsCount: 0,
+                    docsDeleted: 0,
+                    storeSizeBytes: 0,
+                    primaryStoreSizeBytes: 0,
+                  }),
+                ],
+              }),
+            },
+          })
+        );
+      });
+
+      it('throws when fetching index stats fails', async () => {
+        const http = httpServiceMock.createInternalSetupContract();
+        const metrics = metricsServiceMock.createInternalSetupContract();
+        const savedObjectsStartPromise = Promise.resolve(
+          savedObjectsServiceMock.createStartContract()
+        );
+        const changedDeprecatedConfigPath$ = new BehaviorSubject({
+          set: ['new.path'],
+          unset: ['deprecated.path'],
+        });
+        service.setup({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ });
+        const elasticsearch = elasticsearchServiceMock.createStart();
+        elasticsearch.client.asInternalUser.indices.stats.mockRejectedValueOnce(
+          new Error('stats boom')
+        );
+        elasticsearch.client.asInternalUser.search.mockResponseOnce({
+          hits: { total: { value: 6 } },
+          aggregations: {
+            aliases: {
+              buckets: {
+                active: { doc_count: 1 },
+                disabled: { doc_count: 2 },
+              },
+            },
+          },
+        } as any);
+        const typeRegistry = savedObjectsServiceMock.createTypeRegistryMock();
+        typeRegistry.getAllTypes.mockReturnValue([
+          { name: 'type 1', indexPattern: '.kibana' },
+          { name: 'type 2', indexPattern: '.kibana_task_manager' },
+        ] as any);
+
+        const { getCoreUsageData } = service.start({
+          savedObjects: savedObjectsServiceMock.createInternalStartContract(typeRegistry),
+          exposedConfigsToUsage: new Map(),
+          elasticsearch,
+        });
+
+        await expect(getCoreUsageData()).rejects.toThrow('stats boom');
       });
 
       describe('elasticsearch.principal', () => {

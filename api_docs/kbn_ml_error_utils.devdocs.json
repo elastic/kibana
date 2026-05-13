@@ -43,6 +43,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,6 +63,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,16 +76,13 @@
                 "label": "error",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ml-error-utils",
-                    "scope": "common",
-                    "docId": "kibKbnMlErrorUtilsPluginApi",
-                    "section": "def-common.MLErrorObject",
-                    "text": "MLErrorObject"
-                  }
+                  "MLErrorObject"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
+                "lineNumber": 26,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "MLErrorObject",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -93,16 +94,13 @@
                 "label": "resp",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ml-error-utils",
-                    "scope": "common",
-                    "docId": "kibKbnMlErrorUtilsPluginApi",
-                    "section": "def-common.ErrorType",
-                    "text": "ErrorType"
-                  }
+                  "ErrorType"
                 ],
                 "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
+                "lineNumber": 26,
+                "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "ErrorType",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -125,16 +123,12 @@
         ],
         "signature": [
           "(error: ",
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.ErrorType",
-            "text": "ErrorType"
-          },
+          "ErrorType",
           ") => string"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
+        "lineNumber": 117,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -146,16 +140,13 @@
             "label": "error",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/ml-error-utils",
-                "scope": "common",
-                "docId": "kibKbnMlErrorUtilsPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              }
+              "ErrorType"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
+            "lineNumber": 117,
+            "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -174,23 +165,13 @@
         ],
         "signature": [
           "(error: ",
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.ErrorType",
-            "text": "ErrorType"
-          },
+          "ErrorType",
           ") => ",
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.MLErrorObject",
-            "text": "MLErrorObject"
-          }
+          "MLErrorObject"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -202,16 +183,13 @@
             "label": "error",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/ml-error-utils",
-                "scope": "common",
-                "docId": "kibKbnMlErrorUtilsPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              }
+              "ErrorType"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
+            "lineNumber": 25,
+            "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ErrorType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -234,6 +212,8 @@
           "(error: any) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -248,6 +228,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -271,6 +253,8 @@
           "(error: any) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -285,6 +269,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -308,6 +294,8 @@
           "(error: any) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -322,6 +310,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -345,6 +335,8 @@
           "(error: any) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,6 +351,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -382,7 +376,9 @@
         "description": [
           "\nInterface holding error message"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 59,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -397,7 +393,9 @@
             "description": [
               "\nmessage"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -417,7 +415,9 @@
         "description": [
           "\nML Error Object"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -435,7 +435,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -450,7 +452,9 @@
             "description": [
               "\nmessage"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,7 +472,9 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,7 +493,9 @@
               "ErrorResponseBase",
               " | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -510,18 +518,14 @@
           "\nMLHttpFetchErrorBase"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.MLHttpFetchErrorBase",
-            "text": "MLHttpFetchErrorBase"
-          },
+          "MLHttpFetchErrorBase",
           "<T> extends ",
           "IHttpFetchError",
           "<T>"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -539,7 +543,9 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -559,7 +565,9 @@
         "description": [
           "\nML Response error"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -574,7 +582,9 @@
             "description": [
               "\nstatusCode"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -589,7 +599,9 @@
             "description": [
               "\nerror"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -604,7 +616,9 @@
             "description": [
               "\nmessage"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,7 +638,9 @@
               "ErrorResponseBase",
               "; } | undefined"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -641,23 +657,13 @@
           "\nTo be used for client side errors related to search query bars."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.QueryErrorMessage",
-            "text": "QueryErrorMessage"
-          },
+          "QueryErrorMessage",
           " extends ",
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.ErrorMessage",
-            "text": "ErrorMessage"
-          }
+          "ErrorMessage"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -672,7 +678,9 @@
             "description": [
               "\nquery"
             ],
-            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -696,20 +704,16 @@
         ],
         "signature": [
           "string | ",
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.MLHttpFetchError",
-            "text": "MLHttpFetchError"
-          },
+          "MLHttpFetchError",
           " | ",
           "ErrorResponseBase",
           " | ",
           "Boom",
           "<any> | undefined"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 136,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -728,7 +732,9 @@
         "signature": [
           "ErrorResponseBase"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -748,7 +754,9 @@
           "ErrorCauseKeys",
           " & { [property: string]: any; }"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -766,24 +774,14 @@
           "\nMLHttpFetchError"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.MLHttpFetchErrorBase",
-            "text": "MLHttpFetchErrorBase"
-          },
+          "MLHttpFetchErrorBase",
           "<",
-          {
-            "pluginId": "@kbn/ml-error-utils",
-            "scope": "common",
-            "docId": "kibKbnMlErrorUtilsPluginApi",
-            "section": "def-common.MLResponseError",
-            "text": "MLResponseError"
-          },
+          "MLResponseError",
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/common-types/errors.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,9 +7,12 @@
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { transparentize } from 'polished';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Bar } from './bar';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import type { CriticalPathSegment } from './critical_path';
+import { Bar, type BarSegment } from './bar';
 import { BarDetails } from './bar_details';
 import { TOGGLE_BUTTON_WIDTH, ToggleAccordionButton } from './toggle_accordion_button';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
@@ -28,21 +31,37 @@ export const ACCORDION_HEIGHT = 48; // px
 export const BORDER_THICKNESS = 1; // px
 
 export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
-  const { duration, margin, showAccordion, onClick, highlightedTraceId } =
-    useTraceWaterfallContext();
-  const isHighlighted = highlightedTraceId === item.id;
+  const {
+    duration,
+    margin,
+    showAccordion,
+    onClick,
+    contextSpanIds,
+    selectedSpanId,
+    criticalPathSegmentsById,
+    showCriticalPath,
+    ebt,
+  } = useTraceWaterfallContext();
+  const isContext = contextSpanIds?.includes(item.id) ?? false;
+  const isSelected = selectedSpanId === item.id;
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
   const hasToggle = showAccordion && childrenCount > 0;
-  const accordionIndent = ACCORDION_PADDING_LEFT * item.depth;
+  const accordionIndent = ACCORDION_PADDING_LEFT * (item.depth > 200 ? 200 : item.depth);
   const { euiTheme } = useEuiTheme();
   const itemStatusIsFailureOrError = isFailureOrError(item.status?.value);
 
+  const displayedColor = showCriticalPath ? transparentize(0.5, item.color) : item.color;
+
+  const segments = getCriticalPathOverlays(
+    criticalPathSegmentsById[item.id],
+    item,
+    euiTheme.colors.accent
+  );
+
   function calculateMarginLeft() {
     const marginLeft =
-      margin.left -
-      accordionIndent -
-      (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
+      margin.left - (itemStatusIsFailureOrError ? BORDER_THICKNESS * 2 : BORDER_THICKNESS);
     return hasToggle ? marginLeft - TOGGLE_BUTTON_WIDTH : marginLeft;
   }
 
@@ -55,7 +74,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           border-bottom: ${euiTheme.border.thin};
           ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
         `}
-        onClick={() => {
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
           if (!hasToggle && onClick) {
             onClick(item.id);
           }
@@ -73,11 +93,18 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
               : `${euiTheme.border.thin};`
           }
           padding: 6px 0;
-          ${isHighlighted ? `background-color: ${euiTheme.colors.lightestShade};` : undefined}
           ${
-            !highlightedTraceId &&
+            isSelected
+              ? `background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};`
+              : isContext
+              ? `background-color: ${euiTheme.colors.backgroundBaseWarning};`
+              : undefined
+          }
+          ${
+            !!onClick &&
+            !isSelected &&
             ` &:hover {
-            background-color: ${euiTheme.colors.lightestShade};
+            background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
           }`
           }
         `}
@@ -95,10 +122,14 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           <EuiFlexItem>
             <div
               data-test-subj="traceItemRowContent"
+              {...(onClick && ebt?.row
+                ? getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SPAN, element: ebt.row.element })
+                : {})}
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}
-              onClick={() => {
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
                 if (hasToggle && onClick) {
                   onClick(item.id);
                 }
@@ -124,7 +155,14 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
                   : undefined
               }
             >
-              <Bar width={widthPercent} left={leftPercent} color={item.color} />
+              <Bar
+                width={widthPercent}
+                left={leftPercent}
+                color={displayedColor}
+                segments={segments}
+                duration={item.duration}
+                composite={item.composite}
+              />
               <BarDetails item={item} left={leftPercent} />
             </div>
           </EuiFlexItem>
@@ -141,10 +179,18 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     <>
       <EuiAccordion
         id={item.id}
+        buttonElement="div"
         buttonContent={content}
         paddingSize="none"
         forceState={state}
         arrowDisplay="none"
+        arrowProps={{
+          // EUI forces arrow display when buttonElement="div" for accessibility.
+          // Hide it since we use custom ToggleAccordionButton with role="button" and tabIndex.
+          css: css`
+            display: none;
+          `,
+        }}
         buttonContentClassName="accordion__buttonContent"
         css={css`
           .accordion__buttonContent {
@@ -154,4 +200,27 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
       />
     </>
   );
+}
+
+/**
+ * Converts critical path segments into visual overlay segments for rendering in the waterfall bar.
+ *
+ * This function:
+ * 1. Filters segments to only include "self" segments (active contribution to critical path)
+ * 2. Calculates relative positioning within the item's duration
+ * 3. Returns segments ready for rendering as overlays
+ */
+export function getCriticalPathOverlays(
+  segments: CriticalPathSegment<TraceWaterfallItem>[] | undefined,
+  item: TraceWaterfallItem,
+  color: string
+): BarSegment[] | undefined {
+  return segments
+    ?.filter((segment) => segment.self)
+    .map((segment) => ({
+      id: segment.item.id,
+      color,
+      left: (segment.offset - item.offset - item.skew) / item.duration,
+      width: segment.duration / item.duration,
+    }));
 }

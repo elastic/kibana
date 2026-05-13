@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import { InstallPrepackedTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -36,7 +37,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       path: PREBUILT_RULES_STATUS_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })
@@ -47,10 +48,11 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const ctx = await context.resolve(['core', 'alerting']);
+        const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
         const savedObjectsClient = ctx.core.savedObjects.client;
         const rulesClient = await ctx.alerting.getRulesClient();
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+        const mlAuthz = ctx.securitySolution.getMlAuthz();
 
         try {
           const latestPrebuiltRules = await ruleAssetsClient.fetchLatestAssets();
@@ -69,8 +71,16 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
             await getExistingPrepackagedRules({ rulesClient, logger })
           );
 
-          const rulesToInstall = getRulesToInstall(latestPrebuiltRules, installedPrebuiltRules);
-          const rulesToUpdate = getRulesToUpdate(latestPrebuiltRules, installedPrebuiltRules);
+          const rulesToInstall = await getRulesToInstall(
+            latestPrebuiltRules,
+            installedPrebuiltRules,
+            mlAuthz
+          );
+          const rulesToUpdate = await getRulesToUpdate(
+            latestPrebuiltRules,
+            installedPrebuiltRules,
+            mlAuthz
+          );
 
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const prebuiltTimelineStatus = await checkTimelinesStatus(frameworkRequest);

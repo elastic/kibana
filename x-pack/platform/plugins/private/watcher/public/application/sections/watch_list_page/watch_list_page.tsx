@@ -60,7 +60,13 @@ const stateColumnHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
         defaultMessage: 'State',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -78,7 +84,13 @@ const conditionLastMetHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
         defaultMessage: 'Condition last met',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -96,7 +108,13 @@ const lastCheckedHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
         defaultMessage: 'Last checked',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -115,7 +133,13 @@ const commentHeader = (
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
         defaultMessage: 'Comment',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -172,7 +196,7 @@ export const WatchListPage = () => {
         <EuiButton
           fill
           data-test-subj="createWatchButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen(!isPopoverOpen)}
         >
@@ -390,7 +414,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Edit' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
@@ -416,7 +440,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Delete' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
@@ -495,6 +519,9 @@ export const WatchListPage = () => {
     content = (
       <div data-test-subj="watchesTableContainer">
         <EuiInMemoryTable
+          tableCaption={i18n.translate('xpack.watcher.sections.watchList.watchTable.caption', {
+            defaultMessage: 'List of watches and their status',
+          })}
           onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
             setPagination({ pageIndex: index, pageSize: size })
           }
@@ -534,7 +561,7 @@ export const WatchListPage = () => {
               </>
             )
           }
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
               defaultMessage="No watches to show"

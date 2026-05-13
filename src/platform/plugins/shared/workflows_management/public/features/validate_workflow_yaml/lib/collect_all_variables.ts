@@ -8,13 +8,65 @@
  */
 
 import type { Document } from 'yaml';
+import { visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { isEnterForeach } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '../../../../common/lib/regex';
-import { getPathAtOffset, getStepNode } from '../../../../common/lib/yaml';
-import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
+import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
 import type { VariableItem } from '../model/types';
+
+interface ScalarEntry {
+  start: number;
+  end: number;
+  path: Array<string | number>;
+}
+
+const scalarIndexCache = new WeakMap<Document, ScalarEntry[]>();
+
+/**
+ * Builds a sorted index of every scalar in the document in a single `visit()`,
+ * pre-computing both ranges and YAML paths.
+ */
+function getScalarIndex(document: Document): ScalarEntry[] {
+  const cached = scalarIndexCache.get(document);
+  if (cached) {
+    return cached;
+  }
+
+  const entries: ScalarEntry[] = [];
+  visit(document, {
+    Scalar(_k, node, ancestors) {
+      if (node.range && node.value !== '') {
+        entries.push({
+          start: node.range[0],
+          end: node.range[1],
+          path: getPathFromAncestors(ancestors, node),
+        });
+      }
+    },
+  });
+
+  entries.sort((a, b) => a.start - b.start);
+  scalarIndexCache.set(document, entries);
+  return entries;
+}
+
+function findScalarAtOffset(entries: ScalarEntry[], offset: number): ScalarEntry | null {
+  let lo = 0;
+  let hi = entries.length - 1;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const entry = entries[mid];
+    if (offset < entry.start) {
+      hi = mid - 1;
+    } else if (offset >= entry.end) {
+      lo = mid + 1;
+    } else {
+      return entry;
+    }
+  }
+  return null;
+}
 
 export function collectAllVariables(
   model: monaco.editor.ITextModel,
@@ -22,49 +74,33 @@ export function collectAllVariables(
   workflowGraph: WorkflowGraph
 ): VariableItem[] {
   const yamlString = model.getValue();
+  const scalarIndex = getScalarIndex(yamlDocument);
   const variableItems: VariableItem[] = [];
-  // Currently, foreach doesn't use mustache expressions, so we need to handle it separately
-  // TODO: remove if/when foreach uses mustache expressions
-  for (const node of workflowGraph?.getAllNodes() ?? []) {
-    if (!isEnterForeach(node)) {
-      // eslint-disable-next-line no-continue
-      continue;
-    }
-    const yamlNode = getStepNode(yamlDocument, node.stepId);
-    const foreachValueNode = yamlNode?.get('foreach', true);
-    if (foreachValueNode && foreachValueNode.range) {
-      const monacoPosition = getMonacoRangeFromYamlNode(model, foreachValueNode);
-      variableItems.push({
-        id: `${node.configuration.foreach}-${monacoPosition?.startLineNumber ?? 0}-${
-          monacoPosition?.startColumn ?? 0
-        }-${monacoPosition?.endLineNumber ?? 0}-${monacoPosition?.endColumn ?? 0}`,
-        startLineNumber: monacoPosition?.startLineNumber ?? 0,
-        startColumn: monacoPosition?.startColumn ?? 0,
-        endLineNumber: monacoPosition?.endLineNumber ?? 0,
-        endColumn: monacoPosition?.endColumn ?? 0,
-        key: node.configuration.foreach,
-        type: 'foreach',
-        yamlPath: getPathAtOffset(yamlDocument, foreachValueNode.range[0]),
-      });
-    }
-  }
+
   for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
     const startOffset = match.index ?? 0;
-    const endOffset = startOffset + (match[0].length ?? 0);
-    const startPosition = model.getPositionAt(startOffset);
-    const endPosition = model.getPositionAt(endOffset);
-    variableItems.push({
-      id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
-        endPosition.lineNumber
-      }-${endPosition.column}`,
-      startLineNumber: startPosition.lineNumber,
-      startColumn: startPosition.column,
-      endLineNumber: endPosition.lineNumber,
-      endColumn: endPosition.column,
-      key: match.groups?.key ?? null,
-      type: 'regexp',
-      yamlPath: getPathAtOffset(yamlDocument, startOffset),
-    });
+    const entry = findScalarAtOffset(scalarIndex, startOffset);
+    if (entry) {
+      const endOffset = startOffset + (match[0].length ?? 0);
+      const startPosition = model.getPositionAt(startOffset);
+      const endPosition = model.getPositionAt(endOffset);
+      const { path: yamlPath } = entry;
+      const type =
+        yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
+      variableItems.push({
+        id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
+          endPosition.lineNumber
+        }-${endPosition.column}`,
+        startLineNumber: startPosition.lineNumber,
+        startColumn: startPosition.column,
+        endLineNumber: endPosition.lineNumber,
+        endColumn: endPosition.column,
+        key: match.groups?.key ?? null,
+        type,
+        yamlPath,
+        offset: startOffset,
+      });
+    }
   }
 
   return variableItems;

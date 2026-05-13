@@ -14,7 +14,7 @@ For general information about writing evaluation tests, configuration, and usage
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 > The Scout server Kibana instance is accessible at <http://localhost:5620>. This may be useful if you want to query evaluation results for further analysis.
@@ -56,6 +56,68 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
     evals/alerts/alerts.spec.ts \
   --project="my-connector" \
 ```
+
+### Running Evaluations with Elastic AI Agent (Agent Builder)
+
+The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Elastic AI Agent early in the migration process.
+
+#### Client Selection
+
+Use the `EVALUATION_CLIENT` environment variable to specify which client to use:
+
+- `obs_ai_assistant` (default): Uses the Obs AI Assistant API
+- `agent_builder`: Uses the Agent Builder API
+
+When using `agent_builder`, you can optionally specify which agent to invoke using the `AGENT_BUILDER_AGENT_ID` environment variable (defaults to the default agent).
+
+#### Local Setup for Agent Builder Evaluations
+
+Run Agent Builder evaluations against a local Kibana instance using these steps:
+
+**1. Start Kibana without base path**
+
+```bash
+yarn start --no-base-path
+```
+
+> The APM synthrace client fixture requires Kibana to run without a base path.
+
+**2. Configure local Scout server**
+
+Create `.scout/servers/local.json` with the following content:
+
+```json
+{
+  "serverless": false,
+  "isCloud": false,
+  "hosts": {
+    "kibana": "http://localhost:5601/",
+    "elasticsearch": "http://localhost:9200/"
+  },
+  "auth": {
+    "username": "elastic",
+    "password": "changeme"
+  }
+}
+```
+
+**3. Run evaluations**
+
+```bash
+EVALUATION_REPETITIONS=1 \
+EVALUATION_CLIENT="agent_builder" \
+EVALUATION_CONNECTOR_ID="your-connector-id" \
+  node scripts/playwright test \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
+    evals/esql/esql.spec.ts \
+  --project="your-connector" \
+  --debug
+```
+
+#### Important Notes
+
+- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Elastic AI Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
+- The Agent Builder client implementation and infrastructure are ready for when Agent-specific evaluation criteria are developed
 
 ### Evaluation Reporting
 
@@ -144,3 +206,7 @@ FROM .kibana-evaluations
     """
 }
 ```
+
+## AI Insights Evaluations
+
+For setup, prerequisites, and instructions on running AI Insights evaluations, see the [AI Insights README](./ai_insights/README.md).

@@ -14,7 +14,10 @@ export function transformLayersOut(layers: Writable<Partial<LayerDescriptor>>[])
     if ('sourceDescriptor' in layer && layer.sourceDescriptor) {
       const source = layer.sourceDescriptor as { type?: string };
       if (source.type === SOURCE_TYPES.ESQL) {
-        const { columns, ...restOfSource } = source as ESQLSourceDescriptor & { columns?: unknown };
+        const { columns, dataViewId, ...restOfSource } = source as ESQLSourceDescriptor & {
+          columns?: unknown;
+          dataViewId?: string;
+        };
         layer.sourceDescriptor = restOfSource;
       }
     }

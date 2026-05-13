@@ -61,6 +61,7 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
     padInstallationStatus?.ml_module_setup_status === 'complete';
 
   return (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {padInstallationStatusError && (
         <EuiCallOut
@@ -133,7 +134,6 @@ export const PrivilegedAccessDetectionsPanel: React.FC<{ spaceId: string }> = ({
                     id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.topPrivilegedAccessDetectionAnomalies.title"
                     defaultMessage="Top privileged access anomalies"
                   />
-
                   <PrivilegedAccessInfoPopover />
                 </>
               }

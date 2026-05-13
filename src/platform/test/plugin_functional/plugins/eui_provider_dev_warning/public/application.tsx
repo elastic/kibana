@@ -9,11 +9,12 @@
 
 import React from 'react';
 import { EuiPageTemplate, EuiTitle, EuiText } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export const renderApp = (_core: CoreStart, { element }: AppMountParameters) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <EuiPageTemplate restrictWidth="1000px">
       <EuiPageTemplate.Header>
         <EuiTitle size="l">
@@ -31,9 +32,8 @@ export const renderApp = (_core: CoreStart, { element }: AppMountParameters) => 
           </p>
         </EuiText>
       </EuiPageTemplate.Section>
-    </EuiPageTemplate>,
-    element
+    </EuiPageTemplate>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

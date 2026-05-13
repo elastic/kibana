@@ -10,7 +10,9 @@ import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { FindResult, PartialRule } from '@kbn/alerting-plugin/server';
+import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_status';
+import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
+import type { FindResult, PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -20,9 +22,15 @@ import type {
   RuleAction as RuleActionSchema,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
+  FindRulesSortField,
   FindRulesResponse,
   RuleToImport,
 } from '../../../../../common/api/detection_engine/rule_management';
+import type { SortOrder, WarningSchema } from '../../../../../common/api/detection_engine';
+import {
+  MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+  MAX_RULES_WITH_GAPS_TO_FETCH,
+} from '../../../../../common/constants';
 
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -30,6 +38,7 @@ import type { InvestigationFieldsCombined, RuleAlertType, RuleParams } from '../
 import { hasValidRuleType } from '../../rule_schema';
 import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 import type { BulkActionError } from '../api/rules/bulk_actions/bulk_actions_response';
+import { getGapFilteredRuleIds } from '../logic/search/get_gap_filtered_rule_ids';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -63,7 +72,10 @@ export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] =
   return rules.map((rule) => internalRuleToAPIResponse(rule));
 };
 
-export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
+export const transformFindAlerts = (
+  ruleFindResults: FindResult<RuleParams>,
+  warnings?: WarningSchema[]
+): FindRulesResponse => {
   return {
     page: ruleFindResults.page,
     perPage: ruleFindResults.perPage,
@@ -71,6 +83,54 @@ export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): Fi
     data: ruleFindResults.data.map((rule) => {
       return internalRuleToAPIResponse(rule);
     }),
+    ...(warnings && warnings.length > 0 ? { warnings } : {}),
+  };
+};
+
+export const resolveGapPreFilter = async ({
+  rulesClient,
+  filter,
+  sortField,
+  sortOrder,
+  gapFillStatuses,
+  gapsRangeStart,
+  gapsRangeEnd,
+  excludedReasons,
+  schedulerId,
+}: {
+  rulesClient: RulesClient;
+  filter: string | undefined;
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+  gapFillStatuses: GapFillStatus[];
+  gapsRangeStart: string;
+  gapsRangeEnd: string;
+  excludedReasons?: GapReasonType[];
+  schedulerId?: string;
+}): Promise<{ ruleIds: string[]; warnings: WarningSchema[] }> => {
+  const { ruleIds, truncated } = await getGapFilteredRuleIds({
+    rulesClient,
+    gapRange: { start: gapsRangeStart, end: gapsRangeEnd },
+    gapFillStatuses,
+    maxRuleIds: MAX_RULES_WITH_GAPS_TO_FETCH,
+    filter,
+    sortField,
+    sortOrder,
+    excludedReasons,
+    schedulerId,
+  });
+
+  return {
+    ruleIds,
+    warnings: truncated
+      ? [
+          {
+            type: MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
+            message: `Only the first ${MAX_RULES_WITH_GAPS_TO_FETCH} rules with gaps in the selected time range are returned. Additional rules with gaps are not included in this response.`,
+            actionPath: '',
+          },
+        ]
+      : [],
   };
 };
 
@@ -145,7 +205,7 @@ export const swapActionIds = async (
       return { ...action, id: foundAction.saved_objects[0].id };
     } else if (foundAction.saved_objects.length > 1) {
       return new Error(
-        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details`
+        `Found two action connectors with originId or _id: ${action.id} The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/docs/extend/kibana/saved-objects/share for more details`
       );
     }
     return action;

@@ -16,6 +16,7 @@ jest.mock('@kbn/expandable-flyout');
 
 const mockProps: HostPreviewPanelFooterProps = {
   hostName: 'test',
+  entityId: 'entity-id',
   contextID: 'test-host-panel',
   scopeId: 'test-scope-id',
 };

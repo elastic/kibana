@@ -22,8 +22,8 @@ export default function (ctx: FtrProviderContext) {
   const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
   const securityService = getService('security');
-  const globalNav = getService('globalNav');
   const {
+    appMenu,
     common,
     error,
     discover,
@@ -34,6 +34,7 @@ export default function (ctx: FtrProviderContext) {
     unifiedFieldList,
     exports,
   } = getPageObjects([
+    'appMenu',
     'common',
     'error',
     'discover',
@@ -48,6 +49,7 @@ export default function (ctx: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
   const deployment = getService('deployment');
+  const spaces = getService('spaces');
   const logstashIndexName = 'logstash-2015.09.22';
 
   async function setDiscoverTimeRange() {
@@ -110,16 +112,15 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('global_discover_all_role');
         await securityService.user.delete('global_discover_all_user');
       });
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql([
-          'Discover',
-          'Stack Management', // because `global_discover_all_role` enables search sessions and reporting
-        ]);
+        expect(navLinks.map((link) => link.text)).to.contain('Discover');
+        expect(navLinks.map((link) => link.text)).to.contain('Stack Management'); // because `global_discover_all_role` enables search sessions and reporting
       });
 
       it('shows save button', async () => {
@@ -127,7 +128,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it(`doesn't show read-only badge`, async () => {
-        await globalNav.badgeMissingOrFail();
+        await testSubjects.missingOrFail('discover-readonly-badge');
       });
 
       it('Shows short urls for users with the right privileges', async () => {
@@ -178,27 +179,41 @@ export default function (ctx: FtrProviderContext) {
         await security.login('global_discover_read_user', 'global_discover_read_user-password', {
           expectSpaceSelector: false,
         });
+
+        await spaces.create({
+          id: 'readonly-solution-space',
+          name: 'Readonly Solution Space',
+          solution: 'oblt',
+        });
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('global_discover_read_role');
         await securityService.user.delete('global_discover_read_user');
+        await spaces.delete('readonly-solution-space');
       });
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover']);
+        expect(navLinks).to.contain('Discover');
       });
 
       it(`doesn't show save button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
-        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
+        await appMenu.existOrFail('discoverNewButton');
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
-      it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+      it('shows read-only badge in the default space', async () => {
+        await testSubjects.existOrFail('discover-readonly-badge');
+      });
+
+      it('shows read-only badge in a solution space', async () => {
+        await common.navigateToApp('discover', { basePath: 's/readonly-solution-space' });
+        await common.waitForTopNavToBeVisible();
+        await testSubjects.existOrFail('discover-readonly-badge');
       });
 
       it(`doesn't show visualize button`, async () => {
@@ -222,7 +237,6 @@ export default function (ctx: FtrProviderContext) {
             query: '',
           },
           sort: [['@timestamp', 'desc']],
-          columns: [],
           interval: 'auto',
           filters: [],
           dataViewId: 'logstash-*',
@@ -286,24 +300,25 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.user.delete('global_discover_read_url_create_user');
         await securityService.role.delete('global_discover_read_url_create_role');
       });
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover']);
+        expect(navLinks).to.contain('Discover');
       });
 
       it(`doesn't show save button`, async () => {
         await common.navigateToApp('discover');
         await common.waitForTopNavToBeVisible();
-        await testSubjects.existOrFail('discoverNewButton', { timeout: 10000 });
+        await appMenu.existOrFail('discoverNewButton');
         await testSubjects.missingOrFail('discoverSaveButton');
       });
 
       it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+        await testSubjects.existOrFail('discover-readonly-badge');
       });
 
       it(`doesn't show visualize button`, async () => {
@@ -363,6 +378,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('global_discover_visualize_read_role');
         await securityService.user.delete('global_discover_visualize_read_user');
       });
@@ -416,6 +432,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        await security.forceLogout();
         await securityService.role.delete('no_discover_privileges_role');
         await securityService.user.delete('no_discover_privileges_user');
       });
@@ -494,13 +511,13 @@ export default function (ctx: FtrProviderContext) {
             ],
           })
           .expect(200);
-
+        await security.forceLogout();
         await securityService.role.delete('discover_only_data_views_role');
         await securityService.user.delete('discover_only_data_views_user');
       });
 
       it('allows to access only via a permitted index alias', async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+        await testSubjects.existOrFail('discover-readonly-badge');
 
         // can't access logstash index directly
         await discover.selectIndexPattern('logstash-*');

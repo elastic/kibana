@@ -1,0 +1,21 @@
+summary: Create a maintenance window
+description: >
+  Create a maintenance window that recurs every week on Monday and Wednesday for two hours, with a scope that filters specific alerts using a KQL query.
+value:
+  title: 'Weekly Maintenance Window'
+  enabled: true
+  schedule:
+    custom:
+      start: '2025-03-01T08:00:00.000Z'
+      duration: '2h'
+      timezone: 'Europe/Amsterdam'
+      recurring:
+        every: '1w'
+        onWeekDay:
+          - 'MO'
+          - 'WE'
+        occurrences: 10
+  scope:
+    alerting:
+      query:
+        kql: 'kibana.alert.tags: "infra"'

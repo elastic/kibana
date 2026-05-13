@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { AttachmentRequest } from '../../common/types/api';
+import type { AttachmentRequest, AttachmentRequestV2 } from '../../common/types/api';
 import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
 import { isCommentRequestTypePersistableState } from '../../common/utils/attachments';
 import type { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
@@ -72,7 +72,7 @@ export function injectPersistableReferences(
   return { ...state, ...injectedState, persistableStateAttachmentTypeId };
 }
 
-export const extractPersistableStateReferencesFromSO = <T extends AttachmentRequest>(
+export const extractPersistableStateReferencesFromSO = <T extends AttachmentRequestV2>(
   attachmentAttributes: T,
   deps: ExtractDeps
 ) => {

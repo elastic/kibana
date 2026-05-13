@@ -6,12 +6,13 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import {
   ATTACK_DISCOVERY_API_ACTION_ALL,
   ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
 } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import {
   API_VERSIONS,
@@ -22,7 +23,6 @@ import {
 import { buildResponse } from '../../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../../types';
 import { performChecks } from '../../../../helpers';
-import { throwIfPublicApiDisabled } from '../../../helpers/throw_if_public_api_disabled';
 
 export const enableAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -36,6 +36,7 @@ export const enableAttackDiscoverySchedulesRoute = (
           requiredPrivileges: [
             ATTACK_DISCOVERY_API_ACTION_ALL,
             ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE,
+            ALERTS_API_READ,
           ],
         },
       },
@@ -80,8 +81,6 @@ export const enableAttackDiscoverySchedulesRoute = (
         const { id } = request.params;
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const dataClient = await assistantContext.getAttackDiscoverySchedulingDataClient();
           if (!dataClient) {
             return resp.error({

@@ -63,7 +63,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
         fill
         target="_blank"
         iconSide="left"
-        iconType="launch"
+        iconType="rocket"
         fullWidth
         href={cloudFormationUrl}
       >

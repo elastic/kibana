@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: PrivMonHealth
       summary: Health check on Privilege Monitoring
+      description: Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
 
       responses:
         "200":
@@ -44,3 +45,11 @@ paths:
 
                 required:
                   - status
+              examples:
+                PrivMonHealthResponse:
+                  summary: Healthy privilege monitoring engine
+                  value:
+                    status: started
+                    users:
+                      current_count: 42
+                      max_allowed: 1000

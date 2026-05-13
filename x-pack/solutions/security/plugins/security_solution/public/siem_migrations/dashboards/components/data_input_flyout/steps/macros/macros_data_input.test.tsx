@@ -8,12 +8,13 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MacrosDataInput } from './macros_data_input';
-import { DashboardUploadSteps } from '../constants';
 import { getDashboardMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
 import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
+import type { MigrationStepProps } from '../../../../../common/types';
+import { MigrationSource, SplunkDataInputStep } from '../../../../../common/types';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -40,20 +41,30 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   }),
 }));
 jest.mock('../../../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: {
+    get: () => ({
+      splunkV2DashboardsEnabled: false,
+    }),
+  },
+}));
 
 describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
-  const defaultProps = {
+  const defaultProps: MigrationStepProps = {
     onMissingResourcesFetched: jest.fn(),
-    dataInputStep: DashboardUploadSteps.MacrosUpload,
+    dataInputStep: SplunkDataInputStep.Macros,
     migrationStats: getDashboardMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
-    missingMacros: ['macro1', 'macro2'],
+    migrationSource: MigrationSource.SPLUNK,
+    onMigrationCreated: jest.fn(),
+    setDataInputStep: jest.fn(),
+    missingResourcesIndexed: { macros: ['macro1', 'macro2'], lookups: [] },
   };
 
   beforeEach(() => {
     appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.mocked(useAppToasts).mockReturnValue(appToastsMock);
   });
 
   afterEach(() => {
@@ -83,7 +94,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when dataInputStep is not MacrosUpload', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} dataInputStep={DashboardUploadSteps.DashboardsUpload} />
+        <MacrosDataInput {...defaultProps} dataInputStep={SplunkDataInputStep.Upload} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();
@@ -101,7 +112,7 @@ describe('MacrosDataInput', () => {
   it('does not render sub-steps when missingMacros is missing', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <MacrosDataInput {...defaultProps} missingMacros={undefined} />
+        <MacrosDataInput {...defaultProps} missingResourcesIndexed={undefined} />
       </TestProviders>
     );
     expect(queryByTestId('migrationsSubSteps')).not.toBeInTheDocument();

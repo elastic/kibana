@@ -13,14 +13,12 @@ import type { KbnClient } from '@kbn/test';
 import { createGunzip } from 'zlib';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import { scriptsDataDir } from '../data/lib/indexing';
 
 const pipelineAsync = promisify(pipeline);
 
 const PIPELINE_NAME = 'insights_pipeline';
-const DIRECTORY_PATH = path.resolve(
-  __dirname,
-  '../../../../test/security_solution_cypress/cypress/fixtures/assistant/attack_discovery'
-);
+const DIRECTORY_PATH = scriptsDataDir('episodes', 'attacks');
 
 const MAPPING_FILE_PATH = path.join(DIRECTORY_PATH, 'mapping.json');
 

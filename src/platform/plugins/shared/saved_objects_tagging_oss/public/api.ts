@@ -50,6 +50,12 @@ export interface ITagsCache {
    * Return an observable that will emit everytime the cache's state mutates.
    */
   getState$(params?: { waitForInitialization?: boolean }): Observable<Tag[]>;
+
+  /**
+   * True after the cache has completed its initial load (`initialize`), including
+   * when that load produced an empty tag list.
+   */
+  isInitialized(): boolean;
 }
 
 /**
@@ -159,6 +165,11 @@ export interface SavedObjectsTaggingApiUi {
   getTagIdsFromReferences(
     references: Array<SavedObjectReference | SavedObjectsFindOptionsReference>
   ): string[];
+
+  /**
+   * Returns tag reference for given tag id
+   */
+  tagIdToReference(tagId: string): SavedObjectReference;
 
   /**
    * Returns the id for given tag name. Will return `undefined`

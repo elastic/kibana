@@ -10,43 +10,46 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import type { TabItem, TabPreviewData } from '@kbn/unified-tabs';
 import { TabStatus } from '@kbn/unified-tabs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { RuntimeStateManager, TabState } from '../../state_management/redux';
+import type {
+  RecentlyClosedTabState,
+  RuntimeStateManager,
+  TabState,
+} from '../../state_management/redux';
 import {
   selectTabRuntimeState,
   useInternalStateSelector,
   selectAllTabs,
+  selectRecentlyClosedTabs,
 } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 
 export const usePreviewData = (runtimeStateManager: RuntimeStateManager) => {
   const allTabs = useInternalStateSelector(selectAllTabs);
+  const recentlyClosedTabs = useInternalStateSelector(selectRecentlyClosedTabs);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
 
   const previewDataMap$ = useMemo(
     () =>
       combineLatest(
-        allTabs.reduce<Record<string, Observable<TabPreviewData>>>((acc, tabState) => {
-          const tabId = tabState.id;
-          return {
-            ...acc,
-            [tabId]: getPreviewDataObservable(
-              runtimeStateManager,
-              tabId,
-              tabState.initialAppState,
-              tabState.initialInternalState,
-              savedDataViews
-            ),
-          };
-        }, {})
+        [...allTabs, ...recentlyClosedTabs].reduce<Record<string, Observable<TabPreviewData>>>(
+          (acc, tabState) => {
+            const tabId = tabState.id;
+            return {
+              ...acc,
+              [tabId]: getPreviewDataObservable(runtimeStateManager, tabState, savedDataViews),
+            };
+          },
+          {}
+        )
       ),
-    [allTabs, runtimeStateManager, savedDataViews]
+    [allTabs, recentlyClosedTabs, runtimeStateManager, savedDataViews]
   );
   const previewDataMap = useObservable(previewDataMap$);
   const getPreviewData = useCallback(
@@ -141,54 +144,58 @@ const getPreviewTitle = (
 
 const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
-  tabId: string,
-  initialAppState: TabState['initialAppState'] | undefined,
-  initialInternalState: TabState['initialInternalState'] | undefined,
+  tabState: TabState | RecentlyClosedTabState,
   savedDataViews: DataViewListItem[]
 ) => {
-  return selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
-    switchMap((tabStateContainer) => {
-      if (!tabStateContainer) {
+  if ('closedAt' in tabState) {
+    // Recently closed tab, no runtime state, no updates expected
+    const derivedDataViewName = getDataViewNameFromInitialInternalState(
+      tabState.initialInternalState,
+      savedDataViews
+    );
+    return of({
+      status: TabStatus.DEFAULT,
+      query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+      title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
+    });
+  }
+
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabState.id);
+
+  return tabRuntimeState.dataStateContainer$.pipe(
+    switchMap((dataStateContainer) => {
+      if (!dataStateContainer) {
         const derivedDataViewName = getDataViewNameFromInitialInternalState(
-          initialInternalState,
+          tabState.initialInternalState,
           savedDataViews
         );
         return of({
           status: TabStatus.DEFAULT,
-          query: getPreviewQuery(initialAppState?.query, derivedDataViewName),
-          title: getPreviewTitle(initialAppState?.query, derivedDataViewName),
+          query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+          title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
         });
       }
 
-      const { appState } = tabStateContainer;
-
-      return combineLatest([
-        tabStateContainer.dataState.data$.main$,
-        appState.state$.pipe(startWith(appState.get())),
-        tabStateContainer.savedSearchState
-          .getCurrent$()
-          .pipe(startWith(tabStateContainer.savedSearchState.getState())),
-      ]).pipe(
-        map(([{ fetchStatus }, { query }, { searchSource }]) => ({
+      return combineLatest([dataStateContainer.data$.main$, tabRuntimeState.currentDataView$]).pipe(
+        map(([{ fetchStatus }, dataView]) => ({
           fetchStatus,
-          query,
-          dataViewName: searchSource?.getField('index')?.name,
+          dataViewName: dataView?.name,
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        map(({ fetchStatus, query, dataViewName }) => {
+        map(({ fetchStatus, dataViewName }) => {
           let derivedDataViewName = dataViewName;
 
-          if (!derivedDataViewName && initialInternalState?.serializedSearchSource) {
+          if (!derivedDataViewName && tabState.initialInternalState?.serializedSearchSource) {
             derivedDataViewName = getDataViewNameFromInitialInternalState(
-              initialInternalState,
+              tabState.initialInternalState,
               savedDataViews
             );
           }
 
           return {
-            status: getPreviewStatus(fetchStatus),
-            query: getPreviewQuery(query, derivedDataViewName),
-            title: getPreviewTitle(query, derivedDataViewName),
+            status: tabState.forceFetchOnSelect ? TabStatus.DEFAULT : getPreviewStatus(fetchStatus),
+            query: getPreviewQuery(tabState.appState.query, derivedDataViewName),
+            title: getPreviewTitle(tabState.appState.query, derivedDataViewName),
           };
         })
       );

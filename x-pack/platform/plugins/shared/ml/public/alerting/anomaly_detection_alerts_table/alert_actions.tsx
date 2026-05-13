@@ -89,7 +89,6 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
       <DefaultAlertActions<{}>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
-        isAlertDetailsEnabled={false}
         resolveRulePagePath={(alertRuleId) =>
           alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
         }
@@ -143,6 +142,9 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
     <>
       <EuiPopover
         anchorPosition="downLeft"
+        aria-label={i18n.translate('xpack.ml.alertsTable.actionsPopoverAriaLabel', {
+          defaultMessage: 'Alert actions',
+        })}
         button={
           <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
             <EuiButtonIcon
@@ -150,7 +152,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
               color="text"
               data-test-subj="alertsTableRowActionMore"
               display="empty"
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               onClick={toggleActionsPopover}
               size="s"
             />

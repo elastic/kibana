@@ -17,7 +17,7 @@ import type {
   LensAppServices,
   FramePublicAPI,
   VisualizationDimensionEditorProps,
-  XYState,
+  XYVisualizationState,
   XYAnnotationLayerConfig,
   XYDataLayerConfig,
 } from '@kbn/lens-common';
@@ -27,7 +27,7 @@ import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
 
 export const AnnotationsPanel = (
-  props: VisualizationDimensionEditorProps<XYState> & {
+  props: VisualizationDimensionEditorProps<XYVisualizationState> & {
     datatableUtilities: DatatableUtilitiesService;
     dataViewsService: DataViewsPublicPluginStart;
   }
@@ -36,7 +36,7 @@ export const AnnotationsPanel = (
 
   // we don't listen to the state prop after the initial render, because we don't want to
   // slow the annotation settings UI updates down on a full Redux state update
-  const [localState, setLocalState] = useState<XYState>(state);
+  const [localState, setLocalState] = useState<XYVisualizationState>(state);
 
   const index = localState.layers.findIndex((l) => l.layerId === layerId);
   const localLayer = localState.layers.find(
@@ -94,22 +94,24 @@ export const AnnotationsPanel = (
   }
 
   return currentDataView ? (
-    <AnnotationEditorControls
-      annotation={currentAnnotation}
-      onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
-      dataView={currentDataView}
-      getDefaultRangeEnd={(rangeStart) =>
-        getEndTimestamp(
-          props.datatableUtilities,
-          rangeStart,
-          frame,
-          localState.layers.filter(isDataLayer)
-        )
-      }
-      queryInputServices={queryInputServices}
-      calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-      appName={LENS_APP_NAME}
-    />
+    <div className="lnsIndexPatternDimensionEditor--padded">
+      <AnnotationEditorControls
+        annotation={currentAnnotation}
+        onAnnotationChange={(newAnnotation) => setAnnotation(newAnnotation)}
+        dataView={currentDataView}
+        getDefaultRangeEnd={(rangeStart) =>
+          getEndTimestamp(
+            props.datatableUtilities,
+            rangeStart,
+            frame,
+            localState.layers.filter(isDataLayer)
+          )
+        }
+        queryInputServices={queryInputServices}
+        calendarClassName={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        appName={LENS_APP_NAME}
+      />
+    </div>
   ) : null;
 };
 

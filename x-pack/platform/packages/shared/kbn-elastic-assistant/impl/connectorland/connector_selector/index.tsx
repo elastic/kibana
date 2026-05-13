@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
@@ -23,12 +24,12 @@ import type {
 import { ConnectorSelectable } from '@kbn/ai-assistant-connector-selector-action';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
-import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
@@ -43,6 +44,7 @@ interface Props {
   displayFancy?: (label: string, aIConnector?: AIConnector) => React.ReactNode;
   setIsOpen?: (isOpen: boolean) => void;
   stats?: AttackDiscoveryStats | null;
+  loadConnectorFeatureId?: string;
 
   /**
    * Allows parent components to control whether the default connector should be
@@ -54,7 +56,30 @@ interface Props {
 export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
+  /** When true, this connector represents an Elastic-managed inference endpoint (EIS). */
+  isEis?: boolean;
 };
+
+interface GroupedConnectors {
+  customConnectors: ConnectorSelectableComponentProps['customConnectors'];
+  preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
+}
+
+const groupConnectors = (connectors: AIConnector[] | undefined): GroupedConnectors =>
+  (connectors ?? []).reduce<GroupedConnectors>(
+    (acc, connector) => {
+      const target =
+        connector.isEis || connector.isPreconfigured
+          ? acc.preConfiguredConnectors
+          : acc.customConnectors;
+      target.push({ label: connector.name, value: connector.id });
+      return acc;
+    },
+    {
+      customConnectors: [],
+      preConfiguredConnectors: [],
+    }
+  );
 
 export const ConnectorSelector: React.FC<Props> = React.memo(
   ({
@@ -67,15 +92,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     setIsOpen,
     stats = null,
     explicitConnectorSelection,
+    loadConnectorFeatureId = 'elastic_assistant',
   }) => {
-    const {
-      actionTypeRegistry,
-      http,
-      assistantAvailability,
-      inferenceEnabled,
-      settings,
-      navigateToApp,
-    } = useAssistantContext();
+    const { actionTypeRegistry, http, assistantAvailability, settings, navigateToApp } =
+      useAssistantContext();
     const { euiTheme } = useEuiTheme();
 
     const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
@@ -86,7 +106,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({
       http,
-      inferenceEnabled,
+      featureId: loadConnectorFeatureId,
       settings,
     });
 
@@ -146,35 +166,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     );
     const buttonLabel = selectedOrDefaultConnector?.name ?? i18n.INLINE_CONNECTOR_PLACEHOLDER;
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+    const isAddConnectorMissingPrivileges = !assistantAvailability.hasConnectorsAllPrivilege;
+    const isAddConnectorDisabled = isDisabled || isAddConnectorMissingPrivileges;
 
     // Group connectors into pre-configured and custom
     const { customConnectors, preConfiguredConnectors } = useMemo(
-      () =>
-        (aiConnectors ?? []).reduce<{
-          customConnectors: ConnectorSelectableComponentProps['customConnectors'];
-          preConfiguredConnectors: ConnectorSelectableComponentProps['preConfiguredConnectors'];
-        }>(
-          (acc, connector) => {
-            if (connector.isPreconfigured) {
-              acc.preConfiguredConnectors.push({
-                label: connector.name,
-                value: connector.id,
-              });
-            } else {
-              acc.customConnectors.push({
-                label: connector.name,
-                value: connector.id,
-              });
-            }
-            return acc;
-          },
-          {
-            customConnectors: [],
-            preConfiguredConnectors: [],
-          }
-        ),
+      () => groupConnectors(aiConnectors),
       [aiConnectors]
     );
+
+    const totalConnectors = customConnectors.length + preConfiguredConnectors.length;
+    const hasNoConnectors = !connectorExists && totalConnectors === 0;
 
     const renderOption: ConnectorSelectableProps['renderOption'] = useCallback(
       (option: EuiSelectableOption) => {
@@ -208,13 +210,10 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
                 ? () => setIsConnectorModalVisible(true)
                 : undefined
             }
-            onManageConnectorsClick={
-              assistantAvailability.hasConnectorsReadPrivilege
-                ? () =>
-                    navigateToApp('management', {
-                      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-                    })
-                : undefined
+            onManageConnectorsClick={() =>
+              navigateToApp('management', {
+                path: '/modelManagement/model_settings',
+              })
             }
             preConfiguredConnectors={preConfiguredConnectors}
             customConnectors={customConnectors}
@@ -230,7 +229,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     const input = useMemo(() => {
       return (
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           size="s"
           color="text"
@@ -263,18 +262,28 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       euiTheme.colors.textPrimary,
     ]);
 
+    const addConnectorButton = (
+      <EuiButtonEmpty
+        data-test-subj="addNewConnectorButton"
+        iconType="plusCircle"
+        isDisabled={isAddConnectorDisabled}
+        size="xs"
+        onClick={() => setIsConnectorModalVisible(true)}
+      >
+        {i18n.ADD_CONNECTOR}
+      </EuiButtonEmpty>
+    );
+
     return (
       <>
-        {!connectorExists && customConnectors.length + preConfiguredConnectors.length === 0 ? (
-          <EuiButtonEmpty
-            data-test-subj="addNewConnectorButton"
-            iconType="plusInCircle"
-            isDisabled={localIsDisabled}
-            size="xs"
-            onClick={() => setIsConnectorModalVisible(true)}
-          >
-            {i18n.ADD_CONNECTOR}
-          </EuiButtonEmpty>
+        {hasNoConnectors ? (
+          isAddConnectorMissingPrivileges ? (
+            <EuiToolTip content={i18n.ADD_CONNECTOR_MISSING_PRIVILEGES_DESCRIPTION}>
+              {addConnectorButton}
+            </EuiToolTip>
+          ) : (
+            addConnectorButton
+          )
         ) : (
           <EuiInputPopover
             input={input}

@@ -10,6 +10,7 @@
 export type {
   SubFeature,
   ActionType,
+  ActionTypeSource,
   ValidatedEmail,
   ActionTypeExecutorResult,
   ActionTypeExecutorRawResult,
@@ -47,6 +48,8 @@ export {
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   EndpointSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
   AlertingConnectorFeature,
   CasesConnectorFeature,
   UptimeConnectorFeature,
@@ -55,6 +58,8 @@ export {
   GenerativeAIForObservabilityFeature,
   GenerativeAIForSearchPlaygroundFeature,
   EndpointSecurityConnectorFeature,
+  WorkflowsConnectorFeature,
+  AgentBuilderConnectorFeature,
   areValidFeatures,
   getConnectorFeatureName,
   getConnectorCompatibility,
@@ -82,4 +87,18 @@ export const DEFAULT_MICROSOFT_GRAPH_API_SCOPE = 'https://graph.microsoft.com/.d
 // information on email sizes.  Greater than 25MB does seem to cause
 // OOMs, so that seems like a safe limit for now.
 export const MAX_EMAIL_BODY_LENGTH = 25 * 1000 * 1000; // 25MB
+
+export const CONNECTOR_ID_MAX_LENGTH = 36;
 export const DEFAULT_EMAIL_BODY_LENGTH = MAX_EMAIL_BODY_LENGTH;
+
+export type {
+  StartOAuthFlowRequestBody,
+  StartOAuthFlowPathParams,
+  StartOAuthFlowResponse,
+  DisconnectOAuthPathParams,
+} from './routes/connector/apis/oauth';
+export {
+  OAuthAuthorizationStatus,
+  OAUTH_CALLBACK_QUERY_PARAMS,
+  OAUTH_BROADCAST_CHANNEL_NAME,
+} from './oauth_callback';

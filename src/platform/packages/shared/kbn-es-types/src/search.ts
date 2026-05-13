@@ -675,12 +675,10 @@ export interface ESQLSearchResponse {
 }
 
 export interface ESQLSearchParams {
-  // TODO: time_zone support was temporarily removed from ES|QL,
-  // we will need to add it back in once it is supported again.
-  // https://github.com/elastic/elasticsearch/pull/102767
-  // time_zone?: string;
+  time_zone?: string;
   query: string;
   filter?: unknown;
+  project_routing?: string;
   locale?: string;
   include_execution_metadata?: boolean;
   dropNullColumns?: boolean;

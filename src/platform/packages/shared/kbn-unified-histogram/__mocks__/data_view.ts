@@ -100,7 +100,10 @@ export const buildDataViewMock = ({
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName: timeFieldName || '',
     docvalueFields: [],
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({
+      convert: (value: unknown) => value,
+      reactConvert: (value: unknown) => value,
+    })),
     isTimeNanosBased: () => false,
     isPersisted: () => true,
     getTimeField: () => {
@@ -110,7 +113,7 @@ export const buildDataViewMock = ({
     toMinimalSpec: () => ({}),
   } as unknown as DataView;
 
-  dataView.isTimeBased = () => !!timeFieldName;
+  dataView.isTimeBased = (() => !!timeFieldName) as DataView['isTimeBased'];
 
   return dataView;
 };

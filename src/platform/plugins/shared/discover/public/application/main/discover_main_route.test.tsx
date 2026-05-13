@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -20,12 +19,9 @@ import { createCustomizationService } from '../../customizations/customization_s
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { RootProfileState } from '../../context_awareness';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { AppMountParameters } from '@kbn/core/public';
-import { createRuntimeStateManager } from './state_management/redux';
-import { BehaviorSubject } from 'rxjs';
 
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
@@ -45,24 +41,14 @@ jest.mock('./components/single_tab_view/main_app', () => {
 
 const defaultRootProfileState: RootProfileState = {
   rootProfileLoading: false,
-  AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
   getDefaultAdHocDataViews: () => [],
+  getDefaultEsqlQuery: () => undefined,
 };
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
-jest.mock('../../context_awareness', () => {
-  const originalModule = jest.requireActual('../../context_awareness');
-  return {
-    ...originalModule,
-    useRootProfile: () => mockRootProfileState,
-  };
-});
-
-jest.mock('./state_management/redux/runtime_state', () => ({
-  ...jest.requireActual('./state_management/redux/runtime_state'),
-  createRuntimeStateManager: jest.fn(),
+jest.mock('../../context_awareness/hooks/use_root_profile', () => ({
+  useRootProfile: () => mockRootProfileState,
 }));
-const mockCreateRuntimeStateManager = jest.mocked(createRuntimeStateManager);
 
 function getServicesMock(
   hasESData = true,
@@ -120,10 +106,6 @@ describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
-    mockCreateRuntimeStateManager.mockReturnValue({
-      adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-      tabs: { byId: {} },
-    });
   });
 
   test('renders the main app when hasESData=true & hasUserDataView=true ', async () => {

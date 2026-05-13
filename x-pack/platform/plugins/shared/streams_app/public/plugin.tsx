@@ -31,6 +31,7 @@ import type {
 } from './types';
 import type { StreamsAppServices } from './services/types';
 import {
+  createDiscoverFlyoutStreamFieldByStreamNameLink,
   createDiscoverFlyoutStreamFieldLink,
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
@@ -58,7 +59,6 @@ export const renderApp = ({
 
   const appWrapperClassName = css`
     overflow: auto;
-    height: 0;
   `;
   const appWrapperElement = document.getElementsByClassName(APP_WRAPPER_CLASS)[1];
   appWrapperElement.classList.add(appWrapperClassName);
@@ -159,7 +159,7 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
@@ -168,12 +168,15 @@ export class StreamsAppPlugin
         renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          coreApplication: coreStart.application,
         }),
-        renderFlyoutStreamProcessingLink: createDiscoverFlyoutStreamProcessingLink({
+        renderFlyoutStreamFieldByStreamName: createDiscoverFlyoutStreamFieldByStreamNameLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
-          coreApplication: coreStart.application,
+        }),
+        renderFlyoutStreamProcessingLink: createDiscoverFlyoutStreamProcessingLink({
+          fieldFormats: pluginsStart.fieldFormats,
+          streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+          locator,
         }),
       });
     });

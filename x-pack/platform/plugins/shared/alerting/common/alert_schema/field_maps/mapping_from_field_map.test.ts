@@ -208,7 +208,20 @@ describe('mappingFromFieldMap', () => {
             },
             original: {
               type: 'keyword',
-              ignore_above: 1024,
+              ignore_above: 32766,
+            },
+          },
+        },
+        data_stream: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            dataset: {
+              type: 'keyword',
+            },
+            namespace: {
+              type: 'keyword',
             },
           },
         },
@@ -247,6 +260,9 @@ describe('mappingFromFieldMap', () => {
                 maintenance_window_ids: {
                   type: 'keyword',
                 },
+                maintenance_window_names: {
+                  type: 'keyword',
+                },
                 instance: {
                   properties: {
                     id: {
@@ -256,6 +272,9 @@ describe('mappingFromFieldMap', () => {
                 },
                 last_detected: {
                   type: 'date',
+                },
+                muted: {
+                  type: 'boolean',
                 },
                 pending_recovered_count: {
                   type: 'long',
@@ -329,6 +348,9 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                severity: {
+                  type: 'keyword',
+                },
                 severity_improving: {
                   type: 'boolean',
                 },
@@ -388,6 +410,7 @@ describe('mappingFromFieldMap', () => {
         },
         tags: {
           type: 'keyword',
+          ignore_above: 1024,
         },
       },
     });
@@ -439,7 +462,7 @@ describe('mappingFromFieldMap', () => {
             },
           },
         },
-        ecs: { properties: { version: { type: 'keyword' } } },
+        ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
       },
     });
   });

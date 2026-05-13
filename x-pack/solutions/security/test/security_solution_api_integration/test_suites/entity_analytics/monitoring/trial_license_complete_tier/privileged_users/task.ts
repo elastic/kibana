@@ -12,7 +12,6 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const entityAnalyticsApi = getService('entityAnalyticsApi');
@@ -36,15 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
   describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
-    const kibanaServer = getService('kibanaServer');
-
-    before(async () => {
-      await enablePrivmonSetting(kibanaServer);
-    });
-
     after(async () => {
       await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
-      await disablePrivmonSetting(kibanaServer);
     });
 
     describe('Index Entity Source APIs', () => {

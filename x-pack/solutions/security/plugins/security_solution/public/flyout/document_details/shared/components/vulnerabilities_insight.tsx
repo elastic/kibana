@@ -18,13 +18,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
-import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   type CloudSecurityUiCounters,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  buildEuidCspPreviewOptions,
+  inferEntityTypeFromIdentityFields,
+} from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
@@ -32,12 +36,14 @@ import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
 } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../utils';
+import { useUiSetting } from '../../../../common/lib/kibana';
 
 interface VulnerabilitiesInsightProps {
   /**
-   *  Host name to retrieve vulnerabilities for
+   * Entity identifiers used to filter the vulnerabilities by.
    */
-  hostName: string;
+  identityFields: IdentityFields;
   /**
    * The direction of the flex group
    */
@@ -57,10 +63,10 @@ interface VulnerabilitiesInsightProps {
 }
 
 /*
- * Displays a distribution bar and the total vulnerabilities count for a given host
+ * Displays a distribution bar and the total vulnerabilities count for a given entity
  */
 export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
-  hostName,
+  identityFields,
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
@@ -69,12 +75,18 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
-  const { data } = useVulnerabilitiesPreview({
-    query: buildGenericEntityFlyoutPreviewQuery('host.name', hostName),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
+  const euidApi = useEntityStoreEuidApi();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityType = inferEntityTypeFromIdentityFields(identityFields);
+  const cspPreviewOptions = useMemo(
+    () =>
+      buildEuidCspPreviewOptions(entityType, identityFields, euidApi, {
+        entityStoreV2Enabled,
+        legacyIdentityFields: identityFields,
+      }),
+    [euidApi, entityStoreV2Enabled, entityType, identityFields]
+  );
+  const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
   const totalVulnerabilities = useMemo(

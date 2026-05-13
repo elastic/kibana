@@ -28,14 +28,14 @@ import type { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
@@ -208,8 +208,14 @@ export class UpdateSLO {
 
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
-      // Any errors here should not prevent moving forward.
-      // Worst case we keep rolling up data for the previous revision number.
+      // Don't block the update on cleanup failures, but surface them in logs so
+      // stale transforms and orphan summary documents become diagnosable.
+      // SDH #6202.
+      this.logger.warn(
+        `Failed to clean up resources for previous revision of SLO ` +
+          `[id=${slo.id}, revision=${slo.revision}]. ` +
+          `Old resources may continue producing data. ${err}`
+      );
     }
   }
 

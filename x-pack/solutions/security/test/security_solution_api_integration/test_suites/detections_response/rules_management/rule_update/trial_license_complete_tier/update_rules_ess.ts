@@ -10,6 +10,12 @@ import type { Rule } from '@kbn/alerting-plugin/common';
 import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
 import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '@kbn/detections-response-ftr-services';
+import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
@@ -23,12 +29,6 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   updateUsername,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -154,11 +154,11 @@ export default ({ getService }: FtrProviderContext) => {
           investigation_fields: ['foo'],
         };
 
-        // @ts-expect-error we are testing the invalid payload
+        // we are testing the invalid payload
         const { body } = await detectionsApi.updateRule({ body: updatedRule }).expect(400);
 
         expect(body.message).to.eql(
-          '[request body]: investigation_fields: Expected object, received array'
+          '[request body]: investigation_fields: Invalid input: expected object, received array'
         );
       });
 

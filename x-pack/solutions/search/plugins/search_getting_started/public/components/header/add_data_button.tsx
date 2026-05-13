@@ -8,12 +8,11 @@ import React, { useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { SEARCH_INDICES } from '@kbn/deeplinks-search';
 import { useKibana } from '../../hooks/use_kibana';
 
 export const AddDataButton: React.FC = () => {
   const {
-    services: { application },
+    services: { application, share },
   } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -25,10 +24,12 @@ export const AddDataButton: React.FC = () => {
     setIsPopoverOpen(false);
   };
 
+  const indexManagementLocator = share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
+
   const items = [
     <EuiContextMenuItem
       key="upload"
-      icon="exportAction"
+      icon="upload"
       data-test-subj="gettingStartedUploadMenuItem"
       onClick={() => {
         closePopover();
@@ -52,26 +53,32 @@ export const AddDataButton: React.FC = () => {
         defaultMessage: 'Browse sample datasets',
       })}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="empty"
-      icon="indexOpen"
-      data-test-subj="gettingStartedCreateIndexMenuItem"
-      onClick={() => {
-        closePopover();
-        application.navigateToApp(SEARCH_INDICES, { path: 'create' });
-      }}
-    >
-      {i18n.translate('xpack.search.gettingStarted.addDataButton.createEmptyIndex', {
-        defaultMessage: 'Create an empty index',
-      })}
-    </EuiContextMenuItem>,
+    ...(indexManagementLocator
+      ? [
+          <EuiContextMenuItem
+            key="empty"
+            icon="indexOpen"
+            data-test-subj="gettingStartedCreateIndexMenuItem"
+            onClick={() => {
+              closePopover();
+              indexManagementLocator.navigate({
+                page: 'index_list',
+              });
+            }}
+          >
+            {i18n.translate('xpack.search.gettingStarted.addDataButton.createEmptyIndex', {
+              defaultMessage: 'Create an empty index',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
   ];
 
   const button = (
     <EuiButton
       color="primary"
       fill={true}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       data-test-subj="gettingStartedAddDataButton"

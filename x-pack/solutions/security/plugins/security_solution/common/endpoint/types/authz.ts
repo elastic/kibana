@@ -99,6 +99,7 @@ export interface EndpointAuthz {
   canReadEndpointExceptions: boolean;
   /** if the user has read permissions for endpoint exceptions */
   canWriteEndpointExceptions: boolean;
+
   /** If user is allowed to manage global artifacts. Introduced support for spaces feature */
   canManageGlobalArtifacts: boolean;
 
@@ -114,6 +115,11 @@ export interface EndpointAuthz {
    */
   canReadAdminData: boolean;
   canWriteAdminData: boolean;
+
+  /** User has privilege to read from the scripts library */
+  canReadScriptsLibrary: boolean;
+  /** user has privilege to write to the scripts library */
+  canWriteScriptsLibrary: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

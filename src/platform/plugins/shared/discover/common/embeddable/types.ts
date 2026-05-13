@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   SavedSearchAttributes,
   SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSessionEmbeddableState } from '../../server';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 // These are options that are not persisted in the saved object, but can be used by solutions
@@ -27,9 +28,9 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-type SearchEmbeddableBaseState = SerializedTitles &
+export type SearchEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> &
+  SerializedDrilldowns &
   EditableSavedSearchAttributes & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
@@ -40,9 +41,12 @@ export type SearchEmbeddableByValueState = SearchEmbeddableBaseState & {
 
 export type SearchEmbeddableByReferenceState = SearchEmbeddableBaseState & {
   savedObjectId: string;
+  selectedTabId?: string;
 };
 
 export type SearchEmbeddableState = SearchEmbeddableByValueState | SearchEmbeddableByReferenceState;
+
+export type SearchEmbeddablePanelApiState = DiscoverSessionEmbeddableState | SearchEmbeddableState;
 
 export type StoredSearchEmbeddableByValueState = SearchEmbeddableByValueState;
 

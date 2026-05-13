@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -11,5 +11,8 @@
     "@kbn/developer-toolbar",
     "@kbn/core-chrome-layout-components",
     "@kbn/config-schema",
+    "@kbn/core-chrome-browser-internal-types",
+    "@kbn/measure-component",
+    "@kbn/core-chrome-feature-flags",
   ]
 }

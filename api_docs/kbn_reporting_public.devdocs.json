@@ -10,6 +10,8 @@
         "label": "Job",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -21,7 +23,7 @@
             "label": "payload",
             "description": [],
             "signature": [
-              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; forceNow?: string | undefined; layout?: { id?: ",
+              "{ spaceId?: string | undefined; version: string; isDeprecated?: boolean | undefined; title: string; objectType: string; forceNow?: string | undefined; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -31,11 +33,13 @@
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
-              "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; browserTimezone: string; pagingStrategy?: ",
+              "> | undefined; zoom?: number | undefined; } | undefined; browserTimezone: string; pagingStrategy?: ",
               "CsvPagingStrategy",
               " | undefined; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -47,6 +51,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -58,6 +64,8 @@
             "label": "index",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -69,6 +77,8 @@
             "label": "objectType",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,6 +90,8 @@
             "label": "title",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -94,6 +106,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -108,6 +122,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -122,6 +138,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,6 +164,8 @@
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -161,6 +181,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,6 +194,8 @@
             "label": "version",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -183,6 +207,8 @@
             "label": "jobtype",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,6 +223,8 @@
               "string | false"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,6 +236,8 @@
             "label": "created_at",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -222,6 +252,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -236,6 +268,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,6 +290,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,6 +303,8 @@
             "label": "attempts",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -281,6 +319,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -295,6 +335,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -309,6 +351,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -323,6 +367,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -337,6 +383,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -351,6 +399,8 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -365,6 +415,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,6 +431,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -394,6 +448,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -408,6 +464,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -422,6 +480,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -445,6 +505,8 @@
               ">[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -459,6 +521,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -473,6 +537,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,6 +553,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -501,6 +569,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -515,7 +585,10 @@
                   "ReportApiJSON"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+                "lineNumber": 84,
+                "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReportApiJSON",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -533,6 +606,8 @@
               "() => boolean"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -549,6 +624,8 @@
               "() => React.JSX.Element | null"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -562,6 +639,8 @@
             "label": "prettyStatus",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 178,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -573,6 +652,8 @@
             "label": "canLinkToKibanaApp",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -584,6 +665,8 @@
             "label": "isDownloadReady",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -598,6 +681,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 193,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -609,6 +694,8 @@
             "label": "prettyTimeout",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 215,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -625,6 +712,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -643,6 +732,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -659,6 +750,8 @@
               "() => string | React.JSX.Element"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -675,6 +768,8 @@
               "() => string[] | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 265,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -691,6 +786,8 @@
               "() => string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 271,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -707,6 +804,8 @@
               "() => React.JSX.Element | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 280,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -723,6 +822,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/job.tsx",
+            "lineNumber": 319,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -753,6 +854,8 @@
           " implements IReportingAPI"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -767,6 +870,8 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -781,7 +886,10 @@
                   "HttpSetup"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 84,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -796,7 +904,10 @@
                   "IUiSettingsClient"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 85,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IUiSettingsClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -811,6 +922,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 86,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -837,6 +950,8 @@
               ") => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -857,7 +972,10 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 91,
+                "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Job",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -877,6 +995,8 @@
               "(jobId: string) => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -891,6 +1011,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 110,
+                "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -909,6 +1031,8 @@
               "(jobId: string) => void"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -923,6 +1047,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 118,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -941,6 +1067,8 @@
               "(jobId: string) => Promise<void>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -955,6 +1083,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 124,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -981,6 +1111,8 @@
               "[]>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -995,6 +1127,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 128,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1010,6 +1144,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 128,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1025,6 +1161,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 128,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1043,6 +1181,8 @@
               "() => Promise<number>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1059,6 +1199,8 @@
               "(jobId: string) => Promise<string>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1073,6 +1215,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 148,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1099,6 +1243,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1113,6 +1259,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 162,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1133,6 +1281,8 @@
               " | undefined>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1147,6 +1297,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 169,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1162,6 +1314,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 169,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1177,6 +1331,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 169,
+                "columnNumber": 69,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1203,6 +1359,8 @@
               "[]>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1217,6 +1375,8 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 181,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1239,6 +1399,8 @@
               ") => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1253,6 +1415,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 193,
+                "columnNumber": 36,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1268,7 +1432,10 @@
                   "BaseParams"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 193,
+                "columnNumber": 56,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1296,6 +1463,8 @@
               " | undefined>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1310,6 +1479,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 200,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1325,7 +1496,10 @@
                   "BaseParams"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 200,
+                "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1355,6 +1529,8 @@
               " | undefined>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 214,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1369,6 +1545,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 217,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1384,7 +1562,10 @@
                   "BaseParams"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 217,
+                "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1405,6 +1586,8 @@
               "BaseParams"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 238,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1419,7 +1602,10 @@
                   "T"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 241,
+                "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1437,6 +1623,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 255,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1453,6 +1641,8 @@
               "(jobId: string) => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 258,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1467,7 +1657,10 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+                "lineNumber": 258,
+                "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1485,6 +1678,8 @@
               "() => string"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 260,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1503,6 +1698,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 262,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1521,6 +1718,8 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1537,6 +1736,8 @@
               "() => Promise<unknown>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/reporting_api_client.ts",
+            "lineNumber": 270,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1567,6 +1768,8 @@
           "LicenseCheckResults"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/license_check.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1587,7 +1790,10 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/license_check.ts",
+            "lineNumber": 13,
+            "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "LicenseCheck",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1616,6 +1822,8 @@
           "; }>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/context.tsx",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1640,6 +1848,8 @@
               "; }>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/context.tsx",
+            "lineNumber": 26,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1659,6 +1869,8 @@
           "() => { getPendingJobIds: () => string[]; addPendingJobId: (jobId: string) => void; setPendingJobIds: (jobIds: string[]) => void; }"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/job_completion_notifications.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1686,6 +1898,8 @@
           ", Error>"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/hooks.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1703,6 +1917,8 @@
           "() => ContextValue"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/context.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1738,6 +1954,8 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1754,6 +1972,8 @@
         "label": "ClientConfigType",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1765,9 +1985,11 @@
             "label": "csv",
             "description": [],
             "signature": [
-              "{ scroll: { duration: string; size: number; }; }"
+              "{ scroll: { duration: string; size: number; }; maxRows: number; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,6 +2004,8 @@
               "{ jobsRefresh: { interval: number; intervalErrorMultiplier: number; }; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1796,6 +2020,8 @@
               "{ pdf: { enabled: boolean; }; png: { enabled: boolean; }; csv: { enabled: boolean; }; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1810,6 +2036,8 @@
               "{ enabled: boolean; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1824,6 +2052,8 @@
         "label": "KibanaContext",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1838,6 +2068,8 @@
               "HttpSetup"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1852,6 +2084,8 @@
               "ApplicationStart"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1866,6 +2100,8 @@
               "SettingsStart"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1880,6 +2116,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1894,6 +2132,8 @@
               "DocLinksStart"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1914,6 +2154,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1933,7 +2175,49 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "IntlShape",
+              ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1956,6 +2240,8 @@
               "[]; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1976,6 +2262,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1990,6 +2278,8 @@
               "NotificationsStart"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2013,6 +2303,24 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.KibanaContext.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "src/platform/packages/private/kbn-reporting/public/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

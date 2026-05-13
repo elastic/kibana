@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { Shape } from '../../../canvas_plugin_src/renderers/shape';
 import { ShapePreview } from '../shape_preview';
@@ -28,8 +27,3 @@ export const ShapePicker: FC<Props> = ({ shapes, onChange = () => {} }) => (
     ))}
   </EuiFlexGrid>
 );
-
-ShapePicker.propTypes = {
-  onChange: PropTypes.func,
-  shapes: PropTypes.object.isRequired,
-};

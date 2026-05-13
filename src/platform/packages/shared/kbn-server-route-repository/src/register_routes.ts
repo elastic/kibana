@@ -23,7 +23,7 @@ import type {
 import { parseEndpoint } from '@kbn/server-route-repository-utils';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
-import { isZod } from '@kbn/zod';
+import { isZod } from '@kbn/zod/v4';
 import { merge, omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { isObservable } from 'rxjs';
@@ -201,6 +201,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       }).addVersion(
         {
           version,
+          options,
           validate: {
             request: validationObject,
           },

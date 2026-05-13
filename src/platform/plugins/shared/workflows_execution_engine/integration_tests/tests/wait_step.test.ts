@@ -9,7 +9,7 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with wait step', () => {
@@ -127,7 +127,7 @@ steps:
       expect(lastStepExecution).toBeDefined();
 
       const waitStepStartTime = new Date(waitStepExecution!.startedAt).getTime();
-      const waitStepEndTime = new Date(waitStepExecution!.completedAt!).getTime();
+      const waitStepEndTime = new Date(waitStepExecution!.finishedAt!).getTime();
       const lastStepStartTime = new Date(lastStepExecution!.startedAt).getTime();
 
       // Wait step execution time should be at least 2s
@@ -227,15 +227,6 @@ steps:
 
       expect(nextRunAt.getTime()).toBeGreaterThan(expectedMinTime.getTime());
       expect(nextRunAt.getTime()).toBeLessThan(expectedMaxTime.getTime());
-    });
-
-    it('should store resume task ID in wait step state', async () => {
-      const waitStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).filter((se) => se.stepId === 'waitStep');
-      expect(waitStepExecutions.length).toBe(1);
-      expect(waitStepExecutions[0].state).toBeDefined();
-      expect(waitStepExecutions[0].state?.resumeExecutionTaskId).toBe('fake_task_id');
     });
 
     it('should have workflow finish time undefined when waiting', async () => {

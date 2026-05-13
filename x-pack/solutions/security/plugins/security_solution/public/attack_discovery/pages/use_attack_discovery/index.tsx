@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import {
-  AttackDiscoveryPostInternalResponse,
   API_VERSIONS,
-  ATTACK_DISCOVERY_INTERNAL,
   ATTACK_DISCOVERY_GENERATE,
   PostAttackDiscoveryGenerateResponse,
 } from '@kbn/elastic-assistant-common';
@@ -19,16 +17,16 @@ import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assista
 
 import { useKibana } from '../../../common/lib/kibana';
 import { getErrorToastText } from '../helpers';
-import { getGenAiConfig, getRequestBody } from './helpers';
+import { getRequestBody } from './helpers';
 import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import * as i18n from './translations';
 import { useInvalidateGetAttackDiscoveryGenerations } from '../use_get_attack_discovery_generations';
-import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface FetchAttackDiscoveriesOptions {
   end?: string;
   filter?: Record<string, unknown>;
   overrideConnectorId?: string;
+  overrideConnectorName?: string;
   overrideEnd?: string;
   overrideFilter?: Record<string, unknown>;
   overrideSize?: number;
@@ -57,13 +55,7 @@ export const useAttackDiscovery = ({
   const {
     http,
     notifications: { toasts },
-    settings,
   } = useKibana().services;
-
-  const { data: aiConnectors } = useLoadConnectors({
-    http,
-    settings,
-  });
 
   // loading boilerplate:
   const [isLoading, setIsLoading] = useState(false);
@@ -74,8 +66,6 @@ export const useAttackDiscovery = ({
   const { data: anonymizationFields } = useFetchAnonymizationFields();
 
   const invalidateGetAttackDiscoveryGenerations = useInvalidateGetAttackDiscoveryGenerations();
-
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(
@@ -89,54 +79,35 @@ export const useAttackDiscovery = ({
         const effectiveStart = options?.overrideStart ?? options?.start;
         const effectiveConnectorId = options?.overrideConnectorId ?? connectorId;
 
-        // Get the request body with the effective connector ID
-        const effectiveConnector = aiConnectors?.find(
-          (connector) => connector.id === effectiveConnectorId
-        );
-        const effectiveGenAiConfig = getGenAiConfig(effectiveConnector);
+        if (!effectiveConnectorId) {
+          throw new Error(CONNECTOR_ERROR);
+        }
+
         const effectiveRequestBody = getRequestBody({
           alertsIndexPattern,
           anonymizationFields,
-          genAiConfig: effectiveGenAiConfig,
+          connectorId: effectiveConnectorId,
           size,
-          selectedConnector: effectiveConnector,
           traceOptions,
         });
 
         const bodyWithOverrides = {
           ...effectiveRequestBody,
-          connectorName: effectiveConnector?.name ?? connectorName,
+          connectorName,
           end: effectiveEnd,
           filter: effectiveFilter,
           size: effectiveSize,
           start: effectiveStart,
         };
-
-        if (
-          bodyWithOverrides.apiConfig.connectorId === '' ||
-          bodyWithOverrides.apiConfig.actionTypeId === ''
-        ) {
-          throw new Error(CONNECTOR_ERROR);
-        }
         setLoadingConnectorId?.(effectiveConnectorId ?? null);
 
-        const route = attackDiscoveryPublicApiEnabled
-          ? ATTACK_DISCOVERY_GENERATE
-          : ATTACK_DISCOVERY_INTERNAL;
-
-        const version = attackDiscoveryPublicApiEnabled
-          ? API_VERSIONS.public.v1
-          : API_VERSIONS.internal.v1;
-
         // call the API to generate attack discoveries:
-        const rawResponse = await http.post(route, {
+        const rawResponse = await http.post(ATTACK_DISCOVERY_GENERATE, {
           body: JSON.stringify(bodyWithOverrides),
-          version,
+          version: API_VERSIONS.public.v1,
         });
 
-        const parsedResponse = attackDiscoveryPublicApiEnabled
-          ? PostAttackDiscoveryGenerateResponse.safeParse(rawResponse)
-          : AttackDiscoveryPostInternalResponse.safeParse(rawResponse);
+        const parsedResponse = PostAttackDiscoveryGenerateResponse.safeParse(rawResponse);
 
         if (!parsedResponse.success) {
           throw new Error('Failed to parse the response');
@@ -144,7 +115,7 @@ export const useAttackDiscovery = ({
 
         toasts?.addSuccess({
           title: i18n.GENERATION_STARTED_TITLE,
-          text: i18n.GENERATION_STARTED_TEXT(effectiveConnector?.name ?? connectorName),
+          text: i18n.GENERATION_STARTED_TEXT(options?.overrideConnectorName ?? connectorName),
         });
       } catch (error) {
         setIsLoading(false);
@@ -157,10 +128,8 @@ export const useAttackDiscovery = ({
       }
     },
     [
-      aiConnectors,
       alertsIndexPattern,
       anonymizationFields,
-      attackDiscoveryPublicApiEnabled,
       connectorId,
       connectorName,
       http,

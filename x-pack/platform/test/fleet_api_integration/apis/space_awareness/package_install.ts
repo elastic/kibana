@@ -19,6 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
+  const NGINX_PACKAGE_VERSION = '2.3.2';
+
   describe('package install', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
@@ -51,7 +53,7 @@ export default function (providerContext: FtrProviderContext) {
           await cleanFleetIndices(esClient);
           await apiClient.installPackage({
             pkgName: 'nginx',
-            pkgVersion: '1.20.0',
+            pkgVersion: NGINX_PACKAGE_VERSION,
             force: true, // To avoid package verification
           });
         });
@@ -87,9 +89,15 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should allow to install kibana assets in default space', async () => {
-          await apiClient.installPackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          await apiClient.installPackageKibanaAssets({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -100,11 +108,14 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should allow to install kibana assets in another space', async () => {
           await apiClient.installPackageKibanaAssets(
-            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
             TEST_SPACE_1
           );
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -114,16 +125,39 @@ export default function (providerContext: FtrProviderContext) {
             Object.keys(res.item.installationInfo?.additional_spaces_installed_kibana ?? {})
           ).eql([TEST_SPACE_1]);
 
-          const dashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
+          const overviewDashboard = res.item.installationInfo!.additional_spaces_installed_kibana?.[
             TEST_SPACE_1
-          ]!.find((asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519');
-          expect(dashboard).not.eql(undefined);
+          ]!.find((asset) => asset.originId === 'nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519');
+          expect(overviewDashboard).not.eql(undefined);
+
+          const accessAndErrorLogsDashboard =
+            res.item.installationInfo!.additional_spaces_installed_kibana?.[TEST_SPACE_1]!.find(
+              (asset) => asset.originId === 'nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519'
+            );
+          expect(accessAndErrorLogsDashboard).not.eql(undefined);
+          // Assert that markdown link to dashboard have been updated
+
+          const overviewDashboardSO = await kibanaServer.savedObjects.get({
+            space: TEST_SPACE_1,
+            type: 'dashboard',
+            id: overviewDashboard!.id,
+          });
+
+          expect(overviewDashboardSO.attributes.panelsJSON).not.to.contain(
+            accessAndErrorLogsDashboard!.originId
+          );
+          expect(overviewDashboardSO.attributes.panelsJSON).to.contain(
+            accessAndErrorLogsDashboard!.id
+          );
         });
 
         it('should not allow to delete kibana assets from default space', async () => {
           let err: Error | undefined;
           try {
-            await apiClient.deletePackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+            await apiClient.deletePackageKibanaAssets({
+              pkgName: 'nginx',
+              pkgVersion: NGINX_PACKAGE_VERSION,
+            });
           } catch (_err) {
             err = _err;
           }
@@ -133,11 +167,14 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should allow to delete kibana assets from test space', async () => {
           await apiClient.deletePackageKibanaAssets(
-            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
             TEST_SPACE_1
           );
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -149,11 +186,14 @@ export default function (providerContext: FtrProviderContext) {
         it('should allow to install kibana in another space from the default space', async () => {
           await apiClient.installPackageKibanaAssets({
             pkgName: 'nginx',
-            pkgVersion: '1.20.0',
+            pkgVersion: NGINX_PACKAGE_VERSION,
             spaceIds: [TEST_SPACE_1],
           });
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -175,7 +215,7 @@ export default function (providerContext: FtrProviderContext) {
           await apiClient.installPackage(
             {
               pkgName: 'nginx',
-              pkgVersion: '1.20.0',
+              pkgVersion: NGINX_PACKAGE_VERSION,
               force: true, // To avoid package verification
             },
             TEST_SPACE_1
@@ -214,11 +254,14 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should allow to install kibana assets in test space', async () => {
           await apiClient.installPackageKibanaAssets(
-            { pkgName: 'nginx', pkgVersion: '1.20.0' },
+            { pkgName: 'nginx', pkgVersion: NGINX_PACKAGE_VERSION },
             TEST_SPACE_1
           );
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -228,9 +271,15 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should allow to install kibana assets in default space', async () => {
-          await apiClient.installPackageKibanaAssets({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          await apiClient.installPackageKibanaAssets({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
 
-          const res = await apiClient.getPackage({ pkgName: 'nginx', pkgVersion: '1.20.0' });
+          const res = await apiClient.getPackage({
+            pkgName: 'nginx',
+            pkgVersion: NGINX_PACKAGE_VERSION,
+          });
           if (!('installationInfo' in res.item)) {
             throw new Error('not installed');
           }
@@ -253,7 +302,7 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await apiClient.installPackage({
           pkgName: 'nginx',
-          pkgVersion: '1.20.0',
+          pkgVersion: NGINX_PACKAGE_VERSION,
           force: true, // To avoid package verification
         });
         const agentPolicyRes = await apiClient.createAgentPolicy();
@@ -264,7 +313,7 @@ export default function (providerContext: FtrProviderContext) {
           description: 'test',
           package: {
             name: 'nginx',
-            version: '1.20.0',
+            version: NGINX_PACKAGE_VERSION,
           },
           inputs: {},
         });
@@ -277,7 +326,7 @@ export default function (providerContext: FtrProviderContext) {
         try {
           await apiClient.uninstallPackage({
             pkgName: 'nginx',
-            pkgVersion: '1.20.0',
+            pkgVersion: NGINX_PACKAGE_VERSION,
             force: true, // To avoid package verification
           });
         } catch (_err) {
@@ -292,7 +341,7 @@ export default function (providerContext: FtrProviderContext) {
           await apiClient.uninstallPackage(
             {
               pkgName: 'nginx',
-              pkgVersion: '1.20.0',
+              pkgVersion: NGINX_PACKAGE_VERSION,
               force: true, // To avoid package verification
             },
             TEST_SPACE_1

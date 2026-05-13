@@ -196,7 +196,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
                 data-test-subj="typePopoverIcon"
                 onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
               >
-                <EuiIcon type="question" />
+                <EuiIcon type="question" aria-hidden={true} />
               </EuiLink>
             }
             isOpen={isPopoverOpen}
@@ -349,7 +349,7 @@ export const ConfigurationStep = ({ onNext }: Props) => {
             fill
             color="primary"
             iconSide="right"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             disabled={form.isValid === false}
             data-test-subj="nextButton"
             onClick={onSubmit}

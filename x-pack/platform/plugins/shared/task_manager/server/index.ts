@@ -31,7 +31,7 @@ export {
 } from './saved_objects';
 
 export type { RruleSchedule } from './task';
-export { TaskStatus, TaskPriority, TaskCost } from './task';
+export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
 
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
@@ -54,11 +54,14 @@ export {
 } from './queries/mark_available_tasks_as_claimed';
 export { aggregateTaskOverduePercentilesForType } from './queries/aggregate_task_overdue_percentiles_for_type';
 
+export { runInvalidate } from './invalidate_api_keys/lib';
 export type {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from './plugin';
+
+export { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants';
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,

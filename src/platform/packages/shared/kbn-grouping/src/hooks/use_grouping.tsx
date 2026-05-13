@@ -15,7 +15,7 @@ import type { GroupingProps, GroupSelectorProps } from '..';
 import { isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
-import type { GroupMap, GroupOption } from './types';
+import type { GroupMap, GroupOption, GroupSettings } from './types';
 import { defaultGroup } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
@@ -40,6 +40,8 @@ type StaticGroupingProps<T> = Pick<
   | 'unit'
   | 'groupsUnit'
   | 'multiValueFields'
+  | 'emptyGroupingComponent'
+  | 'getAdditionalActionButtons'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
@@ -50,7 +52,7 @@ export type DynamicGroupingProps<T> = Pick<
   | 'activePage'
   | 'data'
   | 'groupingLevel'
-  | 'inspectButton'
+  | 'additionalToolbarControls'
   | 'isLoading'
   | 'itemsPerPage'
   | 'onChangeGroupsItemsPerPage'
@@ -91,6 +93,7 @@ export interface GroupingArgs<T> {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  settings?: GroupSettings;
 }
 
 /**
@@ -120,6 +123,7 @@ export const useGrouping = <T,>({
   tracker,
   title,
   onOpenTracker,
+  settings,
 }: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(
     groupsReducerWithStorage,
@@ -154,6 +158,7 @@ export const useGrouping = <T,>({
     tracker,
     title,
     onOpenTracker,
+    settings,
   });
 
   const getGrouping = useCallback(

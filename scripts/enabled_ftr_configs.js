@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 
-var yaml = require('js-yaml');
+var yaml = require('yaml');
 var fs = require('fs');
 var path = require('path');
 
@@ -20,7 +20,7 @@ var allManifestPaths = Object.values(manifestsSource).flat();
 
 try {
   for (var manifestRelPath of allManifestPaths) {
-    var manifest = yaml.load(fs.readFileSync(manifestRelPath, 'utf8'));
+    var manifest = yaml.parse(fs.readFileSync(manifestRelPath, 'utf8'));
     if (manifest.enabled) {
       manifest.enabled.forEach(function (x) {
         console.log(x);

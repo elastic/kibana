@@ -12,7 +12,12 @@ import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@el
 import type { Table, CellContext, Row } from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
-import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
+import type {
+  CascadeVirtualizerProps,
+  CascadeRootVirtualizerReturnValue,
+} from '../../lib/core/virtualizer';
+import type { ChildVirtualizerController } from '../../lib/core/virtualizer/child_virtualizer_controller';
+import type { DataCascadeImplRef, DataCascadeRestorableState } from '../../lib/core/api';
 import type { SelectionDropdownProps } from './data_cascade_header/group_selection_combobox/selection_dropdown';
 
 /**
@@ -20,26 +25,44 @@ import type { SelectionDropdownProps } from './data_cascade_header/group_selecti
  */
 export type CascadeSizing = keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
 
-interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
+export interface CascadeGroupNodeUIInteraction<G extends GroupNode> {
+  /**
+   * The row instance that was interacted with in the group by hierarchy.
+   */
   row: G;
   /**
-   * The path of the row that was expanded in the group by hierarchy.
+   * The path of the row that was interacted with in the group by hierarchy.
+   *
+   * @example
+   * ```
+   * ['@timestamp', 'geo.src.country_name']
+   * ```
    */
   nodePath: string[];
   /**
    * KV record of the path values for the row node.
+   *
+   * @example
+   * ```
+   * {
+   *   '@timestamp': '2026-01-13T00:00:00.000Z',
+   *   'geo.src.country_name': 'United States'
+   * }
+   * ```
    */
   nodePathMap: Record<string, string>;
 }
 
-/**
- * Provides the props required to anchor another virtualized list
- * within our already virtualized row, and have it controlled by the same scrollable parent, if we wish so.
- */
-export interface CascadeRowCellNestedVirtualizationAnchorProps<G extends GroupNode>
-  extends Pick<CascadeVirtualizerProps<G>, 'getScrollElement'> {
-  getScrollOffset: () => number;
-  getScrollMargin: () => number;
+type OnCascadeLeafNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
+
+type OnCascadeLeafNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
+
+export interface CascadeRowCellRendererProps<G extends GroupNode, L extends LeafNode> {
+  data: L[] | null;
+  cellId: string;
+  nodePath: string[];
+  virtualizerController: ChildVirtualizerController;
+  rowIndex: number;
 }
 
 export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
@@ -52,29 +75,23 @@ export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends Lea
    * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
    */
   onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
-  getVirtualizer: () => ReturnType<typeof useCascadeVirtualizer>;
-  /*
-   *
+  /**
+   * Callback invoked when a leaf node gets collapsed, possibly to clean up any data associated with the leaf node or cancel any pending requests if necessary.
+   */
+  onCascadeLeafNodeCollapsed?: (args: OnCascadeLeafNodeCollapsedArgs<G>) => void;
+  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
+  /**
    * Render prop function that provides the leaf node data when available, which can be used to render the content we'd to display with the data received.
    */
-  children: (
-    args: { data: L[] | null; cellId: string } & CascadeRowCellNestedVirtualizationAnchorProps<G>
-  ) => React.ReactNode;
+  children: (args: CascadeRowCellRendererProps<G, L>) => React.ReactNode;
 }
 
-interface OnCascadeGroupNodeExpandedArgs<G extends GroupNode> {
-  row: G;
-  /**
-   * @description The path of the row that was expanded in the group by hierarchy.
-   */
-  nodePath: string[];
-  /**
-   * @description KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
+type OnCascadeGroupNodeExpandedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
+
+type OnCascadeGroupNodeCollapsedArgs<G extends GroupNode> = CascadeGroupNodeUIInteraction<G>;
 
 export interface CascadeRowActionProps {
+  isMobile: boolean;
   maxActionCount?: number;
   headerRowActions: Array<
     Pick<EuiButtonIconProps, 'iconType' | 'aria-label' | 'data-test-subj'> & {
@@ -93,6 +110,10 @@ export interface CascadeRowActionProps {
 
 export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends LeafNode> {
   /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
+  /**
    * Whether to enable row selection. Default is false.
    */
   enableRowSelection?: boolean;
@@ -105,19 +126,23 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
    */
   isGroupNode: boolean;
   /**
-   * @description Callback function that is called when a cascade node is expanded.
+   * Callback function that is called when a cascade node is expanded.
    */
   onCascadeGroupNodeExpanded: (args: OnCascadeGroupNodeExpandedArgs<G>) => Promise<G[]>;
   /**
-   * @description The row instance for the cascade row.
+   * Callback function that is called when a cascade node is collapsed.
+   */
+  onCascadeGroupNodeCollapsed?: (args: OnCascadeGroupNodeCollapsedArgs<G>) => void;
+  /**
+   * The row instance for the cascade row.
    */
   rowInstance: Row<G>;
   /**
-   * @description The row header title slot for the cascade row.
+   * The row header title slot for the cascade row.
    */
   rowHeaderTitleSlot: React.FC<{ rowData: G; nodePath: string[] }>;
   /**
-   * @description The row header meta slots for the cascade row.
+   * The row header meta slots for the cascade row.
    */
   rowHeaderMetaSlots?: (props: {
     rowDepth: number;
@@ -125,14 +150,14 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
     nodePath: string[];
   }) => React.ReactNode[];
   /**
-   * @description The row header actions slot for the cascade row.
+   * The row header actions slot for the cascade row.
    */
   rowHeaderActions?: (params: {
     rowData: G;
     nodePath: string[];
   }) => CascadeRowActionProps['headerRowActions'];
   /**
-   * @description The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
+   * The size of the row component, can be 's' (small), 'm' (medium), or 'l' (large).
    */
   size: CascadeRowCellPrimitiveProps<G, L>['size'];
 }
@@ -144,29 +169,44 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
 export interface CascadeRowPrimitiveProps<G extends GroupNode, L extends LeafNode>
   extends Omit<CascadeRowHeaderPrimitiveProps<G, L>, 'isGroupNode'> {
   /**
-   * ref used to portal the active sticky header.
+   * Ref that provides a reference to the DOM element that will be used to portal the active sticky header.
    */
   activeStickyRenderSlotRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Denotes if the device viewport matches the mobile screen media query.
+   */
+  isMobile: boolean;
+  /**
+   * Denotes if the row is sticky.
+   */
   isActiveSticky: boolean;
+  /**
+   * Ref that provides a reference to the DOM element that renders the cascade row.
+   */
   innerRef: React.LegacyRef<HTMLDivElement>;
   /**
-   * @description The virtual row for the cascade row.
+   * The virtual row for the cascade row.
    */
   virtualRow: VirtualItem;
   /**
-   * @description The virtual row style for the cascade row.
+   * Style for the virtual row of the cascade row.
    */
   virtualRowStyle: React.CSSProperties;
+  /**
+   * Accessor for the parent cascade virtualizer instance.
+   */
+  getVirtualizer: () => CascadeRootVirtualizerReturnValue;
 }
 
 export type DataCascadeRowCellProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowCellPrimitiveProps<G, L>,
-  'onCascadeLeafNodeExpanded' | 'children'
+  'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed' | 'children'
 >;
 
 export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
   CascadeRowPrimitiveProps<G, L>,
   | 'onCascadeGroupNodeExpanded'
+  | 'onCascadeGroupNodeCollapsed'
   | 'rowHeaderMetaSlots'
   | 'rowHeaderTitleSlot'
   | 'rowHeaderActions'
@@ -201,13 +241,9 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
   extends Pick<CascadeVirtualizerProps<G>, 'overscan'>,
     Pick<CascadeRowPrimitiveProps<G, L>, 'enableRowSelection'> {
   /**
-   * The data to be displayed in the cascade. It should be an array of group nodes.
+   * Callback function that is called when the group by selection changes. Only required if component is not used in a controlled manner
    */
-  data: G[];
-  /**
-   * Callback function that is called when the group by selection changes.
-   */
-  onCascadeGroupingChange: SelectionDropdownProps['onSelectionChange'];
+  onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
   /**
    * The spacing size of the component, can be 's' (small), 'm' (medium), or 'l' (large). Default is 'm'.
    */
@@ -220,7 +256,12 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    * Whether to allow multiple group rows to be expanded at the same time, default is false.
    */
   allowMultipleRowToggle?: boolean;
+  /**
+   * Persisted restorable state to restore the component to a previous state on mount.
+   */
+  initialState?: DataCascadeRestorableState;
   children: React.ReactElement<DataCascadeRowProps<G, L>>;
+  cascadeRef: React.ForwardedRef<DataCascadeImplRef<G, L>>;
 }
 
 export type DataCascadeImplProps<

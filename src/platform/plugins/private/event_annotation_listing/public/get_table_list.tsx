@@ -8,6 +8,9 @@
  */
 
 import React from 'react';
+import { firstValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { type TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
@@ -19,6 +22,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {
@@ -30,6 +34,7 @@ export interface EventAnnotationListingPageServices {
   queryInputServices: QueryInputServices;
   LensEmbeddableComponent: LensEmbeddableComponent;
   sessionService: ISessionService;
+  embeddable: EmbeddableStart;
 }
 
 export const getTableList = (
@@ -55,7 +60,35 @@ export const getTableList = (
           dataViews={services.dataViews}
           createDataView={services.createDataView}
           queryInputServices={services.queryInputServices}
-          navigateToLens={() => services.core.application.navigateToApp('lens')}
+          navigateToLens={async () => {
+            const currentApp = await firstValueFrom(services.core.application.currentAppId$);
+            if (!currentApp) return;
+            const stateTransfer = services.embeddable.getStateTransfer();
+            const annotationGroupsTabTitle = i18n.translate(
+              'eventAnnotationListing.listingViewTitle',
+              { defaultMessage: 'Annotation groups' }
+            );
+            const breadcrumbs: EmbeddableEditorBreadcrumb[] = [
+              {
+                text: stateTransfer.getAppNameFromId(currentApp) ?? currentApp,
+                href: services.core.application.getUrlForApp(currentApp),
+              },
+              {
+                text: annotationGroupsTabTitle,
+                href: services.core.application.getUrlForApp(currentApp, {
+                  path: window.location.hash,
+                }),
+              },
+            ];
+            await stateTransfer.navigateToEditor('lens', {
+              path: '',
+              state: {
+                originatingApp: currentApp,
+                originatingPath: window.location.hash,
+                breadcrumbs,
+              },
+            });
+          }}
           LensEmbeddableComponent={services.LensEmbeddableComponent}
           sessionService={services.sessionService}
         />

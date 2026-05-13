@@ -10,7 +10,11 @@
 import type { Client } from '@elastic/elasticsearch';
 import { createHmac, randomBytes, X509Certificate } from 'crypto';
 import { readFile } from 'fs/promises';
+import Url from 'url';
+import { promisify } from 'util';
 import { SignedXml } from 'xml-crypto';
+import { parseString } from 'xml2js';
+import zlib from 'zlib';
 
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 
@@ -28,9 +32,10 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
-import { seedTestUser } from './cosmos_db_seeder';
+import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
 
@@ -58,12 +63,8 @@ export async function createMockIdpMetadata(kibanaUrl: string) {
           </ds:X509Data>
         </ds:KeyInfo>
       </md:KeyDescriptor>
-      <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
       <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
         Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGOUT_PATH}" />
-      <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-        Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
       <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
         Location="${trimTrailingSlash(kibanaUrl)}${MOCK_IDP_LOGIN_PATH}" />
     </md:IDPSSODescriptor>
@@ -99,11 +100,21 @@ export async function createSAMLResponse(options: {
   kibanaUrl: string;
   /** ID from SAML authentication request */
   authnRequestId?: string;
+  /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
+  spEntityId?: string;
   username: string;
   full_name?: string;
   email?: string;
   roles: string[];
-  serverless?: { organizationId: string; projectType: string; uiamEnabled: boolean };
+  serverless?:
+    | { organizationId: string; projectType: string; uiamEnabled: false }
+    | {
+        organizationId: string;
+        projectType: string;
+        uiamEnabled: true;
+        accessTokenLifetimeSec?: number;
+        refreshTokenLifetimeSec?: number;
+      };
 }) {
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
@@ -116,8 +127,19 @@ export async function createSAMLResponse(options: {
         roles: options.roles,
         fullName: options.full_name,
         email: options.email,
+        accessTokenLifetimeSec: options.serverless.accessTokenLifetimeSec,
+        refreshTokenLifetimeSec: options.serverless.refreshTokenLifetimeSec,
       })
     : undefined;
+
+  const conditionsXml = `
+      <saml:Conditions NotBefore="${issueInstant}" NotOnOrAfter="${notOnOrAfter}">
+        ${
+          options.spEntityId
+            ? `<saml:AudienceRestriction><saml:Audience>${options.spEntityId}</saml:Audience></saml:AudienceRestriction>`
+            : ''
+        }
+      </saml:Conditions>`;
 
   const samlAssertionTemplateXML = `
     <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Version="2.0" ID="_RPs1WfOkul8lZ72DtJtes0BKyPgaCamg" IssueInstant="${issueInstant}">
@@ -129,7 +151,7 @@ export async function createSAMLResponse(options: {
     options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
   } Recipient="${options.kibanaUrl}" />
         </saml:SubjectConfirmation>
-      </saml:Subject>
+      </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
         <saml:AuthnContext>
           <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified</saml:AuthnContextClassRef>
@@ -249,13 +271,73 @@ export async function ensureSAMLRoleMapping(client: Client) {
   });
 }
 
-async function createUiamSessionTokens({
+export function generateCosmosDBApiRequestHeaders(
+  httpVerb: 'POST' | 'PUT',
+  resourceType: 'dbs' | 'colls' | 'docs',
+  resourceId: string
+) {
+  // Generate date in RFC 1123 format
+  const timestamp = new Date().toUTCString();
+
+  // Cosmos DB expects all inputs in the string-to-sign to be lowercased
+  // Format: Verb\nResourceType\nResourceID\nTimestamp\n\n
+  const stringToSign =
+    `${httpVerb.toLowerCase()}\n` +
+    `${resourceType.toLowerCase()}\n` +
+    `${resourceId}\n` +
+    `${timestamp.toLowerCase()}\n` +
+    `\n`;
+
+  const key = Buffer.from(MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY, 'base64');
+  return {
+    Authorization: encodeURIComponent(
+      `type=master&ver=1.0&sig=${createHmac('sha256', key).update(stringToSign).digest('base64')}`
+    ),
+    'x-ms-date': timestamp,
+    'x-ms-version': '2018-12-31',
+    'Content-Type': 'application/json',
+  };
+}
+
+// Kibana project type names mapped to CLI aliases used for role file paths.
+export const projectTypeToAlias = new Map<string, string>([
+  ['observability', 'oblt'],
+  ['security', 'security'],
+  ['search', 'es'],
+  ['workplaceai', 'workplaceai'],
+  ['vectordb', 'vectordb'],
+]);
+
+// Normalizes differences between Kibana solution names (`search`), CLI aliases (`es` and `oblt`),
+// and the canonical project type names used in UIAM and ES Serverless configuration.
+const normalizeProjectType = (projectType: string) => {
+  if (projectType === 'search' || projectType === 'es') {
+    return 'elasticsearch';
+  }
+
+  if (projectType === 'oblt') {
+    return 'observability';
+  }
+
+  if (projectType === 'vectordb') {
+    // return 'vectordb' here once stateless ES and UIAM supports it
+    return 'elasticsearch';
+  }
+
+  return projectType;
+};
+
+export async function createUiamSessionTokens({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   fullName,
   email,
+  // 1H
+  accessTokenLifetimeSec = 3600,
+  // 3D
+  refreshTokenLifetimeSec = 3 * 24 * 3600,
 }: {
   username: string;
   organizationId: string;
@@ -263,13 +345,16 @@ async function createUiamSessionTokens({
   roles: string[];
   fullName?: string;
   email?: string;
+  accessTokenLifetimeSec?: number;
+  refreshTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
   const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
 
-  await seedTestUser({
+  const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
     roleId: 'cloud-role-id',
@@ -279,6 +364,15 @@ async function createUiamSessionTokens({
     firstName: givenName,
     lastName: familyName,
   });
+  if (!userSeedResult.success) {
+    throw userSeedResult.response;
+  }
+
+  // Seed an org admin UIAM API key to simplify testing of API key authentication in UIAM.
+  const apiKeySeedResult = await seedTestApiKey({ creator: username, organizationId });
+  if (!apiKeySeedResult.success) {
+    throw apiKeySeedResult.response;
+  }
 
   const accessTokenBody = Buffer.from(
     JSON.stringify({
@@ -308,8 +402,7 @@ async function createUiamSessionTokens({
       },
 
       nbf: iat,
-      // 1H
-      exp: iat + 3600,
+      exp: iat + accessTokenLifetimeSec,
       iat,
       jti: randomBytes(16).toString('hex'),
     })
@@ -324,8 +417,7 @@ async function createUiamSessionTokens({
       sub: username,
 
       nbf: iat,
-      // 3D
-      exp: iat + 3600 * 24 * 3,
+      exp: iat + refreshTokenLifetimeSec,
       iat,
       session_created: iat,
       jti: randomBytes(16).toString('hex'),
@@ -342,10 +434,101 @@ async function createUiamSessionTokens({
 
   return {
     accessToken: prepareJwtForUiam(accessToken),
-    accessTokenExpiresAt: (iat + 3600) * 1000,
+    accessTokenExpiresAt: (iat + accessTokenLifetimeSec) * 1000,
     refreshToken: prepareJwtForUiam(refreshToken),
-    refreshTokenExpiresAt: (iat + 3600) * 1000,
+    refreshTokenExpiresAt: (iat + refreshTokenLifetimeSec) * 1000,
   };
+}
+
+/**
+ * Creates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.
+ *
+ * Unlike {@link createUiamSessionTokens}, this creates a token with `typ: 'oauth-access-token'`
+ * that includes OAuth-specific claims (audience, scope, client_id, connection_id).
+ */
+export async function createUiamOAuthAccessToken({
+  username,
+  organizationId,
+  projectType,
+  roles,
+  audience,
+  fullName,
+  email,
+  accessTokenLifetimeSec = 3600,
+}: {
+  username: string;
+  organizationId: string;
+  projectType: string;
+  roles: string[];
+  audience: string;
+  fullName?: string;
+  email?: string;
+  accessTokenLifetimeSec?: number;
+}) {
+  const iat = Math.floor(Date.now() / 1000);
+
+  const givenName = fullName ? fullName.split(' ')[0] : 'Test';
+  const familyName = fullName ? fullName.split(' ').slice(1).join(' ') : 'User';
+
+  const userSeedResult = await seedTestUser({
+    userId: username,
+    organizationId,
+    roleId: 'cloud-role-id',
+    projectType,
+    applicationRoles: roles,
+    email,
+    firstName: givenName,
+    lastName: familyName,
+  });
+  if (!userSeedResult.success) {
+    throw userSeedResult.response;
+  }
+
+  const accessTokenBody = Buffer.from(
+    JSON.stringify({
+      typ: 'oauth-access-token',
+      var: 'oauth',
+      iss: 'elastic-cloud',
+      sjt: 'user',
+
+      oid: organizationId,
+      sub: username,
+      given_name: givenName,
+      family_name: familyName,
+      email,
+
+      aud: audience,
+      scope: 'all',
+      client_id: 'test-oauth-client',
+      connection_id: 'test-oauth-connection',
+
+      ras: {
+        platform: [],
+        organization: [],
+        user: [],
+        project: [
+          {
+            role_id: 'cloud-role-id',
+            organization_id: organizationId,
+            project_type: projectType,
+            application_roles: roles,
+            project_scope: { scope: 'all' },
+          },
+        ],
+      },
+
+      nbf: iat,
+      exp: iat + accessTokenLifetimeSec,
+      iat,
+      jti: randomBytes(16).toString('hex'),
+    })
+  ).toString('base64url');
+
+  const tokenHeader = Buffer.from(JSON.stringify({ typ: 'JWT', alg: 'HS256' })).toString(
+    'base64url'
+  );
+
+  return prepareJwtForUiam(`${tokenHeader}.${accessTokenBody}`);
 }
 
 function prepareJwtForUiam(unsignedJwt: string): string {
@@ -362,4 +545,52 @@ function signJwt(unsignedJwt: string): string {
 function wrapSignedJwt(signedJwt: string): string {
   const accessTokenEncodedWithChecksum = encodeWithChecksum(signedJwt);
   return prefixWithEssuDev(accessTokenEncodedWithChecksum);
+}
+
+const inflateRawAsync = promisify(zlib.inflateRaw);
+const parseStringAsync = promisify(parseString);
+
+export interface SAMLRequestInfo {
+  requestId: string;
+  acsUrl?: string;
+  issuer?: string;
+}
+
+/**
+ * Parses a SAML AuthnRequest from the redirect URL and extracts the request ID
+ * and optional AssertionConsumerServiceURL. The ACS URL tells us where to POST
+ * the SAMLResponse (e.g. UIAM vs Kibana/ES).
+ */
+export async function parseSAMLRequest(requestUrl: string): Promise<SAMLRequestInfo | undefined> {
+  const parsed = Url.parse(requestUrl, true);
+  const samlRequest = parsed.query.SAMLRequest;
+
+  if (!samlRequest) {
+    return undefined;
+  }
+
+  try {
+    const inflatedSAMLRequest = (await inflateRawAsync(
+      Buffer.from(samlRequest as string, 'base64')
+    )) as Buffer;
+
+    const parsedSAMLRequest = (await parseStringAsync(inflatedSAMLRequest.toString())) as any;
+    const authnRequest = parsedSAMLRequest['saml2p:AuthnRequest'];
+    const attrs = authnRequest.$;
+    const issuerElement = authnRequest['saml2:Issuer']?.[0];
+    const issuer =
+      typeof issuerElement === 'string' ? issuerElement : issuerElement?._ ?? undefined;
+    return {
+      requestId: attrs.ID as string,
+      acsUrl: attrs.AssertionConsumerServiceURL as string | undefined,
+      issuer,
+    };
+  } catch (e) {
+    return undefined;
+  }
+}
+
+export async function getSAMLRequestId(requestUrl: string): Promise<string | undefined> {
+  const info = await parseSAMLRequest(requestUrl);
+  return info?.requestId;
 }

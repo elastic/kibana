@@ -15,14 +15,18 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { licenseService } from '..';
+import { appContextService, licenseService } from '..';
 import { LICENSE_FOR_AGENT_MIGRATION } from '../../../common/constants';
+
+import type { AgentActionEvent } from '../action_sender';
+import { sendActionTelemetryEvents } from '../action_sender';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { getAgents, getAgentsByKuery, openPointInTime } from './crud';
 
 import { MigrateActionRunner, bulkMigrateAgentsBatch } from './migrate_action_runner';
+import { detectTargetClusterType } from './detect_target_cluster_type';
 
 export async function migrateSingleAgent(
   esClient: ElasticsearchClient,
@@ -61,6 +65,11 @@ export async function migrateSingleAgent(
       `Agent cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
     );
   }
+
+  const targetType = detectTargetClusterType(options.uri);
+  appContextService
+    .getLogger()
+    .debug(`Detected target cluster type for migration telemetry: ${targetType}`);
   const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
@@ -74,7 +83,39 @@ export async function migrateSingleAgent(
       secrets: { enrollment_token: options.enrollment_token },
     }),
   });
+
+  const cloud = appContextService.getCloud();
+  sendTelemetryEvent(1, {
+    sourceType: cloud?.isCloudEnabled
+      ? cloud.isServerlessEnabled
+        ? 'serverless'
+        : 'ech'
+      : undefined,
+    targetType,
+  });
+
   return { actionId: response.id };
+}
+
+function sendTelemetryEvent(
+  agentCount: number,
+  clusterInfo: {
+    sourceType?: AgentActionEvent['sourceType'];
+    targetType?: AgentActionEvent['targetType'];
+  }
+) {
+  const { sourceType, targetType } = clusterInfo;
+  const actionTelemetry: AgentActionEvent = {
+    eventType: 'MIGRATE',
+    agentCount,
+    sourceType,
+    targetType,
+  };
+  sendActionTelemetryEvents(
+    appContextService.getLogger(),
+    appContextService.getTelemetryEventsSender(),
+    actionTelemetry
+  );
 }
 
 export async function bulkMigrateAgents(
@@ -95,15 +136,30 @@ export async function bulkMigrateAgents(
   }
 
   const currentSpaceId = getCurrentNamespace(soClient);
+  const targetType = detectTargetClusterType(options.uri);
+  appContextService
+    .getLogger()
+    .debug(`Detected target cluster type for migration telemetry: ${targetType}`);
+  const cloud = appContextService.getCloud();
+  const clusterInfo = {
+    sourceType: cloud?.isCloudEnabled
+      ? cloud.isServerlessEnabled
+        ? ('serverless' as const)
+        : ('ech' as const)
+      : undefined,
+    targetType,
+  };
 
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, soClient, options);
-    return await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
+    const response = await bulkMigrateAgentsBatch(esClient, soClient, givenAgents, {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
       settings: options.settings,
       spaceId: currentSpaceId,
     });
+    sendTelemetryEvent(options.agentIds.length, clusterInfo);
+    return response;
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
@@ -116,14 +172,16 @@ export async function bulkMigrateAgents(
     perPage: batchSize,
   });
   if (res.total <= batchSize) {
-    return await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
+    const response = await bulkMigrateAgentsBatch(esClient, soClient, res.agents, {
       enrollment_token: options.enrollment_token,
       uri: options.uri,
       settings: options.settings,
       spaceId: currentSpaceId,
     });
+    sendTelemetryEvent(res.total, clusterInfo);
+    return response;
   } else {
-    return await new MigrateActionRunner(
+    const response = await new MigrateActionRunner(
       esClient,
       soClient,
       {
@@ -134,5 +192,7 @@ export async function bulkMigrateAgents(
       },
       { pitId: await openPointInTime(esClient) }
     ).runActionAsyncTask();
+    sendTelemetryEvent(res.total, clusterInfo);
+    return response;
   }
 }

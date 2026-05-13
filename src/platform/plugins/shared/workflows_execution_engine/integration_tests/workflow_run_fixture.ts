@@ -7,49 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import type { Client } from '@elastic/elasticsearch';
 import YAML from 'yaml';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type {
-  CoreStart,
-  ElasticsearchServiceStart,
-  IClusterClient,
-  KibanaRequest,
-  Logger,
-} from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { ByteSizeValue } from '@kbn/config-schema';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  LogsRepositoryMock,
-  StepExecutionRepositoryMock,
-  WorkflowExecutionRepositoryMock,
-} from './mocks';
-import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
+import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
+import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
+import { mockContextDependencies } from '../server/execution_functions/__mock__/context_dependencies';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
-import type { ContextDependencies } from '../server/workflow_context_manager/types';
+import { workflowsExecutionEngineMock } from '../server/mocks';
+
+// Mock the repository classes so setupDependencies uses our mocks
+jest.mock('../server/repositories/workflow_execution_repository');
+jest.mock('../server/repositories/step_execution_repository');
 
 export class WorkflowRunFixture {
-  /** This prop is just to satisfy runWorkflow function params. Consider having real mock once needed. */
-  public readonly esClientMock = {} as unknown as Client;
   public readonly taskAbortController = new AbortController();
-  public readonly coreStartMock = {
-    elasticsearch: {
-      client: {
-        asScoped: jest.fn().mockReturnValue({}) as any,
-      } as IClusterClient,
-    } as ElasticsearchServiceStart,
-  } as CoreStart;
-  public readonly dependencies: ContextDependencies = {
-    cloudSetup: cloudMock.createSetup(),
-  };
-  public readonly taskManagerMock = TaskManagerMock.create() as TaskManagerStartContract;
+  public readonly dependencies = mockContextDependencies();
   public readonly loggerMock = {
     info: jest.fn(),
     warn: jest.fn(),
@@ -61,37 +40,59 @@ export class WorkflowRunFixture {
   private readonly sharedExecuteMock = jest.fn();
   public readonly unsecuredActionsClientMock = new UnsecuredActionsClientMock();
   public readonly scopedActionsClientMock = new ScopedActionsClientMock();
-  public readonly actionsClientMock = {
+  public readonly actionsClientMock = jest.mocked<ActionsPluginStartContract>({
     getUnsecuredActionsClient: jest.fn().mockReturnValue(this.unsecuredActionsClientMock),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
-  } as unknown as ActionsPluginStartContract;
-
-  constructor() {
-    // Wire both clients to use the same shared execute mock with normalized parameters
-    this.unsecuredActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) =>
-      this.unsecuredActionsClientMock.returnMockedConnectorResult(options)
-    );
-    this.scopedActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) => {
-      // Normalize scoped client parameters to match unsecured client for test assertions
-      // Convert actionId -> id so tests can check using 'id' parameter
-      const normalizedOptions = { ...options, id: options.actionId };
-      this.sharedExecuteMock.mock.calls[this.sharedExecuteMock.mock.calls.length - 1][0] =
-        normalizedOptions;
-      return this.scopedActionsClientMock.returnMockedConnectorResult(options);
-    });
-  }
-  public readonly configMock = {
+  } as unknown as ActionsPluginStartContract);
+  public readonly configMock: WorkflowsExecutionEngineConfig = {
+    enabled: true,
+    eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+    maxWorkflowDepth: 10,
     logging: {
       console: true,
     },
     http: {
       allowedHosts: ['*'],
     },
-  } as WorkflowsExecutionEngineConfig;
+    maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb default
+    },
+    collectQueueMetrics: false,
+  };
   public readonly fakeKibanaRequest = {} as KibanaRequest;
   public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
   public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
-  public readonly logsRepositoryMock = new LogsRepositoryMock();
+  public readonly taskManagerMock = TaskManagerMock.create();
+  public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
+
+  constructor() {
+    // Mock repository constructors to return our mock instances
+    const workflowRepoModule = jest.requireMock(
+      '../server/repositories/workflow_execution_repository'
+    );
+    const stepRepoModule = jest.requireMock('../server/repositories/step_execution_repository');
+    (workflowRepoModule.WorkflowExecutionRepository as jest.Mock).mockImplementation(
+      () => this.workflowExecutionRepositoryMock
+    );
+    (stepRepoModule.StepExecutionRepository as jest.Mock).mockImplementation(
+      () => this.stepExecutionRepositoryMock
+    );
+
+    // Wire both clients to use the same shared execute mock with normalized parameters
+    this.unsecuredActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) =>
+      this.unsecuredActionsClientMock.returnMockedConnectorResult(options)
+    );
+    this.scopedActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) => {
+      const normalizedOptions = { ...options, id: options.actionId };
+      this.sharedExecuteMock.mock.calls[this.sharedExecuteMock.mock.calls.length - 1][0] =
+        normalizedOptions;
+      return this.scopedActionsClientMock.returnMockedConnectorResult(options);
+    });
+
+    this.dependencies.actions = this.actionsClientMock;
+    this.dependencies.taskManager = this.taskManagerMock;
+  }
 
   public runWorkflow({
     workflowYaml,
@@ -99,8 +100,8 @@ export class WorkflowRunFixture {
     event,
   }: {
     workflowYaml: string;
-    inputs?: Record<string, any>;
-    event?: Record<string, any>;
+    inputs?: Record<string, unknown>;
+    event?: Record<string, unknown>;
   }) {
     // clean up before running workflow
     this.cleanup();
@@ -127,18 +128,12 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
-      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
-      coreStart: this.coreStartMock,
       dependencies: this.dependencies,
-      esClient: this.esClientMock,
-      actions: this.actionsClientMock,
-      taskManager: this.taskManagerMock,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
     });
   }
 
@@ -146,18 +141,12 @@ export class WorkflowRunFixture {
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
-      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
-      coreStart: this.coreStartMock,
-      esClient: this.esClientMock,
-      actions: this.actionsClientMock,
-      taskManager: this.taskManagerMock,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
       dependencies: this.dependencies,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
     });
   }
 
@@ -168,7 +157,7 @@ export class WorkflowRunFixture {
   }: {
     workflowYaml: string;
     stepId: string;
-    contextOverride?: Record<string, any>;
+    contextOverride?: Record<string, unknown>;
   }) {
     // clean up before running workflow
     this.cleanup();
@@ -195,18 +184,12 @@ export class WorkflowRunFixture {
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
       spaceId: 'fake_space_id',
-      workflowExecutionRepository: this.workflowExecutionRepositoryMock as any,
-      stepExecutionRepository: this.stepExecutionRepositoryMock as any,
-      logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
-      coreStart: this.coreStartMock,
       dependencies: this.dependencies,
-      esClient: this.esClientMock,
-      actions: this.actionsClientMock,
-      taskManager: this.taskManagerMock,
       logger: this.loggerMock,
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
+      workflowsExecutionEngine: this.workflowsExecutionEngineMock,
     });
   }
 
@@ -214,6 +197,5 @@ export class WorkflowRunFixture {
     jest.clearAllMocks();
     this.workflowExecutionRepositoryMock.workflowExecutions.clear();
     this.stepExecutionRepositoryMock.stepExecutions.clear();
-    this.logsRepositoryMock.logs.clear();
   }
 }

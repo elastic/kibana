@@ -5,27 +5,39 @@
  * 2.0.
  */
 
-import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import {
+  SERVICE_SYNTH_GO,
+  SERVICE_SYNTH_GO_2,
+  SERVICE_SYNTH_NODE_1,
+  PRODUCTION_ENVIRONMENT,
+} from '../constants';
 
 export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
-  const start = Date.now() - 1000 * 60 * 15;
-  const end = Date.now();
-  const range = timerange(new Date(start).getTime(), new Date(end).getTime());
+  // Custom-link filter suggestions query the last ~24h (see FiltersSection in the flyout).
+  // This generator used to emit only ~15m of spans (misnamed) which amplified clock/queue drift
+  // vs the UI interval on slow serverless pipelines (#262047).
+  const TWENTY_FOUR_H_MS = 1000 * 60 * 60 * 24;
+  const range = timerange(Date.now() - TWENTY_FOUR_H_MS, Date.now());
   const synthGo1 = apm
     .service({
-      name: 'synth-go-1',
-      environment: 'production',
+      name: SERVICE_SYNTH_GO,
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'go',
     })
     .instance('my-instance');
   const synthGo2 = apm
-    .service({ name: 'synth-go-2', environment: 'production', agentName: 'go' })
+    .service({
+      name: SERVICE_SYNTH_GO_2,
+      environment: PRODUCTION_ENVIRONMENT,
+      agentName: 'go',
+    })
     .instance('my-instance');
   const synthNode = apm
     .service({
-      name: 'synth-node-1',
-      environment: 'production',
+      name: SERVICE_SYNTH_NODE_1,
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'nodejs',
     })
     .instance('my-instance');

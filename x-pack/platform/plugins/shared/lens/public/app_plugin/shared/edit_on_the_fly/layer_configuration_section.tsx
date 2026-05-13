@@ -19,7 +19,6 @@ export function LayerConfiguration({
   attributes,
   coreStart,
   startDependencies,
-  datasourceId,
   framePublicAPI,
   hasPadding,
   setIsInlineFlyoutVisible,
@@ -32,8 +31,8 @@ export function LayerConfiguration({
   parentApi,
   panelId,
   closeFlyout,
-  canEditTextBasedQuery,
   editorContainer,
+  onTextBasedQueryStateChange,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -53,7 +52,7 @@ export function LayerConfiguration({
     [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
   );
 
-  const layerPanelsProps: ConfigPanelWrapperProps = {
+  const configPanelWrapperProps: ConfigPanelWrapperProps = {
     attributes,
     lensAdapters,
     dataLoading$,
@@ -61,7 +60,6 @@ export function LayerConfiguration({
     core: coreStart,
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
-    hideLayerHeader: datasourceId === 'textBased',
     // TODO: remove this prop once we display the chart switch in Discover
     onlyAllowSwitchToSubtypes,
     indexPatternService,
@@ -73,8 +71,8 @@ export function LayerConfiguration({
     parentApi,
     panelId,
     closeFlyout,
-    canEditTextBasedQuery,
     editorContainer,
+    onTextBasedQueryStateChange,
   };
   return (
     <div
@@ -82,7 +80,7 @@ export function LayerConfiguration({
         padding: ${hasPadding ? euiTheme.size.s : 0};
       `}
     >
-      <ConfigPanelWrapper {...layerPanelsProps} />
+      <ConfigPanelWrapper {...configPanelWrapperProps} />
     </div>
   );
 }

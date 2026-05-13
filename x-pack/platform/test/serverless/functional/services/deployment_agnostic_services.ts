@@ -68,4 +68,5 @@ export const services = {
   usageCollection: functionalPlatformServices.usageCollection,
   userMenu: functionalPlatformServices.userMenu,
   vegaDebugInspector: functionalPlatformServices.vegaDebugInspector,
+  searchSessions: functionalPlatformServices.searchSessions,
 };

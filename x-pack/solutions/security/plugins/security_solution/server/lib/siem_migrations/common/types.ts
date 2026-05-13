@@ -14,6 +14,7 @@ import type {
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ExperimentalFeatures } from '../../../../common';
 import type {
   DashboardMigration,
   DashboardMigrationDashboard,
@@ -30,6 +31,7 @@ export interface SiemMigrationsClientDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface SiemMigrationsCreateClientParams {

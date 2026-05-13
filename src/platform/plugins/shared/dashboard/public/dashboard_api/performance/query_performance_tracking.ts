@@ -10,8 +10,7 @@
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import type { PublishesPhaseEvents } from '@kbn/presentation-publishing';
+import type { PresentationContainer, PublishesPhaseEvents } from '@kbn/presentation-publishing';
 import { apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
 import {
   clearPerformanceTrackersByType,
@@ -22,6 +21,7 @@ import {
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
@@ -160,4 +160,5 @@ function reportPerformanceMetrics({
 
   reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);
   clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.PANEL);
+  performance.clearMarks(DASHBOARD_DURATION_START_MARK);
 }

@@ -1,13 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-plugin",
-  "owner": "@elastic/streams-program-team",
+  "owner": "@elastic/obs-onboarding-team @elastic/obs-sig-events-team",
   "description": "A manager for Streams",
   "group": "platform",
   "visibility": "shared",
   "plugin": {
     "id": "streams",
-    "configPath": ["xpack", "streams"],
+    "configPath": [
+      "xpack",
+      "streams"
+    ],
     "browser": true,
     "server": true,
     "requiredPlugins": [
@@ -25,8 +28,19 @@
       "usageCollection",
       "fieldsMetadata"
     ],
-    "optionalPlugins": ["cloud", "serverless", "globalSearch", "spaces"],
+    "optionalPlugins": [
+      "agentBuilder",
+      "cloud",
+      "esql",
+      "serverless",
+      "globalSearch",
+      "searchInferenceEndpoints",
+      "spaces",
+      "workflowsManagement"
+    ],
     "requiredBundles": [],
-    "extraPublicDirs": ["common"]
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

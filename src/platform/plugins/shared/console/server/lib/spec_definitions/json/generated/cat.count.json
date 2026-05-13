@@ -6,14 +6,36 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "h": [],
+      "h": [
+        "epoch",
+        "timestamp",
+        "count"
+      ],
       "s": []
     },
     "methods": [
+      "POST",
       "GET"
     ],
     "patterns": [
@@ -21,6 +43,7 @@
       "_cat/count/{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-count",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-cat-count",
     "availability": {
       "stack": true,
       "serverless": true

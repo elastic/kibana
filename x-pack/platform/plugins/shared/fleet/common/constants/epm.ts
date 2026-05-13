@@ -19,6 +19,7 @@ export const FLEET_ENDPOINT_PACKAGE = 'endpoint';
 export const FLEET_APM_PACKAGE = 'apm';
 export const FLEET_SYNTHETICS_PACKAGE = 'synthetics';
 export const FLEET_KUBERNETES_PACKAGE = 'kubernetes';
+export const FLEET_OTEL_COLLECTOR_INTERNAL_TELEMETRY_PACKAGE = 'otel_collector_internal_telemetry';
 export const FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE = 'profiler_symbolizer';
 export const FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE = 'profiler_collector';
 export const FLEET_CLOUD_SECURITY_POSTURE_PACKAGE = 'cloud_security_posture';
@@ -27,6 +28,7 @@ export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE = 'asset_inventory';
 export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
+export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
 export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
 export const FLEET_CONNECTORS_PACKAGE = 'elastic_connectors';
 
@@ -36,6 +38,8 @@ export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   `pf-elastic-symbolizer`,
   `pf-elastic-collector`,
   `fleet-server`,
+  FLEET_CLOUD_DEFEND_PACKAGE,
+  `${FLEET_CLOUD_DEFEND_PACKAGE}/control`,
   FLEET_CLOUD_BEAT_PACKAGE,
   `${FLEET_CLOUD_BEAT_PACKAGE}/cis_k8s`,
   `${FLEET_CLOUD_BEAT_PACKAGE}/cis_eks`,
@@ -51,6 +55,7 @@ export const OTEL_TEMPLATE_SUFFIX = 'otel';
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
 export const DATA_STREAM_TYPE_VAR_NAME = 'data_stream.type';
+export const USE_APM_VAR_NAME = 'use_apm';
 
 export const CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION = '2.9.0';
 
@@ -84,6 +89,8 @@ export const HIDDEN_API_REFERENCE_PACKAGES = [
   FLEET_SYNTHETICS_PACKAGE,
 ];
 
+export const EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES = [FLEET_ENDPOINT_PACKAGE];
+
 export const autoUpgradePoliciesPackages = [
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -115,9 +122,7 @@ export const installationStatuses = {
 // This array also controls the order in which the asset types are displayed
 export const displayedAssetTypes: DisplayedAssetTypes = [
   ...Object.values(KibanaSavedObjectType),
-  ...(Object.values(ElasticsearchAssetType).filter(
-    (assetType) => assetType !== ElasticsearchAssetType.knowledgeBase
-  ) as ElasticsearchAssetType[]), // Filter out knowledgeBase assets, we dont want to expose to the user
+  ...Object.values(ElasticsearchAssetType),
 ];
 
 export const displayedAssetTypesLookup = new Set<string>(displayedAssetTypes);

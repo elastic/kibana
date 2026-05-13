@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { PublishesSavedSearch } from '@kbn/discover-plugin/public';
+import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch } from '@kbn/discover-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { LicenseCheckState } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -59,8 +59,11 @@ describe('GetCsvReportPanelAction', () => {
   });
 
   beforeEach(() => {
+    core.uiSettings.get.mockReturnValue('America/Los_Angeles');
+
     csvConfig = {
       scroll: {} as ClientConfigType['csv']['scroll'],
+      maxRows: 10000,
     };
 
     apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
@@ -91,7 +94,7 @@ describe('GetCsvReportPanelAction', () => {
 
     context = {
       embeddable: {
-        type: 'search',
+        type: SEARCH_EMBEDDABLE_TYPE,
         savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
         getInspectorAdapters: () => null,
         getInput: () => ({
@@ -128,7 +131,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       columns: [],
       objectType: 'search',
       searchSource: {},
@@ -162,7 +165,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       columns: ['column_a', 'column_b'],
       objectType: 'search',
       searchSource: { testData: 'testDataValue' },
@@ -184,7 +187,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_searchsource', {
-      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
+      body: '{"jobParams":"(browserTimezone:America/Los_Angeles,columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
       method: 'POST',
     });
   });

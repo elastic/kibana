@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import type { HostMetricTypes } from '../charts/types';
+import {
+  AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
+  MAX_AS_FIRST_FUNCTION_PATTERN,
+} from '../constants';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 export const useHostCharts = ({
@@ -27,7 +32,7 @@ export const useHostCharts = ({
     const hostCharts = await getHostsCharts({
       metric,
       overview,
-      schema: schema ?? 'ecs',
+      schema: schema ?? DEFAULT_SCHEMA,
     });
 
     return hostCharts.map((chart) => ({
@@ -83,12 +88,24 @@ export const useKubernetesCharts = ({
   return { charts, error };
 };
 
-const getSubtitleFromFormula = (value: string) =>
-  value.startsWith('max')
-    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
-    : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
-        defaultMessage: 'Average',
-      });
+export const getSubtitleFromFormula = (value: string) => {
+  // Check if 'avg' or 'average' is the first word/function in the formula
+  if (AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+      defaultMessage: 'Average',
+    });
+  }
+
+  // Check if 'max' is the first word/function in the formula
+  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+      defaultMessage: 'Max',
+    });
+  }
+
+  // remove the fallback subtitle to avoid confusion
+  return '';
+};
 
 export const useHostKpiCharts = ({
   indexPattern,
@@ -106,15 +123,17 @@ export const useHostKpiCharts = ({
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, memory, disk } = await model.metrics.getCharts({
-      schema: schema ?? 'ecs',
+      schema: schema ?? DEFAULT_SCHEMA,
     });
 
-    return [
+    const hostKpiCharts = [
       cpu.metric.cpuUsage,
       cpu.metric.normalizedLoad1m,
       memory.metric.memoryUsage,
       disk.metric.diskUsage,
-    ].map((chart) => ({
+    ];
+
+    return hostKpiCharts.map((chart) => ({
       ...chart,
       seriesColor,
       decimals: 1,
@@ -142,7 +161,7 @@ const getHostsCharts = async ({
   const model = findInventoryModel('host');
 
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
-    schema: schema ?? 'ecs',
+    schema: schema ?? DEFAULT_SCHEMA,
   });
 
   switch (metric) {

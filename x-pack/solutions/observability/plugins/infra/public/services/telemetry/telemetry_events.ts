@@ -429,6 +429,19 @@ const schemaSelectorInteractions: InfraTelemetryEvent = {
   },
 };
 
+const metricsExplorerCalloutViewInDiscoverClicked: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.METRICS_EXPLORER_CALLOUT_VIEW_IN_DISCOVER_CLICKED,
+  schema: {
+    view: {
+      type: 'keyword',
+      _meta: {
+        description: 'Where the action was initiated (view in discover cta)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
   assetDetailsFlyoutViewed,
   assetDetailsPageViewed,
@@ -447,4 +460,5 @@ export const infraTelemetryEvents = [
   anomalyDetectionPartitionFieldChange,
   anomalyDetectionFilterFieldChange,
   schemaSelectorInteractions,
+  metricsExplorerCalloutViewInDiscoverClicked,
 ];

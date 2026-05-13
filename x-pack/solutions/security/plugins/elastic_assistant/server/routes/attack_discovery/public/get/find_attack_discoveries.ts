@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -14,10 +15,9 @@ import {
   AttackDiscoveryFindRequestQuery,
   AttackDiscoveryFindResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { hasReadAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
@@ -31,7 +31,7 @@ export const findAttackDiscoveriesRoute = (
       path: ATTACK_DISCOVERY_FIND,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
@@ -78,8 +78,6 @@ export const findAttackDiscoveriesRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
@@ -114,6 +112,7 @@ export const findAttackDiscoveriesRoute = (
               sortField: query.sort_field,
               sortOrder: query.sort_order,
               withReplacements: query.with_replacements ?? true, // public APIs default to applying replacements in responses as a convenience to non-Kibana clients
+              scheduled: query.scheduled,
             },
             logger,
           });

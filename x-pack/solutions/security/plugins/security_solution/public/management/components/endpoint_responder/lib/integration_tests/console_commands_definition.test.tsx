@@ -44,7 +44,9 @@ describe('When displaying Endpoint Response Actions', () => {
 
   describe('for agent type endpoint', () => {
     beforeEach(() => {
-      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({});
+      (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
+        responseActionsEndpointMemoryDump: true,
+      });
       commands = getEndpointConsoleCommands({
         agentType: 'endpoint',
         endpointAgentId: '123',

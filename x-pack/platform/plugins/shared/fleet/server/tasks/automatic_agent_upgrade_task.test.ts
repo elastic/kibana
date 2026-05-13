@@ -204,7 +204,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 3),
@@ -228,7 +228,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 2), // As theres already one upgrading, and 30% of 11 is 3, we only want two items to be sent for upgrade
@@ -252,7 +252,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 2),
@@ -289,7 +289,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: activeAgents.slice(0, 3),
@@ -297,7 +297,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).not.toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         { agents: uninstalledAgents, version: '8.18.0' }
       );
@@ -370,7 +370,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 30),
@@ -411,7 +411,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 3),
@@ -447,7 +447,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: firstAgentsBatch,
@@ -456,12 +456,44 @@ describe('AutomaticAgentUpgradeTask', () => {
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: secondAgentsBatch.slice(0, 4),
           version: '8.18.0',
         }
+      );
+    });
+
+    it('Should upgrade agent that would be missed due to cross-policy contamination before fix', async () => {
+      // Scenario: 1 active agent on 8.15.0 in this policy. A different policy has an agent
+      // actively upgrading to 8.18.0 (non-failed upgrade_details).
+      // Before the fix: totalOnOrUpdatingToTargetVersionAgents = 1 (that other-policy agent)
+      //   → numberOfAgentsForUpgrade = 1 - 1 = 0 → "target percentage already reached", no upgrade.
+      // After the fix: query is scoped to policy_id, count = 0 → agent is upgraded.
+      const agentPolicies = [
+        {
+          id: 'agent-policy-1',
+          required_versions: [{ version: '8.18.0', percentage: 100 }],
+        },
+      ] as AgentPolicy[];
+      mockAgentPolicyService.fetchAllAgentPolicies =
+        getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
+
+      const agents = generateAgents(1);
+      mockedGetAgentsByKuery
+        .mockResolvedValueOnce({ total: agents.length } as any) // active agents in this policy
+        .mockResolvedValueOnce({ total: 0 } as any); // agents on or updating to target version *in this policy*
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery([])) // agents marked for retry
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents));
+
+      await runTask();
+
+      expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
+        undefined,
+        expect.anything(),
+        expect.objectContaining({ agents, version: '8.18.0' })
       );
     });
 
@@ -525,11 +557,12 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 1),
           version: '8.18.0',
+          force: true,
         }
       );
     });

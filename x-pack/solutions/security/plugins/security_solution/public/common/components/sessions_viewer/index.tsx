@@ -11,6 +11,8 @@ import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/publi
 import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -19,12 +21,10 @@ import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -127,20 +127,20 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     [ACTION_BUTTON_COUNT]
   );
 
-  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+  const addBulkToTimelineActions = useAddBulkToTimelineAction({
     localFilters: sessionsFilter,
     tableId,
     from: startDate,
     to: endDate,
-    scopeId: SourcererScopeName.default,
+    scopeId: PageScope.default,
   });
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,
-      customBulkActions: [addBulkToTimelineAction],
+      customBulkActions: addBulkToTimelineActions,
     } as BulkActionsProp;
-  }, [addBulkToTimelineAction]);
+  }, [addBulkToTimelineActions]);
 
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
@@ -148,7 +148,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   return (
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
-        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+        cellActionsTriggerId={SECURITY_CELL_ACTIONS_DEFAULT}
         pageFilters={sessionsFilter}
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
@@ -158,7 +158,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={SourcererScopeName.default}
+        sourcererScope={PageScope.default}
         start={startDate}
         unit={unit}
       />

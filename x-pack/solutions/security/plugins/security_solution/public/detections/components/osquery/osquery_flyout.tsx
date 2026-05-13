@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import {
   EuiFlyout,
@@ -13,12 +13,12 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useQueryClient } from '@kbn/react-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAddToTimeline } from '../../../common/hooks/use_add_to_timeline';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
 
@@ -47,16 +47,11 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
   onClose,
   ecsData,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const maskProps = useMemo(
-    () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-    [euiTheme.levels.flyout]
-  );
-
   const {
     services: { osquery },
   } = useKibana();
   const queryClient = useQueryClient();
+  const addToTimeline = useAddToTimeline();
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
@@ -70,13 +65,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
 
   if (osquery?.OsqueryAction) {
     return (
-      <EuiFlyout
-        size="m"
-        onClose={onClose}
-        aria-labelledby={osqueryFlyoutTitleId}
-        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        maskProps={maskProps}
-      >
+      <EuiFlyout size="m" onClose={onClose} aria-labelledby={osqueryFlyoutTitleId}>
         <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
           <EuiTitle>
             <h2 id={osqueryFlyoutTitleId}>{ACTION_OSQUERY}</h2>
@@ -90,6 +79,7 @@ const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
               defaultValues={defaultValues}
               ecsData={ecsData}
               onSuccess={invalidateQueries}
+              addToTimeline={addToTimeline}
             />
           </OsqueryActionWrapper>
         </EuiFlyoutBody>

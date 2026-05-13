@@ -83,7 +83,6 @@ export const TableSection = memo(
       TableId.alertsOnAlertsPage
     );
 
-    // AlertsTable manages global filters itself, so not including `filters`
     const defaultFilters = useMemo(
       () => [
         ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),

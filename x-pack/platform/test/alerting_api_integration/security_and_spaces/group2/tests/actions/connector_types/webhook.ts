@@ -26,6 +26,7 @@ const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
   hasAuth: true,
+  authType: 'webhook-authentication-basic',
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
@@ -72,6 +73,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
+    objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
+
     return createdAction.id;
   }
 
@@ -102,9 +105,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       );
     });
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
-    it('should return 200 when creating a webhook connector successfully', async () => {
+    it('should return 200 when creating a webhook connector successfully with default method', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
@@ -155,8 +160,54 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           url: webhookSimulatorURL,
         },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
+
+    for (const method of ['post', 'put', 'patch', 'get', 'delete']) {
+      it(`should return 200 when creating a webhook connector successfully with ${method} method`, async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Webhook action',
+            connector_type_id: '.webhook',
+            secrets: {
+              user: 'username',
+              password: 'mypassphrase',
+            },
+            config: {
+              url: webhookSimulatorURL,
+              method,
+            },
+          })
+          .expect(200);
+
+        const expectedResult = {
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name: 'A generic Webhook action',
+          connector_type_id: '.webhook',
+          is_missing_secrets: false,
+          config: {
+            ...defaultValues,
+            url: webhookSimulatorURL,
+            method,
+          },
+          is_connector_type_deprecated: false,
+        };
+
+        expect(createdAction).to.eql(expectedResult);
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction).to.eql({ ...expectedResult, auth_mode: 'shared' });
+      });
+    }
 
     it('should remove headers when a webhook is updated', async () => {
       const { body: createdAction } = await supertest
@@ -234,6 +285,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           },
         },
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -258,7 +310,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'post' },
         kibanaURL
       );
-      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -295,7 +346,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'put' },
         kibanaURL
       );
-      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -336,7 +386,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'get' },
         kibanaURL
       );
-      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -353,7 +402,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         { method: 'delete' },
         kibanaURL
       );
-      objectRemover.add('default', webhookActionId, 'connector', 'actions', false);
       const { body: result } = await supertest
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
@@ -382,6 +430,32 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
+      expect(result.message).to.match(/is not added to the Kibana config/);
+    });
+
+    it('should reject OAuth2 webhook when accessTokenUrl host is not in allowedHosts', async () => {
+      const tokenUrl = 'http://oauth.mynonexistent.com/token';
+      const { body: result } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'OAuth2 Webhook disallowed token URL',
+          connector_type_id: '.webhook',
+          secrets: {
+            clientSecret: 'secret',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            hasAuth: true,
+            authType: 'webhook-oauth2-client-credentials',
+            accessTokenUrl: tokenUrl,
+            clientId: 'client-id',
+          },
+        })
+        .expect(400);
+
+      expect(result.error).to.eql('Bad Request');
+      expect(result.message).to.contain(tokenUrl);
       expect(result.message).to.match(/is not added to the Kibana config/);
     });
 
@@ -547,11 +621,12 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(/Connector must be a webhook or cases webhook/);
+        expect(result.message).to.match(/Connector must be one of the following types/);
       });
     });
 
-    describe('OAuth2 client credentials', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/236174
+    describe.skip('OAuth2 client credentials', () => {
       let oauth2Server: OAuth2Server;
       let webhookActionId: string = '';
       const clientId = 'test-client-id';
@@ -639,9 +714,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // waits enough for the token to be expired
+        // waits enough for the token to be expired plus some buffer
         await new Promise((resolve) =>
-          setTimeout(() => resolve(true), oauth2Server.getTokenExpirationTime() * 1000)
+          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
         );
 
         // this second call should trigger a second call to the auth server because

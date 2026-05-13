@@ -26,6 +26,8 @@
         "label": "SampleParserClient",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -40,6 +42,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -51,6 +55,8 @@
                 "label": "options",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                "lineNumber": 18,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -71,6 +77,8 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                    "lineNumber": 18,
+                    "columnNumber": 26,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -90,6 +98,8 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -106,6 +116,8 @@
               "() => Promise<string[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -119,7 +131,15 @@
             "label": "getLogGenerators",
             "description": [],
             "signature": [
-              "({ rpm, distribution, systems, streamType, }: { rpm?: number | undefined; distribution?: \"relative\" | \"uniform\" | undefined; systems: { loghub?: boolean | string[] | undefined; serverless?: boolean | string[] | undefined; }; streamType?: \"classic\" | \"wired\" | undefined; }) => Promise<",
+              "({ rpm, distribution, systems, streamType, loghubTimestampLayout, }: { rpm?: number | undefined; distribution?: \"relative\" | \"uniform\" | undefined; systems: { loghub?: boolean | string[] | undefined; serverless?: boolean | string[] | undefined; }; streamType?: \"classic\" | \"wired\" | undefined; loghubTimestampLayout?: ",
+              {
+                "pluginId": "@kbn/sample-log-parser",
+                "scope": "common",
+                "docId": "kibKbnSampleLogParserPluginApi",
+                "section": "def-common.LoghubTimestampLayout",
+                "text": "LoghubTimestampLayout"
+              },
+              " | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/sample-log-parser",
                 "scope": "common",
@@ -130,6 +150,8 @@
               "[]>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,9 +160,11 @@
                 "id": "def-common.SampleParserClient.getLogGenerators.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    rpm = 10000,\n    distribution = 'uniform',\n    systems = {},\n    streamType = 'wired',\n  }",
+                "label": "{\n    rpm = 10000,\n    distribution = 'uniform',\n    systems = {},\n    streamType = 'wired',\n    loghubTimestampLayout,\n  }",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                "lineNumber": 40,
+                "columnNumber": 6,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -155,6 +179,8 @@
                       "number | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                    "lineNumber": 41,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -169,6 +195,8 @@
                       "\"relative\" | \"uniform\" | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                    "lineNumber": 42,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -183,6 +211,8 @@
                       "{ loghub?: boolean | string[] | undefined; serverless?: boolean | string[] | undefined; }"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                    "lineNumber": 43,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -197,6 +227,33 @@
                       "\"classic\" | \"wired\" | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                    "lineNumber": 47,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/sample-log-parser",
+                    "id": "def-common.SampleParserClient.getLogGenerators.$1.loghubTimestampLayout",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "loghubTimestampLayout",
+                    "description": [
+                      "LogHub only; default preserves upstream log timestamps."
+                    ],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/sample-log-parser",
+                        "scope": "common",
+                        "docId": "kibKbnSampleLogParserPluginApi",
+                        "section": "def-common.LoghubTimestampLayout",
+                        "text": "LoghubTimestampLayout"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/client/index.ts",
+                    "lineNumber": 48,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -221,6 +278,8 @@
           "() => void"
         ],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/cli/index.ts",
+        "lineNumber": 71,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -238,6 +297,8 @@
           "(query: DslQuery) => StructuredInputMatchFunction"
         ],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+        "lineNumber": 99,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -252,7 +313,10 @@
               "DslQuery"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+            "lineNumber": 99,
+            "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "DslQuery",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -271,6 +335,8 @@
           "(text: string) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -285,6 +351,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+            "lineNumber": 90,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -303,6 +371,8 @@
         "label": "LoghubQuery",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -314,6 +384,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -325,6 +397,8 @@
             "label": "title",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,6 +410,8 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -350,6 +426,8 @@
               "DslQuery"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/validate_queries.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -364,6 +442,8 @@
         "label": "StreamLogGenerator",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -375,6 +455,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -391,6 +473,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -405,6 +489,8 @@
                   "number"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/types.ts",
+                "lineNumber": 15,
+                "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -417,7 +503,27 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/sample-log-parser",
+        "id": "def-common.LoghubTimestampLayout",
+        "type": "Type",
+        "tags": [],
+        "label": "LoghubTimestampLayout",
+        "description": [
+          "\n- `source`: preserve relative timing from the LogHub file (`systemRpm` / timestamp spread).\n- `uniform_interval`: emit one document every `60000 / targetRpm` ms in simulation time, cycling\n  lines for message content only. Same `targetRpm` across systems → comparable document counts per\n  `[from, to]` window (synthtrace / eval seeding)."
+        ],
+        "signature": [
+          "\"source\" | \"uniform_interval\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/create_loghub_generator.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

@@ -72,9 +72,9 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToAlertsAndAction() {
-      await PageObjects.common.navigateToApp('triggersActions');
+      await PageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
-      await testSubjects.existOrFail('rulesList');
+      await testSubjects.existOrFail('rulesListSection');
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {

@@ -8,17 +8,10 @@
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import type { StreamsConfig } from '../common/config';
 import type { StreamsPluginSetup, StreamsPluginStart } from './plugin';
-import { config } from './plugin';
 import type { StreamsRouteRepository } from './routes';
-import type { SimulationDocReport } from './routes/internal/streams/processing/simulation_handler';
+import { config } from './config';
 
-export type {
-  StreamsConfig,
-  StreamsPluginSetup,
-  StreamsPluginStart,
-  StreamsRouteRepository,
-  SimulationDocReport,
-};
+export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {

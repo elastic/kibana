@@ -38,6 +38,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         supported_feature_ids: ['alerting'],
         is_system_action_type: false,
         is_deprecated: true,
+        source: 'stack',
       });
 
       const { body: createdConnector } = await supertest
@@ -67,6 +68,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         is_system_action: false,
         is_missing_secrets: false,
         is_connector_type_deprecated: true,
+        auth_mode: 'shared',
       });
     });
   });

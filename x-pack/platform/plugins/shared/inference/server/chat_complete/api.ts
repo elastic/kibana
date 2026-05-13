@@ -5,42 +5,25 @@
  * 2.0.
  */
 
-import type { ChatCompleteOptions } from '@kbn/inference-common';
-import { type ChatCompleteAPI } from '@kbn/inference-common';
-import { createChatCompleteCallbackApi } from './callback_api';
-import type { CreateChatCompleteApiOptions } from './types';
+import type { ChatCompleteOptions, ChatCompleteAPI } from '@kbn/inference-common';
+import type { ChatCompleteApiWithCallback } from './callback_api';
 
-export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
+export function createChatCompleteApi(opts: {
+  callbackApi: ChatCompleteApiWithCallback;
+}): ChatCompleteAPI;
 export function createChatCompleteApi({
-  request,
-  actions,
-  logger,
-  anonymizationRulesPromise,
-  regexWorker,
-  esClient,
-}: CreateChatCompleteApiOptions) {
-  const callbackApi = createChatCompleteCallbackApi({
-    request,
-    actions,
-    logger,
-    anonymizationRulesPromise,
-    regexWorker,
-    esClient,
-  });
-
+  callbackApi,
+}: {
+  callbackApi: ChatCompleteApiWithCallback;
+}) {
   return (options: ChatCompleteOptions) => {
     const { connectorId, stream, abortSignal, retryConfiguration, maxRetries, ...rest } = options;
+
+    const callback = (_context: unknown) => rest;
+
     return callbackApi(
-      {
-        connectorId,
-        stream,
-        abortSignal,
-        retryConfiguration,
-        maxRetries,
-      },
-      () => {
-        return rest;
-      }
+      { connectorId, stream, abortSignal, retryConfiguration, maxRetries },
+      callback
     );
   };
 }

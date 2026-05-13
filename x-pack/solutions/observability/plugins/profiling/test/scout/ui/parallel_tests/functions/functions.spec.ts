@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Functions page', { tag: ['@ess'] }, () => {
+test.describe('Functions page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
 
   test.beforeEach(async ({ browserAuth }) => {
@@ -102,8 +103,8 @@ test.describe('Functions page', { tag: ['@ess'] }, () => {
     // Add KQL filter - this should not throw an error
     await functionsPage.addKqlFilter('Stacktrace.id', '-7DvnP1mizQYw8mIIpgbMg');
 
-    // Verify filter was applied - the table should still be visible and have data
-    await expect(frameCell).toContainText('vmlinux');
+    // Wait for the table to re-render and verify filter was applied
+    await expect(frameCell).toContainText('vmlinux', { timeout: 30000 });
 
     // Clear the filter
     await functionsPage.clearKqlFilter();

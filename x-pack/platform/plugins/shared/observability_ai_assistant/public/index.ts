@@ -52,7 +52,7 @@ export { FailedToLoadResponse } from './components/message_panel/failed_to_load_
 
 export { MessageText } from './components/message_panel/message_text';
 
-export { ElasticLlmTourCallout } from './components/tour_callout/elastic_llm_tour_callout';
+export { EisKnowledgeBaseCallout } from './components/tour_callout/eis_knowledge_base_callout';
 
 export {
   type ChatActionClickHandler,
@@ -76,7 +76,6 @@ export {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
-  E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '../common';
@@ -112,11 +111,6 @@ export {
   aiAssistantSearchConnectorIndexPattern,
 } from '../common/ui_settings/settings_keys';
 
-export {
-  getElasticManagedLlmConnector,
-  INFERENCE_CONNECTOR_ACTION_TYPE_ID,
-} from './utils/get_elastic_managed_llm_connector';
-
 export const elasticAiAssistantImage = elasticAiAssistantImg;
 
 export const plugin: PluginInitializer<
@@ -128,8 +122,8 @@ export const plugin: PluginInitializer<
   new ObservabilityAIAssistantPlugin(pluginInitializerContext);
 
 export {
-  getConnectorsManagementHref,
-  navigateToConnectorsManagementApp,
+  getModelManagementHref,
+  navigateToModelManagementApp,
 } from './utils/navigate_to_connectors';
 
 export { navigateToSettingsManagementApp } from './utils/navigate_to_settings';
@@ -140,6 +134,13 @@ export {
 } from './hooks/use_elastic_llm_callout_dismissed';
 
 export {
+  useEisKnowledgeBaseCalloutDismissed,
+  EIS_KNOWLEDGE_BASE_CALLOUT_KEY,
+} from './hooks/use_eis_knowledge_base_callout_dismissed';
+
+export {
   ObservabilityAIAssistantFlyoutStateProvider,
   useObservabilityAIAssistantFlyoutStateContext,
 } from './context/observability_ai_assistant_flyout_state_context';
+
+export { useIsAgentBuilderEnabled } from './hooks/use_is_agent_builder_enabled';

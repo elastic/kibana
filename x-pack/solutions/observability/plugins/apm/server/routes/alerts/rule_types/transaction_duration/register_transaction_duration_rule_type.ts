@@ -29,6 +29,8 @@ import { getParsedFilterQuery, termQuery } from '@kbn/observability-plugin/serve
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
   ApmRuleType,
@@ -37,6 +39,7 @@ import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { transactionDurationParamsSchema } from '@kbn/response-ops-rule-params/transaction_duration';
 import { unflattenObject } from '@kbn/object-utils';
+import { getDurationFieldForTransactions } from '@kbn/apm-data-access-plugin/server/utils';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getEnvironmentEsField } from '../../../../../common/environment_filter_values';
@@ -62,10 +65,7 @@ import {
   getAlertUrlTransaction,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
-import {
-  getBackwardCompatibleDocumentTypeFilter,
-  getDurationFieldForTransactions,
-} from '../../../../lib/helpers/transactions';
+import { getBackwardCompatibleDocumentTypeFilter } from '../../../../lib/helpers/transactions';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import type { RegisterRuleDependencies } from '../../register_apm_rule_types';
@@ -320,7 +320,9 @@ export function registerTransactionDurationRuleType({
           [PROCESSOR_EVENT]: ProcessorEvent.transaction,
           [ALERT_EVALUATION_VALUE]: transactionDuration,
           [ALERT_EVALUATION_THRESHOLD]: thresholdMicroseconds,
+          [ALERT_GROUPING]: groupingObject,
           [ALERT_REASON]: reason,
+          [ALERT_INDEX_PATTERN]: index,
           ...sourceFields,
           ...groupByFields,
         };
@@ -369,7 +371,8 @@ export function registerTransactionDurationRuleType({
           alertHits?.[ALERT_EVALUATION_VALUE]
         ).formatted;
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
-        const groupingObject = unflattenObject(groupByFields);
+        const groupingObjectFromRecoveredAlert =
+          alertHits?.[ALERT_GROUPING] ?? unflattenObject(groupByFields);
 
         const recoveredContext = {
           alertDetailsUrl,
@@ -383,7 +386,7 @@ export function registerTransactionDurationRuleType({
           threshold: ruleParams.threshold,
           triggerValue: transactionDurationFormatted,
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: groupingObjectFromRecoveredAlert,
           ...groupByActionVariables,
         };
 

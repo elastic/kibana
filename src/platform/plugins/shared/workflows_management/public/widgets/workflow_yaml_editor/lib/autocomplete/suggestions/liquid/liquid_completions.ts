@@ -133,6 +133,14 @@ export const LIQUID_FILTERS = [
     example: '{{ "HELLO" | downcase }} => hello',
   },
   {
+    name: 'entries',
+    description:
+      'Converts an object into an array of {key, value} pairs, enabling iteration over object keys with foreach',
+    insertText: 'entries',
+    example:
+      '{{ {"a": 1, "b": 2} | entries }} => [{"key": "a", "value": 1}, {"key": "b", "value": 2}]',
+  },
+  {
     name: 'escape',
     description: 'Escapes a string by replacing characters with escape sequences',
     insertText: 'escape',
@@ -169,6 +177,21 @@ export const LIQUID_FILTERS = [
     insertText: 'group_by_exp: "${1:expression}"',
     example:
       '{{ products | group_by_exp: "item.price > 100" }} => [{"name": "true", "items": [...]}, {"name": "false", "items": [...]}]',
+  },
+  {
+    name: 'has',
+    description:
+      'Checks if an array of objects contains an object with a property (one param) or a specific property value (two params)',
+    insertText: 'has: "${1:property}", "${2:value}"',
+    example:
+      '{{ products | has: "type" }} => true if any product has "type" property\n{{ products | has: "type", "book" }} => true if any product has type="book"',
+  },
+  {
+    name: 'has_exp',
+    description: 'Checks if an array contains an item that matches an expression',
+    insertText: 'has_exp: "${1:itemName}", "${2:expression}"',
+    example:
+      '{{ products | has_exp: "item", "item.price > 100" }} => true if any product has price > 100',
   },
   {
     name: 'join',

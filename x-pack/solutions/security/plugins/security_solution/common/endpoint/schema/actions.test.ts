@@ -128,14 +128,24 @@ describe('actions schemas', () => {
         }).not.toThrow();
       });
 
-      it('should not limit multiple agent IDs', () => {
+      it('should accept up to 250 agent IDs', () => {
         expect(() => {
           EndpointActionListRequestSchema.query.validate({
-            agentIds: Array(255)
+            agentIds: Array(250)
               .fill(1)
               .map(() => uuidv4()),
           });
         }).not.toThrow();
+      });
+
+      it('should not accept more than 250 agent IDs', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            agentIds: Array(251)
+              .fill(1)
+              .map(() => uuidv4()),
+          });
+        }).toThrow();
       });
     });
 
@@ -253,6 +263,26 @@ describe('actions schemas', () => {
           });
         }).not.toThrow();
       });
+
+      it('should accept up to 50 userIds', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            userIds: Array(50)
+              .fill(1)
+              .map((_, i) => `user-${i}`),
+          });
+        }).not.toThrow();
+      });
+
+      it('should not accept more than 50 userIds', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            userIds: Array(51)
+              .fill(1)
+              .map((_, i) => `user-${i}`),
+          });
+        }).toThrow();
+      });
     });
 
     describe('commands', () => {
@@ -305,6 +335,14 @@ describe('actions schemas', () => {
             commands: ['isolate', 'unisolate'],
           });
         }).not.toThrow();
+      });
+
+      it('should not accept more than 50 commands', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            commands: Array(51).fill('isolate'),
+          });
+        }).toThrow();
       });
     });
 
@@ -425,6 +463,26 @@ describe('actions schemas', () => {
           });
         }).not.toThrow();
       });
+
+      it('should accept up to 50 withOutputs action IDs', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            withOutputs: Array(50)
+              .fill(1)
+              .map(() => uuidv4()),
+          });
+        }).not.toThrow();
+      });
+
+      it('should not accept more than 50 withOutputs action IDs', () => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            withOutputs: Array(51)
+              .fill(1)
+              .map(() => uuidv4()),
+          });
+        }).toThrow();
+      });
     });
   });
 
@@ -467,6 +525,26 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it('should accept up to 250 endpoint ids', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: Array(250)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
+      }).not.toThrow();
+    });
+
+    it('should not accept more than 250 endpoint ids', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: Array(251)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
+      }).toThrow();
+    });
+
     it('should accept a comment', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({
@@ -494,6 +572,17 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
+    it('should not accept more than 50 alert ids', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          alert_ids: Array(51)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
+      }).toThrow();
+    });
+
     it('should not accept empty case IDs', () => {
       expect(() => {
         NoParametersRequestSchema.body.validate({
@@ -510,6 +599,17 @@ describe('actions schemas', () => {
           case_ids: ['000000000-000-000'],
         });
       }).not.toThrow();
+    });
+
+    it('should not accept more than 50 case ids', () => {
+      expect(() => {
+        NoParametersRequestSchema.body.validate({
+          endpoint_ids: ['ABC-XYZ-000'],
+          case_ids: Array(51)
+            .fill(1)
+            .map(() => uuidv4()),
+        });
+      }).toThrow();
     });
   });
 
@@ -1241,20 +1341,16 @@ describe('actions schemas', () => {
     });
 
     it('should throw if pid or entity id is used with type = kernel', () => {
-      // @ts-expect-error
       memDumpBody.parameters.pid = 1;
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
 
-      // @ts-expect-error
       delete memDumpBody.parameters.pid;
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = 'some-value';
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 
     it('should accept type of process with a pid', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.pid = 1;
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
@@ -1262,7 +1358,6 @@ describe('actions schemas', () => {
 
     it('should accept type of process with an entity id', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = 'some-value';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
@@ -1278,7 +1373,6 @@ describe('actions schemas', () => {
 
     it('should throw if entity id is an empty string', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = '';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
@@ -1286,7 +1380,6 @@ describe('actions schemas', () => {
 
     it('should throw if entity id a string padded with only spaces', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = '       ';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
@@ -1300,9 +1393,7 @@ describe('actions schemas', () => {
 
     it('should throw if type is process and both pid and entity id is used', () => {
       memDumpBody.parameters.type = 'process';
-      // @ts-expect-error
       memDumpBody.parameters.pid = 1;
-      // @ts-expect-error
       memDumpBody.parameters.entity_id = 'some-value';
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();

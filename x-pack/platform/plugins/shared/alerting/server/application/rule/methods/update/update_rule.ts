@@ -8,12 +8,17 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
+import {
+  getMappedParams,
+  addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
+} from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -29,6 +34,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -40,36 +46,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-
-const validateCanUpdateFlapping = (
-  isFlappingEnabled: boolean,
-  originalFlapping: RawRule['flapping'],
-  updateFlapping: UpdateRuleParams['data']['flapping']
-) => {
-  // If flapping is enabled, allow rule flapping to be updated and do nothing
-  if (isFlappingEnabled) {
-    return;
-  }
-
-  // If updated flapping is undefined then don't do anything, it's not being updated
-  if (updateFlapping === undefined) {
-    return;
-  }
-
-  // If both versions are falsy, allow it even if its changing between undefined and null
-  if (!originalFlapping && !updateFlapping) {
-    return;
-  }
-
-  // If both values are equal, allow it because it's essentially not changing anything
-  if (isEqual(originalFlapping, updateFlapping)) {
-    return;
-  }
-
-  throw Boom.badRequest(
-    `Error updating rule: can not update rule flapping if global flapping is disabled`
-  );
-};
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
@@ -78,7 +55,6 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   data: UpdateRuleData<Params>;
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
-  isFlappingEnabled?: boolean;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -101,7 +77,6 @@ async function updateWithOCC<Params extends RuleParams = never>(
     data: initialData,
     allowMissingConnectorSecrets,
     id,
-    isFlappingEnabled = false,
     shouldIncrementRevision = () => true,
   } = updateParams;
 
@@ -153,11 +128,9 @@ async function updateWithOCC<Params extends RuleParams = never>(
     schedule,
     name,
     apiKey,
+    uiamApiKey,
     apiKeyCreatedByUser,
-    flapping: originalFlapping,
   } = originalRuleSavedObject.attributes;
-
-  validateCanUpdateFlapping(isFlappingEnabled, originalFlapping, initialData.flapping);
 
   let validationPayload: ValidateScheduleLimitResult = null;
   if (enabled && schedule.interval !== data.schedule.interval) {
@@ -251,10 +224,20 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
+  const apiKeysToInvalidate = [];
+  if (apiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(apiKey);
+  }
+  if (uiamApiKey && !apiKeyCreatedByUser) {
+    apiKeysToInvalidate.push(uiamApiKey);
+  }
+
   await Promise.all([
-    apiKey && !apiKeyCreatedByUser
+    apiKeysToInvalidate.length > 0
       ? bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKey] },
+          {
+            apiKeys: apiKeysToInvalidate,
+          },
           context.logger,
           context.unsecuredSavedObjectsClient
         )
@@ -340,7 +323,16 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     username,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
+    apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
   });
+
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    updateRuleData.tags,
+    apiKeyAttributes.uiamApiKey,
+    apiKeyAttributes.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
 
   const notifyWhen = getRuleNotifyWhenType(
     updateRuleData.notifyWhen ?? null,
@@ -348,9 +340,10 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   );
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
-    ...originalRule,
+    ...omit(originalRule, API_KEY_ATTRIBUTES_TO_STRIP),
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
+    tags: tagsWithUiamCheck,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,
@@ -358,6 +351,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updatedBy: username,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
+    ...(originalRule.lastRun
+      ? { lastRun: migrateLegacyLastRunOutcomeMsg(originalRule.lastRun) }
+      : {}),
   });
 
   const mappedParams = getMappedParams(updatedParams);
@@ -369,7 +365,10 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRuleSavedObject: SavedObject<RawRule>;
 
   const { id, version } = originalRuleSavedObject;
+
   try {
+    const updateRuleTimestamp = Date.now();
+
     updatedRuleSavedObject = await createRuleSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       ruleAttributes: updatedRuleAttributes,
@@ -380,15 +379,29 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         references: extractedReferences,
       },
     });
+
+    await logBulkRuleChanges({
+      ruleSOs: [updatedRuleSavedObject],
+      rulesClientContext: context,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdate,
+        timestamp: updateRuleTimestamp,
+      },
+    });
   } catch (e) {
+    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
+
+    const apiKeysToInvalidate = [];
+    if (apiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(apiKey);
+    }
+    if (uiamApiKey && !apiKeyCreatedByUser) {
+      apiKeysToInvalidate.push(uiamApiKey);
+    }
+
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys:
-          updatedRuleAttributes.apiKey && !updatedRuleAttributes.apiKeyCreatedByUser
-            ? [updatedRuleAttributes.apiKey]
-            : [],
-      },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

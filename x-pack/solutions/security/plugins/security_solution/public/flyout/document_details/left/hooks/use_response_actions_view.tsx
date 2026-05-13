@@ -12,6 +12,8 @@ import { EuiLink, EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ResponseActionsEmptyPrompt as ResponseActionsPrivilegeRequiredCallout } from '../../../../common/components/response_actions/response_actions_empty_prompt';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { RESPONSE_NO_DATA_TEST_ID } from '../components/test_ids';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import type {
@@ -85,13 +87,15 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
 }: UseResponseActionsViewParams): EuiTabbedContentTab => {
+  const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
+
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
 
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
-  const shouldEarlyReturn = !rawEventData;
+  const hasRawEventData = !!rawEventData;
 
   const alertId = rawEventData?._id ?? '';
   const [isLive, setIsLive] = useState(false);
@@ -100,15 +104,19 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
     {
       alertIds: [alertId],
     },
-    { enabled: !shouldEarlyReturn, isLive }
+    // fetch action details if we have raw event data and user has privileges
+    { enabled: hasRawEventData && canAccessEndpointActionsLogManagement, isLive }
   );
+
+  const showResponseActions =
+    canAccessEndpointActionsLogManagement && isFetched && !!automatedList?.items?.length;
 
   // calculating whether or not our useGetAutomatedActionList (react-query) should try to refetch data
   useEffect(() => {
     setIsLive(() => !(!responseActions?.length || !!automatedList?.items?.length));
   }, [automatedList, responseActions?.length]);
 
-  if (shouldEarlyReturn) {
+  if (!hasRawEventData) {
     return {
       ...viewData,
       content: <EmptyResponseActions />,
@@ -128,7 +136,9 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
         <>
           <EuiSpacer size="s" />
           <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-            {isFetched && !!automatedListItems.length ? (
+            {!canAccessEndpointActionsLogManagement ? (
+              <ResponseActionsPrivilegeRequiredCallout type="endpoint" />
+            ) : showResponseActions ? (
               <ResponseActionsResults
                 actions={automatedListItems}
                 ruleName={ruleName}

@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { errors } from '@elastic/elasticsearch';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { SavedObject } from '@kbn/core/server';
 import type {
@@ -31,6 +32,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -48,6 +50,7 @@ import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
@@ -77,6 +80,7 @@ import {
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
+import { gapReasonType } from '../../common/constants';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -87,7 +91,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helpers';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -98,8 +101,10 @@ import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import * as getExecutorServicesModule from './get_executor_services';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
-import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
+import {
+  getMockMaintenanceWindow,
+  maintenanceWindowsServiceMock,
+} from './maintenance_windows/maintenance_windows_service.mock';
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
@@ -200,6 +205,8 @@ describe('Task Runner', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
+    shouldGrantUiam: false,
   };
 
   beforeEach(() => {
@@ -333,7 +340,11 @@ describe('Task Runner', () => {
     testAlertingEventLogCalls({ status: 'ok' });
 
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({})
+      ...generateRuleUpdateParams({
+        metrics: {
+          total_search_duration_ms: 23423,
+        },
+      })
     );
 
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
@@ -352,6 +363,74 @@ describe('Task Runner', () => {
     ).toHaveBeenCalled();
   });
 
+  test('passes total_search_duration_ms from execution metrics into rule monitoring via addFrameworkMetrics', async () => {
+    const addFrameworkMetricsSpy = jest.spyOn(
+      RuleMonitoringService.prototype,
+      'addFrameworkMetrics'
+    );
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(addFrameworkMetricsSpy).toHaveBeenCalledWith({
+      total_search_duration_ms: 23423,
+    });
+    addFrameworkMetricsSpy.mockRestore();
+  });
+
+  test('passes consumer metrics to AlertingEventLogger', async () => {
+    const consumerMetrics = {
+      matched_indices_count: 3,
+      frozen_indices_queried_count: 3,
+      alerts_candidate_count: 42,
+      alerts_suppressed_count: 7,
+    };
+    ruleType.executor.mockImplementation(async ({ services: { ruleMonitoringService } }) => {
+      ruleMonitoringService?.setMetrics(consumerMetrics);
+      return { state: {} };
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        },
+      },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(alertingEventLogger.done).toHaveBeenCalledWith(
+      expect.objectContaining({
+        consumerMetrics,
+      })
+    );
+  });
+
   test('should update the persisted alerts', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
@@ -367,8 +446,31 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
+    alertsClient.getAlertsToUpdateWithMaintenanceWindows.mockReturnValue([
+      mockAAD['kibana.alert.uuid'],
+    ]);
+    alertsClient.getAlertsToUpdateWithLastScheduledActions.mockReturnValue({
+      [mockAAD['kibana.alert.uuid']]: {
+        group: 'default',
+        date: new Date().toISOString(),
+      },
+    });
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {
+        [mockAAD['kibana.alert.uuid']]: {
+          meta: {
+            uuid: mockAAD['kibana.alert.uuid'],
+            lastScheduledActions: {
+              group: 'default',
+              date: new Date().toISOString(),
+            },
+          },
+          state: {},
+        },
+      },
+      rawRecoveredAlerts: {},
+    });
 
-    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
     const taskRunner = new TaskRunner({
@@ -403,6 +505,8 @@ describe('Task Runner', () => {
     await taskRunner.run();
 
     expect(alertsClient.updatePersistedAlerts).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithMaintenanceWindows).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithLastScheduledActions).toHaveBeenCalledTimes(1);
   });
 
   test('throws error when schedule.interval is not provided', async () => {
@@ -1868,6 +1972,39 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
+  test('should set authentication errors as user-error', async () => {
+    jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
+      throw new errors.ResponseError({
+        warnings: [],
+        meta: {} as never,
+        statusCode: 401,
+      });
+    });
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    await taskRunner.run();
+
+    expect(logger.error).toBeCalledTimes(1);
+
+    const loggerCall = logger.error.mock.calls[0][0];
+    const loggerMeta = logger.error.mock.calls[0][1];
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: Response Error"`
+    );
+    expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'user-error']);
+  });
+
   test('should set unexpected errors as framework-error', async () => {
     jest.spyOn(getExecutorServicesModule, 'getExecutorServices').mockImplementation(() => {
       throw new Error('test');
@@ -2692,7 +2829,10 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
     expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
-      ...generateRuleUpdateParams({ nextRun: '1970-01-01T00:00:10.000Z' })
+      ...generateRuleUpdateParams({
+        nextRun: '1970-01-01T00:00:10.000Z',
+        metrics: { total_search_duration_ms: 23423 },
+      })
     );
   });
 
@@ -2851,6 +2991,9 @@ describe('Task Runner', () => {
         outcome: 'warning',
         warning,
         alertsCount: { active: 1, new: 1 },
+        metrics: {
+          total_search_duration_ms: null,
+        },
       })
     );
 
@@ -2868,6 +3011,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
               flapping: false,
               pendingRecoveredCount: 0,
               activeCount: 1,
@@ -3023,6 +3167,9 @@ describe('Task Runner', () => {
         outcome: 'warning',
         warning,
         alertsCount: { active: 2, new: 2 },
+        metrics: {
+          total_search_duration_ms: null,
+        },
       })
     );
 
@@ -3040,6 +3187,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
               flapping: false,
               pendingRecoveredCount: 0,
               activeCount: 1,
@@ -3058,6 +3206,7 @@ describe('Task Runner', () => {
               },
               flappingHistory: [true],
               maintenanceWindowIds: [],
+              maintenanceWindowNames: [],
               flapping: false,
               pendingRecoveredCount: 0,
               activeCount: 1,
@@ -3306,8 +3455,9 @@ describe('Task Runner', () => {
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
-  test('when there is a gap, report it to alert event log', async () => {
+  test('when there is a gap, report it with reason to alert event log', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     jest.spyOn(RuleMonitoringService.prototype, 'getMonitoring').mockImplementation(() => {
       return {
         run: {
@@ -3321,6 +3471,9 @@ describe('Task Runner', () => {
               gap_range: {
                 gte: '2021-09-01T00:00:00.000Z',
                 lte: '2021-09-01T00:00:00.001Z',
+              },
+              gap_reason: {
+                type: gapReasonType.RULE_DISABLED,
               },
             },
           },
@@ -3340,6 +3493,7 @@ describe('Task Runner', () => {
 
     expect(alertingEventLogger.reportGap).toHaveBeenCalledWith({
       gap: { gte: '2021-09-01T00:00:00.000Z', lte: '2021-09-01T00:00:00.001Z' },
+      reason: { type: gapReasonType.RULE_DISABLED },
     });
   });
 
@@ -3623,6 +3777,7 @@ describe('Task Runner', () => {
           triggeredActionsStatus: 'complete',
           hasReachedQueuedActionsLimit,
         },
+        consumerMetrics: undefined,
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
           status,

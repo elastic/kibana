@@ -121,7 +121,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           aria-label={'alerts-to-analyze'}
           key={'alerts-to-analyze'}
           onClick={handleShowAlertsModal}
-          icon={'magnifyWithExclamation'}
+          icon={'magnifyExclamation'}
           data-test-subj={'alerts-to-analyze'}
         >
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -135,9 +135,9 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
       ],
       [
-        handleNavigateToAnonymization,
-        handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
       ]
@@ -147,6 +147,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
           <EuiPopover
+            aria-label={i18n.AI_ASSISTANT_MENU}
             button={
               <EuiButtonIcon
                 aria-label={i18n.AI_ASSISTANT_MENU}

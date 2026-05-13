@@ -18,7 +18,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
-  StateComparators,
+  ProjectRoutingOverrides,
+  PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -30,25 +31,40 @@ import {
   type Filter,
   type Query,
 } from '@kbn/es-query';
+import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { getEsqlDataView } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
-  SearchEmbeddableRuntimeState,
   SearchEmbeddableSerializedAttributes,
   SearchEmbeddableStateManager,
 } from './types';
-import { getEsqlDataView } from '../application/main/state_management/utils/get_esql_data_view';
 
 const initializeSearchSource = async (
   discoverServices: DiscoverServices,
   serializedSearchSource?: SerializedSearchSourceFields
 ) => {
-  const [searchSource, parentSearchSource] = await Promise.all([
-    discoverServices.data.search.searchSource.create(serializedSearchSource),
-    discoverServices.data.search.searchSource.create(),
-  ]);
+  let searchSource: ISearchSource;
+  let parentSearchSource: ISearchSource;
+
+  try {
+    [searchSource, parentSearchSource] = await Promise.all([
+      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(),
+    ]);
+  } catch (error) {
+    if (error instanceof SavedObjectNotFound) {
+      [searchSource, parentSearchSource] = await Promise.all([
+        discoverServices.data.search.searchSource.create(),
+        discoverServices.data.search.searchSource.create(),
+      ]);
+    } else {
+      throw error;
+    }
+  }
 
   searchSource.setParent(parentSearchSource);
 
@@ -78,22 +94,30 @@ const initializedSavedSearch = (
   };
 };
 
-export const initializeSearchEmbeddableApi = async (
-  initialState: SearchEmbeddableRuntimeState,
-  {
-    discoverServices,
-  }: {
-    discoverServices: DiscoverServices;
+const getProjectRoutingOverrides = (query: Query | AggregateQuery | undefined) => {
+  if (isOfAggregateQueryType(query)) {
+    const value = getProjectRoutingFromEsqlQuery(query.esql);
+    return value ? [{ value }] : undefined;
   }
-): Promise<{
+};
+
+export const initializeSearchEmbeddableApi = async ({
+  initialState,
+  dataLoading$,
+  discoverServices,
+}: {
+  initialState: SearchEmbeddableSerializedAttributes;
+  dataLoading$: BehaviorSubject<boolean | undefined>;
+  discoverServices: DiscoverServices;
+}): Promise<{
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
-    Partial<PublishesWritableUnifiedSearch>;
+    Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
+    PublishesProjectRoutingOverrides;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
-  comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
-  reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => void;
+  reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
@@ -102,8 +126,6 @@ export const initializeSearchEmbeddableApi = async (
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
-
-  const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
@@ -126,6 +148,11 @@ export const initializeSearchEmbeddableApi = async (
   );
   const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
     searchSource.getField('query')
+  );
+
+  const initialQuery = searchSource.getField('query');
+  const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
+    getProjectRoutingOverrides(initialQuery)
   );
 
   const canEditUnifiedSearch = () => false;
@@ -189,6 +216,37 @@ export const initializeSearchEmbeddableApi = async (
     stateManager.columns.next(columns);
   };
 
+  const reinitializeState = async (state: SearchEmbeddableSerializedAttributes) => {
+    // Trigger dataLoading$ and clear rows$ to show the initial loading state
+    dataLoading$.next(true);
+    rows$.next([]);
+
+    const { searchSource: newSearchSource, dataView: newDataView } = await initializeSearchSource(
+      discoverServices,
+      state.serializedSearchSource
+    );
+
+    // Ensure all state updates happen synchronously to prevent multiple reloads
+    searchSource$.next(newSearchSource);
+
+    dataViews$.next(newDataView ? [newDataView] : undefined);
+
+    const newQuery = newSearchSource.getField('query');
+    const newFilters = newSearchSource.getField('filter') as Filter[] | undefined;
+
+    query$.next(newQuery);
+    filters$.next(newFilters);
+    sort$.next(state.sort);
+    columns$.next(state.columns);
+    grid$.next(state.grid);
+    sampleSize$.next(state.sampleSize);
+    rowsPerPage$.next(state.rowsPerPage);
+    rowHeight$.next(state.rowHeight);
+    headerRowHeight$.next(state.headerRowHeight);
+    savedSearchViewMode$.next(state.viewMode);
+    density$.next(state.density);
+  };
+
   /** Keep the saved search in sync with any state changes */
   const syncSavedSearch = combineLatest([onAnyStateChange, searchSource$])
     .pipe(
@@ -203,9 +261,20 @@ export const initializeSearchEmbeddableApi = async (
       savedSearch$.next(newSavedSearch);
     });
 
+  /** Keep projectRoutingOverrides$ in sync with query$ changes */
+  const syncProjectRoutingOverrides = query$.subscribe((query) => {
+    const currentOverrides = projectRoutingOverrides$.getValue();
+    const nextOverrides = getProjectRoutingOverrides(query);
+
+    if (!deepEqual(currentOverrides, nextOverrides)) {
+      projectRoutingOverrides$.next(nextOverrides);
+    }
+  });
+
   return {
     cleanup: () => {
       syncSavedSearch.unsubscribe();
+      syncProjectRoutingOverrides.unsubscribe();
     },
     api: {
       setDataViews,
@@ -215,34 +284,12 @@ export const initializeSearchEmbeddableApi = async (
       setFilters,
       query$,
       setQuery,
+      projectRoutingOverrides$,
       canEditUnifiedSearch,
       setColumns,
     },
     stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
-    comparators: {
-      sort: (a, b) => deepEqual(a ?? [], b ?? []),
-      columns: 'deepEquality',
-      grid: (a, b) => deepEqual(a ?? {}, b ?? {}),
-      sampleSize: (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
-      rowsPerPage: (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
-      rowHeight: (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
-      headerRowHeight: (a, b) =>
-        (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
-      serializedSearchSource: 'referenceEquality',
-      viewMode: 'referenceEquality',
-      density: 'referenceEquality',
-    },
-    reinitializeState: (lastSaved?: SearchEmbeddableRuntimeState) => {
-      sort$.next(lastSaved?.sort);
-      columns$.next(lastSaved?.columns);
-      grid$.next(lastSaved?.grid);
-      sampleSize$.next(lastSaved?.sampleSize);
-      rowsPerPage$.next(lastSaved?.rowsPerPage);
-      rowHeight$.next(lastSaved?.rowHeight);
-      headerRowHeight$.next(lastSaved?.headerRowHeight);
-      savedSearchViewMode$.next(lastSaved?.viewMode);
-      density$.next(lastSaved?.density);
-    },
+    reinitializeState,
   };
 };

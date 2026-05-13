@@ -23,6 +23,7 @@
       "_data_stream/_migrate/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-migrate-to-data-stream",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-migrate-to-data-stream",
     "availability": {
       "stack": true,
       "serverless": true

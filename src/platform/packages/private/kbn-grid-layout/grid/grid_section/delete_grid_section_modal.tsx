@@ -17,6 +17,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -32,16 +33,18 @@ export const DeleteGridSectionModal = ({
   setDeleteModalVisible: (visible: boolean) => void;
 }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiModal
       data-test-subj={`kbnGridLayoutDeleteSectionModal-${sectionId}`}
+      aria-labelledby={modalTitleId}
       onClose={() => {
         setDeleteModalVisible(false);
       }}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('kbnGridLayout.deleteGridSectionModal.title', {
             defaultMessage: 'Delete section',
           })}

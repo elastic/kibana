@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "__jest__/**/*",
     "../../../../../typings/**/*"
   ],
@@ -26,7 +27,6 @@
     "@kbn/i18n-react",
     "@kbn/analytics",
     "@kbn/monaco",
-    "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
@@ -43,7 +43,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/ingest-pipelines-shared",
     "@kbn/licensing-types",
-    "@kbn/core-chrome-layout-constants"
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/code-editor-mock",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

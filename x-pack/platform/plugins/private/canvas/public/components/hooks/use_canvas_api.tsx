@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 
-import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { SerializedTimeRange, ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import type { CanvasContainerApi } from '../../../types';
@@ -18,9 +18,29 @@ import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { CANVAS_APP } from '../../../common/lib';
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 
 const reload$ = new Subject<void>();
+
+// Canvas does not provide the global time range
+// To ensure embeddables have consistent time range from editor,
+// provide global time range in embeddable state when not provided.
+export function ensureTimeRange(
+  embeddableState: SerializedTimeRange
+): Required<SerializedTimeRange> {
+  if (embeddableState.time_range) {
+    return embeddableState as Required<SerializedTimeRange>;
+  }
+
+  const time = dataService.query.timefilter.timefilter.getTime();
+  return {
+    ...embeddableState,
+    time_range: {
+      from: time.from,
+      to: time.to,
+    },
+  };
+}
 
 export function forceReload() {
   reload$.next();
@@ -36,7 +56,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, type);
       }
       if (embeddableInput) {
-        const expression = embeddableInputToExpression(embeddableInput, type, undefined, true);
+        const expression = embeddableInputToExpression(ensureTimeRange(embeddableInput), type);
         dispatch(addElement(selectedPageId, { expression }));
       }
     },
@@ -44,10 +64,10 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   );
 
   const getCanvasApi = useCallback((): CanvasContainerApi => {
-    const panelStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
+    const panelStateMap: Record<string, BehaviorSubject<object>> = {};
 
     function getSerializedStateForChild(childId: string) {
-      return panelStateMap[childId]?.value ?? { rawState: {} };
+      return panelStateMap[childId]?.value ?? {};
     }
 
     return {
@@ -66,9 +86,9 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         serializedState,
       }: {
         panelType: string;
-        serializedState: SerializedPanelState<object>;
+        serializedState: object;
       }) => {
-        createNewEmbeddable(panelType, serializedState.rawState);
+        createNewEmbeddable(panelType, serializedState);
       },
       disableTriggers: true,
       // this is required to disable inline editing now enabled by default
@@ -78,10 +98,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       lastSavedStateForChild$: (childId: string) => panelStateMap[childId] ?? of(undefined),
       // Canvas auto saves so lastSavedState is the same as currentState
       getLastSavedStateForChild: getSerializedStateForChild,
-      setSerializedStateForChild: (
-        childId: string,
-        serializePanelState: SerializedPanelState<object>
-      ) => {
+      setSerializedStateForChild: (childId: string, serializePanelState: object) => {
         if (!panelStateMap[childId]) {
           panelStateMap[childId] = new BehaviorSubject(serializePanelState);
           return;

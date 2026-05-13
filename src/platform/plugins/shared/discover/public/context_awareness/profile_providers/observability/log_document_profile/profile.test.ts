@@ -19,7 +19,7 @@ import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
-import { RESOLUTION_MATCH } from './__mocks__';
+import { RESOLUTION_MATCH } from './__mocks__/log_document_resolution_match';
 
 const mockServices = createProfileProviderSharedServicesMock();
 
@@ -171,6 +171,7 @@ describe('logDocumentProfileProvider', () => {
         { context: RESOLUTION_MATCH.context }
       );
       const docViewer = getDocViewer({
+        actions: {},
         record: buildDataTableRecord({}),
       });
       const registry = new DocViewsRegistry();
@@ -184,7 +185,7 @@ describe('logDocumentProfileProvider', () => {
           id: 'doc_view_logs_overview',
           title: 'Log overview',
           order: 0,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

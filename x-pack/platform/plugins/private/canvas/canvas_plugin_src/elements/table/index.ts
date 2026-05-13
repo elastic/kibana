@@ -12,7 +12,7 @@ export const table: ElementFactory = () => ({
   displayName: 'Data table',
   type: 'chart',
   help: 'A scrollable grid for displaying data in a tabular format',
-  icon: 'visTable',
+  icon: 'table',
   expression: `kibana
 | selectFilter
 | demodata

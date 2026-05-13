@@ -18,6 +18,8 @@ export default createTestConfig({
     `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'automaticDashboardsMigration',
+      'qradarRulesMigration',
+      'sentinelRulesMigration',
     ])}`,
   ],
   testFiles: [require.resolve('..')],

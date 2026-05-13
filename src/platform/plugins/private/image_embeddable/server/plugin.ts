@@ -11,16 +11,14 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransforms } from '../common/transforms';
 import type { SetupDeps, StartDeps } from './types';
-import { imageEmbeddableSchema } from './schemas';
+import { getImageEmbeddableSchema } from './schemas';
 
 export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.embeddable.registerTransforms(IMAGE_EMBEDDABLE_TYPE, {
-      ...getTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      ),
-      schema: imageEmbeddableSchema,
+    plugins.embeddable.registerEmbeddableServerDefinition(IMAGE_EMBEDDABLE_TYPE, {
+      title: 'Image',
+      getTransforms,
+      getSchema: (getDrilldownsSchemas) => getImageEmbeddableSchema(getDrilldownsSchemas),
     });
   }
 

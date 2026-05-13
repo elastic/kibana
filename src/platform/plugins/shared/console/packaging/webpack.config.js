@@ -173,7 +173,7 @@ module.exports = [
                       loaderContext.context || loaderContext.rootContext,
                       path.resolve(
                         kibanaRoot,
-                        'src/core/public/styles/core_app/_globals_v8light.scss'
+                        'src/core/public/styles/core_app/_globals_borealislight.scss'
                       )
                     )
                   );
@@ -196,7 +196,7 @@ module.exports = [
       extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
     },
     optimization: {
-      minimize: false,
+      minimize: true,
       noEmitOnErrors: true,
       splitChunks: false,
       runtimeChunk: false,

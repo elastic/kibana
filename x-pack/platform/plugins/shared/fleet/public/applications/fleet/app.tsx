@@ -277,6 +277,7 @@ const FleetTopNav = memo(
     }, [euiTheme]);
 
     const { TopNavMenu } = services.navigation.ui;
+    const isFeedbackEnabled = services.notifications.feedback.isEnabled();
 
     const topNavConfig: TopNavMenuData[] = [];
 
@@ -287,7 +288,7 @@ const FleetTopNav = memo(
         }),
         disableButton: true,
         className: readOnlyBtnClass,
-        iconType: 'glasses',
+        iconType: 'readOnly',
         tooltip: i18n.translate('xpack.fleet.appNavigation.readOnlyTooltip', {
           defaultMessage:
             "You can view most Fleet settings, but your current privileges don't allow you to perform all actions.",
@@ -295,13 +296,15 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
-        defaultMessage: 'Give feedback',
-      }),
-      iconType: 'popout',
-      run: () => window.open(FEEDBACK_URL),
-    });
+    if (isFeedbackEnabled) {
+      topNavConfig.push({
+        label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+          defaultMessage: 'Give feedback',
+        }),
+        iconType: 'external',
+        run: () => window.open(FEEDBACK_URL),
+      });
+    }
 
     return (
       <TopNavMenu

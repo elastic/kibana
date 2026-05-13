@@ -25,7 +25,7 @@ export const DocCallouts: React.FC<DocCalloutsProps> = ({
 }) => {
   return (
     <>
-      <EuiTitle size="xxs">
+      <EuiTitle size="xs">
         <h4>{title}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
@@ -36,7 +36,8 @@ export const DocCallouts: React.FC<DocCalloutsProps> = ({
       <span>
         <EuiButtonEmpty
           href={buttonHref}
-          iconType="popout"
+          target="_blank"
+          iconType="external"
           iconSide="right"
           flush="left"
           data-test-subj={dataTestSubj}

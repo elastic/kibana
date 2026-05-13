@@ -37,7 +37,7 @@ export const RuleConditionsGroup = <ConditionProps extends unknown>({
         onResetConditionsFor &&
         !actionGroup.isRequired && (
           <EuiButtonIcon
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             aria-label={i18n.translate(
               'xpack.triggersActionsUI.sections.ruleForm.conditions.removeConditionLabel',
@@ -52,7 +52,6 @@ export const RuleConditionsGroup = <ConditionProps extends unknown>({
     >
       {React.isValidElement(children) ? (
         React.cloneElement(React.Children.only(children), {
-          // @ts-expect-error upgrade typescript v4.9.5
           actionGroup,
           ...otherProps,
         })

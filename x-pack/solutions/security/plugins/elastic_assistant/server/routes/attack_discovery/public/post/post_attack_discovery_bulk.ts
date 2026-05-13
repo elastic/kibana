@@ -6,6 +6,7 @@
  */
 
 import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
+import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ATTACK_DISCOVERY_API_ACTION_ALL } from '@kbn/security-solution-features/actions';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -14,10 +15,9 @@ import {
   PostAttackDiscoveryBulkRequestBody,
   PostAttackDiscoveryBulkResponse,
 } from '@kbn/elastic-assistant-common';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import { performChecks } from '../../../helpers';
-import { throwIfPublicApiDisabled } from '../../helpers/throw_if_public_api_disabled';
 import { buildResponse } from '../../../../lib/build_response';
 import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
@@ -31,7 +31,7 @@ export const postAttackDiscoveryBulkRoute = (
       path: ATTACK_DISCOVERY_BULK,
       security: {
         authz: {
-          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL],
+          requiredPrivileges: [ATTACK_DISCOVERY_API_ACTION_ALL, ALERTS_API_READ],
         },
       },
     })
@@ -82,8 +82,6 @@ export const postAttackDiscoveryBulkRoute = (
         }
 
         try {
-          await throwIfPublicApiDisabled(context);
-
           const currentUser = await checkResponse.currentUser;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 

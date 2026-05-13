@@ -11,9 +11,17 @@ export {
   getSecurityV2Feature,
   getSecurityV3Feature,
   getSecurityV4Feature,
+  getSecurityV5Feature,
 } from './src/security';
 export { getAssistantFeature } from './src/assistant';
 export { getAttackDiscoveryFeature } from './src/attack_discovery';
 export { getTimelineFeature } from './src/timeline';
 export { getNotesFeature } from './src/notes';
 export { getSiemMigrationsFeature } from './src/siem_migrations';
+export {
+  getRulesFeature,
+  getRulesV2Feature,
+  getRulesV3Feature,
+  getRulesV4Feature,
+} from './src/rules';
+export { getAlertsFeature } from './src/alerts';

@@ -36,10 +36,52 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+## 9.4.0 [kibana-9.4.0-breaking-changes]
+
+$$$kibana-255122-9.4.0$$$
+::::{dropdown} The `_source` field mode is now saved to the template index settings
+**Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
+
+**Impact**<br> When you edit a template in the UI, any existing `mappings._source.mode` setting is automatically moved to the index settings and removed from mappings.
+
+**Action**<br> The migration happens automatically when you edit a template in the **Index Management** UI. If you manage templates outside the UI (via API or configuration files), update them to use `settings.index.mapping.source.mode` instead of `mappings._source.mode`.
+
+View [#255122]({{kib-pull}}255122).
+::::
+
+
+$$$kibana-249855$$$
+::::{dropdown} {{esql}} tool parameter types simplified in Agent Builder API
+**Details**<br> The Agent Builder {{esql}} tool API now uses simplified parameter types aligned with {{esql}}'s actual capabilities instead of Elasticsearch field types. The supported `configuration.params[*].type` values are now: `string`, `integer`, `float`, `boolean`, and `date`. Previously accepted types (`text`, `keyword`, `long`, `double`, `object`, `nested`) are no longer valid for new API requests. Additionally, `defaultValue` is now restricted to `string | number | boolean` and requires `optional: true` to be set.
+
+**Impact**<br> API calls to `POST /api/agent_builder/tools` or `PUT /api/agent_builder/tools/{id}` that use legacy parameter types will be rejected with a 400 error. Existing tools stored with legacy types are automatically migrated on read: `text`/`keyword`/`object`/`nested` become `string`, `long` becomes `integer`, and `double` becomes `float`. Legacy `object`/`nested` default values are JSON-stringified.
+
+**Action**<br> Update any integrations that create or update {{esql}} tools via the API to use the new type values:
+- Use `string` instead of `text`, `keyword`, `object`, or `nested`
+- Use `integer` instead of `long`
+- Use `float` instead of `double`
+- Ensure `defaultValue` is only provided when `optional: true`
+
+View [#249855]({{kib-pull}}249855).
+::::
+
+## 9.3.2 [kibana-9.3.2-breaking-changes]
+$$$kibana-255122$$$
+::::{dropdown} The `_source` field mode is now saved to the template index settings
+
+**Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. When you edit a template in the UI, any existing `mappings._source.mode` setting is automatically moved to the index settings and removed from mappings. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
+
+View [#255122]({{kib-pull}}255122).
+::::
+
+## 9.3.0 [kibana-9.3.0-breaking-changes]
+
+There are no breaking changes in this version.
+
 ## 9.2.0 [kibana-9.2.0-breaking-changes]
 $$$kibana-230067$$$
 ::::{dropdown} Improved advanced settings management APIs privilege checks 
-% **Details**<br> Roles with explicit `read` access to advanced settings but `all` access to `SavedObjectManagement` can no longer update settings using the internal advanced settings API. This update enforces explicit privileges instead of relying on saved object security checks.
+**Details**<br> Roles with explicit `read` access to advanced settings but `all` access to `SavedObjectManagement` can no longer update settings using the internal advanced settings API. This update enforces explicit privileges instead of relying on saved object security checks.
 View [#230067]({{kib-pull}}230067).
 ::::
 
@@ -47,9 +89,20 @@ View [#230067]({{kib-pull}}230067).
 $$$kibana-213916$$$
 ::::{dropdown} Change to variable syntax in {{esql}} queries
 
-% **Details**<br> Fields and functions variables are now described with `??` in {{esql}} queries. For value variables, you can continue to use `?`. 
+**Details**<br> Fields and functions variables are now described with `??` in {{esql}} queries. For value variables, you can continue to use `?`. 
 
 View [#213916]({{kib-pull}}213916).
+::::
+
+$$$kibana-216558$$$
+::::{dropdown} API keys are used for authenticating report generation requests
+
+**Details**<br> In 9.1.0, report generation requests are authenticated by API keys instead of session cookies. There are several key differences between the authentication methods. API keys capture your role privileges, whereas session cookie are based on your user credentials. API keys are also longer-lived, compared to session cookies, which have a shorter lifespan.
+
+
+If you have a cross-cluster search environment and want to generate reports from remote clusters, you must have the appropriate cluster and index privileges on the remote cluster and local cluster. For example, if requests are authenticated with an API key, the API key requires certain privileges on the local cluster that contains the local index, in addition to the remote. For more information and examples, refer to [Configure roles and users for remote clusters](docs-content://deploy-manage/remote-clusters/remote-clusters-cert.md#remote-clusters-privileges-cert).
+
+View [#216558]({{kib-pull}}216558).
 ::::
 
 ## 9.0.0 [kibana-900-breaking-changes]

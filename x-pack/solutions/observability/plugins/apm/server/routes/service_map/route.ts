@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { jsonRt } from '@kbn/io-ts-utils';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
@@ -24,6 +25,12 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
+import {
+  getServiceMapServiceBadges,
+  type ServiceMapServiceBadgesResponse,
+} from './get_service_map_service_badges';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -150,7 +157,17 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 const serviceMapDependencyNodeRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
-    query: t.intersection([t.type({ dependencyName: t.string }), environmentRt, rangeRt, offsetRt]),
+    query: t.intersection([
+      t.type({
+        dependencies: t.union([t.string, t.array(t.string)]),
+      }),
+      t.partial({
+        sourceServiceName: t.string,
+      }),
+      environmentRt,
+      rangeRt,
+      offsetRt,
+    ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
@@ -166,12 +183,13 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { dependencyName, environment, start, end, offset },
+      query: { dependencies, sourceServiceName, environment, start, end, offset },
     } = params;
 
     return getServiceMapDependencyNodeInfo({
       apmEventClient,
-      dependencyName,
+      sourceServiceName,
+      dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
       start,
       end,
       environment,
@@ -180,8 +198,55 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
   },
 });
 
+const serviceMapServiceBadgesRoute = createApmServerRoute({
+  endpoint: 'POST /internal/apm/service-map/service_badges',
+  params: t.type({
+    query: t.intersection([
+      environmentRt,
+      rangeRt,
+      t.partial({
+        kuery: t.string,
+      }),
+    ]),
+    body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ServiceMapServiceBadgesResponse> => {
+    const { config, context, params } = resources;
+
+    if (!config.serviceMapEnabled) {
+      throw Boom.notFound();
+    }
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
+      throw Boom.forbidden(invalidLicenseMessage);
+    }
+
+    const {
+      query: { environment, start, end, kuery },
+      body: { serviceNames },
+    } = params;
+
+    const [apmAlertsClient, sloClient] = await Promise.all([
+      getApmAlertsClient(resources).catch((): undefined => undefined),
+      getApmSloClient(resources),
+    ]);
+
+    return getServiceMapServiceBadges({
+      serviceNames,
+      environment,
+      start,
+      end,
+      kuery,
+      apmAlertsClient,
+      sloClient,
+    });
+  },
+});
+
 export const serviceMapRouteRepository = {
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,
+  ...serviceMapServiceBadgesRoute,
 };

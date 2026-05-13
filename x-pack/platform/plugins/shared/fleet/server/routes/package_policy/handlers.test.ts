@@ -137,6 +137,7 @@ jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
       get: jest.fn(),
+      getByIds: jest.fn(),
       update: jest.fn(),
       list: jest.fn(),
     },
@@ -300,6 +301,7 @@ describe('When calling package policy', () => {
           type: 'text',
         },
       },
+      var_group_selections: { auth_method: 'api_key' },
     };
 
     beforeEach(() => {
@@ -333,6 +335,7 @@ describe('When calling package policy', () => {
         ],
       });
       (agentPolicyService.get as jest.Mock).mockResolvedValue({ inputs: [] });
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
     });
 
     it('should use existing package policy props if not provided by request', async () => {
@@ -399,6 +402,19 @@ describe('When calling package policy', () => {
       });
     });
 
+    it('should update var_group_selections when provided', async () => {
+      const newData = {
+        var_group_selections: { auth_method: 'oauth' },
+      };
+      const request = getUpdateKibanaRequest(newData as any);
+
+      await routeHandler(context, request, response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { item: { ...existingPolicy, ...newData } },
+      });
+    });
+
     it('should throw if policy_ids changed on agentless integration', async () => {
       (agentPolicyService.get as jest.Mock).mockResolvedValue({
         supports_agentless: true,
@@ -410,6 +426,32 @@ describe('When calling package policy', () => {
       await expect(() => routeHandler(context, request, response)).rejects.toThrow(
         /Cannot change agent policies of an agentless integration/
       );
+    });
+
+    it('should throw if output_id changed on a managed agent policy', async () => {
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: true }]);
+      const request = getUpdateKibanaRequest({ output_id: 'new-output' } as any);
+
+      await expect(() => routeHandler(context, request, response)).rejects.toThrow(
+        /Cannot change the output of a package policy belonging to a managed agent policy/
+      );
+    });
+
+    it('should not throw if output_id unchanged on a managed agent policy', async () => {
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: true }]);
+      // existingPolicy has no output_id, so passing undefined should not trigger the check
+      const request = getUpdateKibanaRequest({ name: 'endpoint-2' } as any);
+
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('should allow output_id change on a non-managed agent policy', async () => {
+      (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([{ is_managed: false }]);
+      const request = getUpdateKibanaRequest({ output_id: 'new-output' } as any);
+
+      await routeHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalled();
     });
 
     it('should rename the agentless agent policy to sync with the package policy name if agentless is enabled', async () => {
@@ -430,7 +472,7 @@ describe('When calling package policy', () => {
         expect.anything(),
         'agent-policy',
         { name: 'Agentless policy for new-name' },
-        { force: true }
+        { bumpRevision: false, force: true }
       );
     });
     it('should not rename the agentless agent policy if agentless is not enabled in cloud environment', async () => {
@@ -619,6 +661,19 @@ describe('When calling package policy', () => {
     });
   });
 
+  it('should filter out duplicate ids', async () => {
+    const items: PackagePolicy[] = [testPackagePolicy];
+    packagePolicyServiceMock.getByIDs.mockResolvedValue(items);
+    const request = httpServerMock.createKibanaRequest({
+      query: {},
+      body: { ids: ['1', '1'] },
+    });
+    await bulkGetPackagePoliciesHandler(context, request, response);
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { items },
+    });
+  });
+
   describe('orphaned package policies api handler', () => {
     it('should return valid response', async () => {
       const items: PackagePolicy[] = [testPackagePolicy];
@@ -705,6 +760,22 @@ describe('When calling package policy', () => {
   });
 
   describe('create api handler', () => {
+    it('should not allow to create agentless policies if disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, supports_agentless: true },
+      });
+
+      await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
+        /To create agentless package policies, use the Fleet agentless policies API./
+      );
+    });
+
     it('should return valid response', async () => {
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       (
@@ -724,25 +795,26 @@ describe('When calling package policy', () => {
   });
 
   describe('bulk delete api handler', () => {
-    it('should return valid response', async () => {
-      const responseBody: PostDeletePackagePoliciesResponse = [
-        {
-          id: '1',
-          name: 'policy',
-          success: true,
-          policy_ids: ['1'],
-          output_id: '1',
-          package: {
-            name: 'package',
-            version: '1.0.0',
-            title: 'Package',
-          },
-          statusCode: 409,
-          body: {
-            message: 'conflict',
-          },
+    const responseBody: PostDeletePackagePoliciesResponse = [
+      {
+        id: '1',
+        name: 'policy',
+        success: true,
+        policy_ids: ['1'],
+        output_id: '1',
+        package: {
+          name: 'package',
+          version: '1.0.0',
+          title: 'Package',
         },
-      ];
+        statusCode: 409,
+        body: {
+          message: 'conflict',
+        },
+      },
+    ];
+
+    it('should return valid response', async () => {
       packagePolicyServiceMock.delete.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -755,6 +827,19 @@ describe('When calling package policy', () => {
       });
       const validationResp = DeletePackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
+    });
+
+    it('should deduplicate ids', async () => {
+      packagePolicyServiceMock.delete.mockResolvedValue(responseBody);
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '1'],
+        },
+      });
+      await deletePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
     });
   });
 
@@ -799,18 +884,19 @@ describe('When calling package policy', () => {
   });
 
   describe('upgrade api handler', () => {
-    it('should return valid response', async () => {
-      const responseBody: UpgradePackagePolicyResponse = [
-        {
-          id: '1',
-          name: 'policy',
-          success: true,
-          statusCode: 200,
-          body: {
-            message: 'success',
-          },
+    const responseBody: UpgradePackagePolicyResponse = [
+      {
+        id: '1',
+        name: 'policy',
+        success: true,
+        statusCode: 200,
+        body: {
+          message: 'success',
         },
-      ];
+      },
+    ];
+
+    it('should return valid response', async () => {
       packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -824,10 +910,24 @@ describe('When calling package policy', () => {
       const validationResp = UpgradePackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
     });
+
+    it('should deduplicate ids', async () => {
+      packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '1'],
+        },
+      });
+      await upgradePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
+    });
   });
 
   describe('dry run upgrade api handler', () => {
-    it('should return valid response', async () => {
+    let responseBody: UpgradePackagePolicyDryRunResponse;
+    beforeEach(() => {
       const dryRunPackagePolicy: DryRunPackagePolicy = {
         description: '',
         enabled: true,
@@ -901,9 +1001,13 @@ describe('When calling package policy', () => {
           ],
         ],
       };
-      const responseBody: UpgradePackagePolicyDryRunResponse = [responseItem, responseItem];
+      responseBody = [responseItem, responseItem];
+
       packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[0]);
       packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[1]);
+    });
+
+    it('should return valid response', async () => {
       const request = httpServerMock.createKibanaRequest({
         body: {
           packagePolicyIds: ['1', '2'],
@@ -915,6 +1019,18 @@ describe('When calling package policy', () => {
       });
       const validationResp = DryRunPackagePoliciesResponseBodySchema.validate(responseBody);
       expect(validationResp).toEqual(responseBody);
+    });
+
+    it('should deduplicate ids', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1', '2', '1', '2'],
+        },
+      });
+      await dryRunUpgradePackagePolicyHandler(context, request, response);
+      expect(response.ok).toHaveBeenCalledWith({
+        body: responseBody,
+      });
     });
   });
 });

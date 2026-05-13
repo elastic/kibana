@@ -8,6 +8,7 @@
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -17,7 +18,11 @@ import type {
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
-import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
+import {
+  getDeleteTaskRunResult,
+  TaskCost,
+  TaskPriority,
+} from '@kbn/task-manager-plugin/server/task';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -25,6 +30,7 @@ export interface SampleTaskManagerFixtureSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 export interface SampleTaskManagerFixtureStartDeps {
+  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -32,6 +38,10 @@ export class SampleTaskManagerFixturePlugin
   implements
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
+  securityStart$: Subject<SecurityPluginStart | undefined> = new Subject<
+    SecurityPluginStart | undefined
+  >();
+  securityStart: Promise<SecurityPluginStart | undefined> = firstValueFrom(this.securityStart$);
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
@@ -245,6 +255,26 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleRecurringTaskTimingOutWithError: {
+        title: 'Sample Recurring Task that Times Out and Throws an Error',
+        description: 'A sample task that times out each run and throws an error.',
+        maxAttempts: 3,
+        timeout: '1s',
+        createTaskRunner: () => {
+          let isCancelled: boolean = false;
+          return {
+            async run() {
+              await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds
+              if (isCancelled) {
+                throw new Error('The task was cancelled and there was an error!');
+              }
+            },
+            async cancel() {
+              isCancelled = true;
+            },
+          };
+        },
+      },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',
         description: 'A sample task that requests deletion.',
@@ -326,6 +356,19 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      sampleLongRunningRecurringTask: {
+        title: 'Sample Long Running Recurring Task',
+        description: 'A sample long running task that hangs for 1m 30s.',
+        timeout: '365d',
+        createTaskRunner: () => ({
+          async run() {
+            await new Promise((resolve) => setTimeout(resolve, 90000));
+            return {
+              state: {},
+            };
+          },
+        }),
+      },
       sampleOneTimeTaskThrowingError: {
         title: 'Sample One-Time Task that throws an error',
         description: 'A sample task that throws an error each run.',
@@ -343,6 +386,35 @@ export class SampleTaskManagerFixturePlugin
         paramsSchema: schema.object({}),
         createTaskRunner: () => ({
           async run() {},
+        }),
+      },
+      extraLargeCostTask: {
+        title: 'Task used for testing task cost',
+        cost: TaskCost.ExtraLarge,
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state, schedule } = taskInstance;
+            const prevState = state || { count: 0 };
+            const count = (prevState.count || 0) + 1;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              body: {
+                type: 'task',
+                taskType: 'extraLargeCostTask',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: { count },
+              schedule,
+            };
+          },
         }),
       },
       lowPriorityTask: {
@@ -488,12 +560,19 @@ export class SampleTaskManagerFixturePlugin
         return context;
       },
     });
-    initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
+    initRoutes(
+      core.http.createRouter(),
+      this.taskManagerStart,
+      this.securityStart,
+      taskTestingEvents
+    );
   }
 
-  public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
+  public start(core: CoreStart, { security, taskManager }: SampleTaskManagerFixtureStartDeps) {
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
+    this.securityStart$.next(security);
+    this.securityStart$.complete();
   }
   public stop() {}
 }

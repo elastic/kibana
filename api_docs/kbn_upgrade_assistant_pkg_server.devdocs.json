@@ -24,6 +24,8 @@
           ", indices: string[]) => Promise<StatusCheckResult>"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_indices_state_check.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +40,10 @@
               "ElasticsearchClient"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_indices_state_check.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -53,6 +58,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_indices_state_check.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,6 +89,8 @@
           ") => \"open\" | \"closed\""
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/get_index_state.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,6 +107,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/get_index_state.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +132,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/get_index_state.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ResolveIndexResponseFromES",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -158,6 +172,8 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/index_settings.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +194,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/index_settings.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FlatSettings",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -193,6 +212,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/index_settings.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -222,6 +243,8 @@
           ", index: string) => Promise<string | undefined>"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -236,7 +259,10 @@
               "ElasticsearchClient"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -257,7 +283,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -272,6 +301,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -305,6 +336,8 @@
           "<any>>"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_version_precheck.ts",
+        "lineNumber": 96,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -319,6 +352,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_version_precheck.ts",
+            "lineNumber": 97,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -337,6 +372,8 @@
         "label": "FlatSettings",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -352,6 +389,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -368,6 +407,8 @@
               " | undefined; _meta?: MetaProperties | undefined; } | undefined"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -382,6 +423,8 @@
         "label": "IndexWarning",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -396,6 +439,8 @@
               "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -407,9 +452,11 @@
             "label": "flow",
             "description": [],
             "signature": [
-              "\"reindex\" | \"all\" | \"readonly\""
+              "\"reindex\" | \"readonly\" | \"all\""
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -426,6 +473,8 @@
               "{ [key: string]: string | boolean | string[]; } | undefined"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -440,6 +489,8 @@
         "label": "ResolveIndexResponseFromES",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -454,6 +505,8 @@
               "{ name: string; attributes: (\"hidden\" | \"open\" | \"closed\" | \"frozen\")[]; aliases?: string[] | undefined; data_stream?: string | undefined; }[]"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,6 +521,8 @@
               "{ name: string; indices: string[]; }[]"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,6 +537,8 @@
               "{ name: string; backing_indices: string[]; timestamp_field: string; }[]"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -512,6 +569,8 @@
           ", index: string) => Promise<string | undefined>"
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -524,7 +583,11 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -604,39 +667,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
+              "; helpers: ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -662,26 +695,46 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; cancelReindex: { (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
+              ">; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CancelReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -890,7 +943,27 @@
               "FieldCapsResponse",
               ">; }; fleet: ",
               "default",
-              "; getScript: { (this: That, params: ",
+              "; getReindex: { (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; }; getScript: { (this: That, params: ",
               "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -1034,29 +1107,49 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
+              "default",
+              "; listReindex: { (this: That, params?: ",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "ListReindexResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "ListReindexResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
-              "default",
-              "; logstash: ",
+              "ListReindexResponse",
+              ">; }; logstash: ",
               "default",
               "; mget: { <TDocument = unknown>(this: That, params?: ",
               "MgetRequest",
@@ -1193,6 +1286,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -1344,6 +1439,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
               "<TDocument, TAggregations>>; }; searchApplication: ",
               "default",
               "; searchMvt: { (this: That, params: ",
@@ -1513,7 +1634,10 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ElasticsearchClient",
             "trackAdoption": false
           },
           {
@@ -1533,7 +1657,10 @@
               }
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false
           },
           {
@@ -1544,6 +1671,8 @@
             "label": "index",
             "description": [],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1561,6 +1690,8 @@
           "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
         ],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1573,6 +1704,8 @@
         "label": "REINDEX_OP_TYPE",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1587,6 +1720,8 @@
         "label": "mlSavedObjectType",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1598,6 +1733,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1612,6 +1749,8 @@
               "true"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1626,6 +1765,8 @@
               "\"agnostic\""
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1637,6 +1778,8 @@
             "label": "mappings",
             "description": [],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1651,6 +1794,8 @@
                   "false"
                 ],
                 "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1662,6 +1807,8 @@
                 "label": "properties",
                 "description": [],
                 "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                "lineNumber": 18,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1673,6 +1820,8 @@
                     "label": "snapshotId",
                     "description": [],
                     "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                    "lineNumber": 19,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1687,6 +1836,8 @@
                           "\"text\""
                         ],
                         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                        "lineNumber": 20,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -1698,6 +1849,8 @@
                         "label": "fields",
                         "description": [],
                         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                        "lineNumber": 21,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false,
                         "children": [
@@ -1709,6 +1862,8 @@
                             "label": "keyword",
                             "description": [],
                             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                            "lineNumber": 22,
+                            "columnNumber": 11,
                             "deprecated": false,
                             "trackAdoption": false,
                             "children": [
@@ -1723,6 +1878,8 @@
                                   "\"keyword\""
                                 ],
                                 "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                                "lineNumber": 23,
+                                "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false
                               },
@@ -1734,6 +1891,8 @@
                                 "label": "ignore_above",
                                 "description": [],
                                 "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                                "lineNumber": 24,
+                                "columnNumber": 13,
                                 "deprecated": false,
                                 "trackAdoption": false
                               }
@@ -1758,6 +1917,8 @@
         "label": "reindexOperationSavedObjectType",
         "description": [],
         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1769,6 +1930,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1783,6 +1946,8 @@
               "true"
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1797,6 +1962,8 @@
               "\"agnostic\""
             ],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1808,6 +1975,8 @@
             "label": "mappings",
             "description": [],
             "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1822,6 +1991,8 @@
                   "false"
                 ],
                 "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                "lineNumber": 16,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1833,6 +2004,8 @@
                 "label": "properties",
                 "description": [],
                 "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                "lineNumber": 17,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1844,6 +2017,8 @@
                     "label": "indexName",
                     "description": [],
                     "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                    "lineNumber": 18,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1858,6 +2033,8 @@
                           "\"keyword\""
                         ],
                         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                        "lineNumber": 19,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -1871,6 +2048,8 @@
                     "label": "status",
                     "description": [],
                     "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                    "lineNumber": 21,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
@@ -1885,6 +2064,8 @@
                           "\"integer\""
                         ],
                         "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                        "lineNumber": 22,
+                        "columnNumber": 9,
                         "deprecated": false,
                         "trackAdoption": false
                       }

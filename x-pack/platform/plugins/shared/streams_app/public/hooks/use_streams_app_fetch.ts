@@ -4,27 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { omit } from 'lodash';
-import { isRequestAbortedError } from '@kbn/server-route-repository-client';
+import type { TimeState } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { TimeState } from '@kbn/es-query';
-import type { NotificationsStart } from '@kbn/core/public';
-import { useKibana } from './use_kibana';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
+import { omit } from 'lodash';
+import { useEffect, useRef } from 'react';
+import { useFetchErrorToast } from './use_fetch_error_toast';
 import { useTimefilter } from './use_timefilter';
 
 interface StreamsAppFetchOptions {
   withTimeRange?: boolean;
   withRefresh?: boolean;
   disableToastOnError?: boolean;
-}
-
-interface DefaultStreamsAppFetchOptions {
-  withTimeRange: false;
-  withRefresh: false;
-  disableToastOnError: false;
+  /** When true, the fetch error toast is not shown (e.g. 404 handled inline by the caller). */
+  shouldSuppressFetchErrorToast?: (error: Error) => boolean;
 }
 
 type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> = {
@@ -33,23 +27,29 @@ type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> 
 
 export function useStreamsAppFetch<
   T,
-  TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
+  TOptions extends StreamsAppFetchOptions | undefined = undefined
 >(
   callback: ({}: ParametersFromOptions<TOptions>) => T,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deps: any[],
   options?: TOptions
 ): AbortableAsyncState<T> {
   const {
-    core: { notifications },
-  } = useKibana();
-
-  const { disableToastOnError = false, withRefresh = false, withTimeRange = false } = options || {};
+    disableToastOnError = false,
+    withRefresh = false,
+    withTimeRange = false,
+    shouldSuppressFetchErrorToast,
+  } = options || {};
 
   const { timeState, timeState$ } = useTimefilter();
+  const showFetchErrorToast = useFetchErrorToast();
 
   const onError = (error: Error) => {
     if (!disableToastOnError && !isRequestAbortedError(error)) {
-      showErrorToast(notifications, error);
+      if (shouldSuppressFetchErrorToast?.(error)) {
+        return;
+      }
+      showFetchErrorToast(error);
 
       // log to console to get the actual stack trace
       // eslint-disable-next-line no-console
@@ -58,7 +58,7 @@ export function useStreamsAppFetch<
   };
 
   const optionsForHook = {
-    ...omit(options, 'disableToastOnError', 'withTimeRange'),
+    ...omit(options, 'disableToastOnError', 'withTimeRange', 'shouldSuppressFetchErrorToast'),
     onError,
   };
 
@@ -100,40 +100,4 @@ export function useStreamsAppFetch<
   }, [timeState$, withTimeRange, withRefresh]);
 
   return state;
-}
-
-export function showErrorToast(notifications: NotificationsStart, error: Error) {
-  if (
-    'body' in error &&
-    typeof error.body === 'object' &&
-    !!error.body &&
-    'message' in error.body &&
-    typeof error.body.message === 'string'
-  ) {
-    error.message = error.body.message;
-  }
-
-  if (error instanceof AggregateError) {
-    error.message = error.errors.map((err) => err.message).join(', ');
-  }
-
-  let requestUrl: string | undefined;
-  if (
-    'request' in error &&
-    typeof error.request === 'object' &&
-    !!error.request &&
-    'url' in error.request &&
-    typeof error.request.url === 'string'
-  ) {
-    requestUrl = error.request.url;
-  }
-
-  return notifications.toasts.addError(error, {
-    title: i18n.translate('xpack.streams.failedToFetchError', {
-      defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
-      values: {
-        requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',
-      },
-    }),
-  });
 }

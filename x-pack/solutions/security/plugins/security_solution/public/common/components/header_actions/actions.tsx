@@ -6,24 +6,20 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
 } from '../../../notes/store/notes.slice';
 import type { State } from '../../store';
 import { selectTimelineById } from '../../../timelines/store/selectors';
-import {
-  eventHasNotes,
-  getEventType,
-  getPinOnClick,
-} from '../../../timelines/components/timeline/body/helpers';
+import { getEventType } from '../../../timelines/components/timeline/body/helpers';
 import { isTimelineScope } from '../../../helpers';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { timelineActions } from '../../../timelines/store';
-import type { ActionProps, OnPinEvent } from '../../../../common/types';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
+import type { ActionProps } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
@@ -45,53 +41,52 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const ActionsComponent: React.FC<ActionProps> = ({
+export type ActionsComponentProps = Pick<
+  ActionProps,
+  | 'ariaRowindex'
+  | 'columnValues'
+  | 'disableExpandAction'
+  | 'disablePinAction'
+  | 'disableTimelineAction'
+  | 'ecsData'
+  | 'eventData'
+  | 'eventId'
+  | 'eventIdToNoteIds'
+  | 'hit'
+  | 'isEventViewer'
+  | 'onEventDetailsPanelOpened'
+  | 'onRuleChange'
+  | 'refetch'
+  | 'showNotes'
+  | 'timelineId'
+  | 'toggleShowNotes'
+>;
+
+const ActionsComponent: React.FC<ActionsComponentProps> = ({
   ariaRowindex,
   columnValues,
   disableExpandAction = false,
+  disablePinAction = true,
+  disableTimelineAction = false,
   ecsData,
+  eventData,
   eventId,
   eventIdToNoteIds,
-  isEventPinned = false,
+  hit,
   isEventViewer = false,
   onEventDetailsPanelOpened,
   onRuleChange,
+  refetch,
   showNotes,
   timelineId,
-  refetch,
   toggleShowNotes,
-  disablePinAction = true,
-  disableTimelineAction = false,
 }) => {
-  const dispatch = useDispatch();
-
   const { timelineType, savedObjectId } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
 
   const { startTransaction } = useStartTransaction();
 
-  const onPinEvent: OnPinEvent = useCallback(
-    (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
-    [dispatch, timelineId]
-  );
-
-  const onUnPinEvent: OnPinEvent = useCallback(
-    (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
-    [dispatch, timelineId]
-  );
-
-  const handlePinClicked = useCallback(
-    () =>
-      getPinOnClick({
-        allowUnpinning: eventIdToNoteIds ? !eventHasNotes(eventIdToNoteIds[eventId]) : true,
-        eventId,
-        onPinEvent,
-        onUnPinEvent,
-        isEventPinned,
-      }),
-    [eventIdToNoteIds, eventId, isEventPinned, onPinEvent, onUnPinEvent]
-  );
   const eventType = getEventType(ecsData);
 
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
@@ -167,17 +162,22 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   // we hide the analyzer icon if the data is not available for the resolver
-  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
-  const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
+  // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
+  const showAnalyzerIcon = useIsAnalyzerEnabled(hit);
 
   // we hide the session view icon if the session view is not available
-  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
   // or if the user is not on an enterprise license or on the kubernetes page
   const isEnterprisePlus = useLicense().isEnterprise();
   const showSessionViewIcon = useMemo(
     () => sessionViewConfig !== null && isEnterprisePlus,
 
     [isEnterprisePlus, sessionViewConfig]
+  );
+
+  const isRemoteDocument = useMemo(
+    () => isNonLocalIndexName(ecsData._index ?? ''),
+    [ecsData._index]
   );
 
   return (
@@ -190,7 +190,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="expand-event"
-                  iconType="expand"
+                  iconType="maximize"
                   onClick={onExpandEvent}
                   size="s"
                   color="text"
@@ -199,21 +199,20 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         )}
-        <>
-          {!disableTimelineAction && timelineId !== TimelineId.active && (
-            <InvestigateInTimelineAction
-              ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
-              key="investigate-in-timeline"
-              ecsRowData={ecsData}
-            />
-          )}
-        </>
+        {!disableTimelineAction && timelineId !== TimelineId.active && (
+          <InvestigateInTimelineAction
+            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
+            key="investigate-in-timeline"
+            ecsRowData={ecsData}
+          />
+        )}
         {!isEventViewer && showNotes && (
           <AddEventNoteAction
             ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
             key="add-event-note"
             timelineType={timelineType}
             notesCount={documentBasedNotes.length}
+            eventData={eventData}
             eventId={eventId}
             toggleShowNotes={toggleShowNotes}
           />
@@ -221,12 +220,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
         {!isEventViewer && !disablePinAction && (
           <PinEventAction
-            ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+            ariaRowindex={ariaRowindex}
+            columnValues={columnValues}
+            eventId={eventId}
+            eventIdToNoteIds={eventIdToNoteIds}
             isAlert={isAlert(eventType)}
             key="pin-event"
-            onPinClicked={handlePinClicked}
             noteIds={timelineNoteIds}
-            eventIsPinned={isEventPinned}
+            timelineId={timelineId}
             timelineType={timelineType}
           />
         )}
@@ -237,7 +238,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={false}
+          disabled={isRemoteDocument}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />
@@ -266,7 +267,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
         {showSessionViewIcon ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
+              <EuiToolTip data-test-subj="session-view-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
                 <EuiButtonIcon
                   aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
                   data-test-subj="session-view-button"

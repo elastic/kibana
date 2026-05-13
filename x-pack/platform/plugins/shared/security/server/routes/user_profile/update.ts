@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components';
 
 import type { RouteDefinitionParams } from '..';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
@@ -18,8 +19,47 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.darkMode',
   'userSettings.contrastMode',
-  'solutionNavigationTour:completed', // TODO: remove with https://github.com/elastic/kibana/issues/239313
+  'userSettings.agentBuilderAnnouncementModalSeen',
+  'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
+  'userSettings.locale',
 ];
+
+const MAX_STRING_FIELD_LENGTH = 1024;
+
+const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
+
+/** Stringified JSON map (space id → seen); cap is defensive and stays well under {@link MAX_USER_PROFILE_DATA_SIZE_BYTES}. */
+const MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS = 64 * 1024;
+
+const userProfileUpdateSchema = schema.object({
+  avatar: schema.maybe(
+    schema.object({
+      initials: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      color: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      imageUrl: schema.nullable(schema.string()),
+    })
+  ),
+  userSettings: schema.maybe(
+    schema.object({
+      darkMode: schema.maybe(
+        schema.oneOf([
+          schema.literal('system'),
+          schema.literal('dark'),
+          schema.literal('light'),
+          schema.literal('space_default'),
+        ])
+      ),
+      contrastMode: schema.maybe(
+        schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
+      ),
+      agentBuilderAnnouncementModalSeen: schema.maybe(schema.boolean()),
+      agentBuilderAnnouncementModalSeenBySpaceJson: schema.maybe(
+        schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
+      ),
+      locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+    })
+  ),
+});
 
 export function defineUpdateUserProfileDataRoute({
   router,
@@ -27,6 +67,7 @@ export function defineUpdateUserProfileDataRoute({
   getUserProfileService,
   logger,
   getAuthenticationService,
+  i18n: i18nService,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -39,7 +80,12 @@ export function defineUpdateUserProfileDataRoute({
         },
       },
       validate: {
-        body: schema.recordOf(schema.string(), schema.any()),
+        body: userProfileUpdateSchema,
+      },
+      options: {
+        body: {
+          maxBytes: MAX_USER_PROFILE_DATA_SIZE_BYTES,
+        },
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
@@ -77,6 +123,28 @@ export function defineUpdateUserProfileDataRoute({
           return response.customError({
             body: 'Unsupported media type',
             statusCode: 415,
+          });
+        }
+      }
+
+      const avatarColor = userProfileData.avatar?.color;
+      if (avatarColor) {
+        const isValidColor = isValidUserProfileAvatarColor(avatarColor);
+        if (!isValidColor) {
+          return response.customError({
+            body: 'Invalid hex color',
+            statusCode: 400,
+          });
+        }
+      }
+
+      const requestedLocale = userProfileData.userSettings?.locale;
+      if (requestedLocale) {
+        const allowedLocales = i18nService.getLocales();
+        if (!allowedLocales.includes(requestedLocale)) {
+          return response.customError({
+            body: `Locale "${requestedLocale}" is not enabled for this deployment`,
+            statusCode: 400,
           });
         }
       }

@@ -16,10 +16,10 @@ export function MachineLearningDataFrameAnalyticsMapProvider({ getService }: Ftr
     async assertMapElementsExists() {
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap');
       await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapLegend');
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapCytoscape');
+      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMapGraph');
     },
     async assertJobMapTitle(id: string) {
-      const expected = `Map for job ID ${id}`;
+      const expected = 'Analytics map';
       const titleElement = await find.byCssSelector('.euiPageHeader .euiTitle');
       const actualTitle = await titleElement.getVisibleText();
       expect(actualTitle).to.eql(

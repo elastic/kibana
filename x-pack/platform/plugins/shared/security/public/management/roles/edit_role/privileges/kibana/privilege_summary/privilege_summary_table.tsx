@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role, RoleKibanaPrivilege } from '@kbn/security-plugin-types-common';
 import {
@@ -129,7 +130,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
           onClick={() => toggleExpandedFeature(featureId)}
           data-test-subj={`expandPrivilegeSummaryRow`}
           aria-label={expandedFeatures.includes(featureId) ? 'Collapse' : 'Expand'}
-          iconType={expandedFeatures.includes(featureId) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedFeatures.includes(featureId) ? 'chevronSingleUp' : 'chevronSingleDown'}
         />
       );
     },
@@ -282,6 +283,13 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
               ),
             };
           }, {})}
+          tableCaption={i18n.translate(
+            'xpack.security.management.editRole.privilegeSummaryTable.categoryCaption',
+            {
+              defaultMessage: 'Privileges for {categoryLabel}',
+              values: { categoryLabel: category.label },
+            }
+          )}
         />
       </EuiAccordion>
     );

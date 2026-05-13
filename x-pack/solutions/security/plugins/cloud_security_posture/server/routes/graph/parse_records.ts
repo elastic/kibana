@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
-import { castArray } from 'lodash';
+import { castArray, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type {
+  ConnectorNodeType,
   EdgeColor,
   EdgeDataModel,
   EntityNodeDataModel,
@@ -18,12 +20,21 @@ import type {
   LabelNodeDataModel,
   NodeDataModel,
   NodeDocumentDataModel,
+  RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
-import type { GraphEdge } from './types';
-import { transformEntityTypeToIconAndShape } from './utils';
+import { ENTITY_RELATIONSHIP_LABELS } from '@kbn/cloud-security-posture-common/constants';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
+import {
+  type EventEdge,
+  type RelationshipEdge,
+  type EntityRecord,
+  NON_ENRICHED_ENTITY_TYPE_PLURAL,
+  NON_ENRICHED_ENTITY_TYPE_SINGULAR,
+} from './types';
+import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
 
-interface LabelEdges {
+interface ConnectorEdges {
   source: string;
   target: string;
   edgeType: EdgeDataModel['type'];
@@ -33,8 +44,13 @@ interface ParseContext {
   readonly nodesLimit?: number;
   readonly nodesMap: Record<string, NodeDataModel>;
   readonly edgesMap: Record<string, EdgeDataModel>;
-  readonly edgeLabelsNodes: Record<string, string[]>;
-  readonly labelEdges: Record<string, LabelEdges>;
+  /**
+   * Maps connector node ID (event or relationship) to array of edges (source-target pairs).
+   * A single connector node can connect to multiple actor-target pairs when
+   * MV_EXPAND creates multiple rows from the same document(s).
+   * Used for both event events and relationship nodes.
+   */
+  readonly connectorEdges: Record<string, ConnectorEdges[]>;
   readonly messages: ApiMessageCode[];
   readonly logger: Logger;
 }
@@ -48,23 +64,63 @@ interface NodeVisualProps {
 
 export const parseRecords = (
   logger: Logger,
-  records: GraphEdge[],
+  eventRecords: EventEdge[] = [],
+  relationshipRecords: RelationshipEdge[] = [],
+  entityRecords: EntityRecord[] = [],
   nodesLimit?: number
 ): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
   const ctx: ParseContext = {
     nodesLimit,
     logger,
     nodesMap: {},
-    edgeLabelsNodes: {},
     edgesMap: {},
-    labelEdges: {},
+    connectorEdges: {},
     messages: [],
   };
 
-  logger.trace(`Parsing records [length: ${records.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`);
+  logger.trace(
+    `Parsing records [events: ${eventRecords.length}] [relationships: ${
+      relationshipRecords.length
+    }] [entities: ${entityRecords.length}] [nodesLimit: ${nodesLimit ?? 'none'}]`
+  );
 
-  createNodes(records, ctx);
+  // Process event records
+  for (const record of eventRecords) {
+    if (isAboveAPINodesLimit(ctx)) {
+      emitAPINodesLimitMessage(ctx);
+      break;
+    }
+    processEventRecord(record, ctx);
+  }
+
+  // Process relationship records (shared limit with events)
+  for (const record of relationshipRecords) {
+    if (isAboveAPINodesLimit(ctx)) {
+      emitAPINodesLimitMessage(ctx);
+      break;
+    }
+    processRelationshipRecord(record, ctx);
+  }
+
+  // Create edges and groups for both
   createEdgesAndGroups(ctx);
+
+  for (const entity of entityRecords) {
+    if (ctx.nodesMap[entity.id] === undefined) {
+      createEntityNode(
+        ctx.nodesMap,
+        {
+          nodeId: entity.id,
+          idsCount: 1,
+          entityType: entity.type,
+          entitySubType: entity.sub_type,
+          entityName: entity.name,
+          docData: entity.docData ? castArray(entity.docData) : [],
+        },
+        ctx.logger
+      );
+    }
+  }
 
   logger.trace(
     `Parsed [nodes: ${Object.keys(ctx.nodesMap).length}, edges: ${
@@ -74,10 +130,11 @@ export const parseRecords = (
 
   // Sort groups to be first (fixes minor layout issue)
   const nodes = sortNodes(ctx.nodesMap);
+  const edges = sortEdges(ctx.edgesMap, ctx.nodesMap);
 
   return {
     nodes,
-    edges: Object.values(ctx.edgesMap),
+    edges,
     messages: ctx.messages.length > 0 ? ctx.messages : undefined,
   };
 };
@@ -101,108 +158,181 @@ const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProp
   return mappedProps as NodeVisualProps;
 };
 
+/**
+ * Resolves the entity type based on enrichment data
+ * Falls back to singular/plural non-enriched types based on entity count
+ */
+const resolveEntityType = (entityType: string | null | undefined, idsCount: number): string => {
+  if (entityType) {
+    return entityType;
+  }
+  return idsCount === 1 ? NON_ENRICHED_ENTITY_TYPE_SINGULAR : NON_ENRICHED_ENTITY_TYPE_PLURAL;
+};
+
+/**
+ * Generates the appropriate label for an entity node
+ * Logic matches the previous ESQL EVAL calculations
+ */
+const generateEntityLabel = (
+  idsCount: number,
+  entityNodeId: string,
+  entityType: string,
+  entityName: string | string[] | null | undefined,
+  entitySubType: string | null | undefined
+): string => {
+  // Single non-enriched entity: show the group ID (which is the entity ID for single entities)
+  if (idsCount === 1 && entityType === NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
+    return entityNodeId;
+  }
+  // Single enriched entity: show the name (extract first element if array)
+  if (idsCount === 1 && entityType !== NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
+    const name = Array.isArray(entityName) ? entityName[0] : entityName;
+    return name || '';
+  }
+  // Multiple entities with subtype: show the subtype
+  if (idsCount > 1 && entitySubType) {
+    return entitySubType;
+  }
+  return '';
+};
+
+/**
+ * Creates or updates an entity node in the nodesMap.
+ * Shared by both event and relationship record processing.
+ */
+const createEntityNode = (
+  nodesMap: Record<string, NodeDataModel>,
+  params: {
+    nodeId: string;
+    idsCount: number;
+    entityType?: string | null;
+    entitySubType?: string | null;
+    entityName?: string | string[] | null;
+    docData?: Array<string | null> | string;
+    hostIps?: string[];
+  },
+  logger?: Logger
+): void => {
+  const { nodeId, idsCount, entityType, entitySubType, entityName, docData, hostIps } = params;
+  const EXPAND_DOT_NOTATION = false;
+
+  if (nodesMap[nodeId] !== undefined) return;
+
+  const resolvedType = resolveEntityType(entityType, idsCount);
+  const label = generateEntityLabel(idsCount, nodeId, resolvedType, entityName, entitySubType);
+
+  const documentsData: NodeDocumentDataModel[] | undefined = docData
+    ? parseDocumentsData(logger, docData)
+    : undefined;
+
+  documentsData?.forEach((doc) => {
+    if (doc.entity?.sourceFields) {
+      const currentlySupportedSourceFields = omit(
+        doc.entity.sourceFields,
+        GRAPH_ACTOR_EUID_SOURCE_FIELDS.all
+      );
+      (doc as Writable<typeof doc>).entity = {
+        ...doc.entity,
+        sourceFields: EXPAND_DOT_NOTATION
+          ? expandDotNotation(currentlySupportedSourceFields)
+          : currentlySupportedSourceFields,
+      };
+    }
+  });
+
+  nodesMap[nodeId] = {
+    id: nodeId,
+    color: 'primary' as const,
+    ...(label ? { label } : {}),
+    documentsData,
+    ...deriveEntityAttributesFromType(resolvedType),
+    ...(idsCount > 1 ? { count: idsCount } : {}),
+    ...(hostIps && hostIps.length > 0 ? { ips: hostIps } : {}),
+  };
+};
+
 const createGroupedActorAndTargetNodes = (
-  record: GraphEdge,
+  record: EventEdge,
   context: ParseContext
 ): {
   actorId: string;
   targetId: string;
 } => {
-  const { nodesMap } = context;
+  const { nodesMap, logger } = context;
   const {
-    // actor attributes
-    actorIds,
+    actorNodeId,
     actorIdsCount,
     actorsDocData,
-    actorEntityGroup,
     actorEntityType,
-    actorLabel,
+    actorEntitySubType,
+    actorEntityName,
     actorHostIps,
-    // target attributes
-    targetIds,
+    targetNodeId,
     targetIdsCount,
     targetsDocData,
     targetEntityType,
-    targetLabel,
+    targetEntitySubType,
+    targetEntityName,
     targetHostIps,
   } = record;
 
-  const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
-  const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
+  // Create actor entity node
+  createEntityNode(
+    nodesMap,
+    {
+      nodeId: actorNodeId,
+      idsCount: actorIdsCount,
+      entityType: actorEntityType,
+      entitySubType: actorEntitySubType,
+      entityName: actorEntityName,
+      docData: actorsDocData,
+      hostIps: actorHostIps ? castArray(actorHostIps) : [],
+    },
+    logger
+  );
 
-  const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
-    ? castArray(actorsDocData)
-        .filter((actorData): actorData is string => actorData !== null && actorData !== undefined)
-        .map((actorData) => JSON.parse(actorData))
-    : [];
+  // Create target entity node (or unknown target)
+  const targetId = targetIdsCount > 0 && targetNodeId ? targetNodeId : `unknown-${uuidv4()}`;
 
-  const targetsDocDataArray: NodeDocumentDataModel[] = targetsDocData
-    ? castArray(targetsDocData)
-        .filter(
-          (targetData): targetData is string => targetData !== null && targetData !== undefined
-        )
-        .map((targetData) => JSON.parse(targetData))
-    : [];
-
-  const actorIdsArray = castArray(actorIds);
-  const targetIdsArray = castArray(targetIds);
-
-  const actorGroup = {
-    id: actorIdsCount > 0 ? actorIdsArray[0] : `${actorEntityGroup} ${uuidv4()}`,
-    type: actorEntityType,
-    label: actorLabel,
-    count: actorIdsCount,
-    docData: actorsDocDataArray,
-    hostIps: actorHostIpsArray,
-  };
-
-  const targetGroup =
-    targetIdsCount > 0
-      ? {
-          id: targetIdsArray[0]!, // by definition, it can't be null
-          type: targetEntityType,
-          label: targetLabel,
-          count: targetIdsCount,
-          docData: targetsDocDataArray,
-          hostIps: targetHostIpsArray,
-        }
-      : {
-          // Unknown target
-          id: `unknown ${uuidv4()}`,
-          type: '',
-          label: 'Unknown',
-          count: 0,
-          docData: [],
-          hostIps: [],
-        };
-
-  [actorGroup, targetGroup].forEach(({ id, label, type, count, docData, hostIps }) => {
-    if (nodesMap[id] === undefined) {
-      nodesMap[id] = {
-        id,
-        color: 'primary' as const,
-        label,
-        documentsData: docData,
-        ...deriveEntityAttributesFromType(type),
-        ...(count > 1 ? { count } : {}),
-        ...(hostIps.length > 0 ? { ips: hostIps } : {}),
-      };
-    }
-  });
+  if (targetIdsCount > 0 && targetNodeId) {
+    createEntityNode(
+      nodesMap,
+      {
+        nodeId: targetNodeId,
+        idsCount: targetIdsCount,
+        entityType: targetEntityType,
+        entitySubType: targetEntitySubType,
+        entityName: targetEntityName,
+        docData: targetsDocData,
+        hostIps: targetHostIps ? castArray(targetHostIps) : [],
+      },
+      logger
+    );
+  } else if (nodesMap[targetId] === undefined) {
+    // Unknown target
+    nodesMap[targetId] = {
+      id: targetId,
+      color: 'primary' as const,
+      label: 'Unknown',
+      documentsData: [],
+      ...deriveEntityAttributesFromType(''),
+    };
+  }
 
   return {
-    actorId: actorGroup.id,
-    targetId: targetGroup.id,
+    actorId: actorNodeId,
+    targetId,
   };
 };
 
-const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel => {
+const createLabelNode = (logger: Logger | undefined, record: EventEdge): LabelNodeDataModel => {
   const {
+    labelNodeId,
     action,
     docs,
-    isAlert,
     isOrigin,
     isOriginAlert,
+    isAlert,
     badge,
     uniqueEventsCount,
     uniqueAlertsCount,
@@ -210,7 +340,9 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
     sourceCountryCodes,
   } = record;
 
-  const labelId = edgeId + `label(${action})oe(${isOrigin ? 1 : 0})oa(${isOriginAlert ? 1 : 0})`;
+  const labelId = `label(${action})ln(${labelNodeId})oe(${isOrigin ? 1 : 0})oa(${
+    isOriginAlert ? 1 : 0
+  })`;
   const color =
     uniqueAlertsCount >= 1 && uniqueEventsCount === 0 && (isOriginAlert || isAlert)
       ? 'danger'
@@ -223,7 +355,7 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
     label: action,
     color,
     shape: 'label',
-    documentsData: parseDocumentsData(docs),
+    documentsData: parseDocumentsData(logger, docs),
     count: badge,
     ...(uniqueEventsCount > 0 ? { uniqueEventsCount } : {}),
     ...(uniqueAlertsCount > 0 ? { uniqueAlertsCount } : {}),
@@ -232,28 +364,37 @@ const createLabelNode = (record: GraphEdge, edgeId: string): LabelNodeDataModel 
   };
 };
 
-const processLabelNodes = (
+/**
+ * Unified function to process connector nodes (labels and relationships).
+ * Adds the node to nodesMap if new, and accumulates edges in connectorEdges.
+ */
+const processConnectorNode = (
   context: ParseContext,
   nodeData: {
-    edgeId: string;
     sourceId: string;
     targetId: string;
-    labelNode: LabelNodeDataModel;
+    connectorNode: LabelNodeDataModel | RelationshipNodeDataModel;
   }
 ) => {
-  const { nodesMap, edgeLabelsNodes, labelEdges } = context;
-  const { edgeId, sourceId, targetId, labelNode } = nodeData;
-  if (edgeLabelsNodes[edgeId] === undefined) {
-    edgeLabelsNodes[edgeId] = [];
+  const { nodesMap, connectorEdges } = context;
+  const { sourceId, targetId, connectorNode } = nodeData;
+
+  // Add node to nodesMap if new
+  if (!nodesMap[connectorNode.id]) {
+    nodesMap[connectorNode.id] = connectorNode;
+    connectorEdges[connectorNode.id] = [];
   }
 
-  nodesMap[labelNode.id] = labelNode;
-  edgeLabelsNodes[edgeId].push(labelNode.id);
-  labelEdges[labelNode.id] = {
-    source: sourceId,
-    target: targetId,
-    edgeType: 'solid',
-  };
+  // Add edge (source-target pair) - dedupe by checking existing edges
+  const existingEdges = connectorEdges[connectorNode.id];
+  const edgeExists = existingEdges.some((e) => e.source === sourceId && e.target === targetId);
+  if (!edgeExists) {
+    existingEdges.push({
+      source: sourceId,
+      target: targetId,
+      edgeType: 'solid',
+    });
+  }
 };
 
 const isAboveAPINodesLimit = (context: ParseContext) => {
@@ -269,109 +410,269 @@ const emitAPINodesLimitMessage = (context: ParseContext) => {
   messages.push(ApiMessageCode.ReachedNodesLimit);
 };
 
-const createNodes = (records: GraphEdge[], context: ParseContext) => {
-  for (const record of records) {
-    if (isAboveAPINodesLimit(context)) {
-      emitAPINodesLimitMessage(context);
-      break;
-    }
+const processEventRecord = (record: EventEdge, context: ParseContext) => {
+  const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
+  const labelNode = createLabelNode(context.logger, record);
 
-    const { actorId, targetId } = createGroupedActorAndTargetNodes(record, context);
+  processConnectorNode(context, {
+    sourceId: actorId,
+    targetId,
+    connectorNode: labelNode,
+  });
+};
 
-    const edgeId = `a(${actorId})-b(${targetId})`;
-    const labelNode = createLabelNode(record, edgeId);
+const getRelationshipLabel = (relationship: string): string =>
+  ENTITY_RELATIONSHIP_LABELS[relationship as keyof typeof ENTITY_RELATIONSHIP_LABELS] ??
+  relationship;
 
-    processLabelNodes(context, {
-      edgeId,
-      sourceId: actorId,
-      targetId,
-      labelNode,
-    });
-  }
+/**
+ * Creates a relationship node for static/configuration-based relationships.
+ * The node ID is based on relationshipNodeId (source + relationship) to ensure
+ * one relationship node per source+relationship combination.
+ */
+const createRelationshipNode = (
+  relationshipNodeId: string,
+  relationship: string
+): RelationshipNodeDataModel => {
+  return {
+    id: `rel(${relationshipNodeId})`,
+    label: getRelationshipLabel(relationship),
+    shape: 'relationship',
+  };
+};
+
+const processRelationshipRecord = (record: RelationshipEdge, context: ParseContext) => {
+  const actorNodeId = record.actorNodeId;
+  const targetNodeId = record.targetNodeId;
+
+  // Create actor and target entity nodes using shared helper
+  createEntityNode(
+    context.nodesMap,
+    {
+      nodeId: actorNodeId,
+      idsCount: record.actorIdsCount,
+      entityType: record.actorEntityType,
+      entitySubType: record.actorEntitySubType,
+      entityName: record.actorEntityName,
+      docData: record.actorsDocData,
+      hostIps: record.actorHostIps ? castArray(record.actorHostIps) : [],
+    },
+    context.logger
+  );
+
+  createEntityNode(
+    context.nodesMap,
+    {
+      nodeId: targetNodeId,
+      idsCount: record.targetIdsCount,
+      entityType: record.targetEntityType,
+      entitySubType: record.targetEntitySubType,
+      entityName: record.targetEntityName,
+      docData: record.targetsDocData,
+      hostIps: record.targetHostIps ? castArray(record.targetHostIps) : [],
+    },
+    context.logger
+  );
+
+  // Create relationship node - ID is based on actor + relationship (relationshipNodeId)
+  // so each actor+relationship combination gets one node that connects to all target groups
+  const relationshipNode = createRelationshipNode(record.relationshipNodeId, record.relationship);
+
+  processConnectorNode(context, {
+    sourceId: actorNodeId,
+    targetId: targetNodeId,
+    connectorNode: relationshipNode,
+  });
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
-  const groupNodes = [];
-  const otherNodes = [];
+  const groupNodes: NodeDataModel[] = [];
+  const connectorNodes: (LabelNodeDataModel | RelationshipNodeDataModel)[] = [];
+  const otherNodes: NodeDataModel[] = [];
 
   for (const node of Object.values(nodesMap)) {
     if (node.shape === 'group') {
       groupNodes.push(node);
+    } else if (node.shape === 'relationship' || node.shape === 'label') {
+      connectorNodes.push(node);
     } else {
       otherNodes.push(node);
     }
   }
 
-  return [...groupNodes, ...otherNodes];
+  connectorNodes.sort(compareConnectorNodes);
+
+  return [...groupNodes, ...connectorNodes, ...otherNodes];
 };
 
-const createEdgesAndGroups = (context: ParseContext) => {
-  const { edgeLabelsNodes, edgesMap, nodesMap, labelEdges } = context;
+/**
+ * Sort edges so relationship edges come before label edges.
+ * This affects Dagre layout which positions nodes based on edge order.
+ */
+const sortEdges = (
+  edgesMap: Record<string, EdgeDataModel>,
+  nodesMap: Record<string, NodeDataModel>
+): EdgeDataModel[] => {
+  const edges = Object.values(edgesMap);
 
-  Object.entries(edgeLabelsNodes).forEach(([edgeId, edgeLabelsIds]) => {
-    // When there's more than one edge label, create a group node
-    if (edgeLabelsIds.length === 1) {
-      const edgeLabelId = edgeLabelsIds[0];
+  // Helper to get the connector node shape for an edge
+  const getConnectorShape = (edge: EdgeDataModel): 'relationship' | 'label' | 'other' => {
+    // Check if target is a connector node
+    const targetNode = nodesMap[edge.target];
+    if (targetNode?.shape === 'relationship') return 'relationship';
+    if (targetNode?.shape === 'label') return 'label';
 
-      connectEntitiesAndLabelNode(
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelId].source,
-        edgeLabelId,
-        labelEdges[edgeLabelId].target,
-        labelEdges[edgeLabelId].edgeType
-      );
-    } else {
-      const groupNode: GroupNodeDataModel = {
-        id: `grp(${edgeId})`,
-        shape: 'group',
-      };
-      nodesMap[groupNode.id] = groupNode;
-      let groupEdgesColor: EdgeColor = 'subdued';
+    // Check if source is a connector node
+    const sourceNode = nodesMap[edge.source];
+    if (sourceNode?.shape === 'relationship') return 'relationship';
+    if (sourceNode?.shape === 'label') return 'label';
 
-      // Order of creation matters when using dagre layout, first create edges to the group node,
-      // then connect the group node to the label nodes
-      connectEntitiesAndLabelNode(
-        edgesMap,
-        nodesMap,
-        labelEdges[edgeLabelsIds[0]].source,
-        groupNode.id,
-        labelEdges[edgeLabelsIds[0]].target,
-        'solid',
-        groupEdgesColor
-      );
+    return 'other';
+  };
 
-      edgeLabelsIds.forEach((edgeLabelId) => {
-        (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
-        connectEntitiesAndLabelNode(
-          edgesMap,
-          nodesMap,
-          groupNode.id,
-          edgeLabelId,
-          groupNode.id,
-          labelEdges[edgeLabelId].edgeType
-        );
+  return edges.sort((a, b) => {
+    const shapeA = getConnectorShape(a);
+    const shapeB = getConnectorShape(b);
 
-        if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
-          groupEdgesColor = 'danger';
-        }
-      });
-    }
+    // Priority: relationship > label > other
+    const priority = { relationship: 0, label: 1, other: 2 };
+    const shapeDiff = priority[shapeA] - priority[shapeB];
+
+    // If same priority, sort alphabetically by edge ID for deterministic ordering
+    if (shapeDiff !== 0) return shapeDiff;
+    return a.id.localeCompare(b.id);
   });
 };
 
-const connectEntitiesAndLabelNode = (
+/**
+ * Helper to process either label or relationship connector groups.
+ */
+const processConnectorGroup = (
+  groupingKey: string,
+  connectorIds: string[],
+  connectorEdgesMap: Record<string, ConnectorEdges[]>,
+  edgesMap: Record<string, EdgeDataModel>,
+  nodesMap: Record<string, NodeDataModel>,
+  connectorType: ConnectorNodeType
+) => {
+  if (connectorIds.length === 1) {
+    const connectorId = connectorIds[0];
+    const edges = connectorEdgesMap[connectorId];
+
+    // A single label can fan out to multiple targets (e.g., one action affecting multiple entities)
+    // Create edges for all source-target pairs
+    edges.forEach((edge) => {
+      connectEntitiesAndConnectorNode(
+        edgesMap,
+        nodesMap,
+        edge.source,
+        connectorId,
+        edge.target,
+        edge.edgeType
+      );
+    });
+  } else {
+    // Create group node for multiple connectors
+    const groupNode: GroupNodeDataModel = {
+      id: `grp(${groupingKey})`,
+      shape: 'group',
+    };
+    nodesMap[groupNode.id] = groupNode;
+
+    let groupEdgesColor: EdgeColor = 'subdued';
+
+    // Get all unique source-target pairs from all labels in this group
+    const firstConnectorEdges = connectorEdgesMap[connectorIds[0]];
+
+    // Order of creation matters when using dagre layout, first create edges to the group node,
+    // then connect the group node to the connector nodes
+    firstConnectorEdges.forEach((edge) => {
+      connectEntitiesAndConnectorNode(
+        edgesMap,
+        nodesMap,
+        edge.source,
+        groupNode.id,
+        edge.target,
+        edge.edgeType,
+        groupEdgesColor
+      );
+    });
+
+    connectorIds.forEach((connectorId) => {
+      const node = nodesMap[connectorId];
+      (node as Writable<LabelNodeDataModel | RelationshipNodeDataModel>).parentId = groupNode.id;
+
+      connectEntitiesAndConnectorNode(
+        edgesMap,
+        nodesMap,
+        groupNode.id,
+        connectorId,
+        groupNode.id,
+        connectorEdgesMap[connectorId][0].edgeType
+      );
+
+      // Update group color if any label node is danger
+      if (connectorType === 'label' && (node as LabelNodeDataModel).color === 'danger') {
+        groupEdgesColor = 'danger';
+      }
+    });
+  }
+};
+
+const createEdgesAndGroups = (context: ParseContext) => {
+  const { edgesMap, nodesMap, connectorEdges } = context;
+
+  // Build grouping for connector nodes (labels and relationships)
+  // Nodes with same source-target pairs get stacked together
+  const labelGrouping: Record<string, string[]> = {};
+  const relationshipGrouping: Record<string, string[]> = {};
+
+  Object.entries(connectorEdges).forEach(([connectorNodeId, edges]) => {
+    const node = nodesMap[connectorNodeId];
+    if (!node) return;
+
+    // Compute grouping key from all source-target pairs
+    // Sort to ensure consistent key regardless of edge order
+    const edgePairs = edges.map((e) => `${e.source}-${e.target}`).sort();
+    const groupingKey = createHash('sha256').update(edgePairs.join(',')).digest('hex');
+
+    // Build grouping maps by node type
+    if (node.shape === 'label') {
+      if (!labelGrouping[groupingKey]) {
+        labelGrouping[groupingKey] = [];
+      }
+      labelGrouping[groupingKey].push(connectorNodeId);
+    } else if (node.shape === 'relationship') {
+      if (!relationshipGrouping[groupingKey]) {
+        relationshipGrouping[groupingKey] = [];
+      }
+      relationshipGrouping[groupingKey].push(connectorNodeId);
+    }
+  });
+
+  // Process label nodes (handles stacking)
+  Object.entries(labelGrouping).forEach(([groupingKey, nodeIds]) => {
+    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'label');
+  });
+
+  // Process relationship nodes (handles stacking)
+  Object.entries(relationshipGrouping).forEach(([groupingKey, nodeIds]) => {
+    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'relationship');
+  });
+};
+
+const connectEntitiesAndConnectorNode = (
   edgesMap: Record<string, EdgeDataModel>,
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
-  labelNodeId: string,
+  connectorNodeId: string,
   targetNodeId: string,
   edgeType: EdgeDataModel['type'] = 'solid',
   colorOverride?: EdgeColor
 ) => {
   [
-    connectNodes(nodesMap, sourceNodeId, labelNodeId, edgeType, colorOverride),
-    connectNodes(nodesMap, labelNodeId, targetNodeId, edgeType, colorOverride),
+    connectNodes(nodesMap, sourceNodeId, connectorNodeId, edgeType, colorOverride),
+    connectNodes(nodesMap, connectorNodeId, targetNodeId, edgeType, colorOverride),
   ].forEach((edge) => {
     edgesMap[edge.id] = edge;
   });
@@ -401,10 +702,45 @@ const connectNodes = (
   };
 };
 
-const parseDocumentsData = (docs: string[] | string): NodeDocumentDataModel[] => {
+const parseDocumentsData = (
+  logger: Logger | undefined,
+  docs: Array<string | null> | string
+): NodeDocumentDataModel[] => {
   if (typeof docs === 'string') {
-    return [JSON.parse(docs)];
+    try {
+      return [JSON.parse(docs)];
+    } catch (e) {
+      logger?.error(`Failed to parse document data: ${e}`);
+      logger?.trace(docs);
+      throw e;
+    }
   }
 
-  return docs.map((doc) => JSON.parse(doc));
+  return docs
+    .filter((d): d is string => d != null)
+    .map((doc) => {
+      try {
+        return JSON.parse(doc);
+      } catch (e) {
+        logger?.error(`Failed to parse document data: ${e}`);
+        logger?.trace(doc);
+        throw e;
+      }
+    });
+};
+
+const expandDotNotation = (flat: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [dotKey, value] of Object.entries(flat)) {
+    const parts = dotKey.split('.');
+    let cursor = result;
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (cursor[parts[i]] == null || typeof cursor[parts[i]] !== 'object') {
+        cursor[parts[i]] = {};
+      }
+      cursor = cursor[parts[i]] as Record<string, unknown>;
+    }
+    cursor[parts[parts.length - 1]] = value;
+  }
+  return result;
 };

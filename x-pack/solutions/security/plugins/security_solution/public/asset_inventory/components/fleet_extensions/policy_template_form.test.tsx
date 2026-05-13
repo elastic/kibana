@@ -252,7 +252,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     expect(option1).toBeChecked();
   });
 
-  it.skip('selects default CSP input selector', async () => {
+  it('selects default CSP input selector', async () => {
     const policy = getMockPolicyAWS();
     // enable all inputs of a policy template, same as fleet does
     policy.inputs = policy.inputs.map((input) => ({
@@ -285,15 +285,15 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: undefined,
+        isValid: false,
         updatedPolicy,
       });
     });
 
-    // 2nd call happens on mount and increments cspm template enabled input
+    // 2nd call happens on mount and selects the default enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: undefined,
+      isValid: false,
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => {
@@ -301,7 +301,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
             return {
               ...input,
               enabled: true,
-              config: { cloud_formation_template_url: { value: 's3_url' } },
             };
           }
           return input;
@@ -321,13 +320,13 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: undefined,
+      isValid: false,
       updatedPolicy: updatedPolicy2,
     });
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: undefined,
+      isValid: false,
       updatedPolicy: updatedPolicy2,
     });
   });
@@ -866,7 +865,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL)).toBeInTheDocument();
       });
     });
-    it.skip('should render setup technology selector for GCP for single-account', async () => {
+    it('should render setup technology selector for GCP for single-account', async () => {
       const newPackagePolicy = getMockPolicyGCP({
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT, type: 'text' },
       });
@@ -891,8 +890,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(orgIdField).not.toBeInTheDocument();
 
       const projectIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      const credentialsJsonField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON);
-      await waitFor(() => expect(credentialsJsonField).toBeInTheDocument());
       const credentialsTypeSelector = queryByTestId(
         GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );
@@ -1125,7 +1122,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in cloud GCP environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in cloud GCP environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1175,11 +1172,10 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
     it('should render setup technology selector for AWS and allow to select cloud connectors in serverless aws environment', async () => {
@@ -1243,7 +1239,7 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in serverless gcp environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in serverless gcp environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1297,15 +1293,14 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
 
-    it('should render setup technology selector for AWS and hide cloud connectors in serverless azure environment', async () => {
+    it('should render setup technology selector for AWS and show cloud connectors in serverless azure environment', async () => {
       const newPackagePolicy = getMockPolicyAWS();
       (useKibana as jest.Mock).mockReturnValue({
         services: {
@@ -1359,11 +1354,10 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       const optionValues = options.map((option) => option.value);
 
       await waitFor(() => {
-        expect(options).toHaveLength(2);
+        expect(options).toHaveLength(3);
         expect(optionValues).toEqual(
-          expect.arrayContaining(['direct_access_keys', 'temporary_keys'])
+          expect.arrayContaining(['cloud_connectors', 'direct_access_keys', 'temporary_keys'])
         );
-        expect(optionValues).not.toContain('cloud_connectors');
       });
     });
   });

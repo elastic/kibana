@@ -8,12 +8,12 @@
 import React from 'react';
 import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth/constants';
+import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
@@ -24,6 +24,12 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
     useConnectorContext: jest.fn(),
   };
 });
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -148,16 +154,24 @@ describe('WebhookActionConnectorFields renders', () => {
       jest.clearAllMocks();
     });
 
-    const tests: Array<[string, string]> = [
-      ['webhookUrlText', 'not-valid'],
-      ['webhookUserInput', ''],
-      ['webhookPasswordInput', ''],
-    ];
+    it.each([
+      WebhookMethods.POST,
+      WebhookMethods.PUT,
+      WebhookMethods.PATCH,
+      WebhookMethods.GET,
+      WebhookMethods.DELETE,
+    ])('connector validation succeeds when connector config is valid - %s', async (method) => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          method,
+        },
+      };
 
-    it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider
-          connector={actionConnector}
+          connector={connector}
           onSubmit={onSubmit}
           serializer={formSerializer}
           deserializer={formDeserializer}
@@ -172,34 +186,34 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await screen.findByTestId('webhookHeaderPanel');
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
-
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.webhook',
-          name: 'webhook',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            headers: { 'content-type': 'text' },
-            hasAuth: true,
-            authType: AuthType.Basic,
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            config: {
+              method,
+              url: 'https://test.com',
+              headers: { 'content-type': 'text' },
+              hasAuth: true,
+              authType: AuthType.Basic,
+            },
+            id: 'webhook',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+            },
+            isDeprecated: false,
           },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-          __internal__: {
-            hasHeaders: true,
-            hasCA: false,
-            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -229,31 +243,31 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await screen.findByTestId('webhookHeaderPanel');
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
-
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.webhook',
-          name: 'webhook',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            headers: { 'content-type': 'text' },
-            hasAuth: false,
-            authType: null,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            config: {
+              method: 'PUT',
+              url: 'https://test.com',
+              headers: { 'content-type': 'text' },
+              hasAuth: false,
+              authType: null,
+            },
+            id: 'webhook',
+            secrets: {},
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+            },
+            isDeprecated: false,
           },
-          secrets: {},
-          __internal__: {
-            hasHeaders: true,
-            hasCA: false,
-            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -279,31 +293,32 @@ describe('WebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.webhook',
-          name: 'webhook',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            hasAuth: true,
-            authType: AuthType.Basic,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            config: {
+              method: 'PUT',
+              url: 'https://test.com',
+              hasAuth: true,
+              authType: AuthType.Basic,
+            },
+            id: 'webhook',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
+            __internal__: {
+              hasHeaders: false,
+              hasCA: false,
+            },
+            isDeprecated: false,
           },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-          __internal__: {
-            hasHeaders: false,
-            hasCA: false,
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -327,14 +342,18 @@ describe('WebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
-    it.each(tests)('validates correctly %p', async (field, value) => {
+    it.each([
+      ['webhookUrlText', 'not-valid'],
+      ['webhookUserInput', ''],
+      ['webhookPasswordInput', ''],
+    ])('validates correctly %p', async (field, value) => {
       const connector = {
         ...actionConnector,
         config: {
@@ -343,7 +362,7 @@ describe('WebhookActionConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <WebhookActionConnectorFields
             readOnly={false}
@@ -354,16 +373,19 @@ describe('WebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      const fieldElement = await screen.findByTestId(field);
+
+      await userEvent.clear(fieldElement);
+
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
-          delay: 10,
-        });
+        await userEvent.type(fieldElement, value);
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
     it('validates correctly with a CA and verificationMode', async () => {
@@ -394,35 +416,36 @@ describe('WebhookActionConnectorFields renders', () => {
 
       await screen.findByTestId('webhookHeaderPanel');
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({
-        data: {
-          actionTypeId: '.webhook',
-          name: 'webhook',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            hasAuth: true,
-            authType: AuthType.Basic,
-            ca: Buffer.from('some binary string').toString('base64'),
-            verificationMode: 'full',
-            headers: { 'content-type': 'text' },
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            config: {
+              method: 'PUT',
+              url: 'https://test.com',
+              hasAuth: true,
+              authType: AuthType.Basic,
+              ca: Buffer.from('some binary string').toString('base64'),
+              verificationMode: 'full',
+              headers: { 'content-type': 'text' },
+            },
+            id: 'webhook',
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+            },
+            isDeprecated: false,
           },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-          __internal__: {
-            hasHeaders: true,
-            hasCA: true,
-            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -458,34 +481,35 @@ describe('WebhookActionConnectorFields renders', () => {
 
       await screen.findByTestId('webhookHeaderPanel');
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({
-        data: {
-          actionTypeId: '.webhook',
-          name: 'webhook',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            hasAuth: true,
-            authType: AuthType.SSL,
-            certType: SSLCertType.CRT,
-            headers: { 'content-type': 'text' },
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            config: {
+              method: 'PUT',
+              url: 'https://test.com',
+              hasAuth: true,
+              authType: AuthType.SSL,
+              certType: SSLCertType.CRT,
+              headers: { 'content-type': 'text' },
+            },
+            id: 'webhook',
+            secrets: {
+              crt: Buffer.from('some binary string').toString('base64'),
+              key: Buffer.from('some binary string').toString('base64'),
+            },
+            __internal__: {
+              hasHeaders: true,
+              hasCA: false,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+            },
+            isDeprecated: false,
           },
-          secrets: {
-            crt: Buffer.from('some binary string').toString('base64'),
-            key: Buffer.from('some binary string').toString('base64'),
-          },
-          __internal__: {
-            hasHeaders: true,
-            hasCA: false,
-            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -520,33 +544,34 @@ describe('WebhookActionConnectorFields renders', () => {
 
       await screen.findByTestId('webhookHeaderPanel');
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({
-        data: {
-          actionTypeId: '.webhook',
-          name: 'webhook',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            hasAuth: true,
-            authType: AuthType.SSL,
-            certType: SSLCertType.PFX,
-            headers: { 'content-type': 'text' },
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.webhook',
+            name: 'webhook',
+            config: {
+              method: 'PUT',
+              url: 'https://test.com',
+              hasAuth: true,
+              authType: AuthType.SSL,
+              certType: SSLCertType.PFX,
+              headers: { 'content-type': 'text' },
+            },
+            secrets: {
+              pfx: Buffer.from('some binary string').toString('base64'),
+            },
+            id: 'webhook',
+            isDeprecated: false,
+            __internal__: {
+              hasHeaders: true,
+              headers: [{ key: 'content-type', value: 'text', type: 'config' }],
+              hasCA: false,
+            },
           },
-          secrets: {
-            pfx: Buffer.from('some binary string').toString('base64'),
-          },
-          isDeprecated: false,
-          __internal__: {
-            hasHeaders: true,
-            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
-            hasCA: false,
-          },
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -574,13 +599,13 @@ describe('WebhookActionConnectorFields renders', () => {
         { wrapper: customQueryProviderWrapper }
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({
-        data: {},
-        isValid: false,
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
   });

@@ -13,6 +13,7 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { CARDINALITY_ID, CARDINALITY_NAME } from '@kbn/lens-formula-docs';
 import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { OperationDefinition, ParamEditorProps } from '.';
 
 import {
@@ -173,9 +174,11 @@ export const cardinalityOperation: OperationDefinition<
       },
     ];
   },
-  toESQL: (column, columnId) => {
+  toESQL: (column) => {
     if (column.params?.emptyAsNull || column.timeShift) return;
-    return `COUNT_DISTINCT(${column.sourceField})`;
+    return {
+      template: `COUNT_DISTINCT(${esql.col(column.sourceField)})`,
+    };
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {

@@ -9,7 +9,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
@@ -84,19 +83,4 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
       ) : null}
     </>
   );
-};
-
-ManageData.propTypes = {
-  features: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number as PropTypes.Validator<number | undefined>,
-    }).isRequired
-  ).isRequired,
 };

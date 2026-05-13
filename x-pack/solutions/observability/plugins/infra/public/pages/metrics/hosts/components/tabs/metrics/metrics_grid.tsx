@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
-import { Popover } from '../../common/popover';
+import { Popover } from '../../../../../../components/popover';
 import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
 import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -43,7 +43,7 @@ export const MetricsGrid = () => {
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {charts.map((chartProp, index) => (
           <EuiFlexItem key={index} grow={false}>
-            <Chart {...chartProp} />
+            <Chart {...chartProp} dataView={metricsView?.dataViewReference} />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

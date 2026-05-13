@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
-  ActionType as ConnectorType,
+  ClassicActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -33,6 +33,8 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+  AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
@@ -42,6 +44,7 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { emailSchema } from '@kbn/connector-schemas/email/schemas/latest';
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
@@ -52,6 +55,7 @@ export type EmailConnectorType = ConnectorType<
   ActionParamsType,
   unknown
 >;
+
 export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
@@ -68,6 +72,13 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 };
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
+
+const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
+  'xpack.stackConnectors.email.noRecipientsErrorMessage',
+  { defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required' }
+);
+
+const isNonBlankRecipient = (email: string) => email.trim().length > 0;
 
 function validateConfig(
   configObject: ConnectorTypeConfigType,
@@ -97,6 +108,13 @@ function validateConfig(
   });
   if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
+  }
+
+  const { oauthTokenUrl } = config;
+  if (oauthTokenUrl && !configurationUtilities.isUriAllowed(oauthTokenUrl)) {
+    throw new Error(
+      `[oauthTokenUrl]: host name value for '${oauthTokenUrl}' is not in the allowedHosts configuration`
+    );
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
@@ -165,23 +183,44 @@ function validateConfig(
 
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
-
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
-  const { to, cc, bcc } = params;
-  const addrs = to.length + cc.length + bcc.length;
+  const { to, cc, bcc, replyTo } = params;
+  // Mirror the executor's filter so that empty/whitespace-only entries don't
+  // trick the recipients-required check, and aren't surfaced as confusing
+  // "Invalid email addresses" errors below.
+  const validTo = to.filter(isNonBlankRecipient);
+  const validCc = cc.filter(isNonBlankRecipient);
+  const validBcc = bcc.filter(isNonBlankRecipient);
 
-  if (addrs === 0) {
-    throw new Error('no [to], [cc], or [bcc] entries');
+  if (validTo.length + validCc.length + validBcc.length === 0) {
+    throw new Error(NO_RECIPIENTS_ERROR_MESSAGE);
   }
 
-  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  try {
+    emailSchema.parse(validTo);
+    emailSchema.parse(validCc);
+    emailSchema.parse(validBcc);
+
+    if (replyTo) {
+      emailSchema.parse(replyTo);
+    }
+  } catch (error) {
+    throw new Error(`Invalid email addresses: ${error}`);
+  }
+
+  const emails = withoutMustacheTemplate(validTo.concat(validCc).concat(validBcc)).concat(
+    replyTo ?? []
+  );
+
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
     treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    throw new Error(`[to/cc/bcc]: ${invalidEmailsMessage}`);
+    const labels = ['to', 'cc', 'bcc'];
+    if (params.replyTo && params.replyTo.length) labels.push('replyTo');
+    throw new Error(`[${labels.join('/')}]: ${invalidEmailsMessage}`);
   }
 }
 
@@ -219,6 +258,8 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
+      AgentBuilderConnectorFeatureId,
     ],
     validate: {
       config: {
@@ -276,7 +317,18 @@ async function executor(
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
-  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const validEmails = emails.filter(isNonBlankRecipient);
+
+  if (validEmails.length === 0) {
+    return {
+      status: 'error',
+      actionId,
+      message: NO_RECIPIENTS_ERROR_MESSAGE,
+      errorSource: TaskErrorSource.USER,
+    };
+  }
+
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(validEmails);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }
@@ -382,6 +434,7 @@ async function executor(
       to: params.to,
       cc: params.cc,
       bcc: params.bcc,
+      ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     },
     content: {
       subject: params.subject,

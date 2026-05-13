@@ -11,7 +11,23 @@ export * from './owners';
 export * from './files';
 export * from './application';
 export * from './observables';
-export { LENS_ATTACHMENT_TYPE } from './visualizations';
+export * from './attachments';
+
+/**
+ * Cases connector limits.
+ */
+export const MAX_OPEN_CASES_DEFAULT_MAXIMUM = 20;
+export const ABSOLUTE_MAX_CASES_PER_RUN = 1000;
+export const DEFAULT_MAX_OPEN_CASES = 5;
+export const MAX_OPEN_CASES_ADVANCED_SETTING = 'cases:maxOpenCasesPerRuleRun' as const;
+
+export const getMaximumOpenCases = (maxOpenCases?: number | null): number => {
+  if (maxOpenCases == null || Number.isNaN(maxOpenCases) || !Number.isFinite(maxOpenCases)) {
+    return MAX_OPEN_CASES_DEFAULT_MAXIMUM;
+  }
+
+  return Math.min(ABSOLUTE_MAX_CASES_PER_RUN, Math.max(1, Math.floor(maxOpenCases)));
+};
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -24,9 +40,11 @@ export const CASE_SAVED_OBJECT = 'cases' as const;
 export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' as const;
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
+export const CASE_ATTACHMENT_SAVED_OBJECT = 'cases-attachments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
+export const CASE_TEMPLATE_SAVED_OBJECT = 'cases-templates' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -37,6 +55,7 @@ export const SAVED_OBJECT_TYPES = [
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
 ];
 
 /**
@@ -96,8 +115,15 @@ export const INTERNAL_CASE_OBSERVABLES_DELETE_URL =
 export const INTERNAL_CASE_FIND_USER_ACTIONS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/user_actions/_find` as const;
 export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
-  `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
+  `${CASES_INTERNAL_URL}/case/attachments/_find_containing_all` as const;
 export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
+
+export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
+export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
+export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_delete` as const;
+export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
+export const INTERNAL_TEMPLATE_TAGS_URL = `${INTERNAL_TEMPLATES_URL}/tags` as const;
+export const INTERNAL_TEMPLATE_CREATORS_URL = `${INTERNAL_TEMPLATES_URL}/creators` as const;
 
 /**
  * Action routes
@@ -164,10 +190,11 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
  */
 
 export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
-  alerts: { sync: true, enabled: true, isExperimental: false },
+  alerts: { sync: true, enabled: true, isExperimental: false, read: true, all: true },
   metrics: [],
   observables: { enabled: true, autoExtract: false },
   events: { enabled: false },
+  templates: { enabled: false },
 });
 
 /**
@@ -198,6 +225,7 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 export const CASES_REOPEN_CAPABILITY = 'case_reopen' as const;
 export const CREATE_COMMENT_CAPABILITY = 'create_comment' as const;
 export const ASSIGN_CASE_CAPABILITY = 'cases_assign' as const;
+export const MANAGE_TEMPLATES_CAPABILITY = 'cases_manage_templates' as const;
 
 /**
  * Cases API Tags
@@ -240,6 +268,9 @@ export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
   casesTableState: 'cases.list.state',
+  templatesTableState: 'templates.list.state',
+  templatesYamlEditorCreateState: 'templates.yaml.editor.create',
+  templatesYamlEditorEditState: 'templates.yaml.editor.edit',
 };
 
 /**
@@ -295,4 +326,19 @@ export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
 /**
  * EBT events
  */
-export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view';
+export const CASE_PAGE_VIEW_EVENT_TYPE = 'case_page_view' as const;
+
+export const CASE_ATTACH_EVENTS_EVENT_TYPE = 'case_attach_events' as const;
+
+export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_tab_clicked' as const;
+
+export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
+  'case_view_attachments_sub_tab_clicked' as const;
+
+/**
+ * Exporting this to make it easier to track the usage across the codebase
+ * via lsp references.
+ */
+export const CASE_EXTENDED_FIELDS = 'extended_fields' as const;
+export const CASE_EXTENDED_FIELDS_LABELS = 'extended_fields_labels' as const;

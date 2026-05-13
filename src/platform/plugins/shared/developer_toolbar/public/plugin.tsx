@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
 import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
 export interface DeveloperToolbarItemRegistry {
@@ -21,6 +23,12 @@ export interface DeveloperToolbarItemRegistry {
 
 export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
+
+const LazyMeasureButton = lazy(() =>
+  import('@kbn/measure-component').then(({ MeasureButton }) => ({
+    default: MeasureButton,
+  }))
+);
 
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
@@ -37,11 +45,30 @@ export class DeveloperToolbarPlugin
 
   public start(core: CoreStart): DeveloperToolbarStart {
     const LazyToolbar = React.lazy(() => import('./toolbar'));
-    core.chrome.setGlobalFooter(
+    (core.chrome as InternalChromeStart).setGlobalFooter(
       <Suspense>
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
       </Suspense>
     );
+
+    this.registerItem({
+      id: 'Measure Component',
+      children: (
+        <Suspense fallback={null}>
+          <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
+
+    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false)) {
+      import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
+        this.registerItem({
+          id: 'Chrome Next',
+          children: <ChromeNextToggle featureFlags={core.featureFlags} />,
+          priority: 1,
+        });
+      });
+    }
 
     return {
       registerItem: this.registerItem.bind(this),

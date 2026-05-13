@@ -26,6 +26,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/track_application_view.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +38,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "{@link TrackApplicationViewProps }"
+              "{@link TrackApplicationViewProps}"
             ],
             "signature": [
               {
@@ -48,6 +50,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/track_application_view.tsx",
+            "lineNumber": 25,
+            "columnNumber": 69,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,9 +69,19 @@
         "tags": [],
         "label": "TrackApplicationViewProps",
         "description": [
-          "\nProps to provide to the {@link TrackApplicationView} component."
+          "\nProps to provide to the ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "public",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-public.TrackApplicationView",
+            "text": "TrackApplicationView"
+          },
+          " component."
         ],
         "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -81,6 +95,8 @@
               "\nThe name of the view to be tracked. The appId will be obtained automatically."
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -94,9 +110,11 @@
               "\nThe React component to be tracked."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -117,6 +135,8 @@
         "Public's setup APIs exposed by the UsageCollection Service"
       ],
       "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+      "lineNumber": 43,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -133,6 +153,8 @@
             "{ ApplicationUsageTrackingProvider: React.FC<{ children?: React.ReactNode; }>; }"
           ],
           "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+          "lineNumber": 45,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         },
@@ -149,6 +171,8 @@
             "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+          "lineNumber": 82,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -163,6 +187,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 84,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -178,7 +204,10 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 85,
+              "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "UiCounterMetricType",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -193,6 +222,8 @@
                 "string | string[]"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 86,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -208,6 +239,8 @@
                 "number | undefined"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 87,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -229,6 +262,8 @@
         "Public's start APIs exposed by the UsageCollection Service"
       ],
       "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+      "lineNumber": 91,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -245,6 +280,8 @@
             "(appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+          "lineNumber": 93,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -259,6 +296,8 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 95,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -274,7 +313,10 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 96,
+              "columnNumber": 5,
               "deprecated": false,
+              "docsReferencedTypeName": "UiCounterMetricType",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -289,6 +331,8 @@
                 "string | string[]"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 97,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -304,6 +348,8 @@
                 "number | undefined"
               ],
               "path": "src/platform/plugins/shared/usage_collection/public/plugin.tsx",
+              "lineNumber": 98,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -330,6 +376,8 @@
           "\nThe context for the `fetch` method: It includes the most commonly used clients in the collectors (ES and SO clients).\nBoth are scoped based on the request and the context:\n- When users are requesting a sample of data, it is scoped to their role to avoid exposing data they shouldn't read\n- When building the telemetry data payload to report to the remote cluster, the requests are scoped to the `kibana` internal user\n"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -343,7 +391,11 @@
               "\nRequest-scoped Elasticsearch client"
             ],
             "signature": [
-              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -423,39 +475,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; helpers: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
-              "; search: { <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "SearchResponse",
-              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
-              "AggregationsAggregate",
-              ">>(this: That, params?: ",
-              "SearchRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
-              "default",
-              "; child: (opts: ",
-              "ClientOptions",
-              ") => ",
+              "; helpers: ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -481,26 +503,46 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
+              ">; }; cancelReindex: { (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
+              ">; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CancelReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
               ">; }; capabilities: { (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "CapabilitiesResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "CapabilitiesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
+              "CapabilitiesResponse",
               ">; }; cat: ",
               "default",
               "; ccr: ",
@@ -709,7 +751,27 @@
               "FieldCapsResponse",
               ">; }; fleet: ",
               "default",
-              "; getScript: { (this: That, params: ",
+              "; getReindex: { (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; }; getScript: { (this: That, params: ",
               "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
@@ -853,29 +915,49 @@
               "InfoResponse",
               ">; }; ingest: ",
               "default",
-              "; knnSearch: { (this: That, params?: ",
-              "TODO",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
+              "default",
+              "; listReindex: { (this: That, params?: ",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "TODO",
+              "ListReindexResponse",
               ">; (this: That, params?: ",
-              "TODO",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "TODO",
+              "ListReindexResponse",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
+              "ListReindexRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "TODO",
-              ">; }; license: ",
-              "default",
-              "; logstash: ",
+              "ListReindexResponse",
+              ">; }; logstash: ",
               "default",
               "; mget: { <TDocument = unknown>(this: That, params?: ",
               "MgetRequest",
@@ -1012,6 +1094,8 @@
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
@@ -1163,6 +1247,32 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
               "<TDocument, TAggregations>>; }; searchApplication: ",
               "default",
               "; searchMvt: { (this: That, params: ",
@@ -1332,6 +1442,8 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1348,6 +1460,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1374,6 +1488,8 @@
           "<TFetchReturn, ExtraOptions>"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 165,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1396,6 +1512,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 169,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1409,6 +1527,8 @@
               "The registered type (aka name) of the collector"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 171,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1419,7 +1539,15 @@
             "tags": [],
             "label": "fetch",
             "description": [
-              "\nThe actual logic that reports the Usage collection.\nIt will be called on every collection request.\nWhatever is returned in this method will be passed through as-is under\nthe {@link ICollector.type} key.\n"
+              "\nThe actual logic that reports the Usage collection.\nIt will be called on every collection request.\nWhatever is returned in this method will be passed through as-is under\nthe ",
+              {
+                "pluginId": "usageCollection",
+                "scope": "server",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-server.ICollector.type",
+                "text": "ICollector.type"
+              },
+              " key.\n"
             ],
             "signature": [
               "(this: ",
@@ -1441,6 +1569,8 @@
               ") => TFetchReturn | Promise<TFetchReturn>"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1462,7 +1592,10 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 139,
+                "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "CollectorFetchContext",
                 "trackAdoption": false
               }
             ]
@@ -1480,6 +1613,8 @@
               "() => boolean | Promise<boolean>"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 185,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1498,6 +1633,8 @@
           "\nInterface to register and manage Usage Collectors through a CollectorSet"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1530,6 +1667,8 @@
               "<TFetchReturn, ExtraOptions>"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1551,7 +1690,10 @@
                   "<TFetchReturn, ExtraOptions>"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 33,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UsageCollectorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1579,6 +1721,8 @@
               "<TFetchReturn, ExtraOptions>) => void"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1600,7 +1744,10 @@
                   "<TFetchReturn, ExtraOptions>"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Collector",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1628,6 +1775,8 @@
               "<TFetchReturn, ExtraOptions> | undefined"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1642,6 +1791,8 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1659,9 +1810,19 @@
         "tags": [],
         "label": "IUsageCounter",
         "description": [
-          "\nUsage Counter allows to keep track of any events that occur.\nBy calling {@link IUsageCounter.incrementCounter} devs can notify this\nAPI whenever the event happens."
+          "\nUsage Counter allows to keep track of any events that occur.\nBy calling ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.IUsageCounter.incrementCounter",
+            "text": "IUsageCounter.incrementCounter"
+          },
+          " devs can notify this\nAPI whenever the event happens."
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1675,6 +1836,8 @@
               "\nDefines a domainId (aka a namespace) under which multiple counters can be stored"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1691,6 +1854,8 @@
               "number | undefined"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1709,6 +1874,8 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1719,12 +1886,14 @@
                 "tags": [],
                 "label": "params",
                 "description": [
-                  "{@link IncrementCounterParams }"
+                  "{@link IncrementCounterParams}"
                 ],
                 "signature": [
                   "IncrementCounterParams"
                 ],
                 "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/usage_counter.ts",
+                "lineNumber": 39,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1756,6 +1925,8 @@
           "AbstractCounter"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1769,6 +1940,8 @@
               "Number of times the event has occurred"
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1791,6 +1964,8 @@
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
         "path": "node_modules/@elastic/ebt/client/src/schema/types.d.ts",
+        "lineNumber": 7,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1802,7 +1977,15 @@
         "tags": [],
         "label": "CollectorFetchMethod",
         "description": [
-          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is {@link CollectorFetchContext}."
+          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorFetchContext",
+            "text": "CollectorFetchContext"
+          },
+          "."
         ],
         "signature": [
           "(this: ",
@@ -1824,6 +2007,8 @@
           ") => TReturn | Promise<TReturn>"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1845,7 +2030,10 @@
               }
             ],
             "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CollectorFetchContext",
             "trackAdoption": false
           }
         ],
@@ -1880,6 +2068,8 @@
           "<TFetchReturn, ExtraOptions>; } & ExtraOptions"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 142,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1892,6 +2082,8 @@
         "label": "IncrementCounterParams",
         "description": [],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1903,7 +2095,15 @@
         "tags": [],
         "label": "MakeSchemaFrom",
         "description": [
-          "\nThe `schema` property in {@link CollectorOptions} must match the output of\nthe `fetch` method. This type helps ensure that is correct"
+          "\nThe `schema` property in ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorOptions",
+            "text": "CollectorOptions"
+          },
+          " must match the output of\nthe `fetch` method. This type helps ensure that is correct"
         ],
         "signature": [
           "{ [Key in keyof Required<Base>]: Required<Base>[Key] extends (infer U)[] ? { type: \"array\"; items: ",
@@ -1913,6 +2113,8 @@
           "<Required<Base>[Key], RequireMeta>; }"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/types.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1930,6 +2132,8 @@
           "\"usage-counter\""
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1941,7 +2145,15 @@
         "tags": [],
         "label": "UsageCollectorOptions",
         "description": [
-          "\nSame as {@link CollectorOptions} but with the `schema` property enforced"
+          "\nSame as ",
+          {
+            "pluginId": "usageCollection",
+            "scope": "server",
+            "docId": "kibUsageCollectionPluginApi",
+            "section": "def-server.CollectorOptions",
+            "text": "CollectorOptions"
+          },
+          " but with the `schema` property enforced"
         ],
         "signature": [
           "{ type: string; isReady: () => boolean | Promise<boolean>; schema?: ",
@@ -1979,6 +2191,8 @@
           "<TFetchReturn, {}>; }, \"schema\">>"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/collector/usage_collector.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2005,6 +2219,8 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/usage_collection/server/usage_counters/saved_objects.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2032,6 +2248,8 @@
         "UsageCountersServiceSetup"
       ],
       "path": "src/platform/plugins/shared/usage_collection/server/plugin.ts",
+      "lineNumber": 25,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2050,6 +2268,8 @@
         "UsageCountersServiceStart"
       ],
       "path": "src/platform/plugins/shared/usage_collection/server/plugin.ts",
+      "lineNumber": 28,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

@@ -12,14 +12,11 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import {
-  getImportExceptionsListSchemaMock,
-  toNdJsonString,
-} from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type TestAgent from 'supertest/lib/agent';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
-import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
@@ -168,26 +165,6 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('should return 400 for import of endpoint exceptions', async () => {
-      await endpointPolicyManagerSupertest
-        .post(`${EXCEPTION_LIST_URL}/_import?overwrite=false`)
-        .set('kbn-xsrf', 'true')
-        .attach(
-          'file',
-          Buffer.from(
-            toNdJsonString([
-              getImportExceptionsListSchemaMock(hostIsolationExceptionData.artifact.list_id),
-            ])
-          ),
-          'exceptions.ndjson'
-        )
-        .expect(400, {
-          status_code: 400,
-          message:
-            'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions',
-        });
-    });
-
     describe('and has authorization to manage endpoint security', () => {
       for (const hostIsolationExceptionApiCall of hostIsolationExceptionCalls) {
         it(`[${hostIsolationExceptionApiCall.method}] if invalid condition entry fields are used`, async () => {
@@ -285,11 +262,18 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    // no such role in serverless
-    describe('@skipInServerless and user has authorization to read host isolation exceptions', function () {
+    describe('and user has authorization to read host isolation exceptions', function () {
       let hunterSupertest: TestAgent;
+
       before(async () => {
-        hunterSupertest = await utils.createSuperTest(ROLE.hunter);
+        hunterSupertest = await utils.createSuperTestWithCustomRole({
+          name: 'custom_hunter_role',
+          privileges: getHunter(),
+        });
+      });
+
+      after(async () => {
+        await utils.cleanUpCustomRoles();
       });
 
       for (const hostIsolationExceptionApiCall of [

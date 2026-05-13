@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -340,6 +340,7 @@ function matchPathToPattern(filePath: string, pattern: string): boolean {
 
   // Convert glob pattern to regex
   let regexPattern = normalizedPattern
+    .replace(/\\/g, '\\\\') // Escape backslashes
     .replace(/\./g, '\\.') // Escape dots
     .replace(/\*\*/g, '___DOUBLESTAR___') // Placeholder for **
     .replace(/\*/g, '[^/]*') // Single * matches anything except /

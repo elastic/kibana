@@ -38,12 +38,13 @@ import type {
   LensTopNavMenuEntryGenerator,
   LensAttributesService,
 } from '@kbn/lens-common';
-import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import { LENS_EMBEDDABLE_TYPE, LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { App } from './app';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import type { LensPluginStartDependencies } from '../plugin';
-import { extractLensReferences } from '../../common/references';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
+import { LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import type { RedirectToOriginProps, HistoryLocationState } from './types';
 import type { LensRootStore } from '../state_management';
 import { makeConfigureStore, navigateAway, loadInitial, setState } from '../state_management';
@@ -95,8 +96,10 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    kql,
     serverless,
     contentManagement,
+    cps,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -131,8 +134,10 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    kql,
     locator,
     serverless,
+    cps,
     ...coreStart,
   };
 }
@@ -177,7 +182,7 @@ export async function mountApp(
       tooltip: i18n.translate('xpack.lens.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save visualizations to the library',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
   coreStart.chrome.docTitle.change(
@@ -189,7 +194,7 @@ export async function mountApp(
       return embeddableEditorIncomingState?.valueInput as LensSerializedState;
     }
     if (id) {
-      return { savedObjectId: id } as LensSerializedState;
+      return { ref_id: id };
     }
   };
 
@@ -209,6 +214,11 @@ export async function mountApp(
       initialContext && 'originatingApp' in initialContext ? initialContext.originatingApp : null;
     const mergedOriginatingApp =
       embeddableEditorIncomingState?.originatingApp ?? contextOriginatingApp;
+    const mergedOriginatingPath =
+      embeddableEditorIncomingState?.originatingPath ??
+      (initialContext && 'originatingPath' in initialContext
+        ? initialContext.originatingPath
+        : undefined);
     if (!mergedOriginatingApp) {
       throw new Error('redirectToOrigin called without an originating app');
     }
@@ -217,25 +227,24 @@ export async function mountApp(
       embeddableId = initialContext.embeddableId;
     }
     if (stateTransfer && props?.state) {
-      const { state: rawState, isCopied } = props;
-      const { references } = extractLensReferences(rawState);
-      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedState>(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
-        state: [
-          {
-            embeddableId: isCopied ? undefined : embeddableId,
-            type: LENS_EMBEDDABLE_TYPE,
-            serializedState: {
-              references,
-              rawState,
+      const { state, isCopied } = props;
+      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
+        mergedOriginatingApp,
+        {
+          path: mergedOriginatingPath,
+          state: [
+            {
+              embeddableId: isCopied ? undefined : embeddableId,
+              type: LENS_EMBEDDABLE_TYPE,
+              serializedState: state,
+              searchSessionId: data.search.session.getSessionId(),
             },
-            searchSessionId: data.search.session.getSessionId(),
-          },
-        ],
-      });
+          ],
+        }
+      );
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
+        path: mergedOriginatingPath,
       });
     }
   };
@@ -250,6 +259,8 @@ export async function mountApp(
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
   }
+
+  lensServices.cps?.cpsManager?.registerAppAccess('lens', () => ProjectRoutingAccess.EDITABLE);
 
   const { datasourceMap, visualizationMap } = instance;
   const storeDeps = {
@@ -431,6 +442,11 @@ export async function mountApp(
     lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
-    stateTransfer.clearEditorState?.(APP_ID);
+    // Only clear editor state on intentional programmatic navigation,
+    // not on browser back/forward. `POP` must preserve the state so that
+    // navigating forward again restores the originating app breadcrumb context.
+    if (params.history.action !== 'POP') {
+      stateTransfer.clearEditorState?.(APP_ID);
+    }
   };
 }

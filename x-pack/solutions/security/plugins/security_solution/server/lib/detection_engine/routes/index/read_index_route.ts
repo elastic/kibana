@@ -8,6 +8,7 @@
 import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
 import type { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { INITIALIZE_SECURITY_SOLUTION } from '@kbn/security-solution-features/constants';
 import type { ReadAlertsIndexResponse } from '../../../../../common/api/detection_engine/index_management';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
@@ -28,7 +29,7 @@ export const readIndexRoute = (
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [INITIALIZE_SECURITY_SOLUTION],
         },
       },
     })

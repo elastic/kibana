@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets, performUpgradePrebuiltRules } from '../../../../utils';
@@ -15,6 +15,7 @@ import { deleteAllPrebuiltRuleAssets, performUpgradePrebuiltRules } from '../../
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const deps = {
     es,
@@ -83,6 +84,14 @@ export default ({ getService }: FtrProviderContext): void => {
             mode: ModeEnum.ALL_RULES,
             pick_version: pickVersion,
           });
+          const [{ body: upgradedRuleA }, { body: upgradedRuleB }] = await Promise.all([
+            detectionsApi.readRule({
+              query: { rule_id: 'rule_1' },
+            }),
+            detectionsApi.readRule({
+              query: { rule_id: 'rule_2' },
+            }),
+          ]);
 
           expect(response.summary).toMatchObject({
             total: 2,
@@ -92,6 +101,19 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(response.results.updated).toHaveLength(2);
           expect(response.results.updated).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                rule_id: 'rule_1',
+                version: 2,
+              }),
+              expect.objectContaining({
+                rule_id: 'rule_2',
+                version: 2,
+              }),
+            ])
+          );
+
+          expect([upgradedRuleA, upgradedRuleB]).toEqual(
             expect.arrayContaining([
               expect.objectContaining({
                 rule_id: 'rule_1',
@@ -149,6 +171,14 @@ export default ({ getService }: FtrProviderContext): void => {
           mode: ModeEnum.ALL_RULES,
           pick_version: 'MERGED',
         });
+        const [{ body: upgradedRuleA }, { body: upgradedRuleB }] = await Promise.all([
+          detectionsApi.readRule({
+            query: { rule_id: 'rule_1' },
+          }),
+          detectionsApi.readRule({
+            query: { rule_id: 'rule_2' },
+          }),
+        ]);
 
         expect(response.summary).toMatchObject({
           total: 2,
@@ -158,6 +188,19 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(response.results.updated).toHaveLength(2);
         expect(response.results.updated).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              rule_id: 'rule_1',
+              version: 2,
+            }),
+            expect.objectContaining({
+              rule_id: 'rule_2',
+              version: 2,
+            }),
+          ])
+        );
+
+        expect([upgradedRuleA, upgradedRuleB]).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
               rule_id: 'rule_1',
@@ -286,6 +329,14 @@ export default ({ getService }: FtrProviderContext): void => {
             mode: ModeEnum.ALL_RULES,
             pick_version: pickVersion,
           });
+          const [{ body: upgradedRuleA }, { body: upgradedRuleB }] = await Promise.all([
+            detectionsApi.readRule({
+              query: { rule_id: 'rule_1' },
+            }),
+            detectionsApi.readRule({
+              query: { rule_id: 'rule_2' },
+            }),
+          ]);
 
           expect(response.summary).toMatchObject({
             total: 2,
@@ -295,6 +346,19 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(response.results.updated).toHaveLength(2);
           expect(response.results.updated).toEqual(
+            expect.arrayContaining([
+              expect.objectContaining({
+                rule_id: 'rule_1',
+                version: 2,
+              }),
+              expect.objectContaining({
+                rule_id: 'rule_2',
+                version: 2,
+              }),
+            ])
+          );
+
+          expect([upgradedRuleA, upgradedRuleB]).toEqual(
             expect.arrayContaining([
               expect.objectContaining({
                 rule_id: 'rule_1',

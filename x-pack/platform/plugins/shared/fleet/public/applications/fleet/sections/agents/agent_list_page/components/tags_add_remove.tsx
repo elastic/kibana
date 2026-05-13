@@ -185,7 +185,7 @@ export const TagsAddRemove: React.FC<Props> = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="plus" />
+          <EuiIcon type="plus" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <FormattedMessage
@@ -207,6 +207,7 @@ export const TagsAddRemove: React.FC<Props> = ({
         button={button!}
         closePopover={closePopover}
         anchorPosition="leftUp"
+        hasArrow={true}
       >
         <EuiSelectable
           // workaround for auto-scroll to first element after clearing search

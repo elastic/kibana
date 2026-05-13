@@ -29,6 +29,7 @@ export enum Aggregators {
   MIN = 'min',
   MAX = 'max',
   CARDINALITY = 'cardinality',
+  MED = 'median',
   RATE = 'rate',
   P95 = 'p95',
   P99 = 'p99',
@@ -51,6 +52,8 @@ export enum AlertStates {
   ERROR,
 }
 
+export type NoDataBehavior = 'recover' | 'remainActive' | 'alertOnNoData';
+
 // Types for the executor
 export interface CustomThresholdSearchSourceFields extends SerializedSearchSourceFields {
   query?: Query;
@@ -63,6 +66,7 @@ export interface ThresholdParams {
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  noDataBehavior?: NoDataBehavior;
   searchConfiguration: CustomThresholdSearchSourceFields;
   groupBy?: string[];
 }

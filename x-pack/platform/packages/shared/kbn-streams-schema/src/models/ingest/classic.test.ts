@@ -6,27 +6,32 @@
  */
 
 import { emptyAssets } from '../../helpers/empty_assets';
-import { ClassicStream } from './classic';
+import { ClassicIngestUpsertRequest, ClassicStream } from './classic';
 
 describe('ClassicStream', () => {
   describe('Definition', () => {
     it.each([
       {
+        type: 'classic' as const,
         name: 'classic-stream',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           classic: {},
+          failure_store: { inherit: {} },
         },
       },
       {
+        type: 'classic' as const,
         name: 'classic-stream-with-fields',
         description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           classic: {
             field_overrides: {
@@ -35,9 +40,10 @@ describe('ClassicStream', () => {
               },
             },
           },
+          failure_store: { inherit: {} },
         },
       },
-    ])('is valid', (val) => {
+    ] satisfies ClassicStream.Definition[])('is valid', (val) => {
       expect(ClassicStream.Definition.asserts(val)).toBe(true);
       expect(ClassicStream.Definition.right.parse(val)).toEqual(val);
     });
@@ -46,6 +52,7 @@ describe('ClassicStream', () => {
       {
         name: 'classic-stream',
         description: null,
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -57,12 +64,24 @@ describe('ClassicStream', () => {
         name: 'classic-stream',
         description: '',
         ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          settings: {},
           classic: {},
         },
       },
       {
         name: 'classic-stream',
         description: '',
+        updated_at: new Date().toISOString(),
+        ingest: {
+          classic: {},
+        },
+      },
+      {
+        name: 'classic-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
           processing: { steps: [] },
@@ -72,7 +91,11 @@ describe('ClassicStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(() => ClassicStream.Definition.asserts(val as any)).toThrow();
+      expect(() =>
+        ClassicStream.Definition.asserts(
+          val as Parameters<typeof ClassicStream.Definition.asserts>[0]
+        )
+      ).toThrow();
     });
   });
 
@@ -80,13 +103,16 @@ describe('ClassicStream', () => {
     it.each([
       {
         stream: {
+          type: 'classic' as const,
           name: 'classic-stream',
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         effective_lifecycle: {
@@ -101,9 +127,13 @@ describe('ClassicStream', () => {
           text_structure: true,
           read_failure_store: true,
           manage_failure_store: true,
+          create_snapshot_repository: true,
           view_index_metadata: true,
         },
         data_stream_exists: true,
+        effective_failure_store: {
+          lifecycle: { enabled: { data_retention: '30d', is_default_retention: true } },
+        },
         ...emptyAssets,
       },
     ] satisfies ClassicStream.GetResponse[])('is valid', (val) => {
@@ -115,6 +145,7 @@ describe('ClassicStream', () => {
       {
         stream: {
           description: '',
+          updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
@@ -134,13 +165,19 @@ describe('ClassicStream', () => {
           text_structure: true,
           failure_store: true,
           view_index_metadata: true,
+          create_snapshot_repository: true,
         },
         data_stream_exists: true,
         dashboards: [],
+        rules: [],
         queries: [],
       },
     ])('is not valid', (val) => {
-      expect(ClassicStream.GetResponse.is(val as any)).toBe(false);
+      expect(
+        ClassicStream.GetResponse.is(
+          val as unknown as Parameters<typeof ClassicStream.GetResponse.is>[0]
+        )
+      ).toBe(false);
     });
   });
 
@@ -148,17 +185,19 @@ describe('ClassicStream', () => {
     it.each([
       {
         stream: {
+          type: 'classic' as const,
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: { steps: [] },
             settings: {},
             classic: {},
+            failure_store: { inherit: {} },
           },
         },
         ...emptyAssets,
       },
-    ])('is valid', (val) => {
+    ] satisfies ClassicStream.UpsertRequest[])('is valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val)).toBe(true);
       expect(ClassicStream.UpsertRequest.right.parse(val)).toEqual(val);
     });
@@ -178,8 +217,90 @@ describe('ClassicStream', () => {
           },
         },
       },
+      {
+        stream: {
+          description: 'updated_at should not be present',
+          updated_at: new Date().toISOString(),
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            classic: {},
+          },
+        },
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          description: 'ingest.processing.updated_at should not be present',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            classic: {},
+          },
+        },
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          description: 'missing ingest',
+        },
+        ...emptyAssets,
+      },
     ])('is not valid', (val) => {
-      expect(ClassicStream.UpsertRequest.is(val as any)).toBe(false);
+      expect(
+        ClassicStream.UpsertRequest.is(val as Parameters<typeof ClassicStream.UpsertRequest.is>[0])
+      ).toBe(false);
+    });
+  });
+
+  describe('IngestUpsertRequest', () => {
+    it.each([
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+        classic: {},
+        failure_store: { inherit: {} },
+      },
+    ] satisfies ClassicIngestUpsertRequest[])('is valid', (val) => {
+      expect(ClassicIngestUpsertRequest.is(val)).toBe(true);
+      expect(ClassicIngestUpsertRequest.right.parse(val)).toEqual(val);
+    });
+
+    it.each([
+      // Missing classic
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+      },
+      // Missing processing
+      {
+        lifecycle: { inherit: {} },
+        settings: {},
+        classic: {},
+      },
+      // Missing settings
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        classic: {},
+      },
+      // Processing includes updated_at
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
+        classic: {},
+      },
+    ])('is not valid', (val) => {
+      expect(
+        ClassicIngestUpsertRequest.is(
+          val as unknown as Parameters<typeof ClassicIngestUpsertRequest.is>[0]
+        )
+      ).toBe(false);
     });
   });
 });

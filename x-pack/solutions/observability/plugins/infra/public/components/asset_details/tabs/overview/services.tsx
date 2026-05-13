@@ -95,7 +95,7 @@ export const ServicesContent = ({
             defaultMessage: 'Error',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           {i18n.translate('xpack.infra.assetDetails.services.getServicesRequestError', {
             defaultMessage: 'An error occurred while fetching services.',
@@ -124,10 +124,14 @@ export const ServicesContent = ({
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.services.noServicesMsg"
-            defaultMessage="No services found on this host. Click {apmTutorialLink} to instrument your services with APM."
+            defaultMessage="We were unable to find services running on this host. Click {apmTutorialLink} to instrument your services with APM."
             values={{
               apmTutorialLink: (
                 <EuiLink
+                  aria-label={i18n.translate(
+                    'xpack.infra.servicesContent.euiLink.apmTutorialLinkLabel',
+                    { defaultMessage: 'APM Instrumentation Tutorial' }
+                  )}
                   data-test-subj="assetDetailsTooltipAPMTutorialLink"
                   href={isServerlessEnv ? serverlessLinkProps.href : linkProps.href}
                 >

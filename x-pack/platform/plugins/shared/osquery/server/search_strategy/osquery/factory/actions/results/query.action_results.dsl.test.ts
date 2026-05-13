@@ -180,7 +180,7 @@ describe('buildActionResultsQuery', () => {
       });
     });
 
-    it('should build query with time range filter', () => {
+    it('should build query with time range filter using event.ingested', () => {
       const startDate = '2024-03-15T14:20:00.000Z';
       const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
 
@@ -207,7 +207,7 @@ describe('buildActionResultsQuery', () => {
           filter: [
             {
               range: {
-                started_at: {
+                'event.ingested': {
                   gte: startDate,
                   lte: expectedEndDate,
                 },
@@ -317,7 +317,7 @@ describe('buildActionResultsQuery', () => {
             filter: [
               {
                 range: {
-                  started_at: {
+                  'event.ingested': {
                     gte: startDate,
                     lte: expectedEndDate,
                   },
@@ -435,6 +435,93 @@ describe('buildActionResultsQuery', () => {
       expect(resultPage1.aggs).toEqual(resultPage10.aggs);
       expect(resultPage1.from).toBe(0);
       expect(resultPage10.from).toBe(500);
+    });
+  });
+
+  describe('CCS support', () => {
+    const basePagination = { activePage: 0, querySize: 10, cursorStart: 0 };
+    const baseSort = { field: 'started_at' as const, direction: Direction.desc };
+
+    it('should include remote cluster patterns when ccsEnabled is true and using legacy index', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: false,
+        useNewDataStream: false,
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toBe('.fleet-actions-results*,*:.fleet-actions-results*');
+    });
+
+    it('should include remote cluster patterns when ccsEnabled is true and using component template index', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: true,
+        useNewDataStream: false,
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toBe(
+        '.logs-osquery_manager.action.responses*,*:.logs-osquery_manager.action.responses*'
+      );
+    });
+
+    it('should include remote cluster patterns when ccsEnabled is true and using new data stream', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: false,
+        useNewDataStream: true,
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toBe(
+        'logs-osquery_manager.action.responses*,*:logs-osquery_manager.action.responses*'
+      );
+    });
+
+    it('should include remote cluster patterns for each namespace when ccsEnabled is true', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: true,
+        useNewDataStream: false,
+        integrationNamespaces: ['default', 'ns1'],
+        ccsEnabled: true,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toBe(
+        '.logs-osquery_manager.action.responses-default,.logs-osquery_manager.action.responses-ns1,*:.logs-osquery_manager.action.responses-default,*:.logs-osquery_manager.action.responses-ns1'
+      );
+    });
+
+    it('should not modify index when ccsEnabled is false', () => {
+      const options: ActionResultsRequestOptions = {
+        actionId: 'action-no-ccs',
+        pagination: basePagination,
+        sort: baseSort,
+        componentTemplateExists: false,
+        useNewDataStream: true,
+        ccsEnabled: false,
+      };
+
+      const result = buildActionResultsQuery(options);
+
+      expect(result.index).toBe('logs-osquery_manager.action.responses*');
     });
   });
 

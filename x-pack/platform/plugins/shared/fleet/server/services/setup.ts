@@ -8,9 +8,10 @@
 import fs from 'fs/promises';
 
 import apm from 'elastic-apm-node';
+import { withActiveSpan } from '@kbn/tracing-utils';
 
 import { compact } from 'lodash';
-import pMap from 'p-map';
+
 import pRetry from 'p-retry';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
@@ -23,7 +24,6 @@ import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
 import { scheduleSetupTask } from '../tasks/setup/schedule';
-import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../constants';
 
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
@@ -40,12 +40,7 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import {
-  ensureFleetEventIngestedPipelineIsInstalled,
-  ensureFleetFinalPipelineIsInstalled,
-} from './epm/elasticsearch/ingest_pipeline/install';
-import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
-import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
+
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
@@ -69,6 +64,7 @@ import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_co
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
+import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -102,22 +98,32 @@ export async function setupFleet(
     useLock: boolean;
   } = { useLock: false }
 ): Promise<SetupStatus> {
-  const t = apm.startTransaction('fleet-setup', 'fleet');
-  try {
-    if (options.useLock) {
-      return _runSetupWithLock(() =>
-        awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
-      );
-    } else {
-      return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  return withActiveSpan(
+    'fleet-setup',
+    {
+      attributes: { 'transaction.type': 'fleet' },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
+    async () => {
+      const t = apm.startTransaction('fleet-setup', 'fleet');
+      try {
+        if (options.useLock) {
+          return _runSetupWithLock(() =>
+            awaitIfPending(async () => createSetupSideEffects(soClient, esClient))
+          );
+        } else {
+          return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+        }
+      } catch (error) {
+        apm.captureError(error);
+        t.setOutcome('failure');
+        throw error;
+      } finally {
+        t.end();
+      }
     }
-  } catch (error) {
-    apm.captureError(error);
-    t.setOutcome('failure');
-    throw error;
-  } finally {
-    t.end();
-  }
+  );
 }
 
 async function createSetupSideEffects(
@@ -179,7 +185,12 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet Elasticsearch assets');
   let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
-  await ensureFleetGlobalEsAssets(soClient, esClient);
+  await ensureFleetGlobalEsAssets(
+    { soClient, esClient, logger },
+    {
+      reinstallPackages: true,
+    }
+  );
   stepSpan?.end();
 
   // Ensure that required packages are always installed even if they're left out of the config
@@ -217,12 +228,24 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  await setupUpgradeManagedPackagePolicies(soClient, esClient);
+  await setupUpgradeManagedPackagePolicies(soClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
   stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
-  await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  const config = appContextService.getConfig();
+  const shouldDeferPackageBumpInstallVersion =
+    config?.startupOptimization?.deferPackageBumpInstallVersion ?? false;
+
+  if (shouldDeferPackageBumpInstallVersion) {
+    logger.info('Deferring package install version upgrade to background task');
+    await scheduleSetupTask(appContextService.getTaskManagerStart()!, {
+      type: 'upgradePackageInstallVersion',
+    });
+  } else {
+    await upgradePackageInstallVersion({ soClient, esClient, logger });
+  }
   stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');
@@ -308,44 +331,6 @@ async function createSetupSideEffects(
     isInitialized: true,
     nonFatalErrors,
   };
-}
-
-/**
- * Ensure ES assets shared by all Fleet index template are installed
- */
-export async function ensureFleetGlobalEsAssets(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
-  const logger = appContextService.getLogger();
-  // Ensure Global Fleet ES assets are installed
-  logger.debug('Creating Fleet component template and ingest pipeline');
-  const globalAssetsRes = await Promise.all([
-    ensureDefaultComponentTemplates(esClient, logger), // returns an array
-    ensureFleetFinalPipelineIsInstalled(esClient, logger),
-    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
-  ]);
-  const assetResults = globalAssetsRes.flat();
-  if (assetResults.some((asset) => asset.isCreated)) {
-    // Update existing index template
-    const installedPackages = await getInstallations(soClient);
-    await pMap(
-      installedPackages.saved_objects,
-      async ({ attributes: installation }) => {
-        await reinstallPackageForInstallation({
-          soClient,
-          esClient,
-          installation,
-        }).catch((err) => {
-          apm.captureError(err);
-          logger.error(
-            `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
-          );
-        });
-      },
-      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
-    );
-  }
 }
 
 /**

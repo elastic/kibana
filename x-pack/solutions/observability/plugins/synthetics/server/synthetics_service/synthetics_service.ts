@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskInstance,
@@ -18,10 +18,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
 import moment from 'moment';
-import { MaintenanceWindowClient } from '@kbn/alerting-plugin/server/maintenance_window_client';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
-import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import type { SyntheticsServerSetup } from '../types';
 import {
@@ -112,8 +111,30 @@ export class SyntheticsService {
   public start(taskManager: TaskManagerStartContract) {
     if (this.config?.manifestUrl) {
       void this.scheduleSyncTask(taskManager);
+    } else {
+      const logLevel = this.shouldLogAsError() ? 'error' : 'debug';
+      const message =
+        'Synthetics sync task is not being scheduled because manifestUrl is not configured.';
+      this.logger[logLevel](message);
     }
     void this.setupIndexTemplates();
+  }
+
+  private shouldLogAsError(): boolean {
+    const cloud = this.server.cloud;
+    if (!cloud) {
+      return false; // Self-managed, use DEBUG
+    }
+    // Serverless deployments should log as ERROR
+    if (cloud.isServerlessEnabled) {
+      return true;
+    }
+    // ECH (stateful) deployments have deploymentId, should log as ERROR
+    if (cloud.isCloudEnabled && cloud.deploymentId) {
+      return true;
+    }
+    // ECE or self-managed, use DEBUG
+    return false;
   }
 
   public async setupIndexTemplates() {
@@ -129,7 +150,17 @@ export class SyntheticsService {
       if (!this.indexTemplateInstalling) {
         this.indexTemplateInstalling = true;
 
-        const installedPackage = await installSyntheticsIndexTemplates(this.server);
+        const installedPackage = await pRetry(() => installSyntheticsIndexTemplates(this.server), {
+          retries: 3,
+          minTimeout: 3000,
+          factor: 2,
+          onFailedAttempt: (error) => {
+            this.logger.debug(
+              `Attempt ${error.attemptNumber} to install synthetics index templates failed. ` +
+                `${error.retriesLeft} retries remaining.`
+            );
+          },
+        });
         this.indexTemplateInstalling = false;
         if (
           installedPackage.name === 'synthetics' &&
@@ -196,8 +227,14 @@ export class SyntheticsService {
                 service.signupUrl = signupUrl;
 
                 if (service.isAllowed && service.config.manifestUrl) {
-                  void service.setupIndexTemplates();
-                  await service.pushConfigs();
+                  await service.setupIndexTemplates();
+                  if (service.indexTemplateExists) {
+                    await service.pushConfigs(ALL_SPACES_ID);
+                  } else {
+                    service.logger.warn(
+                      'Skipping monitor push — synthetics index templates not yet installed.'
+                    );
+                  }
                 } else {
                   if (!service.isAllowed) {
                     service.logger.debug('User is not allowed to access Synthetics service.');
@@ -410,7 +447,7 @@ export class SyntheticsService {
     }
   }
 
-  async pushConfigs() {
+  async pushConfigs(spaceId: string) {
     const license = await this.getLicense();
     const service = this;
 
@@ -420,7 +457,7 @@ export class SyntheticsService {
     let output: ServiceData['output'] | null = null;
 
     const paramsBySpace = await this.getSyntheticsParams();
-    const maintenanceWindows = await this.getMaintenanceWindows();
+    const maintenanceWindows = await this.getMaintenanceWindows(spaceId);
     const finder = await this.getSOClientFinder({ pageSize: PER_PAGE });
 
     const bucketsByLocation: Record<string, MonitorFields[]> = {};
@@ -511,7 +548,7 @@ export class SyntheticsService {
     // execute the remaining monitors
     await syncAllLocations();
 
-    await finder.close();
+    finder.close().catch(() => {});
   }
 
   async runOnceConfigs(configs?: ConfigData) {
@@ -649,19 +686,19 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  async getMaintenanceWindows() {
-    const { savedObjects } = this.server.coreStart;
-    const soClient = savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
+  async getMaintenanceWindows(spaceId: string) {
+    const maintenanceWindowClient = this.server.getMaintenanceWindowClientInternal(
+      {} as KibanaRequest
+    );
 
-    const maintenanceWindowClient = new MaintenanceWindowClient({
-      savedObjectsClient: soClient,
-      getUserName: async () => '',
-      uiSettings: this.server.coreStart.uiSettings.asScopedToClient(soClient),
-      logger: this.logger,
-    });
+    if (!maintenanceWindowClient) {
+      return [];
+    }
+
     const mws = await maintenanceWindowClient.find({
       page: 0,
       perPage: 1000,
+      namespaces: [spaceId],
     });
     return mws.data;
   }
@@ -704,6 +741,7 @@ export class SyntheticsService {
         configId: monitor.id,
         heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
         spaceId: monitorSpace,
+        kibanaUrl: this.server.basePath.publicBaseUrl ?? undefined,
       };
     });
 

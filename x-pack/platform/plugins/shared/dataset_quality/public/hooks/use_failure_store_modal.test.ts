@@ -17,13 +17,34 @@ jest.mock('@kbn/failure-store-modal', () => ({
   FailureStoreModal: jest.fn(),
 }));
 
+jest.mock('@kbn/streams-schema', () => ({
+  isRootStreamDefinition: jest.fn(),
+  isEnabledFailureStore: jest.fn(),
+  isInheritFailureStore: jest.fn(),
+  isDisabledLifecycleFailureStore: jest.fn(),
+  isEnabledLifecycleFailureStore: jest.fn(),
+}));
+
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
+import {
+  isRootStreamDefinition,
+  isEnabledFailureStore,
+  isInheritFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
+} from '@kbn/streams-schema';
 
 describe('useFailureStoreModal', () => {
   const mockUseDatasetQualityDetailsState = useDatasetQualityDetailsState as jest.Mock;
   const mockFailureStoreModal = FailureStoreModal as jest.Mock;
   const mockUpdateFailureStore = jest.fn();
+  const mockIsRootStreamDefinition = isRootStreamDefinition as unknown as jest.Mock;
+  const mockIsEnabledFailureStore = isEnabledFailureStore as unknown as jest.Mock;
+  const mockIsInheritFailureStore = isInheritFailureStore as unknown as jest.Mock;
+  const mockIsDisabledLifecycleFailureStore =
+    isDisabledLifecycleFailureStore as unknown as jest.Mock;
+  const mockIsEnabledLifecycleFailureStore = isEnabledLifecycleFailureStore as unknown as jest.Mock;
 
   const defaultMockData = {
     canUserReadFailureStore: true,
@@ -32,6 +53,9 @@ describe('useFailureStoreModal', () => {
     customRetentionPeriod: '30d',
     updateFailureStore: mockUpdateFailureStore,
     canUserManageFailureStore: true,
+    view: 'dataQuality' as const,
+    streamDefinition: undefined,
+    dataStreamDetails: undefined,
   };
 
   beforeEach(() => {
@@ -40,6 +64,12 @@ describe('useFailureStoreModal', () => {
     mockFailureStoreModal.mockImplementation(() =>
       React.createElement('div', { 'data-testid': 'failure-store-modal' })
     );
+    // Default mock implementations
+    mockIsRootStreamDefinition.mockReturnValue(false);
+    mockIsEnabledFailureStore.mockReturnValue(true);
+    mockIsInheritFailureStore.mockReturnValue(false);
+    mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+    mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
   });
 
   describe('initialization', () => {
@@ -91,173 +121,822 @@ describe('useFailureStoreModal', () => {
   });
 
   describe('handleSaveModal', () => {
-    it('should call updateFailureStore with correct data and close modal', async () => {
-      const { result } = renderHook(() => useFailureStoreModal());
-
-      act(() => {
-        result.current.openModal();
-      });
-      expect(result.current.isFailureStoreModalOpen).toBe(true);
-
-      const saveData = {
-        failureStoreEnabled: true,
-        customRetentionPeriod: '15d',
-      };
-
-      await act(async () => {
-        await result.current.handleSaveModal(saveData);
+    describe('dataQuality view', () => {
+      beforeEach(() => {
+        mockUseDatasetQualityDetailsState.mockReturnValue({
+          ...defaultMockData,
+          view: 'dataQuality',
+        });
       });
 
-      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
-        failureStoreEnabled: true,
-        customRetentionPeriod: '15d',
+      it('should call updateFailureStore with correct data and close modal', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(true);
+
+        const saveData = {
+          failureStoreEnabled: true,
+          customRetentionPeriod: '15d',
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreDataQualityConfig: {
+            failureStoreEnabled: true,
+            customRetentionPeriod: '15d',
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
       });
-      expect(result.current.isFailureStoreModalOpen).toBe(false);
+
+      it('should handle save with only failureStoreEnabled', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: false,
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreDataQualityConfig: {
+            failureStoreEnabled: false,
+            customRetentionPeriod: undefined,
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
+      });
+
+      it('should handle save with undefined customRetentionPeriod', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: true,
+          customRetentionPeriod: undefined,
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreDataQualityConfig: {
+            failureStoreEnabled: true,
+            customRetentionPeriod: undefined,
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
+      });
+
+      it('should close modal when updateFailureStore is called', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: true,
+          customRetentionPeriod: '10d',
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreDataQualityConfig: {
+            failureStoreEnabled: true,
+            customRetentionPeriod: '10d',
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
+      });
     });
 
-    it('should handle save with only failureStoreEnabled', async () => {
-      const { result } = renderHook(() => useFailureStoreModal());
-
-      act(() => {
-        result.current.openModal();
-      });
-
-      const saveData = {
-        failureStoreEnabled: false,
+    describe('stream views (classic/wired)', () => {
+      const mockStreamDefinition = {
+        stream: {
+          name: 'test-stream',
+          ingest: {
+            failure_store: {
+              lifecycle: {
+                enabled: {
+                  data_retention: '7d',
+                },
+              },
+            },
+          },
+        },
       };
 
-      await act(async () => {
-        await result.current.handleSaveModal(saveData);
+      beforeEach(() => {
+        mockUseDatasetQualityDetailsState.mockReturnValue({
+          ...defaultMockData,
+          view: 'classic',
+          streamDefinition: mockStreamDefinition,
+        });
       });
 
-      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
-        failureStoreEnabled: false,
-        customRetentionPeriod: undefined,
-      });
-      expect(result.current.isFailureStoreModalOpen).toBe(false);
-    });
+      it('should handle inherit option when enabled', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
 
-    it('should handle save with undefined customRetentionPeriod', async () => {
-      const { result } = renderHook(() => useFailureStoreModal());
+        act(() => {
+          result.current.openModal();
+        });
 
-      act(() => {
-        result.current.openModal();
-      });
+        const saveData = {
+          failureStoreEnabled: true,
+          inherit: true,
+        };
 
-      const saveData = {
-        failureStoreEnabled: true,
-        customRetentionPeriod: undefined,
-      };
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
 
-      await act(async () => {
-        await result.current.handleSaveModal(saveData);
-      });
-
-      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
-        failureStoreEnabled: true,
-        customRetentionPeriod: undefined,
-      });
-      expect(result.current.isFailureStoreModalOpen).toBe(false);
-    });
-
-    it('should close modal when updateFailureStore is called', async () => {
-      const { result } = renderHook(() => useFailureStoreModal());
-
-      act(() => {
-        result.current.openModal();
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreStreamConfig: { inherit: {} },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
       });
 
-      const saveData = {
-        failureStoreEnabled: true,
-        customRetentionPeriod: '10d',
-      };
+      it('should handle disabled failure store', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
 
-      await act(async () => {
-        await result.current.handleSaveModal(saveData);
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: false,
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreStreamConfig: { disabled: {} },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
       });
 
-      expect(mockUpdateFailureStore).toHaveBeenCalledWith({
-        failureStoreEnabled: true,
-        customRetentionPeriod: '10d',
+      it('should handle retention disabled', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: true,
+          retentionDisabled: true,
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreStreamConfig: {
+            lifecycle: { disabled: {} },
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
       });
-      expect(result.current.isFailureStoreModalOpen).toBe(false);
+
+      it('should handle custom retention period', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: true,
+          customRetentionPeriod: '15d',
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreStreamConfig: {
+            lifecycle: {
+              enabled: {
+                data_retention: '15d',
+              },
+            },
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
+      });
+
+      it('should handle enabled without custom retention', async () => {
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const saveData = {
+          failureStoreEnabled: true,
+        };
+
+        await act(async () => {
+          await result.current.handleSaveModal(saveData);
+        });
+
+        expect(mockUpdateFailureStore).toHaveBeenCalledWith({
+          failureStoreStreamConfig: {
+            lifecycle: {
+              enabled: {
+                data_retention: undefined,
+              },
+            },
+          },
+        });
+        expect(result.current.isFailureStoreModalOpen).toBe(false);
+      });
     });
   });
 
   describe('renderModal', () => {
-    it('should return FailureStoreModal when user can manage and modal is open', () => {
-      const { result } = renderHook(() => useFailureStoreModal());
+    describe('common behavior', () => {
+      it('should return null when user cannot manage failure store', () => {
+        mockUseDatasetQualityDetailsState.mockReturnValue({
+          ...defaultMockData,
+          canUserManageFailureStore: false,
+        });
 
-      act(() => {
-        result.current.openModal();
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const modalElement = result.current.renderModal();
+
+        expect(modalElement).toBeNull();
+        expect(mockFailureStoreModal).not.toHaveBeenCalled();
       });
 
-      const modalElement = result.current.renderModal();
+      it('should return null when modal is not open', () => {
+        const { result } = renderHook(() => useFailureStoreModal());
 
-      expect(modalElement).not.toBeNull();
-      expect(React.isValidElement(modalElement)).toBe(true);
-      expect(modalElement?.props).toEqual({
-        onCloseModal: result.current.closeModal,
-        onSaveModal: result.current.handleSaveModal,
-        failureStoreProps: {
-          failureStoreEnabled: true,
-          defaultRetentionPeriod: '7d',
-          customRetentionPeriod: '30d',
-        },
+        const modalElement = result.current.renderModal();
+
+        expect(modalElement).toBeNull();
+        expect(mockFailureStoreModal).not.toHaveBeenCalled();
       });
     });
 
-    it('should return null when user cannot manage failure store', () => {
-      mockUseDatasetQualityDetailsState.mockReturnValue({
-        ...defaultMockData,
-        canUserManageFailureStore: false,
+    describe('dataQuality view', () => {
+      beforeEach(() => {
+        mockUseDatasetQualityDetailsState.mockReturnValue({
+          ...defaultMockData,
+          view: 'dataQuality',
+        });
       });
 
-      const { result } = renderHook(() => useFailureStoreModal());
+      it('should return FailureStoreModal with correct props when modal is open', () => {
+        const { result } = renderHook(() => useFailureStoreModal());
 
-      act(() => {
-        result.current.openModal();
+        act(() => {
+          result.current.openModal();
+        });
+
+        const modalElement = result.current.renderModal();
+
+        expect(modalElement).not.toBeNull();
+        expect(React.isValidElement(modalElement)).toBe(true);
+        expect(modalElement?.props).toEqual({
+          onCloseModal: result.current.closeModal,
+          onSaveModal: result.current.handleSaveModal,
+          failureStoreProps: {
+            failureStoreEnabled: true,
+            defaultRetentionPeriod: '7d',
+            customRetentionPeriod: '30d',
+          },
+        });
       });
 
-      const modalElement = result.current.renderModal();
-
-      expect(modalElement).toBeNull();
-      expect(mockFailureStoreModal).not.toHaveBeenCalled();
-    });
-
-    it('should return null when modal is not open', () => {
-      const { result } = renderHook(() => useFailureStoreModal());
-
-      const modalElement = result.current.renderModal();
-
-      expect(modalElement).toBeNull();
-      expect(mockFailureStoreModal).not.toHaveBeenCalled();
-    });
-
-    it('should pass correct props to FailureStoreModal', () => {
-      mockUseDatasetQualityDetailsState.mockReturnValue({
-        ...defaultMockData,
-        hasFailureStore: false,
-        defaultRetentionPeriod: '1d',
-        customRetentionPeriod: '5d',
-      });
-
-      const { result } = renderHook(() => useFailureStoreModal());
-
-      act(() => {
-        result.current.openModal();
-      });
-
-      const modalElement = result.current.renderModal();
-
-      expect(modalElement?.props).toEqual({
-        onCloseModal: result.current.closeModal,
-        onSaveModal: result.current.handleSaveModal,
-        failureStoreProps: {
-          failureStoreEnabled: false,
+      it('should pass correct props to FailureStoreModal with different values', () => {
+        mockUseDatasetQualityDetailsState.mockReturnValue({
+          ...defaultMockData,
+          view: 'dataQuality',
+          hasFailureStore: false,
           defaultRetentionPeriod: '1d',
           customRetentionPeriod: '5d',
+        });
+
+        const { result } = renderHook(() => useFailureStoreModal());
+
+        act(() => {
+          result.current.openModal();
+        });
+
+        const modalElement = result.current.renderModal();
+
+        expect(modalElement?.props).toEqual({
+          onCloseModal: result.current.closeModal,
+          onSaveModal: result.current.handleSaveModal,
+          failureStoreProps: {
+            failureStoreEnabled: false,
+            defaultRetentionPeriod: '1d',
+            customRetentionPeriod: '5d',
+          },
+        });
+      });
+    });
+
+    describe('stream views (classic/wired)', () => {
+      const mockStreamDefinition = {
+        stream: {
+          name: 'test-stream',
+          ingest: {
+            failure_store: {
+              lifecycle: {
+                enabled: {
+                  data_retention: '14d',
+                },
+              },
+            },
+          },
         },
+      };
+
+      describe('classic view (non-root stream)', () => {
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'classic',
+            streamDefinition: mockStreamDefinition,
+            dataStreamDetails: { isServerless: false },
+          });
+          mockIsRootStreamDefinition.mockReturnValue(false);
+          mockIsEnabledFailureStore.mockReturnValue(true);
+          mockIsInheritFailureStore.mockReturnValue(false);
+          mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
+        });
+
+        it('should return FailureStoreModal with inherit options for non-root stream', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(React.isValidElement(modalElement)).toBe(true);
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: '14d',
+              retentionDisabled: false,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: false,
+              isCurrentlyInherited: false,
+            },
+            canShowDisableLifecycle: true,
+            showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+
+        it('should not show disable lifecycle option in serverless', () => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'classic',
+            streamDefinition: mockStreamDefinition,
+            dataStreamDetails: { isServerless: true },
+          });
+
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(React.isValidElement(modalElement)).toBe(true);
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: '14d',
+              retentionDisabled: false,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: false,
+              isCurrentlyInherited: false,
+            },
+            canShowDisableLifecycle: false,
+            showIlmDescription: false,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+      });
+
+      describe('wired view (non-root stream)', () => {
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'wired',
+            streamDefinition: mockStreamDefinition,
+            dataStreamDetails: { isServerless: false },
+          });
+          mockIsRootStreamDefinition.mockReturnValue(false);
+          mockIsEnabledFailureStore.mockReturnValue(true);
+          mockIsInheritFailureStore.mockReturnValue(false);
+          mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
+        });
+
+        it('should return FailureStoreModal with wired inherit options', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(React.isValidElement(modalElement)).toBe(true);
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: '14d',
+              retentionDisabled: false,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: true,
+              isCurrentlyInherited: false,
+            },
+            canShowDisableLifecycle: true,
+            showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+
+        it('should not show disable lifecycle option in serverless', () => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'wired',
+            streamDefinition: mockStreamDefinition,
+            dataStreamDetails: { isServerless: true },
+          });
+
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(React.isValidElement(modalElement)).toBe(true);
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: '14d',
+              retentionDisabled: false,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: true,
+              isCurrentlyInherited: false,
+            },
+            canShowDisableLifecycle: false,
+            showIlmDescription: false,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+      });
+
+      describe('root stream', () => {
+        const rootStreamDefinition = {
+          stream: {
+            name: 'logs',
+            ingest: {
+              wired: {},
+              failure_store: {
+                lifecycle: {
+                  enabled: {
+                    data_retention: '7d',
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'wired',
+            streamDefinition: rootStreamDefinition,
+            dataStreamDetails: { isServerless: false },
+          });
+          mockIsRootStreamDefinition.mockReturnValue(true);
+          mockIsEnabledFailureStore.mockReturnValue(true);
+          mockIsInheritFailureStore.mockReturnValue(false);
+          mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(true);
+        });
+
+        it('should not include inherit options for root stream', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(React.isValidElement(modalElement)).toBe(true);
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: '7d',
+              retentionDisabled: false,
+            },
+            canShowDisableLifecycle: true,
+            showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+
+        it('should not show disable lifecycle option for root stream in serverless', () => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'wired',
+            streamDefinition: rootStreamDefinition,
+            dataStreamDetails: { isServerless: true },
+          });
+
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(React.isValidElement(modalElement)).toBe(true);
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: '7d',
+              retentionDisabled: false,
+            },
+            canShowDisableLifecycle: false,
+            showIlmDescription: false,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+      });
+
+      describe('inherited failure store', () => {
+        const inheritedStreamDefinition = {
+          stream: {
+            name: 'test-stream',
+            ingest: {
+              failure_store: {
+                inherit: {},
+              },
+            },
+          },
+        };
+
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'classic',
+            streamDefinition: inheritedStreamDefinition,
+            dataStreamDetails: { isServerless: false },
+          });
+          mockIsRootStreamDefinition.mockReturnValue(false);
+          mockIsEnabledFailureStore.mockReturnValue(false);
+          mockIsInheritFailureStore.mockReturnValue(true);
+          mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(false);
+        });
+
+        it('should show inherited state in modal props', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: false,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: undefined,
+              retentionDisabled: false,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: false,
+              isCurrentlyInherited: true,
+            },
+            canShowDisableLifecycle: true,
+            showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+      });
+
+      describe('disabled lifecycle failure store', () => {
+        const disabledLifecycleStreamDefinition = {
+          stream: {
+            name: 'test-stream',
+            ingest: {
+              failure_store: {
+                lifecycle: {
+                  disabled: {},
+                },
+              },
+            },
+          },
+        };
+
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'classic',
+            streamDefinition: disabledLifecycleStreamDefinition,
+            dataStreamDetails: { isServerless: false },
+          });
+          mockIsRootStreamDefinition.mockReturnValue(false);
+          mockIsEnabledFailureStore.mockReturnValue(true);
+          mockIsInheritFailureStore.mockReturnValue(false);
+          mockIsDisabledLifecycleFailureStore.mockReturnValue(true);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(false);
+        });
+
+        it('should show retention disabled state in modal props', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: true,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: undefined,
+              retentionDisabled: true,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: false,
+              isCurrentlyInherited: false,
+            },
+            canShowDisableLifecycle: true,
+            showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+      });
+
+      describe('disabled failure store', () => {
+        const disabledStreamDefinition = {
+          stream: {
+            name: 'test-stream',
+            ingest: {
+              failure_store: {
+                disabled: {},
+              },
+            },
+          },
+        };
+
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'classic',
+            streamDefinition: disabledStreamDefinition,
+            dataStreamDetails: { isServerless: false },
+          });
+          mockIsRootStreamDefinition.mockReturnValue(false);
+          mockIsEnabledFailureStore.mockReturnValue(false);
+          mockIsInheritFailureStore.mockReturnValue(false);
+          mockIsDisabledLifecycleFailureStore.mockReturnValue(false);
+          mockIsEnabledLifecycleFailureStore.mockReturnValue(false);
+        });
+
+        it('should show disabled state in modal props', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).not.toBeNull();
+          expect(modalElement?.props).toEqual({
+            onCloseModal: result.current.closeModal,
+            onSaveModal: result.current.handleSaveModal,
+            failureStoreProps: {
+              failureStoreEnabled: false,
+              defaultRetentionPeriod: '7d',
+              customRetentionPeriod: undefined,
+              retentionDisabled: false,
+            },
+            inheritOptions: {
+              canShowInherit: true,
+              isWired: false,
+              isCurrentlyInherited: false,
+            },
+            canShowDisableLifecycle: true,
+            showIlmDescription: true,
+            disableButtonLabel: 'Indefinite',
+          });
+        });
+      });
+
+      describe('null stream definition', () => {
+        beforeEach(() => {
+          mockUseDatasetQualityDetailsState.mockReturnValue({
+            ...defaultMockData,
+            view: 'classic',
+            streamDefinition: undefined,
+          });
+        });
+
+        it('should return null when stream definition is missing', () => {
+          const { result } = renderHook(() => useFailureStoreModal());
+
+          act(() => {
+            result.current.openModal();
+          });
+
+          const modalElement = result.current.renderModal();
+
+          expect(modalElement).toBeNull();
+        });
       });
     });
   });

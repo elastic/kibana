@@ -5,137 +5,105 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const DOT_EXPANDER_TYPE = 'dot_expander';
 
 describe('Processor: Dot Expander', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    testBed.component.update();
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: DOT_EXPANDER_TYPE },
+    });
 
-    // Open flyout to add new processor
-    testBed.actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await testBed.actions.addProcessorType(DOT_EXPANDER_TYPE);
+    await screen.findByTestId('addProcessorForm');
+    await screen.findByTestId('fieldNameField');
   });
 
   test('prevents form submission if required fields are not provided', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with only the type defined
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
-    // Expect form error as "field" is a required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
+    expect(await screen.findByText('A field value is required.')).toBeInTheDocument();
   });
 
   test('prevents form submission if field for the dot notation does not contain a . and not equal to *', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-      component,
-    } = testBed;
-
     // Add invalid "field" value (required)
-    form.setInputValue('fieldNameField.input', 'missingTheDot');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'missingTheDot' },
+    });
 
     // Save the processor with invalid field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
-    // Move ahead the debounce time which will then execute any validations
-    await act(async () => {
-      jest.runAllTimers();
-    });
-    component.update();
-
-    // Expect form error as "field" does not contain '.'
-    expect(form.getErrorsMessages()).toEqual([
-      'The field name must be an asterisk or contain a dot character.',
-    ]);
+    expect(
+      await screen.findByText('The field name must be an asterisk or contain a dot character.')
+    ).toBeInTheDocument();
   });
 
   test('allows form submission if the field for the dot notation is equal to *', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Set "field" value to a * for expanding all top-level dotted field names
-    form.setInputValue('fieldNameField.input', '*');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: '*' },
+    });
 
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: '*',
     });
   });
 
   test('saves with default parameter values', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field.with.dot');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field.with.dot' },
+    });
 
-    // Save the field
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: 'field.with.dot',
     });
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Add "field" value (required)
-    form.setInputValue('fieldNameField.input', 'field.notation');
+    fireEvent.change(within(screen.getByTestId('fieldNameField')).getByTestId('input'), {
+      target: { value: 'field.notation' },
+    });
 
     // Set optional parameters
-    form.setInputValue('pathField.input', 'somepath');
-    form.toggleEuiSwitch('overrideField.input');
+    fireEvent.change(within(screen.getByTestId('pathField')).getByTestId('input'), {
+      target: { value: 'somepath' },
+    });
+    fireEvent.click(within(screen.getByTestId('overrideField')).getByTestId('input'));
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, DOT_EXPANDER_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][DOT_EXPANDER_TYPE]).toEqual({
       field: 'field.notation',
       path: 'somepath',

@@ -33,6 +33,9 @@ import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import { SavedObjectsManager } from '../saved_objects_manager';
 import type { ZipArchive } from '../types';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { getInstallTaskId, type InstallSampleDataTaskState } from '../../tasks/install_sample_data';
 
 const MockedArtifactManager = ArtifactManager as jest.MockedClass<typeof ArtifactManager>;
 const MockedIndexManager = IndexManager as jest.MockedClass<typeof IndexManager>;
@@ -49,6 +52,7 @@ describe('SampleDataManager', () => {
   let mockArtifactManager: jest.Mocked<ArtifactManager>;
   let mockIndexManager: jest.Mocked<IndexManager>;
   let mockSavedObjectsManager: jest.Mocked<SavedObjectsManager>;
+  let taskManager: ReturnType<typeof taskManagerMock.createStart>;
 
   const mockArchive = {
     close: jest.fn(),
@@ -104,6 +108,8 @@ describe('SampleDataManager', () => {
     MockedArtifactManager.mockImplementation(() => mockArtifactManager);
     MockedIndexManager.mockImplementation(() => mockIndexManager);
     MockedSavedObjectsManager.mockImplementation(() => mockSavedObjectsManager);
+
+    taskManager = taskManagerMock.createStart();
 
     sampleDataManager = new SampleDataManager({
       ...sampleDataManagerOpts,
@@ -184,8 +190,8 @@ describe('SampleDataManager', () => {
         soImporter,
       });
 
-      expect(mockSavedObjectsManager.getDashboardId).toHaveBeenCalledWith(soClient, sampleType);
-      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(sampleType);
+      expect(mockSavedObjectsManager.getDashboardId).not.toHaveBeenCalled();
+      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(sampleType, undefined);
       expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith({
         indexName: expectedIndexName,
         mappings: mockMappings,
@@ -265,7 +271,10 @@ describe('SampleDataManager', () => {
         soImporter,
       });
 
-      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(elasticsearchSampleType);
+      expect(mockArtifactManager.prepareArtifact).toHaveBeenCalledWith(
+        elasticsearchSampleType,
+        undefined
+      );
       expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith({
         indexName: expectedElasticsearchIndexName,
         mappings: mockMappings,
@@ -332,6 +341,66 @@ describe('SampleDataManager', () => {
   describe('getSampleDataStatus', () => {
     const sampleType = 'elasticsearch_documentation' as DatasetSampleType;
     const expectedIndexName = 'kibana_sample_data_elasticsearch_documentation';
+    it('should return installing status when background task is running', async () => {
+      const taskId = getInstallTaskId(sampleType);
+      const task = taskManagerMock.createTask({
+        id: taskId,
+        status: TaskStatus.Running,
+        state: {} as InstallSampleDataTaskState,
+      });
+
+      taskManager.get.mockResolvedValue(task);
+
+      const managerWithTaskManager = new SampleDataManager({
+        ...sampleDataManagerOpts,
+        logger,
+        isServerlessPlatform: false,
+        taskManager,
+      });
+
+      const result = await managerWithTaskManager.getSampleDataStatus({
+        sampleType,
+        esClient,
+        soClient,
+      });
+
+      expect(result).toEqual({
+        status: 'installing',
+        taskId,
+      });
+      expect(taskManager.get).toHaveBeenCalledWith(taskId);
+    });
+
+    it('should return error status when background task failed', async () => {
+      const taskId = getInstallTaskId(sampleType);
+      const task = taskManagerMock.createTask({
+        id: taskId,
+        status: TaskStatus.Failed,
+        state: { status: 'error', errorMessage: 'boom' } as InstallSampleDataTaskState,
+      });
+
+      taskManager.get.mockResolvedValue(task);
+
+      const managerWithTaskManager = new SampleDataManager({
+        ...sampleDataManagerOpts,
+        logger,
+        isServerlessPlatform: false,
+        taskManager,
+      });
+
+      const result = await managerWithTaskManager.getSampleDataStatus({
+        sampleType,
+        esClient,
+        soClient,
+      });
+
+      expect(result).toEqual({
+        status: 'error',
+        taskId,
+        error: 'boom',
+      });
+      expect(taskManager.get).toHaveBeenCalledWith(taskId);
+    });
 
     it('should return installed status when index exists', async () => {
       mockIndexManager.hasIndex.mockResolvedValue(true);
@@ -375,7 +444,7 @@ describe('SampleDataManager', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `Failed to check sample data status for [${sampleType}]: Elasticsearch error`
+        `Failed to check if sample data is installed for [${sampleType}]: Elasticsearch error`
       );
       expect(result).toEqual({
         status: 'uninstalled',

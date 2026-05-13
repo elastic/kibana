@@ -7,24 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: remove eslint exception and use i18n for strings
-/* eslint-disable @typescript-eslint/no-explicit-any, react/jsx-no-literals */
-
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { take } from 'rxjs';
-import type { Query, TimeRange } from '@kbn/data-plugin/common';
-import { buildEsQuery } from '@kbn/es-query';
+import { AlertsSearchBar, useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
+import { SortDirection } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
@@ -46,70 +47,85 @@ interface WorkflowExecuteEventFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
+  /**
+   * When false, RAC alert index/fields HTTP calls are not made
+   */
+  racQueriesEnabled?: boolean;
 }
-
-const unflattenObject = (flatObject: Record<string, any>): Record<string, any> => {
-  const result: Record<string, any> = {};
-
-  for (const key of Object.keys(flatObject)) {
-    const keys = key.split('.');
-    let current = result;
-    for (let i = 0; i < keys.length; i++) {
-      const currentKey = keys[i];
-      if (i === keys.length - 1) {
-        const v = flatObject[key];
-        current[currentKey] = v && typeof v === 'object' ? { ...v } : v;
-      } else {
-        if (
-          current[currentKey] === undefined ||
-          typeof current[currentKey] !== 'object' ||
-          Array.isArray(current[currentKey]) ||
-          !Object.isExtensible(current[currentKey]) // add this
-        ) {
-          current[currentKey] = {};
-        }
-        current = current[currentKey];
-      }
-    }
-  }
-
-  return result;
-};
 
 export const WorkflowExecuteEventForm = ({
   value,
   setValue,
   errors,
   setErrors,
+  racQueriesEnabled = true,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
-  const {
-    unifiedSearch: {
-      ui: { SearchBar },
-    },
-    spaces,
-  } = services;
-  const [spaceId, setSpaceId] = useState<string | null>(null);
+  const { http, notifications, data: dataService, unifiedSearch } = services;
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [timeRange, setTimeRange] = useState<TimeRange>({
+  const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
     from: 'now-15m',
     to: 'now',
   });
 
   const [alertsLoading, setAlertsLoading] = useState(false);
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [query, setQuery] = useState<string>('');
+  const [submittedQuery, setSubmittedQuery] = useState<string>('');
+  const [filters, setFilters] = useState<Filter[]>([]);
+  const [dataView, setDataView] = useState<DataView | null>(null);
+  const dataViewCreatingRef = useRef(false);
 
-  // Get space ID
-  useEffect(() => {
-    if (spaces) {
-      spaces.getActiveSpace().then((space) => {
-        setSpaceId(space.id);
-      });
+  // Fetch alert indices via the RAC endpoint (handles space-unaware systems like o11y)
+  // Empty ruleTypeIds + enabled → returns indices for all authorized rule types.
+  const { data: alertIndexNames } = useFetchAlertsIndexNamesQuery(
+    { http, ruleTypeIds: [] },
+    {
+      enabled: racQueriesEnabled,
+      retry: false,
     }
-  }, [spaces]);
+  );
+
+  const indexPattern = useMemo(
+    () => (alertIndexNames && alertIndexNames.length > 0 ? alertIndexNames.join(',') : undefined),
+    [alertIndexNames]
+  );
+
+  // Create and cache data view when alert index names are available
+  useEffect(() => {
+    if (!dataService || !indexPattern) {
+      return;
+    }
+
+    if (dataViewCreatingRef.current) {
+      return;
+    }
+
+    dataViewCreatingRef.current = true;
+
+    const createDataView = async () => {
+      try {
+        const newDataView = await dataService.dataViews.create({
+          title: indexPattern,
+          timeFieldName: '@timestamp',
+        });
+        setDataView(newDataView);
+      } catch (err) {
+        setErrors(
+          i18n.translate('workflows.workflowExecuteEventForm.dataViewError', {
+            defaultMessage: 'Failed to create data view for alerts',
+          })
+        );
+      } finally {
+        dataViewCreatingRef.current = false;
+      }
+    };
+
+    createDataView();
+  }, [dataService, indexPattern, setErrors]);
 
   const fetchAlerts = useCallback(async () => {
-    if (!services.data || !spaceId) {
+    if (!dataService || !dataView) {
       return;
     }
 
@@ -117,39 +133,65 @@ export const WorkflowExecuteEventForm = ({
     setErrors(null);
 
     try {
-      const esQuery = buildEsQuery(undefined, query ? [query] : [], []);
-      const searchQuery = {
-        bool: {
-          must: esQuery.bool.must || [],
-          filter: [
-            ...(esQuery.bool.filter || []),
-            {
-              range: {
-                '@timestamp': {
-                  gte: timeRange.from,
-                  lte: timeRange.to,
-                },
-              },
-            },
-          ],
-          should: esQuery.bool.should || [],
-          must_not: esQuery.bool.must_not || [],
-        },
-      };
+      // Use SearchSource to match Discovery's behavior - this handles fields API, date formats, etc.
+      const searchSource = await dataService.search.searchSource.create();
 
-      const request = {
-        params: {
-          index: `.alerts-*-${spaceId}`,
-          body: {
-            query: searchQuery,
-            size: 50,
-            sort: [{ '@timestamp': { order: 'desc' } }],
-            _source: [],
+      searchSource.setField('index', dataView);
+
+      // Set query
+      if (submittedQuery) {
+        searchSource.setField('query', {
+          query: submittedQuery,
+          language: 'kuery',
+        });
+      }
+
+      // Set time range filter with proper format (matching Discovery)
+      const timeFilter: Filter = {
+        query: {
+          range: {
+            '@timestamp': {
+              gte: timeRange.from,
+              lte: timeRange.to,
+              format: 'strict_date_optional_time',
+            },
           },
         },
+        meta: {
+          type: 'custom',
+        },
       };
 
-      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
+      // Set filters
+      searchSource.setField('filter', [...filters, timeFilter]);
+
+      // Set sort (matching Discovery's format)
+      // Using type assertion because unmapped_type is a valid ES parameter
+      // but not included in SearchSource's EsQuerySortValue type
+      const sortWithUnmappedType = [
+        {
+          '@timestamp': {
+            order: SortDirection.desc,
+            format: 'strict_date_optional_time||epoch_millis',
+            unmapped_type: 'boolean',
+          },
+        },
+        {
+          _doc: {
+            order: SortDirection.desc,
+            unmapped_type: 'boolean',
+          },
+        },
+      ] as estypes.SortCombinations[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      searchSource.setField('sort', sortWithUnmappedType as any);
+
+      // Set size and track_total_hits (matching Discovery)
+      searchSource.setField('size', 50);
+      searchSource.setField('trackTotalHits', false);
+
+      // Fetch using SearchSource (this will use fields API like Discovery)
+      const response = await searchSource.fetch$().pipe(take(1)).toPromise();
 
       if (
         response &&
@@ -162,35 +204,37 @@ export const WorkflowExecuteEventForm = ({
         setAlerts([]);
       }
     } catch (err) {
-      setErrors(err instanceof Error ? err.message : 'Failed to fetch alerts');
+      setErrors(
+        err instanceof Error
+          ? err.message
+          : i18n.translate('workflows.workflowExecuteEventForm.fetchError', {
+              defaultMessage: 'Failed to fetch alerts',
+            })
+      );
       setAlerts([]);
     } finally {
       setAlertsLoading(false);
     }
-  }, [services.data, setErrors, query, timeRange.from, timeRange.to, spaceId]);
+  }, [dataService, setErrors, submittedQuery, timeRange.from, timeRange.to, filters, dataView]);
 
   useEffect(() => {
-    if (spaceId) {
+    if (dataView) {
       fetchAlerts();
     }
-  }, [fetchAlerts, spaceId]);
+    // Only trigger fetch when dataView is ready and query/time/filters change
+  }, [dataView, submittedQuery, timeRange.from, timeRange.to, filters, fetchAlerts]);
 
   const updateEventData = (selectedAlerts: Alert[]) => {
     if (selectedAlerts.length > 0) {
-      const alertEvents = selectedAlerts.map((alert: Alert) => {
-        const unflattenedAlert = unflattenObject(alert._source);
+      const alertIds: AlertSelection[] = selectedAlerts.map((alert: Alert) => ({
+        _id: alert._id,
+        _index: alert._index,
+      }));
 
-        return {
-          id: alert._id,
-          index: alert._index,
-          timestamp: alert._source['@timestamp'],
-          ...unflattenedAlert.kibana.alert,
-        };
-      });
-
-      const workflowEvent = {
+      const workflowEvent: AlertTriggerInput = {
         event: {
-          alerts: alertEvents,
+          alertIds,
+          triggerType: 'alert',
         },
       };
 
@@ -198,18 +242,44 @@ export const WorkflowExecuteEventForm = ({
     }
   };
 
-  const handleQueryChange = ({
-    query: newQuery,
-    dateRange,
-  }: {
-    query?: Query;
-    dateRange: TimeRange;
-  }) => {
-    if (newQuery) {
-      setQuery(newQuery);
-    }
-    setTimeRange(dateRange);
-  };
+  const handleQueryChange = useCallback(
+    ({
+      query: newQuery,
+      dateRange,
+    }: {
+      query?: string;
+      dateRange: { from: string; to: string };
+    }) => {
+      if (newQuery !== undefined) {
+        setQuery(newQuery);
+      }
+      setTimeRange(dateRange);
+    },
+    []
+  );
+
+  const handleQuerySubmit = useCallback(
+    ({
+      query: newQuery,
+      dateRange,
+    }: {
+      query?: string;
+      dateRange: { from: string; to: string };
+    }) => {
+      // Update both draft and submitted query on submit
+      if (newQuery !== undefined) {
+        setQuery(newQuery);
+        setSubmittedQuery(newQuery);
+      }
+      setTimeRange(dateRange);
+      // fetchAlerts will be triggered by useEffect when submittedQuery changes
+    },
+    []
+  );
+
+  const handleFiltersUpdated = useCallback((newFilters: Filter[]) => {
+    setFilters(newFilters);
+  }, []);
 
   const fmt = services.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE);
 
@@ -223,71 +293,97 @@ export const WorkflowExecuteEventForm = ({
     },
     {
       field: '_source.kibana.alert.rule.name',
-      name: 'Rule',
+      name: i18n.translate('workflows.workflowExecuteEventForm.ruleColumnHeader', {
+        defaultMessage: 'Rule',
+      }),
       sortable: true,
       render: (name: string, item: Alert) => item._source['kibana.alert.rule.name'],
+    },
+    {
+      field: '_source.message',
+      name: i18n.translate('workflows.workflowExecuteEventForm.messageColumnHeader', {
+        defaultMessage: 'Message',
+      }),
+      sortable: true,
+      render: (message: string, item: Alert) => {
+        const originalMessage = item._source.message;
+        if (originalMessage) {
+          return typeof originalMessage === 'string' ? originalMessage : String(originalMessage);
+        }
+        return item._source['kibana.alert.reason'] || '-';
+      },
     },
   ];
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="s" />
-      <EuiFlexItem>
-        <SearchBar
+      <EuiFlexItem grow={false}>
+        <AlertsSearchBar
           appName="workflow_management"
           showDatePicker
-          onQuerySubmit={handleQueryChange}
+          onQueryChange={handleQueryChange}
+          onQuerySubmit={handleQuerySubmit}
+          onFiltersUpdated={handleFiltersUpdated}
           query={query}
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
+          filters={filters}
+          rangeFrom={timeRange.from}
+          rangeTo={timeRange.to}
           showFilterBar={false}
           showSubmitButton={true}
-          placeholder="Filter your data using KQL syntax"
-          data-test-subj="workflow-query-input"
+          placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
+            defaultMessage:
+              'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
+          })}
+          ruleTypeIds={[]}
+          http={http}
+          toasts={notifications.toasts}
+          unifiedSearchBar={unifiedSearch.ui.SearchBar}
+          dataService={dataService}
+          fetchUnifiedAlertsFields={Boolean(
+            racQueriesEnabled && alertIndexNames && alertIndexNames.length > 0
+          )}
         />
       </EuiFlexItem>
-      <EuiFlexItem>
-        {alertsLoading ? (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">Loading alerts...</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiBasicTable
-            itemId="_id"
-            rowHeader="@timestamp"
-            tableLayout="fixed"
-            items={alerts}
-            columns={columns}
-            selection={{
-              onSelectionChange: updateEventData,
-            }}
-          />
-        )}
-      </EuiFlexItem>
 
-      {/* Error Display */}
       {errors && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
-            title="Failed to load alerts"
+            title={i18n.translate('workflows.workflowExecuteEventForm.errorTitle', {
+              defaultMessage: 'Failed to load alerts',
+            })}
             color="warning"
             iconType="help"
             size="s"
           >
             <p>{errors}</p>
             <EuiText size="s">
-              Make sure you have the proper permissions to access security alerts, or manually enter
-              the event data below.
+              {i18n.translate('workflows.workflowExecuteEventForm.errorMessage', {
+                defaultMessage:
+                  'Make sure you have the proper permissions to access security alerts, or manually enter the event data below.',
+              })}
             </EuiText>
           </EuiCallOut>
         </EuiFlexItem>
       )}
+
+      <EuiFlexItem>
+        <EuiBasicTable
+          itemId="_id"
+          rowHeader="@timestamp"
+          tableLayout="fixed"
+          items={alerts}
+          columns={columns}
+          loading={alertsLoading}
+          tableCaption={i18n.translate('workflows.workflowExecuteEventForm.tableCaption', {
+            defaultMessage: 'Alerts list for workflow execution',
+          })}
+          selection={{
+            onSelectionChange: updateEventData,
+          }}
+          css={{ border: euiTheme.border.thin, paddingTop: '1px' }}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

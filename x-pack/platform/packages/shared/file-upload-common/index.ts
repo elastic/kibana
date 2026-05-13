@@ -26,11 +26,14 @@ export type {
   ImportResults,
   CreateDocsResponse,
   ImportFactoryOptions,
+  TestGrokPatternResponse,
+  GetAdditionalLinksParams,
+  GetAdditionalLinks,
+  ResultLink,
 } from './src/types';
 
 export {
   OPEN_FILE_UPLOAD_LITE_ACTION,
-  OPEN_FILE_UPLOAD_LITE_TRIGGER,
   FILE_FORMATS,
   FILE_SIZE_DISPLAY_FORMAT,
   MB,
@@ -50,3 +53,10 @@ export {
   FILE_UPLOAD_EVENT,
   FileUploadTelemetryService,
 } from './src/telemetry';
+
+export type { ConfigSchema, ResultLinks } from './src/app';
+
+export {
+  getFieldsFromGrokPattern,
+  replaceFieldInGrokPattern,
+} from './src/grok_pattern_utils/grok_pattern';

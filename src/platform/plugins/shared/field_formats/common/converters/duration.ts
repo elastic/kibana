@@ -68,6 +68,11 @@ export class DurationFormat extends FieldFormat {
   }
 
   textConvert: TextContextTypeConvert = (val: number) => {
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
+    }
+
     const inputFormat = this.param('inputFormat');
     const outputFormat = this.param('outputFormat') as keyof Duration;
     const outputPrecision = this.param('outputPrecision');

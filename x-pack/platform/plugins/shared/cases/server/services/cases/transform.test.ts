@@ -6,8 +6,11 @@
  */
 
 import { omit } from 'lodash';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
+  basicESCaseFields,
   createCaseSavedObjectResponse,
   createESJiraConnector,
   createExternalService,
@@ -15,6 +18,7 @@ import {
 } from '../test_utils';
 import {
   transformAttributesToESModel,
+  transformESModelToCase,
   transformSavedObjectToExternalModel,
   transformUpdateResponseToExternalModel,
 } from './transform';
@@ -24,6 +28,7 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
+import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
 
@@ -754,6 +759,189 @@ describe('case transforms', () => {
         // @ts-expect-error: total_alerts is not defined in the attributes
         transformSavedObjectToExternalModel(resWithTotalAlerts).attributes.total_alerts
       ).not.toBeDefined();
+    });
+  });
+
+  describe('transformESModelToCase', () => {
+    const createMockSearchHit = (
+      references?: SavedObjectReference[],
+      seqNo?: number,
+      primaryTerm?: number
+    ): estypes.SearchHit<{ references?: SavedObjectReference[] }> => ({
+      _index: 'cases',
+      _id: 'case-1',
+      _score: 1.0,
+      _seq_no: seqNo ?? 5,
+      _primary_term: primaryTerm ?? 1,
+      _source: {
+        references,
+      },
+    });
+
+    it('transforms basic case data correctly', () => {
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        total_alerts: 5,
+        total_comments: 3,
+        total_events: 2,
+      };
+
+      const hit = createMockSearchHit([], 5, 1);
+
+      const result = transformESModelToCase('case-1', caseData, hit);
+
+      expect(result.id).toBe('case-1');
+      expect(result.version).toBe(Buffer.from(JSON.stringify([5, 1]), 'utf8').toString('base64'));
+      expect(result.totalComment).toBe(3);
+      expect(result.totalAlerts).toBe(5);
+      expect(result.totalEvents).toBe(2);
+      expect(result.severity).toBe(CaseSeverity.LOW);
+      expect(result.status).toBe(CaseStatuses.open);
+    });
+
+    it('transforms connector with reference correctly', () => {
+      const connector = createESJiraConnector();
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        connector: {
+          name: connector.name,
+          type: connector.type,
+          fields: connector.fields,
+        },
+      };
+
+      const hit = createMockSearchHit([
+        { id: connector.id, name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
+      ]);
+
+      const result = transformESModelToCase('case-1', caseData, hit);
+
+      expect(result.connector).toMatchInlineSnapshot(`
+        Object {
+          "fields": Object {
+            "issueType": "bug",
+            "parent": "2",
+            "priority": "high",
+          },
+          "id": "1",
+          "name": ".jira",
+          "type": ".jira",
+        }
+      `);
+    });
+
+    it('transforms connector to none when reference is not found', () => {
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        connector: {
+          name: ConnectorTypes.jira,
+          type: ConnectorTypes.jira,
+          fields: [{ key: 'issueType', value: 'bug' }],
+        },
+      };
+
+      const hit = createMockSearchHit([]);
+      const result = transformESModelToCase('case-1', caseData, hit);
+      expect(result.connector).toMatchInlineSnapshot(`
+        Object {
+          "fields": null,
+          "id": "none",
+          "name": "none",
+          "type": ".none",
+        }
+      `);
+    });
+
+    it('transforms external service with reference correctly', () => {
+      const externalService = createExternalService({ connector_id: '100' });
+      const { connector_id: pushConnectorId, ...restExternalService } = externalService;
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        external_service: restExternalService,
+      };
+
+      const hit = createMockSearchHit([
+        {
+          id: pushConnectorId,
+          name: PUSH_CONNECTOR_ID_REFERENCE_NAME,
+          type: ACTION_SAVED_OBJECT_TYPE,
+        },
+      ]);
+
+      const result = transformESModelToCase('case-1', caseData, hit);
+
+      expect(result.external_service).toMatchInlineSnapshot(`
+        Object {
+          "connector_id": "100",
+          "connector_name": ".jira",
+          "external_id": "100",
+          "external_title": "awesome",
+          "external_url": "http://www.google.com",
+          "pushed_at": "2019-11-25T21:54:48.952Z",
+          "pushed_by": Object {
+            "email": "testemail@elastic.co",
+            "full_name": "elastic",
+            "username": "elastic",
+          },
+        }
+      `);
+    });
+
+    it('transforms external service to none when reference is not found', () => {
+      const externalService = createExternalService();
+      const { connector_id: pushConnectorId, ...restExternalService } = externalService;
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        external_service: restExternalService,
+      };
+
+      const hit = createMockSearchHit([]);
+      const result = transformESModelToCase('case-1', caseData, hit);
+      expect(result.external_service?.connector_id).toBe('none');
+    });
+
+    it('preserves all other case attributes', () => {
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+        title: 'Test Title',
+        description: 'Test Description',
+        tags: ['tag1', 'tag2'],
+        owner: 'securitySolution',
+        assignees: [{ uid: 'user1' }],
+        created_at: '2020-01-01T00:00:00.000Z',
+        updated_at: '2020-01-02T00:00:00.000Z',
+      };
+
+      const hit = createMockSearchHit([]);
+
+      const result = transformESModelToCase('case-1', caseData, hit);
+
+      expect(result.title).toBe('Test Title');
+      expect(result.description).toBe('Test Description');
+      expect(result.tags).toEqual(['tag1', 'tag2']);
+      expect(result.owner).toBe('securitySolution');
+      expect(result.assignees).toEqual([{ uid: 'user1' }]);
+      expect(result.created_at).toBe('2020-01-01T00:00:00.000Z');
+      expect(result.updated_at).toBe('2020-01-02T00:00:00.000Z');
+    });
+
+    it('returns "0" as version when _seq_no and _primary_term are missing', () => {
+      const caseData: CasePersistedAttributes = {
+        ...basicESCaseFields,
+      };
+
+      const hit: estypes.SearchHit<{ references?: SavedObjectReference[] }> = {
+        _index: 'cases',
+        _id: 'case-1',
+        _score: 1.0,
+        _source: {
+          references: [],
+        },
+      };
+
+      const result = transformESModelToCase('case-1', caseData, hit);
+
+      expect(result.version).toBe('0');
     });
   });
 });

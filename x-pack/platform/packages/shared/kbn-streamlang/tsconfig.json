@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -17,6 +17,10 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/i18n",
-    "@kbn/esql-ast"
+    "@kbn/tinymath",
+    "@kbn/datemath",
+    "@kbn/tinymath",
+    "@kbn/grok-ui",
+    "@kbn/index-management-shared-types",
   ]
 }

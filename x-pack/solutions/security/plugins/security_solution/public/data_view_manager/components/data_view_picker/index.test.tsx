@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
 import { useDispatch } from 'react-redux';
 import { useKibana } from '../../../common/lib/kibana';
@@ -15,7 +15,7 @@ import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 
 jest.mock('../../../common/utils/global_query_string', () => ({
   useUpdateUrlParam: jest.fn(),
@@ -72,6 +72,7 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 
 describe('DataViewPicker', () => {
   let mockDispatch = jest.fn();
+  const mockAddDanger = jest.fn();
 
   beforeEach(() => {
     jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
@@ -83,6 +84,11 @@ describe('DataViewPicker', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         ...mockUseKibana().services,
+        notifications: {
+          toasts: {
+            addDanger: mockAddDanger,
+          },
+        },
         dataViewFieldEditor: { openEditor: jest.fn() },
         dataViewEditor: {
           userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
@@ -98,7 +104,7 @@ describe('DataViewPicker', () => {
   it('renders with the current data view ID', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -109,7 +115,7 @@ describe('DataViewPicker', () => {
   it('calls selectDataView when changing data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -124,7 +130,7 @@ describe('DataViewPicker', () => {
   it('calls useUpdateUrlParam when changing the default scoped data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -141,7 +147,7 @@ describe('DataViewPicker', () => {
   it('calls useUpdateUrlParam when changing the explore scoped data view', () => {
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.explore} />
+        <DataViewPicker scope={PageScope.explore} />
       </TestProviders>
     );
 
@@ -163,7 +169,7 @@ describe('DataViewPicker', () => {
 
     render(
       <TestProviders>
-        <DataViewPicker scope={DataViewManagerScopeName.default} />
+        <DataViewPicker scope={PageScope.default} />
       </TestProviders>
     );
 
@@ -177,6 +183,27 @@ describe('DataViewPicker', () => {
     });
   });
 
+  it('shows a danger toast when adding field fails to load data view', async () => {
+    jest
+      .mocked(useKibana().services.data.dataViews.get)
+      .mockRejectedValue(new Error('conflict loading data view'));
+
+    render(
+      <TestProviders>
+        <DataViewPicker scope={PageScope.default} />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId('addField'));
+
+    await waitFor(() => {
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title: 'Error retrieving data view',
+        text: 'Error: conflict loading data view',
+      });
+    });
+  });
+
   describe('when user does not have editDataView permission', () => {
     it('does not render edit data view button', () => {
       jest
@@ -185,7 +212,7 @@ describe('DataViewPicker', () => {
 
       render(
         <TestProviders>
-          <DataViewPicker scope={DataViewManagerScopeName.default} />
+          <DataViewPicker scope={PageScope.default} />
         </TestProviders>
       );
 
@@ -199,7 +226,7 @@ describe('DataViewPicker', () => {
 
       render(
         <TestProviders>
-          <DataViewPicker scope={DataViewManagerScopeName.default} />
+          <DataViewPicker scope={PageScope.default} />
         </TestProviders>
       );
 

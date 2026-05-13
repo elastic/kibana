@@ -6,14 +6,16 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type {
   FleetRequestHandler,
   PutSettingsRequestSchema,
   PutSpaceSettingsRequestSchema,
 } from '../../types';
-import { settingsService } from '../../services';
+import { appContextService, settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
+import { scheduleReindexIntegrationKnowledgeTask } from '../../tasks/reindex_integration_knowledge_task';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -30,13 +32,17 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
   TypeOf<typeof PutSpaceSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
+  const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+
   await saveSpaceSettings({
     settings: {
       allowed_namespace_prefixes: request.body.allowed_namespace_prefixes,
     },
-    spaceId: soClient.getCurrentNamespace(),
+    spaceId,
   });
-  const settings = await getSpaceSettings(soClient.getCurrentNamespace());
+
+  const settings = await getSpaceSettings(spaceId);
+
   const body = {
     item: settings,
   };
@@ -72,6 +78,10 @@ export const putSettingsHandler: FleetRequestHandler<
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
+
+    if (request.body.integration_knowledge_enabled) {
+      await scheduleReindexIntegrationKnowledgeTask(appContextService.getTaskManagerStart()!);
+    }
 
     const body = {
       item: settings,

@@ -7,7 +7,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+
+import type { DocLinks } from '@kbn/doc-links';
+
+import { loadYaml } from '@kbn/yaml-loader';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 
@@ -24,7 +28,24 @@ export const zodStringWithDurationValidation = z
     ),
   });
 
-export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
+export const zodStringWithYamlValidation = z.string().refine(
+  async (val) => {
+    const yaml = await loadYaml();
+    try {
+      yaml.parse(val);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  {
+    message: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage', {
+      defaultMessage: 'Must be a valid YAML string',
+    }),
+  }
+);
+
+export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): SettingsConfig[] => [
   {
     name: 'agent.limits.go_max_procs',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsTitle', {
@@ -34,8 +55,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
         defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
       }),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-limit-cpu',
+    learnMoreLink: docLinks?.agentPolicyLimitCpu,
     api_field: {
       name: 'agent_limits_go_max_procs',
     },
@@ -52,8 +72,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription', {
         defaultMessage: 'Timeout for downloading the agent binary.',
       }),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#configure-agent-download-timeout',
+    learnMoreLink: docLinks?.agentDownloadTimeout,
     api_field: {
       name: 'agent_download_timeout',
     },
@@ -79,8 +98,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
           defaultMessage: 'The disk path to which the agent binary will be downloaded.',
         }
       ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
+    learnMoreLink: docLinks?.elasticAgentStandaloneDownload,
     schema: z.string(),
     example_value: '/tmp/test',
   },
@@ -103,8 +121,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
           defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
         }
       ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
   },
@@ -123,8 +140,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_level',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-log-level',
+    learnMoreLink: docLinks?.agentPolicyLogLevel,
     schema: z.enum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
     example_value: 'info',
   },
@@ -142,8 +158,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_to_files',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.boolean().default(true),
     example_value: true,
   },
@@ -161,8 +176,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_files_rotateeverybytes',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.number().int().min(0),
     example_value: 10,
   },
@@ -180,8 +194,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_files_keepfiles',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.number().int().min(0),
     example_value: 10,
   },
@@ -202,8 +215,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_files_interval',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
   },
@@ -252,5 +264,46 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
         ),
       },
     ],
+  },
+  {
+    name: 'agent.features.disable_policy_change_acks.enabled',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksTitle', {
+      defaultMessage: 'Disable policy change acknowledgments',
+    }),
+    description: () =>
+      i18n.translate(
+        'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksDescription',
+        {
+          defaultMessage:
+            'Disable policy change acknowlegements from the Elastic Agent to Fleet. Policy changes will be communicated through regular checkins.',
+        }
+      ),
+    api_field: {
+      name: 'agent_features_disable_policy_change_acks_enabled',
+    },
+    schema: z.boolean().default(false),
+    example_value: true,
+    checkboxLabel: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.disablePolicyChangeAcksCheckboxLabel',
+      { defaultMessage: 'Disable' }
+    ),
+  },
+  {
+    name: 'agent.internal',
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsTitle', {
+      defaultMessage: 'Advanced internal YAML settings',
+    }),
+    description: () => (
+      <FormattedMessage
+        id="xpack.fleet.settings.agentPolicyAdvanced.internalYamlSettingsDescription"
+        defaultMessage="Control advanced agent internal settings and feature flags. No stability guarantee is provided for these settings."
+      />
+    ),
+    api_field: {
+      name: 'agent_internal',
+    },
+    schema: zodStringWithYamlValidation,
+    type: 'yaml',
+    example_value: `'agent:\n internal:\n runtime:\n default: otel'`,
   },
 ];

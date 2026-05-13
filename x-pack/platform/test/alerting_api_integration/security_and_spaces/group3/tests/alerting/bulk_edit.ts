@@ -257,8 +257,12 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({ errors: [], rules: [], skipped: [], total: 0 });
-              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'No rules found for bulk edit',
+              });
+              expect(response.statusCode).to.eql(400);
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -389,8 +393,12 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({ errors: [], rules: [], skipped: [], total: 0 });
-              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'No rules found for bulk edit',
+              });
+              expect(response.statusCode).to.eql(400);
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -596,8 +604,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'global_read at space1':
             case 'system_actions at space1':
-              expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
-              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'No rules found for bulk edit',
+              });
+              expect(response.statusCode).to.eql(400);
+
               break;
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
@@ -1048,7 +1061,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body.errors.length).to.eql(1);
 
-        expect(response.body.errors[0].message).to.eql('Cannot use the same system action twice');
+        expect(response.body.errors[0].message).to.eql(
+          'Cannot use action system-connector-test.system-action more than once for this rule'
+        );
       });
     });
 

@@ -8,21 +8,48 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  DEFAULT_ALERTS_INDEX,
-  DEFAULT_DETECTION_PAGE_FILTERS,
-} from '../../../../../common/constants';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { SECURITY_ALERT_DATA_VIEW } from '../../../constants';
+
+export const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    field_name: 'kibana.alert.workflow_status',
+    selected_options: ['open'],
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
+    persist: true,
+  },
+  {
+    title: 'Severity',
+    field_name: 'kibana.alert.severity',
+    selected_options: [],
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
+    },
+  },
+  {
+    title: 'User',
+    field_name: 'user.name',
+  },
+  {
+    title: 'Host',
+    field_name: 'host.name',
+  },
+];
 
 export type PageFiltersProps = Pick<
   AlertFilterControlsProps,
@@ -55,10 +82,10 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       }),
     [history]
   );
-  const filterControlsUrlState = useMemo(
-    () => urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter) ?? undefined,
-    [urlStorage]
-  );
+  const filterControlsUrlState = useMemo(() => {
+    const pageFilters = urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter);
+    return pageFilters ? pageFilters.map(convertCamelCasedKeysToSnakeCase) : undefined;
+  }, [urlStorage]);
 
   const setFilterControlsUrlState = useCallback(
     (newFilterControls: FilterControlConfig[]) => {
@@ -95,8 +122,6 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
 
   return (
     <AlertFilterControls
-      chainingSystem="HIERARCHICAL"
-      ControlGroupRenderer={ControlGroupRenderer}
       controlsUrlState={filterControlsUrlState}
       dataViewSpec={customDataViewSpec}
       defaultControls={DEFAULT_DETECTION_PAGE_FILTERS}

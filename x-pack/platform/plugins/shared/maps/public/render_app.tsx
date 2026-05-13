@@ -38,7 +38,7 @@ function setAppChrome() {
       tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
         defaultMessage: 'Unable to save maps',
       }),
-      iconType: 'glasses',
+      iconType: 'readOnly',
     });
   }
 
@@ -50,11 +50,6 @@ function setAppChrome() {
       {
         linkType: 'documentation',
         href: `${mapUrl}`,
-      },
-      {
-        linkType: 'github',
-        title: '[Maps]',
-        labels: ['Team:Geo'],
       },
     ],
   });
@@ -78,7 +73,7 @@ export async function renderApp(
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput, originatingPath } =
+    const { embeddableId, originatingApp, valueInput, originatingPath, breadcrumbs } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableState: MapEmbeddableState | undefined;
@@ -100,6 +95,7 @@ export async function renderApp(
           stateTransfer={stateTransfer}
           originatingApp={originatingApp}
           originatingPath={originatingPath}
+          breadcrumbs={breadcrumbs}
           history={history}
           key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
         />

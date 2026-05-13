@@ -10,7 +10,7 @@
 import type {
   StepPropInfo,
   WorkflowLookup,
-} from '../../../../../entities/workflows/store/utils/build_workflow_lookup';
+} from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 export function getFocusedYamlPair(
   workflowLookup: WorkflowLookup | undefined,
@@ -26,14 +26,13 @@ export function getFocusedYamlPair(
     return null;
   }
 
-  const focusedProp: StepPropInfo | undefined = Object.entries(focusedStepInfo.propInfos)
-    .map(([, stepPropInfo]) => stepPropInfo)
-    .find(
+  return (
+    Object.values(focusedStepInfo.propInfos).find(
       (stepPropInfo) =>
+        stepPropInfo.valueNode &&
         stepPropInfo.valueNode.range &&
         stepPropInfo.valueNode.range[0] <= absolutePosition &&
         absolutePosition <= stepPropInfo.valueNode.range[2]
-    );
-
-  return focusedProp ?? null;
+    ) ?? null
+  );
 }

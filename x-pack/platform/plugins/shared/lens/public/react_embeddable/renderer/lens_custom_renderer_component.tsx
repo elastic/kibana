@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { useSearchApi } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import type {
-  LensApi,
-  LensParentApi,
-  LensRendererProps,
-  LensSerializedState,
+
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { useSearchApi } from '@kbn/presentation-publishing';
+import type { PresentationPanelProps } from '@kbn/embeddable-plugin/public';
+import {
+  LENS_EMBEDDABLE_TYPE,
+  type LensRendererProps,
+  type LensSerializedState,
 } from '@kbn/lens-common';
-import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { createEmptyLensState, transformOutputState } from '../helper';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
+
+import { createEmptyLensState, transformToApiConfig } from '../helper';
+import type { LensParentApi } from './types';
 
 // This little utility uses the same pattern of the useSearchApi hook:
 // create the Subject once and then update its value on change
@@ -43,6 +45,7 @@ type PanelProps = Pick<
   | 'hideHeader'
   | 'hideInspector'
   | 'getActions'
+  | 'titleHighlight'
 >;
 
 /**
@@ -68,6 +71,7 @@ export function LensRenderer({
   forceDSL,
   hidePanelTitles,
   lastReloadRequestTime,
+  titleHighlight,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -86,8 +90,17 @@ export function LensRenderer({
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
+  const cleanedAttributes = useMemo(() => {
+    // TODO find where people are setting type on attributes to lens
+    const {
+      type: _type,
+      id: _id,
+      ...rest
+    } = props.attributes as LensRendererProps['attributes'] & { type: string; id: string };
+    return rest;
+  }, [props.attributes]);
   const initialStateRef = useRef<LensSerializedState>(
-    props.attributes ? { attributes: props.attributes } : createEmptyLensState(null, title)
+    props.attributes ? { attributes: cleanedAttributes } : createEmptyLensState(null, title)
   );
 
   const searchApi = useSearchApi({ query, filters, timeRange });
@@ -108,11 +121,11 @@ export function LensRenderer({
         ...('attributes' in initialStateRef.current
           ? initialStateRef.current.attributes
           : initialStateRef.current),
-        ...props.attributes,
+        ...cleanedAttributes,
       });
       lensApi.updateOverrides(props.overrides);
     }
-  }, [lensApi, props.attributes, props.overrides]);
+  }, [lensApi, cleanedAttributes, props.overrides]);
 
   useEffect(() => {
     if (syncColors != null && settings.syncColors$.getValue() !== syncColors) {
@@ -132,6 +145,7 @@ export function LensRenderer({
       showNotifications: false,
       showShadow: false,
       showBadges: false,
+      titleHighlight,
       getActions: async (triggerId, context) => {
         const actions = withDefaultActions
           ? await lensApi?.getTriggerCompatibleActions(triggerId, context)
@@ -140,10 +154,10 @@ export function LensRenderer({
         return (extraActions ?? []).concat(actions || []);
       },
     };
-  }, [showInspector, withDefaultActions, extraActions, lensApi]);
+  }, [showInspector, withDefaultActions, extraActions, lensApi, titleHighlight]);
 
   return (
-    <EmbeddableRenderer<LensSerializedState, LensApi>
+    <EmbeddableRenderer<LensWireAPIConfig, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() =>
@@ -159,12 +173,7 @@ export function LensRenderer({
           // pass the sync* settings with the unified settings interface
           settings,
           // make sure to provide the initial state (useful for the comparison check)
-          getSerializedStateForChild: () => {
-            const transformedState = transformOutputState(initialStateRef.current);
-            return {
-              rawState: transformedState,
-            };
-          },
+          getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
           forceDSL,
           esqlVariables$,
           hideTitle$,

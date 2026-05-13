@@ -10,24 +10,24 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import type { CaseUI } from '../../../../common/ui/types';
 
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { CaseViewTabs } from '../case_view_tabs';
 import { ObservablesTable } from '../../observables/observables_table';
 import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
 
 interface CaseViewObservablesProps {
   caseData: CaseUI;
+  searchTerm?: string;
   isLoading: boolean;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
 export const CaseViewObservables = ({
   caseData,
+  searchTerm,
   isLoading,
   onUpdateField,
 }: CaseViewObservablesProps) => {
-  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
+  const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
 
   const caseDataWithFilteredObservables: CaseUI = useMemo(() => {
     return {
@@ -49,7 +49,6 @@ export const CaseViewObservables = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
         <EuiFlexGroup>
           <EuiFlexItem>
             <ObservablesTable

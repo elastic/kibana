@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true,
@@ -9,6 +9,7 @@
     "server/**/*",
     "types/**/*",
     "test_helpers/**/*",
+    "test/scout/**/*",
     "utils/**/*",
     "index.ts"
   ],
@@ -19,7 +20,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-application-browser-internal",
     "@kbn/core-saved-objects-common",
-    "@kbn/core-apps-browser-internal",
     "@kbn/core-root-browser-internal",
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-base-browser-mocks",
@@ -175,6 +175,11 @@
     "@kbn/core-pricing-common",
     "@kbn/lazy-object",
     "@kbn/migrator-test-kit",
+    "@kbn/core-user-activity-server-mocks",
+    "@kbn/core-user-activity-server-internal",
+    "@kbn/scout",
+    "@kbn/core-user-storage-server-internal",
+    "@kbn/core-user-storage-common",
   ],
   "exclude": [
     "target/**/*",

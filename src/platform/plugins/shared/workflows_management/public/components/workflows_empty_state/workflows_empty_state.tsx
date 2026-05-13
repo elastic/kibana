@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -17,10 +16,10 @@ import {
   EuiImage,
   EuiLink,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
@@ -42,51 +41,12 @@ export function WorkflowsEmptyState({
         />
       }
       title={
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="center"
-          gutterSize="s"
-          responsive={false}
-          wrap={false}
-        >
-          <EuiFlexItem grow={false}>
-            <h2 style={{ whiteSpace: 'nowrap' }}>
-              <FormattedMessage
-                id="workflows.emptyState.title"
-                defaultMessage="Get Started with Workflows"
-              />
-            </h2>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              title={
-                <FormattedMessage
-                  id="workflows.emptyState.technicalPreviewBadge"
-                  defaultMessage="Technical Preview"
-                />
-              }
-              content={
-                <FormattedMessage
-                  id="workflows.emptyState.technicalPreviewTooltip"
-                  defaultMessage="This functionality is experimental and not supported. It may change or be removed at any time."
-                />
-              }
-            >
-              <EuiBetaBadge
-                tabIndex={0}
-                label={
-                  <FormattedMessage
-                    id="workflows.emptyState.technicalPreviewBadge"
-                    defaultMessage="Technical Preview"
-                  />
-                }
-                title="Technical Preview"
-                size="s"
-                style={{ alignSelf: 'center', verticalAlign: 'middle' }}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <h2 style={{ whiteSpace: 'nowrap' }}>
+          <FormattedMessage
+            id="workflows.emptyState.title"
+            defaultMessage="Get Started with Workflows"
+          />
+        </h2>
       }
       layout="horizontal"
       color="plain"
@@ -104,7 +64,7 @@ export function WorkflowsEmptyState({
         canCreateWorkflow && onCreateWorkflow ? (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusInCircle">
+              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusCircle">
                 <FormattedMessage
                   id="workflows.emptyState.createButton"
                   defaultMessage="Create a new workflow"
@@ -115,7 +75,7 @@ export function WorkflowsEmptyState({
               <EuiButtonEmpty
                 href="https://github.com/elastic/workflows"
                 target="_blank"
-                iconType="popout"
+                iconType="external"
                 iconSide="right"
                 aria-label="Example workflows"
               >
@@ -138,7 +98,7 @@ export function WorkflowsEmptyState({
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href="#" target="_blank">
+          <EuiLink href={WORKFLOWS_DOCUMENTATION_URL} target="_blank">
             <FormattedMessage
               id="workflows.emptyState.footer.link"
               defaultMessage="Read documentation"

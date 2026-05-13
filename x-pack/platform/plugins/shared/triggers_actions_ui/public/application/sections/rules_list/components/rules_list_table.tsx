@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
+import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -32,6 +33,9 @@ import {
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
+
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import {
   SELECT_ALL_RULES,
@@ -246,8 +250,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
+  const {
+    application: { getUrlForApp },
+  } = useKibana().services;
 
   const ruleRowCss = css`
+    min-width: ${euiTheme.breakpoint.xl}px;
+
     .actRulesList__tableRowDisabled {
       background-color: ${euiTheme.colors.lightestShade};
 
@@ -377,6 +386,13 @@ export const RulesListTable = (props: RulesListTableProps) => {
             disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.selectRuleCheckbox',
+              {
+                defaultMessage: 'Select rule {ruleName}',
+                values: { ruleName: rule.name },
+              }
+            )}
           />
         );
       },
@@ -406,13 +422,22 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = getUrlForApp('rules', {
+            path: getRulesAppDetailsRoute(rule.id),
+          });
+
+          const linkProps = getRouterLinkProps({
+            href: pathToRuleDetails,
+            onClick: () => onRuleClick(rule),
+          });
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} {...linkProps}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
@@ -882,6 +907,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     tagPopoverOpenIndex,
     ruleOutcomeColumnField,
     euiTheme,
+    getUrlForApp,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
@@ -907,7 +933,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     (rule: RuleTableItem) => {
       const selectedClass = isRowSelected(rule) ? 'euiTableRow-isSelected' : '';
       return {
-        'data-test-subj': 'rule-row',
+        'data-test-subj': `rule-row${rule.isEditable ? '' : '-isNotEditable'}`,
         className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
           ? `actRulesList__tableRowDisabled ${selectedClass}`
           : selectedClass,
@@ -985,8 +1011,19 @@ export const RulesListTable = (props: RulesListTableProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem
+        grow={true}
+        css={css`
+          overflow-x: auto;
+        `}
+      >
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.description',
+            {
+              defaultMessage: 'Displays rule list data',
+            }
+          )}
           loading={isLoading}
           /* Don't display rules until we have the rule types initialized */
           items={items}

@@ -8,12 +8,20 @@
 import _ from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { Writable } from '@kbn/utility-types';
 import type { AdhocDataView, MapAttributes } from '../../../../server';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import {
+  APP_ID,
+  MAP_PATH,
+  MAP_SAVED_OBJECT_TYPE,
+  SOURCE_TYPES,
+} from '../../../../common/constants';
 import type { MapStore, MapStoreState } from '../../../reducers/store';
 import { createMapStore } from '../../../reducers/store';
 import type { MapSettings } from '../../../../common/descriptor_types';
@@ -90,6 +98,7 @@ export class SavedMap {
   private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
   private _originatingPath?: string;
+  private readonly _breadcrumbs?: EmbeddableEditorBreadcrumb[];
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
   private _tags: string[] = [];
@@ -104,6 +113,7 @@ export class SavedMap {
     originatingApp,
     stateTransfer,
     originatingPath,
+    breadcrumbs,
     defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
@@ -113,6 +123,7 @@ export class SavedMap {
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
     originatingPath?: string;
+    breadcrumbs?: EmbeddableEditorBreadcrumb[];
     defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
@@ -121,6 +132,7 @@ export class SavedMap {
     this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
     this._originatingPath = originatingPath;
+    this._breadcrumbs = breadcrumbs;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
     this._defaultLayerWizard = defaultLayerWizard || '';
@@ -314,11 +326,17 @@ export class SavedMap {
         pageTitle: this._getPageTitle(),
         isByValue: this.isByValue(),
         getHasUnsavedChanges: this.hasUnsavedChanges,
-        originatingApp: this._originatingApp,
+        originatingApp:
+          this.hasOriginatingApp() || this._isFromDashboardListing()
+            ? this._originatingApp
+            : undefined,
+        incomingBreadcrumbs: this._breadcrumbs,
         getAppNameFromId: this._getStateTransfer().getAppNameFromId,
         history,
       });
-      getCoreChrome().setBreadcrumbs(breadcrumbs);
+      getCoreChrome().setBreadcrumbs(breadcrumbs, {
+        project: { value: breadcrumbs, absolute: true },
+      });
     }
   }
 
@@ -334,8 +352,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  private _isFromDashboardListing(): boolean {
+    return (
+      this._originatingApp === 'dashboards' && Boolean(this._originatingPath?.includes('/list/'))
+    );
+  }
+
   public hasOriginatingApp(): boolean {
-    return !!this._originatingApp;
+    return !!this._originatingApp && !this._isFromDashboardListing();
   }
 
   public getOriginatingPath(): string | undefined {
@@ -386,7 +410,7 @@ export class SavedMap {
 
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
-    return !!this._originatingApp && !hasSavedObjectId;
+    return this.hasOriginatingApp() && !hasSavedObjectId;
   }
 
   public async save({
@@ -470,7 +494,7 @@ export class SavedMap {
           {
             embeddableId: newCopyOnSave ? undefined : this._embeddableId,
             type: MAP_SAVED_OBJECT_TYPE,
-            serializedState: { rawState: mapEmbeddableState },
+            serializedState: mapEmbeddableState,
           },
         ],
         path: this._originatingPath,
@@ -481,7 +505,7 @@ export class SavedMap {
         state: [
           {
             type: MAP_SAVED_OBJECT_TYPE,
-            serializedState: { rawState: mapEmbeddableState },
+            serializedState: mapEmbeddableState,
           },
         ],
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
@@ -540,9 +564,12 @@ export class SavedMap {
 
   private async _getAdHocDataViews() {
     const dataViewIds: string[] = [];
-    getLayerList(this._store.getState()).forEach((layer) => {
-      dataViewIds.push(...layer.getIndexPatternIds());
-    });
+    getLayerList(this._store.getState())
+      // exclude adhoc data views from ESQL sources
+      .filter((layer) => layer.getDescriptor().sourceDescriptor?.type !== SOURCE_TYPES.ESQL)
+      .forEach((layer) => {
+        dataViewIds.push(...layer.getIndexPatternIds());
+      });
 
     const dataViews = await getIndexPatternsFromIds(_.uniq(dataViewIds));
     return dataViews

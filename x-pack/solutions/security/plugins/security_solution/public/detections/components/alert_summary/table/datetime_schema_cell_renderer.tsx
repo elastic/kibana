@@ -12,7 +12,7 @@ import { getAlertFieldValueAsStringOrNumberOrNull } from '../../../utils/type_ut
 
 export interface DatetimeSchemaCellRendererProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
   /**

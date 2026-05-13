@@ -55,8 +55,9 @@ export function CodeSnippet({ currentQuery, callbacks, ignoreErrors }: CodeSnipp
   return (
     <EuiCodeBlock language="typescript" isCopyable>
       {`
-import { ESQLCallbacks, validateQuery } from '@kbn/esql-validation-autocomplete';
-import { parse } from '@kbn/esql-ast';
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { parse } from '@elastic/esql';
+import { validateQuery } from '@kbn/esql-language';
 
 const currentQuery = "${currentQuery}";
 

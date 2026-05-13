@@ -6,31 +6,26 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { of } from 'rxjs';
 
 import { AppContextProvider } from '../../../../app_context';
 import type { AppDependencies } from '../../../../app_context';
 import { IndexActionsContextMenu } from './index_actions_context_menu';
 import type { Index } from '@kbn/index-management-shared-types';
-import { notificationService } from '../../../../services/notification';
-import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
+import { NotificationService } from '../../../../services/notification';
+import { getIndexDetailsLink } from '../../../../services/routing';
+import { type DocCountResult, RequestResultType } from '../index_table/get_doc_count';
 
-const user = userEvent.setup();
+// EUI context menus keep inactive panels mounted with `pointer-events: none`,
+// which can cause user-event to throw when interacting with menu items.
+const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
 jest.mock('../../../../services/routing', () => ({
   ...jest.requireActual('../../../../services/routing'),
   getIndexDetailsLink: jest.fn(() => '/indices/some/stats'),
-  navigateToIndexDetailsPage: jest.fn(),
-}));
-
-jest.mock('../../../../services/notification', () => ({
-  ...jest.requireActual('../../../../services/notification'),
-  notificationService: {
-    showSuccessToast: jest.fn(),
-    showDangerToast: jest.fn(),
-  },
 }));
 
 jest.mock(
@@ -55,6 +50,7 @@ jest.mock(
 );
 
 const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDependencies => {
+  const toasts = { add: jest.fn() } as any;
   const base: AppDependencies = {
     core: {
       fatalErrors: {} as unknown as AppDependencies['core']['fatalErrors'],
@@ -89,7 +85,7 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       } as unknown as AppDependencies['services']['extensionsService'],
       uiMetricService: {} as unknown as AppDependencies['services']['uiMetricService'],
       httpService: {} as unknown as AppDependencies['services']['httpService'],
-      notificationService,
+      notificationService: new NotificationService(toasts),
     },
     config: {
       enableIndexActions: true,
@@ -103,6 +99,8 @@ const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDep
       enableProjectLevelRetentionChecks: true,
       enableSemanticText: false,
       enforceAdaptiveAllocations: false,
+      enableFailureStoreRetentionDisabling: true,
+      isServerless: false,
     },
     history: { push: jest.fn() } as unknown as AppDependencies['history'],
     setBreadcrumbs: jest.fn(),
@@ -172,9 +170,27 @@ const openContextMenu = async () => {
   await user.click(btns[btns.length - 1]);
 };
 
+const closeActionsMenuIfOpen = async () => {
+  // Some tests open the popover just to assert menu items exist. Close it so it doesn't
+  // leak popover state across tests (late async updates can cause act() warnings).
+  if (!document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')) return;
+
+  const btns = screen.getAllByTestId('indexActionsContextMenuButton');
+  await user.click(btns[btns.length - 1]);
+  await waitFor(() => {
+    expect(
+      document.querySelector('[data-popover-open="true"][data-popover-panel="true"]')
+    ).toBeNull();
+  });
+};
+
 describe('IndexActionsContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await closeActionsMenuIfOpen();
   });
 
   describe('WHEN rendering the component', () => {
@@ -183,7 +199,7 @@ describe('IndexActionsContextMenu', () => {
         const props = getBaseProps();
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
-        const button = await screen.findByLabelText(/index options/i);
+        const button = await screen.findByTestId('indexActionsContextMenuButton');
         expect(button).toBeInTheDocument();
         expect(button).toHaveTextContent(/manage index/i);
       });
@@ -244,7 +260,7 @@ describe('IndexActionsContextMenu', () => {
 
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
-        const button = await screen.findByLabelText(/indices options/i);
+        const button = await screen.findByTestId('indexActionsContextMenuButton');
         expect(button).toHaveTextContent(/manage \d+ indices/i);
       });
     });
@@ -279,7 +295,8 @@ describe('IndexActionsContextMenu', () => {
         renderWithProviders(<IndexActionsContextMenu {...closed} />);
 
         await openContextMenu();
-        const openBtn = await screen.findByTestId('openIndexMenuButton');
+        const menu = await screen.findByTestId('indexContextMenu');
+        const openBtn = await within(menu).findByTestId('openIndexMenuButton');
 
         await user.click(openBtn);
 
@@ -370,39 +387,8 @@ describe('IndexActionsContextMenu', () => {
   });
 
   describe('WHEN navigating to index detail pages', () => {
-    describe('AND WHEN clicking Overview/Settings/Mapping', () => {
-      it('SHOULD call navigateToIndexDetailsPage for each navigation', async () => {
-        const props = getBaseProps();
-        const historyPush = jest.fn();
-        const ctx = getIndexManagementCtx({
-          history: { push: historyPush } as unknown as AppDependencies['history'],
-        });
-        render(
-          <I18nProvider>
-            <AppContextProvider value={ctx}>
-              <IndexActionsContextMenu {...props} />
-            </AppContextProvider>
-          </I18nProvider>
-        );
-
-        await openContextMenu();
-        const overviewBtn = await screen.findByText(/show index overview/i);
-        await user.click(overviewBtn);
-
-        await openContextMenu();
-        const settingsBtn = await screen.findByText(/show index settings/i);
-        await user.click(settingsBtn);
-
-        await openContextMenu();
-        const mappingBtn = await screen.findByText(/show index mapping/i);
-        await user.click(mappingBtn);
-
-        expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);
-      });
-    });
-
-    describe('AND WHEN clicking Stats', () => {
-      it('SHOULD use history.push with getIndexDetailsLink', async () => {
+    describe('AND WHEN clicking Overview/Settings/Mapping/Stats', () => {
+      it('SHOULD use history.push with getIndexDetailsLink for each navigation', async () => {
         const props = getBaseProps();
         const historyPush = jest.fn();
         const ctx = getIndexManagementCtx({
@@ -418,11 +404,26 @@ describe('IndexActionsContextMenu', () => {
 
         await openContextMenu();
         const menu = await screen.findByTestId('indexContextMenu');
-        const statsBtn = await within(menu).findByText(/show index stats/i);
+        const overviewBtn = await within(menu).findByText(/show index overview/i);
+        await user.click(overviewBtn);
 
+        await openContextMenu();
+        const menu2 = await screen.findByTestId('indexContextMenu');
+        const settingsBtn = await within(menu2).findByText(/show index settings/i);
+        await user.click(settingsBtn);
+
+        await openContextMenu();
+        const menu3 = await screen.findByTestId('indexContextMenu');
+        const mappingBtn = await within(menu3).findByText(/show index mapping/i);
+        await user.click(mappingBtn);
+
+        await openContextMenu();
+        const menu4 = await screen.findByTestId('indexContextMenu');
+        const statsBtn = await within(menu4).findByText(/show index stats/i);
         await user.click(statsBtn);
 
-        expect(getIndexDetailsLink).toHaveBeenCalled();
+        expect(getIndexDetailsLink).toHaveBeenCalledTimes(4);
+        expect(historyPush).toHaveBeenCalledTimes(4);
         expect(historyPush).toHaveBeenCalledWith('/indices/some/stats');
       });
     });
@@ -561,6 +562,73 @@ describe('IndexActionsContextMenu', () => {
         expect(convertBtn).not.toBeDisabled();
       });
 
+      it('SHOULD use loaded doc count when index documents are missing', async () => {
+        const props = getBaseProps();
+        const docCount$ = of({
+          'index-1': { status: RequestResultType.Success, count: 10 },
+        });
+        const convertible: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName: jest.fn(),
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...convertible} />);
+
+        await openContextMenu();
+        const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
+
+        expect(convertBtn).not.toBeDisabled();
+      });
+
+      it('SHOULD keep convert action disabled when docCountApi emits an error and documents are missing', async () => {
+        // Fail-safe: if the doc-count request errors out and the index has no cached
+        // document count, we cannot determine convertibility, so the action stays
+        // disabled rather than allowing a potentially invalid conversion.
+        const props = getBaseProps();
+        const docCount$ = of<Record<string, DocCountResult>>({
+          'index-1': { status: RequestResultType.Error },
+        });
+        const errorProps: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName: jest.fn(),
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...errorProps} />);
+
+        await openContextMenu();
+        const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
+
+        expect(convertBtn).toBeDisabled();
+      });
+
       it('SHOULD open the Convert to Lookup modal', async () => {
         const props = getBaseProps();
         const convertible: MenuProps = {
@@ -615,6 +683,89 @@ describe('IndexActionsContextMenu', () => {
 
         const tooltip = await screen.findByText(/less than 2 billion documents/i);
         expect(tooltip).toBeInTheDocument();
+      });
+    });
+
+    describe('AND WHEN doc count is missing and not yet cached', () => {
+      it('SHOULD call getByName when the popover opens', async () => {
+        const props = getBaseProps();
+        const getByName = jest.fn();
+        const emptyDocCount$ = of<Record<string, DocCountResult>>({});
+        const missingDocsProps: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+              // documents intentionally omitted to simulate a missing count
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName,
+            getObservable: () => emptyDocCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...missingDocsProps} />);
+        await openContextMenu();
+
+        expect(getByName).toHaveBeenCalledWith('index-1');
+      });
+
+      it('SHOULD NOT call getByName when documents are already present on the index', async () => {
+        const props = getBaseProps(); // has documents: 100
+        const getByName = jest.fn();
+        const docCount$ = of<Record<string, DocCountResult>>({});
+        const propsWithDocs: MenuProps = {
+          ...props,
+          docCountApi: {
+            getByName,
+            getObservable: () => docCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...propsWithDocs} />);
+        await openContextMenu();
+
+        expect(getByName).not.toHaveBeenCalled();
+      });
+
+      it('SHOULD NOT call getByName when the doc count is already in the observable cache', async () => {
+        const props = getBaseProps();
+        const getByName = jest.fn();
+        const cachedDocCount$ = of<Record<string, DocCountResult>>({
+          'index-1': { status: RequestResultType.Success, count: 10 },
+        });
+        const propsWithCache: MenuProps = {
+          ...props,
+          indices: [
+            {
+              name: 'index-1',
+              status: 'open' as Index['status'],
+              primary: 1,
+              hidden: false,
+              aliases: [],
+              isFrozen: false,
+              // documents intentionally omitted
+            } satisfies Partial<Index>,
+          ] as Index[],
+          docCountApi: {
+            getByName,
+            getObservable: () => cachedDocCount$,
+            abort: jest.fn(),
+          },
+        };
+
+        renderWithProviders(<IndexActionsContextMenu {...propsWithCache} />);
+        await openContextMenu();
+
+        expect(getByName).not.toHaveBeenCalled();
       });
     });
 

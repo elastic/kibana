@@ -21,6 +21,7 @@ const createEncryptionExtension = (): jest.Mocked<ISavedObjectsEncryptionExtensi
     decryptOrStripResponseAttributes: jest.fn(),
     encryptAttributes: jest.fn(),
     shouldEnforceRandomId: jest.fn(),
+    getEncryptedAttributes: jest.fn(),
   });
 
 const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> =>
@@ -47,6 +48,8 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
     auditObjectsForSpaceDeletion: jest.fn(),
     getCurrentUser: jest.fn(),
     includeSavedObjectNames: jest.fn(),
+    authorizeChangeAccessControl: jest.fn(),
+    filterInaccessibleObjectsForBulkAction: jest.fn(),
   });
 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>

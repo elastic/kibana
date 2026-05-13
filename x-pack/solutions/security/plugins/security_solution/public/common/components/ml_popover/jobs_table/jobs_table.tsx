@@ -196,7 +196,7 @@ export const NoItemsMessage = React.memo(() => {
       actions={
         <EuiButton
           href={createNewAnomalyDetectionJobUrl}
-          iconType="popout"
+          iconType="external"
           iconSide="right"
           size="s"
           target="_blank"

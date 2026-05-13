@@ -10,6 +10,7 @@ import type { Message } from '@kbn/inference-common';
 import { MessageRole, createInferenceInternalError, ToolChoiceType } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
 import type {
+  ConverseResponse,
   ModelStreamErrorException,
   ToolResultContentBlock,
 } from '@aws-sdk/client-bedrock-runtime';
@@ -17,11 +18,12 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isPlainObject } from 'lodash';
 import type { Readable } from 'stream';
 import type { InferenceConnectorAdapter } from '../../types';
-import { handleConnectorResponse } from '../../utils';
+import { handleConnectorDataResponse, handleConnectorStreamResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockToolUsePart } from './types';
 import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import type { ConverseCompletionChunk } from './process_completion_chunks';
 import { processConverseCompletionChunks } from './process_completion_chunks';
+import { processConverseResponse } from './process_converse_response';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
@@ -37,8 +39,14 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     modelName,
     abortSignal,
     metadata,
+    timeout,
+    stream = false,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
+    const hasToolUseMessages = messages.some(
+      (m) =>
+        m.role === MessageRole.Tool || (m.role === MessageRole.Assistant && m.toolCalls?.length)
+    );
 
     const converseMessages = messagesToBedrock(messages).map((message) => ({
       role: message.role,
@@ -47,58 +55,79 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
-    const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+    const bedRockTools =
+      noToolUsage && !hasToolUseMessages ? [] : toolsToConverseBedrock(tools, messages);
     const connector = executor.getConnector();
 
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools?.length ? bedRockTools : undefined,
-      toolChoice: toolChoiceToConverse(toolChoice),
+      // Bedrock/Claude does not support a true "none" tool choice. If we include tool config
+      // (e.g. because the conversation contains tool use/result messages), we must still send a
+      // valid Bedrock toolChoice. The system directive prevents new tool usage in that case.
+      toolChoice:
+        noToolUsage && bedRockTools?.length
+          ? toolChoiceToConverse(ToolChoiceType.auto)
+          : toolChoiceToConverse(toolChoice),
       ...getTemperatureIfValid(temperature, { connector, modelName }),
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
+      ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
     };
 
-    return defer(async () => {
-      const res = await executor.invoke({
-        subAction: 'converseStream',
+    const connectorResult$ = defer(async () => {
+      return executor.invoke({
+        subAction: stream ? 'converseStream' : 'converse',
         subActionParams,
       });
-      const result = res.data as { stream: Readable };
-      return { ...res, data: result?.stream };
-    }).pipe(
-      handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
-      tap((eventData) => {
-        if (
-          isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
-            'modelStreamErrorException',
-          ])
-        ) {
-          throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
-        }
-      }),
-      filter((value) => {
-        return typeof value === 'object' && !!value;
-      }),
-      map((message) => {
-        const key = Object.keys(message)[0];
-        if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
-          return {
-            type: key,
-            body: JSON.parse(toUtf8(message[key].body)),
-          } as ConverseCompletionChunk;
-        }
-      }),
-      filter((value): value is ConverseCompletionChunk => !!value),
-      processConverseCompletionChunks()
-    );
+    });
+
+    if (stream) {
+      return connectorResult$.pipe(
+        map((res) => {
+          const result = res.data as { stream: Readable };
+          return { ...res, data: result?.stream };
+        }),
+        handleConnectorStreamResponse({ processStream: serdeEventstreamIntoObservable }),
+        tap((eventData) => {
+          if (
+            isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
+              'modelStreamErrorException',
+            ])
+          ) {
+            throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
+          }
+        }),
+        filter((value) => {
+          return typeof value === 'object' && !!value;
+        }),
+        map((message) => {
+          const key = Object.keys(message)[0];
+          if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
+            return {
+              type: key,
+              body: JSON.parse(toUtf8(message[key].body)),
+            } as ConverseCompletionChunk;
+          }
+        }),
+        filter((value): value is ConverseCompletionChunk => !!value),
+        processConverseCompletionChunks(modelName)
+      );
+    } else {
+      return connectorResult$.pipe(
+        handleConnectorDataResponse({
+          parseData: (data) => data as ConverseResponse,
+        }),
+        processConverseResponse(modelName)
+      );
+    }
   },
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  const converseMessages: BedRockMessage[] = messages.map((message): BedRockMessage => {
+  const converseMessages: BedRockMessage[] = messages.flatMap((message): BedRockMessage[] => {
     switch (message.role) {
       case MessageRole.User: {
         const rawContent: BedRockMessage['rawContent'] = [];
@@ -106,9 +135,13 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           typeof message.content === 'string' ? [message.content] : message.content;
         for (const contentPart of contentArr) {
           if (typeof contentPart === 'string') {
-            rawContent.push({ text: contentPart });
+            if (contentPart.trim().length > 0) {
+              rawContent.push({ text: contentPart });
+            }
           } else if (contentPart.type === 'text') {
-            rawContent.push({ text: contentPart.text });
+            if (contentPart.text.trim().length > 0) {
+              rawContent.push({ text: contentPart.text });
+            }
           } else if (contentPart.source?.data && contentPart.source?.mimeType) {
             const format = contentPart.source.mimeType.split(
               '/'
@@ -123,14 +156,22 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             });
           }
         }
-        return {
-          role: 'user',
-          rawContent,
-        };
+
+        // Bedrock requires at least one content block per message.
+        if (rawContent.length === 0) {
+          return [];
+        }
+
+        return [
+          {
+            role: 'user',
+            rawContent,
+          },
+        ];
       }
       case MessageRole.Assistant: {
         const rawContent: BedRockMessage['rawContent'] = [];
-        if (message.content) {
+        if (typeof message.content === 'string' && message.content.trim().length > 0) {
           rawContent.push({ text: message.content });
         }
         if (message.toolCalls) {
@@ -146,10 +187,18 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             });
           }
         }
-        return {
-          role: 'assistant',
-          rawContent,
-        };
+
+        // Bedrock requires at least one content block per message.
+        if (rawContent.length === 0) {
+          return [];
+        }
+
+        return [
+          {
+            role: 'assistant',
+            rawContent,
+          },
+        ];
       }
       case MessageRole.Tool: {
         const contentArr: ToolResultContentBlock[] = [];
@@ -168,17 +217,19 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           }
         }
 
-        return {
-          role: 'user',
-          rawContent: [
-            {
-              toolResult: {
-                toolUseId: message.toolCallId,
-                content: contentArr,
+        return [
+          {
+            role: 'user',
+            rawContent: [
+              {
+                toolResult: {
+                  toolUseId: message.toolCallId,
+                  content: contentArr,
+                },
               },
-            },
-          ],
-        };
+            ],
+          },
+        ];
       }
     }
   });

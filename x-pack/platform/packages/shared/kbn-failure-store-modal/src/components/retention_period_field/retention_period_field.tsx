@@ -32,7 +32,7 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
           'data-test-subj': `selectFailureStorePeriodValue`,
           min: 1,
           append: (
-            <UseField key={'retentionPeriodUnit'} path={'retentionPeriodUnit'}>
+            <UseField key={'retentionPeriodUnit'} path={'retentionPeriodUnit'} fullWidth>
               {(field) => {
                 const onSelect = (option: string) => {
                   field.setValue(option);
@@ -48,7 +48,7 @@ export const RetentionPeriodField: FunctionComponent<{ disabled: boolean }> = ({
                       <EuiButton
                         data-test-subj="selectFailureStoreRetentionPeriodUnit"
                         disabled={disabled}
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         iconSide="right"
                         color="text"
                         onClick={() => setOpen((isOpen) => !isOpen)}

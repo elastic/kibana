@@ -5,66 +5,66 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { startCase } from 'lodash';
+import { screen, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 
-import type { OverviewTestBed } from '../overview.helpers';
 import { setupOverviewPage } from '../overview.helpers';
-import { setupEnvironment } from '../../helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { systemIndicesMigrationStatus, systemIndicesMigrationErrorStatus } from './mocks';
 
 describe('Overview - Migrate system indices - Flyout', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  let user: ReturnType<typeof userEvent.setup>;
+  beforeEach(() => {
+    user = userEvent.setup();
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
-
-    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
-
-    await act(async () => {
-      testBed = await setupOverviewPage(httpSetup);
-    });
-
-    testBed.component.update();
   });
 
   test('shows correct features in flyout table', async () => {
-    const { actions, table } = testBed;
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
+    await setupOverviewPage(httpSetup);
 
-    await actions.clickViewSystemIndicesState();
+    await user.click(await screen.findByTestId('viewSystemIndicesStateButton'));
 
-    const { tableCellsValues } = table.getMetaData('flyoutDetails');
+    const flyoutDetails = await screen.findByTestId('flyoutDetails');
+    const table = within(flyoutDetails).getByTestId('featuresTable');
 
-    expect(tableCellsValues.length).toBe(systemIndicesMigrationStatus.features.length);
-    expect(tableCellsValues).toMatchSnapshot();
+    const rows = within(table).getAllByRole('row');
+    expect(rows.length - 1).toBe(systemIndicesMigrationStatus.features.length);
+
+    systemIndicesMigrationStatus.features.forEach((feature) => {
+      const featureName = startCase(feature.feature_name);
+      const row = rows.find((r) => within(r).queryByText(featureName) !== null);
+      expect(row).toBeDefined();
+
+      const expectedStatusText =
+        feature.migration_status === 'NO_MIGRATION_NEEDED'
+          ? 'Migration complete'
+          : feature.migration_status === 'MIGRATION_NEEDED'
+          ? 'Migration required'
+          : feature.migration_status === 'IN_PROGRESS'
+          ? 'Migration in progress'
+          : 'Migration failed';
+
+      expect(within(row!).getByText(expectedStatusText)).toBeInTheDocument();
+    });
   });
 
   test('can trigger the migration', async () => {
-    const { exists, find, component } = testBed;
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationStatus);
+    await setupOverviewPage(httpSetup);
 
-    // Expect the migration button to be present
-    expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+    await user.click(await screen.findByTestId('startSystemIndicesMigrationButton'));
 
-    await act(async () => {
-      find('startSystemIndicesMigrationButton').simulate('click');
-    });
-    component.update();
+    const modal = await screen.findByTestId('migrationConfirmModal');
+    await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
-    expect(exists('migrationConfirmModal')).toBe(true);
-
-    const modal = document.body.querySelector('[data-test-subj="migrationConfirmModal"]');
-    const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-      '[data-test-subj="confirmModalConfirmButton"]'
-    );
-
-    await act(async () => {
-      confirmButton!.click();
-    });
-    component.update();
-
-    expect(exists('migrationConfirmModal')).toBe(false);
+    expect(screen.queryByTestId('migrationConfirmModal')).not.toBeInTheDocument();
   });
 
   test('disables migrate button when migrating', async () => {
@@ -72,13 +72,8 @@ describe('Overview - Migrate system indices - Flyout', () => {
       migration_status: 'IN_PROGRESS',
     });
 
-    testBed = await setupOverviewPage(httpSetup);
-
-    const { find, component } = testBed;
-
-    component.update();
-
-    expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
+    await setupOverviewPage(httpSetup);
+    expect(await screen.findByTestId('startSystemIndicesMigrationButton')).toBeDisabled();
   });
 
   test('hides the start migration button when finished', async () => {
@@ -86,44 +81,33 @@ describe('Overview - Migrate system indices - Flyout', () => {
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    testBed = await setupOverviewPage(httpSetup);
-
-    const { exists, component } = testBed;
-
-    component.update();
-
-    expect(exists('startSystemIndicesMigrationButton')).toBe(false);
+    await setupOverviewPage(httpSetup);
+    expect(screen.queryByTestId('startSystemIndicesMigrationButton')).not.toBeInTheDocument();
   });
 
   test('shows migration errors inline within the table row', async () => {
     httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationErrorStatus);
 
-    await act(async () => {
-      testBed = await setupOverviewPage(httpSetup);
-    });
+    await setupOverviewPage(httpSetup);
 
-    const { component, actions, table } = testBed;
+    await user.click(await screen.findByTestId('viewSystemIndicesStateButton'));
 
-    component.update();
+    const flyoutDetails = await screen.findByTestId('flyoutDetails');
+    const table = within(flyoutDetails).getByTestId('featuresTable');
 
-    await actions.clickViewSystemIndicesState();
+    const rows = within(table).getAllByRole('row');
+    const firstFeature = systemIndicesMigrationErrorStatus.features[0];
+    const featureName = startCase(firstFeature.feature_name);
 
-    const { rows } = table.getMetaData('flyoutDetails');
+    const row = rows.find((r) => within(r).queryByText(featureName) !== null);
+    expect(row).toBeDefined();
+    expect(within(row!).getByText('Migration failed')).toBeInTheDocument();
 
-    expect(rows[0].columns[1].value).toBe('Migration failed');
+    await user.click(within(row!).getByLabelText('Expand'));
 
-    await act(async () => {
-      rows[0].reactWrapper.find('button').simulate('click');
-    });
-
-    component.update();
-
-    const { rows: resultRows } = table.getMetaData('flyoutDetails');
-
-    // Should contain two errors about the migration
-    // We expect results to be on the second row, given that the first row is used as an expander
-    // and the second holds the collapsible content
-    expect(resultRows[1].reactWrapper.text()).toContain('.kibanamapper_parsing_exception');
-    expect(resultRows[1].reactWrapper.text()).toContain('.logsmapper_parsing_exception');
+    // Expanded row content is rendered by EuiInMemoryTable via itemIdToExpandedRowMap
+    // and should include the failed indices and their error reasons.
+    expect(await within(flyoutDetails).findByText('.kibana')).toBeInTheDocument();
+    expect(within(flyoutDetails).getAllByText('mapper_parsing_exception')).toHaveLength(2);
   });
 });

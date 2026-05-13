@@ -14,16 +14,20 @@ paths:
         - name: id
           in: query
           required: true
+          description: Exception list's internal `id` (UUID) returned on create; use with `list_id` and `namespace_type` for an unambiguous target.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
         - name: list_id
           in: query
           required: true
+          description: Human-readable `list_id` of the exception list to export, as shown in the UI and API responses.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
         - name: namespace_type
           in: query
           required: true
+          description: |
+            `single` exports a list in the current Kibana space; `agnostic` exports a global (space-agnostic) list.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
           examples:

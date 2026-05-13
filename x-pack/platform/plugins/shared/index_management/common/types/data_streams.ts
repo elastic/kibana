@@ -9,9 +9,11 @@ import type {
   ByteSize,
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
+  HealthStatus,
   Metadata,
   IndicesDataStreamIndex,
   IndicesDataStreamLifecycleWithRollover,
+  IndicesFailureStore,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexMode } from '../constants/index_modes';
 
@@ -33,7 +35,7 @@ export type HealthFromEs = 'GREEN' | 'YELLOW' | 'RED';
 
 export type DataStreamIndexFromEs = IndicesDataStreamIndex;
 
-export type Health = 'green' | 'yellow' | 'red';
+export type Health = Lowercase<HealthStatus>;
 
 export type IndexMode = (typeof IndexMode)[keyof typeof IndexMode];
 
@@ -49,6 +51,17 @@ export interface EnhancedDataStreamFromEs extends IndicesDataStream {
     delete_index: boolean;
     manage_data_stream_lifecycle: boolean;
     read_failure_store: boolean;
+  };
+  // Override failure_store to support lifecycle property
+  // Note: We narrow data_retention to string only,
+  // as the native es numeric Duration type values (-1, 0)
+  // from IndicesFailureStoreLifecycle['data_retention']
+  // are not used for data retention in our implementation.
+  failure_store?: IndicesFailureStore & {
+    lifecycle?: {
+      enabled?: boolean;
+      data_retention?: string;
+    };
   };
 }
 
@@ -74,6 +87,7 @@ export interface DataStream {
   failureStoreRetention?: {
     customRetentionPeriod?: string;
     defaultRetentionPeriod?: string;
+    retentionDisabled?: boolean;
   };
   lifecycle?: IndicesDataStreamLifecycleWithRollover & {
     enabled?: boolean;

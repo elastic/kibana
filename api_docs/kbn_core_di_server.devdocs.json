@@ -18,7 +18,15 @@
         "tags": [],
         "label": "CoreSetup",
         "description": [
-          "\nThe service identifier of {@link CoreSetupContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDiServerPluginApi",
+            "section": "def-server.CoreSetupContext",
+            "text": "CoreSetupContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -30,6 +38,8 @@
           "<{}, unknown>[K]>"
         ],
         "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -47,7 +57,10 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -60,7 +73,15 @@
         "tags": [],
         "label": "CoreStart",
         "description": [
-          "\nThe service identifier of {@link CoreStartContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDiServerPluginApi",
+            "section": "def-server.CoreStartContext",
+            "text": "CoreStartContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -72,6 +93,8 @@
           "[K]>"
         ],
         "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "lineNumber": 42,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -89,7 +112,10 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -102,7 +128,15 @@
         "tags": [],
         "label": "PluginInitializer",
         "description": [
-          "\nThe service identifier of {@link PluginInitializerContext}."
+          "\nThe service identifier of ",
+          {
+            "pluginId": "@kbn/core-di-server",
+            "scope": "server",
+            "docId": "kibKbnCoreDiServerPluginApi",
+            "section": "def-server.PluginInitializerContext",
+            "text": "PluginInitializerContext"
+          },
+          "."
         ],
         "signature": [
           "<K extends keyof ",
@@ -114,6 +148,8 @@
           "<unknown>[K]>"
         ],
         "path": "src/core/packages/di/server/src/services/lifecycle.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -131,7 +167,10 @@
               "K"
             ],
             "path": "src/core/packages/di/common-internal/src/modules/lifecycle.ts",
+            "lineNumber": 24,
+            "columnNumber": 63,
             "deprecated": false,
+            "docsReferencedTypeName": "K",
             "trackAdoption": false
           }
         ],
@@ -159,6 +198,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +216,8 @@
               "Method"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,6 +236,8 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -209,6 +254,8 @@
           "\nThe route handler."
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -219,7 +266,23 @@
             "tags": [],
             "label": "handle",
             "description": [
-              "\nThe handler function that will be called when the route is matched.\nThe request and response objects can be injected using {@link Request} and {@link Response}."
+              "\nThe handler function that will be called when the route is matched.\nThe request and response objects can be injected using ",
+              {
+                "pluginId": "@kbn/core-di-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDiServerPluginApi",
+                "section": "def-server.Request",
+                "text": "Request"
+              },
+              " and ",
+              {
+                "pluginId": "@kbn/core-di-server",
+                "scope": "server",
+                "docId": "kibKbnCoreDiServerPluginApi",
+                "section": "def-server.Response",
+                "text": "Response"
+              },
+              "."
             ],
             "signature": [
               "() => ",
@@ -229,6 +292,8 @@
               "<any>>"
             ],
             "path": "src/core/packages/di/server/src/services/http.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -263,6 +328,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/capabilities.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -282,9 +349,14 @@
           "(args_0?: ",
           "SavedObjectsClientProviderOptions",
           " | undefined) => ",
-          "SavedObjectsClientContract"
+          "SavedObjectsClientContract",
+          " | Promise<",
+          "SavedObjectsClientContract",
+          ">"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -300,7 +372,10 @@
               "TArgs"
             ],
             "path": "node_modules/@inversifyjs/core/lib/cjs/binding/models/Factory.d.ts",
+            "lineNumber": 1,
+            "columnNumber": 72,
             "deprecated": false,
+            "docsReferencedTypeName": "TArgs",
             "trackAdoption": false
           }
         ],
@@ -327,6 +402,8 @@
           "<unknown, unknown, unknown, any>, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 72,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -352,6 +429,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 78,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -389,6 +468,8 @@
           ">, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -414,6 +495,8 @@
           "<any>, any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/http.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -441,6 +524,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -466,6 +551,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -493,6 +580,8 @@
           ", any[]>"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

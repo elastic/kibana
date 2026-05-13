@@ -9,24 +9,22 @@
 
 import type { JsonObject } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
-import { FakeConnectors } from '../mocks/actions_plugin.mock';
+import { FakeConnectors } from '../mocks/actions_plugin_mock';
 import { WorkflowRunFixture } from '../workflow_run_fixture';
 
 describe('workflow with foreach', () => {
   let workflowRunFixture: WorkflowRunFixture;
-  let outerArray: string[];
+  let outerArrayExpression: string;
   let innerArray: string[];
 
   beforeEach(async () => {
     workflowRunFixture = new WorkflowRunFixture();
-    outerArray = ['outer1', 'outer2'];
-    innerArray = ['inner1', 'inner2', 'inner3'];
   });
 
   function buildYaml() {
     return `
 consts:
-  outerForeachArray: '${JSON.stringify(outerArray)}'
+  outerForeachArray: '${outerArrayExpression}'
 steps:
   - name: outerForeachStep
     foreach: '{{consts.outerForeachArray}}'
@@ -50,6 +48,8 @@ steps:
   }
 
   it('should successfully execute workflow', async () => {
+    outerArrayExpression = JSON.stringify(['outer1', 'outer2']);
+    innerArray = ['inner1', 'inner2', 'inner3'];
     await workflowRunFixture.runWorkflow({
       workflowYaml: buildYaml(),
       inputs: { innerArray },
@@ -64,6 +64,14 @@ steps:
   });
 
   describe('outer foreach checks', () => {
+    let outerArray: string[];
+
+    beforeEach(() => {
+      outerArray = ['outer1', 'outer2'];
+      outerArrayExpression = JSON.stringify(outerArray);
+      innerArray = ['inner1', 'inner2', 'inner3'];
+    });
+
     it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
@@ -102,6 +110,14 @@ steps:
   });
 
   describe('inner foreach checks', () => {
+    let outerArray: string[];
+
+    beforeEach(() => {
+      outerArray = ['outer1', 'outer2'];
+      outerArrayExpression = JSON.stringify(outerArray);
+      innerArray = ['inner1', 'inner2', 'inner3'];
+    });
+
     it('should have correct amount of innerForeachChildConnectorStep executions', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
@@ -143,5 +159,292 @@ steps:
         });
       });
     });
+
+    it('should resolve steps.outerForeachStep.item in inner foreach child step', async () => {
+      const yaml = `
+consts:
+  outerForeachArray: '${outerArrayExpression}'
+steps:
+  - name: outerForeachStep
+    foreach: '{{consts.outerForeachArray}}'
+    type: foreach
+    steps:
+      - name: innerForeachStep
+        foreach: '{{inputs.innerArray}}'
+        type: foreach
+        steps:
+          - name: innerForeachChildConnectorStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'OuterItem: {{steps.outerForeachStep.item}}; InnerItem: {{foreach.item}}'
+`;
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: yaml,
+        inputs: { innerArray },
+      });
+
+      outerArray.forEach((outerItem) => {
+        innerArray.forEach((innerItem) => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack2.id,
+              params: {
+                message: `OuterItem: ${outerItem}; InnerItem: ${innerItem}`,
+              },
+            })
+          );
+        });
+      });
+    });
+
+    it('should resolve steps.outerForeachStep.index and total in inner foreach child step', async () => {
+      const yaml = `
+consts:
+  outerForeachArray: '${outerArrayExpression}'
+steps:
+  - name: outerForeachStep
+    foreach: '{{consts.outerForeachArray}}'
+    type: foreach
+    steps:
+      - name: innerForeachStep
+        foreach: '{{inputs.innerArray}}'
+        type: foreach
+        steps:
+          - name: innerForeachChildConnectorStep
+            type: slack
+            connector-id: ${FakeConnectors.slack2.name}
+            with:
+              message: 'idx:{{steps.outerForeachStep.index}};total:{{steps.outerForeachStep.total}}'
+`;
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: yaml,
+        inputs: { innerArray },
+      });
+
+      outerArray.forEach((_, outerIndex) => {
+        innerArray.forEach(() => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack2.id,
+              params: {
+                message: `idx:${outerIndex};total:${outerArray.length}`,
+              },
+            })
+          );
+        });
+      });
+    });
   });
+
+  describe('triple-nested foreach', () => {
+    it('should resolve outer and middle foreach context from the innermost step', async () => {
+      const outerItems = ['A', 'B'];
+      const middleItems = ['x', 'y'];
+      const innerItems = ['1', '2'];
+      const yaml = `
+consts:
+  outerArray: '${JSON.stringify(outerItems)}'
+  middleArray: '${JSON.stringify(middleItems)}'
+  innerArray: '${JSON.stringify(innerItems)}'
+steps:
+  - name: outerLoop
+    foreach: '{{consts.outerArray}}'
+    type: foreach
+    steps:
+      - name: middleLoop
+        foreach: '{{consts.middleArray}}'
+        type: foreach
+        steps:
+          - name: innerLoop
+            foreach: '{{consts.innerArray}}'
+            type: foreach
+            steps:
+              - name: leafStep
+                type: slack
+                connector-id: ${FakeConnectors.slack1.name}
+                with:
+                  message: 'o:{{steps.outerLoop.item}};m:{{steps.middleLoop.item}};i:{{foreach.item}}'
+`;
+      await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+      outerItems.forEach((outerItem) => {
+        middleItems.forEach((middleItem) => {
+          innerItems.forEach((innerItem) => {
+            expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+              expect.objectContaining({
+                id: FakeConnectors.slack1.id,
+                params: {
+                  message: `o:${outerItem};m:${middleItem};i:${innerItem}`,
+                },
+              })
+            );
+          });
+        });
+      });
+    });
+  });
+
+  describe('foreach with native YAML array', () => {
+    function createYamlSpecWith(
+      items: string[],
+      options: { inline: boolean; customMessage?: string }
+    ) {
+      // inline: ["a", "b", "c"]
+      // not inline:
+      //   - a
+      //   - b
+      //   - c
+      const itemsString = options.inline
+        ? `["${items.join('", "')}"]`
+        : `\n      - ${items.join('\n      - ')}`;
+      return `steps:
+  - name: nativeForeach
+    type: foreach
+    foreach: ${itemsString}
+    steps:
+      - name: childStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: '${options.customMessage ?? 'Item: {{foreach.item}}'}'`;
+    }
+
+    const FOREACH_VALUES = [
+      { values: ['alpha', 'beta', 'gamma'], inline: false },
+      { values: ['alpha', 'beta', 'gamma'], inline: true },
+    ];
+
+    it.each(FOREACH_VALUES)(
+      'should resolve foreach.item for each element in a native array inline: $inline',
+      async ({ values, inline }) => {
+        const yaml = createYamlSpecWith(values, { inline });
+        await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+        const workflowExecution =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+        values.forEach((item) => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack1.id,
+              params: { message: `Item: ${item}` },
+            })
+          );
+        });
+      }
+    );
+
+    it('should resolve foreach.item correctly with a native array using context variables', async () => {
+      const yaml = `
+inputs:
+  type: object
+  properties:
+    James:
+      type: string
+      default: "foo"
+    Laura:
+      type: string
+      default: "bar" 
+steps:
+  - name: process_items
+    type: foreach
+    foreach: 
+      - name: "James"
+        surname: "{{inputs.James}}"
+      - name: "Laura"
+        surname: "{{inputs.Laura}}"
+    steps:
+      - name: log_item
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: "Item: {{ foreach.item | json}}"`;
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: yaml,
+        inputs: {},
+      });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      [
+        { name: 'James', surname: 'foo' },
+        { name: 'Laura', surname: 'bar' },
+      ].forEach((item) => {
+        expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: FakeConnectors.slack1.id,
+            params: { message: `Item: ${JSON.stringify(item)}` },
+          })
+        );
+      });
+    });
+
+    it.each(FOREACH_VALUES)(
+      'should resolve foreach.index and foreach.total for a native array inline: $inline',
+      async ({ values, inline }) => {
+        const yaml = createYamlSpecWith(values, {
+          inline,
+          customMessage: 'idx:{{foreach.index}};total:{{foreach.total}}',
+        });
+        await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
+
+        const workflowExecution =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+        values.forEach((_, index) => {
+          expect(workflowRunFixture.unsecuredActionsClientMock.execute).toHaveBeenCalledWith(
+            expect.objectContaining({
+              id: FakeConnectors.slack1.id,
+              params: { message: `idx:${index};total:${values.length}` },
+            })
+          );
+        });
+      }
+    );
+  });
+
+  describe.each(['${{inputs.notExistingInput}}', 'not array', '["broken", json]'])(
+    'when invalid array is provided to foreach (%s)',
+    (outerArrayTestCase) => {
+      beforeEach(async () => {
+        outerArrayExpression = outerArrayTestCase;
+        await workflowRunFixture.runWorkflow({
+          workflowYaml: buildYaml(),
+          inputs: { innerArray },
+        });
+      });
+
+      it('should fail the workflow with appropriate error message', async () => {
+        const workflowExecution =
+          await workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        const error =
+          await workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          )?.error;
+        expect(error).toBeDefined();
+        expect(workflowExecution?.status).toBe(ExecutionStatus.FAILED);
+      });
+
+      it('should have only one step execution for outerForeachStep with failed status', async () => {
+        const outerForeachStepExecutions = Array.from(
+          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        ).filter((se) => se.stepId === 'outerForeachStep');
+        expect(outerForeachStepExecutions.length).toBe(1);
+        expect(outerForeachStepExecutions[0].status).toBe(ExecutionStatus.FAILED);
+      });
+    }
+  );
 });

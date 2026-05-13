@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Get Attack discovery indices missing privileges - Internal API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/attack_discovery/_missing_privileges:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetAttackDiscoveryMissingPrivilegesInternal
+      description: |
+        DEPRECATED. Identifies Elasticsearch index privileges required for Attack discovery and returns any that are missing for the current user.
+
+        Do not use this endpoint for new integrations; it remains only for backward compatibility and may be removed in a future release. Prefer ensuring the appropriate index privileges through your deployment’s standard security and index access configuration.
+
+        WARNING: Do not rely on this internal API for long-term automation.
+      summary: '[Deprecated] Missing index privileges for Attack discovery (internal)'
+      deprecated: true
+      tags:
+        - attack_discovery
+        - attack_discovery_missing_privileges
+      responses:
+        200:
+          description: Indicates privileges have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The missing index privileges required for Attack discovery
+                items:
+                  $ref: '#/components/schemas/AttackDiscoveryMissingPrivileges'
+        400:
+          description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    AttackDiscoveryMissingPrivileges:
+      type: object
+      required:
+        - index_name
+        - privileges
+      properties:
+        index_name:
+          type: string
+          description: The index name of the privilege missing
+        privileges:
+          type: array
+          items:
+            type: string
+          description: The index privileges level missing

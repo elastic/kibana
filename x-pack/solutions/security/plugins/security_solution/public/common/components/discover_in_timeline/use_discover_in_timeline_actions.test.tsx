@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { waitFor, act, renderHook } from '@testing-library/react';
@@ -20,9 +19,13 @@ import * as timelineActions from '../../../timelines/store/actions';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { createDiscoverServicesMock } from '@kbn/discover-plugin/public/__mocks__/services';
+import { createMockDiscoverStateContainer } from './mocks/discover_in_timeline_provider';
+
+const discoverServices = createDiscoverServicesMock();
 
 let mockDiscoverStateContainerRef = {
-  current: discoverPluginMock.getDiscoverStateMock({}),
+  current: createMockDiscoverStateContainer(discoverServices),
 };
 
 jest.mock('../../lib/kibana');
@@ -69,7 +72,7 @@ const getTestProviderWithCustomState = (state: State = mockState) => {
 
 const renderTestHook = (customWrapper: ComponentType = getTestProviderWithCustomState()) => {
   mockDiscoverStateContainerRef = {
-    current: discoverPluginMock.getDiscoverStateMock({}),
+    current: createMockDiscoverStateContainer(discoverServices),
   };
   return renderHook(() => useDiscoverInTimelineActions(mockDiscoverStateContainerRef), {
     wrapper: customWrapper,
@@ -153,7 +156,7 @@ describe('useDiscoverInTimelineActions', () => {
             breakdownField: 'customBreakDownField',
             columns: ['default_column'],
             filters: [customFilter],
-            grid: undefined,
+            grid: {},
             hideAggregatedPreview: undefined,
             hideChart: true,
             dataSource: {
@@ -178,7 +181,7 @@ describe('useDiscoverInTimelineActions', () => {
       const { result } = renderTestHook();
       await result.current.resetDiscoverAppState();
       await waitFor(() => {
-        const appState = mockDiscoverStateContainerRef.current.appState.getState();
+        const appState = mockDiscoverStateContainerRef.current.getCurrentTab().appState;
         expect(appState).toMatchObject(result.current.defaultDiscoverAppState);
       });
     });

@@ -8,5 +8,6 @@
 export default function loadTests({ loadTestFile }) {
   describe('Data Stream Endpoints', () => {
     loadTestFile(require.resolve('./list'));
+    loadTestFile(require.resolve('./deprecated_ilm_check'));
   });
 }

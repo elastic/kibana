@@ -20,8 +20,14 @@ export function initRoutes(router: IRouter) {
           { unknowns: 'ignore' }
         ),
       },
-      options: { authRequired: false },
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an identity provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
     },
     async (context, request, response) => {
       nonce = request.query.nonce;
@@ -37,11 +43,17 @@ export function initRoutes(router: IRouter) {
   router.get(
     {
       path: '/oidc_provider/endsession',
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an identity provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
       validate: {
         query: schema.object({ post_logout_redirect_uri: schema.string() }, { unknowns: 'ignore' }),
       },
-      options: { authRequired: false },
     },
     async (context, request, response) => {
       return response.redirected({
@@ -53,9 +65,15 @@ export function initRoutes(router: IRouter) {
   router.post(
     {
       path: '/api/oidc_provider/setup',
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an identity provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
       validate: { body: (value) => ({ value }) },
-      options: { authRequired: false },
     },
     (context, request, response) => {
       nonce = request.body.nonce;
@@ -65,16 +83,29 @@ export function initRoutes(router: IRouter) {
 
   router.post(
     {
-      path: '/api/oidc_provider/token_endpoint',
-      security: { authz: { enabled: false, reason: '' } },
-      validate: { body: (value) => ({ value }) },
+      path: '/api/oidc_provider/token_endpoint/{issuer?}',
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an identity provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
+      validate: {
+        body: (value) => ({ value }),
+        params: schema.object({
+          issuer: schema.string({ defaultValue: 'https://test-op.elastic.co' }),
+        }),
+      },
       // Token endpoint needs authentication (with the client credentials) but we don't attempt to
       // validate this OIDC behavior here
-      options: { authRequired: false, xsrfRequired: false },
+      options: { xsrfRequired: false },
     },
     (context, request, response) => {
       const userId = request.body.code.substring(4);
-      const { accessToken, idToken } = createTokens(userId, nonce);
+
+      const { accessToken, idToken } = createTokens(userId, nonce, request.params.issuer);
       return response.ok({
         body: {
           access_token: accessToken,
@@ -90,9 +121,15 @@ export function initRoutes(router: IRouter) {
   router.get(
     {
       path: '/api/oidc_provider/userinfo_endpoint',
-      security: { authz: { enabled: false, reason: '' } },
+      security: {
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an identity provider endpoint and does not require authentication.',
+        },
+        authz: { enabled: false, reason: '' },
+      },
       validate: false,
-      options: { authRequired: false },
     },
     (context, request, response) => {
       const accessToken = (request.headers.authorization as string).substring(7);

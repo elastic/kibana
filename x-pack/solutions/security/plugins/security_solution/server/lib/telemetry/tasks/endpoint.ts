@@ -30,6 +30,7 @@ import {
   isPackagePolicyList,
   newTelemetryLogger,
   safeValue,
+  withErrorMessage,
 } from '../helpers';
 import type { TelemetryLogger } from '../telemetry_logger';
 import type { PolicyData } from '../../../../common/endpoint/types';
@@ -98,7 +99,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
         return documents.length;
       } catch (error) {
-        log.warn(`Error running endpoint alert telemetry task`, { error });
+        log.warn(`Error running endpoint alert telemetry task`, withErrorMessage(error));
         await taskMetricsService.end(trace, error);
         return 0;
       }
@@ -142,7 +143,10 @@ class EndpointMetadataProcessor {
         return policies;
       })
       .catch((error) => {
-        this.logger.warn('Error fetching fleet agents, using an empty value', { error });
+        this.logger.warn(
+          'Error fetching fleet agents, using an empty value',
+          withErrorMessage(error)
+        );
         return new Map();
       });
     const endpointPolicyById = await this.endpointPolicies(policyIdByFleetAgentId.values());
@@ -159,7 +163,10 @@ class EndpointMetadataProcessor {
         return response;
       })
       .catch((error) => {
-        this.logger.warn('Error fetching policy responses, using an empty value', { error });
+        this.logger.warn(
+          'Error fetching policy responses, using an empty value',
+          withErrorMessage(error)
+        );
         return new Map();
       });
 
@@ -175,7 +182,10 @@ class EndpointMetadataProcessor {
         return response;
       })
       .catch((error) => {
-        this.logger.warn('Error fetching endpoint metadata, using an empty value', { error });
+        this.logger.warn(
+          'Error fetching endpoint metadata, using an empty value',
+          withErrorMessage(error)
+        );
         return new Map();
       });
 
@@ -208,9 +218,7 @@ class EndpointMetadataProcessor {
       // something happened in the middle of the pagination, log the error
       // and return what we collect so far instead of aborting the
       // whole execution
-      this.logger.warn('Error fetching endpoint metrics by id', {
-        error,
-      });
+      this.logger.warn('Error fetching endpoint metrics by id', withErrorMessage(error));
     }
 
     return telemetryPayloads;
@@ -235,8 +243,8 @@ class EndpointMetadataProcessor {
     const endpointPolicyCache = new Map<string, PolicyData>();
     for (const policyId of policies) {
       if (!endpointPolicyCache.has(policyId)) {
-        const agentPolicy = await this.receiver.fetchPolicyConfigs(policyId).catch((e) => {
-          this.logger.warn(`error fetching policy config due to ${e?.message}`);
+        const agentPolicy = await this.receiver.fetchPolicyConfigs(policyId).catch((error) => {
+          this.logger.warn('error fetching policy config', withErrorMessage(error));
           return null;
         });
 

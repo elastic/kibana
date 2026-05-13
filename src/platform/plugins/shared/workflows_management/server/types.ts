@@ -8,33 +8,58 @@
  */
 
 import type {
+  ActionsApiRequestHandlerContext,
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingApiRequestHandlerContext,
+  AlertingServerSetup,
+} from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
+import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
+import type {
+  LicensingApiRequestHandlerContext,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { ServerlessServerSetup } from '@kbn/serverless/server/types';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type { WorkflowsManagementApi } from './api/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
 }
 
-export type WorkflowsServerPluginStart = Record<string, never>;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface WorkflowsServerPluginStart {}
 
 export interface WorkflowsServerPluginSetupDeps {
   features?: FeaturesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginSetup;
+  serverless?: ServerlessServerSetup;
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /**
+   * Optional Inbox plugin. When present, Workflows registers itself as the
+   * `workflows` source so paused `waitForInput` steps surface in the
+   * cross-cutting Inbox UI / MCP / API.
+   */
+  inbox?: InboxPluginSetup;
 }
 
 export interface WorkflowsServerPluginStartDeps {
@@ -42,5 +67,16 @@ export interface WorkflowsServerPluginStartDeps {
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  licensing: LicensingPluginStart;
 }
+
+export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{
+  workflows: WorkflowsApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
+}>;
+
+export type WorkflowsRouter = IRouter<WorkflowsRequestHandlerContext>;

@@ -8,28 +8,14 @@
 import { useKibana } from './use_kibana';
 
 export interface Authorization {
-  canCreateIntegrations: boolean;
-  canExecuteConnectors: boolean;
+  /** Kibana Management > Connectors: All (create/update connectors). */
   canCreateConnectors: boolean;
 }
+
 export const useAuthorization = (): Authorization => {
   const { capabilities } = useKibana().services.application;
-  const { fleet: integrations, fleetv2: fleet, actions } = capabilities;
+  const { actions } = capabilities;
   return {
-    canCreateIntegrations: Boolean(fleet?.all && integrations?.all),
-    canExecuteConnectors: Boolean(actions?.show && actions?.execute),
     canCreateConnectors: Boolean(actions?.save),
-  };
-};
-
-export interface RoutesAuthorization {
-  canUseAutomaticImport: boolean;
-  canUseIntegrationUpload: boolean;
-}
-export const useRoutesAuthorization = (): RoutesAuthorization => {
-  const { canCreateIntegrations, canExecuteConnectors } = useAuthorization();
-  return {
-    canUseAutomaticImport: canCreateIntegrations && canExecuteConnectors,
-    canUseIntegrationUpload: canCreateIntegrations,
   };
 };

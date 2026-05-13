@@ -7,8 +7,9 @@
 
 import React from 'react';
 import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { getDescriptionFields as genericGetDescriptionFields } from './get_description_fields';
+import { getDescriptionFields as genericGetDescriptionFields } from '../get_description_fields';
 import {
+  RULE_CLUSTER_HEALTH,
   RULE_ELASTICSEARCH_VERSION_MISMATCH,
   RULE_KIBANA_VERSION_MISMATCH,
   RULE_LICENSE_EXPIRATION,
@@ -36,6 +37,7 @@ const RULES_WITH_DESCRIPTION_FIELDS = [
   RULE_LOGSTASH_VERSION_MISMATCH,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_CLUSTER_HEALTH,
 ];
 
 export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {

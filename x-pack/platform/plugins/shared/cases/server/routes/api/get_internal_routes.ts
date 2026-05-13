@@ -26,9 +26,11 @@ import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
-import { findCasesContainingAllAlertsRoute } from './internal/find_cases_containing_all_alerts';
+import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
+import type { ConfigType } from '../../config';
+import { getTemplateRoutes } from './templates';
 
-export const getInternalRoutes = (userProfileService: UserProfileService) =>
+export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -49,5 +51,6 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
-    findCasesContainingAllAlertsRoute,
+    findCasesContainingAllDocumentsRoute,
+    ...getTemplateRoutes(config),
   ] as CaseRoute[];

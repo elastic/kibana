@@ -15,9 +15,7 @@ import { DateNanosFormatEditor } from './date_nanos';
 
 const fieldType = 'date_nanos';
 const format = {
-  getConverterFor: jest
-    .fn()
-    .mockImplementation(() => (input: string) => `converted date for ${input}`),
+  reactConvert: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS' };
   }),

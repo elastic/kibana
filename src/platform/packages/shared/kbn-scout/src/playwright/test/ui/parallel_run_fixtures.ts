@@ -13,11 +13,9 @@ import {
   coreWorkerFixtures,
   esArchiverFixture,
   scoutSpaceParallelFixture,
-  synthtraceFixture,
 } from '../../fixtures/scope/worker';
 import type {
   ApiServicesFixture,
-  CoreWorkerFixtures,
   EsClient,
   KbnClient,
   KibanaUrl,
@@ -61,36 +59,31 @@ export interface ScoutParallelWorkerFixtures {
   esClient: EsClient;
   scoutSpace: ScoutSpaceParallelFixture;
   apiServices: ApiServicesFixture;
+  isSnapshotBuild: boolean;
 }
-
-/**
- * Pre-creates Elasticsearch Security indexes (.security-tokens, .security-profile)
- * during global setup to prevent race conditions when parallel tests perform their first SAML authentication.
- */
-const preCreateSecurityIndexesFixture = coreWorkerFixtures.extend<
-  {},
-  { samlAuth: CoreWorkerFixtures['samlAuth']; preCreateSecurityIndexes: void }
->({
-  preCreateSecurityIndexes: [
-    async (
-      {
-        samlAuth,
-        log,
-      }: { samlAuth: CoreWorkerFixtures['samlAuth']; log: CoreWorkerFixtures['log'] },
-      use: (arg: void) => Promise<void>
-    ) => {
-      log.debug('Running SAML authentication to pre-create Elasticsearch .security indexes');
-      await samlAuth.session.getInteractiveUserSessionCookieWithRoleScope('admin');
-      await use();
-    },
-    { scope: 'worker', auto: true },
-  ],
-});
 
 export const globalSetupFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
-  synthtraceFixture,
-  apiServicesFixture,
-  preCreateSecurityIndexesFixture
+  apiServicesFixture
 );
+
+/**
+ * Fixtures available in the global teardown hook (`global.teardown.ts`).
+ *
+ * Intentionally narrower than `globalSetupFixtures`: `esArchiver` is omitted on
+ * purpose. Scout's `esArchiver` fixture only exposes `loadIfNeeded` (see
+ * `fixtures/scope/worker/es_archiver.ts`) — archive-driven unloading is not
+ * supported by design, because deleting indexes that way is slow and offers
+ * no real benefit (leftover indexes in the cluster don't affect test outcomes
+ * once setup is idempotent). For state that *does* need to be reset across
+ * configs sharing the cluster (e.g. server-wide feature-flag overrides,
+ * legacy/hand-indexed data), teardown should use direct primitives:
+ *   - `esClient.indices.delete` / `deleteByQuery` / `indices.deleteDataStream`
+ *   - `kbnClient.savedObjects.*` and `kbnClient.uiSettings.{unset,update,updateGlobal}`
+ *   - `apiServices.*` (e.g. `apiServices.core.settings(...)` to revert feature flags)
+ *
+ * This is also consistent with the `scout_no_es_archiver_in_parallel_tests`
+ * ESLint rule, which only allows `esArchiver` in `global.setup.ts`.
+ */
+export const globalTeardownFixtures = mergeTests(coreWorkerFixtures, apiServicesFixture);

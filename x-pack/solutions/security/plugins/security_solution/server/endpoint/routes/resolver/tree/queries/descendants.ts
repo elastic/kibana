@@ -136,6 +136,7 @@ export class DescendantsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: {
                 [ancestryField]: nodes,

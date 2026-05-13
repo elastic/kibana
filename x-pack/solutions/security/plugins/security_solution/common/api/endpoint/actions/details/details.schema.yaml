@@ -14,9 +14,9 @@ paths:
         - name: action_id
           in: path
           required: true
+          description: The ID of the response action to retrieve.
           schema:
             type: string
-            description: The ID of the action to retrieve.
             example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
       responses:
         '200':
@@ -25,6 +25,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionDetailsResponse'
+              examples:
+                actionDetails:
+                  summary: Details of an isolate response action
+                  value:
+                    data:
+                      id: '233db9ea-6733-4849-9226-5a7039c7161d'
+                      command: 'isolate'
+                      agentType: 'endpoint'
+                      agents:
+                        - 'ed518850-681a-4d60-bb98-e22640cae2a8'
+                      startedAt: '2022-08-08T15:23:37.359Z'
+                      isCompleted: true
+                      completedAt: '2022-08-08T10:41:57.352Z'
+                      wasSuccessful: true
+                      isExpired: false
+                      createdBy: 'elastic'
 
 
 components:
@@ -43,6 +59,7 @@ components:
         - $ref: '#/components/schemas/Unisolate'
         - $ref: '#/components/schemas/SuspendProcess'
         - $ref: '#/components/schemas/RunningProcesses'
+        - $ref: '#/components/schemas/MemoryDump'
       discriminator:
         propertyName: command
         mapping:
@@ -57,6 +74,7 @@ components:
           unisolate: '#/components/schemas/Unisolate'
           suspend-process: '#/components/schemas/SuspendProcess'
           running-processes: '#/components/schemas/RunningProcesses'
+          memory-dump: '#/components/schemas/MemoryDump'
 
     DownloadUri:
       type: object
@@ -345,10 +363,16 @@ components:
                         type: string
 
     Isolate:
-      $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          description: Details of an isolate action response.
 
     Unisolate:
-      $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          description: Details of an unisolate action response.
 
     SuspendProcess:
       allOf:
@@ -437,3 +461,71 @@ components:
                       - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
                       - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
 
+    MemoryDump:
+      allOf:
+        - $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  title: Kernel memory dump
+                  required:
+                    - type
+                  properties:
+                    type:
+                      description: Kernel-level memory dump
+                      type: string
+                      enum:
+                        - kernel
+                - type: object
+                  title: Process memory dump with PID
+                  required:
+                    - type
+                    - pid
+                  properties:
+                    type:
+                      description: Process-level memory dump using a process ID
+                      type: string
+                      enum:
+                        - process
+                    pid:
+                      type: number
+                      description: The process ID (PID)
+                - type: object
+                  title: Process memory dump with entity ID
+                  required:
+                    - type
+                    - entity_id
+                  properties:
+                    type:
+                      description: Process-level memory dump using an entity ID
+                      type: string
+                      enum:
+                        - process
+                    entity_id:
+                      type: string
+                      description: The process entity ID
+
+            outputs:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  content:
+                    type: object
+                    title: Memory dump output
+                    properties:
+                      code:
+                        type: string
+                      file_size:
+                        type: string
+                        description: The size of the memory dump compressed file in bytes
+                      path:
+                        type: string
+                        description: The path to the memory dump compressed file on the host machine
+                      disk_free_space:
+                        type: number
+                        description: The free space on the host machine in bytes after the memory dump is written to disk

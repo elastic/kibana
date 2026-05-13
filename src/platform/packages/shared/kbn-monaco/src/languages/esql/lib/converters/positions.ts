@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
+import type { EditorError } from '@elastic/esql/types';
+import type { ESQLMessage } from '@kbn/esql-language';
 import type { MonacoEditorError } from '../../../../types';
 import { monaco } from '../../../../monaco_imports';
 
@@ -58,6 +59,7 @@ export function wrapAsMonacoMessages(
       endColumn: endPosition.column + 1,
       endLineNumber: endPosition.lineNumber,
       severity: convertSeverityToMonacoKind(e.type),
+      underlinedWarning: e.underlinedWarning,
       _source: 'client' as const,
     };
   });

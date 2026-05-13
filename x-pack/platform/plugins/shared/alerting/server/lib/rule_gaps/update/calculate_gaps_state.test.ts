@@ -59,8 +59,7 @@ describe('calculateGapStateFromAllBackfills', () => {
 
     expect(mockBackfillClient.findOverlappingBackfills).toHaveBeenCalledWith({
       ruleId: 'test-rule-id',
-      start: testGap.range.gte,
-      end: testGap.range.lte,
+      ranges: [{ start: testGap.range.gte, end: testGap.range.lte }],
       savedObjectsRepository: mockSavedObjectsRepository,
       actionsClient,
     });

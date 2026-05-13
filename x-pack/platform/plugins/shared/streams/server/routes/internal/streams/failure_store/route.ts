@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
 import {
-  getFailureStore,
+  getClusterDefaultFailureStoreRetentionValue,
   getFailureStoreStats,
-  updateFailureStore,
-} from '../../../../lib/streams/stream_crud';
+} from '../../../../lib/streams/failure_store';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
-import { SecurityError } from '../../../../lib/streams/errors/security_error';
-import { StatusError } from '../../../../lib/streams/errors/status_error';
-
-export interface UpdateFailureStoreResponse {
-  acknowledged: true;
-}
 
 export const getFailureStoreStatsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/failure_store/stats',
@@ -39,94 +31,58 @@ export const getFailureStoreStatsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({
+    const { scopedClusterClient, streamsClient, isSecurityEnabled } = await getScopedClients({
       request,
     });
 
     const { name } = params.path;
 
-    const [privileges, failureStore] = await Promise.all([
-      streamsClient.getPrivileges(name),
-      getFailureStore({
-        name,
-        scopedClusterClient,
-        isServerless: server.isServerless,
-      }),
-    ]);
+    const privileges = await streamsClient.getPrivileges(name);
 
-    if (!failureStore.enabled || !privileges.manage_failure_store) {
-      return { config: failureStore, stats: null };
+    if (!privileges.manage_failure_store) {
+      return { stats: null };
     }
 
     const stats = await getFailureStoreStats({
       name,
-      scopedClusterClient,
+      esClient: scopedClusterClient.asCurrentUser,
+      esClientAsSecondaryAuthUser: isSecurityEnabled
+        ? scopedClusterClient.asSecondaryAuthUser
+        : undefined,
       isServerless: server.isServerless,
     });
 
-    return { config: failureStore, stats };
+    return { stats };
   },
 });
 
-export const updateFailureStoreRoute = createServerRoute({
-  endpoint: 'PUT /internal/streams/{name}/_failure_store',
+export const getFailureStoreDefaultRetentionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/failure_store/default_retention',
   options: {
     access: 'internal',
-    summary: 'Update failure store configuration',
-    description: 'Updates the failure store configuration for a stream',
+    summary: 'Get failure store default retention',
+    description: 'Gets the default retention period for the failure store',
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: z.object({
-    path: z.object({
-      name: z.string(),
-    }),
-    body: z.object({
-      failureStoreEnabled: z.boolean(),
-      customRetentionPeriod: z.optional(z.string()),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<UpdateFailureStoreResponse> => {
-    const { streamsClient, scopedClusterClient } = await getScopedClients({
+  handler: async ({ request, getScopedClients, server }) => {
+    const { scopedClusterClient } = await getScopedClients({
       request,
     });
 
-    const { name } = params.path;
-    const { failureStoreEnabled, customRetentionPeriod } = params.body;
-
-    const stream = await streamsClient.getStream(name);
-
-    if (Streams.WiredStream.Definition.is(stream)) {
-      throw new StatusError('Only wired streams can be exported', 400);
-    }
-
-    // Check if user has failure store manage privileges
-    const privileges = await streamsClient.getPrivileges(name);
-    if (!privileges.manage_failure_store) {
-      throw new SecurityError('Insufficient privileges to update failure store configuration');
-    }
-
-    await updateFailureStore({
-      name,
-      enabled: failureStoreEnabled,
-      customRetentionPeriod,
-      scopedClusterClient,
-      isServerless: server.isServerless,
+    const defaultRetention = await getClusterDefaultFailureStoreRetentionValue({
+      esClient: scopedClusterClient.asCurrentUser,
+      isServerless: !!server.isServerless,
     });
 
-    return { acknowledged: true };
+    return { default_retention: defaultRetention };
   },
 });
 
 export const failureStoreRoutes = {
   ...getFailureStoreStatsRoute,
-  ...updateFailureStoreRoute,
+  ...getFailureStoreDefaultRetentionRoute,
 };

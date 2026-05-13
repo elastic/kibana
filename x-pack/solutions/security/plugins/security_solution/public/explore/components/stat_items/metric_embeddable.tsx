@@ -6,13 +6,15 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { PageScope } from '../../../data_view_manager/constants';
 import { FlexItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
+import type { ExtraOptions } from '../../../common/components/visualization_actions/types';
 import type { FieldConfigs } from './types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface MetricEmbeddableProps {
+  extraOptions?: ExtraOptions;
   fields: FieldConfigs[];
   id: string;
   inspectTitle?: string;
@@ -22,6 +24,7 @@ export interface MetricEmbeddableProps {
 const CHART_HEIGHT = 36;
 
 const MetricEmbeddableComponent = ({
+  extraOptions,
   fields,
   id,
   inspectTitle,
@@ -50,16 +53,13 @@ const MetricEmbeddableComponent = ({
                 <div data-test-subj="stat-title">
                   <VisualizationEmbeddable
                     data-test-subj="embeddable-metric"
+                    extraOptions={extraOptions}
                     height={CHART_HEIGHT}
                     id={`${id}-${field.key}-metric-embeddable`}
                     lensAttributes={field.lensAttributes}
                     timerange={timerange}
                     inspectTitle={inspectTitle}
-                    scopeId={
-                      newDataViewPickerEnabled
-                        ? DataViewManagerScopeName.explore
-                        : DataViewManagerScopeName.default
-                    }
+                    scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
                   />
                 </div>
               )}

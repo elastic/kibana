@@ -18,7 +18,6 @@ import type { InternalServices } from './services/types';
 import { createServices } from './services/create_services';
 import type { WorkplaceAIAppConfig } from './config';
 import { AppLogger } from './utils';
-import { registerWorkplaceAIDataTypes } from './data_types';
 import type {
   WorkplaceAIAppPluginSetup,
   WorkplaceAIAppPluginStart,
@@ -54,6 +53,7 @@ export class WorkplaceAIAppPlugin
       core,
       router,
       logger: this.loggerFactory.get('routes'),
+      config: this.config,
       getServices: () => {
         if (!this.services) {
           throw new Error('getServices called before #start');
@@ -63,9 +63,6 @@ export class WorkplaceAIAppPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
-
-    // Register custom data types with the data sources registry
-    registerWorkplaceAIDataTypes({ dataSourcesRegistry: setupDeps.dataSourcesRegistry });
 
     return {};
   }

@@ -9,11 +9,6 @@ import React, { memo, useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE,
-} from '../../../../common/constants';
 
 const MISSING_CONNECTOR = i18n.translate('xpack.securitySolution.alertSummary.missingConnector', {
   defaultMessage: 'Missing connector',
@@ -21,14 +16,14 @@ const MISSING_CONNECTOR = i18n.translate('xpack.securitySolution.alertSummary.mi
 const CONNECTOR_MISSING_MESSAGE = i18n.translate(
   'xpack.securitySolution.alertSummary.noConnectorMessage',
   {
-    defaultMessage: 'Your default AI connector is invalid and may have been deleted.',
+    defaultMessage: 'Your default model is invalid and may have been deleted.',
   }
 );
 const CONNECTOR_MISSING_MESSAGE_ADMIN = i18n.translate(
   'xpack.securitySolution.alertSummary.noConnectorMessageForAdmin',
   {
     defaultMessage:
-      'Your default AI connector is invalid and may have been deleted. You may update the default AI connector via',
+      'Your default model is invalid and may have been deleted. You may update the default model via',
   }
 );
 const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
@@ -55,21 +50,14 @@ export interface ConnectorMissingCalloutProps {
  */
 export const ConnectorMissingCallout = memo(
   ({ canSeeAdvancedSettings }: ConnectorMissingCalloutProps) => {
-    const { featureFlags } = useKibana().services;
-    const useNewDefaultConnector = featureFlags.getBooleanValue(
-      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-      AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED_VALUE
-    );
     const { navigateTo } = useNavigateTo();
     const goToKibanaSettings = useCallback(
       () =>
         navigateTo({
           appId: 'management',
-          path: useNewDefaultConnector
-            ? '/ai/genAiSettings'
-            : '/kibana/settings?query=defaultAIConnector',
+          path: '/modelManagement/model_settings',
         }),
-      [navigateTo, useNewDefaultConnector]
+      [navigateTo]
     );
 
     return (

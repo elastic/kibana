@@ -194,7 +194,8 @@ describe('DataView list component', () => {
       expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByRole('searchbox');
+    // When the list has items, the input has role "combobox" (not "searchbox")
+    const searchInput = screen.getByRole('combobox');
 
     // Clear and type to filter options
     await user.clear(searchInput);

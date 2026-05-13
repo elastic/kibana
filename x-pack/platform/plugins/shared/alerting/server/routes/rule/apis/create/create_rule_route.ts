@@ -7,6 +7,7 @@
 
 import type { RouteOptions } from '../../..';
 import type {
+  CreateRuleActionV1,
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
@@ -71,11 +72,10 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
-          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const createRuleData = req.body as CreateRuleRequestBodyV1<RuleParamsV1>;
           const params: CreateRuleRequestParamsV1 = req.params;
 
           countUsageOfPredefinedIds({
@@ -100,12 +100,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
             });
 
-            const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
-            const systemActions = allActions.filter((action) =>
+            const actions = allActions.filter(
+              (action: CreateRuleActionV1) => !actionsClient.isSystemAction(action.id)
+            );
+            const systemActions = allActions.filter((action: CreateRuleActionV1) =>
               actionsClient.isSystemAction(action.id)
             );
-
-            const flappingSettings = await rulesSettingsClient.flapping().get();
 
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
@@ -115,7 +115,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              isFlappingEnabled: flappingSettings.enabled,
               options: { id: params?.id },
             })) as Rule<RuleParamsV1>;
 

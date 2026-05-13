@@ -8,9 +8,11 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
+import type { SupportedHostOsType } from '../constants';
 import type { MemoryDumpActionRequestBody } from '../../api/endpoint/actions/response_actions/memory_dump';
 import type {
   ActionStatusRequestSchema,
+  EndpointRunScriptActionRequestParams,
   KillProcessRequestBody,
   RunScriptActionRequestBody,
   SuspendProcessRequestBody,
@@ -120,6 +122,8 @@ export interface ResponseActionRunScriptOutputContent {
    */
   downloadUri?: string;
 }
+
+export type ResponseActionEndpointRunScriptOutputContent = ResponseActionExecuteOutputContent;
 
 export interface ResponseActionCancelOutputContent {
   code: string;
@@ -684,3 +688,11 @@ export interface ResponseActionScript<TMeta extends {} = {}> {
 export interface ResponseActionScriptsApiResponse<TMeta extends {} = {}> {
   data: ResponseActionScript<TMeta>[];
 }
+
+/**
+ * Type used in Rules when setting up the `runscript` response action for Elastic Defend
+ */
+export type AutomatedRunScriptConfig = Record<
+  SupportedHostOsType,
+  EndpointRunScriptActionRequestParams
+>;

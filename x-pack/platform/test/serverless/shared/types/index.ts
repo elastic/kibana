@@ -35,6 +35,7 @@ export interface CreateTestConfigOptions<
 > {
   serverlessProject: ServerlessProjectType;
   esServerArgs?: string[];
+  esServerlessOptions?: { uiam: boolean };
   kbnServerArgs?: string[];
   testFiles: string[];
   junit: { reportName: string };
@@ -44,4 +45,5 @@ export interface CreateTestConfigOptions<
   apps?: Record<string, { pathname: string; hash?: string }>;
   screenshots?: { directory: string };
   indexRefreshInterval?: string | false;
+  enableFleetDockerRegistry?: boolean;
 }

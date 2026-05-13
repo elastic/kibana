@@ -17,7 +17,6 @@ import { updateAttackDiscoverySchedule } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 
 export const UPDATE_ATTACK_DISCOVERY_SCHEDULE_MUTATION_KEY = [
   'PUT',
@@ -31,7 +30,6 @@ interface UpdateAttackDiscoveryScheduleParams {
 
 export const useUpdateAttackDiscoverySchedule = () => {
   const { addError, addSuccess } = useAppToasts();
-  const { attackDiscoveryPublicApiEnabled } = useKibanaFeatureFlags();
 
   const invalidateGetAttackDiscoverySchedule = useInvalidateGetAttackDiscoverySchedule();
   const invalidateFindAttackDiscoverySchedule = useInvalidateFindAttackDiscoverySchedule();
@@ -43,7 +41,6 @@ export const useUpdateAttackDiscoverySchedule = () => {
   >(
     ({ id, scheduleToUpdate }) =>
       updateAttackDiscoverySchedule({
-        attackDiscoveryPublicApiEnabled,
         id,
         body: scheduleToUpdate,
       }),

@@ -30,6 +30,8 @@
           "(options: ReporterOptions) => Promise<void>"
         ],
         "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +46,10 @@
               "ReporterOptions"
             ],
             "path": "packages/kbn-ci-stats-performance-metrics/src/reporter.ts",
+            "lineNumber": 29,
+            "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "ReporterOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -63,6 +68,8 @@
           "() => Promise<void>"
         ],
         "path": "packages/kbn-ci-stats-performance-metrics/src/cli.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

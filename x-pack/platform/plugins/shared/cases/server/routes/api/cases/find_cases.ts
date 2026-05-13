@@ -27,7 +27,7 @@ export const findCaseRoute = createCasesRoute({
 
       const options = request.query as caseApiV1.CasesFindRequest;
 
-      const res: caseApiV1.CasesFindResponse = await casesClient.cases.search({ ...options });
+      const res: caseApiV1.CasesFindResponse = await casesClient.cases.find({ ...options });
 
       return response.ok({
         body: res,

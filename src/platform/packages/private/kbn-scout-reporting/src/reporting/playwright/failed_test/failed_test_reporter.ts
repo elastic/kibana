@@ -16,28 +16,29 @@ import type {
   TestResult,
 } from '@playwright/test/reporter';
 
-import path from 'node:path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
-import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  type CodeOwnersEntry,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
+  type CodeOwnersEntry,
 } from '@kbn/code-owners';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
+import path from 'node:path';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestTarget } from '@kbn/scout-info';
+import {
+  computeTestID,
+  excapeHtmlCharacters,
+  generateTestRunId,
+  getKibanaModuleData,
+  getRunCommand,
+  getTestTargetFromProcessArguments,
+  parseStdout,
+  stripFilePath,
+} from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
-import {
-  getRunTarget,
-  getKibanaModuleData,
-  parseStdout,
-  generateTestRunId,
-  getTestIDForTitle,
-  stripRunCommand,
-  stripFilePath,
-  excapeHtmlCharacters,
-} from '../../../helpers';
+import { ScoutFailureTracker } from './failure_tracking';
 
 /**
  * Scout Failed Test reporter
@@ -48,8 +49,8 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
   private readonly command: string;
-
-  private target = 'undefined'; // when '--grep' is not provided in the command line
+  private readonly testTarget: string;
+  private failureTracker?: ScoutFailureTracker;
   private kibanaModule: TestFailure['kibanaModule'];
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
@@ -61,7 +62,9 @@ export class ScoutFailedTestReporter implements Reporter {
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.command = stripRunCommand(process.argv);
+    this.command = getRunCommand();
+    this.testTarget =
+      (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -87,8 +90,6 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    this.target = getRunTarget();
-
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
       const metadata = getKibanaModuleData(config.configFile);
@@ -99,18 +100,36 @@ export class ScoutFailedTestReporter implements Reporter {
         group: metadata.group,
       };
     }
+
+    // Initialize failure tracker for GitHub issue integration
+    const reportRootPath = path.join(
+      SCOUT_REPORT_OUTPUT_ROOT,
+      `scout-playwright-test-failures-${this.runId}`
+    );
+    this.failureTracker = new ScoutFailureTracker(this.log, reportRootPath, this.runId);
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status !== 'failed') {
+    // Playwright marks timeouts and interruptions as separate statuses, but we still
+    // want to generate a Scout failure report artifact for them (e.g. global.setup.ts timeouts).
+    if (
+      result.status !== 'failed' &&
+      result.status !== 'timedOut' &&
+      result.status !== 'interrupted'
+    ) {
       return;
     }
 
+    // We don't include the first three elements in the title path (root suite, project, test file path)
+    // for full test titles in Scout, especially not when calculating test IDs
+    const fullTestTitle = test.titlePath().slice(3).join(' ');
+    const testFilePath = path.relative(REPO_ROOT, test.location.file);
+
     const testFailure: TestFailure = {
-      id: getTestIDForTitle(test.titlePath().join(' ')),
+      id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
       title: test.title,
-      target: this.target,
+      target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
       owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
@@ -126,12 +145,17 @@ export class ScoutFailedTestReporter implements Reporter {
     };
 
     this.report.logEvent(testFailure);
+
+    // Also track failure for GitHub issue integration
+    this.failureTracker?.addFailure(testFailure);
   }
 
   onEnd(result: FullResult) {
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
+      // Save failure tracking file for GitHub issue integration
+      this.failureTracker?.save();
     } finally {
       this.report.conclude();
     }

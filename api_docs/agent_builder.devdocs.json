@@ -1,0 +1,3577 @@
+{
+  "id": "agentBuilder",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-public.AGENTBUILDER_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AGENTBUILDER_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"agentBuilder\""
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-public.uiPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "uiPrivileges",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-public.uiPrivileges.show",
+            "type": "string",
+            "tags": [],
+            "label": "show",
+            "description": [
+              "/** Read access: view Agent Builder and read-only actions */"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-public.uiPrivileges.write",
+            "type": "string",
+            "tags": [],
+            "label": "write",
+            "description": [
+              "/** Create/update/delete for areas not covered by sub-features. */"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-public.uiPrivileges.manageAgents",
+            "type": "string",
+            "tags": [],
+            "label": "manageAgents",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-public.uiPrivileges.manageTools",
+            "type": "string",
+            "tags": [],
+            "label": "manageTools",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-public.uiPrivileges.manageSkills",
+            "type": "string",
+            "tags": [],
+            "label": "manageSkills",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_builder/common/features.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "parentPluginId": "agentBuilder",
+      "id": "def-public.AgentBuilderPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+      "lineNumber": 119,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "agentBuilder",
+      "id": "def-public.AgentBuilderPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderPluginStart",
+      "description": [
+        "\nPublic start contract for the browser-side agentBuilder plugin."
+      ],
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+      "lineNumber": 121,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [
+            "\nAgent service contract, can be used to list agents."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.AgentsServiceStartContract",
+              "text": "AgentsServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 125,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.attachments",
+          "type": "Object",
+          "tags": [],
+          "label": "attachments",
+          "description": [
+            "\nAttachment service contract, can be used to register and retrieve attachment UI definitions."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.AttachmentServiceStartContract",
+              "text": "AttachmentServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 129,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.tools",
+          "type": "Object",
+          "tags": [],
+          "label": "tools",
+          "description": [
+            "\nTool service contract, can be used to list or execute tools."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.ToolServiceStartContract",
+              "text": "ToolServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 133,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.events",
+          "type": "Object",
+          "tags": [],
+          "label": "events",
+          "description": [
+            "\nEvents service contract, can be used to listen to chat events."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.EventsServiceStartContract",
+              "text": "EventsServiceStartContract"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 137,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.openChat",
+          "type": "Function",
+          "tags": [],
+          "label": "openChat",
+          "description": [
+            "\nOpens the conversation sidebar.\n"
+          ],
+          "signature": [
+            "(options?: ",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.OpenConversationSidebarOptions",
+              "text": "OpenConversationSidebarOptions"
+            },
+            " | undefined) => ",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.OpenConversationSidebarReturn",
+              "text": "OpenConversationSidebarReturn"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 141,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.openChat.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "- Configuration options for the sidebar"
+              ],
+              "signature": [
+                {
+                  "pluginId": "@kbn/agent-builder-browser",
+                  "scope": "common",
+                  "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                  "section": "def-common.OpenConversationSidebarOptions",
+                  "text": "OpenConversationSidebarOptions"
+                },
+                " | undefined"
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 158,
+              "columnNumber": 14,
+              "deprecated": false,
+              "docsReferencedTypeName": "OpenConversationSidebarOptions",
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": [
+            "An object containing the sidebar reference"
+          ]
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.toggleChat",
+          "type": "Function",
+          "tags": [],
+          "label": "toggleChat",
+          "description": [
+            "\nToggles the conversation sidebar.\n\nIf the sidebar is open, it will be closed. Otherwise, it will be opened."
+          ],
+          "signature": [
+            "(options?: ",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.OpenConversationSidebarOptions",
+              "text": "OpenConversationSidebarOptions"
+            },
+            " | undefined) => void"
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 159,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.toggleChat.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/agent-builder-browser",
+                  "scope": "common",
+                  "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                  "section": "def-common.OpenConversationSidebarOptions",
+                  "text": "OpenConversationSidebarOptions"
+                },
+                " | undefined"
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 164,
+              "columnNumber": 16,
+              "deprecated": false,
+              "docsReferencedTypeName": "OpenConversationSidebarOptions",
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.setChatConfig",
+          "type": "Function",
+          "tags": [],
+          "label": "setChatConfig",
+          "description": [],
+          "signature": [
+            "(config: ",
+            {
+              "pluginId": "@kbn/agent-builder-browser",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderBrowserPluginApi",
+              "section": "def-common.EmbeddableConversationProps",
+              "text": "EmbeddableConversationProps"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 165,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.setChatConfig.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "config",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/agent-builder-browser",
+                  "scope": "common",
+                  "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                  "section": "def-common.EmbeddableConversationProps",
+                  "text": "EmbeddableConversationProps"
+                }
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 165,
+              "columnNumber": 19,
+              "deprecated": false,
+              "docsReferencedTypeName": "EmbeddableConversationProps",
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.clearChatConfig",
+          "type": "Function",
+          "tags": [],
+          "label": "clearChatConfig",
+          "description": [],
+          "signature": [
+            "() => void"
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 166,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.addAttachment",
+          "type": "Function",
+          "tags": [],
+          "label": "addAttachment",
+          "description": [
+            "\nAdds an attachment to the active conversation sidebar.\nIf no sidebar is open, the attachment is ignored.\n"
+          ],
+          "signature": [
+            "(attachment: ",
+            "AttachmentInput",
+            "<string, unknown>) => void"
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 167,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.addAttachment.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "attachment",
+              "description": [
+                "- The attachment to add"
+              ],
+              "signature": [
+                "AttachmentInput",
+                "<string, unknown>"
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 173,
+              "columnNumber": 19,
+              "deprecated": false,
+              "docsReferencedTypeName": "AttachmentInput",
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin",
+          "type": "Function",
+          "tags": [],
+          "label": "updateAttachmentOrigin",
+          "description": [
+            "\nUpdates the origin of an attachment in a conversation.\nUse this after saving a by-value attachment to link it to its persistent store.\n"
+          ],
+          "signature": [
+            "(conversationId: string, attachmentId: string, origin: string) => Promise<",
+            {
+              "pluginId": "@kbn/agent-builder-common",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderCommonPluginApi",
+              "section": "def-common.UpdateOriginResponse",
+              "text": "UpdateOriginResponse"
+            },
+            ">"
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+          "lineNumber": 174,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$1",
+              "type": "string",
+              "tags": [],
+              "label": "conversationId",
+              "description": [
+                "- The conversation containing the attachment"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 194,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$2",
+              "type": "string",
+              "tags": [],
+              "label": "attachmentId",
+              "description": [
+                "- The ID of the attachment to update"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 195,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "agentBuilder",
+              "id": "def-public.AgentBuilderPluginStart.updateAttachmentOrigin.$3",
+              "type": "string",
+              "tags": [],
+              "label": "origin",
+              "description": [
+                "- Origin string for the attachment (e.g. saved object id); same value passed to `resolve` on the server"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/plugin_contract.ts",
+              "lineNumber": 196,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": [
+            "Promise resolving to the update result"
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationAgentExecution",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationAgentExecution",
+        "description": [
+          "\nAn agent execution in conversation mode — tied to a conversation with persistence."
+        ],
+        "signature": [
+          "ConversationAgentExecution",
+          " extends BaseAgentExecution"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationAgentExecution.executionMode",
+            "type": "string",
+            "tags": [],
+            "label": "executionMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentExecutionMode",
+                "text": "AgentExecutionMode"
+              },
+              ".conversation"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationAgentExecution.agentParams",
+            "type": "Object",
+            "tags": [],
+            "label": "agentParams",
+            "description": [],
+            "signature": [
+              "ConversationExecutionParams"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationExecutionParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationExecutionParams",
+        "description": [
+          "\nExecution parameters for conversation mode — tied to a conversation with persistence."
+        ],
+        "signature": [
+          "ConversationExecutionParams",
+          " extends ",
+          "BaseExecutionParams"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.conversationId",
+            "type": "string",
+            "tags": [],
+            "label": "conversationId",
+            "description": [
+              "Id of the conversation to continue."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.storeConversation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "storeConversation",
+            "description": [
+              "When false, the conversation will not be persisted. Defaults to true."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.autoCreateConversationWithId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoCreateConversationWithId",
+            "description": [
+              "Create conversation with specified ID if not found."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.browserApiTools",
+            "type": "Array",
+            "tags": [],
+            "label": "browserApiTools",
+            "description": [
+              "Browser API tools to make available to the agent."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.BrowserApiToolMetadata",
+                "text": "BrowserApiToolMetadata"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationExecutionParams.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "The action to perform: \"regenerate\" re-executes the last round with original input (requires conversationId)."
+            ],
+            "signature": [
+              "\"regenerate\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationListOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationListOptions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation_list.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationListOptions.agentId",
+            "type": "string",
+            "tags": [],
+            "label": "agentId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/chat/conversation_list.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ConversationsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationsStart",
+        "description": [
+          "\nAgentBuilder conversations service's start contract (read-only)."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 174,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ConversationsStart.getScopedClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getScopedClient",
+            "description": [
+              "\nReturns a read-only conversation client scoped to the given request's user and space."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ReadOnlyConversationClient",
+                "text": "ReadOnlyConversationClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ConversationsStart.getScopedClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 181,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "agentBuilder",
+                    "id": "def-server.ConversationsStart.getScopedClient.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 181,
+                    "columnNumber": 27,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ReadOnlyConversationClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReadOnlyConversationClient",
+        "description": [
+          "\nA read-only conversation client exposing only get and list operations."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 160,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ReadOnlyConversationClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nRetrieve a single conversation by its ID, including all rounds."
+            ],
+            "signature": [
+              "(conversationId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ReadOnlyConversationClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "conversationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 167,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ReadOnlyConversationClient.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList conversations for the current user, optionally filtered by agent ID."
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ConversationListOptions",
+                "text": "ConversationListOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ConversationWithoutRounds",
+                "text": "ConversationWithoutRounds"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ReadOnlyConversationClient.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.ConversationListOptions",
+                    "text": "ConversationListOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 171,
+                "columnNumber": 8,
+                "deprecated": false,
+                "docsReferencedTypeName": "ConversationListOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlChunk",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlChunk",
+        "description": [
+          "\nA single SML chunk to be indexed."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Type of the chunk (e.g., 'dashboard', 'lens', 'esql')"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "Searchable content (indexed as `semantic_text`)"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "Display title"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Longer summary for semantic search (indexed as `semantic_text`); omit or empty if none"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.user_id",
+            "type": "string",
+            "tags": [],
+            "label": "user_id",
+            "description": [
+              "Owner or last-modifier user id when known"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "Other SML chunk ids this item references"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.permissions",
+            "type": "Array",
+            "tags": [],
+            "label": "permissions",
+            "description": [
+              "Permissions required to access the underlying element (e.g., 'saved_object:lens/get')"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlContext",
+        "description": [
+          "\nContext passed to SML type hooks (`list` and `getSmlData`)."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlContext.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "{ child: (opts: ",
+              "ClientOptions",
+              ") => ",
+              "default",
+              "; create: { <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateResponse",
+              "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; }; delete: { (this: That, params: ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; (this: That, params: ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              "default",
+              "; helpers: ",
+              "default",
+              "; asyncSearch: ",
+              "default",
+              "; autoscaling: ",
+              "default",
+              "; bulk: { <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "BulkResponse",
+              ">; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "BulkResponse",
+              ", unknown>>; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
+              "BulkRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "BulkResponse",
+              ">; }; cancelReindex: { (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
+              ">; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CancelReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "CancelReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CancelReindexResponse",
+              ">; }; capabilities: { (this: That, params?: ",
+              "CapabilitiesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CapabilitiesResponse",
+              ">; (this: That, params?: ",
+              "CapabilitiesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CapabilitiesResponse",
+              ", unknown>>; (this: That, params?: ",
+              "CapabilitiesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CapabilitiesResponse",
+              ">; }; cat: ",
+              "default",
+              "; ccr: ",
+              "default",
+              "; clearScroll: { (this: That, params?: ",
+              "ClearScrollRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ClearScrollResponse",
+              ">; (this: That, params?: ",
+              "ClearScrollRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ClearScrollResponse",
+              ", unknown>>; (this: That, params?: ",
+              "ClearScrollRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ClearScrollResponse",
+              ">; }; closePointInTime: { (this: That, params: ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ClosePointInTimeResponse",
+              ">; (this: That, params: ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ClosePointInTimeResponse",
+              ", unknown>>; (this: That, params: ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ClosePointInTimeResponse",
+              ">; }; cluster: ",
+              "default",
+              "; connector: ",
+              "default",
+              "; count: { (this: That, params?: ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CountResponse",
+              ">; (this: That, params?: ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CountResponse",
+              ", unknown>>; (this: That, params?: ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CountResponse",
+              ">; }; danglingIndices: ",
+              "default",
+              "; deleteByQuery: { (this: That, params: ",
+              "DeleteByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "DeleteByQueryResponse",
+              ">; (this: That, params: ",
+              "DeleteByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "DeleteByQueryResponse",
+              ", unknown>>; (this: That, params: ",
+              "DeleteByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "DeleteByQueryResponse",
+              ">; }; deleteByQueryRethrottle: { (this: That, params: ",
+              "DeleteByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TasksTaskListResponseBase",
+              ">; (this: That, params: ",
+              "DeleteByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TasksTaskListResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TasksTaskListResponseBase",
+              ">; }; deleteScript: { (this: That, params: ",
+              "DeleteScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; (this: That, params: ",
+              "DeleteScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "AcknowledgedResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteScriptRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; }; enrich: ",
+              "default",
+              "; eql: ",
+              "default",
+              "; esql: ",
+              "default",
+              "; exists: { (this: That, params: ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
+              "ExistsSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsSourceRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; explain: { <TDocument = unknown>(this: That, params: ",
+              "ExplainRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ExplainResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "ExplainRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ExplainResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "ExplainRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ExplainResponse",
+              "<TDocument>>; }; features: ",
+              "default",
+              "; fieldCaps: { (this: That, params?: ",
+              "FieldCapsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "FieldCapsResponse",
+              ">; (this: That, params?: ",
+              "FieldCapsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "FieldCapsResponse",
+              ", unknown>>; (this: That, params?: ",
+              "FieldCapsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "FieldCapsResponse",
+              ">; }; fleet: ",
+              "default",
+              "; getReindex: { (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "GetReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetReindexResponse",
+              ">; }; getScript: { (this: That, params: ",
+              "GetScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetScriptResponse",
+              ">; (this: That, params: ",
+              "GetScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetScriptResponse",
+              ", unknown>>; (this: That, params: ",
+              "GetScriptRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetScriptResponse",
+              ">; }; getScriptContext: { (this: That, params?: ",
+              "GetScriptContextRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetScriptContextResponse",
+              ">; (this: That, params?: ",
+              "GetScriptContextRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetScriptContextResponse",
+              ", unknown>>; (this: That, params?: ",
+              "GetScriptContextRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetScriptContextResponse",
+              ">; }; getScriptLanguages: { (this: That, params?: ",
+              "GetScriptLanguagesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetScriptLanguagesResponse",
+              ">; (this: That, params?: ",
+              "GetScriptLanguagesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetScriptLanguagesResponse",
+              ", unknown>>; (this: That, params?: ",
+              "GetScriptLanguagesRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetScriptLanguagesResponse",
+              ">; }; getSource: { <TDocument = unknown>(this: That, params: ",
+              "GetSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<TDocument>; <TDocument = unknown>(this: That, params: ",
+              "GetSourceRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<TDocument, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetSourceRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<TDocument>; }; graph: ",
+              "default",
+              "; healthReport: { (this: That, params?: ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "HealthReportResponse",
+              ">; (this: That, params?: ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "HealthReportResponse",
+              ", unknown>>; (this: That, params?: ",
+              "HealthReportRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "HealthReportResponse",
+              ">; }; ilm: ",
+              "default",
+              "; index: { <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; indices: ",
+              "default",
+              "; inference: ",
+              "default",
+              "; info: { (this: That, params?: ",
+              "InfoRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "InfoResponse",
+              ">; (this: That, params?: ",
+              "InfoRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "InfoResponse",
+              ", unknown>>; (this: That, params?: ",
+              "InfoRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "InfoResponse",
+              ">; }; ingest: ",
+              "default",
+              "; knnSearch: { <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "KnnSearchResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "KnnSearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "KnnSearchResponse",
+              "<TDocument>>; }; license: ",
+              "default",
+              "; listReindex: { (this: That, params?: ",
+              "ListReindexRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ListReindexResponse",
+              ">; (this: That, params?: ",
+              "ListReindexRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ListReindexResponse",
+              ", unknown>>; (this: That, params?: ",
+              "ListReindexRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ListReindexResponse",
+              ">; }; logstash: ",
+              "default",
+              "; mget: { <TDocument = unknown>(this: That, params?: ",
+              "MgetRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MgetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
+              "MgetRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MgetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
+              "MgetRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MgetResponse",
+              "<TDocument>>; }; migration: ",
+              "default",
+              "; ml: ",
+              "default",
+              "; monitoring: ",
+              "default",
+              "; msearch: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MsearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MsearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MsearchResponse",
+              "<TDocument, TAggregations>>; }; msearchTemplate: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchTemplateRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MsearchTemplateResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchTemplateRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MsearchTemplateResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "MsearchTemplateRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MsearchTemplateResponse",
+              "<TDocument, TAggregations>>; }; mtermvectors: { (this: That, params?: ",
+              "MtermvectorsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "MtermvectorsResponse",
+              ">; (this: That, params?: ",
+              "MtermvectorsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "MtermvectorsResponse",
+              ", unknown>>; (this: That, params?: ",
+              "MtermvectorsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "MtermvectorsResponse",
+              ">; }; nodes: ",
+              "default",
+              "; openPointInTime: { (this: That, params: ",
+              "OpenPointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "OpenPointInTimeResponse",
+              ">; (this: That, params: ",
+              "OpenPointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "OpenPointInTimeResponse",
+              ", unknown>>; (this: That, params: ",
+              "OpenPointInTimeRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "OpenPointInTimeResponse",
+              ">; }; ping: { (this: That, params?: ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params?: ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params?: ",
+              "PingRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; profiling: ",
+              "default",
+              "; project: ",
+              "default",
+              "; putScript: { (this: That, params: ",
+              "PutScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; (this: That, params: ",
+              "PutScriptRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "AcknowledgedResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "PutScriptRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "AcknowledgedResponseBase",
+              ">; }; queryRules: ",
+              "default",
+              "; rankEval: { (this: That, params: ",
+              "RankEvalRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "RankEvalResponse",
+              ">; (this: That, params: ",
+              "RankEvalRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "RankEvalResponse",
+              ", unknown>>; (this: That, params: ",
+              "RankEvalRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "RankEvalResponse",
+              ">; }; reindex: { (this: That, params: ",
+              "ReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ReindexResponse",
+              ">; (this: That, params: ",
+              "ReindexRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ReindexResponse",
+              ", unknown>>; (this: That, params: ",
+              "ReindexRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ReindexResponse",
+              ">; }; reindexRethrottle: { (this: That, params: ",
+              "ReindexRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ReindexRethrottleResponse",
+              ">; (this: That, params: ",
+              "ReindexRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ReindexRethrottleResponse",
+              ", unknown>>; (this: That, params: ",
+              "ReindexRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ReindexRethrottleResponse",
+              ">; }; renderSearchTemplate: { (this: That, params?: ",
+              "RenderSearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "RenderSearchTemplateResponse",
+              ">; (this: That, params?: ",
+              "RenderSearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "RenderSearchTemplateResponse",
+              ", unknown>>; (this: That, params?: ",
+              "RenderSearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "RenderSearchTemplateResponse",
+              ">; }; rollup: ",
+              "default",
+              "; scriptsPainlessExecute: { <TResult = unknown>(this: That, params?: ",
+              "ScriptsPainlessExecuteRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ScriptsPainlessExecuteResponse",
+              "<TResult>>; <TResult = unknown>(this: That, params?: ",
+              "ScriptsPainlessExecuteRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ScriptsPainlessExecuteResponse",
+              "<TResult>, unknown>>; <TResult = unknown>(this: That, params?: ",
+              "ScriptsPainlessExecuteRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ScriptsPainlessExecuteResponse",
+              "<TResult>>; }; scroll: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "ScrollRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "ScrollResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "ScrollRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "ScrollResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params: ",
+              "ScrollRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "ScrollResponse",
+              "<TDocument, TAggregations>>; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(this: That, params?: ",
+              "SearchRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchResponse",
+              "<TDocument, TAggregations>>; }; searchApplication: ",
+              "default",
+              "; searchMvt: { (this: That, params: ",
+              "SearchMvtRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<ArrayBuffer>; (this: That, params: ",
+              "SearchMvtRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<ArrayBuffer, unknown>>; (this: That, params: ",
+              "SearchMvtRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<ArrayBuffer>; }; searchShards: { (this: That, params?: ",
+              "SearchShardsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchShardsResponse",
+              ">; (this: That, params?: ",
+              "SearchShardsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchShardsResponse",
+              ", unknown>>; (this: That, params?: ",
+              "SearchShardsRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchShardsResponse",
+              ">; }; searchTemplate: { <TDocument = unknown>(this: That, params?: ",
+              "SearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "SearchTemplateResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
+              "SearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "SearchTemplateResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
+              "SearchTemplateRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "SearchTemplateResponse",
+              "<TDocument>>; }; searchableSnapshots: ",
+              "default",
+              "; security: ",
+              "default",
+              "; shutdown: ",
+              "default",
+              "; simulate: ",
+              "default",
+              "; slm: ",
+              "default",
+              "; snapshot: ",
+              "default",
+              "; sql: ",
+              "default",
+              "; ssl: ",
+              "default",
+              "; streams: ",
+              "default",
+              "; synonyms: ",
+              "default",
+              "; tasks: ",
+              "default",
+              "; termsEnum: { (this: That, params: ",
+              "TermsEnumRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TermsEnumResponse",
+              ">; (this: That, params: ",
+              "TermsEnumRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TermsEnumResponse",
+              ", unknown>>; (this: That, params: ",
+              "TermsEnumRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TermsEnumResponse",
+              ">; }; termvectors: { <TDocument = unknown>(this: That, params: ",
+              "TermvectorsRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "TermvectorsResponse",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "TermvectorsRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "TermvectorsResponse",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "TermvectorsRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "TermvectorsResponse",
+              ">; }; textStructure: ",
+              "default",
+              "; transform: ",
+              "default",
+              "; updateByQuery: { (this: That, params: ",
+              "UpdateByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateByQueryResponse",
+              ">; (this: That, params: ",
+              "UpdateByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateByQueryResponse",
+              ", unknown>>; (this: That, params: ",
+              "UpdateByQueryRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateByQueryResponse",
+              ">; }; updateByQueryRethrottle: { (this: That, params: ",
+              "UpdateByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateByQueryRethrottleResponse",
+              ">; (this: That, params: ",
+              "UpdateByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateByQueryRethrottleResponse",
+              ", unknown>>; (this: That, params: ",
+              "UpdateByQueryRethrottleRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateByQueryRethrottleResponse",
+              ">; }; watcher: ",
+              "default",
+              "; xpack: ",
+              "default",
+              "; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlContext.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlData",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlData",
+        "description": [
+          "\nReturn value from getSmlData — normalized data to index."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlData.chunks",
+            "type": "Array",
+            "tags": [],
+            "label": "chunks",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlChunk",
+                "text": "SmlChunk"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlIndexAttachmentParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlIndexAttachmentParams",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlIndexAttachmentParams.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlIndexAttachmentParams.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlIndexAttachmentParams.attachmentType",
+            "type": "string",
+            "tags": [],
+            "label": "attachmentType",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlIndexAttachmentParams.action",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"create\" | \"update\" | \"delete\""
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlIndexAttachmentParams.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlIndexAttachmentParams.includedHiddenTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "includedHiddenTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlListItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlListItem",
+        "description": [
+          "\nAn item returned by the `list` hook of an SML type."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 63,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlListItem.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique ID of the attachment (e.g., saved object ID)"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlListItem.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [
+              "Last updated timestamp — used by crawler for change detection"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlListItem.spaces",
+            "type": "Array",
+            "tags": [],
+            "label": "spaces",
+            "description": [
+              "Space IDs this item belongs to"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlToAttachmentContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlToAttachmentContext",
+        "description": [
+          "\nContext passed to the toAttachment hook."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlToAttachmentContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlToAttachmentContext.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlToAttachmentContext.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SmlTypeDefinition",
+        "description": [
+          "\nServer-side type definition for SML (Semantic Metadata Layer).\n\nRegistered via `agentContextLayer.registerType()` during plugin setup.\n\nSolutions register these to make their content discoverable via the SML."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlTypeDefinition.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique identifier for this SML type (e.g., 'dashboard', 'lens', 'esql')"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlTypeDefinition.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nYield pages of items to consider for indexing.\nCalled by the crawler to enumerate candidates.\nEach yielded array is one page; the crawler processes pages\nwith O(page_size) memory instead of loading everything at once."
+            ],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlContext",
+                "text": "SmlContext"
+              },
+              ") => AsyncIterable<",
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlListItem",
+                "text": "SmlListItem"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.SmlTypeDefinition.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "agentContextLayer",
+                    "scope": "server",
+                    "docId": "kibAgentContextLayerPluginApi",
+                    "section": "def-server.SmlContext",
+                    "text": "SmlContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+                "lineNumber": 92,
+                "columnNumber": 10,
+                "deprecated": false,
+                "docsReferencedTypeName": "SmlContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlTypeDefinition.getSmlData",
+            "type": "Function",
+            "tags": [],
+            "label": "getSmlData",
+            "description": [
+              "\nReturn normalized data to index for a specific item."
+            ],
+            "signature": [
+              "(originId: string, context: ",
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlContext",
+                "text": "SmlContext"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlData",
+                "text": "SmlData"
+              },
+              " | undefined>"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.SmlTypeDefinition.getSmlData.$1",
+                "type": "string",
+                "tags": [],
+                "label": "originId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+                "lineNumber": 97,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.SmlTypeDefinition.getSmlData.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "agentContextLayer",
+                    "scope": "server",
+                    "docId": "kibAgentContextLayerPluginApi",
+                    "section": "def-server.SmlContext",
+                    "text": "SmlContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+                "lineNumber": 97,
+                "columnNumber": 34,
+                "deprecated": false,
+                "docsReferencedTypeName": "SmlContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlTypeDefinition.toAttachment",
+            "type": "Function",
+            "tags": [],
+            "label": "toAttachment",
+            "description": [
+              "\nConvert an SML document into a conversation attachment."
+            ],
+            "signature": [
+              "(item: ",
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlDocument",
+                "text": "SmlDocument"
+              },
+              ", context: ",
+              {
+                "pluginId": "agentContextLayer",
+                "scope": "server",
+                "docId": "kibAgentContextLayerPluginApi",
+                "section": "def-server.SmlToAttachmentContext",
+                "text": "SmlToAttachmentContext"
+              },
+              ") => Promise<",
+              "AttachmentInput",
+              "<string, unknown> | undefined>"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.SmlTypeDefinition.toAttachment.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "agentContextLayer",
+                    "scope": "server",
+                    "docId": "kibAgentContextLayerPluginApi",
+                    "section": "def-server.SmlDocument",
+                    "text": "SmlDocument"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+                "lineNumber": 103,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "SmlDocument",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.SmlTypeDefinition.toAttachment.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "agentContextLayer",
+                    "scope": "server",
+                    "docId": "kibAgentContextLayerPluginApi",
+                    "section": "def-server.SmlToAttachmentContext",
+                    "text": "SmlToAttachmentContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "SmlToAttachmentContext",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlTypeDefinition.fetchFrequency",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchFrequency",
+            "description": [
+              "\nOptional: custom crawl interval for the crawler.\nDefaults to '10m' if not provided."
+            ],
+            "signature": [
+              "(() => string) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ToolsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolsSetup",
+        "description": [
+          "\nAgentBuilder tool service's setup contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ToolsSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister a built-in tool to be available in agentBuilder."
+            ],
+            "signature": [
+              "<RunInput extends ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>(tool: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.StaticToolRegistration",
+                "text": "StaticToolRegistration"
+              },
+              "<RunInput, ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
+              ">) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ToolsSetup.register.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tool",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.StaticToolRegistration",
+                    "text": "StaticToolRegistration"
+                  },
+                  "<RunInput, ",
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.ToolResult",
+                    "text": "ToolResult"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 38,
+                "columnNumber": 45,
+                "deprecated": false,
+                "docsReferencedTypeName": "StaticToolRegistration",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ToolsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolsStart",
+        "description": [
+          "\nAgentBuilder tool service's start contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ToolsStart.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [
+              "\nExecute a tool."
+            ],
+            "signature": [
+              "<TParams = Record<string, unknown>>(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RunToolParams",
+                "text": "RunToolParams"
+              },
+              "<TParams>) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RunToolReturn",
+                "text": "RunToolReturn"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ToolsStart.execute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.RunToolParams",
+                    "text": "RunToolParams"
+                  },
+                  "<TParams>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
+                "lineNumber": 199,
+                "columnNumber": 3,
+                "deprecated": false,
+                "docsReferencedTypeName": "RunToolParams",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.ToolsStart.getRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegistry",
+            "description": [
+              "\nReturn a tool registry scoped to the current user and context."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolRegistry",
+                "text": "ToolRegistry"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "agentBuilder",
+                "id": "def-server.ToolsStart.getRegistry.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 52,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "agentBuilder",
+                    "id": "def-server.ToolsStart.getRegistry.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 52,
+                    "columnNumber": 25,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.ExecutionStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "ExecutionStatus",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/execution_status.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.smlIndexName",
+        "type": "string",
+        "tags": [],
+        "label": "smlIndexName",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.SmlSearchResult",
+        "type": "Type",
+        "tags": [],
+        "label": "SmlSearchResult",
+        "description": [
+          "\nAn SML search result — same fields as ",
+          {
+            "pluginId": "agentBuilder",
+            "scope": "server",
+            "docId": "kibAgentBuilderPluginApi",
+            "section": "def-server.SmlDocument",
+            "text": "SmlDocument"
+          },
+          " plus relevance score.\n`content` and `description` are optional when excluded from `_source` (e.g. `skipContent`)."
+        ],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "agentContextLayer",
+            "scope": "server",
+            "docId": "kibAgentContextLayerPluginApi",
+            "section": "def-server.SmlDocument",
+            "text": "SmlDocument"
+          },
+          ", \"content\"> & { content?: string | undefined; score: number; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+        "lineNumber": 144,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "agentBuilder",
+        "id": "def-server.smlElasticsearchIndexMappings",
+        "type": "Object",
+        "tags": [],
+        "label": "smlElasticsearchIndexMappings",
+        "description": [
+          "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
+        ],
+        "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.smlElasticsearchIndexMappings.dynamic",
+            "type": "string",
+            "tags": [],
+            "label": "dynamic",
+            "description": [
+              "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
+            ],
+            "signature": [
+              "\"strict\""
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.smlElasticsearchIndexMappings.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [
+              "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
+            ],
+            "signature": [
+              "{ id: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; type: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; } & { fields: { autocomplete: ",
+              "MappingSearchAsYouTypeProperty",
+              " & Partial<",
+              "MappingSearchAsYouTypeProperty",
+              ">; }; }; title: ",
+              "MappingSearchAsYouTypeProperty",
+              " & Partial<",
+              "MappingSearchAsYouTypeProperty",
+              ">; origin_id: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; content: ",
+              "MappingSemanticTextProperty",
+              " & Partial<",
+              "MappingSemanticTextProperty",
+              ">; description: ",
+              "MappingSemanticTextProperty",
+              " & Partial<",
+              "MappingSemanticTextProperty",
+              ">; user_id: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; references: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; created_at: ",
+              "MappingDateProperty",
+              " & { format: \"strict_date_optional_time\"; }; updated_at: ",
+              "MappingDateProperty",
+              " & { format: \"strict_date_optional_time\"; }; spaces: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; permissions: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "parentPluginId": "agentBuilder",
+      "id": "def-server.AgentBuilderPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderPluginSetup",
+      "description": [
+        "\nSetup contract of the agentBuilder plugin."
+      ],
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+      "lineNumber": 192,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [
+            "\nAgents setup contract, which can be used to register built-in agents."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.AgentsSetup",
+              "text": "AgentsSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 196,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.tools",
+          "type": "Object",
+          "tags": [],
+          "label": "tools",
+          "description": [
+            "\nTools setup contract, which can be used to register built-in tools."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ToolsSetup",
+              "text": "ToolsSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 200,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.attachments",
+          "type": "Object",
+          "tags": [],
+          "label": "attachments",
+          "description": [
+            "\nAttachments setup contract, which can be used to register attachment types."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.AttachmentsSetup",
+              "text": "AttachmentsSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 204,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [
+            "\nHooks setup contract, which can be used to register lifecycle event hooks."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.HooksServiceSetup",
+              "text": "HooksServiceSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 208,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.skills",
+          "type": "Object",
+          "tags": [],
+          "label": "skills",
+          "description": [
+            "\nSkills setup contract, which can be used to register skills."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.SkillsSetup",
+              "text": "SkillsSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 212,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.plugins",
+          "type": "Object",
+          "tags": [],
+          "label": "plugins",
+          "description": [
+            "\nPlugins setup contract, which can be used to register built-in plugins."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.PluginsSetup",
+              "text": "PluginsSetup"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 216,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginSetup.topSnippets",
+          "type": "Object",
+          "tags": [],
+          "label": "topSnippets",
+          "description": [
+            "\nTOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.\nExposed so that dependent plugins can pass these values to search utilities."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.TopSnippetsConfig",
+              "text": "TopSnippetsConfig"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 220,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "agentBuilder",
+      "id": "def-server.AgentBuilderPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderPluginStart",
+      "description": [
+        "\nStart contract of the agentBuilder plugin."
+      ],
+      "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+      "lineNumber": 227,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.agents",
+          "type": "Object",
+          "tags": [],
+          "label": "agents",
+          "description": [
+            "\nAgents service, to execute agents."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.AgentsStart",
+              "text": "AgentsStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 231,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.tools",
+          "type": "Object",
+          "tags": [],
+          "label": "tools",
+          "description": [
+            "\nTools service, to manage or execute tools."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ToolsStart",
+              "text": "ToolsStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 235,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.skills",
+          "type": "Object",
+          "tags": [],
+          "label": "skills",
+          "description": [
+            "\nSkills service, to manage and access skills."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.SkillsStart",
+              "text": "SkillsStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 239,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.plugins",
+          "type": "Object",
+          "tags": [],
+          "label": "plugins",
+          "description": [
+            "\nPlugins service, to query built-in and persisted plugins."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.PluginsStart",
+              "text": "PluginsStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 243,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.execution",
+          "type": "Object",
+          "tags": [],
+          "label": "execution",
+          "description": [
+            "\nExecution service, to execute agents and retrieve execution status."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ExecutionStart",
+              "text": "ExecutionStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 247,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.runtime",
+          "type": "Object",
+          "tags": [],
+          "label": "runtime",
+          "description": [
+            "\nRuntime utilities for consumers that need to interact with LLM models\noutside of the agent builder's built-in tool/agent execution flow."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.RuntimeStart",
+              "text": "RuntimeStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 251,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "agentBuilder",
+          "id": "def-server.AgentBuilderPluginStart.conversations",
+          "type": "Object",
+          "tags": [],
+          "label": "conversations",
+          "description": [
+            "\nConversations service (read-only), to list and retrieve conversations."
+          ],
+          "signature": [
+            {
+              "pluginId": "@kbn/agent-builder-server",
+              "scope": "common",
+              "docId": "kibKbnAgentBuilderServerPluginApi",
+              "section": "def-common.ConversationsStart",
+              "text": "ConversationsStart"
+            }
+          ],
+          "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+          "lineNumber": 256,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

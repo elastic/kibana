@@ -1,0 +1,66 @@
+{
+  "id": "@kbn/heap-snapshot-analyzer-cli",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/heap-snapshot-analyzer-cli",
+        "id": "def-common.getHeapTrackPreloadPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getHeapTrackPreloadPath",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "packages/kbn-heap-snapshot-analyzer-cli/src/preload_path.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/heap-snapshot-analyzer-cli",
+        "id": "def-common.runHeapSnapshotAnalyzerCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runHeapSnapshotAnalyzerCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-heap-snapshot-analyzer-cli/src/run_cli.ts",
+        "lineNumber": 139,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

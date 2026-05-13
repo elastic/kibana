@@ -19,12 +19,15 @@ export interface GetThresholdRuleVisualizationDataParams {
     interval: string;
   };
   http: HttpSetup;
+  /** Cross-project search scope (serverless); forwarded as `project_routing` on the request body. */
+  projectRouting?: string;
 }
 
 export async function getThresholdRuleVisualizationData({
   model,
   visualizeOptions,
   http,
+  projectRouting,
 }: GetThresholdRuleVisualizationDataParams): Promise<TimeSeriesResult> {
   const timeSeriesQueryParams = {
     index: model.index,
@@ -40,6 +43,7 @@ export async function getThresholdRuleVisualizationData({
     dateStart: new Date(visualizeOptions.rangeFrom).toISOString(),
     dateEnd: new Date(visualizeOptions.rangeTo).toISOString(),
     interval: visualizeOptions.interval,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   return await http.post<TimeSeriesResult>(`${INDEX_THRESHOLD_DATA_API_ROOT}/_time_series_query`, {

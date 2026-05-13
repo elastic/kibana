@@ -282,7 +282,7 @@ export function ConversationList({
                         }
                       )}
                       titleSize="xs"
-                      iconType="list"
+                      iconType="listBullet"
                       iconSize="m"
                       onToggle={(isOpen) =>
                         setOpenSection(isOpen ? ListSections.CONVERSATIONS : ListSections.ARCHIVED)
@@ -332,6 +332,7 @@ export function ConversationList({
                 <EuiFlexItem grow className={newChatButtonWrapperClassName}>
                   <NewChatButton
                     href={newConversationHref}
+                    // @ts-expect-error upgrade typescript v5.9.3
                     onClick={(event) => onClickConversation(event)}
                   />
                 </EuiFlexItem>

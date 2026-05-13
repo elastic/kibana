@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ZodError } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type {
   ActionType,
   ActionTypeConfig,
@@ -14,7 +14,6 @@ import type {
   ActionTypeParams,
   ValidatorServices,
 } from '../types';
-import { formatZodError } from './format_zod_error';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
@@ -111,7 +110,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
           break;
         case 'config':
@@ -125,13 +124,13 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
 
           break;
         case 'secrets':
           name = 'connector type secrets';
-          if (actionType.validate.secrets) {
+          if (actionType.validate.secrets && value !== undefined && value !== null) {
             const validatedValue = actionType.validate.secrets.schema.parse(value);
 
             if (actionType.validate.secrets.customValidator) {
@@ -140,7 +139,7 @@ function validateWithSchema<
                 validatorServices
               );
             }
-            return validatedValue;
+            return validatedValue as Record<string, unknown>;
           }
           break;
         default:
@@ -149,8 +148,8 @@ function validateWithSchema<
       }
     } catch (err) {
       let errMessage = err.message;
-      if (err instanceof ZodError) {
-        errMessage = formatZodError(err);
+      if (err instanceof z.ZodError) {
+        errMessage = z.prettifyError(err);
       }
       // we can't really i18n this yet, since the err.message isn't i18n'd itself
       throw Boom.badRequest(`error validating ${name}: ${errMessage}`);

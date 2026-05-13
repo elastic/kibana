@@ -9,24 +9,22 @@
 
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
+import { connectorParamsSchemaResolver } from '../../../../common/lib/connector_params_schema_resolver';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import {
+  selectEditorYaml,
+  selectStepExecutions,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 
-interface WorkflowVisualEditorStatefulProps {
-  workflowYaml: string;
-  workflowExecutionId?: string;
-}
-
-export function WorkflowVisualEditorStateful({
-  workflowYaml,
-  workflowExecutionId,
-}: WorkflowVisualEditorStatefulProps) {
-  const { data: workflowExecution } = useWorkflowExecution(workflowExecutionId ?? null);
+export const WorkflowVisualEditorStateful = () => {
+  const stepExecutions = useSelector(selectStepExecutions);
+  const workflowYaml = useSelector(selectEditorYaml) ?? '';
   const connectorsData = useAvailableConnectors();
 
   const workflowYamlObject = useMemo(() => {
@@ -35,7 +33,8 @@ export function WorkflowVisualEditorStateful({
     }
     const result = parseWorkflowYamlToJSON(
       workflowYaml,
-      getWorkflowZodSchemaLoose(connectorsData.connectorTypes)
+      getWorkflowZodSchemaLoose(connectorsData.connectorTypes),
+      { connectorParamsSchemaResolver }
     );
     if (result.error) {
       return null;
@@ -82,8 +81,8 @@ export function WorkflowVisualEditorStateful({
 
   return (
     <WorkflowVisualEditor
-      workflow={workflowYamlObject as WorkflowYaml}
-      stepExecutions={workflowExecution?.stepExecutions}
+      workflow={workflowYamlObject as unknown as WorkflowYaml}
+      stepExecutions={stepExecutions}
     />
   );
-}
+};

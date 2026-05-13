@@ -6,7 +6,7 @@
  */
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
@@ -18,7 +18,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../constants';
+import { PageScope } from '../../constants';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
@@ -28,7 +28,7 @@ interface DataViewPickerProps {
   /**
    * The scope of the data view picker
    */
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
   /**
    * Optional callback when the data view picker is closed
    */
@@ -44,7 +44,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const selectDataView = useSelectDataView();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats, notifications },
   } = useKibana();
 
   const canEditDataView = useMemo(
@@ -64,8 +64,8 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
   const savedDataViews = useSavedDataViews();
 
-  const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
-  const isExploreSourcerer = scope === DataViewManagerScopeName.explore;
+  const isDefaultSourcerer = scope === PageScope.default;
+  const isExploreSourcerer = scope === PageScope.explore;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const dataViewId = dataView?.id;
@@ -78,7 +78,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       if (isDefaultSourcerer) {
         updateUrlParam({
-          [DataViewManagerScopeName.default]: {
+          [PageScope.default]: {
             id,
             // NOTE: Boolean filter for removing empty patterns
             selectedPatterns: indexPattern.split(',').filter(Boolean),
@@ -88,7 +88,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
 
       if (isExploreSourcerer) {
         updateUrlParam({
-          [DataViewManagerScopeName.explore]: {
+          [PageScope.explore]: {
             id,
             // NOTE: Boolean filter for removing empty patterns
             selectedPatterns: indexPattern.split(',').filter(Boolean),
@@ -117,27 +117,35 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         return;
       }
 
-      const dataViewInstance = await data.dataViews.get(dataViewId);
-      // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
-      if (dataViewInstance.isPersisted?.()) {
-        data.dataViews.clearInstanceCache(dataViewId);
+      // We wrap dataViews.get within a try catch because we've seen errors happening with conflicting ids in the saved object api
+      try {
+        const dataViewInstance = await data.dataViews.get(dataViewId);
+        // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
+        if (dataViewInstance.isPersisted?.()) {
+          data.dataViews.clearInstanceCache(dataViewId);
+        }
+
+        closeFieldEditor.current = await dataViewFieldEditor.openEditor({
+          ctx: {
+            dataView: dataViewInstance,
+          },
+          fieldName,
+          onSave: async () => {
+            if (!dataViewInstance.id) {
+              return;
+            }
+
+            handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
+          },
+        });
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: 'Error retrieving data view',
+          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+        });
       }
-
-      closeFieldEditor.current = await dataViewFieldEditor.openEditor({
-        ctx: {
-          dataView: dataViewInstance,
-        },
-        fieldName,
-        onSave: async () => {
-          if (!dataViewInstance.id) {
-            return;
-          }
-
-          handleChangeDataView(dataViewInstance.id, dataViewInstance.getIndexPattern());
-        },
-      });
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView, notifications]
   );
 
   const getDataViewHelpText = useCallback(

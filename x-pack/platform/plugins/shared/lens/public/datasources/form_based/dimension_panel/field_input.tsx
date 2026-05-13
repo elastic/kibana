@@ -44,12 +44,13 @@ export function FieldInput({
       selectedOperationDefinition?.input,
       currentFieldIsInvalid
     );
+  const fieldLabel = i18n.translate('xpack.lens.indexPattern.chooseField', {
+    defaultMessage: 'Field',
+  });
   return (
     <EuiFormRow
       data-test-subj="indexPattern-field-selection-row"
-      label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-        defaultMessage: 'Field',
-      })}
+      label={fieldLabel}
       fullWidth
       isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
       error={fieldErrorMessage}
@@ -86,6 +87,7 @@ export function FieldInput({
           groupId,
           dimensionGroups
         )}
+        aria-label={fieldLabel}
       />
     </EuiFormRow>
   );

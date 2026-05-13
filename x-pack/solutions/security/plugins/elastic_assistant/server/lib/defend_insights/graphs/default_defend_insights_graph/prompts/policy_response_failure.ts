@@ -5,33 +5,28 @@
  * 2.0.
  */
 
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { InferenceConnector } from '@kbn/inference-common';
 
 import type { DefendInsightsCombinedPrompts } from '.';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { promptDictionary, getPromptsByGroupId } from '../../../../prompt';
 
 export async function getPolicyResponseFailurePrompt({
-  actionsClient,
-  connector,
+  getInferenceConnectorById,
   connectorId,
   model,
   provider,
   savedObjectsClient,
 }: {
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  connector?: Connector;
+  getInferenceConnectorById?: (id: string) => Promise<InferenceConnector>;
   connectorId: string;
   model?: string;
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<DefendInsightsCombinedPrompts> {
   const prompts = await getPromptsByGroupId({
-    actionsClient,
-    connector,
+    getInferenceConnectorById,
     connectorId,
     model,
     provider,

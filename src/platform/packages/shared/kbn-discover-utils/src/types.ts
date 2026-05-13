@@ -18,7 +18,7 @@ export type {
   RowControlRowProps,
 } from './components/custom_control_columns/types';
 export type * from './components/app_menu/types';
-export { AppMenuActionId, AppMenuActionType } from './components/app_menu/types';
+export { AppMenuActionId } from './components/app_menu/types';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 
@@ -61,14 +61,16 @@ export type DataTableColumnsMeta = Record<
   }
 >;
 
+import type { ReactNode } from 'react';
+
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
-  formattedValue: string,
+  formattedValue: ReactNode,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
- * Pairs array for each field in the hit
+ * Pairs array for each field in the hit where values are ReactNodes
  */
 export type FormattedHit = FormattedHitPair[];
 
@@ -82,6 +84,7 @@ export interface LogDocumentOverview
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'body.text'?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
@@ -96,11 +99,15 @@ export interface LogDocumentOverview
 export interface ApmErrorLogFields {
   'processor.event': string;
   'error.log.level'?: string;
+  'error.exception.type'?: string;
   'error.exception.message'?: string;
+  'error.culprit'?: string;
+  'error.grouping_name'?: string;
 }
 
 export interface OtelExceptionLogFields {
   event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {
@@ -184,15 +191,4 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
-}
-
-export interface TraceDocumentOverview
-  extends TraceFields,
-    Partial<ServiceFields>,
-    Partial<SpanFields>,
-    Partial<UserAgentFields>,
-    Partial<TransactionFields> {
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
 }

@@ -13,7 +13,10 @@ import type { DashboardState } from '@kbn/dashboard-plugin/server';
 import type { DashboardItem } from '../../types';
 import { dashboardServices } from '../../services/kibana_services';
 
-function getDashboardItem(id: string, dashboardState: DashboardState) {
+function getDashboardItem(
+  id: string,
+  dashboardState: Pick<DashboardState, 'title' | 'description'>
+) {
   return {
     id,
     title: dashboardState.title,
@@ -55,13 +58,12 @@ export const fetchDashboards = async ({
 }): Promise<DashboardItem[]> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const responses = await findDashboardsService.search({
-    search,
-    size,
-    options: { onlyTitle: true },
+    query: search,
+    per_page: size,
   });
 
-  let dashboardList: DashboardItem[] = responses.hits.map((hit) => {
-    return getDashboardItem(hit.id, hit.attributes);
+  let dashboardList: DashboardItem[] = responses.dashboards.map(({ id, data }) => {
+    return getDashboardItem(id, data);
   });
 
   /** If there is no search string... */

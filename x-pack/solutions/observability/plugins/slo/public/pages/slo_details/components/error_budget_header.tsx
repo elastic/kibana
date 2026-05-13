@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
@@ -13,21 +13,17 @@ import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 
-import { ErrorBudgetActions } from './error_budget_actions';
-
 interface Props {
   slo: SLOWithSummaryResponse;
   hideTitle?: boolean;
-  isMouseOver?: boolean;
+  hideHeaderDurationLabel?: boolean;
   setDashboardAttachmentReady?: (value: boolean) => void;
-  hideMetadata?: boolean;
 }
 
 export function ErrorBudgetHeader({
   slo,
   hideTitle = false,
-  hideMetadata = false,
-  isMouseOver,
+  hideHeaderDurationLabel = false,
   setDashboardAttachmentReady,
 }: Props) {
   const { executionContext } = useKibana().services;
@@ -49,18 +45,21 @@ export function ErrorBudgetHeader({
               </EuiTitle>
             </EuiFlexItem>
           )}
-          {!isDashboardContext && (
-            <EuiFlexGroup justifyContent="flexEnd" wrap>
-              {isMouseOver && (
-                <EuiFlexItem grow={false}>
-                  <ErrorBudgetActions setDashboardAttachmentReady={setDashboardAttachmentReady} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+          {!isDashboardContext && setDashboardAttachmentReady && (
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                onClick={() => setDashboardAttachmentReady(true)}
+                data-test-subj="sloActionsAddToDashboard"
+              >
+                {i18n.translate('xpack.slo.item.actions.addToDashboard', {
+                  defaultMessage: 'Add to Dashboard',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {!hideMetadata && (
+      {!hideHeaderDurationLabel && (
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)

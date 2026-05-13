@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -147,7 +147,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     },
   };
 
-  describe('create alert', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/246218
+  describe.skip('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     let esQueryRuleId: string;
@@ -212,7 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
     });
 
@@ -230,6 +231,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulePageFooterSaveButton');
 
       // add new action and remove first one
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
 
       // add webhook connector 2
@@ -332,7 +334,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -426,7 +428,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -478,6 +480,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -522,7 +525,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
 
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
 
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -558,7 +561,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      await pageObjects.common.navigateToApp('triggersActions');
+      await pageObjects.common.navigateToApp('rules');
       await testSubjects.click('rulesTab');
 
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
@@ -629,7 +632,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await browser.pressKeys(browser.keys.ESCAPE);
 
-      await testSubjects.existOrFail('ESQLEditor-footerPopoverButton-warning');
+      await retry.waitForWithTimeout(
+        'ES|QL KEEP warning footer button to appear',
+        testSubjects.TRY_TIME,
+        async () =>
+          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+      );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
       const warningContent = await testSubjects.find('ESQLEditor-errors-warnings-content');

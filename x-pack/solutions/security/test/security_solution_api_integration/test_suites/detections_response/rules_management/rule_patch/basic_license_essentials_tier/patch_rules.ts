@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 
-import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
+import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getCustomQueryRuleParams,
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toEqual(
-            '[request body]: max_signals: Number must be greater than or equal to 1'
+            '[request body]: max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, and 3 more'
           );
         });
       });

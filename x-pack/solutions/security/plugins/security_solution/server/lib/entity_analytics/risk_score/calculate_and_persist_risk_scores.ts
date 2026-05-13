@@ -11,10 +11,10 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
-import { calculateRiskScores } from './calculate_risk_scores';
 import type { CalculateAndPersistScoresParams } from '../types';
 import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
+import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 export type CalculationResults = RiskScoresCalculationResponse & {
   entities: Record<EntityType, string[]>;
@@ -23,6 +23,7 @@ export type CalculationResults = RiskScoresCalculationResponse & {
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
     assetCriticalityService: AssetCriticalityService;
+    privmonUserCrudService: PrivmonUserCrudService;
     esClient: ElasticsearchClient;
     logger: Logger;
     spaceId: string;
@@ -36,10 +37,7 @@ export const calculateAndPersistRiskScores = async (
     namespace: spaceId,
   });
 
-  const calculate = params.experimentalFeatures.disableESQLRiskScoring
-    ? calculateRiskScores
-    : calculateScoresWithESQL;
-  const { after_keys: afterKeys, scores } = await calculate(rest);
+  const { after_keys: afterKeys, scores } = await calculateScoresWithESQL(rest);
 
   // Extract entity IDs from scores for reset-to-zero functionality
   const entities: Record<EntityType, string[]> = {

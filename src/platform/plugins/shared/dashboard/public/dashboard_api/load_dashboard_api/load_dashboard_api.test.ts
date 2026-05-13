@@ -12,9 +12,12 @@ import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('../performance/query_performance_tracking', () => {
   return {
-    startQueryPerformanceTracking: () => {},
+    startQueryPerformanceTracking: jest.fn(),
   };
 });
+
+import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
+import { DASHBOARD_DURATION_START_MARK } from '../performance/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -37,7 +40,7 @@ jest.mock('../../dashboard_client', () => {
   };
 });
 
-const lastSavedQuery = { query: 'memory:>220000', language: 'kuery' };
+const lastSavedQuery = { expression: 'memory:>220000', language: 'kql' as const };
 
 describe('loadDashboardApi', () => {
   const getDashboardApiMock = jest.fn();
@@ -52,11 +55,17 @@ describe('loadDashboardApi', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_backup_service').getDashboardBackupService = () => ({
+    require('../../services/dashboard_api_services').getDashboardBackupService = () => ({
       getState: () => ({
         query: lastSavedQuery,
       }),
     });
+
+    window.performance.getEntriesByName = jest.fn().mockReturnValue([
+      {
+        startTime: 12345,
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -93,7 +102,7 @@ describe('loadDashboardApi', () => {
 
     // dashboard app passes URL state as override state
     test('should overwrite saved object state and unsaved state with override state', async () => {
-      const queryFromUrl = { query: 'memory:>5000', language: 'kuery' };
+      const queryFromUrl = { expression: 'memory:>5000', language: 'kql' as const };
       await loadDashboardApi({
         getCreationOptions: async () => ({
           useSessionStorageIntegration: true,
@@ -108,6 +117,26 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
         query: queryFromUrl,
+      });
+    });
+  });
+
+  describe('performance monitoring', () => {
+    test('should start performance tracking on load', async () => {
+      await loadDashboardApi({
+        getCreationOptions: async () => ({
+          useSessionStorageIntegration: false,
+        }),
+        savedObjectId: '12345',
+      });
+
+      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
+        DASHBOARD_DURATION_START_MARK,
+        'mark'
+      );
+      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+        firstLoad: true,
+        creationStartTime: 12345,
       });
     });
   });

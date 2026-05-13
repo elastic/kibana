@@ -15,7 +15,8 @@ export function averageOfValues(values: number[]) {
 export function makeUnpackMetric<T extends string>(metricByField: Record<T, string>) {
   // Make sure metrics are accessed as row[metricByField['FIELD_NAME']]
   // Not row['FIELD_NAME'] by accident
-  return (row: MetricsExplorerRow, field: T) => row[metricByField[field]] as number | null;
+  return (row: MetricsExplorerRow, field: T) =>
+    (row[metricByField[field]] as number | null) ?? null;
 }
 
 export function scaleUpPercentage(unscaled: number) {

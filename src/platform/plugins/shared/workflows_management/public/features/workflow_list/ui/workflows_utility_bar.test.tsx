@@ -28,6 +28,7 @@ describe('WorkflowsUtilityBar', () => {
   const defaultProps = {
     totalWorkflows: 10,
     selectedWorkflows: [] as WorkflowListItemDto[],
+    allWorkflows: [] as WorkflowListItemDto[],
     deselectWorkflows: mockDeselectWorkflows,
     onRefresh: mockOnRefresh,
     showStart: 1,

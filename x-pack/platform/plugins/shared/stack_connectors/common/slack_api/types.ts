@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
+import type { ClassicActionType as ConnectorType } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorOptions as ConnectorTypeExecutorOptions } from '@kbn/actions-plugin/server/types';
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
 import type {
@@ -74,11 +74,13 @@ export interface SlackApiService {
   postMessage: ({
     channels,
     channelIds,
+    channelNames,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
   postBlockkit: ({
     channels,
     channelIds,
+    channelNames,
     text,
   }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

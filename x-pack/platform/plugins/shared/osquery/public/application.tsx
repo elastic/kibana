@@ -19,6 +19,8 @@ import { PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
 import { KibanaRenderContextProvider } from './shared_imports';
+import { ExperimentalFeaturesProvider } from './common/experimental_features_context';
+import { ExperimentalFeaturesService } from './common/experimental_features_service';
 
 export const renderApp = (
   core: CoreStart,
@@ -39,12 +41,14 @@ export const renderApp = (
           storage,
         }}
       >
-        <Router history={history}>
-          <QueryClientProvider client={queryClient}>
-            <OsqueryApp />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </Router>
+        <ExperimentalFeaturesProvider value={ExperimentalFeaturesService.get()}>
+          <Router history={history}>
+            <QueryClientProvider client={queryClient}>
+              <OsqueryApp />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
+          </Router>
+        </ExperimentalFeaturesProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element

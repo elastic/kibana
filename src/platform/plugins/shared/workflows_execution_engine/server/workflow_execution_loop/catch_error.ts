@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -70,22 +72,33 @@ export async function catchError(
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      await failedStepExecutionRuntime.failStep(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        params.workflowExecutionState.getWorkflowExecution().error!
-      );
+      const stepExecution = failedStepExecutionRuntime.stepExecution;
+      // A step may already be COMPLETED if workflow.output/workflow.fail finished
+      // it successfully before setting the workflow-level error (e.g., status: 'failed')
+      if (stepExecution?.status !== ExecutionStatus.COMPLETED) {
+        const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
+        failedStepExecutionRuntime.failStep(
+          workflowError
+            ? new ExecutionError(workflowError)
+            : new Error('Step failed with unknown error')
+        );
+      }
     }
-
+    let workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+      params.workflowExecutionState.getWorkflowExecution().scopeStack
+    );
     while (
       params.workflowExecutionState.getWorkflowExecution().error &&
-      params.workflowExecutionState.getWorkflowExecution().scopeStack.length
+      !workflowScopeStack.isEmpty()
     ) {
-      const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-        params.workflowExecutionState.getWorkflowExecution().scopeStack
-      );
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const scopeEntry = workflowScopeStack.getCurrentScope()!;
+      const scopeEntry = workflowScopeStack.getCurrentScope();
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
+      const currentNodeId = params.workflowExecutionState.getWorkflowExecution().currentNodeId;
+
+      if (!currentNodeId) {
+        throw new Error('No current node ID in workflow execution state. This should not happen.');
+      }
+
       params.workflowExecutionState.updateWorkflowExecution({
         currentNodeId: scopeEntry.nodeId,
         scopeStack: newWorkflowScopeStack.stackFrames,
@@ -100,9 +113,13 @@ export async function catchError(
 
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
+        const failedContext = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: currentNodeId,
+          stackFrames: workflowScopeStack.stackFrames,
+        });
 
         try {
-          await stepErrorCatcher.catchError();
+          await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
           params.workflowExecutionState.updateWorkflowExecution({
             error,
@@ -110,12 +127,15 @@ export async function catchError(
         }
       }
 
-      if (params.workflowExecutionState.getWorkflowExecution().error) {
+      workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+        params.workflowExecutionState.getWorkflowExecution().scopeStack
+      );
+
+      const workflowError = params.workflowExecutionState.getWorkflowExecution().error;
+
+      if (workflowError) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          await stepExecutionRuntime.failStep(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            params.workflowExecutionState.getWorkflowExecution().error!
-          );
+          stepExecutionRuntime.failStep(new ExecutionError(workflowError));
         }
       }
     }

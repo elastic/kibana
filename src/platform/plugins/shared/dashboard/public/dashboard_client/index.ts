@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
+export { hasLibraryItemWithTitle } from './has_library_item_with_title';
 export { dashboardClient } from './dashboard_client';
 export { findService } from './find_service';
+export { searchAction } from './search_action';
+export { getDashboardsByIdsAction } from './get_dashboard_by_id_action';
 
-export type {
-  FindDashboardsByIdResponse,
-  FindDashboardsService,
-  SearchDashboardsResponse,
-} from './types';
+export type { FindDashboardsByIdResponse, FindDashboardsService } from './types';

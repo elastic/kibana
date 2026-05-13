@@ -1,0 +1,267 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import {
+  createToolNotFoundError,
+  createBadRequestError,
+  validateToolId,
+  ToolResultType,
+  type ToolType,
+  type ErrorResult,
+} from '@kbn/agent-builder-common';
+import type {
+  Runner,
+  RunToolReturn,
+  ScopedRunnerRunToolsParams,
+  ToolAvailabilityContext,
+  InternalToolDefinition,
+  ToolRegistry,
+  ToolListParams,
+  ToolCreateParams,
+  ToolUpdateParams,
+} from '@kbn/agent-builder-server';
+import type { UiSettingsServiceStart, IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ToolProvider, WritableToolProvider, ReadonlyToolProvider } from './tool_provider';
+import { isReadonlyToolProvider } from './tool_provider';
+import { toExecutableTool } from './utils';
+import type { ToolHealthClient } from './health';
+
+interface CreateToolRegistryParams {
+  getRunner: () => Runner;
+  persistedProvider: WritableToolProvider;
+  builtinProvider: ReadonlyToolProvider;
+  request: KibanaRequest;
+  space: string;
+  logger: Logger;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  healthClient: ToolHealthClient;
+  healthTrackedToolTypes: Set<ToolType>;
+  experimentalFeaturesEnabled: boolean;
+}
+
+export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegistry => {
+  return new ToolRegistryImpl(params);
+};
+
+interface ToolRegistryScopedClients {
+  soClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
+}
+
+class ToolRegistryImpl implements ToolRegistry {
+  private readonly logger: Logger;
+  private readonly persistedProvider: WritableToolProvider;
+  private readonly builtinProvider: ReadonlyToolProvider;
+  private readonly spaceId: string;
+  private readonly request: KibanaRequest;
+  private readonly uiSettings: UiSettingsServiceStart;
+  private readonly savedObjects: SavedObjectsServiceStart;
+  private readonly getRunner: () => Runner;
+  private readonly healthClient: ToolHealthClient;
+  private readonly healthTrackedToolTypes: Set<ToolType>;
+  private readonly experimentalFeaturesEnabled: boolean;
+  private _scopedClients?: ToolRegistryScopedClients;
+
+  constructor({
+    logger,
+    persistedProvider,
+    builtinProvider,
+    request,
+    getRunner,
+    space,
+    uiSettings,
+    savedObjects,
+    healthClient,
+    healthTrackedToolTypes,
+    experimentalFeaturesEnabled,
+  }: CreateToolRegistryParams) {
+    this.logger = logger;
+    this.persistedProvider = persistedProvider;
+    this.builtinProvider = builtinProvider;
+    this.request = request;
+    this.spaceId = space;
+    this.uiSettings = uiSettings;
+    this.savedObjects = savedObjects;
+    this.getRunner = getRunner;
+    this.healthClient = healthClient;
+    this.healthTrackedToolTypes = healthTrackedToolTypes;
+    this.experimentalFeaturesEnabled = experimentalFeaturesEnabled;
+  }
+
+  private get orderedProviders(): ToolProvider[] {
+    return [this.builtinProvider, this.persistedProvider];
+  }
+
+  private isVisible(tool: InternalToolDefinition): boolean {
+    return !tool.experimental || this.experimentalFeaturesEnabled;
+  }
+
+  async execute<
+    TParams extends Record<string, unknown> = Record<string, unknown>,
+    TResult = unknown
+  >(params: ScopedRunnerRunToolsParams<TParams>): Promise<RunToolReturn> {
+    const { toolId, ...otherParams } = params;
+    const tool = await this.get(toolId);
+    if (!(await this.isAvailable(tool))) {
+      throw createBadRequestError(`Tool ${toolId} is not available`);
+    }
+    const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
+    const result = (await executable.execute(otherParams)) as RunToolReturn;
+
+    // Track health for tool types that have opted in via trackHealth: true
+    // Fire-and-forget: don't block tool execution on health tracking
+    if (this.healthTrackedToolTypes.has(tool.type)) {
+      void this.trackToolHealth(toolId, result).catch(() => {});
+    }
+
+    return result;
+  }
+
+  async has(toolId: string) {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        const tool = await provider.get(toolId);
+        return this.isVisible(tool);
+      }
+    }
+    return false;
+  }
+
+  async get(toolId: string) {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        const tool = await provider.get(toolId);
+        if (!this.isVisible(tool)) {
+          throw createToolNotFoundError({ toolId });
+        }
+        if (!(await this.isAvailable(tool))) {
+          throw createBadRequestError(`Tool ${toolId} is not available`);
+        }
+        return tool;
+      }
+    }
+    throw createToolNotFoundError({ toolId });
+  }
+
+  async list(opts?: ToolListParams | undefined) {
+    const providerFilters = {
+      types: opts?.types && opts.types.length > 0 ? opts.types : undefined,
+      tags: opts?.tags && opts.tags.length > 0 ? opts.tags : undefined,
+    };
+
+    const allTools: InternalToolDefinition[] = [];
+    for (const provider of this.orderedProviders) {
+      const toolsFromType = await provider.list(providerFilters);
+      const visibleTools = toolsFromType.filter((tool) => this.isVisible(tool));
+      const availabilityResults = await Promise.all(
+        visibleTools.map((tool) => this.isAvailable(tool))
+      );
+      visibleTools.forEach((tool, index) => {
+        if (availabilityResults[index]) {
+          allTools.push(tool);
+        }
+      });
+    }
+    return allTools;
+  }
+
+  async create(createRequest: ToolCreateParams) {
+    const { id: toolId } = createRequest;
+
+    const validationError = validateToolId({ toolId, builtIn: false });
+    if (validationError) {
+      throw createBadRequestError(`Invalid tool id: "${toolId}": ${validationError}`);
+    }
+
+    if (await this.has(toolId)) {
+      throw createBadRequestError(`Tool with id ${toolId} already exists`);
+    }
+
+    return this.persistedProvider.create(createRequest);
+  }
+
+  async update(toolId: string, update: ToolUpdateParams) {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        if (isReadonlyToolProvider(provider)) {
+          throw createBadRequestError(`Tool ${toolId} is read-only and can't be updated`);
+        }
+        return provider.update(toolId, update);
+      }
+    }
+    throw createToolNotFoundError({ toolId });
+  }
+
+  async delete(toolId: string): Promise<boolean> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(toolId)) {
+        if (isReadonlyToolProvider(provider)) {
+          throw createBadRequestError(`Tool ${toolId} is read-only and can't be deleted`);
+        }
+
+        // Clean up health data when tool is deleted (fire-and-forget)
+        void this.healthClient.delete(toolId).catch(() => {});
+
+        return provider.delete(toolId);
+      }
+    }
+    throw createToolNotFoundError({ toolId });
+  }
+
+  private getScopedClients() {
+    if (!this._scopedClients) {
+      const soClient = this.savedObjects.getScopedClient(this.request);
+      const uiSettingsClient = this.uiSettings.asScopedToClient(soClient);
+      this._scopedClients = { soClient, uiSettingsClient };
+    }
+    return this._scopedClients;
+  }
+
+  private async isAvailable(tool: InternalToolDefinition, timeoutMs = 2000): Promise<boolean> {
+    const { uiSettingsClient } = this.getScopedClients();
+    const context: ToolAvailabilityContext = {
+      spaceId: this.spaceId,
+      request: this.request,
+      uiSettings: uiSettingsClient,
+    };
+    let timeoutHandle: ReturnType<typeof setTimeout>;
+    const checkPromise = Promise.resolve(tool.isAvailable(context)).then((s) => {
+      clearTimeout(timeoutHandle);
+      return s.status === 'available';
+    });
+    const timeoutPromise = new Promise<boolean>((resolve) => {
+      timeoutHandle = setTimeout(() => {
+        this.logger.warn(`Tool availability check for "${tool.id}" timed out after ${timeoutMs}ms`);
+        resolve(false);
+      }, timeoutMs);
+    });
+    return Promise.race([checkPromise, timeoutPromise]);
+  }
+
+  /**
+   * Tracks health state for a tool based on its execution result.
+   * Records success if no error results are present, otherwise records failure.
+   */
+  private async trackToolHealth(toolId: string, result: RunToolReturn): Promise<void> {
+    if (result.results) {
+      const errorResult = result.results?.find(
+        (r): r is ErrorResult => r.type === ToolResultType.error
+      );
+
+      if (errorResult) {
+        await this.healthClient.recordFailure(toolId, errorResult.data.message);
+      } else {
+        await this.healthClient.recordSuccess(toolId);
+      }
+    }
+  }
+}

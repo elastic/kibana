@@ -71,6 +71,7 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
+      preferCached: Joi.boolean().optional(),
       waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
       waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
@@ -229,6 +230,7 @@ export const schema = Joi.object()
           }),
         }),
         files: Joi.array().items(Joi.string()),
+        secureFiles: Joi.array().items(Joi.string()),
       })
       .default(),
 
@@ -236,6 +238,7 @@ export const schema = Joi.object()
       .keys({
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
+        uiam: Joi.boolean().default(false),
       })
       .default(),
 
@@ -307,6 +310,7 @@ export const schema = Joi.object()
     uiSettings: Joi.object()
       .keys({
         defaults: Joi.object().unknown(true),
+        globalDefaults: Joi.object().unknown(true),
       })
       .default(),
 

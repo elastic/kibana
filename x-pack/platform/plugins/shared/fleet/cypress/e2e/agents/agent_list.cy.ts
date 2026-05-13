@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CreateAgentPolicyRequest } from '@kbn/fleet-plugin/common/types';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 
 import { FLEET_AGENT_LIST_PAGE } from '../../screens/fleet';
 
 import { createAgentDoc } from '../../tasks/agents';
 import { setupFleetServer } from '../../tasks/fleet_server';
 import { deleteAgentDocs, cleanupAgentPolicies } from '../../tasks/cleanup';
-import type { CreateAgentPolicyRequest } from '../../../common/types';
-import { setUISettings } from '../../tasks/ui_settings';
 
-import { API_VERSIONS } from '../../../common/constants';
-import { request } from '../../tasks/common';
+import { request, visit } from '../../tasks/common';
 import { login } from '../../tasks/login';
 
 const createAgentDocs = (kibanaVersion: string) => [
@@ -98,7 +97,6 @@ describe('View agents list', () => {
     deleteAgentDocs(true);
     cleanupAgentPolicies();
     setupFleetServer();
-    setUISettings('hideAnnouncements', true);
 
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);
@@ -114,6 +112,7 @@ describe('View agents list', () => {
     cleanupAgentPolicies();
   });
   beforeEach(() => {
+    cy.clearAllSessionStorage();
     login();
 
     cy.intercept('/api/fleet/agents/setup', {
@@ -135,11 +134,12 @@ describe('View agents list', () => {
       uninstalled: 0,
     });
     cy.intercept('GET', /\/api\/fleet\/agents/).as('getAgents');
+    cy.intercept('POST', /\/api\/fleet\/agents\/bulk_reassign/).as('bulkReassign');
   });
 
   describe('Agent filter suggestions', () => {
     it('should filter based on agent id', () => {
-      cy.visit('/app/fleet/agents');
+      visit('/app/fleet/agents');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.QUERY_INPUT).type('agent.id: "agent-1"{enter}');
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE);
       assertTableContainsNAgents(1);
@@ -215,6 +215,10 @@ describe('View agents list', () => {
 
   describe('Agent status filter', () => {
     const clearFilters = () => {
+      cy.visit('/app/fleet/agents');
+      waitForLoading();
+      // Default state has all 5 statuses selected — deselect them all so each
+      // test starts with no status filter active and can add its own.
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
       // Force true due to pointer-events: none on parent prevents user mouse interaction.
       cy.get('li').contains('Healthy').click({ force: true });
@@ -226,7 +230,6 @@ describe('View agents list', () => {
       waitForLoading();
     };
     it('should filter on healthy (17 results)', () => {
-      cy.visit('/app/fleet/agents');
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
@@ -238,7 +241,6 @@ describe('View agents list', () => {
     });
 
     it('should filter on unhealthy (1 result)', () => {
-      cy.visit('/app/fleet/agents');
       clearFilters();
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
@@ -250,7 +252,6 @@ describe('View agents list', () => {
     });
 
     it('should filter on inactive (0 result)', () => {
-      cy.visit('/app/fleet/agents');
       clearFilters();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
@@ -261,7 +262,6 @@ describe('View agents list', () => {
     });
 
     it('should filter on healthy and unhealthy', () => {
-      cy.visit('/app/fleet/agents');
       clearFilters();
 
       cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
@@ -379,8 +379,11 @@ describe('View agents list', () => {
       // Trigger a bulk upgrade
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Assign to new policy').click();
-      cy.get('.euiModalBody select').select('Agent policy 4');
+      cy.get('.euiModalBody input').clear().type('Agent policy 4');
+      cy.get('[role="option"]').contains('Agent policy 4').should('exist');
+      cy.get('.euiModalBody input').type('{downArrow}{enter}');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
+      cy.wait('@bulkReassign');
       waitForLoading();
       assertTableIsEmpty();
       // Select new policy is filters
@@ -394,8 +397,73 @@ describe('View agents list', () => {
       // Trigger a bulk upgrade
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Assign to new policy').click();
-      cy.get('.euiModalBody select').select('Agent policy 3');
+      cy.get('.euiModalBody input').clear().type('Agent policy 3');
+      cy.get('[role="option"]').contains('Agent policy 3').should('exist');
+      cy.get('.euiModalBody input').type('{downArrow}{enter}');
       cy.get('.euiModalFooter button:enabled').contains('Assign policy').click();
+      cy.wait('@bulkReassign');
+      waitForLoading();
+    });
+
+    it('should show hierarchical menu with submenus', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
+      cy.get('li').contains('Agent policy 3').click();
+      waitForLoading();
+      assertTableContainsNAgents(15);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
+
+      // Open bulk actions menu
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
+
+      // Check top-level items are visible
+      cy.get('button').contains('Add / remove tags').should('be.visible');
+      cy.get('button').contains('Assign to new policy').should('be.visible');
+      cy.get('button').contains('Upgrade 15 agents').should('be.visible');
+
+      // Check submenu triggers are visible
+      cy.get('button').contains('Upgrade management').should('be.visible');
+      cy.get('button').contains('Maintenance and diagnostics').should('be.visible');
+      cy.get('button').contains('Security and removal').should('be.visible');
+    });
+
+    it('should navigate to Security and removal submenu and show unenroll option', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
+      cy.get('li').contains('Agent policy 3').click();
+      waitForLoading();
+      assertTableContainsNAgents(15);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
+
+      // Open bulk actions menu
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
+
+      // Navigate to Security submenu
+      cy.get('button').contains('Security and removal').click();
+
+      // Check submenu items are visible
+      cy.get('button').contains('Unenroll 15 agents').should('be.visible');
+    });
+
+    it('should navigate to Maintenance and diagnostics submenu', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
+      cy.get('li').contains('Agent policy 3').click();
+      waitForLoading();
+      assertTableContainsNAgents(15);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
+
+      // Open bulk actions menu
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
+
+      // Navigate to Maintenance submenu
+      cy.get('button').contains('Maintenance and diagnostics').click();
+
+      // Check submenu items are visible
+      cy.get('button').contains('Request diagnostics for 15 agents').should('be.visible');
     });
   });
 });

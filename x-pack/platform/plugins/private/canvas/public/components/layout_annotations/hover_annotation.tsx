@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -29,9 +28,3 @@ export const HoverAnnotation: FC<Props> = ({ transformMatrix, width, height }) =
     }}
   />
 );
-
-HoverAnnotation.propTypes = {
-  height: PropTypes.number.isRequired,
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  width: PropTypes.number.isRequired,
-};

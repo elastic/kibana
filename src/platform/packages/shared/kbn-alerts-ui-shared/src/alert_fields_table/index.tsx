@@ -112,6 +112,9 @@ export const AlertFieldsTable = memo(({ alert, fields }: AlertFieldsTableProps) 
   }, [alert, fields]);
   return (
     <EuiInMemoryTable
+      tableCaption={i18n.translate('alertsUIShared.alertFieldsTable.tableCaption', {
+        defaultMessage: 'Alert fields',
+      })}
       items={items}
       itemId="key"
       columns={columns}

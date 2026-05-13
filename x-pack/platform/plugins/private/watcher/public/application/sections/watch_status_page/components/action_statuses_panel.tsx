@@ -91,7 +91,13 @@ export const ActionStatusesPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -117,7 +123,13 @@ export const ActionStatusesPanel = () => {
                 defaultMessage: 'Last executed',
               }
             )}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -268,7 +280,13 @@ export const ActionStatusesPanel = () => {
         pagination={PAGINATION}
         sorting={true}
         data-test-subj="watchActionStatusTable"
-        message={
+        tableCaption={i18n.translate(
+          'xpack.watcher.sections.watchDetail.watchActionStatusesTable.caption',
+          {
+            defaultMessage: 'Action statuses',
+          }
+        )}
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
             defaultMessage="No actions to show"

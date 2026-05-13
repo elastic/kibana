@@ -16,6 +16,7 @@ import type {
   MetaOrUndefined,
   Name,
   NamespaceType,
+  OsTypeArray,
   Tags,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
@@ -35,6 +36,7 @@ interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   user: string;
   tags: Tags;
+  osTypes: OsTypeArray;
   tieBreaker?: string;
   type: ExceptionListType;
   version: Version;
@@ -47,6 +49,7 @@ export const createExceptionList = async ({
   namespaceType,
   name,
   description,
+  osTypes,
   meta,
   user,
   tags,
@@ -69,7 +72,7 @@ export const createExceptionList = async ({
     list_type: 'list',
     meta,
     name,
-    os_types: [],
+    os_types: osTypes,
     tags,
     tie_breaker_id: tieBreaker ?? uuidv4(),
     type,

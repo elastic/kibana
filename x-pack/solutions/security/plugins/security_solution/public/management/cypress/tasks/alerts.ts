@@ -199,7 +199,7 @@ export const getEndpointDetectionAlertsQueryForAgentId = (endpointAgentId: strin
 };
 
 export const changeAlertsFilter = (text: string) => {
-  cy.getByTestSubj('filters-global-container').within(() => {
+  cy.getByTestSubj('kbnQueryBar').within(() => {
     cy.getByTestSubj('queryInput').type(text);
     cy.getByTestSubj('querySubmitButton').click();
   });
@@ -214,10 +214,14 @@ export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .
 export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="internalAlertsPageLoading"]';
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
 export const ALERTS_URL = '/app/security/alerts';
-export const GLOBAL_KQL_WRAPPER = '[data-test-subj="filters-global-container"]';
-export const REFRESH_BUTTON = `${GLOBAL_KQL_WRAPPER} [data-test-subj="querySubmitButton"]`;
+export const REFRESH_BUTTON = `[data-test-subj="kbnQueryBar"] [data-test-subj="querySubmitButton"]`;
 export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsTableEmptyState"]';
 export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
+export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
+
+export const goToAlertsTab = () => {
+  cy.get(ALERTS_TAB).click();
+};
 
 export const waitForPageFilters = () => {
   cy.log('Waiting for Page Filters');

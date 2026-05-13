@@ -33,7 +33,7 @@ import {
   type LENS_NUMBER_DISPLAY,
   type LENS_LAYER_TYPES,
 } from './constants';
-import type { SeriesType, XYState } from './xy/types';
+import type { SeriesType, XYVisualizationState } from './xy/types';
 import type { LensTagCloudState } from './tagcloud/types';
 import type { LensPartitionVisualizationState } from './partition/types';
 import type { MetricVisualizationState } from './metric/types';
@@ -90,7 +90,7 @@ export type LensLayerType = (typeof LENS_LAYER_TYPES)[keyof typeof LENS_LAYER_TY
 export type CollapseFunction = (typeof LENS_COLLAPSE_FUNCTIONS)[number];
 
 export type LensConfiguration =
-  | XYState
+  | XYVisualizationState
   | DatatableVisualizationState
   | LensPartitionVisualizationState
   | MetricVisualizationState
@@ -246,6 +246,12 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   triggers?: string[];
   /**
+   * Optional priority used to sort suggestions when multiple visualizations
+   * compete. Higher values are sorted first. Defaults to 0.
+   */
+  suggestionPriority?: number;
+
+  /**
    * Visualizations must provide at least one type for the chart switcher,
    * but can register multiple subtypes
    */
@@ -345,6 +351,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
   isSubtypeCompatible?: (subtype1?: string, subtype2?: string) => boolean;
 
+  isSubtypeSupported?: (subtype: string) => boolean;
+
   /**
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
@@ -362,16 +370,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   LayerPanelComponent?: (
     props: VisualizationLayerWidgetProps<T>
   ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
-  /**
-   * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
-   * settings for the visualization.
-   */
-  ToolbarComponent?: (
-    props: VisualizationToolbarProps<T>
-  ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
   /**
-   * Optional flyout toolbar component that renders visualization-specific controls
+   * Flyout toolbar component that renders visualization-specific controls
    * in a flyout panel. Provides configuration options for style, legend and filters.
    */
   FlyoutToolbarComponent?: (
@@ -384,6 +385,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   setDimension: (
     props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
+  ) => T;
+
+  reorderDimension?: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; targetColumnId: string }
   ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
@@ -481,7 +486,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getUserMessages?: (state: T, deps: { frame: FramePublicAPI }) => UserMessage[];
+  getUserMessages?: (
+    state: T,
+    deps: { frame: FramePublicAPI; setState?: StateSetter<T> }
+  ) => UserMessage[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
@@ -540,6 +548,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
 export interface VisualizationState {
   activeId: string | null;
+  selectedLayerId: string | null;
   state: unknown;
 }
 

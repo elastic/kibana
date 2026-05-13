@@ -9,11 +9,12 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import type { OverviewTrend } from '../../../../../../../../common/types';
+import { useMetricSubtitle } from '../../../../../hooks/use_metric_subtitle';
 import { MetricItemExtra } from './metric_item_extra';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import type { ClientPluginsStart } from '../../../../../../../plugin';
@@ -33,6 +34,7 @@ import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
 import { MetricItemIcon } from './metric_item_icon';
 import type { FlyoutParamProps } from '../types';
+import { getTrendDuration } from '../../../../../utils/formatting/trend_duration';
 
 export const METRIC_ITEM_HEIGHT = 180;
 
@@ -42,13 +44,14 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
   }
 
   // make sure these are synced with slo card colors while making changes
-
   switch (status) {
     case 'down':
       return euiTheme.colors.backgroundBaseDanger;
     case 'up':
       return euiTheme.colors.backgroundBaseSuccess;
     case 'unknown':
+      return euiTheme.colors.backgroundBasePlain;
+    case 'pending':
       return euiTheme.colors.backgroundBasePlain;
     default:
       return euiTheme.colors.backgroundBaseSuccess;
@@ -65,6 +68,50 @@ const truncateText = (text: string) => {
   return `${text.slice(0, halfLength)}…${text.slice(-halfLength)}`;
 };
 
+/**
+ * Get metric value props for Metric component. The goal of this function is
+ * to be able to handle the loading state of the trend data without disrupting
+ * the type expectations of the Metric component.
+ */
+export const getMetricValueProps = (trendData: OverviewTrend | 'loading' | null | undefined) => {
+  return getTrendDuration<
+    | {
+        value: string;
+        extra: React.JSX.Element;
+        valueFormatter?: undefined;
+      }
+    | {
+        value: number;
+        valueFormatter: (d: number) => string;
+        extra: React.JSX.Element;
+      }
+  >({
+    onLoading: (onLoadingComponent) => ({
+      value: '',
+      extra: onLoadingComponent,
+    }),
+    onNoData: (onNoDataComponent) => ({
+      value: '',
+      extra: onNoDataComponent,
+    }),
+    onData: ({ max, median, min, avg }) => ({
+      value: median,
+      valueFormatter: (d: number) => formatDuration(d),
+      extra: (
+        <MetricItemExtra
+          stats={{
+            medianDuration: median,
+            minDuration: min,
+            maxDuration: max,
+            avgDuration: avg,
+          }}
+        />
+      ),
+    }),
+    trendData,
+  });
+};
+
 export const MetricItem = ({
   monitor,
   onClick,
@@ -74,14 +121,17 @@ export const MetricItem = ({
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
 }) => {
+  const status = monitor.overallStatus;
+  const locationId = monitor.locations[0]?.id ?? '';
   const { euiTheme } = useEuiTheme();
-  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
+  const metricSubtitle = useMetricSubtitle(monitor);
   const locationName = useLocationName(monitor);
-  const { status, timestamp, configIdByLocation } = useStatusByLocationOverview({
+  const { timestamp, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
-    locationId: monitor.locationId,
+    locationId,
   });
 
   const { charts } = useKibana<ClientPluginsStart>().services;
@@ -117,7 +167,7 @@ export const MetricItem = ({
 
   return (
     <div
-      data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
+      data-test-subj={`${monitor.name}-${locationId}-metric-item`}
       aria-label={i18n.translate('xpack.synthetics.overview.metricItem.label', {
         defaultMessage:
           'Monitor {name} in {location}. The background of this element also contains a sparkline chart indicating the status of test duration over the selected time window. {trendMessage}',
@@ -128,7 +178,7 @@ export const MetricItem = ({
         },
       })}
       // this is the ID the Chart child will expect in its `aria-labelledby` attribute
-      id={`echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-title_echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-description`}
+      id={`echMetric-${monitor.configId}-${locationId}-metric-chart-0-0-trend-title_echMetric-${monitor.configId}-${locationId}-metric-chart-0-0-trend-description`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel
@@ -162,7 +212,7 @@ export const MetricItem = ({
         `}
         title={moment(timestamp).format('LLL')}
       >
-        <Chart id={`${monitor.configId}-${monitor.locationId}-metric-chart`}>
+        <Chart id={`${monitor.configId}-${locationId}-metric-chart`}>
           <Settings
             onElementClick={() => {
               if (testInProgress) {
@@ -174,10 +224,10 @@ export const MetricItem = ({
               }
               if (!testInProgress && locationName) {
                 onClick({
+                  locationId,
                   configId: monitor.configId,
                   id: monitor.configId,
                   location: locationName,
-                  locationId: monitor.locationId,
                   spaces: monitor.spaces,
                 });
               }
@@ -186,36 +236,64 @@ export const MetricItem = ({
             locale={i18n.getLocale()}
           />
           <Metric
-            id={`${monitor.configId}-${monitor.locationId}`}
+            id={configIdByLocation}
             data={[
               [
                 {
                   title: truncateText(monitor.name),
-                  subtitle: locationName,
-                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
-                  trendShape: MetricTrendShape.Area,
-                  trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
-                  extra:
-                    trendData !== 'loading' && !!trendData ? (
-                      <MetricItemExtra
-                        stats={{
-                          medianDuration: trendData.median,
-                          minDuration: trendData.min,
-                          maxDuration: trendData.max,
-                          avgDuration: trendData.avg,
+                  subtitle: metricSubtitle,
+                  body: (
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onMouseUp={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        const closestInteractive = target.closest(
+                          'a, button, [role="button"], .euiBadge'
+                        );
+                        if (!closestInteractive || closestInteractive === e.currentTarget) {
+                          onClick({
+                            locationId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locationName ?? '',
+                            spaces: monitor.spaces,
+                          });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onClick({
+                            locationId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locationName ?? '',
+                            spaces: monitor.spaces,
+                          });
+                        }
+                      }}
+                    >
+                      <MetricItemBody
+                        monitor={monitor}
+                        onLocationClick={(locId, locLabel) => {
+                          onClick({
+                            locationId: locId,
+                            configId: monitor.configId,
+                            id: monitor.configId,
+                            location: locLabel,
+                            spaces: monitor.spaces,
+                          });
                         }}
                       />
-                    ) : trendData === 'loading' ? (
-                      <span>
-                        <FormattedMessage
-                          defaultMessage="..."
-                          id="xpack.synthetics.overview.metricItem.loadingMessage"
-                        />
-                      </span>
-                    ) : undefined,
-                  valueFormatter: (d: number) => formatDuration(d),
+                    </div>
+                  ),
                   color: getColor(euiTheme, monitor.isEnabled, status),
-                  body: <MetricItemBody monitor={monitor} />,
+                  trendShape: MetricTrendShape.Area,
+                  trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
+                  ...getMetricValueProps(trendData),
                 },
               ],
             ]}
@@ -227,7 +305,7 @@ export const MetricItem = ({
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             position="relative"
-            locationId={monitor.locationId}
+            locationId={locationId}
           />
         </div>
         {configIdByLocation && (

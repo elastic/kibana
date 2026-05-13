@@ -8,34 +8,54 @@
 import { useMemo } from 'react';
 import type { CaseUI } from './types';
 import { type GetAttachments } from '../components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { useFindCasesContainingAllSelectedAlerts } from './use_find_cases_containing_all_selected_alerts';
+import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
 export interface UseCheckAlertAttachmentsProps {
   cases: Pick<CaseUI, 'id'>[];
   getAttachments?: GetAttachments;
 }
 
-function hasAlertId<T>(arg: T): arg is T & { alertId: string[] | string } {
-  const candidate = arg as unknown;
-  return (
-    typeof candidate === 'object' &&
-    candidate !== null &&
-    'alertId' in candidate &&
-    (Array.isArray(candidate.alertId) || typeof candidate.alertId === 'string')
-  );
+interface DocumentReference {
+  alertId?: string[] | string;
+  eventId?: string | string[];
+  externalReferenceId?: string | string[];
 }
 
-export const useCheckAlertAttachments = ({
+export const hasDocReferences = <T>(arg: T): arg is T & DocumentReference => {
+  if (arg === null || typeof arg !== 'object') {
+    return false;
+  }
+
+  const candidate = arg as DocumentReference;
+  const idFields = ['alertId', 'eventId', 'externalReferenceId'] as const;
+
+  for (const fieldName of idFields) {
+    if (
+      fieldName in candidate &&
+      (Array.isArray(candidate[fieldName]) || typeof candidate[fieldName] === 'string')
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+export const useCheckDocumentAttachments = ({
   cases,
   getAttachments,
 }: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
-  const selectedAlerts = (getAttachments?.({ theCase: undefined }) ?? [])
-    .filter(hasAlertId)
-    .map(({ alertId }) => alertId)
-    .flatMap((arrayOrString) => arrayOrString);
+  const selectedDocumentIds = (getAttachments?.({ theCase: undefined }) ?? [])
+    .filter(hasDocReferences)
+    .flatMap(({ alertId, eventId, externalReferenceId }) =>
+      [alertId, eventId, externalReferenceId].flat()
+    )
+    .filter(
+      (reference): reference is string => typeof reference === 'string' && reference.length > 0
+    );
 
-  const { data, isFetching } = useFindCasesContainingAllSelectedAlerts(
-    selectedAlerts,
+  const { data, isFetching } = useFindCasesContainingAllSelectedDocuments(
+    selectedDocumentIds,
     cases.map(({ id }) => id)
   );
 
@@ -44,4 +64,4 @@ export const useCheckAlertAttachments = ({
   return { disabledCases, isLoading: isFetching };
 };
 
-export type UseCheckAlertAttachments = ReturnType<typeof useCheckAlertAttachments>;
+export type UseCheckDocumentAttachments = ReturnType<typeof useCheckDocumentAttachments>;

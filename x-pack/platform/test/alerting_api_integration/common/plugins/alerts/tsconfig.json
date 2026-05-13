@@ -1,12 +1,12 @@
 {
-  "extends": "../../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
-    "public/**/**/*",
-    "server/**/**/*",
+    "public/**/*",
+    "server/**/*",
     "common/**/*",
   ],
   "kbn_references": [
@@ -28,6 +28,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/data-plugin",
     "@kbn/zod",
+    "@kbn/change-history",
   ],
   "exclude": [
     "target/**/*",

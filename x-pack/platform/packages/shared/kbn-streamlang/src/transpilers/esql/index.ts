@@ -6,7 +6,8 @@
  */
 
 import { pipe } from 'fp-ts/function';
-import type { BasicPrettyPrinterOptions } from '@kbn/esql-ast';
+import type { BasicPrettyPrinterOptions } from '@elastic/esql';
+import type { StreamlangResolverOptions } from '../../../types/resolvers';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import { streamlangDSLSchema } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
@@ -14,6 +15,8 @@ import { convertConditionToESQL, convertStreamlangDSLToESQLCommands } from './co
 import type { Condition } from '../../../types/conditions';
 
 const DEFAULT_PIPE_TAB = '  ';
+
+export { conditionToESQLAst } from './condition_to_esql';
 
 export interface ESQLTranspilationOptions {
   pipeTab: BasicPrettyPrinterOptions['pipeTab'];
@@ -30,17 +33,18 @@ export const conditionToESQL = (condition: Condition): string => {
   return convertConditionToESQL(condition);
 };
 
-export const transpile = (
+export const transpile = async (
   streamlang: StreamlangDSL,
-  transpilationOptions: ESQLTranspilationOptions = { pipeTab: DEFAULT_PIPE_TAB }
-): ESQLTranspilationResult => {
+  transpilationOptions: ESQLTranspilationOptions = { pipeTab: DEFAULT_PIPE_TAB },
+  resolverOptions?: StreamlangResolverOptions
+): Promise<ESQLTranspilationResult> => {
   const validatedStreamlang = streamlangDSLSchema.parse(streamlang);
 
   const esqlCommandsFromStreamlang = pipe(flattenSteps(validatedStreamlang.steps), (steps) =>
-    convertStreamlangDSLToESQLCommands(steps, transpilationOptions)
+    convertStreamlangDSLToESQLCommands(steps, transpilationOptions, resolverOptions)
   );
 
-  const commandsArray = [esqlCommandsFromStreamlang].filter(Boolean);
+  const commandsArray = [await esqlCommandsFromStreamlang].filter(Boolean);
 
   return {
     query: `  | ${commandsArray.join('\n|')}`,

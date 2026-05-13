@@ -21,8 +21,15 @@ import {
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '@kbn/security-solution-plugin/common/constants';
+import {
+  getMaxSignalsWarning as getMaxAlertsWarning,
+  getMissingIdFieldWarning,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import {
+  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
+} from '@kbn/security-solution-plugin/common/constants';
+import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 import {
   getPreviewAlerts,
   previewRule,
@@ -40,11 +47,6 @@ import {
   setBrokenRuntimeField,
   unsetBrokenRuntimeField,
 } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -68,8 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   const internalIdPipe = (id: string) => `| where id=="${id}"`;
 
-  // Failing: See https://github.com/elastic/kibana/issues/235886
-  describe.skip('@ess @serverless ES|QL rule type', () => {
+  describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -260,6 +261,73 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('non-aggregating query rules', () => {
+      describe('auto-inject metadata _id', () => {
+        it('should deduplicate alerts when query omits METADATA clause (auto-injected)', async () => {
+          const id = uuidv4();
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts).toHaveLength(1);
+        });
+
+        it('should deduplicate alerts when KEEP without _id is used (auto-injected)', async () => {
+          const id = uuidv4();
+          const doc1 = {
+            id,
+            '@timestamp': '2020-10-28T05:55:00.000Z',
+            agent: { name: 'test-1' },
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_compliant ${internalIdPipe(id)} | keep agent.name`,
+            from: 'now-45m',
+            interval: '30m',
+          };
+
+          await indexListOfDocuments([doc1]);
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts).toHaveLength(1);
+        });
+      });
       it('should add source document to alert', async () => {
         const id = uuidv4();
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
@@ -354,7 +422,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
           query: `from ecs_compliant ${internalIdPipe(
             id
-          )} | where agent.name=="test-1" | keep agent.name | rename agent.name as custom_named_agent`,
+          )} | where agent.name=="test-1" | stats count() by agent.name | rename agent.name as custom_named_agent`,
           from: 'now-1h',
           interval: '1h',
         };
@@ -1722,7 +1790,7 @@ export default ({ getService }: FtrProviderContext) => {
             ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
             query: `from ecs_compliant, ecs_compliant_synthetic_source metadata _id, _index ${internalIdPipe(
               id
-            )} | mv_expand agent.name | sort @timestamp asc`,
+            )} | mv_expand agent.name | sort @timestamp asc, _index asc`, // sort by timestamp and index to ensure deterministic results, see https://github.com/elastic/kibana/issues/253849
             from: '2020-10-28T05:15:00.000Z',
             to: '2020-10-28T06:00:00.000Z',
             interval: '45m',
@@ -1736,7 +1804,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
 
           await Promise.all(
-            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index) =>
+            ['ecs_compliant', 'ecs_compliant_synthetic_source'].map((index, i) =>
               es.index({
                 index,
                 id,
@@ -1790,6 +1858,116 @@ export default ({ getService }: FtrProviderContext) => {
             ecs_compliant_synthetic_source: 100,
           });
         });
+      });
+    });
+
+    describe('missing _id warning', () => {
+      it('generates warning when non-aggregating query does not return _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1" | DROP _id`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('does not generate warning when non-aggregating query returns _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('does not generate warning for aggregating queries without _id', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | stats counted=count(agent.name)`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).not.toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+      });
+
+      it('generates warning when auto-injected _id is dropped by DROP command', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1" | DROP _id`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].warnings).toEqual(expect.arrayContaining([getMissingIdFieldWarning()]));
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
       });
     });
 
@@ -2204,7 +2382,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits).toHaveLength(2);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {
@@ -2382,7 +2560,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests).toHaveProperty('0.description', 'ES|QL request to find all matches');
         expect(requests).toHaveProperty('0.duration', expect.any(Number));
         expect(requests![0].request).toContain(
-          `"query": "from ecs_compliant metadata _id | where id==\\\"${id}\\\" | where agent.name==\\\"test-1\\\" | limit 101",`
+          `"query": "FROM ecs_compliant METADATA _id | WHERE id == \\\"${id}\\\" | WHERE agent.name == \\\"test-1\\\" | limit 101",`
         );
 
         expect(requests).toHaveProperty(
@@ -2614,6 +2792,89 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.[ALERT_ANCESTORS]).toEqual([
           { depth: 0, id: '', index: '', type: 'event' },
         ]);
+      });
+    });
+
+    describe('with data stream namespace filter', () => {
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        // Clean up UI setting
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: [],
+        });
+      });
+
+      it('should only include documents from specified namespaces when filter is configured', async () => {
+        const id = uuidv4();
+        const timestamp = '2020-10-28T06:00:00.000Z';
+
+        // Create documents with different namespaces
+        const docNamespace1 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace1' },
+          agent: {
+            name: 'agent-namespace1',
+          },
+        };
+        const docNamespace2 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace2' },
+          agent: {
+            name: 'agent-namespace2',
+          },
+        };
+        const docNamespace3 = {
+          id,
+          '@timestamp': timestamp,
+          data_stream: { namespace: 'namespace3' },
+          agent: {
+            name: 'agent-namespace3',
+          },
+        };
+
+        await indexListOfDocuments([docNamespace1, docNamespace2, docNamespace3]);
+
+        // Set UI setting to include only namespace1 and namespace2
+        await setAdvancedSettings(supertest, {
+          [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: ['namespace1', 'namespace2'],
+        });
+
+        const ruleQuery = `from ecs_compliant metadata _id, _index ${internalIdPipe(
+          id
+        )} | where agent.name=="agent-namespace1" or agent.name=="agent-namespace2" or agent.name=="agent-namespace3"`;
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: ruleQuery,
+          from: '2020-10-28T06:00:00.000Z',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        // Should only get alerts from namespace1 and namespace2, not namespace3
+        expect(previewAlerts.length).toEqual(2);
+        const namespaces = previewAlerts.map((alert) => alert._source?.['data_stream.namespace']);
+        expect(namespaces).toContain('namespace1');
+        expect(namespaces).toContain('namespace2');
+        expect(namespaces).not.toContain('namespace3');
       });
     });
   });

@@ -16,6 +16,8 @@
           "<unknown>"
         ],
         "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,6 +32,8 @@
               "string"
             ],
             "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -45,6 +49,8 @@
               "string"
             ],
             "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,6 +66,8 @@
               "Request"
             ],
             "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,7 +83,10 @@
               "Response | undefined"
             ],
             "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Response",
             "trackAdoption": false,
             "isRequired": false
           },
@@ -90,7 +101,10 @@
               "TResponseBody | undefined"
             ],
             "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TResponseBody",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -149,6 +163,8 @@
           ">; }"
         ],
         "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -163,6 +179,8 @@
         "label": "httpServiceMock",
         "description": [],
         "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,6 +205,8 @@
               ">>"
             ],
             "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -196,12 +216,14 @@
                 "id": "def-public.httpServiceMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ basePath = '' }",
                 "description": [],
                 "signature": [
                   "{ basePath?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+                "lineNumber": 55,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -219,6 +241,8 @@
               "HttpSetupMock"
             ],
             "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -228,12 +252,14 @@
                 "id": "def-public.httpServiceMock.createSetupContract.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  basePath = '',\n  publicBaseUrl,\n}",
                 "description": [],
                 "signature": [
                   "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+                "lineNumber": 22,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -251,6 +277,8 @@
               "HttpSetupMock"
             ],
             "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -260,12 +288,14 @@
                 "id": "def-public.httpServiceMock.createStartContract.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  basePath = '',\n  publicBaseUrl,\n}",
                 "description": [],
                 "signature": [
                   "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+                "lineNumber": 22,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -284,6 +314,8 @@
               ">"
             ],
             "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -293,12 +325,14 @@
                 "id": "def-public.httpServiceMock.createBasePath.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  publicBaseUrl = '/',\n  serverBasePath = '/',\n  assetsHrefBase = '/',\n}",
                 "description": [],
                 "signature": [
                   "{ publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; assetsHrefBase?: string | undefined; }"
                 ],
                 "path": "src/core/packages/http/browser-mocks/src/base_path.mock.ts",
+                "lineNumber": 13,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }

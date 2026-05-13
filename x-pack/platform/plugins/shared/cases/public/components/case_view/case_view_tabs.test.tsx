@@ -21,7 +21,6 @@ import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
-import * as similarCasesHook from '../../containers/use_get_similar_cases';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
@@ -84,9 +83,8 @@ describe('CaseViewTabs', () => {
     });
 
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
-    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-attachments')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
   });
 
   it('renders the activity tab by default', async () => {
@@ -98,100 +96,6 @@ describe('CaseViewTabs', () => {
       'aria-selected',
       'true'
     );
-  });
-
-  it('shows the alerts tab as active', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-alerts')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('shows the files tab as active', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-files')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('shows the events tab as active', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-events')).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-  });
-
-  it('shows the files tab with the correct count', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    const badge = await screen.findByTestId('case-view-files-stats-badge');
-
-    expect(badge).toHaveTextContent('3');
-  });
-
-  it('do not show count on the files tab if the call isLoading', async () => {
-    useGetCaseFileStatsMock.mockReturnValue({ isLoading: true, data });
-
-    renderWithTestingProviders(
-      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
-  });
-
-  it('shows the alerts tab with the correct count', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    const badge = await screen.findByTestId('case-view-alerts-stats-badge');
-
-    expect(badge).toHaveTextContent('3');
-  });
-
-  it('the alerts tab count has a different color if the tab is not active', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.FILES} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(
-      (await screen.findByTestId('case-view-alerts-stats-badge')).getAttribute('class')
-    ).not.toMatch(/accent/);
   });
 
   it('navigates to the activity tab when the activity tab is clicked', async () => {
@@ -210,195 +114,9 @@ describe('CaseViewTabs', () => {
     });
   });
 
-  it('navigates to the alerts tab when the alerts tab is clicked', async () => {
-    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-      wrapperProps: { license: basicLicense },
-    });
-
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
-
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-      });
-    });
-  });
-
-  it('navigates to the files tab when the files tab is clicked', async () => {
-    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-      wrapperProps: { license: basicLicense },
-    });
-
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-files'));
-
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.FILES,
-      });
-    });
-  });
-
-  it('navigates to the events tab when the events tab is clicked', async () => {
-    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-    renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
-      wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-    });
-
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-events'));
-
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.EVENTS,
-      });
-    });
-  });
-
-  it('should display the alerts tab when the feature is enabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { enabled: true } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-  });
-
-  it('should not display the alerts tab when the feature is disabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { enabled: false } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
-  });
-
-  it('should not show the experimental badge on the alerts table', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { isExperimental: false } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('case-view-alerts-table-experimental-badge')
-    ).not.toBeInTheDocument();
-  });
-
-  it('should show the experimental badge on the alerts table', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { alerts: { isExperimental: true } } },
-      }
-    );
-
-    expect(
-      await screen.findByTestId('case-view-alerts-table-experimental-badge')
-    ).toBeInTheDocument();
-  });
-
-  it('should display the events tab with correct count when the feature is enabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithEvents} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: true } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
-
-    const badge = await screen.findByTestId('case-view-events-stats-badge');
-
-    expect(badge).toHaveTextContent('4');
-  });
-
-  it('should not display the events tab when the feature is disabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithEvents} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
-      {
-        wrapperProps: { license: basicLicense, features: { events: { enabled: false } } },
-      }
-    );
-
-    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-events')).not.toBeInTheDocument();
-  });
-
-  it('should not show observable tabs in non-platinum tiers', async () => {
-    const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
-
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
-      {
-        wrapperProps: { license: basicLicense },
-      }
-    );
-
-    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
-
-    // NOTE: we are still calling the hook but the fetching is disabled (based on the license)
-    expect(spyOnUseGetSimilarCases).toHaveBeenLastCalledWith(
-      expect.objectContaining({ enabled: false })
-    );
-  });
-
-  it('should not show observable tabs if the observables feature is not enabled', async () => {
-    renderWithTestingProviders(
-      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />,
-      {
-        wrapperProps: {
-          license: basicLicense,
-          features: { observables: { enabled: false, autoExtract: false } },
-        },
-      }
-    );
-
-    expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
-  });
-
   describe('show observable tabs in platinum tier or higher', () => {
     const platinumLicense = licensingMock.createLicense({
       license: { type: 'platinum' },
-    });
-
-    it('should show observable tabs in platinum+ tiers', async () => {
-      const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
-
-      renderWithTestingProviders(
-        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
-        {
-          wrapperProps: { license: platinumLicense },
-        }
-      );
-
-      // NOTE: ensure we are calling the hook but the fetching is enabled (based on the license)
-      expect(spyOnUseGetSimilarCases).toHaveBeenLastCalledWith(
-        expect.objectContaining({ enabled: true })
-      );
-    });
-
-    it('should show the observables tab', async () => {
-      renderWithTestingProviders(
-        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
-        {
-          wrapperProps: { license: platinumLicense },
-        }
-      );
-
-      expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
     });
 
     it('should show the similar cases tab', async () => {
@@ -426,32 +144,6 @@ describe('CaseViewTabs', () => {
           tabId: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
         });
       });
-    });
-
-    it('shows the observables tab with the correct count', async () => {
-      renderWithTestingProviders(
-        <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
-        {
-          wrapperProps: { license: platinumLicense },
-        }
-      );
-
-      const badge = await screen.findByTestId('case-view-observables-stats-badge');
-
-      expect(badge).toHaveTextContent('0');
-    });
-
-    it('do not show count on the observables tab if the call isLoading', async () => {
-      useGetCaseObservablesMock.mockReturnValue({ isLoading: true, observables: [] });
-
-      renderWithTestingProviders(
-        <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />,
-        {
-          wrapperProps: { license: platinumLicense },
-        }
-      );
-
-      expect(screen.queryByTestId('case-view-observables-stats-badge')).not.toBeInTheDocument();
     });
   });
 });

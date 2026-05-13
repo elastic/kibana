@@ -77,7 +77,7 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
       ],
     },
     {
-      icon: 'tableDensityExpanded',
+      icon: 'tableDensityLow',
       shape: 'rectangle',
       values: ['Application (Desktop or Web App)'],
     },
@@ -90,6 +90,7 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
         'Snapshot',
         'Volume',
         'Volume Claim',
+        'Storage',
         'Storage Bucket',
         'Backup Service',
         'Managed Certificate',
@@ -186,6 +187,11 @@ const buildEntityTypeMappings = (): EntityTypeMappings => {
       icon: 'key',
       shape: 'rectangle',
       values: ['Secrets', 'Keys', 'API Keys', 'Encryption Keys', 'Access Keys'],
+    },
+    {
+      icon: 'magnifyExclamation',
+      shape: 'rectangle',
+      values: ['Entities', 'Entity'],
     },
   ];
 

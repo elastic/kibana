@@ -8,6 +8,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import {
   DISCOVER_CELL_ACTION_TYPE,
   createCellAction,
@@ -18,21 +19,14 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import React from 'react';
 import { createEsqlDataSource } from '../../../common/data_sources';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import type {
-  Action,
-  ActionDefinition,
-  ActionExecutionContext,
-} from '@kbn/ui-actions-plugin/public/actions';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  type AdditionalCellAction,
-  type DiscoverCellActionExecutionContext,
-} from '../types';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
+import { type AdditionalCellAction, type DiscoverCellActionExecutionContext } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { type ScopedProfilesManager } from '../profiles_manager';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import { v4 as uuidv4 } from 'uuid';
 import type { ScopedDiscoverEBTManager } from '../../ebt_manager';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 
 let mockScopedProfilesManager: ScopedProfilesManager;
 let mockScopedEbtManager: ScopedDiscoverEBTManager;
@@ -40,12 +34,11 @@ let mockUuid = 0;
 
 jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: jest.fn() }));
 
-const mockActions: Array<ActionDefinition<DiscoverCellActionExecutionContext>> = [];
-const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER.id]: [] };
+const mockActions: string[] = [];
+const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: [] };
 
-jest.spyOn(discoverServiceMock.uiActions, 'registerAction').mockImplementation((action) => {
-  mockActions.push(action as ActionDefinition<DiscoverCellActionExecutionContext>);
-  return action as Action;
+jest.spyOn(discoverServiceMock.uiActions, 'registerActionAsync').mockImplementation((actionId) => {
+  mockActions.push(actionId);
 });
 
 jest
@@ -56,7 +49,7 @@ jest
 
 jest.spyOn(discoverServiceMock.uiActions, 'unregisterAction').mockImplementation((id) => {
   mockActions.splice(
-    mockActions.findIndex((action) => action.id === id),
+    mockActions.findIndex((actionId) => actionId === id),
     1
   );
 });
@@ -124,18 +117,18 @@ describe('useAdditionalCellActions', () => {
     const { rerender, result, unmount } = render();
     expect(result.current.instanceId).toEqual('1');
     expect(mockActions).toHaveLength(1);
-    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['root-action-2']);
+    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER_ID]).toEqual(['root-action-2']);
     await act(() => mockScopedProfilesManager.resolveDataSourceProfile({}));
     rerender(initialProps);
     expect(result.current.instanceId).toEqual('3');
     expect(mockActions).toHaveLength(2);
-    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual([
+    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER_ID]).toEqual([
       'root-action-4',
       'data-source-action-5',
     ]);
     unmount();
     expect(mockActions).toHaveLength(0);
-    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual([]);
+    expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER_ID]).toEqual([]);
   });
 });
 
@@ -149,7 +142,7 @@ describe('createCellAction', () => {
     ],
     metadata: undefined,
     nodeRef: React.createRef(),
-    trigger: DISCOVER_CELL_ACTIONS_TRIGGER,
+    trigger: triggers[DISCOVER_CELL_ACTIONS_TRIGGER_ID],
   };
 
   const getCellAction = (isCompatible?: AdditionalCellAction['isCompatible']) => {

@@ -16,6 +16,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getAlertType as getAlwaysFiringAlertType } from './alert_types/always_firing';
 import { getAlertType as getPeopleInSpaceAlertType } from './alert_types/astros';
+import { getAlertType as getPatternAlertType } from './alert_types/pattern';
 import { registerNavigation } from './alert_types';
 
 export type Setup = void;
@@ -52,6 +53,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
 
     triggersActionsUi.ruleTypeRegistry.register(getAlwaysFiringAlertType());
     triggersActionsUi.ruleTypeRegistry.register(getPeopleInSpaceAlertType());
+    triggersActionsUi.ruleTypeRegistry.register(getPatternAlertType());
 
     registerNavigation(alerting);
 

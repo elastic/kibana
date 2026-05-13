@@ -127,16 +127,39 @@ describe('embeddable state transfer', () => {
     expect(stateTransfer.isTransferInProgress).toEqual(false);
   });
 
+  it('emits to incomingPackagesState$ after navigateToEditor for same-page transfers', async () => {
+    const received: unknown[] = [];
+    stateTransfer
+      .onTransferEmbeddablePackage$(destinationApp)
+      .subscribe((val) => received.push(val));
+
+    await stateTransfer.navigateToEditor(destinationApp, { state: { originatingApp } });
+    expect(received).toHaveLength(1);
+  });
+
+  it('does not emit to incomingPackagesState$ when openInNewTab is true', async () => {
+    const received: unknown[] = [];
+    stateTransfer
+      .onTransferEmbeddablePackage$(destinationApp)
+      .subscribe((val) => received.push(val));
+
+    await stateTransfer.navigateToEditor(destinationApp, {
+      state: { originatingApp },
+      openInNewTab: true,
+    });
+    expect(received).toHaveLength(0);
+  });
+
   it('can send an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
-      state: [{ type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } }],
+      state: [{ type: 'coolestType', serializedState: { savedObjectId: '150' } }],
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       [EMBEDDABLE_PACKAGE_STATE_KEY]: {
         [destinationApp]: [
           {
             type: 'coolestType',
-            serializedState: { rawState: { savedObjectId: '150' } },
+            serializedState: { savedObjectId: '150' },
           },
         ],
       },
@@ -151,7 +174,7 @@ describe('embeddable state transfer', () => {
       kibanaIsNowForSports: 'extremeSportsKibana',
     });
     await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
-      state: [{ type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } }],
+      state: [{ type: 'coolestType', serializedState: { savedObjectId: '150' } }],
     });
     expect(store.set).toHaveBeenCalledWith(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, {
       kibanaIsNowForSports: 'extremeSportsKibana',
@@ -159,7 +182,7 @@ describe('embeddable state transfer', () => {
         [destinationApp]: [
           {
             type: 'coolestType',
-            serializedState: { rawState: { savedObjectId: '150' } },
+            serializedState: { savedObjectId: '150' },
           },
         ],
       },
@@ -171,7 +194,7 @@ describe('embeddable state transfer', () => {
 
   it('sets isTransferInProgress to true when sending an outgoing embeddable package state', async () => {
     await stateTransfer.navigateToWithEmbeddablePackages(destinationApp, {
-      state: [{ type: 'coolestType', serializedState: { rawState: { savedObjectId: '150' } } }],
+      state: [{ type: 'coolestType', serializedState: { savedObjectId: '150' } }],
     });
     expect(stateTransfer.isTransferInProgress).toEqual(true);
     currentAppId$.next(destinationApp);
@@ -239,7 +262,7 @@ describe('embeddable state transfer', () => {
         [testAppId]: [
           {
             type: 'skisEmbeddable',
-            serializedState: { rawState: { savedObjectId: '123' } },
+            serializedState: { savedObjectId: '123' },
           },
         ],
       },
@@ -248,7 +271,7 @@ describe('embeddable state transfer', () => {
     expect(fetchedState).toEqual([
       {
         type: 'skisEmbeddable',
-        serializedState: { rawState: { savedObjectId: '123' } },
+        serializedState: { savedObjectId: '123' },
       },
     ]);
   });
@@ -259,7 +282,7 @@ describe('embeddable state transfer', () => {
         [testAppId]: [
           {
             type: 'skisEmbeddable',
-            serializedState: { rawState: { savedObjectId: '123' } },
+            serializedState: { savedObjectId: '123' },
           },
         ],
       },
@@ -268,7 +291,7 @@ describe('embeddable state transfer', () => {
     expect(fetchedState).toEqual([
       {
         type: 'skisEmbeddable',
-        serializedState: { rawState: { savedObjectId: '123' } },
+        serializedState: { savedObjectId: '123' },
       },
     ]);
   });
@@ -279,13 +302,13 @@ describe('embeddable state transfer', () => {
         [testAppId]: [
           {
             type: 'skisEmbeddable',
-            serializedState: { rawState: { savedObjectId: '123' } },
+            serializedState: { savedObjectId: '123' },
           },
         ],
         testApp2: [
           {
             type: 'crossCountryEmbeddable',
-            serializedState: { rawState: { savedObjectId: '456' } },
+            serializedState: { savedObjectId: '456' },
           },
         ],
       },
@@ -294,7 +317,7 @@ describe('embeddable state transfer', () => {
     expect(fetchedState).toEqual([
       {
         type: 'skisEmbeddable',
-        serializedState: { rawState: { savedObjectId: '123' } },
+        serializedState: { savedObjectId: '123' },
       },
     ]);
 
@@ -302,7 +325,7 @@ describe('embeddable state transfer', () => {
     expect(fetchedState2).toEqual([
       {
         type: 'crossCountryEmbeddable',
-        serializedState: { rawState: { savedObjectId: '456' } },
+        serializedState: { savedObjectId: '456' },
       },
     ]);
   });
@@ -327,7 +350,7 @@ describe('embeddable state transfer', () => {
         [testAppId]: [
           {
             type: 'coolestType',
-            serializedState: { rawState: { savedObjectId: '150' } },
+            serializedState: { savedObjectId: '150' },
           },
         ],
       },

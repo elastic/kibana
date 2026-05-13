@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -143,12 +142,12 @@ export const WorkpadHeader: FC<Props> = ({
 
   const quickButtons = [
     {
-      iconType: 'visText',
+      iconType: 'text',
       label: elementStrings.markdown.displayName,
       onClick: createElement('markdown'),
     },
     {
-      iconType: 'node',
+      iconType: 'vectorTriangle',
       label: elementStrings.shape.displayName,
       onClick: createElement('shape'),
     },
@@ -217,7 +216,7 @@ export const WorkpadHeader: FC<Props> = ({
               )}
               <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
                 <EuiButtonIcon
-                  iconType={isWriteable ? 'eyeClosed' : 'eye'}
+                  iconType={isWriteable ? 'eyeSlash' : 'eye'}
                   onClick={toggleWriteable}
                   size="s"
                   aria-label={getEditToggleToolTipText()}
@@ -237,14 +236,4 @@ export const WorkpadHeader: FC<Props> = ({
       {isEmbedPanelVisible ? renderEmbedPanel(hideEmbedPanel) : null}
     </>
   );
-};
-
-WorkpadHeader.propTypes = {
-  isWriteable: PropTypes.bool,
-  commit: PropTypes.func.isRequired,
-  onSetWriteable: PropTypes.func,
-  canUserWrite: PropTypes.bool,
-  renderEmbedPanel: PropTypes.func.isRequired,
-  elements: PropTypes.object.isRequired,
-  addElement: PropTypes.func.isRequired,
 };
