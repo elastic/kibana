@@ -46,6 +46,7 @@ export interface TestGroupRunOrderResponse {
     count: number;
     queue?: string;
     groups: Array<{
+      title?: string;
       durationMin: number;
       names: string[];
     }>;
