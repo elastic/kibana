@@ -45,6 +45,14 @@ import {
   getTemplate,
   getTemplatePriority,
   generateTemplateIndexPattern,
+  generateTemplateName,
+  generateESIndexPatterns,
+  generateNamespaceTemplateName,
+  generateNamespaceTemplateIndexPattern,
+  getNamespaceTemplatePriority,
+  isNamespaceTemplate,
+  getNamespaceFromTemplateId,
+  NAMESPACE_TEMPLATE_PRIORITY_BOOST,
   updateCurrentWriteIndices,
 } from './template';
 
@@ -2687,6 +2695,710 @@ describe('EPM template', () => {
           },
         })
       );
+    });
+  });
+
+  describe('getTemplate — event-ingested suppression when agentIdVerification is enabled', () => {
+    it('does not add event-ingested template when agentIdVerificationEnabled is true even if eventIngestedEnabled is true', () => {
+      appContextService.start(
+        createAppContextStartContractMock({
+          agentIdVerificationEnabled: true,
+          eventIngestedEnabled: true,
+        })
+      );
+
+      const template = getTemplate({
+        templateIndexPattern: 'logs-*',
+        type: 'logs',
+        packageName: 'nginx',
+        composedOfTemplates: [],
+        templatePriority: 200,
+        isIndexModeTimeSeries: false,
+      });
+
+      expect(template.composed_of).not.toContain(FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME);
+      expect(template.composed_of).toContain(FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME);
+    });
+  });
+
+  describe('generateTemplateName', () => {
+    it('returns the base name for a data stream', () => {
+      const dataStream = {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'ga',
+        package: 'nginx',
+        path: 'access',
+        ingest_pipeline: 'default',
+      } as RegistryDataStream;
+
+      expect(generateTemplateName(dataStream)).toBe('logs-nginx.access');
+    });
+  });
+
+  describe('generateESIndexPatterns', () => {
+    it('returns empty object when dataStreams is undefined', () => {
+      expect(generateESIndexPatterns(undefined)).toEqual({});
+    });
+
+    it('returns a record mapping path to index pattern for each data stream', () => {
+      const dataStreams = [
+        {
+          type: 'logs',
+          dataset: 'nginx.access',
+          title: 'Nginx access logs',
+          release: 'ga',
+          package: 'nginx',
+          path: 'access',
+          ingest_pipeline: 'default',
+        },
+        {
+          type: 'metrics',
+          dataset: 'nginx.stub',
+          title: 'Nginx metrics',
+          release: 'ga',
+          package: 'nginx',
+          path: 'stub',
+          ingest_pipeline: 'default',
+        },
+      ] as RegistryDataStream[];
+
+      expect(generateESIndexPatterns(dataStreams)).toEqual({
+        access: 'logs-nginx.access-*',
+        stub: 'metrics-nginx.stub-*',
+      });
+    });
+
+    // TODO: generateESIndexPatterns does not accept an isOtelInputType flag and therefore
+    // never appends the '.otel' suffix for OTel input packages. The pattern is stored in
+    // the Fleet installation saved object (es_index_patterns) and used by get.ts to match
+    // active data streams for the Fleet UI — it does not affect ES index template routing.
+    // With the missing suffix, the UI will fail to match data streams named
+    // 'logs-generic.otel-<namespace>' against the stored pattern 'logs-generic-*'.
+    // The test below locks in the current (incorrect) behavior so any future fix is explicit.
+    it('does not append .otel suffix for OTel input data streams (current behavior — see TODO above)', () => {
+      const otelDataStream = {
+        type: 'logs',
+        dataset: 'generic',
+        title: 'Generic OTel logs',
+        release: 'ga',
+        package: 'otel',
+        path: 'generic',
+        ingest_pipeline: 'default',
+      } as RegistryDataStream;
+
+      expect(generateESIndexPatterns([otelDataStream])).toEqual({
+        generic: 'logs-generic-*',
+      });
+    });
+  });
+
+  describe('namespace template helpers', () => {
+    const baseDataStream = {
+      type: 'logs',
+      dataset: 'nginx.access',
+      title: 'Nginx access logs',
+      release: 'ga',
+      package: 'nginx',
+      path: 'access',
+      ingest_pipeline: 'default',
+    } as RegistryDataStream;
+
+    const prefixDataStream = {
+      ...baseDataStream,
+      type: 'metrics',
+      dataset: 'test.dataset',
+      dataset_is_prefix: true,
+    } as RegistryDataStream;
+
+    describe('generateNamespaceTemplateName', () => {
+      it('appends @namespace.<namespace> to the base name', () => {
+        expect(generateNamespaceTemplateName('logs-nginx.access', 'production')).toBe(
+          'logs-nginx.access@namespace.production'
+        );
+      });
+
+      it('works with any namespace string', () => {
+        expect(generateNamespaceTemplateName('metrics-test.dataset', 'default')).toBe(
+          'metrics-test.dataset@namespace.default'
+        );
+      });
+    });
+
+    describe('generateNamespaceTemplateIndexPattern', () => {
+      it('returns <baseName>-<namespace> for a regular data stream (no trailing wildcard)', () => {
+        const pattern = generateNamespaceTemplateIndexPattern(baseDataStream, 'production');
+        expect(pattern).toBe('logs-nginx.access-production');
+        // Pattern must not end with * so it does not match sibling namespaces like production_eu
+        expect(pattern.endsWith('*')).toBe(false);
+      });
+
+      it('returns <baseName>.*-<namespace> for a dataset_is_prefix data stream', () => {
+        const pattern = generateNamespaceTemplateIndexPattern(prefixDataStream, 'production');
+        expect(pattern).toBe('metrics-test.dataset.*-production');
+        expect(pattern.endsWith('*')).toBe(false);
+      });
+
+      it('handles isOtelInputType flag (appends .otel to dataset name)', () => {
+        const otelDataStream = {
+          ...baseDataStream,
+          type: 'traces',
+          dataset: 'generic',
+        } as RegistryDataStream;
+        // With isOtelInputType=true, getRegistryDataStreamAssetBaseName appends '.otel'
+        // so 'generic' becomes 'traces-generic.otel'.
+        const pattern = generateNamespaceTemplateIndexPattern(otelDataStream, 'production', true);
+        expect(pattern).toBe('traces-generic.otel-production');
+      });
+    });
+
+    describe('getNamespaceTemplatePriority', () => {
+      it('returns base priority + NAMESPACE_TEMPLATE_PRIORITY_BOOST for non-prefix data stream', () => {
+        // 200 (DEFAULT_TEMPLATE_PRIORITY) + 50 = 250
+        expect(getNamespaceTemplatePriority(baseDataStream)).toBe(250);
+        expect(getNamespaceTemplatePriority(baseDataStream)).toBe(200 + NAMESPACE_TEMPLATE_PRIORITY_BOOST);
+      });
+
+      it('returns 200 for dataset_is_prefix data stream (150 + 50), same as regular base priority — tie broken by index pattern specificity', () => {
+        // 150 (DATASET_IS_PREFIX_TEMPLATE_PRIORITY) + 50 = 200
+        expect(getNamespaceTemplatePriority(prefixDataStream)).toBe(200);
+        expect(getNamespaceTemplatePriority(prefixDataStream)).toBe(150 + NAMESPACE_TEMPLATE_PRIORITY_BOOST);
+      });
+    });
+
+    describe('isNamespaceTemplate', () => {
+      it('returns true for a namespace template id', () => {
+        expect(isNamespaceTemplate('logs-nginx.access@namespace.production')).toBe(true);
+      });
+
+      it('returns false for a regular template id', () => {
+        expect(isNamespaceTemplate('logs-nginx.access')).toBe(false);
+      });
+
+      it('returns false for an empty string', () => {
+        expect(isNamespaceTemplate('')).toBe(false);
+      });
+
+      it('returns true even when there are multiple @ in the id', () => {
+        expect(isNamespaceTemplate('logs-nginx@custom@namespace.production')).toBe(true);
+      });
+    });
+
+    describe('getNamespaceFromTemplateId', () => {
+      it('returns the namespace portion after @namespace.', () => {
+        expect(getNamespaceFromTemplateId('logs-nginx.access@namespace.production')).toBe(
+          'production'
+        );
+      });
+
+      it('returns undefined for a non-namespace template id', () => {
+        expect(getNamespaceFromTemplateId('logs-nginx.access')).toBeUndefined();
+      });
+
+      it('returns undefined for an empty string', () => {
+        expect(getNamespaceFromTemplateId('')).toBeUndefined();
+      });
+
+      it('returns the substring after the first @namespace. when there are multiple occurrences', () => {
+        // Locks in current behavior: slice starts after first marker
+        const id = 'a@namespace.b@namespace.c';
+        expect(getNamespaceFromTemplateId(id)).toBe('b@namespace.c');
+      });
+    });
+  });
+
+  describe('generateMappings — field type × context cross-product matrix', () => {
+    // Helper to generate mappings from a single field definition and extract the
+    // relevant output for the given context.
+    const staticResult = (field: Field) => generateMappings([field]).properties ?? {};
+
+    const dynamicResult = (field: Field) => {
+      const result = generateMappings([field]);
+      return result.dynamic_templates ?? [];
+    };
+
+    const runtimeResult = (field: Field) => {
+      const result = generateMappings([field]);
+      return result.runtime ?? {};
+    };
+
+    // --- static context ---
+
+    describe('static mappings (top-level field)', () => {
+      it('keyword', () => {
+        expect(staticResult({ name: 'f', type: 'keyword' })).toEqual({
+          f: { type: 'keyword', ignore_above: 1024 },
+        });
+      });
+
+      it('text', () => {
+        expect(staticResult({ name: 'f', type: 'text' })).toEqual({ f: { type: 'text' } });
+      });
+
+      it('match_only_text', () => {
+        expect(staticResult({ name: 'f', type: 'match_only_text' })).toEqual({
+          f: { type: 'match_only_text' },
+        });
+      });
+
+      it('wildcard includes default ignore_above', () => {
+        expect(staticResult({ name: 'f', type: 'wildcard' })).toEqual({
+          f: { type: 'wildcard', ignore_above: 1024 },
+        });
+      });
+
+      it('long', () => {
+        expect(staticResult({ name: 'f', type: 'long' })).toEqual({ f: { type: 'long' } });
+      });
+
+      it('integer maps to long', () => {
+        expect(staticResult({ name: 'f', type: 'integer' })).toEqual({ f: { type: 'long' } });
+      });
+
+      it('short', () => {
+        expect(staticResult({ name: 'f', type: 'short' })).toEqual({ f: { type: 'short' } });
+      });
+
+      it('byte', () => {
+        expect(staticResult({ name: 'f', type: 'byte' })).toEqual({ f: { type: 'byte' } });
+      });
+
+      it('unsigned_long', () => {
+        expect(staticResult({ name: 'f', type: 'unsigned_long' })).toEqual({
+          f: { type: 'unsigned_long' },
+        });
+      });
+
+      it('double', () => {
+        expect(staticResult({ name: 'f', type: 'double' })).toEqual({ f: { type: 'double' } });
+      });
+
+      it('float', () => {
+        expect(staticResult({ name: 'f', type: 'float' })).toEqual({ f: { type: 'float' } });
+      });
+
+      it('half_float', () => {
+        expect(staticResult({ name: 'f', type: 'half_float' })).toEqual({
+          f: { type: 'half_float' },
+        });
+      });
+
+      it('boolean', () => {
+        expect(staticResult({ name: 'f', type: 'boolean' })).toEqual({ f: { type: 'boolean' } });
+      });
+
+      it('date', () => {
+        expect(staticResult({ name: 'f', type: 'date' })).toEqual({ f: { type: 'date' } });
+      });
+
+      it('date with format', () => {
+        expect(staticResult({ name: 'f', type: 'date', date_format: 'strict_date' })).toEqual({
+          f: { type: 'date', format: 'strict_date' },
+        });
+      });
+
+      it('ip', () => {
+        expect(staticResult({ name: 'f', type: 'ip' })).toEqual({ f: { type: 'ip' } });
+      });
+
+      it('histogram', () => {
+        expect(staticResult({ name: 'f', type: 'histogram' })).toEqual({
+          f: { type: 'histogram' },
+        });
+      });
+
+      it('scaled_float', () => {
+        expect(staticResult({ name: 'f', type: 'scaled_float' })).toEqual({
+          f: { type: 'scaled_float', scaling_factor: 1000 },
+        });
+      });
+
+      it('aggregate_metric_double', () => {
+        expect(
+          staticResult({
+            name: 'f',
+            type: 'aggregate_metric_double',
+            metrics: ['min', 'max'],
+            default_metric: 'min',
+          })
+        ).toEqual({
+          f: { type: 'aggregate_metric_double', metrics: ['min', 'max'], default_metric: 'min' },
+        });
+      });
+
+      it('flattened', () => {
+        expect(staticResult({ name: 'f', type: 'flattened' })).toEqual({
+          f: { type: 'flattened' },
+        });
+      });
+
+      it('flattened with ignore_above', () => {
+        expect(staticResult({ name: 'f', type: 'flattened', ignore_above: 512 })).toEqual({
+          f: { type: 'flattened', ignore_above: 512 },
+        });
+      });
+
+      it('constant_keyword without value', () => {
+        expect(staticResult({ name: 'f', type: 'constant_keyword' })).toEqual({
+          f: { type: 'constant_keyword' },
+        });
+      });
+
+      it('constant_keyword with value', () => {
+        expect(staticResult({ name: 'f', type: 'constant_keyword', value: 'prod' })).toEqual({
+          f: { type: 'constant_keyword', value: 'prod' },
+        });
+      });
+
+      it('alias', () => {
+        expect(staticResult({ name: 'f', type: 'alias', path: 'other.field' })).toEqual({
+          f: { type: 'alias', path: 'other.field' },
+        });
+      });
+
+      it('array with object_type maps to object_type', () => {
+        expect(staticResult({ name: 'f', type: 'array', object_type: 'keyword' })).toEqual({
+          f: { type: 'keyword' },
+        });
+      });
+
+      it('object without object_type', () => {
+        expect(staticResult({ name: 'f', type: 'object' })).toEqual({
+          f: { type: 'object' },
+        });
+      });
+
+      it('nested (empty fields produces empty properties object)', () => {
+        expect(staticResult({ name: 'f', type: 'nested', fields: [] })).toEqual({
+          f: { type: 'nested', properties: {} },
+        });
+      });
+
+      it('group produces no top-level property but includes child properties', () => {
+        const result = staticResult({
+          name: 'g',
+          type: 'group',
+          fields: [{ name: 'child', type: 'keyword' }],
+        });
+        expect(result).toEqual({
+          g: { properties: { child: { type: 'keyword', ignore_above: 1024 } } },
+        });
+      });
+
+      it('group with no fields produces no mapping', () => {
+        const result = staticResult({ name: 'g', type: 'group', fields: [] });
+        expect(result).toEqual({});
+      });
+    });
+
+    // --- multi-field context ---
+
+    describe('multi-field mappings', () => {
+      const multiFieldResult = (baseType: string, multiFieldDef: Field) => {
+        const result = generateMappings([
+          { name: 'f', type: baseType, multi_fields: [multiFieldDef] },
+        ]);
+        const baseProps = result.properties?.f as any;
+        return baseProps?.fields ?? {};
+      };
+
+      it('keyword multi-field on a text field', () => {
+        expect(
+          multiFieldResult('text', { name: 'raw', type: 'keyword' })
+        ).toEqual({ raw: { type: 'keyword', ignore_above: 1024 } });
+      });
+
+      it('text multi-field on a keyword field', () => {
+        expect(
+          multiFieldResult('keyword', { name: 'analyzed', type: 'text' })
+        ).toEqual({ analyzed: { type: 'text' } });
+      });
+
+      it('long multi-field', () => {
+        expect(
+          multiFieldResult('keyword', { name: 'num', type: 'long' })
+        ).toEqual({ num: { type: 'long' } });
+      });
+
+      it('double multi-field', () => {
+        expect(
+          multiFieldResult('keyword', { name: 'num', type: 'double' })
+        ).toEqual({ num: { type: 'double' } });
+      });
+
+      it('match_only_text multi-field', () => {
+        expect(
+          multiFieldResult('keyword', { name: 'txt', type: 'match_only_text' })
+        ).toEqual({ txt: { type: 'match_only_text' } });
+      });
+
+      it('unsupported multi-field type produces no entry (current silent-skip behavior)', () => {
+        // Types not in the multiFields switch today produce no output — lock this in.
+        expect(
+          multiFieldResult('keyword', { name: 'b', type: 'boolean' })
+        ).toEqual({});
+      });
+    });
+
+    // --- object_type dynamic mapping context ---
+
+    describe('object_type dynamic mappings (type: object, object_type: X)', () => {
+      it('keyword object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'labels',
+          type: 'object',
+          object_type: 'keyword',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toMatchObject({
+          mapping: { type: 'keyword' },
+          match_mapping_type: 'string',
+        });
+      });
+
+      it('long object_type produces dynamic template with matchingType long', () => {
+        const templates = dynamicResult({ name: 'metrics', type: 'object', object_type: 'long' });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toMatchObject({
+          mapping: { type: 'long' },
+          match_mapping_type: 'long',
+        });
+      });
+
+      it('integer object_type maps to long', () => {
+        const templates = dynamicResult({
+          name: 'metrics',
+          type: 'object',
+          object_type: 'integer',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect((Object.values(entry)[0] as any).mapping.type).toBe('long');
+      });
+
+      it('double object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'metrics',
+          type: 'object',
+          object_type: 'double',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toMatchObject({
+          mapping: { type: 'double' },
+          match_mapping_type: 'double',
+        });
+      });
+
+      it('boolean object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'flags',
+          type: 'object',
+          object_type: 'boolean',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toMatchObject({ mapping: { type: 'boolean' } });
+      });
+
+      it('ip object_type produces dynamic template', () => {
+        const templates = dynamicResult({ name: 'addrs', type: 'object', object_type: 'ip' });
+        expect(templates.length).toBeGreaterThan(0);
+      });
+
+      it('scaled_float object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'vals',
+          type: 'object',
+          object_type: 'scaled_float',
+          scaling_factor: 1000,
+        });
+        expect(templates.length).toBeGreaterThan(0);
+      });
+
+      it('histogram object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'hist',
+          type: 'object',
+          object_type: 'histogram',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+      });
+
+      it('flattened object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'flat',
+          type: 'object',
+          object_type: 'flattened',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+      });
+
+      it('text object_type produces dynamic template with matchingType string', () => {
+        const templates = dynamicResult({ name: 'msgs', type: 'object', object_type: 'text' });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toMatchObject({
+          mapping: { type: 'text' },
+          match_mapping_type: 'string',
+        });
+      });
+
+      it('aggregate_metric_double object_type produces dynamic template', () => {
+        const templates = dynamicResult({
+          name: 'agg',
+          type: 'object',
+          object_type: 'aggregate_metric_double',
+          metrics: ['min', 'max'],
+          default_metric: 'min',
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect((Object.values(entry)[0] as any).mapping.type).toBe('aggregate_metric_double');
+      });
+
+      it('unsupported object_type throws PackageInvalidArchiveError', () => {
+        expect(() =>
+          dynamicResult({ name: 'f', type: 'object', object_type: 'totally_unknown_type' })
+        ).toThrow();
+      });
+    });
+
+    // --- runtime_simple context ---
+
+    describe('runtime mappings (runtime: true, standard types)', () => {
+      it('keyword runtime field', () => {
+        const result = runtimeResult({ name: 'f', type: 'keyword', runtime: true });
+        expect(result).toHaveProperty('f');
+        expect((result as any).f.type).toBe('keyword');
+      });
+
+      it('long runtime field', () => {
+        const result = runtimeResult({ name: 'f', type: 'long', runtime: true });
+        expect((result as any).f.type).toBe('long');
+      });
+
+      it('double runtime field', () => {
+        const result = runtimeResult({ name: 'f', type: 'double', runtime: true });
+        expect((result as any).f.type).toBe('double');
+      });
+
+      it('boolean runtime field', () => {
+        const result = runtimeResult({ name: 'f', type: 'boolean', runtime: true });
+        expect((result as any).f.type).toBe('boolean');
+      });
+
+      it('date runtime field', () => {
+        const result = runtimeResult({ name: 'f', type: 'date', runtime: true });
+        expect((result as any).f.type).toBe('date');
+      });
+
+      it('integer runtime field maps to long', () => {
+        const result = runtimeResult({ name: 'f', type: 'integer', runtime: true });
+        expect((result as any).f.type).toBe('long');
+      });
+
+      it('runtime field with painless script', () => {
+        const result = runtimeResult({
+          name: 'f',
+          type: 'keyword',
+          runtime: 'emit(doc["other"].value)',
+        });
+        expect((result as any).f.script).toEqual({ source: 'emit(doc["other"].value)' });
+      });
+    });
+
+    // --- runtime_object context (type: object, object_type: X, runtime: true) ---
+
+    describe('runtime + object_type dynamic mappings', () => {
+      it('keyword runtime object_type produces a dynamic template with a runtime slot', () => {
+        const templates = dynamicResult({
+          name: 'labels',
+          type: 'object',
+          object_type: 'keyword',
+          runtime: true,
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toHaveProperty('runtime');
+      });
+
+      it('long runtime object_type produces a dynamic template with runtime slot', () => {
+        const templates = dynamicResult({
+          name: 'metrics',
+          type: 'object',
+          object_type: 'long',
+          runtime: true,
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toHaveProperty('runtime');
+      });
+
+      it('boolean runtime object_type produces a dynamic template with runtime slot', () => {
+        const templates = dynamicResult({
+          name: 'flags',
+          type: 'object',
+          object_type: 'boolean',
+          runtime: true,
+        });
+        expect(templates.length).toBeGreaterThan(0);
+        const entry = templates[0] as any;
+        expect(Object.values(entry)[0]).toHaveProperty('runtime');
+      });
+
+      it('ip runtime object_type — current behavior: no dynamic template produced (silent skip)', () => {
+        // ip is not in the runtime+object_type switch today — lock in the silent-skip.
+        // This test documents the gap; a follow-up can add support intentionally.
+        const templates = dynamicResult({
+          name: 'addrs',
+          type: 'object',
+          object_type: 'ip',
+          runtime: true,
+        });
+        expect(templates).toEqual([]);
+      });
+
+      it('histogram runtime object_type — current behavior: no dynamic template produced (silent skip)', () => {
+        const templates = dynamicResult({
+          name: 'hist',
+          type: 'object',
+          object_type: 'histogram',
+          runtime: true,
+        });
+        expect(templates).toEqual([]);
+      });
+    });
+
+    // --- text mapping: static vs dynamic ignore_above behavior ---
+
+    describe('text mapping: static vs dynamic ignore_above parity', () => {
+      it('wildcard static mapping includes default ignore_above 1024', () => {
+        const result = staticResult({ name: 'f', type: 'wildcard' });
+        expect((result as any).f.ignore_above).toBe(1024);
+      });
+
+      it('wildcard object_type dynamic mapping does NOT include default ignore_above (backwards compat)', () => {
+        const templates = dynamicResult({ name: 'f', type: 'object', object_type: 'wildcard' });
+        const entry = templates[0] as any;
+        const mapping = (Object.values(entry)[0] as any).mapping;
+        expect(mapping.ignore_above).toBeUndefined();
+      });
+
+      it('text static mapping does NOT include ignore_above', () => {
+        const result = staticResult({ name: 'f', type: 'text' });
+        expect((result as any).f.ignore_above).toBeUndefined();
+      });
+
+      it('text object_type dynamic mapping does NOT include ignore_above', () => {
+        const templates = dynamicResult({ name: 'f', type: 'object', object_type: 'text' });
+        const entry = templates[0] as any;
+        const mapping = (Object.values(entry)[0] as any).mapping;
+        expect(mapping.ignore_above).toBeUndefined();
+      });
     });
   });
 });
