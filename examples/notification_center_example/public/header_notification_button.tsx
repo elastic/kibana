@@ -46,7 +46,11 @@ export function HeaderNotificationButton({ currentAppId$ }: HeaderNotificationBu
       aria-label={`${isActive ? 'Close' : 'Open'} notification center (${unreadCount} unread)`}
       notification={unreadCount > 0}
       isSelected={isActive}
-      style={isActive ? { backgroundColor: euiTheme.components.buttons.backgroundEmptyPrimaryActive } : undefined}
+      style={
+        isActive
+          ? { backgroundColor: euiTheme.components.buttons.backgroundEmptyPrimaryActive }
+          : undefined
+      }
       onClick={handleClick}
     >
       <EuiIcon type="bell" size="m" aria-hidden={true} />

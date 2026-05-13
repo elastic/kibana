@@ -9,13 +9,14 @@
 
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
+import type { ContentListItem } from '@kbn/content-list-provider';
 import type { NotificationStackItem } from '..';
 
 export const PinnedIndicatorCell = ({
   item,
   onTogglePin,
 }: {
-  item: NotificationStackItem;
+  item: ContentListItem;
   onTogglePin: (item: NotificationStackItem) => void;
 }) => {
   const { id, isPinned } = item;
@@ -28,7 +29,7 @@ export const PinnedIndicatorCell = ({
       color={isPinned ? 'primary' : 'text'}
       aria-label={pinAria}
       title={pinLabel}
-      onClick={() => onTogglePin(item)}
+      onClick={() => onTogglePin(item as NotificationStackItem)}
       data-test-subj={`${id}-notificationEventPinButton`}
     />
   );

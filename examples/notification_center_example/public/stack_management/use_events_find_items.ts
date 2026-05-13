@@ -21,22 +21,23 @@ import {
 import { NOTIFICATION_STACK_QUERY_KEY } from './constants';
 
 /** Maps a `NotificationEvent` to a `ContentListItem` with notification-specific extra fields. */
-const toStackItem = (event: NotificationEvent): ContentListItem => ({
-  id: event.id,
-  title: event.title,
-  description: Array.isArray(event.message) ? event.message[0] : event.message,
-  updatedAt: new Date(event.timestamp),
-  // Notification-specific fields accessed via cast in column cells.
-  isRead: event.isRead,
-  isPinned: event.isPinned ?? false,
-  severity: event.severity,
-  badgeColor: event.badgeColor,
-  iconType: event.iconType,
-  eventName: event.eventName,
-  typeId: event.typeId,
-  spaceId: event.spaceId,
-  timestamp: event.timestamp,
-} as ContentListItem);
+const toStackItem = (event: NotificationEvent): ContentListItem =>
+  ({
+    id: event.id,
+    title: event.title,
+    description: Array.isArray(event.message) ? event.message[0] : event.message,
+    updatedAt: new Date(event.timestamp),
+    // Notification-specific fields accessed via cast in column cells.
+    isRead: event.isRead,
+    isPinned: event.isPinned ?? false,
+    severity: event.severity,
+    badgeColor: event.badgeColor,
+    iconType: event.iconType,
+    eventName: event.eventName,
+    typeId: event.typeId,
+    spaceId: event.spaceId,
+    timestamp: event.timestamp,
+  } as ContentListItem);
 
 function applyParams(
   events: NotificationEvent[],

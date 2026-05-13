@@ -30,7 +30,9 @@ export function BulkActionsBar() {
   const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
 
   const handleMarkAsRead = useCallback(async () => {
-    await Promise.all(selectedItems.map((item: ContentListItem) => events.markAsRead(item.id, true)));
+    await Promise.all(
+      selectedItems.map((item: ContentListItem) => events.markAsRead(item.id, true))
+    );
     clearSelection();
   }, [selectedItems, events, clearSelection]);
 
@@ -57,7 +59,8 @@ export function BulkActionsBar() {
             data-test-subj="notificationStackBulkMarkAsRead"
           >
             {i18n.translate('notificationCenterExample.stack.bulk.markAsRead', {
-              defaultMessage: 'Mark {count, plural, one {# notification} other {# notifications}} as read',
+              defaultMessage:
+                'Mark {count, plural, one {# notification} other {# notifications}} as read',
               values: { count: selectedCount },
             })}
           </EuiButton>
