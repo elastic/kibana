@@ -97,7 +97,7 @@ const SkillDraftReferences = ({
   referencedContent: SkillReferencedContent[] | undefined;
 }) => {
   const hasTools = toolIds.length > 0;
-  const hasFiles = (referencedContent?.length ?? 0) > 0;
+  const hasFiles = Array.isArray(referencedContent) && referencedContent.length > 0;
   if (!hasTools && !hasFiles) {
     return null;
   }
@@ -133,7 +133,7 @@ const SkillDraftReferences = ({
         <>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            {referencedContent!.map((file) => (
+            {referencedContent.map((file) => (
               <EuiFlexItem grow={false} key={file.relativePath}>
                 <EuiBadge>
                   <FormattedMessage
