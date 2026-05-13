@@ -37,8 +37,7 @@ The CLI treats unknown step types as schema errors, so any example using one
 of those step types **will fail** static validation here.
 
 For real coverage of connector params drift and step-type renames, examples
-must be exercised against a running Kibana with the plugin's full schema. That
-work is tracked separately as the "stub-connector full dry-run" plan.
+must be exercised against a running Kibana with the plugin's full schema.
 
 This CLI is therefore a **fast-fail gate**: it catches the cheapest classes of
 regression on every PR without needing a Kibana stack. It does not replace
@@ -50,6 +49,6 @@ end-to-end validation.
 import {
   runValidation,
   validateExampleYaml,
-  buildPublicWorkflowSchema,
+  buildWorkflowSchema,
 } from '@kbn/workflows-examples-cli';
 ```

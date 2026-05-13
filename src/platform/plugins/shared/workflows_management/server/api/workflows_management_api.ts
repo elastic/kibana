@@ -258,12 +258,12 @@ export class WorkflowsManagementApi {
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, zodSchema, {
       connectorParamsSchemaResolver,
     });
-    if (parsedYaml.error) {
+    if (!parsedYaml.success) {
       throw parsedYaml.error;
     }
 
     const updatedYaml = {
-      ...parsedYaml.data,
+      ...(parsedYaml.data as Record<string, unknown>),
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,

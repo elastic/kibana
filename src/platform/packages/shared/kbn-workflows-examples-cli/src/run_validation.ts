@@ -10,7 +10,7 @@
 import { readFile } from 'fs/promises';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { buildPublicWorkflowSchema } from './build_schema';
+import { buildWorkflowSchema } from './build_schema';
 import { discoverExampleFiles } from './discover_examples';
 import type { ExampleResult } from './junit_report';
 import { validateExampleYaml, type ValidationOutcome } from './validate_example';
@@ -34,7 +34,7 @@ export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSu
   }
   log.info(`Validating ${files.length} example(s) under ${rootDir}`);
 
-  const schema = buildPublicWorkflowSchema();
+  const schema = buildWorkflowSchema();
   const results: ExampleResult[] = [];
   let passed = 0;
   let failed = 0;
@@ -60,7 +60,7 @@ export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSu
 
 async function validateOne(
   file: string,
-  schema: ReturnType<typeof buildPublicWorkflowSchema>
+  schema: ReturnType<typeof buildWorkflowSchema>
 ): Promise<ValidationOutcome> {
   let yaml: string;
   try {

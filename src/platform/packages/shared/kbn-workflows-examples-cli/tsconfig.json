@@ -12,6 +12,9 @@
     "@kbn/workflows",
     "@kbn/workflows-yaml",
     "@kbn/tooling-log",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/workflows-extensions",
+    "@kbn/agent-builder-plugin",
+    "@kbn/cases-plugin"
   ]
 }

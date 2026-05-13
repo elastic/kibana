@@ -8,17 +8,17 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import {
-  generateYamlSchemaFromConnectors,
-  getElasticsearchConnectors,
-  getKibanaConnectors,
-} from '@kbn/workflows';
+import { generateYamlSchemaFromConnectors, getAllStaticConnectors } from '@kbn/workflows';
+import { getExtensionStepContracts } from './extension_step_definitions';
 
 let cachedSchema: z.ZodType | undefined;
 
-export function buildPublicWorkflowSchema(): z.ZodType {
+export const buildWorkflowSchema = (): z.ZodType => {
   if (cachedSchema) return cachedSchema;
-  const connectors = [...getElasticsearchConnectors(), ...getKibanaConnectors()];
-  cachedSchema = generateYamlSchemaFromConnectors(connectors, [], true);
+  cachedSchema = generateYamlSchemaFromConnectors(
+    [...getAllStaticConnectors(), ...getExtensionStepContracts()],
+    [],
+    true
+  );
   return cachedSchema;
-}
+};

@@ -18,7 +18,7 @@ import { renderJUnitXml } from './src/junit_report';
 export { runValidation } from './src/run_validation';
 export { validateExampleYaml } from './src/validate_example';
 export type { ValidationOutcome, SchemaIssue } from './src/validate_example';
-export { buildPublicWorkflowSchema } from './src/build_schema';
+export { buildWorkflowSchema } from './src/build_schema';
 export { discoverExampleFiles } from './src/discover_examples';
 export { renderJUnitXml } from './src/junit_report';
 export type { ExampleResult } from './src/junit_report';

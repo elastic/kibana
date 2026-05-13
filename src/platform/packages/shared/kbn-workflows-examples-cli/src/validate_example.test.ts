@@ -9,7 +9,7 @@
 
 import { readdirSync, readFileSync } from 'fs';
 import Path from 'path';
-import { buildPublicWorkflowSchema } from './build_schema';
+import { buildWorkflowSchema } from './build_schema';
 import { validateExampleYaml } from './validate_example';
 
 const EXAMPLES_DIR = Path.resolve(
@@ -17,8 +17,12 @@ const EXAMPLES_DIR = Path.resolve(
   '../../../../packages/shared/kbn-workflows/spec/examples'
 );
 
+// Examples using legacy top-level format (version as integer + workflow: wrapper).
+// These are intentionally not fully validatable in a static context.
+const SCHEMA_ERROR_EXPECTED = new Set(['basic.yml', 'example_nesting.yml']);
+
 describe('validateExampleYaml', () => {
-  const schema = buildPublicWorkflowSchema();
+  const schema = buildWorkflowSchema();
 
   it('flags YAML syntax errors', () => {
     const result = validateExampleYaml('name: "missing close-quote', schema);
@@ -42,13 +46,18 @@ describe('validateExampleYaml', () => {
   describe('bundled in-repo examples', () => {
     const files = readdirSync(EXAMPLES_DIR).filter((f) => /\.ya?ml$/i.test(f));
 
-    it.each(files)('parses %s without crashing or producing unexpected errors', (filename) => {
+    it.each(files)('validates %s successfully', (filename) => {
       const yaml = readFileSync(Path.join(EXAMPLES_DIR, filename), 'utf8');
       const result = validateExampleYaml(yaml, schema);
 
-      expect(result.kind).not.toBe('syntax-error');
-      expect(result.kind).not.toBe('oversize');
-      expect(result.kind).not.toBe('unexpected-error');
+      if (SCHEMA_ERROR_EXPECTED.has(filename)) {
+        // Legacy format / runtime-only step types: must parse without crashing
+        expect(result.kind).not.toBe('syntax-error');
+        expect(result.kind).not.toBe('oversize');
+        expect(result.kind).not.toBe('unexpected-error');
+      } else {
+        expect(result.kind).toBe('ok');
+      }
     });
   });
 });
