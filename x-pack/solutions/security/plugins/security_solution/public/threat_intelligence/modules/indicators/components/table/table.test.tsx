@@ -13,7 +13,7 @@ import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
-import { IOC_DETAILS_TITLE_TEST_ID } from '../../../../../flyout_v2/ioc/test_ids';
+import { IOC_DETAILS_TITLE_TEST_ID } from '../../../../../flyout_v2/ioc/main/test_ids';
 
 jest.mock('../../../../hooks/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: jest.fn(() => ({ investigateInTimelineFn: jest.fn() })),
