@@ -116,6 +116,9 @@ export interface INotificationEvents {
   /** Clear the persisted pin flag for `eventId`. */
   unpin: (eventId: string) => Promise<void>;
 
+  /** Remove an event from the in-memory list and the persisted store. */
+  delete: (eventId: string) => Promise<void>;
+
   /**
    * Reactive unread count. Maintained as a `BehaviorSubject` inside
    * `EventsService` and updated on every state transition that flips an

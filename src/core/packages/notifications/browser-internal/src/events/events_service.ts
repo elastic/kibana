@@ -130,6 +130,18 @@ export class EventsService implements INotificationEvents {
     await this.setPinned(eventId, false);
   }
 
+  public async delete(eventId: string): Promise<void> {
+    const events = this.events$.getValue();
+    const index = events.findIndex((e) => e.id === eventId);
+    if (index === -1) return;
+    const removed = events[index];
+    this.events$.next(events.filter((_, i) => i !== index));
+    if (!removed.isRead) {
+      this.unreadCount$.next(Math.max(0, this.unreadCount$.getValue() - 1));
+    }
+    await this.store.removeEvent(eventId);
+  }
+
   private async setPinned(eventId: string, isPinned: boolean): Promise<void> {
     const events = this.events$.getValue();
     const index = events.findIndex((e) => e.id === eventId);
