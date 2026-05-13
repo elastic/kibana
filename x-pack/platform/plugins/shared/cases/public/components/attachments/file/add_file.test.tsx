@@ -31,7 +31,7 @@ jest.mock('../../../common/lib/kibana');
 const useToastsMock = useToasts as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
-const mockedExternalReferenceId = 'externalReferenceId';
+const mockedFiletId = 'fileAttachmentId';
 const validateMetadata = jest.fn();
 const mockFileUpload = jest
   .fn()
@@ -47,7 +47,7 @@ const mockFileUpload = jest
           data-test-subj="testOnDone"
           type="button"
           onClick={() =>
-            onDone([{ id: mockedExternalReferenceId, kind, fileJSON: { ...basicFileMock, meta } }])
+            onDone([{ id: mockedFiletId, kind, fileJSON: { ...basicFileMock, meta } }])
           }
         >
           {'test'}
@@ -135,9 +135,10 @@ describe('AddFile', () => {
         caseOwner: mockedTestProvidersOwner[0],
         attachments: [
           {
-            externalReferenceAttachmentTypeId: '.files',
-            externalReferenceId: mockedExternalReferenceId,
-            externalReferenceMetadata: {
+            type: 'file',
+            attachmentId: mockedFiletId,
+            metadata: {
+              soType: 'file',
               files: [
                 {
                   created: '2020-02-19T23:06:33.798Z',
@@ -147,8 +148,6 @@ describe('AddFile', () => {
                 },
               ],
             },
-            externalReferenceStorage: { soType: 'file', type: 'savedObject' },
-            type: 'externalReference',
           },
         ],
       })
@@ -215,7 +214,7 @@ describe('AddFile', () => {
 
     expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,
-      fileIds: [mockedExternalReferenceId],
+      fileIds: [mockedFiletId],
     });
 
     createAttachmentsMock.mockRestore();
