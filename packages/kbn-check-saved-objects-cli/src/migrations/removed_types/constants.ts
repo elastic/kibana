@@ -9,4 +9,7 @@
 
 import { resolve } from 'path';
 
-export const REMOVED_TYPES_JSON_PATH = resolve(__dirname, '../../../removed_types.json');
+export const REMOVED_TYPES_JSON_PATH = resolve(
+  __dirname,
+  '../../../../../src/core/packages/saved-objects/server-internal/removed_types.json'
+);
