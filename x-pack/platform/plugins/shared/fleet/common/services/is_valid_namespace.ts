@@ -24,15 +24,18 @@ export function isValidNamespace(
     return { valid, error };
   }
 
-  for (const prefix of allowedNamespacePrefixes || []) {
-    if (!namespace.trim().startsWith(prefix)) {
-      return allowedNamespacePrefixes?.length === 1
+  if (allowedNamespacePrefixes && allowedNamespacePrefixes.length > 0) {
+    const matchesAnyPrefix = allowedNamespacePrefixes.some((prefix) =>
+      namespace.trim().startsWith(prefix)
+    );
+    if (!matchesAnyPrefix) {
+      return allowedNamespacePrefixes.length === 1
         ? {
             valid: false,
             error: i18n.translate('xpack.fleet.namespaceValidation.notAllowedPrefixError', {
               defaultMessage: 'Namespace should start with {allowedNamespacePrefixes}',
               values: {
-                allowedNamespacePrefixes: allowedNamespacePrefixes?.[0],
+                allowedNamespacePrefixes: allowedNamespacePrefixes[0],
               },
             }),
           }
@@ -42,7 +45,7 @@ export function isValidNamespace(
               defaultMessage:
                 'Namespace should start with one of these prefixes {allowedNamespacePrefixes}',
               values: {
-                allowedNamespacePrefixes: allowedNamespacePrefixes?.join(', ') ?? '',
+                allowedNamespacePrefixes: allowedNamespacePrefixes.join(', '),
               },
             }),
           };

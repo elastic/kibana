@@ -29,6 +29,7 @@ import {
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
+import { useSpaceSettingsContext } from '../../../../../hooks/use_space_settings_context';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
@@ -48,6 +49,7 @@ import {
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
 import {
+  applyNamespaceCustomizationChange,
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
@@ -177,6 +179,33 @@ export const EditPackagePolicyForm = memo<{
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
+
+  // Namespace-level customization toggle state. Initialized once package info loads.
+  const { allowedNamespacePrefixes } = useSpaceSettingsContext();
+  const installedNamespaceCustomizationEnabledFor = useMemo(() => {
+    if (packageInfo && 'installationInfo' in packageInfo) {
+      return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
+    }
+    return [];
+  }, [packageInfo]);
+  const [namespaceCustomizationEnabled, setNamespaceCustomizationEnabled] =
+    useState<boolean>(false);
+  const [namespaceCustomizationInitialized, setNamespaceCustomizationInitialized] =
+    useState<boolean>(false);
+  useEffect(() => {
+    if (namespaceCustomizationInitialized || !packagePolicy.namespace || !packageInfo) {
+      return;
+    }
+    setNamespaceCustomizationEnabled(
+      installedNamespaceCustomizationEnabledFor.includes(packagePolicy.namespace.trim())
+    );
+    setNamespaceCustomizationInitialized(true);
+  }, [
+    installedNamespaceCustomizationEnabledFor,
+    packagePolicy.namespace,
+    namespaceCustomizationInitialized,
+    packageInfo,
+  ]);
 
   // make form dirty if new agent policy is selected
   useEffect(() => {
@@ -353,6 +382,17 @@ export const EditPackagePolicyForm = memo<{
         : packagePolicy.policy_ids,
     });
     if (!error) {
+      if (packageInfo) {
+        await applyNamespaceCustomizationChange(
+          packageInfo.name,
+          packageInfo.version,
+          packagePolicy.namespace,
+          namespaceCustomizationEnabled,
+          installedNamespaceCustomizationEnabledFor,
+          notifications,
+          packageInfo.title ?? packageInfo.name
+        );
+      }
       setIsEdited(false);
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
@@ -464,6 +504,14 @@ export const EditPackagePolicyForm = memo<{
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               agentPolicies={agentPolicies}
+              namespaceCustomizationEnabled={namespaceCustomizationEnabled}
+              onNamespaceCustomizationEnabledChange={(enabled) => {
+                setNamespaceCustomizationEnabled(enabled);
+                setIsEdited(true);
+              }}
+              installedNamespaceCustomizationEnabledFor={installedNamespaceCustomizationEnabledFor}
+              allowedNamespacePrefixes={allowedNamespacePrefixes}
+              packagePolicyId={packagePolicyId}
             />
           )}
 
@@ -519,6 +567,11 @@ export const EditPackagePolicyForm = memo<{
       isUpgrade,
       validationResults,
       varGroupSelections,
+      namespaceCustomizationEnabled,
+      installedNamespaceCustomizationEnabledFor,
+      allowedNamespacePrefixes,
+      packagePolicyId,
+      setIsEdited,
     ]
   );
 

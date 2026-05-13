@@ -41,5 +41,13 @@ describe('Fleet - isValidNamespace', () => {
       ).valid
     ).toBe(false);
     expect(isValidNamespace('default', false, ['test']).valid).toBe(false);
+    expect(isValidNamespace('default', false, ['prod', 'qa']).valid).toBe(false);
+  });
+
+  it('accepts a namespace matching any of multiple allowed prefixes', () => {
+    expect(isValidNamespace('prod', false, ['prod', 'qa']).valid).toBe(true);
+    expect(isValidNamespace('qa', false, ['prod', 'qa']).valid).toBe(true);
+    expect(isValidNamespace('prodenv', false, ['prod', 'qa']).valid).toBe(true);
+    expect(isValidNamespace('qaenv', false, ['prod', 'qa']).valid).toBe(true);
   });
 });

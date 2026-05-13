@@ -16,6 +16,8 @@ import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
 
+import { useGetPackagePoliciesQuery } from '../../../../../hooks';
+
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
 jest.mock('./components/hooks', () => ({
@@ -25,6 +27,11 @@ jest.mock('./components/hooks', () => ({
     canUseOutputPerIntegration: true,
     allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
   }),
+}));
+
+jest.mock('../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../hooks'),
+  useGetPackagePoliciesQuery: jest.fn().mockReturnValue({ data: { items: [] } }),
 }));
 
 describe('StepDefinePackagePolicy', () => {
@@ -419,6 +426,211 @@ describe('StepDefinePackagePolicy', () => {
           var_group_selections: { auth_method: 'basic' },
         });
       }
+    });
+  });
+
+  describe('namespace customization toggle', () => {
+    const renderWithToggle = (overrides: {
+      packagePolicyOverride?: Partial<NewPackagePolicy>;
+      namespaceCustomizationEnabled?: boolean;
+      installedNamespaceCustomizationEnabledFor?: string[];
+      allowedNamespacePrefixes?: string[];
+      onNamespaceCustomizationEnabledChange?: (enabled: boolean) => void;
+    }) => {
+      const policy = { ...packagePolicy, ...(overrides.packagePolicyOverride ?? {}) };
+      return testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={policy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={true}
+          namespaceCustomizationEnabled={!!overrides.namespaceCustomizationEnabled}
+          onNamespaceCustomizationEnabledChange={
+            overrides.onNamespaceCustomizationEnabledChange ?? jest.fn()
+          }
+          installedNamespaceCustomizationEnabledFor={
+            overrides.installedNamespaceCustomizationEnabledFor ?? []
+          }
+          allowedNamespacePrefixes={overrides.allowedNamespacePrefixes ?? []}
+        />
+      );
+    };
+
+    it('renders the toggle in advanced options when all props are provided', async () => {
+      renderResult = renderWithToggle({});
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('packagePolicyNamespaceCustomizationToggle')
+        ).toBeInTheDocument();
+      });
+    });
+
+    it('does not render the toggle when the wiring props are missing', async () => {
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={true}
+        />
+      );
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(
+          renderResult.queryByTestId('packagePolicyNamespaceCustomizationToggle')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('is disabled when the namespace fails prefix validation', async () => {
+      renderResult = renderWithToggle({
+        packagePolicyOverride: { namespace: 'staging' },
+        allowedNamespacePrefixes: ['production'],
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        const toggle = renderResult.getByTestId('packagePolicyNamespaceCustomizationToggle');
+        expect(toggle).toBeDisabled();
+      });
+    });
+
+    it('is enabled when the namespace matches an allowed prefix', async () => {
+      renderResult = renderWithToggle({
+        packagePolicyOverride: { namespace: 'production_west' },
+        allowedNamespacePrefixes: ['production'],
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        const toggle = renderResult.getByTestId('packagePolicyNamespaceCustomizationToggle');
+        expect(toggle).not.toBeDisabled();
+      });
+    });
+
+    it('calls onNamespaceCustomizationEnabledChange when toggled', async () => {
+      const onChange = jest.fn();
+      renderResult = renderWithToggle({
+        packagePolicyOverride: { namespace: 'staging' },
+        onNamespaceCustomizationEnabledChange: onChange,
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
+      await userEvent.click(toggle);
+      expect(onChange).toHaveBeenCalledWith(true);
+    });
+
+    describe('impact warnings', () => {
+      const mockUseGetPackagePoliciesQuery = useGetPackagePoliciesQuery as jest.Mock;
+
+      afterEach(() => {
+        mockUseGetPackagePoliciesQuery.mockReturnValue({ data: { items: [] } });
+      });
+
+      it('shows opt-in warning (Case 3) when toggle is on, namespace not opted in, and other policies exist', async () => {
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'other-policy-1' }, { id: 'other-policy-2' }] },
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          namespaceCustomizationEnabled: true,
+          installedNamespaceCustomizationEnabledFor: [],
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(
+            renderResult.getByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
+          ).toBeInTheDocument();
+        });
+        expect(
+          renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptOutImpactWarning')
+        ).not.toBeInTheDocument();
+      });
+
+      it('shows opt-out warning (Case 8) when toggle is off, namespace is opted in, and other policies exist', async () => {
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'other-policy-1' }] },
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          namespaceCustomizationEnabled: false,
+          installedNamespaceCustomizationEnabledFor: ['staging'],
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(
+            renderResult.getByTestId('packagePolicyNamespaceCustomizationOptOutImpactWarning')
+          ).toBeInTheDocument();
+        });
+        expect(
+          renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
+        ).not.toBeInTheDocument();
+      });
+
+      it('shows no warning when toggle is on and namespace is already opted in (Case 4)', async () => {
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'other-policy-1' }] },
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          namespaceCustomizationEnabled: true,
+          installedNamespaceCustomizationEnabledFor: ['staging'],
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(
+            renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
+          ).not.toBeInTheDocument();
+          expect(
+            renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptOutImpactWarning')
+          ).not.toBeInTheDocument();
+        });
+      });
+
+      it('shows no warning when toggle is on and there are no other policies', async () => {
+        mockUseGetPackagePoliciesQuery.mockReturnValue({ data: { items: [] } });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          namespaceCustomizationEnabled: true,
+          installedNamespaceCustomizationEnabledFor: [],
+        });
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(
+            renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
+          ).not.toBeInTheDocument();
+        });
+      });
+
+      it('excludes the current policy id from the other-policies count', async () => {
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'current-policy' }] },
+        });
+        renderResult = testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, namespace: 'staging' }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={true}
+            namespaceCustomizationEnabled={true}
+            onNamespaceCustomizationEnabledChange={jest.fn()}
+            installedNamespaceCustomizationEnabledFor={[]}
+            allowedNamespacePrefixes={[]}
+            packagePolicyId="current-policy"
+          />
+        );
+        await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+        await waitFor(() => {
+          expect(
+            renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptInImpactWarning')
+          ).not.toBeInTheDocument();
+        });
+      });
     });
   });
 });

@@ -23,10 +23,15 @@ import {
   EuiSelect,
   type EuiComboBoxOptionOption,
   EuiIconTip,
+  EuiSwitch,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+
 import styled from 'styled-components';
 
+import { isNamespaceAllowedByPrefixes } from '../../../../../../../../common/services';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
 
@@ -41,6 +46,7 @@ import type {
 import { Loading } from '../../../../../components';
 import {
   useGetEpmDatastreams,
+  useGetPackagePoliciesQuery,
   useStartServices,
   useVarGroupCloudConnector,
 } from '../../../../../hooks';
@@ -73,6 +79,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
+  // Namespace-level customization toggle (only rendered when all of the following are provided).
+  namespaceCustomizationEnabled?: boolean;
+  onNamespaceCustomizationEnabledChange?: (enabled: boolean) => void;
+  installedNamespaceCustomizationEnabledFor?: string[];
+  allowedNamespacePrefixes?: string[];
+  packagePolicyId?: string;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -85,6 +97,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
     agentPolicies,
+    namespaceCustomizationEnabled,
+    onNamespaceCustomizationEnabledChange,
+    installedNamespaceCustomizationEnabledFor,
+    allowedNamespacePrefixes,
+    packagePolicyId,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -203,6 +220,58 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Output is also disabled when any parent agent policy is managed (e.g. Elastic Cloud Agent Policy).
     const isOutputDisabled = isManaged || agentPolicies?.some((p) => p.is_managed) === true;
+
+    // Namespace-level customization toggle visibility/state.
+    const showNamespaceCustomizationToggle =
+      onNamespaceCustomizationEnabledChange !== undefined &&
+      installedNamespaceCustomizationEnabledFor !== undefined &&
+      allowedNamespacePrefixes !== undefined;
+
+    const currentNamespace = packagePolicy.namespace?.trim() ?? '';
+    const namespacePrefixesForCheck =
+      allowedNamespacePrefixes && allowedNamespacePrefixes.length > 0
+        ? allowedNamespacePrefixes
+        : null;
+    const isNamespacePrefixAllowed = currentNamespace
+      ? isNamespaceAllowedByPrefixes(currentNamespace, namespacePrefixesForCheck)
+      : true;
+    const isNamespaceCustomizationInputDisabled =
+      !currentNamespace || isManaged || !isNamespacePrefixAllowed;
+
+    // When the namespace changes to one that can't use customization, auto-reset the toggle so
+    // stale "enabled" state doesn't persist across namespace edits or form reuse.
+    useEffect(() => {
+      if (isNamespaceCustomizationInputDisabled && namespaceCustomizationEnabled) {
+        onNamespaceCustomizationEnabledChange?.(false);
+      }
+    }, [
+      isNamespaceCustomizationInputDisabled,
+      namespaceCustomizationEnabled,
+      onNamespaceCustomizationEnabledChange,
+    ]);
+
+    // Whether the current namespace is already opted in to namespace-level customization.
+    const isOptedIn = !!installedNamespaceCustomizationEnabledFor?.includes(currentNamespace);
+
+    // Query other policies for the same package + namespace to determine impact warnings.
+    // Only fires when a warning is possible:
+    //   Case 3: toggle on  + namespace not yet opted in → opting in may affect others
+    //   Case 8: toggle off + namespace already opted in → opting out may affect others
+    const otherPoliciesQuery = useGetPackagePoliciesQuery(
+      {
+        perPage: SO_SEARCH_LIMIT,
+        page: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name} and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.namespace:"${currentNamespace}"`,
+      },
+      {
+        enabled:
+          showNamespaceCustomizationToggle &&
+          !isNamespaceCustomizationInputDisabled &&
+          !!namespaceCustomizationEnabled !== isOptedIn,
+      }
+    );
+    const otherPoliciesCount =
+      otherPoliciesQuery.data?.items?.filter((item) => item.id !== packagePolicyId).length ?? 0;
 
     return validationResults ? (
       <>
@@ -431,6 +500,122 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       data-test-subj="packagePolicyNamespaceInput"
                     />
                   </EuiFlexItem>
+
+                  {/* Namespace-level customization toggle */}
+                  {showNamespaceCustomizationToggle && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        position="top"
+                        content={
+                          !currentNamespace
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledMissingNamespace',
+                                {
+                                  defaultMessage:
+                                    'Enter a namespace before enabling namespace-level customization.',
+                                }
+                              )
+                            : !isNamespacePrefixAllowed
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledPrefix',
+                                {
+                                  defaultMessage:
+                                    'This namespace does not match an allowed prefix for this space, so namespace-level customization cannot be enabled.',
+                                }
+                              )
+                            : isManaged
+                            ? i18n.translate(
+                                'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledManaged',
+                                {
+                                  defaultMessage:
+                                    'Namespace-level customization cannot be changed on a managed integration policy.',
+                                }
+                              )
+                            : ''
+                        }
+                      >
+                        <EuiSwitch
+                          data-test-subj="packagePolicyNamespaceCustomizationToggle"
+                          label={i18n.translate(
+                            'xpack.fleet.createPackagePolicy.namespaceCustomization.label',
+                            { defaultMessage: 'Enable namespace-level customization' }
+                          )}
+                          checked={!!namespaceCustomizationEnabled}
+                          disabled={isNamespaceCustomizationInputDisabled}
+                          onChange={(e) =>
+                            onNamespaceCustomizationEnabledChange?.(e.target.checked)
+                          }
+                        />
+                      </EuiToolTip>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.namespaceCustomization.helpText"
+                          defaultMessage="Allows applying customized settings to all data streams in that namespace."
+                        />
+                      </EuiText>
+                      {/* Case 3: toggle on, not yet opted in, others share namespace */}
+                      {namespaceCustomizationEnabled && !isOptedIn && otherPoliciesCount > 0 && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            announceOnMount
+                            iconType="warning"
+                            color="warning"
+                            size="s"
+                            data-test-subj="packagePolicyNamespaceCustomizationOptInImpactWarning"
+                            title={i18n.translate(
+                              'xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactTitle',
+                              {
+                                defaultMessage:
+                                  'Enabling customization will affect {count, plural, one {# other policy} other {# other policies}}',
+                                values: { count: otherPoliciesCount },
+                              }
+                            )}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
+                              defaultMessage="Namespace-level customization is shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling it here will apply to all of them."
+                              values={{
+                                packageTitle: packageInfo.title,
+                                namespace: <strong>{currentNamespace}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                        </>
+                      )}
+                      {/* Case 8: toggle off, currently opted in, others share namespace */}
+                      {!namespaceCustomizationEnabled && isOptedIn && otherPoliciesCount > 0 && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiCallOut
+                            announceOnMount
+                            iconType="warning"
+                            color="warning"
+                            size="s"
+                            data-test-subj="packagePolicyNamespaceCustomizationOptOutImpactWarning"
+                            title={i18n.translate(
+                              'xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactTitle',
+                              {
+                                defaultMessage:
+                                  'Disabling customization will affect {count, plural, one {# other policy} other {# other policies}}',
+                                values: { count: otherPoliciesCount },
+                              }
+                            )}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
+                              defaultMessage="Namespace-level customization is shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling it here will remove it from all of them."
+                              values={{
+                                packageTitle: packageInfo.title,
+                                namespace: <strong>{currentNamespace}</strong>,
+                              }}
+                            />
+                          </EuiCallOut>
+                        </>
+                      )}
+                    </EuiFlexItem>
+                  )}
 
                   {/* Output */}
                   {canUseOutputPerIntegration && (

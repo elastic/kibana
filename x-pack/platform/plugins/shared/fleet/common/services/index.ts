@@ -138,6 +138,8 @@ export * from './cloud_connectors';
 
 export { validateSslCertPath } from './ssl_validators';
 
+export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
+
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';
 export {

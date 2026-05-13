@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,6 +82,7 @@ import {
   computeDefaultVarGroupSelections,
   type VarGroupSelection,
 } from '../services/var_group_helpers';
+import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
@@ -135,7 +136,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
+  const { docLinks, notifications } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -289,6 +290,46 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
   );
+
+  // Namespace-level customization toggle state. Defaults to disabled for new policies; the actual
+  // package update is deferred until policy save (see effect below).
+  const installedNamespaceCustomizationEnabledFor = useMemo(() => {
+    if (packageInfo && 'installationInfo' in packageInfo) {
+      return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
+    }
+    return [];
+  }, [packageInfo]);
+  const [namespaceCustomizationEnabled, setNamespaceCustomizationEnabled] =
+    useState<boolean>(false);
+  const namespaceCustomizationAppliedRef = useRef<string | undefined>(undefined);
+
+  // After policy save: sync the package's namespace_customization_enabled_for list (deferred update).
+  useEffect(() => {
+    if (!savedPackagePolicy || !packageInfo) {
+      return;
+    }
+    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.id) {
+      return;
+    }
+    namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
+    // Reset the toggle so stale "enabled" state doesn't carry over if the form is reused.
+    setNamespaceCustomizationEnabled(false);
+    void applyNamespaceCustomizationChange(
+      packageInfo.name,
+      packageInfo.version,
+      savedPackagePolicy.namespace,
+      namespaceCustomizationEnabled,
+      installedNamespaceCustomizationEnabledFor,
+      notifications,
+      packageInfo.title ?? packageInfo.name
+    );
+  }, [
+    savedPackagePolicy,
+    packageInfo,
+    namespaceCustomizationEnabled,
+    installedNamespaceCustomizationEnabledFor,
+    notifications,
+  ]);
 
   // Retrieve agent count
   const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -556,6 +597,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
             agentPolicies={agentPolicies}
+            namespaceCustomizationEnabled={namespaceCustomizationEnabled}
+            onNamespaceCustomizationEnabledChange={setNamespaceCustomizationEnabled}
+            installedNamespaceCustomizationEnabledFor={installedNamespaceCustomizationEnabledFor}
+            allowedNamespacePrefixes={spaceSettings?.allowedNamespacePrefixes ?? []}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
@@ -605,6 +650,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       varGroupSelections,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
+      namespaceCustomizationEnabled,
+      installedNamespaceCustomizationEnabledFor,
     ]
   );
 
