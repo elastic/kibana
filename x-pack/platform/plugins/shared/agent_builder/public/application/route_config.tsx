@@ -32,7 +32,6 @@ import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
-/** Wire values for sidebar nav `data-ebt-detail` / `ebtNavItem` — derived from the shared EBT catalog */
 type AgentBuilderUiEbtSidebarNavItem =
   (typeof AGENT_BUILDER_UI_EBT.detail.sidebarNavItem)[keyof typeof AGENT_BUILDER_UI_EBT.detail.sidebarNavItem];
 
@@ -60,7 +59,6 @@ export interface RouteDefinition {
   requiresUIAM?: boolean;
   navLabel?: string;
   navIcon?: string;
-  /** `agent_builder_ui_click` detail for sidebar Customize / Manage nav links */
   ebtNavItem?: AgentBuilderUiEbtSidebarNavItem;
 }
 

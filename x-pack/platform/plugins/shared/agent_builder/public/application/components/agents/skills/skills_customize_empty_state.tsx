@@ -48,11 +48,7 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
         plugins: (
           <EuiLink
             data-test-subj="agentSkillsCustomizeEmptyStateLinkPlugins"
-            href={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }));
-            }}
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
             data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
             data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
             data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
@@ -63,11 +59,7 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
         tools: (
           <EuiLink
             data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
-            href={createAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }));
-            }}
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
             data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
             data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
             data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
@@ -85,11 +77,7 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
         tools: (
           <EuiLink
             data-test-subj="agentSkillsCustomizeEmptyStateLinkTools"
-            href={createAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault();
-              navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }));
-            }}
+            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
             data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
             data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
             data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.TOOL}
