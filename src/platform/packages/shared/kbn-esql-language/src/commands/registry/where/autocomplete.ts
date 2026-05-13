@@ -35,7 +35,7 @@ export async function autocomplete(
     callbacks,
     options: {
       preferredExpressionType: 'boolean',
-      allowSubquery: true,
+      allowSubquery: context?.subquerySupport === true,
     },
   });
 

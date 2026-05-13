@@ -13,6 +13,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
+  isSubQuery,
   lastItem,
   type PromQLAstExpression,
 } from '@elastic/esql';
@@ -132,6 +133,15 @@ export function getExpressionType(
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */
       return getExpressionType(root.args[root.args.length - 1], columns, unmappedFieldsStrategy);
+    }
+
+    const rightArg = root.args[1];
+    if (
+      (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+      !Array.isArray(rightArg) &&
+      isSubQuery(rightArg)
+    ) {
+      return 'boolean';
     }
 
     const { argTypes, literalMask } = resolveArgumentTypes(root.args, {

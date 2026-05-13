@@ -32,6 +32,11 @@ const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
 
+const whereContext = {
+  ...mockContext,
+  subquerySupport: true,
+};
+
 export const EMPTY_WHERE_SUGGESTIONS = [...getFieldNamesByType('any'), ...allEvalFns];
 
 export const EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS = [
@@ -45,7 +50,7 @@ const whereExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
-  context = mockContext,
+  context = whereContext,
   offset?: number
 ) => {
   return expectSuggestions(
@@ -302,11 +307,11 @@ describe('WHERE Autocomplete', () => {
 
       await whereExpectSuggestions(
         'from index | WHERE doubleField in (FROM index | KEEP doubleField) ',
-        getOperatorSuggestions(logicalOperators)
+        [...getOperatorSuggestions(logicalOperators), '| ']
       );
       await whereExpectSuggestions(
         'from index | WHERE doubleField not in (FROM index | KEEP doubleField) ',
-        getOperatorSuggestions(logicalOperators)
+        [...getOperatorSuggestions(logicalOperators), '| ']
       );
 
       const expectedFields = getFieldNamesByType(['double']);

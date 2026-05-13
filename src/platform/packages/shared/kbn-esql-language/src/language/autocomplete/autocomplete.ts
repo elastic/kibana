@@ -313,6 +313,7 @@ async function getSuggestionsWithinCommandExpression(
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    subquerySupport: commandDefinition.metadata.subquerySupport,
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
