@@ -75,7 +75,10 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   },
   metaSettings: {
     'telemetry.enabled': {
-      schema: schema.literal(false),
+      schema: schema.boolean({
+        validate: (value) =>
+          Boolean(value) === false ? undefined : 'telemetry.enabled: true does not apply here',
+      }),
       config: {
         'telemetry.optIn': false,
         'telemetry.allowChangingOptInStatus': false,
