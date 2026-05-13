@@ -163,3 +163,16 @@ Event.args = {
 
 // set the name of the Event story to "NotificationEvent" instead of the default "Event"
 Event.storyName = 'NotificationEvent';
+
+export const MultipleMessages: StoryFn<StoryArgs> = Template.bind({});
+MultipleMessages.args = {
+  isRead: false,
+  showPrimaryAction: false,
+  showContextMenu: true,
+  messages: [
+    'The report was generated at 17:12:16 GMT+4.',
+    'It includes data from the last 30 days across all spaces.',
+    'Download will expire in 24 hours.',
+  ],
+};
+MultipleMessages.storyName = 'NotificationEvent - multiple messages';
