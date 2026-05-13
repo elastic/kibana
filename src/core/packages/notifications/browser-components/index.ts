@@ -26,3 +26,13 @@ export {
   NotificationSpacesFilter,
   type NotificationSpacesFilterProps,
 } from './src/filters/notification_spaces_filter';
+
+export {
+  NotificationStackTable,
+  type NotificationStackTableProps,
+  type NotificationStackItem,
+  UnreadIndicatorCell,
+  TypeCell,
+  SpaceCell,
+  ReceivedCell,
+} from './src/stack';
