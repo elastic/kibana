@@ -306,7 +306,6 @@ src/core/packages/saved-objects/migration-server-internal @elastic/kibana-core
 src/core/packages/saved-objects/migration-server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/server @elastic/kibana-core
 src/core/packages/saved-objects/server-internal @elastic/kibana-core
-src/core/packages/saved-objects/server-internal/wip_types.json @elastic/kibana-core
 src/core/packages/saved-objects/server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/utils-server @elastic/kibana-core
 src/core/packages/security/browser @elastic/kibana-core
