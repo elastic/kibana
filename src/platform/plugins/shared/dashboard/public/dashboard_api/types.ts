@@ -173,6 +173,11 @@ export type DashboardApi = CanExpandPanels &
   TrackContentfulRender &
   TracksOverlays &
   PublishesOnSave & {
+    /*
+     * Emits on any dashboard state change
+     * 
+     * Recommend to debounce when subscribing
+     */
     anyStateChange$: Observable<void>;
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
