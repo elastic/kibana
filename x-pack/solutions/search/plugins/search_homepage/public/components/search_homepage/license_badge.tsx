@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 
 export const LicenseBadge = () => {
-  const { licenseType } = useGetLicenseInfo();
+  const { isTrial, licenseType } = useGetLicenseInfo();
   const { euiTheme } = useEuiTheme();
 
   const LICENSE_LABEL: Record<LicenseType, string> = {
@@ -44,7 +44,7 @@ export const LicenseBadge = () => {
           borderRadius: euiTheme.size.l,
           padding: `0 ${euiTheme.size.m}`,
         })}
-        color="hollow"
+        color={isTrial ? 'primary' : 'hollow'}
       >
         {LICENSE_LABEL[licenseType]}
       </EuiBadge>
