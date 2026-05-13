@@ -145,7 +145,7 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <Button
                     size="xs"
-                    flush="left"
+                    flush="both"
                     data-test-subj="selectedEverythingOnAllPagesButton"
                     onClick={() => setSelectionMode('query')}
                   >
