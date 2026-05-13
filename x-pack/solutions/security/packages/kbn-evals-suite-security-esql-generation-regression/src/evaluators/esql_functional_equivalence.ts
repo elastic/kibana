@@ -269,7 +269,28 @@ export function createCalibratedEsqlEquivalenceEvaluator({
           },
         });
 
-        const args = response.toolCalls[0].function.arguments as {
+        // Defensive: `executeUntilValid` is supposed to coerce the judge into
+        // emitting a structured `evaluate` tool call (we pass
+        // `finalToolChoice = { function: 'evaluate' }`), but some judges
+        // — especially when the candidate prediction is huge or contains
+        // long chain-of-thought traces from thinking models like Kimi —
+        // still come back with empty `toolCalls`. The previous
+        // implementation dereferenced `response.toolCalls[0].function`
+        // directly, which threw `TypeError: Cannot read properties of
+        // undefined (reading 'function')`, took down the whole suite for
+        // that connector, and dumped ~31 examples' worth of useful data.
+        // Throw a clean Error here instead so the surrounding `pRetry`
+        // can do its job, and the outer catch below can score
+        // conservatively if all retries exhaust.
+        const firstToolCall = response.toolCalls?.[0];
+        if (!firstToolCall?.function?.arguments) {
+          throw new Error(
+            `Calibrated FuncEq judge returned no structured tool call ` +
+              `(received ${response.toolCalls?.length ?? 0} tool calls). ` +
+              `Likely a bare-text refusal or truncation on the judge side.`
+          );
+        }
+        const args = firstToolCall.function.arguments as {
           equivalence?: unknown;
           reason?: unknown;
         };
@@ -279,40 +300,77 @@ export function createCalibratedEsqlEquivalenceEvaluator({
         return { equivalence: args.equivalence, reason: args.reason };
       }
 
-      const { equivalence, reason } = await pRetry(runAnalysis, {
-        retries: 3,
-        onFailedAttempt: (error) => {
-          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
-          if (isLastAttempt) {
-            log.error(
-              new Error(
-                `Failed to retrieve calibrated ES|QL equivalence judgement after ${error.attemptNumber} attempts`,
-                { cause: error }
-              )
-            );
-          } else {
-            log.warning(
-              new Error(
-                `Calibrated ES|QL equivalence judge returned an invalid response on attempt ${error.attemptNumber}; retrying...`,
-                { cause: error }
-              )
-            );
-          }
-        },
-      });
+      try {
+        const { equivalence, reason } = await pRetry(runAnalysis, {
+          retries: 3,
+          onFailedAttempt: (error) => {
+            const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+            if (isLastAttempt) {
+              log.error(
+                new Error(
+                  `Failed to retrieve calibrated ES|QL equivalence judgement after ${error.attemptNumber} attempts`,
+                  { cause: error }
+                )
+              );
+            } else {
+              log.warning(
+                new Error(
+                  `Calibrated ES|QL equivalence judge returned an invalid response on attempt ${error.attemptNumber}; retrying...`,
+                  { cause: error }
+                )
+              );
+            }
+          },
+        });
 
-      const score = JUDGEMENT_TO_SCORE[equivalence];
-      return {
-        score,
-        label: JUDGEMENT_TO_LABEL[equivalence],
-        explanation: reason,
-        metadata: {
-          equivalence,
-          equivalent: equivalence === 'equivalent',
-          judgeVersion: ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION,
-          reason,
-        },
-      };
+        const score = JUDGEMENT_TO_SCORE[equivalence];
+        return {
+          score,
+          label: JUDGEMENT_TO_LABEL[equivalence],
+          explanation: reason,
+          metadata: {
+            equivalence,
+            equivalent: equivalence === 'equivalent',
+            judgeVersion: ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION,
+            reason,
+          },
+        };
+      } catch (error) {
+        // Judge could not produce a valid structured judgement after all
+        // `pRetry` attempts. Common cause: a candidate query carrying a
+        // multi-thousand-token reasoning trace from a thinking model
+        // (Kimi-K2-Thinking, Kimi-K2.5, Kimi-K2.6 in build 442041) blows
+        // the judge's context budget and Gemini returns a bare-text
+        // refusal instead of the forced `evaluate` tool call.
+        //
+        // Scoring conservatively as `not_equivalent` (0) means one
+        // problematic example no longer kills the connector's entire
+        // suite run — the rest of the 31-example dataset still produces
+        // signal. `metadata.fallback = 'judge_no_tool_call'` lets
+        // dashboards filter these out of the FuncEq distribution so
+        // they don't drag the trendline down for reasons unrelated to
+        // the candidate's actual correctness.
+        log.warning(
+          new Error(
+            `Calibrated ES|QL FuncEq judge could not produce a structured judgement after retries; scoring as not_equivalent for this example.`,
+            { cause: error }
+          )
+        );
+        return {
+          score: JUDGEMENT_TO_SCORE.not_equivalent,
+          label: 'judge-no-tool-call',
+          explanation:
+            'Judge did not return a structured tool call after retries; scored conservatively as not_equivalent. ' +
+            'See metadata.cause for the underlying error.',
+          metadata: {
+            equivalence: 'not_equivalent',
+            equivalent: false,
+            judgeVersion: ESQL_FUNCTIONAL_EQUIVALENCE_JUDGE_VERSION,
+            fallback: 'judge_no_tool_call',
+            reason: error instanceof Error ? error.message : String(error),
+          },
+        };
+      }
     },
   };
 }
