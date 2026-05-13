@@ -9,9 +9,18 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { ViewInAiAssistant } from '.';
+import { useViewInAiAssistant } from './use_view_in_ai_assistant';
 import { TestProviders } from '../../../../../common/mock';
 import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
 import { VIEW_IN_AI_ASSISTANT } from './translations';
+
+jest.mock('./use_view_in_ai_assistant', () => ({
+  useViewInAiAssistant: jest.fn().mockReturnValue({
+    showAssistantOverlay: jest.fn(),
+    disabled: false,
+    isAssistantVisible: true,
+  }),
+}));
 
 describe('ViewInAiAssistant', () => {
   it('renders the assistant avatar', () => {
@@ -62,5 +71,21 @@ describe('ViewInAiAssistant', () => {
 
       expect(viewInAiAssistantCompact).toHaveTextContent(VIEW_IN_AI_ASSISTANT);
     });
+  });
+
+  it('does not render when isAssistantVisible is false', () => {
+    (useViewInAiAssistant as jest.Mock).mockReturnValueOnce({
+      showAssistantOverlay: jest.fn(),
+      disabled: false,
+      isAssistantVisible: false,
+    });
+
+    render(
+      <TestProviders>
+        <ViewInAiAssistant attackDiscovery={mockAttackDiscovery} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('viewInAiAssistant')).not.toBeInTheDocument();
   });
 });
