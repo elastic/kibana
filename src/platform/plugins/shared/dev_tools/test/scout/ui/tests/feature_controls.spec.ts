@@ -57,7 +57,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     for (const { hash, readySubject } of testData.DEV_TOOL_APPS) {
       await page.goto(kbnUrl.app('dev_tools', { pathOptions: { hash } }));
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
-      await expect(page.testSubj.locator('homeApp')).toBeVisible();
+      await expect(page.testSubj.locator('appNotFoundPageContent')).toBeVisible();
     }
   });
 
@@ -106,7 +106,7 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
         })
       );
       await expect(pageObjects.devTools.appContainer(readySubject)).toBeHidden();
-      await expect(page.testSubj.locator('homeApp')).toBeVisible();
+      await expect(page.testSubj.locator('appNotFoundPageContent')).toBeVisible();
     }
   });
 });
