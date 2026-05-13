@@ -48,6 +48,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/core-http-browser",
     "@kbn/react-kibana-mount",
+    "@kbn/core-http-browser",
   ]
 }
 
