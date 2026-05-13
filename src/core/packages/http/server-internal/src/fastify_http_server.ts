@@ -19,10 +19,18 @@ import * as nodePath from 'path';
 import { createBrotliCompress, createGzip, constants as zlibConstants } from 'zlib';
 import mime from 'mime-types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { getServerListener } from '@kbn/server-http-tools';
+import { context, trace, type Span as OTelSpan } from '@opentelemetry/api';
+import { performance } from 'perf_hooks';
+import { v4 as uuidv4 } from 'uuid';
+import apm from 'elastic-apm-node';
+import type { Request } from '@hapi/hapi';
+import { getServerListener, getRequestId } from '@kbn/server-http-tools';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { isNil, omitBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type {
   CoreVersionedRouter,
   InternalRouteHandler,
@@ -33,13 +41,16 @@ import type {
   IRouter,
   AuthenticationHandler,
   KibanaRequest,
+  KibanaRequestState,
   KibanaRouteOptions,
   RouterDeprecatedApiDetails,
   RouterRoute,
   HttpServerInfo,
 } from '@kbn/core-http-server';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 
 import type { GetRoutersOptions, HttpServerSetup, HttpServerSetupOptions } from './http_server';
+import { startEluMeasurement } from './http_server';
 import type { HttpConfig } from './http_config';
 import { BasePath } from './base_path_service';
 import { AuthStateStorage } from './auth_state_storage';
@@ -244,7 +255,11 @@ export class FastifyHttpServer {
     this.redactedSessionIdGetter = getter;
   }
 
-  public async setup({ config$ }: HttpServerSetupOptions): Promise<HttpServerSetup> {
+  public async setup({
+    config$,
+    executionContext,
+    userActivity,
+  }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
 
@@ -274,6 +289,7 @@ export class FastifyHttpServer {
     }) as unknown as FastifyInstance;
 
     installFastifyGlobalErrorHandler(this.fastify, this.log);
+    this.installKibanaRequestStateOnRequest(config, executionContext, userActivity);
 
     // Mirror @hapi/hapi: reject malformed `Cookie` headers before auth redirects (GET `/` would
     // otherwise respond with 302). Bare cookie segments without `=` must yield 400 + message.
@@ -489,6 +505,87 @@ export class FastifyHttpServer {
       maxPayloadBytes: config.maxPayload.getValueInBytes(),
     });
     registerFastifyFallbackStreamBodyParser(fastify);
+  }
+
+  /**
+   * Mirrors {@link HttpServer}'s `setupRequestStateAssignment` `onRequest` ext: installs execution
+   * context from the `x-kbn-context` header, request id, APM/OTel spans, ELU measurement, and initial
+   * user-activity space — required for Elasticsearch `x-opaque-id` and tracing parity with Hapi.
+   */
+  private installKibanaRequestStateOnRequest(
+    config: HttpConfig,
+    executionContext?: InternalExecutionContextSetup,
+    userActivity?: InternalUserActivityServiceSetup
+  ): void {
+    if (!this.fastify) {
+      return;
+    }
+
+    this.fastify.addHook('onRequest', (req, _reply, done) => {
+      const pathname = getFindMyWayLookupPath(req);
+      const stop = startEluMeasurement(pathname, this.log, config.eluMonitor);
+
+      const hapiishHeaders = req.headers as Record<string, string | string[] | undefined>;
+      const parentContext = executionContext?.getParentContextFrom(hapiishHeaders);
+
+      let spaceId: string | undefined;
+      try {
+        spaceId = getSpaceIdFromPath(pathname, config.basePath).spaceId;
+      } catch {
+        spaceId = parentContext?.space;
+      }
+
+      userActivity?.setInjectedContext({
+        kibana: { space: { id: spaceId } },
+      });
+
+      if (executionContext && parentContext) {
+        executionContext.set(parentContext);
+        const labels = executionContext.getAsLabels();
+        const { name, id, page } = labels;
+        addSpanLabels(labels, {
+          otelAttributes: omitBy(
+            {
+              'kibana.execution_context.name': name,
+              'kibana.execution_context.id': id,
+              'kibana.execution_context.page': page,
+            },
+            isNil
+          ) as Record<string, string>,
+        });
+      }
+
+      const hapiLikeRequest = {
+        raw: { req: req.raw },
+        headers: req.headers,
+      } as unknown as Request;
+      const requestId = getRequestId(hapiLikeRequest, config.requestId);
+      executionContext?.setRequestId(requestId);
+
+      const extReq = req as FastifyRequest & { app?: KibanaRequestState };
+      if (extReq.app === undefined) {
+        extReq.app = {} as KibanaRequestState;
+      }
+      const app = extReq.app;
+      app.startTime = performance.now();
+      app.requestId = requestId;
+      app.requestUuid = uuidv4();
+      app.measureElu = stop;
+      app.traceId = apm.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId;
+      app.span = apm.startSpan('pre-route handler middlewares');
+      app.httpSpan = trace.getActiveSpan();
+      app.otelSubSpan = this.createSubspanForRequest('pre-route handler middlewares');
+
+      done();
+    });
+  }
+
+  private createSubspanForRequest(name: string): OTelSpan {
+    const span = trace.getTracer('kibana.http').startSpan(name);
+    context.with(context.active(), () => {
+      context.bind(context.active(), span);
+    });
+    return span;
   }
 
   private registerRouter(router: IRouter) {

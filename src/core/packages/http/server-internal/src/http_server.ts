@@ -73,7 +73,7 @@ import { type InternalStaticAssets, StaticAssets } from './static_assets';
  * @param path The request path
  * @param log  Logger
  */
-function startEluMeasurement<T>(
+export function startEluMeasurement<T>(
   path: string,
   log: Logger,
   eluMonitorOptions: IHttpEluMonitorConfig | undefined
