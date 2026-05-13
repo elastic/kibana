@@ -11,6 +11,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -58,6 +59,8 @@ export function useStreamsPrivileges() {
     false
   );
 
+  const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
+
   return {
     ui: streams as {
       [STREAMS_UI_PRIVILEGES.manage]: boolean;
@@ -83,6 +86,9 @@ export function useStreamsPrivileges() {
       },
       wiredStreamViews: {
         enabled: wiredStreamViewsEnabled,
+      },
+      draftStreams: {
+        enabled: draftStreamsEnabled,
       },
     },
     isLoading: !license,
