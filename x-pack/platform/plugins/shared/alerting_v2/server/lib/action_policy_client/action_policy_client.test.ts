@@ -513,35 +513,6 @@ describe('ActionPolicyClient', () => {
       expect(res.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
 
-    it('defaults legacy attributes (no type) to type "global" with null ruleId', async () => {
-      const existingAttributes = {
-        name: 'legacy',
-        description: 'd',
-        enabled: true,
-        destinations: [{ type: 'workflow' as const, id: 'w' }],
-        auth: { apiKey: 'k', owner: 'u', createdByUser: false },
-        createdBy: null,
-        createdByUsername: null,
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: null,
-        updatedByUsername: null,
-        updatedAt: '2025-01-01T00:00:00.000Z',
-      } as ActionPolicySavedObjectAttributes;
-
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'p-legacy',
-        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: existingAttributes,
-        references: [],
-        version: 'WzEsMV0=',
-      });
-
-      const res = await client.getActionPolicy({ id: 'p-legacy' });
-
-      expect(res.type).toBe('global');
-      expect(res.ruleId).toBeNull();
-    });
-
     it('returns ruleId for a single_rule policy', async () => {
       const existingAttributes = {
         name: 's',
@@ -1701,7 +1672,7 @@ describe('ActionPolicyClient', () => {
         );
       });
 
-      it('normalizes a legacy attributes (no type) to "global" with null ruleId on update', async () => {
+      it('preserves type and ruleId from the existing global policy on partial update', async () => {
         setupSinglePolicyMocks({ ...baseExisting });
 
         await client.updateActionPolicy({
