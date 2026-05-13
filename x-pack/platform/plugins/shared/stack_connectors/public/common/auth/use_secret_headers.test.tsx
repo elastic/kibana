@@ -91,7 +91,7 @@ describe('useSecretHeaders', () => {
 
   it('does not refetch secret headers on window focus', async () => {
     getMock.mockResolvedValue(['secret-key']);
-    const { result } = renderHook(() => useSecretHeaders('connector1', true), {
+    const { result } = renderHook(() => useSecretHeaders('connector1'), {
       wrapper: customWrapper(),
     });
 
