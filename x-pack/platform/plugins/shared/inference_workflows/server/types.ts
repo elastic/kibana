@@ -24,5 +24,6 @@ export interface InferenceWorkflowsServerStartDeps {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InferenceWorkflowsServerSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface InferenceWorkflowsServerStart {}
+export interface InferenceWorkflowsServerStart {
+  getDefaultWorkflows(): Array<{ id: string; yaml: string }>;
+}

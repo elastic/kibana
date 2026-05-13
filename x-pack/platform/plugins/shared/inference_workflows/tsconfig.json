@@ -23,6 +23,7 @@
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/actions-plugin",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/default-anonymization-workflows"
   ]
 }

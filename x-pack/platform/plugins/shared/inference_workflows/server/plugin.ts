@@ -6,6 +6,10 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  beforePromptAnonymizationWorkflow,
+  afterCompletionDeanonymizationWorkflow,
+} from '@kbn/default-anonymization-workflows';
 import { z } from '@kbn/zod/v4';
 import {
   BEFORE_COMPLETION_TRIGGER_ID,
@@ -13,10 +17,6 @@ import {
   beforeCompletionEventSchema,
   afterCompletionEventSchema,
 } from '@kbn/workflows-extensions/common';
-import {
-  defaultBeforeCompletionHandler,
-  defaultAfterCompletionHandler,
-} from './anonymization/default_handlers';
 import {
   aiClassifyStepDefinition,
   aiPromptStepDefinition,
@@ -70,6 +70,7 @@ export class InferenceWorkflowsServerPlugin
         maxTimeout: '15s',
         failurePolicy: 'closed',
         chained: true,
+        inlineExecution: true,
       },
     });
     workflowsExtensions.registerTriggerDefinition({
@@ -80,18 +81,9 @@ export class InferenceWorkflowsServerPlugin
         maxTimeout: '15s',
         failurePolicy: 'closed',
         chained: true,
+        inlineExecution: true,
       },
     });
-
-    // Register default anonymization hook handlers
-    workflowsExtensions.registerHookHandler(
-      BEFORE_COMPLETION_TRIGGER_ID,
-      defaultBeforeCompletionHandler
-    );
-    workflowsExtensions.registerHookHandler(
-      AFTER_COMPLETION_TRIGGER_ID,
-      defaultAfterCompletionHandler
-    );
 
     // Register AI steps (require inference at start time via coreSetup.getStartServices())
     workflowsExtensions.registerStepDefinition(aiClassifyStepDefinition(core));
@@ -117,6 +109,17 @@ export class InferenceWorkflowsServerPlugin
     plugins: InferenceWorkflowsServerStartDeps
   ): InferenceWorkflowsServerStart {
     this.workflowsExtStart = plugins.workflowsExtensions;
-    return {};
+    return {
+      getDefaultWorkflows: () => [
+        {
+          id: 'default-pii-anonymization-before-completion',
+          yaml: beforePromptAnonymizationWorkflow,
+        },
+        {
+          id: 'default-pii-deanonymization-after-completion',
+          yaml: afterCompletionDeanonymizationWorkflow,
+        },
+      ],
+    };
   }
 }

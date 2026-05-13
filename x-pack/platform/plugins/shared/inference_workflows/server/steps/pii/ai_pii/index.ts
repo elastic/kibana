@@ -32,10 +32,22 @@ const inputSchema = z.object({
     .optional()
     .describe('Built-in entity class names to detect (IP, EMAIL, HOST_NAME)'),
   customPatterns: z.array(CustomPatternSchema).optional().describe('Additional custom regex rules'),
+  systemPromptInstruction: z
+    .string()
+    .optional()
+    .describe(
+      'Custom wording for the [Anonymization context] instruction injected into the system prompt. ' +
+        'When omitted the inference plugin generates a default instruction from the entity types present. ' +
+        'Echoed through to the step output so invoke_before_completion.ts can pick it up.'
+    ),
 });
 
 const outputSchema = z.object({
   output: z.union([z.string(), z.array(z.unknown())]).describe('Anonymized text or messages array'),
+  systemPromptInstruction: z
+    .string()
+    .optional()
+    .describe('Custom instruction wording echoed from input, if provided'),
 });
 
 /**
@@ -56,7 +68,9 @@ export const createAiPiiStepDefinition = (
     category: StepCategory.Ai,
     inputSchema,
     outputSchema,
-    handler: async ({ input: { sessionId, input, entities, customPatterns } }) => {
+    handler: async ({
+      input: { sessionId, input, entities, customPatterns, systemPromptInstruction },
+    }) => {
       const ctx = getCapabilities(sessionId)?.[ANONYMIZATION_CONTEXT_CAPABILITY_KEY] as
         | AnonymizationContextHandle
         | undefined;
@@ -75,15 +89,17 @@ export const createAiPiiStepDefinition = (
         ...(customPatterns ?? []),
       ];
 
+      const instruction = systemPromptInstruction ?? undefined;
+
       if (typeof input === 'string') {
         const anonymized = anonymizeString(input, rules, ctx);
-        return { output: { output: anonymized } };
+        return { output: { output: anonymized, systemPromptInstruction: instruction } };
       }
 
       const anonymizedMessages = (input as unknown[]).map((msg) =>
         anonymizeMessageContent(msg, rules, ctx)
       );
-      return { output: { output: anonymizedMessages } };
+      return { output: { output: anonymizedMessages, systemPromptInstruction: instruction } };
     },
   });
 
