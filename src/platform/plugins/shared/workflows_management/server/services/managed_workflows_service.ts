@@ -432,19 +432,21 @@ export class ManagedWorkflowsService {
       actor: MANAGED_WORKFLOW_SYSTEM_USER,
       now,
       spaceId,
-      managedWorkflowMetadata: {
-        managed: true,
-        managedBy: definition.pluginId,
-        definitionHash,
-        managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
-        originManagedWorkflowId: definition.id,
-        lifecycle: definition.management.lifecycle,
-        managedVersion: definition.version,
-      },
     });
 
+    const managedWorkflowData = {
+      ...workflowData,
+      managed: true,
+      managedBy: definition.pluginId,
+      definitionHash,
+      managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
+      originManagedWorkflowId: definition.id,
+      lifecycle: definition.management.lifecycle,
+      managedVersion: definition.version,
+    };
+
     return {
-      ...this.applyManagedEnabledState(workflowData, enabled ?? workflowData.enabled),
+      ...this.applyManagedEnabledState(managedWorkflowData, enabled ?? workflowData.enabled),
       ...(createdAt ? { created_at: createdAt } : {}),
     };
   }
