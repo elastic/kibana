@@ -4,6 +4,8 @@ set -euo pipefail
 
 WORKFLOW_FILE="generate_serverless_changelog.yml"
 WORKFLOW_REF="main"
+WORKFLOW_URL="https://github.com/elastic/kibana/actions/workflows/${WORKFLOW_FILE}"
+WORKFLOW_RUNS_URL="${WORKFLOW_URL}?query=event%3Aworkflow_dispatch+branch%3A${WORKFLOW_REF}"
 
 if [[ -z "${GITHUB_TOKEN:-}" ]]; then
   echo "GITHUB_TOKEN is required to dispatch the serverless changelog workflow" >&2
@@ -65,5 +67,11 @@ if [[ "${status_code}" != "204" && "${status_code}" != "200" ]]; then
   exit 1
 fi
 
+workflow_run_url=""
+if [[ -s "${response_file}" ]]; then
+  workflow_run_url="$(jq -r '.html_url // empty' <"${response_file}")"
+fi
+
 rm -f "${response_file}"
 echo "Triggered ${WORKFLOW_FILE} for ${TARGET_ENV} at ${SERVICE_VERSION}"
+echo "Workflow runs: ${workflow_run_url:-${WORKFLOW_RUNS_URL}}"

@@ -2,8 +2,7 @@ const GITHUB_OWNER = 'elastic';
 const KIBANA_REPO = 'kibana';
 const SERVERLESS_GITOPS_REPO = 'serverless-gitops';
 const VERSIONS_FILE_PATH = 'services/kibana/versions.yaml';
-const COMMITS_TO_FIND = 5;
-const GITHUB_API_VERSION = '2022-11-28';
+const SERVERLESS_EXCLUDED_LABELS = ['backport', 'release_note:skip', 'reverted'];
 
 const requiredEnv = (name) => {
   const value = process.env[name];
@@ -15,8 +14,6 @@ const requiredEnv = (name) => {
   return value;
 };
 
-const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
 const chunk = (items, size) => {
   const chunks = [];
 
@@ -27,84 +24,50 @@ const chunk = (items, size) => {
   return chunks;
 };
 
-const githubRequest = async ({ path, method = 'GET', query = {}, body }) => {
-  const url = new URL(`https://api.github.com${path}`);
-
-  for (const [key, value] of Object.entries(query)) {
-    url.searchParams.set(key, value);
-  }
-
-  const response = await fetch(url, {
-    method,
-    headers: {
-      Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${requiredEnv('GITHUB_TOKEN')}`,
-      'X-GitHub-Api-Version': GITHUB_API_VERSION,
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  const text = await response.text();
-
-  if (!response.ok) {
-    throw new Error(`GitHub API request failed: ${method} ${url} ${response.status} ${text}`);
-  }
-
-  return {
-    data: text ? JSON.parse(text) : undefined,
-    link: response.headers.get('link'),
-  };
-};
-
-const findServerlessGitOpsCommits = async ({ envSearch, repo, filePath }) => {
+const findServerlessGitOpsCommits = async ({ github, envSearch, repo, filePath }) => {
+  const commitsToFind = 5;
   const matchingCommits = [];
-  let page = 1;
 
-  while (matchingCommits.length < COMMITS_TO_FIND) {
-    const { data: commits } = await githubRequest({
-      path: `/repos/${GITHUB_OWNER}/${repo}/commits`,
-      query: {
-        path: filePath,
-        per_page: '100',
-        page: String(page),
-      },
-    });
-
-    if (commits.length === 0) {
-      break;
-    }
-
-    for (const commit of commits) {
+  for await (const response of github.paginate.iterator(github.rest.repos.listCommits, {
+    owner: GITHUB_OWNER,
+    repo,
+    path: filePath,
+    per_page: 100,
+  })) {
+    for (const commit of response.data) {
       if (commit.commit.message.includes(envSearch)) {
         matchingCommits.push(commit);
-        if (matchingCommits.length === COMMITS_TO_FIND) {
+        if (matchingCommits.length === commitsToFind) {
           return matchingCommits;
         }
       }
     }
-
-    page += 1;
   }
 
   return matchingCommits;
 };
 
-const findKibanaServerlessDeployedCommit = async ({ gitOpsSha, envSearch, repo, filePath }) => {
+const findKibanaServerlessDeployedCommit = async ({
+  github,
+  gitOpsSha,
+  envSearch,
+  repo,
+  filePath,
+}) => {
   try {
-    const { data } = await githubRequest({
-      path: `/repos/${GITHUB_OWNER}/${repo}/contents/${filePath}`,
-      query: {
-        ref: gitOpsSha,
-      },
+    const fileResponse = await github.rest.repos.getContent({
+      owner: GITHUB_OWNER,
+      repo,
+      path: filePath,
+      ref: gitOpsSha,
     });
 
-    if (!data.content) {
+    if (!('content' in fileResponse.data)) {
       throw new Error(`File content not available for commit ${gitOpsSha}`);
     }
 
-    const content = Buffer.from(data.content, 'base64').toString('utf8');
-    const regex = new RegExp(`${escapeRegExp(envSearch)}:\\s+"([a-f0-9]{7,40})"`);
+    const content = Buffer.from(fileResponse.data.content, 'base64').toString('utf8');
+    const regex = new RegExp(`${envSearch}:\\s+"([a-f0-9]{7,40})"`);
     const match = content.match(regex);
 
     if (!match || !match[1]) {
@@ -117,8 +80,35 @@ const findKibanaServerlessDeployedCommit = async ({ gitOpsSha, envSearch, repo, 
   }
 };
 
-const getServerlessReleases = async ({ envSearch }) => {
+const matchKibanaTagsToReleaseCommits = async ({ github, serverlessReleases }) => {
+  // Need to retrieve all the tags because ref tags are always last.
+  const tags = await github.paginate(github.rest.repos.listTags, {
+    owner: GITHUB_OWNER,
+    repo: KIBANA_REPO,
+    per_page: 100,
+  });
+
+  return serverlessReleases.flatMap((release) => {
+    const tagForReleaseCommit = tags.find((tag) => tag.commit.sha.startsWith(release.kibanaSha));
+
+    if (!tagForReleaseCommit) {
+      console.warn(`No tag found for the release commit ${release.kibanaSha}, removing.`);
+      return [];
+    }
+
+    return [
+      {
+        ...release,
+        releaseTag: tagForReleaseCommit,
+        releaseDate: new Date(Number(tagForReleaseCommit.name.split('@')[1]) * 1000),
+      },
+    ];
+  });
+};
+
+const getServerlessReleases = async ({ github, envSearch }) => {
   const matchingCommits = await findServerlessGitOpsCommits({
+    github,
     envSearch,
     repo: SERVERLESS_GITOPS_REPO,
     filePath: VERSIONS_FILE_PATH,
@@ -128,42 +118,54 @@ const getServerlessReleases = async ({ envSearch }) => {
     throw new Error(`Could not find matching commits for ${envSearch} in serverless-gitops repo`);
   }
 
-  return Promise.all(
-    matchingCommits.map((commit) =>
-      findKibanaServerlessDeployedCommit({
-        gitOpsSha: commit.sha,
-        envSearch,
-        repo: SERVERLESS_GITOPS_REPO,
-        filePath: VERSIONS_FILE_PATH,
-      })
-    )
+  const deployedShaPromises = matchingCommits.map((commit) =>
+    findKibanaServerlessDeployedCommit({
+      github,
+      gitOpsSha: commit.sha,
+      envSearch,
+      repo: SERVERLESS_GITOPS_REPO,
+      filePath: VERSIONS_FILE_PATH,
+    })
   );
+
+  const serverlessReleases = await Promise.all(deployedShaPromises);
+
+  return matchKibanaTagsToReleaseCommits({ github, serverlessReleases });
 };
 
-const getCompareResults = async ({ older, newer }) => {
-  const compareResults = [];
-  let page = 1;
-  let hasNextPage = true;
-
-  while (hasNextPage) {
-    const { data, link } = await githubRequest({
-      path: `/repos/${GITHUB_OWNER}/${KIBANA_REPO}/compare/${older.kibanaSha}...${newer.kibanaSha}`,
-      query: {
-        per_page: '250',
-        page: String(page),
-      },
-    });
-
-    compareResults.push(data);
-    hasNextPage = Boolean(link?.includes('rel="next"'));
-    page += 1;
+const getPrsForServerless = async ({
+  github,
+  serverlessReleases,
+  selectedServerlessSHAs,
+  excludedLabels = [],
+  includedLabels = [],
+}) => {
+  if (selectedServerlessSHAs.size !== 2) {
+    throw new Error('Exactly two serverless releases must be selected');
   }
 
-  return compareResults;
-};
+  const [newer, older] = Array.from(selectedServerlessSHAs)
+    .map((sha) => {
+      return serverlessReleases.find(({ kibanaSha }) => kibanaSha === sha);
+    })
+    .sort((a, b) => {
+      if (a?.releaseDate && b?.releaseDate) {
+        return Number(b.releaseDate) - Number(a.releaseDate);
+      }
 
-const getPrsForServerless = async ({ older, newer, excludedLabels = [], includedLabels = [] }) => {
-  const compareResult = await getCompareResults({ older, newer });
+      return 0;
+    });
+
+  const serverlessReleaseDate = new Date(Number(newer?.releaseTag?.name.split('@')[1]) * 1000);
+  console.log(`Serverless release date: ${serverlessReleaseDate.toISOString()}`);
+
+  // Get all the merge commits between the two releases.
+  const compareResult = await github.paginate(github.rest.repos.compareCommitsWithBasehead, {
+    owner: GITHUB_OWNER,
+    repo: KIBANA_REPO,
+    basehead: `${older?.kibanaSha}...${newer?.kibanaSha}`,
+    per_page: 250,
+  });
 
   const commitNodeIds = compareResult.reduce((acc, results) => {
     return acc.concat(results.commits.map((commit) => commit.node_id));
@@ -198,23 +200,12 @@ const getPrsForServerless = async ({ older, newer, excludedLabels = [], included
   const pullRequests = [];
   const chunks = chunk(commitNodeIds, 20);
   const results = await Promise.all(
-    chunks.map(async (commitNodeIdChunk) => {
-      const { data: response } = await githubRequest({
-        path: '/graphql',
-        method: 'POST',
-        body: {
-          query,
-          variables: {
-            commitNodeIds: commitNodeIdChunk,
-          },
-        },
-      });
+    chunks.map((commitNodeIdChunk) => {
+      const variables = {
+        commitNodeIds: commitNodeIdChunk,
+      };
 
-      if (response.errors) {
-        throw new Error(`GitHub GraphQL request failed: ${JSON.stringify(response.errors)}`);
-      }
-
-      return response.data;
+      return github.graphql(query, variables);
     })
   );
 
@@ -251,25 +242,38 @@ const getPrsForServerless = async ({ older, newer, excludedLabels = [], included
 };
 
 const selectReleases = ({ releases, serviceVersion }) => {
-  const currentReleaseIndex = releases.findIndex(({ kibanaSha }) => kibanaSha === serviceVersion);
+  const sortedReleases = [...releases].sort((a, b) => {
+    if (a?.releaseDate && b?.releaseDate) {
+      const releaseDateDiff = Number(b.releaseDate) - Number(a.releaseDate);
+
+      if (releaseDateDiff !== 0) {
+        return releaseDateDiff;
+      }
+    }
+
+    // Release dates are based on the Unix timestamp in the tag name, so a deploy-fix can have the same date as a new release.
+    return (a.releaseTag?.name ?? '').localeCompare(b.releaseTag?.name ?? '');
+  });
+
+  const currentReleaseIndex = sortedReleases.findIndex(({ kibanaSha }) => kibanaSha === serviceVersion);
 
   if (currentReleaseIndex === -1) {
     throw new Error(`Could not find ${serviceVersion} in recent serverless releases`);
   }
 
-  const previousRelease = releases[currentReleaseIndex + 1];
+  const previousRelease = sortedReleases[currentReleaseIndex + 1];
 
   if (!previousRelease) {
     throw new Error(`Could not find the previous serverless release before ${serviceVersion}`);
   }
 
   return {
-    newer: releases[currentReleaseIndex],
+    newer: sortedReleases[currentReleaseIndex],
     older: previousRelease,
   };
 };
 
-const main = async () => {
+const generateServerlessChangelog = async ({ github }) => {
   const serviceVersion = requiredEnv('SERVICE_VERSION');
   const targetEnv = requiredEnv('TARGET_ENV');
 
@@ -280,17 +284,19 @@ const main = async () => {
     console.log(`Triggered by Buildkite build: ${process.env.BUILDKITE_BUILD_URL}`);
   }
 
-  const releases = await getServerlessReleases({ envSearch: targetEnv });
+  const releases = await getServerlessReleases({ github, envSearch: targetEnv });
   const { newer, older } = selectReleases({ releases, serviceVersion });
 
   console.log(`Previous service version: ${older.kibanaSha}`);
 
-  const prs = await getPrsForServerless({ older, newer });
+  const prs = await getPrsForServerless({
+    github,
+    serverlessReleases: releases,
+    selectedServerlessSHAs: new Set([newer.kibanaSha, older.kibanaSha]),
+    excludedLabels: SERVERLESS_EXCLUDED_LABELS,
+  });
 
-  console.log(prs.map(({ html_url: htmlUrl }) => htmlUrl).join('\n'));
+  console.log(prs.map(({ html_url: htmlUrl }) => htmlUrl).sort().join('\n'));
 };
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+module.exports = generateServerlessChangelog;
