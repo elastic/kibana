@@ -12,7 +12,11 @@ import type {
   Example,
   EvalsExecutorClient,
 } from '@kbn/evals';
-import { createEsqlEquivalenceEvaluator, createSkillInvocationEvaluator } from '@kbn/evals';
+import {
+  createEsqlEquivalenceEvaluator,
+  createSkillInvocationEvaluator,
+  selectEvaluators,
+} from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -508,6 +512,10 @@ export function createEvaluateDataset({
     }),
   ];
 
+  // Honor SELECTED_EVALUATORS env var so iteration runs can narrow the evaluator set
+  // (documented in README.md but previously a no-op).
+  const selectedEvaluators = selectEvaluators(allEvaluators);
+
   return async function evaluateDataset({
     dataset,
   }: {
@@ -608,7 +616,7 @@ export function createEvaluateDataset({
           }
         },
       },
-      allEvaluators
+      selectedEvaluators
     );
 
     datasetSkipSummaries.set(dataset.name, {
