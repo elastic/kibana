@@ -16,14 +16,17 @@ const toSavedSearchTitleTestSubj = (title: string) =>
 
 const openLoadSavedSearchPanel = async (page: ScoutPage) => {
   const openButton = page.testSubj.locator('discoverOpenButton');
-  const isOpenButtonVisible = await openButton.isVisible();
-  if (!isOpenButtonVisible) {
+  if (await openButton.isVisible()) {
+    await openButton.click();
+  } else {
     const overflowButton = page.testSubj.locator('app-menu-overflow-button');
     await expect(overflowButton).toBeVisible();
     await overflowButton.click();
-    await expect(page.testSubj.locator('app-menu-popover')).toBeVisible();
+    await page.testSubj
+      .locator('app-menu-popover')
+      .locator('[data-test-subj="discoverOpenButton"]')
+      .click();
   }
-  await openButton.click();
   await page.testSubj.waitForSelector('loadSearchForm', { state: 'visible' });
 };
 
@@ -42,7 +45,7 @@ test.describe('Tags - discover integration', { tag: tags.stateful.classic }, () 
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });

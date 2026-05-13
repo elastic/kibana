@@ -40,9 +40,12 @@ const selectTagsInFilter = async (page: ScoutPage, ...tagNames: string[]) => {
 };
 
 test.describe('Tags - saved objects management integration', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ kbnClient, browserAuth, page, kbnUrl }) => {
+  test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.importExport.load(KBN_ARCHIVES.SO_MANAGEMENT);
-    await browserAuth.loginAsAdmin();
+  });
+
+  test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
+    await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('management/kibana/objects'));
     await waitForSavedObjectsTable(page);
   });
