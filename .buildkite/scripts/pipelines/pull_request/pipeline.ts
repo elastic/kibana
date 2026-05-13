@@ -74,7 +74,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     registerCancelKeys([
       'pick_test_group_run_order',
       'build_scout_tests',
-      'build_api_docs',
+      'report_package_metrics',
       'verify_rspack_build',
     ]);
 
