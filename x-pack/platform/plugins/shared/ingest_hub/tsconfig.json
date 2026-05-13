@@ -6,7 +6,6 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*.ts",
     "test/scout/**/*",
     "test/scout_ingest_hub/**/*"
   ],
@@ -21,8 +20,6 @@
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/core-feature-flags-server",
-    "@kbn/fleet-plugin",
     "@kbn/scout"
   ]
 }

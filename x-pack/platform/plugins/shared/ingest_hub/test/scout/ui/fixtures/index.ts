@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export const COMMON_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
-};
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as baseTest } from '@kbn/scout';
 
-export const ONBOARDING_AWS_API_PATH = '/internal/ingest_hub/onboarding/aws';
+export const test = baseTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
